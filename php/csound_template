@@ -1,0 +1,24 @@
+// Bol Processor BP3 compatible with version BP2.9.8
+// Csound instrument file (template)
+16
+-1
+-1
+-1
+-1
+-1
+-1
+-1
+-1
+-1
+-1
+-1
+-1
+-1
+-1
+-1
+-1
+BP2test.orc
+0
+_begin tables
+f1 0 256 10 1 ; This table may be changed
+

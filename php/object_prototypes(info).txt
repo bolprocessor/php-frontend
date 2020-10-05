@@ -1,0 +1,88 @@
+PrototypeTickKey
+PrototypeTickChannel
+PrototypeTickVelocity
+Name of CsoundInstruments
+maxsounds
+
+if "DATA:"
+ Comment on prototype file
+end "DATA:"
+<html>NameOfPrototype
+Type (default 1)
+Resolution (default 1)
+DefaultChannel
+Trefc => Tref = Trefc * Resolution
+Quan
+line (binary): 
+
+	pivbeg = (*p_line)[i++]-'0';
+	pivend = (*p_line)[i++]-'0';
+	pivbegon = (*p_line)[i++]-'0';
+	pivendoff = (*p_line)[i++]-'0';
+	pivcent = (*p_line)[i++]-'0';
+	pivcentonoff = (*p_line)[i++]-'0';
+	okrescale = (*p_line)[i++]-'0';
+	(*p_FixScale)[j] = (*p_line)[i++]-'0';
+	(*p_OkExpand)[j] = (*p_line)[i++]-'0';
+	(*p_OkCompress)[j] = (*p_line)[i++]-'0';
+	(*p_OkRelocate)[j] = (*p_line)[i++]-'0';
+	(*p_BreakTempo)[j] = (*p_line)[i++]-'0';
+	(*p_ContBeg)[j] = (*p_line)[i++]-'0';
+	(*p_ContEnd)[j] = (*p_line)[i++]-'0';
+	(*p_CoverBeg)[j] = (*p_line)[i++]-'0';
+	(*p_CoverEnd)[j] = (*p_line)[i++]-'0';
+	(*p_TruncBeg)[j] = (*p_line)[i++]-'0';
+	(*p_TruncEnd)[j] = (*p_line)[i++]-'0';
+	pivspec = (*p_line)[i++]-'0';
+	(*p_PivType)[j] = pivbeg + 2 * pivend + 3 * pivbegon + 4 * pivendoff
+		+ 5 * pivcent + 6 * pivcentonoff + 7 * pivspec;
+	(*p_AlphaCtrl)[j] = (*p_line)[i++]-'0';
+
+pivbeg,pivend,pivbegon,pivendoff,pivcentonoff,okrescale,FixScale,OkExpand,OkCompress,OkRelocate,BreakTempo,ContBeg,ContEnd,CoverBeg,CoverEnd,TruncBeg,TruncEnd,pivspec,AlphaCtrl => PivType = pivbeg + 2 * pivend + 3 * pivbegon + 4 * pivendoff + 5 * pivcent + 6 * pivcentonoff + 7 * pivspec
+RescaleMode = 0
+AlphaMin = 0.0000
+AlphaMax = 0.0000
+DelayMode = -1
+MaxDelay = 0
+ForwardMode
+MaxForward
+BreakTempoMode = -1
+division = 480
+ContBegMode = 1
+MaxBegGap = 1
+ContEndMode = -1
+MaxEndGap = 0
+CoverBegMode = -1
+MaxCoverBeg = 0
+CoverEndMode = 0
+MaxCoverEnd = 100
+TruncBegMode = 0
+MaxTruncBeg = 100
+TruncEndMode = 0
+MaxTruncEnd = 0
+PivMode = 0
+PivPos = 0
+AlphaCtrlNr = -1
+AlphaCtrlChan = 0.0000
+OkTransp = 255
+OkArticul
+OkVolume
+OkPan
+OkMap
+OkVelocity?
+PreRoll
+PostRoll
+PreRollMode
+PostRollMode
+PeriodMode
+BeforePeriod
+ForceIntegerPeriod
+DiscardNoteOffs
+StrikeAgain
+CsoundAssignedInstr
+CsoundInstr
+Tpict
+ObjectColor.red = -1
+ObjectColor.green = -1
+ObjectColor.blue = -2
+

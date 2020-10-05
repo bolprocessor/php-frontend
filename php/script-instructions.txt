@@ -1,0 +1,96 @@
+Type	1	«text»
+Wait+for	2	«key stroke or MIDI event»
+Activate	0	window «windowname»
+Play	1	«item»
+Play+selection	0	in window «windowname»
+Show messages	0	ON/OFF
+Show graphics	2	ON/OFF
+Note convention	1	English/French/Indian
+Produce items	1
+Non-stop improvize	1	ON/OFF
+New project	0
+Set directory	0	«long»
+Load project	1	«filename»
+Compute while play	2	ON/OFF
+Analyze selection in window	0	«windowname»
+Reset random sequence	1
+AE	0	send/wait Apple event
+Alphabet	0
+Autorandomize	2	ON/OFF
+Beep	0
+Buffer	0
+Clear	0
+Compile	0
+Control	0	pannel
+Copy	0
+Csound score	1	ON/OFF
+Csound trace	0	ON/OFF
+Cyclic play	2	ON/OFF
+Cut	0
+Data	0
+Default buffer size	0	«long» symbols
+Delete	0	«unsigned» chars
+Display items	2	ON/OFF
+Display time setting	0	ON/OFF
+Expand selection	0	window «windowname»
+Freeze windows	0	ON/OFF
+Glossary	0
+Grammar	0
+Graphic color	0	ON/OFF
+Graphics	0
+Graphic scale	0	«long» pixels = «long» milliseconds
+Hide window	0	«windowname»
+Ignore constraints	2	ON/OFF
+Info	0
+Interaction	0
+Interactive	2	ON/OFF
+Keyboard	0
+Load settings	1	«filename»
+Maximum production time	2	«long» ticks
+Metronom	0
+MIDI file	1	ON/OFF
+MIDI sound	1	ON/OFF
+Settings	0
+Number streaks	0	from 0/1
+Object prototypes	0
+Opcode	0	OMS ON/OFF
+Open file	0	«filename»
+Paste	0
+Pause	0
+Play-show	0	«int» times selection in window «windowname»
+Print	0	window «windowname»
+Produce all items	2	ON/OFF
+Produce and play	2	«int» items
+Produce templates	0
+Prompt	0	ON/OFF
+Quantization	2	 «long» milliseconds
+Quantize	2	ON/OFF
+Randomize	2
+Reset session time	2
+Return	2
+Run script	1	«filename»
+Scrap	0
+Script	0
+Select all in window	0	 «windowname»
+Set output Csound file	2	 «filename»
+Set output MIDI file	2	 «filename»
+Set random seed	2	 «unsigned»
+Set selection	0	 start/end «long»
+Set Vref	0	«int»
+Smooth time	2
+Striated time	2
+Start string	0
+Stop	2
+Synchronize start	2	ON/OFF
+Tell	0	session time
+Tempo	2	«long» ticks in «long» secs
+Text color	0	ON/OFF
+Tick cycle	0	ON/OFF
+Time base	0
+Time ticks	0	ON/OFF
+Time resolution	2	«long» milliseconds
+Time setting step	0	ON/OFF
+Trace	0
+Use buffer limit	0	ON/OFF
+Use each substitution	2	ON/OFF
+Wait	2	«long» milliseconds
