@@ -1,1 +1,21 @@
+# Top-level .gitignore for Bol Processor repository
+# Git will ignore these files and directories
+
+# Finder and OS X metadata files
 .DS_Store
+
+# bp-binary
+bp
+bp32
+bp64
+bpconsole
+
+# temporary files
+temp_bolprocessor
+
+# tests-folder
+ctests
+
+# default output folder
+my_output
+
