@@ -4,7 +4,7 @@ $url_this_page = "script_exec.php";
 $this_title = "Script console";
 require_once("_header.php");
 
-$application_path = "..".SLASH;
+$application_path = $bp_application_path;
 
 if(isset($_GET['file'])) $file = urldecode($_GET['file']);
 else {

@@ -7,7 +7,8 @@ else $file = '';
 $url_this_page = "grammar.php?file=".urlencode($file);
 $table = explode(SLASH,$file);
 $here = $filename = end($table);
-$grammar_file = "..".SLASH.$file;
+// $grammar_file = "..".SLASH.$file;
+$grammar_file = $bp_application_path.$file;
 $dir = str_replace($filename,'',$grammar_file);
 
 if($test) echo "grammar_file = ".$grammar_file."<br />";

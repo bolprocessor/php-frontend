@@ -10,7 +10,7 @@ if($file == '') die();
 $url_this_page = "objects.php?file=".urlencode($file);
 $table = explode(SLASH,$file);
 $filename = end($table);
-$this_file = "..".SLASH.$file;
+$this_file = $bp_application_path.$file;
 $dir = str_replace($filename,'',$this_file);
 
 if(isset($_POST['createcsoundinstruments'])) {
@@ -20,7 +20,7 @@ if(isset($_POST['createcsoundinstruments'])) {
 	$template_content = @file_get_contents($template,TRUE);
 	fwrite($handle,$template_content."\n");
 	fclose($handle);
-	$path = str_replace("..".SLASH,'',$dir);
+	$path = str_replace($bp_application_path,'',$dir);
 	$url = "csound.php?file=".urlencode($path.$CsoundInstruments_filename);
 	header("Location: ".$url); 
 	}
@@ -45,7 +45,6 @@ if(isset($_POST['create_object'])) {
 	$new_object = str_replace(' ','-',$new_object);
 	$new_object = str_replace('"','',$new_object);
 	if($new_object <> '') {
-	//	$template = $bp_php_path."/object_template";
 		$template = "object_template";
 		$template_content = @file_get_contents($template,TRUE);
 		$new_object_file = $temp_dir.$temp_folder.SLASH.$new_object.".txt";
@@ -162,7 +161,7 @@ for($i = 0; $i < count($table); $i++) {
 		if($CsoundInstruments_filename <> '') { 
 			echo "&nbsp;➡&nbsp;";
 			$CsoundInstruments_file = $dir.$CsoundInstruments_filename;
-			$path = str_replace("..".SLASH,'',$dir);
+			$path = str_replace($bp_application_path,'',$dir);
 			if($CsoundInstruments_filename <> '' AND file_exists($CsoundInstruments_file)) {
 				echo "<a target=\"_blank\" href=\"csound.php?file=".urlencode($path.$CsoundInstruments_filename)."\">edit this file</a>";
 				}

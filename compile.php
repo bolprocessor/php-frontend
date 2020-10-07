@@ -2,6 +2,10 @@
 session_start();
 $user_os = getOS();
 echo "<p>System = ".$user_os."</p>";
+if(!file_exists("source")) {
+	echo "<p>The ‘source’ folder is missing or misplaced. Return to <a target=\"_blank\" href=\"https://bolprocessor.org/check-bp3/#install\">https://bolprocessor.org/check-bp3/</a> and check your installation!</p>";
+	die();
+	}
 if(file_exists("bp")) unlink("bp");
 doCommand("make");
 echo "<p><a href=\"php/index.php\">Return to Bol Processor home page</a></p>";

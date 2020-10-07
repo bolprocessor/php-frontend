@@ -13,7 +13,7 @@ if($file == '') die();
 $url_this_page = "csound.php?file=".urlencode($file);
 $table = explode(SLASH,$file);
 $filename = end($table);
-$this_file = "..".SLASH.$file;
+$this_file = $bp_application_path.$file;
 $dir = str_replace($filename,'',$this_file);
 
 require_once("_header.php");
@@ -174,7 +174,7 @@ $CsoundOrchestraName = preg_replace("/<\/?html>/u",'',$table[++$j]);
 echo "Csound orchestra file = <input type=\"text\" name=\"CsoundOrchestraName\" size=\"30\" value=\"".$CsoundOrchestraName."\"> ➡ ";
 $orchestra_filename = $dir.$CsoundOrchestraName;
 // echo $orchestra_filename."<br />";
-	$path = str_replace("..".SLASH,'',$dir);
+	$path = str_replace($bp_application_path,'',$dir);
 if(file_exists($orchestra_filename)) {
 	echo "<a target=\"_blank\" href=\"csorchestra.php?file=".urlencode($path.$CsoundOrchestraName)."\">edit this file</a>";
 	}

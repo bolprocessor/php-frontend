@@ -4,18 +4,9 @@ $url_this_page = "produce.php";
 $this_title = "BP console";
 require_once("_header.php");
 
-// $application_path = $bp_application_path.SLASH;
-$application_path = "..".SLASH;
+$application_path = $bp_application_path;
+// $application_path = $bp_application_path;
 
-/* foreach($_POST as $key => $val) {
-	$table = explode('_',$key);
-	if($table[0] == "startup") {
-		$startup = $table[1];
-		echo "<p>Producing item with startup ".$startup."</p>";
-		die();
-		break;
-		}
-	} */
 if(isset($_GET['startup'])) $startup = $_GET['startup'];
 else $startup = '';
 
@@ -60,8 +51,8 @@ else {
 	$thisgrammar = $grammar_path;
 	if(is_integer(strpos($thisgrammar,' ')))
 		$thisgrammar = '"'.$thisgrammar.'"';
-	// $command = $application_path."bp ".$instruction." -gr ".$thisgrammar;
-	$command = "../bp ".$instruction." -gr ".$thisgrammar;
+	$command = $application_path."bp ".$instruction." -gr ".$thisgrammar;
+//	$command = "../bp ".$instruction." -gr ".$thisgrammar;
 
 	$thisalphabet = $alphabet_file;
 	if(is_integer(strpos($thisalphabet,' ')))
@@ -96,7 +87,7 @@ else {
 	$command .= " --seed ".$random_seed;
 	}
 
-echo "<p style=\"color:red;\"><small>command = ".$command."</small></p>";
+echo "<p><small>command = <font color=\"red\">".$command."</font></small></p>";
 
 exec($command,$o);
 $n_messages = count($o);
@@ -106,8 +97,6 @@ for($i = 0; $i < $n_messages; $i++) {
 	if(is_integer($pos=strpos($mssg,"Errors: 0")) AND $pos == 0) $no_error = TRUE;
 	}
 echo "<hr>";
-
-// $this_data_folder = str_replace($bp_application_path.SLASH,'',$here);
 
 if($instruction <> "help") {
 	$tracefile_html = clean_up_file($tracefile);

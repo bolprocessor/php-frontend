@@ -36,7 +36,7 @@ else {
 		echo "<p>The console application ‘bp’ is not working or missing or misplaced… You can't run the application.</p>";
 		$source = $dir."source";
 		if(file_exists($source))
-			echo "<p>Source files have been found: you can try to recompile ‘bp’, then reload this page.<br />➡ <a href=\"".$dir."compile.php\">Run the compiler</a></p>";
+			echo "<p>Source files have been found. You can try to recompile ‘bp’, then reload this page.<br />➡ <a href=\"".$dir."compile.php\">Run the compiler</a></p>";
 		else
 			echo "<p>Source files have not been found. Return to <a target=\"_blank\" href=\"https://bolprocessor.org/check-bp3/#install\">https://bolprocessor.org/check-bp3/</a> and check your installation!</p>";
 		die();
@@ -154,7 +154,7 @@ if(isset($_POST['create_script'])) {
 		}
 	}
 
-$folder = str_replace("..".SLASH,'',$dir);
+$folder = str_replace($bp_application_path,'',$dir);
 if($folder <> '') echo "<h3>Content of folder <font color=\"red\">".$folder."</font></h3>";
 // echo "dir = ".$dir."<br />";
 $table = explode('_',$folder);

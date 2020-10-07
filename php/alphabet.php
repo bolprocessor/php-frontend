@@ -6,7 +6,7 @@ else $file = '';
 $url_this_page = "alphabet.php?file=".urlencode($file);
 $table = explode(SLASH,$file);
 $filename = end($table);
-$this_file = "..".SLASH.$file;
+$this_file = $bp_application_path.$file;
 $dir = str_replace($filename,'',$this_file);
 
 require_once("_header.php");
