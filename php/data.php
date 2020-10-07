@@ -40,13 +40,13 @@ if(isset($_POST['playitem']) OR isset($_POST['expanditem'])) {
 	if($alphabet <> '') $command .= " -ho \"".$alphabet."\"";
 	if(isset($_POST['playitem']) AND $objects <> '') $command .= " -mi \"".$objects."\"";
 //	if($settings <> '') $command .= " -se \"".$settings."\"";
-//	if(isset($_POST['playitem']) $command .= " -d --rtmidi ";
-//	if(isset($_POST['playitem']) $command .= " -d --csoundout \"".$result_textfile."\"";
-	if(isset($_POST['playitem'])) $command .= " -d --midiout ".$temp_dir."temp_".session_id()."check_play.mid";
+	if(isset($_POST['playitem'])) $command .= " -d --rtmidi ";
+//	if(isset($_POST['playitem'])) $command .= " -d --csoundout \"".$result_textfile."\"";
+//	if(isset($_POST['playitem'])) $command .= " -d --midiout ".$temp_dir."temp_".session_id()."check_play.mid";
 	if(isset($_POST['expanditem'])) $command .= " -d -o ".$result_textfile;
 //	$command .= " --traceout ".$tracefile;
 	
-	echo "<p style=\"color:black;\">".$command."</p>";
+	echo "<p style=\"color:red;\">".$command."</p>";
 	$no_error = FALSE;
 	exec($command,$o);
 	$n_messages = count($o);

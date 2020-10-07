@@ -461,7 +461,6 @@ function clean_up_encoding($convert,$text) {
 	$text = str_replace(" . ","•",$text);
 	$text = str_replace("²","≤",$text);
 	$text = str_replace("³","≥",$text);
-//	$text = str_replace("â•","≥",$text);
 	return $text;
 	}
 

@@ -101,7 +101,7 @@ echo "<p style=\"color:red;\"><small>command = ".$command."</small></p>";
 exec($command,$o);
 $n_messages = count($o);
 $no_error = FALSE;
-for($i=0; $i < $n_messages; $i++) {
+for($i = 0; $i < $n_messages; $i++) {
 	$mssg = $o[$i];
 	if(is_integer($pos=strpos($mssg,"Errors: 0")) AND $pos == 0) $no_error = TRUE;
 	}

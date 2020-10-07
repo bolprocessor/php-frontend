@@ -8,7 +8,7 @@ if($path <> '') {
 	$url_this_page .= "?path=".urlencode($path);
 	$dir = $bp_application_path.$path;
 	$table = explode(SLASH,$path);
-	if(($n=count($table)) > 1) {
+	if(($n = count($table)) > 1) {
 		$upper_dir = $table[$n - 2];
 		}
 	else $upper_dir = '';
@@ -21,6 +21,26 @@ if($path <> '') {
 else {
 	echo "<h2 style=\"text-align:center;\">Welcome to Bol Processor ‘BP3’</h2>";
 	$dir = $bp_application_path;
+	$command = $dir."bp --help";
+	exec($command,$o);
+	$n_messages = count($o);
+	$no_error = FALSE;
+	for($i = 0; $i < $n_messages; $i++) {
+		$mssg = $o[$i];
+		if(is_integer($pos=strpos($mssg,"Bol Processor")) AND $pos == 0) {
+			$no_error = TRUE; break;
+			}
+		}
+	$console = $dir."bp";
+	if(!$no_error OR !file_exists($console)) {
+		echo "<p>The console application ‘bp’ is not working or missing or misplaced… You can't run the application.</p>";
+		$source = $dir."source";
+		if(file_exists($source))
+			echo "<p>Source files have been found: you can try to recompile ‘bp’, then reload this page.<br />➡ <a href=\"".$dir."compile.php\">Run the compiler</a></p>";
+		else
+			echo "<p>Source files have not been found. Return to <a target=\"_blank\" href=\"https://bolprocessor.org/check-bp3/#install\">https://bolprocessor.org/check-bp3/</a> and check your installation!</p>";
+		die();
+		}
 	}
 
 echo link_to_help();
