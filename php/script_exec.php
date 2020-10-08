@@ -76,7 +76,7 @@ function run_script($dir,$file,$script_variables,$note_convention,$grammar,$outp
 			if($note_convention <> '') $command .= " --".strtolower($note_convention);
 			$command .= " -d --rtmidi ";
 			echo "<p style=\"color:red;\">".$command."</p>";
-			exec($command,$o);
+			$o = send_to_console($command);
 			$n_messages = count($o);
 			$no_error = FALSE;
 			if($n_messages > 0) {
@@ -134,7 +134,7 @@ function run_script($dir,$file,$script_variables,$note_convention,$grammar,$outp
 				$command .= " --csoundout ".$output_file;
 			else $command .= " --rtmidi ";
 			echo "<p style=\"color:red;\">".$command."</p>";
-			exec($command,$o);
+			$o = send_to_console($command);
 			$n_messages = count($o);
 			$no_error = FALSE;
 			if($n_messages > 0) {

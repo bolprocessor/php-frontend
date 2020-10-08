@@ -22,7 +22,7 @@ else {
 	echo "<h2 style=\"text-align:center;\">Welcome to Bol Processor ‘BP3’</h2>";
 	$dir = $bp_application_path;
 	$command = $dir."bp --help";
-	exec($command,$o);
+	$o = send_to_console($command);
 	$n_messages = count($o);
 	$no_error = FALSE;
 	for($i = 0; $i < $n_messages; $i++) {

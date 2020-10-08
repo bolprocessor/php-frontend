@@ -467,7 +467,7 @@ if(isset($_POST['createcsound'])) {
 			$message_create_sound = "<p id=\"timespan\"><font color=\"red\">➡ </font>MIDI codes to Csound conversion…<p>";
 			$message_create_sound .= "<p style=\"color:red;\"><small>".$command."</small></p>";
 			$no_error = FALSE;
-			exec($command,$o);
+			$o = send_to_console($command);
 			$n_messages = count($o);
 			if($n_messages > 0) {
 				for($i=0; $i < $n_messages; $i++) {
@@ -515,7 +515,7 @@ if(isset($_POST['playexpression'])) {
 		// $command .= " --traceout ".$tracefile;
 		echo "<p style=\"color:red;\"><small>".$command."</small></p>";
 		$no_error = FALSE;
-		exec($command,$o);
+		$o = send_to_console($command);
 		$n_messages = count($o);
 		if($n_messages > 0) {
 			for($i=0; $i < $n_messages; $i++) {

@@ -11,7 +11,8 @@ $test = FALSE;
 // $test = TRUE;
 
 // $bp_application_path = dirname(getcwd()).DIRECTORY_SEPARATOR;
-$bp_application_path = "..".DIRECTORY_SEPARATOR;
+// $bp_application_path = "..".DIRECTORY_SEPARATOR;
+$bp_application_path = "..".SLASH;
 
 $temp_dir = $bp_application_path."temp_bolprocessor";
 if(!file_exists($temp_dir)) {
@@ -63,6 +64,7 @@ $text_help_file = $bp_application_path."BP2_help.txt";
 
 if($test) {
 	echo "<small>";
+	echo "operating system = ".getOS()."<br />";
 	echo "path = ".$path."<br />";
 	echo "bp_application_path = ".$bp_application_path."<br />";
 	echo "temp_dir = ".$temp_dir."<br />";
@@ -290,7 +292,7 @@ function compile_help($text_help_file,$html_help_file) {
 	$help[0] = '';
 	$no_entry = array("ON","OFF","vel");
 	if(!file_exists($text_help_file)) {
-		echo "<p style=\"color:red;\">WARNING: file “BP2_helt.txt” has not been found. It should be placed at the same level as the “php” folder.</p>";
+		echo "<p style=\"color:red;\">Warning: “BP2_help.html” has not been reconstructed.</p>";
 		return '';
 		}
 	$content = @file_get_contents($text_help_file,TRUE);
@@ -1345,5 +1347,62 @@ function get_instruction($line) {
 	$instruction =  preg_replace("/Freeze\swindows.*$/u","Freeze windows",$instruction);
 	$instruction =  preg_replace("/Run\sscript\s.*$/u","Run script",$instruction);
 	return $instruction;
+	}
+
+function getOS() {
+    $user_agent = $_SERVER['HTTP_USER_AGENT'];
+    $os_platform  = "Unknown OS Platform";
+    $os_array     = array(
+         '/windows nt 10/i'      =>  'Windows 10',
+         '/windows nt 6.3/i'     =>  'Windows 8.1',
+         '/windows nt 6.2/i'     =>  'Windows 8',
+         '/windows nt 6.1/i'     =>  'Windows 7',
+         '/windows nt 6.0/i'     =>  'Windows Vista',
+         '/windows nt 5.2/i'     =>  'Windows Server 2003/XP x64',
+         '/windows nt 5.1/i'     =>  'Windows XP',
+         '/windows xp/i'         =>  'Windows XP',
+         '/windows nt 5.0/i'     =>  'Windows 2000',
+         '/windows me/i'         =>  'Windows ME',
+         '/win98/i'              =>  'Windows 98',
+         '/win95/i'              =>  'Windows 95',
+         '/win16/i'              =>  'Windows 3.11',
+         '/macintosh|mac os x/i' =>  'Mac OS X',
+         '/mac_powerpc/i'        =>  'Mac OS 9',
+         '/linux/i'              =>  'Linux',
+         '/ubuntu/i'             =>  'Ubuntu',
+         '/iphone/i'             =>  'iPhone',
+         '/ipod/i'               =>  'iPod',
+         '/ipad/i'               =>  'iPad',
+         '/android/i'            =>  'Android',
+         '/blackberry/i'         =>  'BlackBerry',
+         '/webos/i'              =>  'Mobile'
+          );
+    foreach($os_array as $regex => $value)
+        if(preg_match($regex,$user_agent))
+            $os_platform = $value;
+    return $os_platform;
+	}
+
+function windows_system() {
+	$os_platform = getOS();
+	if(PHP_OS == "WINNT" OR is_integer(strpos($os_platform,"Windows"))) return TRUE;
+	return FALSE;
+	}
+	
+function send_to_console($command) {
+	global $test;
+	$system = getOS();
+	$exec = escapeshellcmd($command);
+	$table = array();
+	if(windows_system()) {
+		$exec = str_replace("..".SLASH."bp ","bp ",$exec);
+		$exec = str_replace("..".SLASH,dirname(getcwd()).SLASH,$exec);
+	//	$exec = str_replace(DIRECTORY_SEPARATOR,"/",$exec);
+		echo "<small>Windows: exec = <font color=\"red\">".$exec."</font></small><br />";
+		}
+	exec($exec,$table);
+//	system($exec,$o);
+//	passthru($exec,$o);
+	return $table;
 	}
 ?>

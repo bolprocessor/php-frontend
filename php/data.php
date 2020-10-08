@@ -48,7 +48,7 @@ if(isset($_POST['playitem']) OR isset($_POST['expanditem'])) {
 	
 	echo "<p style=\"color:red;\">".$command."</p>";
 	$no_error = FALSE;
-	exec($command,$o);
+	$o = send_to_console($command);
 	$n_messages = count($o);
 	if($n_messages > 0) {
 		for($i=0; $i < $n_messages; $i++) {
