@@ -32,7 +32,8 @@ else {
 			}
 		}
 	$console = $dir."bp";
-	if(!$no_error OR !file_exists($console)) {
+	$console_exe = $dir."bp.exe";
+	if(!$no_error OR (!file_exists($console) AND !file_exists($console_exe))) {
 		echo "<p>The console application ‘bp’ is not working or missing or misplaced… You can't run the application.</p>";
 		$source = $dir."source";
 		if(file_exists($source))
