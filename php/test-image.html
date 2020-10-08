@@ -5,8 +5,8 @@
 
 <style>
   body {
-    margin: 0;
-    overflow: hidden;
+    margin: 10;
+ //  overflow: hidden;
   }
 </style>
 <meta name="viewport" content="width=device-width">
@@ -14,17 +14,22 @@
 </head>
 
 <body>
+
 <canvas class="myCanvas">
 <p>Your browser does not support CANVAS…</p>
 </canvas>
 
 <script>
+// https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Client-side_web_APIs/Drawing_graphics
+
 const canvas = document.querySelector('.myCanvas');
-const width = canvas.width = window.innerWidth;
-const height = canvas.height = window.innerHeight;
+const width = canvas.width = window.innerWidth - 20;
+// const height = canvas.height = window.innerHeight;
+const height = canvas.height = 600;
 
 const ctx = canvas.getContext('2d');
 ctx.fillStyle = 'rgb(0, 0, 0)';
+ctx.fillStyle = 'azure';
 ctx.fillRect(0, 0, width, height);
 
 ctx.fillStyle = 'rgb(255, 0, 0)';
@@ -36,10 +41,84 @@ ctx.fillRect(75, 75, 100, 100);
 ctx.fillStyle = 'rgba(255, 0, 255, 0.75)';
 ctx.fillRect(25, 100, 175, 50);
 
-ctx.strokeStyle = 'rgb(255, 255, 255)';
+ctx.strokeStyle = 'black';
 ctx.lineWidth = 5;
 ctx.strokeRect(25, 25, 175, 200);
-    
+
+function degToRad(degrees) {
+  return degrees * Math.PI / 180;
+};
+
+// Draw triangle
+ctx.fillStyle = 'lightgrey';
+ctx.beginPath();
+ctx.moveTo(50, 50);
+ctx.lineTo(150, 50);
+let triHeight = 50 * Math.tan(degToRad(60));
+ctx.lineTo(100, 50+triHeight);
+ctx.lineTo(50, 50);
+ctx.fill();
+
+// Draw arc
+ctx.fillStyle = 'yellow';
+ctx.beginPath();
+ctx.arc(200, 106, 50, degToRad(-45), degToRad(45), true);
+ctx.lineTo(200, 106);
+ctx.fill();
+
+ctx.strokeStyle = 'blue';
+ctx.lineWidth = 1;
+ctx.font = '36px arial';
+ctx.strokeText('Some text', 50, 50);
+
+ctx.fillStyle = 'brown';
+ctx.font = '48px georgia';
+ctx.fillText('Another text!', 50, 150);
+
+let image2 = new Image();
+image2.src = 'pict/loudspeaker.png';
+
+image2.onload = function() {
+ ctx.drawImage(image2, 50, -20, 500, 500, -200, 0, 300, 300);
+ }
+
+ctx.fillStyle = 'azure';
+
+ ctx.translate(width/2,height/2);
+
+let image = new Image();
+image.src = 'pict/walk-right.png';
+image.onload = draw;
+
+let sprite = 0;
+let posX = 0;
+
+function draw() {
+  ctx.fillRect(-(width/2),-74,width,148);
+  ctx.drawImage(image, (sprite*102), 0, 102, 148, 0+posX, -74, 102, 148);
+
+  if(posX % 13 === 0) {
+    if(sprite === 5) {
+      sprite = 0;
+      }
+    else {
+      sprite++;
+      }
+    }
+  if(posX > width/2) {
+    newStartPos = -((width/2) + 102);
+    posX = Math.ceil(newStartPos);
+    console.log(posX);
+    }
+   else {
+    posX += 2;
+    }
+  window.requestAnimationFrame(draw);
+  };
+      
+
 </script>
+<h1 style="color:red;">My picture</h1>
+
 </body>
 </html>
