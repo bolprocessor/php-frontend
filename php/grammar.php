@@ -109,6 +109,13 @@ else {
 echo link_to_help();
 
 echo "<h3>Grammar file “".$filename."”</h3>";
+
+/* echo "<canvas width=\"320\" height=\"240\">";
+echo "<p>Your browser doesn't support canvas. Boo hoo!</p>";
+echo "</canvas>"; */
+$link = "test-image.html";
+echo "<p style=\"border:2px solid gray; background-color:azure; width:13em;  padding:2px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$link."','CANVAS test','width=800,height=625,left=100'); return false;\" href=\"".$link."\">IMAGE</a></p>";
+
 	
 if(isset($_POST['compilegrammar'])) {
 	if(isset($_POST['alphabet_file'])) $alphabet_file = $_POST['alphabet_file'];
