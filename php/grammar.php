@@ -110,11 +110,8 @@ echo link_to_help();
 
 echo "<h3>Grammar file “".$filename."”</h3>";
 
-/* echo "<canvas width=\"320\" height=\"240\">";
-echo "<p>Your browser doesn't support canvas. Boo hoo!</p>";
-echo "</canvas>"; */
 $link = "test-image.html";
-echo "<p style=\"border:2px solid gray; background-color:azure; width:13em;  padding:2px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$link."','CANVAS test','width=800,height=625,left=100'); return false;\" href=\"".$link."\">IMAGE</a></p>";
+echo "<p style=\"border:2px solid gray; background-color:azure; width:13em;  padding:2px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$link."','CANVAS test','width=500,height=500,left=200'); return false;\" href=\"".$link."\">TEST IMAGE</a></p>";
 
 	
 if(isset($_POST['compilegrammar'])) {
@@ -123,11 +120,7 @@ if(isset($_POST['compilegrammar'])) {
 	if(isset($_POST['settings_file'])) $settings_file = $_POST['settings_file'];
 	else $settings_file = '';
 	echo "<p id=\"timespan\">Compiling ‘".$filename."’</p>";
-	$initial_time = filemtime($grammar_file);
-//	echo date("F d Y H:i:s",$initial_time)."<br />";
 	$application_path = $bp_application_path;
-/*	$olddir = getcwd();
-	chdir($dir); */
 	$command = $application_path."bp compile";
 	$thisgrammar = $dir.$filename;
 	if(is_integer(strpos($thisgrammar,' ')))

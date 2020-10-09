@@ -16,17 +16,19 @@
 <body>
 
 <canvas class="myCanvas">
-<p>Your browser does not support CANVAS…</p>
+<p>Your browser does not support CANVAS… :-(</p>
 </canvas>
 
 <script>
 // https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Client-side_web_APIs/Drawing_graphics
 
 const canvas = document.querySelector('.myCanvas');
-const width = canvas.width = window.innerWidth - 20;
+// const width = canvas.width = window.innerWidth - 20;
+const width = canvas.width = 600;
 // const height = canvas.height = window.innerHeight;
 const height = canvas.height = 600;
 
+// Draw rectangles
 const ctx = canvas.getContext('2d');
 ctx.fillStyle = 'rgb(0, 0, 0)';
 ctx.fillStyle = 'azure';
@@ -45,11 +47,11 @@ ctx.strokeStyle = 'black';
 ctx.lineWidth = 5;
 ctx.strokeRect(25, 25, 175, 200);
 
+// Draw triangle
 function degToRad(degrees) {
   return degrees * Math.PI / 180;
-};
+  };
 
-// Draw triangle
 ctx.fillStyle = 'lightgrey';
 ctx.beginPath();
 ctx.moveTo(50, 50);
@@ -66,6 +68,7 @@ ctx.arc(200, 106, 50, degToRad(-45), degToRad(45), true);
 ctx.lineTo(200, 106);
 ctx.fill();
 
+// Draw texts
 ctx.strokeStyle = 'blue';
 ctx.lineWidth = 1;
 ctx.font = '36px arial';
@@ -75,6 +78,7 @@ ctx.fillStyle = 'brown';
 ctx.font = '48px georgia';
 ctx.fillText('Another text!', 50, 150);
 
+// Draw picture
 let image2 = new Image();
 image2.src = 'pict/loudspeaker.png';
 
@@ -84,8 +88,10 @@ image2.onload = function() {
 
 ctx.fillStyle = 'azure';
 
- ctx.translate(width/2,height/2);
+// Set new origin
+ctx.translate(width/2,height/2);
 
+// Draw animation
 let image = new Image();
 image.src = 'pict/walk-right.png';
 image.onload = draw;
@@ -115,10 +121,7 @@ function draw() {
     }
   window.requestAnimationFrame(draw);
   };
-      
-
 </script>
-<h1 style="color:red;">My picture</h1>
-
+<h1 style="color:red; text-align:center;">My picture</h1>
 </body>
 </html>

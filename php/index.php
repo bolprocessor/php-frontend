@@ -279,4 +279,9 @@ foreach($dircontent as $thisfile) {
 		}
 	else echo $thisfile."<br />";
 	}
+
+echo "<hr>";
+$os_platform = getOS();
+if(PHP_OS <> "WINNT" AND !is_integer(strpos($os_platform,"Windows")))
+	echo "<p style=\"text-align:center;\"><a href=\"".$bp_application_path."compile.php\">Recompile BP</a> (be careful!)</p>";
 ?>

@@ -292,7 +292,7 @@ function compile_help($text_help_file,$html_help_file) {
 	$help[0] = '';
 	$no_entry = array("ON","OFF","vel");
 	if(!file_exists($text_help_file)) {
-		echo "<p style=\"color:red;\">Warning: “BP2_help.html” has not been reconstructed.</p>";
+		echo "<p style=\"color:green;\">Warning: “BP2_help.html” has not been reconstructed.</p>";
 		return '';
 		}
 	$content = @file_get_contents($text_help_file,TRUE);
