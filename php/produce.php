@@ -87,6 +87,16 @@ else {
 	$command .= " --seed ".$random_seed;
 	}
 
+$dircontent = scandir($temp_dir);
+foreach($dircontent as $thisfile) {
+	$time_saved = filemtime($temp_dir.$thisfile);
+//	echo $thisfile." ➡ ".date('Y-m-d H\hi',$time_saved)."<br />";
+	$table = explode('_',$thisfile);
+	if($table[0] <> "trace") continue;
+	if($table[1] <> session_id()) continue;
+	if($table[2] == "image") unlink($temp_dir.$thisfile);
+	}
+
 echo "<p><small>command = <font color=\"red\">".$command."</font></small></p>";
 
 $o = send_to_console($command);
@@ -103,11 +113,11 @@ if($instruction <> "help") {
 	$trace_link = $tracefile_html;
 	$output_link = $output;
 	
-if($test) echo "output = ".$output."<br />";
-if($test) echo "tracefile_html = ".$tracefile_html."<br />";
-if($test) echo "dir = ".$dir."<br />";
-if($test) echo "trace_link = ".$trace_link."<br />";
-if($test) echo "output_link = ".$output_link."<br />";
+	if($test) echo "output = ".$output."<br />";
+	if($test) echo "tracefile_html = ".$tracefile_html."<br />";
+	if($test) echo "dir = ".$dir."<br />";
+	if($test) echo "trace_link = ".$trace_link."<br />";
+	if($test) echo "output_link = ".$output_link."<br />";
 
 	if(!$no_error) {
 		echo "<p><font color=\"red\">Errors found… Check the </font> <a onclick=\"window.open('".$trace_link."','errors','width=800,height=800,left=400'); return false;\" href=\"".$trace_link."\">error trace</a> file!</p>";
@@ -117,6 +127,58 @@ if($test) echo "output_link = ".$output_link."<br />";
 		if($output <> '' AND $file_format <> "midi") echo "<font color=\"red\">➡</font> Read the <a onclick=\"window.open('".$output_link."','".$file_format."','width=800,height=800,left=300'); return false;\" href=\"".$output_link."\">output file</a><br />";
 		if($trace_production OR $instruction == "templates" OR $show_production OR $trace_production) echo "<font color=\"red\">➡</font> Read the <a onclick=\"window.open('".$trace_link."','trace','width=800,height=800,left=400'); return false;\" href=\"".$trace_link."\">trace file</a>";
 		echo "</p>";
+		// Prepare images if any
+		$dircontent = scandir($temp_dir);
+		foreach($dircontent as $thisfile) {
+			$table = explode('_',$thisfile);
+			if($table[0] <> "trace") continue;
+			if($table[1] <> session_id()) continue;
+			if($table[2] <> "image") continue;
+			$number = intval(str_replace(".html",'',$table[3]));
+			$content = @file_get_contents($temp_dir.$thisfile,FALSE);
+			$table2 = explode(chr(10),$content);
+			$imax = count($table2);
+			$table3 = array();
+			$title = "Image ".$number;
+			$wmax = $hmax = 0;
+			$found = FALSE;
+			for($i = 0; $i < $imax; $i++) {
+				$line = trim($table2[$i]);
+			//	echo $i." ".recode_tags($line)."<br />";
+				if(is_integer($pos=strpos($line,"WMAX=")) AND $pos == 0) {
+					$table4 = explode("=",$line);
+					$wmax = intval($table4[1]);
+					$found = TRUE;
+				//	echo $i." ".$wmax[$i]."<br />";
+					}
+				if(is_integer($pos=strpos($line,"HMAX=")) AND $pos == 0) {
+					$table4 = explode("=",$line);
+					$hmax = intval($table4[1]);
+				//	echo $i." ".$hmax[$i]."<br />";
+					}
+				}
+			if($found) {
+				for($i = $j = 0; $i < $imax; $i++) {
+					$line = trim($table2[$i]);
+				//	echo $i." ".recode_tags($line)."<br />";
+					if(is_integer($pos=strpos($line,"WMAX=")) AND $pos == 0) continue;
+					if(is_integer($pos=strpos($line,"HMAX=")) AND $pos == 0) continue;
+					$table3[$j] = $line;
+					$table3[$j] = str_replace("THE_WIDTH",$wmax,$table3[$j]);
+					$table3[$j] = str_replace("THE_HEIGHT",$hmax,$table3[$j]);
+					$table3[$j] = str_replace("THE_TITLE",$title,$table3[$j]);
+					$j++;
+					}
+				$new_content = implode(chr(10),$table3);
+				$handle = fopen($temp_dir.$thisfile,"w");
+				fwrite($handle,$new_content);
+				fclose($handle);
+				$link = $temp_dir.$thisfile;
+				$left = 10 + (30 * ($number - 1));
+				echo "<div style=\"border:2px solid gray; background-color:azure; width:8em;  padding:2px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$link."','".$title."','width=1200,height=600,left=".$left."'); return false;\" href=\"".$link."\">IMAGE #".$number."</a></div>&nbsp;";
+				}
+			}
+		echo "<br />";
 		}
 	}
 

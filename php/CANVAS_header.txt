@@ -2,21 +2,18 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-
 <style>
-  body {
-    margin: 10;
- //  overflow: hidden;
-  }
+  body {margin: 10;}
 </style>
 <meta name="viewport" content="width=device-width">
-<title>CANVAS picture</title>
+<title>THE_TITLE</title>
 </head>
-
 <body>
-
 <canvas class="myCanvas">
 <p>Your browser does not support CANVAS… :-(</p>
 </canvas>
-
-<script>  
+<script>
+const canvas = document.querySelector('.myCanvas');
+const width = canvas.width = THE_WIDTH;
+const height = canvas.height = THE_HEIGHT;
+const ctx = canvas.getContext('2d');

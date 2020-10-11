@@ -49,7 +49,7 @@ foreach($dircontent as $thisfile) {
 		$prefix = $table[0];
 		if($prefix == "trace" OR $prefix == "temp") {
 			$id = $table[1];
-			if(($extension == "txt" OR $extension == "html") AND $id <> session_id()) {
+			if(($extension == "txt" OR $extension == "html" OR $extension == "bpda") AND $id <> session_id()) {
 				unlink($temp_dir.$thisfile);
 				continue;
 				}
