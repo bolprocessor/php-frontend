@@ -139,7 +139,7 @@ if($instruction <> "help") {
 			$table2 = explode(chr(10),$content);
 			$imax = count($table2);
 			$table3 = array();
-			$title = "Image ".$number;
+			$title = $grammar_name."_Image_".$number;
 			$wmax = $hmax = 0;
 			$found = FALSE;
 			for($i = 0; $i < $imax; $i++) {
@@ -175,7 +175,7 @@ if($instruction <> "help") {
 				fclose($handle);
 				$link = $temp_dir.$thisfile;
 				$left = 10 + (30 * ($number - 1));
-				echo "<div style=\"border:2px solid gray; background-color:azure; width:8em;  padding:2px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$link."','".$title."','width=1200,height=600,left=".$left."'); return false;\" href=\"".$link."\">IMAGE #".$number."</a></div>&nbsp;";
+				echo "<div style=\"border:2px solid gray; background-color:azure; width:8em;  padding:2px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$link."','".$title."','width=1200,height=600,left=".$left."'); return false;\" href=\"".$link."\">Image ".$number."</a></div>&nbsp;";
 				}
 			}
 		echo "<br />";

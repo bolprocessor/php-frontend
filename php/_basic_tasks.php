@@ -1259,9 +1259,6 @@ function polymetric_expression($mute,$TickKey,$TickCycle,$TickChannel,$TickVeloc
 	}
 
 function is_variable($note_convention,$word) {
-	$word = str_replace(",",'',$word);
-	$word = str_replace("{",'',$word);
-	$word = str_replace("}",'',$word);
 	$word = str_replace(":",'',$word);
 	if($word == "S") return ''; // We take only non-startup variables
 	if($word == "RND") return '';

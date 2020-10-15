@@ -40,28 +40,20 @@ if(isset($_POST['savegrammar']) OR isset($_POST['compilegrammar'])) {
 	if(isset($_POST['note_convention'])) $note_convention = $_POST['note_convention'];
 	if(isset($_POST['random_seed'])) $random_seed = $_POST['random_seed'];
 	else $random_seed = 0;
+	$output_file = trim(str_replace(".bpda",'',$output_file));
+	$output_file = trim(str_replace(".sco",'',$output_file));
+	$output_file = trim(str_replace(".mid",'',$output_file));
 	if($file_format == "data") {
-		$output_file = trim(str_replace(".bpda",'',$output_file));
 		if($output_file == '') $output_file = "out";
 		$output_file .= ".bpda";
 		}
 	if($file_format == "csound") {
-		$table = explode('.',$output_file);
-		$extension = $table[count($table) - 1];
-		if($extension <> "sco") {
-			$output_file = trim(str_replace(".sco",'',$output_file));
-			if($output_file == '') $output_file = "out";
-			$output_file .= ".sco";
-			}
+		if($output_file == '') $output_file = "out";
+		$output_file .= ".sco";
 		}
 	if($file_format == "midi") {
-		$table = explode('.',$output_file);
-		$extension = $table[count($table) - 1];
-		if($extension <> "mid") {
-			$output_file = trim(str_replace(".mid",'',$output_file));
-			if($output_file == '') $output_file = "out";
-			$output_file .= ".mid";
-			}
+		if($output_file == '') $output_file = "out";
+		$output_file .= ".mid";
 		}
 	if($file_format == '') $output_file = '';
 	$handle = fopen($grammar_file,"w");
@@ -111,7 +103,7 @@ echo link_to_help();
 echo "<h3>Grammar file “".$filename."”</h3>";
 
 $link = "test-image.html";
-echo "<p style=\"border:2px solid gray; background-color:azure; width:13em;  padding:2px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$link."','CANVAS test','width=500,height=500,left=200'); return false;\" href=\"".$link."\">TEST IMAGE</a></p>";
+echo "<p style=\"border:2px solid gray; background-color:azure; width:40em;  padding:2px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$link."','CANVAS test','width=500,height=500,left=200'); return false;\" href=\"".$link."\">Test this image to verify that your environment supports CANVAS</a></p>";
 
 	
 if(isset($_POST['compilegrammar'])) {
@@ -343,13 +335,17 @@ $variable = array();
 for($i = 0; $i < $imax; $i++) {
 	$line = trim($table[$i]);
 	$line = preg_replace("/\[.*\]/u",'',$line);
-	if($line == '') continue;
+	$line = preg_replace("/,/u",' ',$line);
+	$line = preg_replace("/{/u",' ',$line);
+	$line = preg_replace("/}/u",' ',$line);
+	$line = preg_replace("/:/u",' ',$line);
+	if(trim($line) == '') continue;
 	if($line == "COMMENT:") break;
 	if(is_integer($pos=strpos($line,"//")) AND $pos == 0) continue;
 	if(is_integer($pos=strpos($line,"-")) AND $pos == 0) continue;
 	$table2 = explode(' ',$line);
 	for($j = 0; $j < count($table2); $j++) {
-		$word = $table2[$j];
+		$word = trim($table2[$j]);
 		if($word == '') continue;
 		$word = is_variable($note_convention,$word);
 		if($word == '') continue;
