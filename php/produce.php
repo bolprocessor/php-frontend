@@ -141,23 +141,26 @@ if($instruction <> "help") {
 			$table3 = array();
 			$title = $grammar_name."_Image_".$number;
 			$wmax = $hmax = 0;
-			$found = FALSE;
+			$found = 0;
 			for($i = 0; $i < $imax; $i++) {
 				$line = trim($table2[$i]);
 			//	echo $i." ".recode_tags($line)."<br />";
 				if(is_integer($pos=strpos($line,"WMAX=")) AND $pos == 0) {
 					$table4 = explode("=",$line);
-					$wmax = intval($table4[1]);
-					$found = TRUE;
+					$wmax = round(intval($table4[1])/2) + 10;
+					$found++;
+				//	if($found > 1) break;
 				//	echo $i." ".$wmax[$i]."<br />";
 					}
 				if(is_integer($pos=strpos($line,"HMAX=")) AND $pos == 0) {
 					$table4 = explode("=",$line);
-					$hmax = intval($table4[1]);
+					$hmax = round(intval($table4[1])/2);
+					$found++;
+				//	if($found > 1) break;
 				//	echo $i." ".$hmax[$i]."<br />";
 					}
 				}
-			if($found) {
+			if($found > 1) {
 				for($i = $j = 0; $i < $imax; $i++) {
 					$line = trim($table2[$i]);
 				//	echo $i." ".recode_tags($line)."<br />";
@@ -175,7 +178,11 @@ if($instruction <> "help") {
 				fclose($handle);
 				$link = $temp_dir.$thisfile;
 				$left = 10 + (30 * ($number - 1));
-				echo "<div style=\"border:2px solid gray; background-color:azure; width:8em;  padding:2px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$link."','".$title."','width=1200,height=600,left=".$left."'); return false;\" href=\"".$link."\">Image ".$number."</a></div>&nbsp;";
+				$window_height = 600;
+				if($hmax < $window_height) $window_height = $hmax;
+				$window_width = 1200;
+				if($wmax < $window_width) $window_width = $wmax;
+				echo "<div style=\"border:2px solid gray; background-color:azure; width:8em;  padding:2px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$link."','".$title."','width=".$window_width.",height=".$window_height.",left=".$left."'); return false;\" href=\"".$link."\">Image ".$number."</a></div>&nbsp;";
 				}
 			}
 		echo "<br />";
