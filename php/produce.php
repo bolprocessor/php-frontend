@@ -127,6 +127,7 @@ if($instruction <> "help") {
 		if($output <> '' AND $file_format <> "midi") echo "<font color=\"red\">➡</font> Read the <a onclick=\"window.open('".$output_link."','".$file_format."','width=800,height=800,left=300'); return false;\" href=\"".$output_link."\">output file</a><br />";
 		if($trace_production OR $instruction == "templates" OR $show_production OR $trace_production) echo "<font color=\"red\">➡</font> Read the <a onclick=\"window.open('".$trace_link."','trace','width=800,height=800,left=400'); return false;\" href=\"".$trace_link."\">trace file</a>";
 		echo "</p>";
+		
 		// Prepare images if any
 		$dircontent = scandir($temp_dir);
 		foreach($dircontent as $thisfile) {
@@ -179,10 +180,11 @@ if($instruction <> "help") {
 				$link = $temp_dir.$thisfile;
 				$left = 10 + (30 * ($number - 1));
 				$window_height = 600;
-				if($hmax < $window_height) $window_height = $hmax;
+				if($hmax < $window_height) $window_height = $hmax + 20;
 				$window_width = 1200;
-				if($wmax < $window_width) $window_width = $wmax;
+				if($wmax < $window_width) $window_width = $wmax +  20;
 				echo "<div style=\"border:2px solid gray; background-color:azure; width:8em;  padding:2px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$link."','".$title."','width=".$window_width.",height=".$window_height.",left=".$left."'); return false;\" href=\"".$link."\">Image ".$number."</a></div>&nbsp;";
+//				echo "<div style=\"border:2px solid gray; background-color:azure; width:8em;  padding:2px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$link."','".$title."','width=screen.width,height=".$window_height.",left=".$left."'); return false;\" href=\"".$link."\">Image ".$number."</a></div>&nbsp;";
 				}
 			}
 		echo "<br />";

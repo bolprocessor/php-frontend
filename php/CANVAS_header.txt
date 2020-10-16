@@ -13,7 +13,6 @@ body {margin: 20;}
 <p>Your browser does not support CANVAS… :-(</p>
 </canvas>
 <script>
-//translate(-600px, -900px)
 const canvas = document.querySelector('.myCanvas');
 const width = canvas.width = THE_WIDTH;
 const height = canvas.height = THE_HEIGHT;
