@@ -190,6 +190,11 @@ $glossary_file = $extract_data['glossary'];
 $metronome = $extract_data['metronome'];
 $time_structure = $extract_data['time_structure'];
 $templates = $extract_data['templates'];
+$found_elsewhere =FALSE;
+if($alphabet_file <> '' AND $objects_file == '') {
+	$objects_file = get_name_mi_file($dir.$alphabet_file);
+	if($objects_file <> '') $found_elsewhere = TRUE;
+	}
 
 if($settings_file <> '') $show_production = get_setting("show_production",$settings_file);
 else $show_production = 0;
@@ -261,6 +266,13 @@ if($settings_file <> '') {
 		}
 	else $link .= "&settings_file=".urlencode($settings_file);
 	}
+if($objects_file <> '') {
+	if(!file_exists($dir.$objects_file)) {
+		echo "<font color=\"red\"><small>WARNING: ".$dir.$objects_file." not found.<small></font><br />";
+		$error = TRUE;
+		}
+	else $link .= "&objects_file=".urlencode($objects_file);
+	}
 if($test) echo "output = ".$output."<br />";
 if($test) echo "output_file = ".$output_file."<br />";
 $link .= "&output=".urlencode($output.SLASH.$output_file)."&format=".$file_format;
@@ -310,7 +322,9 @@ else {
 	$time_structure = '';
 //	echo "<input type=\"hidden\" name=\"settings_file\" value=\"".$settings_file."\">";
 	}
-if($note_convention <> '') echo "• Note convention = <font color=\"blue\">".intval($note_convention)."</font> found in <font color=\"blue\">‘".$settings_file."’</font><br />";
+
+if($found_elsewhere AND $objects_file <> '') echo "• Sound-object prototype file = <font color=\"blue\">‘".$objects_file."’</font> found in <font color=\"blue\">‘".$alphabet_file."’</font><br />";
+if($note_convention <> '') echo "• Note convention = <font color=\"blue\">‘".note_convention(intval($note_convention))."’</font> found in <font color=\"blue\">‘".$settings_file."’</font><br />";
 if($produce_all_items == 1) echo "• Produce all items has been set ON by <font color=\"blue\">‘".$settings_file."’</font><br />";
 if($show_production == 1) echo "• Show production has been set ON by <font color=\"blue\">‘".$settings_file."’</font><br />";
 if($trace_production == 1) echo "• Trace production has been set ON by <font color=\"blue\">‘".$settings_file."’</font><br />";

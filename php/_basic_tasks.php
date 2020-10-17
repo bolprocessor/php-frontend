@@ -1402,4 +1402,14 @@ function send_to_console($command) {
 //	passthru($exec,$o);
 	return $table;
 	}
+	
+function get_name_mi_file($this_file) {
+	$objects_file = '';
+	$content = @file_get_contents($this_file,TRUE);
+	if($content != FALSE) {
+		$extract_data = extract_data(TRUE,$content);
+		$objects_file = $extract_data['objects'];
+		}
+	return $objects_file;
+	}
 ?>

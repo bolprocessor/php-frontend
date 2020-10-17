@@ -26,6 +26,8 @@ else {
 	if($grammar_path == '') die();
 	if(isset($_GET['settings_file'])) $settings_file = $_GET['settings_file'];
 	else $settings_file = '';
+	if(isset($_GET['objects_file'])) $objects_file = $_GET['objects_file'];
+	else $objects_file = '';
 	if(isset($_GET['note_convention'])) $note_convention = $_GET['note_convention'];
 	else $note_convention = '';
 	if(isset($_GET['alphabet'])) $alphabet_file = urldecode($_GET['alphabet']);
@@ -63,6 +65,7 @@ else {
 
 	if($note_convention <> '') $command .= " --".$note_convention;
 	if($settings_file <> '') $command .= " -se ".$dir.$settings_file;
+	if($objects_file <> '') $command .= " -mi ".$dir.$objects_file;
 	
 	if($startup <> '') $command .= " --start ".$startup;
 	if($instruction == "produce" OR $instruction == "produce-all") {

@@ -78,6 +78,7 @@ if(isset($_FILES['mid_upload']) AND $_FILES['mid_upload']['tmp_name'] <> '') {
 		}
 	}
 // else echo "<p>Object file: <font color=\"blue\">".$object_file."</font>";
+unset($_FILES['mid_upload']);
 
 if(isset($_POST['division']) AND $_POST['division'] > 0) $division = $_POST['division'];
 else $division = 1000;
@@ -123,16 +124,19 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 	fwrite($handle,$MIDIchannel."\n");
 	$j++;
 	
-	$Tref = $_POST['Tref'];
+	$Tref = intval($_POST['Tref']);
 //	$Trefc = $_POST['Tref'] / $resolution;
 //	fwrite($handle,$Trefc."\n");
 	fwrite($handle,$Tref."\n");
 	$j++;
 	$quantization = $_POST["object_param_".$j++];
 	fwrite($handle,$quantization."\n"); // Quantization
-	$pivot_mode = $_POST['Pivot_mode'];
+	if(isset($_POST['Pivot_mode']) AND $Tref > 0)
+		$pivot_mode = $_POST['Pivot_mode'];
+	else $pivot_mode = $_POST['Pivot_mode'] = -1;
+	if($pivot_mode == -1 AND $Tref > 0) $pivot_mode = 0;
 	$string = "00000000000000000000";
-	$string[$pivot_mode] = "1";
+	if($pivot_mode >= 0) $string[$pivot_mode] = "1";
 //	echo "<p>".$string."</p>";
 	$k = 6;
 	$okrescale = $FixScale = $OkExpand = $OkCompress = 0;
