@@ -133,63 +133,54 @@ if($instruction <> "help") {
 		
 		// Prepare images if any
 		$dircontent = scandir($temp_dir);
+		echo "<table style=\"background-color:white;\"><tr>";
+		$number_images = 0;
 		foreach($dircontent as $thisfile) {
 			$table = explode('_',$thisfile);
 			if($table[0] <> "trace") continue;
 			if($table[1] <> session_id()) continue;
 			if($table[2] <> "image") continue;
+			if(isset($table[4])) continue;
+			echo "<td>";
 			$number = intval(str_replace(".html",'',$table[3]));
 			$content = @file_get_contents($temp_dir.$thisfile,FALSE);
 			$table2 = explode(chr(10),$content);
 			$imax = count($table2);
 			$table3 = array();
-			$title = $grammar_name."_Image_".$number;
-			$wmax = $hmax = 0;
-			$found = 0;
+			$title1 = $grammar_name."_Image_".$number;
+			$title2 = $grammar_name." Image ".$number;
+			$WidthMax = $HeightMax = 0;
+			$number_images++;
 			for($i = 0; $i < $imax; $i++) {
 				$line = trim($table2[$i]);
 			//	echo $i." ".recode_tags($line)."<br />";
-				if(is_integer($pos=strpos($line,"WMAX=")) AND $pos == 0) {
+				if(is_integer($pos=strpos($line,"canvas.width"))) {
 					$table4 = explode("=",$line);
-					$wmax = round(intval($table4[1])/2) + 10;
-					$found++;
-				//	if($found > 1) break;
-				//	echo $i." ".$wmax[$i]."<br />";
+					$WidthMax = round(intval($table4[2])) + 10;
+				//	echo $i.") WidthMax = ".$WidthMax."<br />";
 					}
-				if(is_integer($pos=strpos($line,"HMAX=")) AND $pos == 0) {
+				if(is_integer($pos=strpos($line,"canvas.height"))) {
 					$table4 = explode("=",$line);
-					$hmax = round(intval($table4[1])/2);
-					$found++;
-				//	if($found > 1) break;
-				//	echo $i." ".$hmax[$i]."<br />";
+					$HeightMax = round(intval($table4[2]));
+				//	echo $i.") HeightMax = ".$HeightMax."<br />";
 					}
 				}
-			if($found > 1) {
-				for($i = $j = 0; $i < $imax; $i++) {
-					$line = trim($table2[$i]);
-				//	echo $i." ".recode_tags($line)."<br />";
-					if(is_integer($pos=strpos($line,"WMAX=")) AND $pos == 0) continue;
-					if(is_integer($pos=strpos($line,"HMAX=")) AND $pos == 0) continue;
-					$table3[$j] = $line;
-					$table3[$j] = str_replace("THE_WIDTH",$wmax,$table3[$j]);
-					$table3[$j] = str_replace("THE_HEIGHT",$hmax,$table3[$j]);
-					$table3[$j] = str_replace("THE_TITLE",$title,$table3[$j]);
-					$j++;
-					}
-				$new_content = implode(chr(10),$table3);
-				$handle = fopen($temp_dir.$thisfile,"w");
-				fwrite($handle,$new_content);
-				fclose($handle);
-				$link = $temp_dir.$thisfile;
-				$left = 10 + (30 * ($number - 1));
-				$window_height = 600;
-				if($hmax < $window_height) $window_height = $hmax + 20;
-				$window_width = 1200;
-				if($wmax < $window_width) $window_width = $wmax +  20;
-				echo "<div style=\"border:2px solid gray; background-color:azure; width:8em;  padding:2px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$link."','".$title."','width=".$window_width.",height=".$window_height.",left=".$left."'); return false;\" href=\"".$link."\">Image ".$number."</a></div>&nbsp;";
-//				echo "<div style=\"border:2px solid gray; background-color:azure; width:8em;  padding:2px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$link."','".$title."','width=screen.width,height=".$window_height.",left=".$left."'); return false;\" href=\"".$link."\">Image ".$number."</a></div>&nbsp;";
+			for($i = $j = 0; $i < $imax; $i++) {
+				$line = trim($table2[$i]);
+				$table3[$j] = $line;
+				$j++;
 				}
+			$link = $temp_dir.$thisfile;
+			$left = 10 + (30 * ($number - 1));
+			$window_height = 600;
+			if($HeightMax < $window_height) $window_height = $HeightMax + 20;
+			$window_width = 1200;
+			if($WidthMax < $window_width) $window_width = $WidthMax +  20;
+			echo "<div style=\"border:2px solid gray; background-color:azure; width:8em;  padding:2px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$link."','".$title1."','width=".$window_width.",height=".$window_height.",left=".$left."'); return false;\" href=\"".$link."\">Image ".$number."</a></div>&nbsp;";
+			echo "</td>";
+			if(++$number_images > 4) echo "</tr><tr>";
 			}
+		echo "</tr></table>";
 		echo "<br />";
 		}
 	}

@@ -13,6 +13,7 @@ body {margin: 20;}
 <p>Your browser does not support CANVAS… :-(</p>
 </canvas>
 <script>
+// This image was created by Bol Processor BP3
 const canvas = document.querySelector('.myCanvas');
 const width = canvas.width = THE_WIDTH;
 const height = canvas.height = THE_HEIGHT;
