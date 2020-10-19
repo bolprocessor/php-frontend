@@ -134,6 +134,7 @@ for($i = 0; $i < $imax; $i++) {
 		} // $$$
 	}
 echo "</table>";
+echo "<p style=\"text-align:left;\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"saveparameters\" value=\"SAVE PARAMETERS TO ‘".$filename."’\"></p>";
 echo "</form>";
 
 /*

@@ -38,7 +38,7 @@ Write Csound scores		0	1
 Opcode OMS (obsolete)		0	1
 Split terminal symbols		1	1
 Split |variables|		1	1
-Use text color		1	1
+Use text color		0	1
 Default buffer size	symbols	1
 Use color in graphics		1	1
 Use buffer limit		1	1

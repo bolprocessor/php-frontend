@@ -173,7 +173,7 @@ if($instruction <> "help") {
 			$link = $temp_dir.$thisfile;
 			$left = 10 + (30 * ($number - 1));
 			$window_height = 600;
-			if($HeightMax < $window_height) $window_height = $HeightMax + 20;
+			if($HeightMax < $window_height) $window_height = $HeightMax + 60;
 			$window_width = 1200;
 			if($WidthMax < $window_width) $window_width = $WidthMax +  20;
 			echo "<div style=\"border:2px solid gray; background-color:azure; width:8em;  padding:2px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$link."','".$title1."','width=".$window_width.",height=".$window_height.",left=".$left."'); return false;\" href=\"".$link."\">Image ".$number."</a></div>&nbsp;";
