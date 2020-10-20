@@ -28,6 +28,8 @@ else {
 	else $settings_file = '';
 	if(isset($_GET['objects_file'])) $objects_file = $_GET['objects_file'];
 	else $objects_file = '';
+	if(isset($_GET['csound_file'])) $csound_file = $_GET['csound_file'];
+	else $csound_file = '';
 	if(isset($_GET['note_convention'])) $note_convention = $_GET['note_convention'];
 	else $note_convention = '';
 	if(isset($_GET['alphabet'])) $alphabet_file = urldecode($_GET['alphabet']);
@@ -65,6 +67,7 @@ else {
 
 	if($note_convention <> '') $command .= " --".$note_convention;
 	if($settings_file <> '') $command .= " -se ".$dir.$settings_file;
+	if($csound_file <> '') $command .= " -cs ".$dir.$csound_file;
 	if($objects_file <> '') $command .= " -mi ".$dir.$objects_file;
 	
 	if($startup <> '') $command .= " --start ".$startup;
@@ -133,7 +136,7 @@ if($instruction <> "help") {
 		
 		// Prepare images if any
 		$dircontent = scandir($temp_dir);
-		echo "<table style=\"background-color:white;\"><tr>";
+		echo "<table style=\"background-color:inherit;\"><tr>";
 		$number_images = 0;
 		foreach($dircontent as $thisfile) {
 			$table = explode('_',$thisfile);
@@ -141,7 +144,7 @@ if($instruction <> "help") {
 			if($table[1] <> session_id()) continue;
 			if($table[2] <> "image") continue;
 			if(isset($table[4])) continue;
-			echo "<td>";
+			echo "<td style=\"background-color:white; border-radius: 6px; border: 4px solid Gold; vertical-align:middle; text-align: center; padding:8px;\>";
 			$number = intval(str_replace(".html",'',$table[3]));
 			$content = @file_get_contents($temp_dir.$thisfile,FALSE);
 			$table2 = explode(chr(10),$content);

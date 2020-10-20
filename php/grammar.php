@@ -273,6 +273,13 @@ if($objects_file <> '') {
 		}
 	else $link .= "&objects_file=".urlencode($objects_file);
 	}
+if($csound_file <> '') {
+	if(!file_exists($dir.$csound_file)) {
+		echo "<font color=\"red\"><small>WARNING: ".$dir.$csound_file." not found.<small></font><br />";
+		$error = TRUE;
+		}
+	else $link .= "&csound_file=".urlencode($csound_file);
+	}
 if($test) echo "output = ".$output."<br />";
 if($test) echo "output_file = ".$output_file."<br />";
 $link .= "&output=".urlencode($output.SLASH.$output_file)."&format=".$file_format;
