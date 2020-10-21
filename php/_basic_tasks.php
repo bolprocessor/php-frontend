@@ -1412,4 +1412,42 @@ function get_name_mi_file($this_file) {
 		}
 	return $objects_file;
 	}
+
+function MIDIfiletype($file) {
+	$test = TRUE;
+	$MIDIfiletype = -1;	
+	$fp = fopen($file,'rb');
+	if(!$fp) return $MIDIfiletype;
+	$i = 0;
+	while(!feof($fp)) {
+	    // Read the file in chunks of 16 bytes
+	    $data = fread($fp,16);
+	    $arr = unpack("C*",$data);
+	    foreach($arr as $key => $value) {
+	 	  	if($i == 9) {
+	    		$MIDIfiletype = intval($value); // break;
+	    		}
+	    	if($test) {
+		 		if($value > 63) $value = chr($value);
+			    echo $i.") ".$key." = " .$value." = ". ord($value)."<br />";
+		    	}
+			$i++; 
+	    	}
+	    if($MIDIfiletype  >= 0) break;
+		}
+	fclose($fp);
+	return $MIDIfiletype;
+	}
+
+function copyemz($file1,$file2){
+          $contentx =@file_get_contents($file1);
+                   $openedfile = fopen($file2, "w");
+                   fwrite($openedfile, $contentx);
+                   fclose($openedfile);
+                    if ($contentx === FALSE) {
+                    $status=false;
+                    }else $status=true;
+                   
+                    return $status;
+    } 
 ?>

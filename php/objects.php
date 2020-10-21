@@ -4,15 +4,6 @@ require_once("_basic_tasks.php");
 $autosave = TRUE;
 // $autosave = FALSE;
 
-?>
-<script>
-// Warning before leaving the page (back button, or outgoinglink)
-window.onbeforeunload = function() {
-   return "Did you save this file before leaving?";
-};
-</script>
-<?php
-
 if(isset($_GET['file'])) $file = urldecode($_GET['file']);
 else $file = '';
 if($file == '') die();

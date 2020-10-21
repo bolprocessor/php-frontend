@@ -1,15 +1,6 @@
 <?php
 require_once("_basic_tasks.php");
 
-?>
-<script>
-// Warning before leaving the page (back button, or outgoinglink)
-window.onbeforeunload = function() {
-   return "Did you save this file before leaving?";
-};
-</script>
-<?php
-
 $url_this_page = "prototype.php";
 
 if(isset($_POST['object_name'])) {
@@ -61,28 +52,44 @@ if(isset($_FILES['mid_upload']) AND $_FILES['mid_upload']['tmp_name'] <> '') {
 		}
 	else {
 		$tmpFile = $_FILES['mid_upload']['tmp_name'];
-		copy($tmpFile,$midi_file) or die('Problem uploading this MIDI file');
+	//	@unlink($midi_file);
+	//	copyemz($tmpFile,$midi_file) or die('Problem uploading this MIDI file');
+		move_uploaded_file($tmpFile,$midi_file) or die('Problem uploading this MIDI file');
 		@chmod($midi_file,0666);
 		$table = explode('.',$upload_filename);
 		$extension = end($table);
 		if($extension <> "mid" and $extension <> "midi") {
-			echo "<h3><font color=\"red\">Uploading failed:</font> <font color=\"blue\">".$upload_filename."</font> <font color=\"red\">is not a MIDI file!</font></h3>";
-			unlink($midi_file);
+			echo "<h4><font color=\"red\">Uploading failed:</font> <font color=\"blue\">".$upload_filename."</font> <font color=\"red\">does not have the extension of a MIDI file!</font></h4>";
+			@unlink($midi_file);
 			}
 		else {
-			echo "<h3 id=\"timespan\"><font color=\"red\">Converting MIDI file:</font> <font color=\"blue\">".$upload_filename."</font></h3>";
-			$midi = new Midi();
-			$midi_text_bytes = convert_mf2t_to_bytes(FALSE,$midi_import,$midi,$midi_file);
-			$division = $_POST['division'] = $midi_text_bytes[0];
-		//	$division = $_POST['division'] = 1000;
-			$tempo = $_POST['tempo'] = $midi_text_bytes[1];
-		//	$tempo = $_POST['tempo'] = 1000000;
-			$timesig = $_POST['timesig'] = "0 TimeSig ".$midi_text_bytes[2]." ".$midi_text_bytes[3]." ".$midi_text_bytes[4];
-			$temp_bytes = array();
-			for($i = 5; $i < count($midi_text_bytes); $i++)
-				$temp_bytes[] = $midi_text_bytes[$i];
-			$midi_text_bytes = $temp_bytes;
-			fix_mf2t_file($midi_import,"unnamed_");
+			$MIDIfiletype = MIDIfiletype($midi_import);
+			if($MIDIfiletype < 0) {
+				echo "<p><font color=\"red\">File </font>“<font color=\"blue\">".$upload_filename."” <font color=\"red\">is unreadable as a MIDI file.</font></p>";
+				$upload_filename = '';
+				@unlink($midi_file);
+				}
+			else if(FALSE AND $MIDIfiletype > 1) {
+				echo "<h4><font color=\"red\">MIDI file </font>“<font color=\"blue\">".$upload_filename."</font>” <font color=\"red\"> of </font><font color=\"blue\">type ".$MIDIfiletype." </font><font color=\"red\">is not accepted. Only types 0 and 1 are compliant.</font></h4>";
+				$upload_filename = '';
+			//	@unlink($midi_file);
+				}
+			else {
+				echo "MIDI filetype = ".$MIDIfiletype."<br />";
+				echo "<h3 id=\"timespan\"><font color=\"red\">Converting MIDI file:</font> <font color=\"blue\">".$upload_filename."</font></h3>";
+				$midi = new Midi();
+				$midi_text_bytes = convert_mf2t_to_bytes(FALSE,$midi_import,$midi,$midi_file);
+				$division = $_POST['division'] = $midi_text_bytes[0];
+			//	$division = $_POST['division'] = 1000;
+				$tempo = $_POST['tempo'] = $midi_text_bytes[1];
+			//	$tempo = $_POST['tempo'] = 1000000;
+				$timesig = $_POST['timesig'] = "0 TimeSig ".$midi_text_bytes[2]." ".$midi_text_bytes[3]." ".$midi_text_bytes[4];
+				$temp_bytes = array();
+				for($i = 5; $i < count($midi_text_bytes); $i++)
+					$temp_bytes[] = $midi_text_bytes[$i];
+				$midi_text_bytes = $temp_bytes;
+				fix_mf2t_file($midi_import,"unnamed_");
+				}
 			}
 		}
 	}
