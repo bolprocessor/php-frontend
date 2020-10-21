@@ -1131,9 +1131,6 @@ Returns to the script in which a subscript was called.
 ### Resume
 Allows current process to continue if it has been interrupted by "Pause".
 • This may also be done by receiving an "Apple Event" of class 'Bel0' and ID 'cont'.
-### Stop
-Forces current process to abort.
-• This is also a script command.
 ### Pause
 Allows current process to pause until the 'Resume' command is activated by clicking the
     "Resume" button or sending an "Apple Event" of class 'Bel0' and ID 'cont'.
