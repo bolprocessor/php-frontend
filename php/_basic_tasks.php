@@ -1275,6 +1275,8 @@ function is_variable($note_convention,$word) {
 		return $word;
 		}
 	if(!ctype_upper($word[0])) return '';
+	$test = preg_replace("/.*•.*/u",'',$word);
+	if($test == '') return '';
 	if($note_convention == 0) { // English convention
 		$test = preg_replace("/[A-G]#?b?[0-9]/u",'',$word);
 		if($test == '') return '';
