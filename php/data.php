@@ -90,6 +90,8 @@ if(isset($_POST['savethisfile'])) {
 	$content = $_POST['thistext'];
 	$handle = fopen($this_file,"w");
 	$file_header = $top_header."\n// Data saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
+	do $content = str_replace("  ",' ',$content,$count);
+	while($count > 0);
 	fwrite($handle,$file_header."\n");
 	fwrite($handle,$content);
 	fclose($handle);
@@ -128,6 +130,11 @@ $imax = count($table);
 for($i = 0; $i < $imax; $i++) {
 	$line = trim($table[$i]);
 	$line = preg_replace("/\[.*\]/u",'',$line);
+	$line = preg_replace("/^i[0-9].*/u",'',$line); // Csound note statement
+	$line = preg_replace("/^f[0-9].*/u",'',$line); // Csound table statement
+	$line = preg_replace("/^t[ ].*/u",'',$line); // Csound tempo statement
+	$line = preg_replace("/^s\s*$/u",'',$line); // Csound "s" statement
+	$line = preg_replace("/^e\s*$/u",'',$line); // Csound "e" statement
 	if($line == '') continue;
 	if(is_integer($pos=strpos($line,"//")) AND $pos == 0) continue;
 	if(is_integer($pos=strpos($line,"-")) AND $pos == 0) continue;
@@ -139,8 +146,8 @@ for($i = 0; $i < $imax; $i++) {
 	echo "<tr id=\"".$i."\"><td>";
 	echo "<input type=\"hidden\" name=\"i\" value=\"".$i."\">";
 	echo "<input type=\"hidden\" name=\"line\" value=\"".$line."\">";
-	echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"playitem\" value=\"PLAY\">&nbsp;";
-	echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"expanditem\" value=\"EXP\">&nbsp;";
+	echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"playitem\" value=\"PLAY\"title=\"Play this polymetric expression\">&nbsp;";
+	echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"expanditem\" value=\"EXP\" title=\"Expand this polymetric expression\">&nbsp;";
 	echo "<input type=\"hidden\" name=\"imax\" value=\"".$imax."\">";
 	echo "</form>";
 	echo $line_recoded;

@@ -453,7 +453,8 @@ function clean_up_encoding($convert,$text) {
 	$text = str_replace("Â","¬",$text);
 	$text = str_replace("¤","•",$text);
 	$text = str_replace("â¢","•",$text);
-	$text = str_replace(" . ","•",$text);
+	$text = preg_replace("/\s\\.$/u"," •",$text);
+	$text = preg_replace("/\s\\.([^0-9])/u"," •$1",$text);
 	$text = str_replace("²","≤",$text);
 	$text = str_replace("³","≥",$text);
 	return $text;
@@ -467,7 +468,9 @@ function recode_tags($text) {
 	}
 
 function recode_entities($text) {
-	$text = str_replace("•"," . ",$text);
+	$text = preg_replace("/\s*•$/u"," .",$text);
+	$text = preg_replace("/\s*•[ ]*/u"," . ",$text);
+	// $text = str_replace("•"," . ",$text);
 	$text = str_replace(" … "," _rest ",$text);
 	return $text;
 	}
@@ -759,6 +762,7 @@ function reformat_grammar($verbose,$grammar_file) {
 			$line = "gram#".$i_gram."[".$irul."] ".$line;
 			$irul++;
 			}
+	//	$line = str_replace(" . "," • ",$line);
 		if($verbose) echo $line."<br />";
 		$table[$i_line] = $line;
 		}
@@ -1089,11 +1093,12 @@ function MIDIparameter_argument($i,$parameter,$StartIndex,$EndIndex,$TableIndex,
 	$r .= "</table><br />";
 	$r .= "<table>";
 	$r .= "<tr>";
-	$r .= "<td colspan=\"5\">";
-	$r .= "<font color=\"red\">".$parameter."</font> variations";
+	$r .= "<td colspan=\"6\">";
+	$r .= "▷ <font color=\"red\">".$parameter."</font> mapping of variations";
 	$r .= "</td>";
 	$r .= "</tr>";
 	$r .= "<tr>";
+	$r .= "<td rowspan = \"2\" style=\"padding:4px; vertical-align:middle; text-align:center; background-color:Cornsilk;\"><small>MIDI<br /><font color=\"red\">▼</font><br />Csound</small></td>";
 	$r .= "<td style=\"padding: 5px;\">";
 	$x = $param_value[0];
 	if($x > 1000000) $x = '';
@@ -1275,13 +1280,20 @@ function is_variable($note_convention,$word) {
 		return $word;
 		}
 	if(!ctype_upper($word[0])) return '';
+	$word = str_replace('_',' ',$word);
+	$word = trim($word);
 	$test = preg_replace("/.*•.*/u",'',$word);
 	if($test == '') return '';
+	$table = explode(' ',$word);
+	if(count($table) > 1) {
+		$word = $table[0];
+	//	echo "“".$word."”<br />";
+		}
 	if($note_convention == 0) { // English convention
 		$test = preg_replace("/[A-G]#?b?[0-9]/u",'',$word);
 		if($test == '') return '';
 		}
-	return $word;
+	return trim($word);
 	}
 
 function get_instruction($line) {

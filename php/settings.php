@@ -15,6 +15,7 @@ echo "<p>Current directory = ".$dir."</p>";
 echo link_to_help();
 
 echo "<h3>Settings file “".$filename."”</h3>";
+echo "<p><i>This temporary layout will remain until the set of relevant parameters has been finalised.</i></p>";
 
 $bp_parameter_names = @file_get_contents("bp_parameter_names.txt",TRUE);
 if($bp_parameter_names === FALSE) echo "ERROR reading ‘bp_parameter_names.txt’";
@@ -56,6 +57,12 @@ if(isset($_POST['saveparameters'])) {
 			$value = "<no input device>";
 		if($i == 53 AND $value == '')
 			$value = "<no output device>";
+		if($i == 45) { // Seed for randomization
+			$newvalue = intval($value);
+			if(strcmp($newvalue,$value) <> 0)
+				echo "<p><font color=\"red\">Seed for randomization must be an integer: “</font><font color=\"blue\">".$value."</font><font color=\"red\">” has been replaced with “</font><font color=\"blue\">".$newvalue."</font><font color=\"red\">”.</font></p>";
+			$value = $newvalue;
+			}
 		if(strlen($value) == 0) $value = ' ';
 		fwrite($handle,$value."\n");
 		}
@@ -73,7 +80,7 @@ $extract_data = extract_data(TRUE,$content);
 echo "<p style=\"color:blue;\">".$extract_data['headers']."</p>";
 $content = $extract_data['content'];
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-echo "<p style=\"text-align:left;\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"saveparameters\" value=\"SAVE PARAMETERS TO ‘".$filename."’\"></p>";
+echo "<p style=\"text-align:left;\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"saveparameters\" value=\"SAVE TO ‘".$filename."’\"></p>";
 echo "<table style=\"border-spacing: 2px;\" cellpadding=\"2px;\">";
 
 $table = explode(chr(10),$content);

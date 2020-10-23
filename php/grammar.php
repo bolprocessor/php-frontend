@@ -59,6 +59,8 @@ if(isset($_POST['savegrammar']) OR isset($_POST['compilegrammar'])) {
 	$handle = fopen($grammar_file,"w");
 	$content = recode_entities($content);
 	$file_header = $top_header."\n// Grammar file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
+	do $content = str_replace("  ",' ',$content,$count);
+	while($count > 0);
 	fwrite($handle,$file_header."\n");
 	fwrite($handle,$content);
 	fclose($handle);
@@ -111,6 +113,8 @@ if(isset($_POST['compilegrammar'])) {
 	else $alphabet_file = '';
 	if(isset($_POST['settings_file'])) $settings_file = $_POST['settings_file'];
 	else $settings_file = '';
+	if(isset($_POST['csound_file'])) $csound_file = $_POST['csound_file'];
+	else $csound_file = '';
 	echo "<p id=\"timespan\">Compiling ‘".$filename."’</p>";
 	$application_path = $bp_application_path;
 	$command = $application_path."bp compile";
@@ -132,6 +136,12 @@ if(isset($_POST['compilegrammar'])) {
 			echo "<p style=\"color:red;\">WARNING: ".$dir.$alphabet_file." not found.</p>";
 			}
 		else $command .= " -ho ".$dir.$alphabet_file;
+		}
+	if($csound_file <> '') {
+		if(!file_exists($dir.$csound_file)) {
+			echo "<p style=\"color:red;\">WARNING: ".$dir.$csound_file." not found.</p>";
+			}
+		else $command .= " -cs ".$dir.$csound_file;
 		}
 	$command .= " --traceout ".$tracefile;
 	echo "<p style=\"color:red;\"><small>".$command."</small></p>";
@@ -234,9 +244,10 @@ if($file_format == "csound") echo " checked";
 echo ">CSOUND file";
 echo "</p></td>";
 echo "<td style=\"text-align:right; vertical-align:middle;\" rowspan=\"2\">";
-echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"savegrammar\" value=\"SAVE ‘".$filename."’\"><br /><br />";
 echo "<input type=\"hidden\" name=\"settings_file\" value=\"".$settings_file."\">";
+echo "<input type=\"hidden\" name=\"csound_file\" value=\"".$csound_file."\">";
 echo "<input style=\"background-color:azure;\" type=\"submit\" name=\"compilegrammar\" value=\"COMPILE GRAMMAR\"><br /><br />";
+echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"savegrammar\" value=\"SAVE ‘".$filename."’\"><br /><br />";
 
 $error = FALSE;
 if($templates) {
@@ -290,7 +301,7 @@ if($trace_production > 0)
 $link .= "&random_seed=".$random_seed;
 $link .= "&here=".urlencode($here);
 $window_name = window_name($filename);
-echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)\"";
+echo "<b>then…</b> <input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)\" title=\"Don't forget to save!\"";
 if($error) echo " disabled";
 echo ">";
 echo "</td></tr>";
@@ -344,7 +355,7 @@ echo "<input type=\"hidden\" name=\"trace_production\" value=\"".$trace_producti
 echo "<input type=\"hidden\" name=\"metronome\" value=\"".$metronome."\">";
 echo "<input type=\"hidden\" name=\"time_structure\" value=\"".$time_structure."\">";
 echo "<input type=\"hidden\" name=\"alphabet_file\" value=\"".$alphabet_file."\">";
-
+echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"savegrammar\" value=\"SAVE ‘".$filename."’\"></p>";
 echo "<textarea name=\"thisgrammar\" rows=\"25\" style=\"width:700px; background-color:Cornsilk;\">".$content."</textarea>";
 echo "</form>";
 
@@ -364,6 +375,7 @@ for($i = 0; $i < $imax; $i++) {
 	if($line == "COMMENT:") break;
 	if(is_integer($pos=strpos($line,"//")) AND $pos == 0) continue;
 	if(is_integer($pos=strpos($line,"-")) AND $pos == 0) continue;
+//	echo $line."<br />";
 	$table2 = explode(' ',$line);
 	for($j = 0; $j < count($table2); $j++) {
 		$word = trim($table2[$j]);

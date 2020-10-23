@@ -18,6 +18,8 @@ if($instruction == '') {
 	}
 if(isset($_GET['here'])) $here = urldecode($_GET['here']);
 else $here = '???';
+if(isset($_GET['csound_file'])) $csound_file = $_GET['csound_file'];
+else $csound_file = '';
 if($instruction == "help")
 	$command = $application_path."bp --help";
 else {
@@ -28,8 +30,6 @@ else {
 	else $settings_file = '';
 	if(isset($_GET['objects_file'])) $objects_file = $_GET['objects_file'];
 	else $objects_file = '';
-	if(isset($_GET['csound_file'])) $csound_file = $_GET['csound_file'];
-	else $csound_file = '';
 	if(isset($_GET['note_convention'])) $note_convention = $_GET['note_convention'];
 	else $note_convention = '';
 	if(isset($_GET['alphabet'])) $alphabet_file = urldecode($_GET['alphabet']);

@@ -8,6 +8,7 @@ if(isset($_POST['instrument_name'])) {
 	$instrument_name = $_POST['instrument_name'];
 	$temp_folder = $_POST['temp_folder'];
 	$instrument_file = $_POST['instrument_file'];
+	$instrument_index = $_POST['instrument_index'];
 	}
 else {
 	"Csound instrument's name is not known. First open the ‘-cs’ file!"; die();
@@ -28,7 +29,7 @@ if($test) echo "folder_this_instrument = ".$folder_this_instrument."<br />";
 
 echo "<p>Instrument file: <font color=\"blue\">".$instrument_file."</font>";
 echo link_to_help();
-echo "<h2>Csound instrument <big><font color=\"red\">".$instrument_name."</font></big></h2>";
+echo "<h2>Csound instrument <big><font color=\"blue\">_ins(".$instrument_index.")</font> <font color=\"red\">".$instrument_name."</font></big></h2>";
 
 $argmax_file = $folder_this_instrument.SLASH."argmax.php";
 		
@@ -233,11 +234,13 @@ if(isset($_POST['saveinstrument'])) {
 $content = file_get_contents($instrument_file,TRUE);
 $extract_data = extract_data(TRUE,$content);
 $content = $extract_data['content'];
+echo "<input type=\"hidden\" name=\"instrument_index\" value=\"".$instrument_index."\">";
 
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 echo "<input type=\"hidden\" name=\"instrument_name\" value=\"".$instrument_name."\">";
 echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";
 echo "<input type=\"hidden\" name=\"instrument_file\" value=\"".$instrument_file."\">";
+echo "<input type=\"hidden\" name=\"instrument_index\" value=\"".$instrument_index."\">";
 $table = explode(chr(10),$content);
 $csfilename = $table[0];
 echo "<input type=\"hidden\" name=\"csfilename\" value=\"".$csfilename."\">";
@@ -422,8 +425,8 @@ foreach($dir_instrument as $thisparameter) {
 	$deleted_parameters .= "“".$parameter_name."” ";
 	}
 if($deleted_parameters <> '') echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"restore\" value=\"RESTORE ALL DELETED PARAMETERS\"> = <font color=\"blue\"><big>".$deleted_parameters."</big></font></p>";
-echo "</form>";
 echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"create_parameter\" value=\"CREATE A NEW PARAMETER\"> named <input type=\"text\" name=\"new_parameter\" size=\"20\" value=\"\"></p>";
+echo "</form>";
 $n = 0;
 foreach($dir_instrument as $thisparameter) {
 	if($thisparameter == '.' OR $thisparameter == ".." OR $thisparameter == ".DS_Store" OR $thisparameter == '') continue;
@@ -450,6 +453,7 @@ if($n > 0) {
 		echo "<td style=\"padding: 5px; vertical-align:middle;\">";
 		echo "<form method=\"post\" action=\"csparameter.php\" enctype=\"multipart/form-data\">";
 		echo "<input type=\"hidden\" name=\"instrument_name\" value=\"".$instrument_name."\">";
+		echo "<input type=\"hidden\" name=\"instrument_index\" value=\"".$instrument_index."\">";
 		echo "<input type=\"hidden\" name=\"csfilename\" value=\"".$csfilename."\">";
 		echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";
 		echo "<input type=\"hidden\" name=\"folder_this_instrument\" value=\"".$folder_this_instrument."\">";
@@ -462,6 +466,7 @@ if($n > 0) {
 		echo "<td style=\"padding: 5px; vertical-align:middle;\">";
 		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		echo "<input type=\"hidden\" name=\"instrument_name\" value=\"".$instrument_name."\">";
+		echo "<input type=\"hidden\" name=\"instrument_index\" value=\"".$instrument_index."\">";
 		echo "<input type=\"hidden\" name=\"parameter_name\" value=\"".$parameter_name."\">";
 	echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";
 	echo "<input type=\"hidden\" name=\"instrument_file\" value=\"".$instrument_file."\">";

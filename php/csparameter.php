@@ -9,6 +9,7 @@ if(isset($_POST['parameter_name'])) {
 	$temp_folder = $_POST['temp_folder'];
 	$folder_this_instrument = $_POST['folder_this_instrument'];
 	$instrument_name = $_POST['instrument_name'];
+	$instrument_index = $_POST['instrument_index'];
 	$csfilename = $_POST['csfilename'];
 	}
 else {
@@ -26,7 +27,7 @@ if($test) echo "parameter_name = ".$parameter_name."<br />";
 echo "<p>Folder of this instrument: <font color=\"blue\">".$folder_this_instrument."</font>";
 echo link_to_help();
 echo "<h2>Csound parameter <big>“<font color=\"green\">".$parameter_name."</font>”</big></h2>";
-echo "<p>This parameter belongs to instrument “<font color=\"blue\">".$instrument_name."</font>” in file “<font color=\"blue\">".$csfilename."</font>”</p>";
+echo "<p>This parameter belongs to <big>_ins(".$instrument_index.") “<font color=\"blue\">".$instrument_name."</font>”</big> in file “<font color=\"blue\">".$csfilename."</font>”</p>";
 
 if(isset($_POST['saveparameter'])) {
 //	echo "parameter_name = ".$parameter_name."<br />";
@@ -59,11 +60,11 @@ if(isset($_POST['saveparameter'])) {
 	}
 
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-
 echo "<input type=\"hidden\" name=\"parameter_name\" value=\"".$parameter_name."\">";
 echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";
 echo "<input type=\"hidden\" name=\"folder_this_instrument\" value=\"".$folder_this_instrument."\">";
 echo "<input type=\"hidden\" name=\"instrument_name\" value=\"".$instrument_name."\">";
+echo "<input type=\"hidden\" name=\"instrument_index\" value=\"".$instrument_index."\">";
 echo "<input type=\"hidden\" name=\"csfilename\" value=\"".$csfilename."\">";
 
 echo "<p style=\"text-align:left;\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"saveparameter\" value=\"SAVE THIS PARAMETER\"></p>";
@@ -80,7 +81,7 @@ echo "<td>end</td>";
 echo "<td>table</td>";
 echo "</tr>";
 echo "<tr>";
-echo "<td>Control arguments</td>";
+echo "<td style=\"text-align:right;\">Arguments:</td>";
 echo "<td style=\"padding: 5px;\">";
 $start_index = $table[2];
 if($start_index == -1) $start_index = '';
@@ -102,14 +103,14 @@ echo "<td colspan=\"2\" style=\"padding: 5px;\">";
 $default_value = $table[5];
 echo "Default value = <input type=\"text\" name=\"default_value\" size=\"12\" value=\"".$default_value."\">";
 echo "</td>";
-echo "<td colspan=\"2\">";
+echo "<td colspan=\"2\" style=\"padding: 6px; vertical-align:middle; text-align:right;\">";
 $GEN = intval($table[6]);
 if($GEN < 10) $GEN = "0".$GEN;
 echo "GEN <input type=\"text\" name=\"GEN\" size=\"4\" value=\"".$GEN."\">";
 echo "</td>";
 echo "</tr>";
 echo "<tr>";
-echo "<td style=\"padding: 5px; vertical-align:middle;\">Combination mode:</td>";
+echo "<td style=\"padding: 6px; vertical-align:middle; text-align:right;\">Combination mode:</td>";
 echo "<td colspan=\"3\" style=\"padding: 5px; vertical-align:middle;\">";
 $mode = intval($table[7]);
 echo "<input type=\"radio\" name=\"mode\" value=\"0\"";

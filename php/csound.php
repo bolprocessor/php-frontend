@@ -482,6 +482,7 @@ if($number_instruments > 0) {
 		echo "<form method=\"post\" action=\"csinstrument.php\" enctype=\"multipart/form-data\">";
 		echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";
 		echo "<input type=\"hidden\" name=\"instrument_file\" value=\"".$instrument_file[$j]."\">";
+		echo "<input type=\"hidden\" name=\"instrument_index\" value=\"".$name_index[$CsoundInstrumentName[$j]]."\">";
 		echo "<big>[".$name_index[$CsoundInstrumentName[$j]]."]</big> ";
 		echo "<input style=\"background-color:azure; font-size:larger;\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" name=\"instrument_name\" value=\"".$CsoundInstrumentName[$j]."\">";
 		
