@@ -124,10 +124,10 @@ echo "</form>";
 
 display_more_buttons($content,$url_this_page,$dir,$objects_file,$csound_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
 echo "</td><td>";
-echo "<table style=\"background-color:azure;\">";
+echo "<table style=\"background-color:Gold;\">";
 $table = explode(chr(10),$content);
 $imax = count($table);
-for($i = 0; $i < $imax; $i++) {
+for($i = $j = 0; $i < $imax; $i++) {
 	$line = trim($table[$i]);
 	$line = preg_replace("/\[.*\]/u",'',$line);
 	$line = preg_replace("/^i[0-9].*/u",'',$line); // Csound note statement
@@ -139,15 +139,16 @@ for($i = 0; $i < $imax; $i++) {
 	if(is_integer($pos=strpos($line,"//")) AND $pos == 0) continue;
 	if(is_integer($pos=strpos($line,"-")) AND $pos == 0) continue;
 	$line_recoded = recode_tags($line);
+	$j++;
 	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 	echo "<input type=\"hidden\" name=\"alphabet_file\" value=\"".$alphabet_file."\">";
 	echo "<input type=\"hidden\" name=\"settings_file\" value=\"".$settings_file."\">";
 	echo "<input type=\"hidden\" name=\"objects_file\" value=\"".$objects_file."\">";
-	echo "<tr id=\"".$i."\"><td>";
+	echo "<tr id=\"".$i."\"><td>".$j."</td><td>";
 	echo "<input type=\"hidden\" name=\"i\" value=\"".$i."\">";
 	echo "<input type=\"hidden\" name=\"line\" value=\"".$line."\">";
-	echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"playitem\" value=\"PLAY\"title=\"Play this polymetric expression\">&nbsp;";
-	echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"expanditem\" value=\"EXP\" title=\"Expand this polymetric expression\">&nbsp;";
+	echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" name=\"playitem\" value=\"PLAY\"title=\"Play this polymetric expression\">&nbsp;";
+	echo "<input style=\"background-color:azure;\" type=\"submit\" name=\"expanditem\" value=\"EXP\" title=\"Expand this polymetric expression\">&nbsp;";
 	echo "<input type=\"hidden\" name=\"imax\" value=\"".$imax."\">";
 	echo "</form>";
 	echo $line_recoded;

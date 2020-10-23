@@ -6,6 +6,7 @@ echo "<meta content=\"text/html; charset=utf-8\" http-equiv=\"Content-Type\" />"
 echo "<link rel=\"stylesheet\" href=\"bp.css\" />\n";
 if(isset($filename)) echo "<title>".$filename."</title>\n";
 else if(isset($this_title)) echo "<title>".$this_title."</title>\n";
+echo "<link rel=\"shortcut icon\" href=\"pict/bp3_logo_ico\" />";
 
 echo "<script>\n";
 // The following might be used later
