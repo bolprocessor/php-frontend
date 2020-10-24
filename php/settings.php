@@ -64,7 +64,7 @@ if(isset($_POST['saveparameters'])) {
 			$value = $newvalue;
 			}
 		if(strlen($value) == 0) $value = ' ';
-	//	if($i == 71) echo "WMAX = ".$value."<br />";
+		if($i == 71) $value = 39;
 		if($i > 71 AND $i < 111) $value = 10;
 		fwrite($handle,$value."\n");
 		}

@@ -69,7 +69,7 @@ Default velocity	(1..127)	1
 Default panoramic	(0..127)	1
 Panoramic controller	(0..127)	1
 SamplingRate		1
-WMAX (39 windows)		1
+WMAX (39 windows)		0
 Font size		0
 Font size		0
 Font size		0
