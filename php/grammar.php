@@ -355,8 +355,9 @@ echo "<input type=\"hidden\" name=\"trace_production\" value=\"".$trace_producti
 echo "<input type=\"hidden\" name=\"metronome\" value=\"".$metronome."\">";
 echo "<input type=\"hidden\" name=\"time_structure\" value=\"".$time_structure."\">";
 echo "<input type=\"hidden\" name=\"alphabet_file\" value=\"".$alphabet_file."\">";
-echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"savegrammar\" value=\"SAVE ‘".$filename."’\"></p>";
-echo "<textarea name=\"thisgrammar\" rows=\"25\" style=\"width:700px; background-color:Cornsilk;\">".$content."</textarea>";
+echo "<p><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"savegrammar\" value=\"SAVE ‘".$filename."’\"></p>";
+echo "<textarea name=\"thisgrammar\" rows=\"50\" style=\"width:90%; background-color:Cornsilk;\">".$content."</textarea>";
+echo "<p style=\"width:90%; text-align:right;\"><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"savegrammar\" value=\"SAVE ‘".$filename."’\"></p>";
 echo "</form>";
 
 display_more_buttons($content,$url_this_page,$dir,$objects_file,$csound_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);

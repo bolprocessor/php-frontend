@@ -808,6 +808,9 @@ if($pivspec == 1 AND $PivMode == 0) {
 	}
 echo ">&nbsp;<input type=\"text\" name=\"PivPos2\" size=\"5\" value=\"".$value."\"> % duration from beginning<br /><br />";
 
+store($h_image,"pivendoff",$pivspec);
+store($h_image,"pivendoff",$PivMode);
+store($h_image,"pivendoff",$PivPos);
 
 echo "<p>RESCALING</p>";
 $value_min = $value_max = $dilation_controller = $dilation_channel = $value_controller = $value_channel = '';

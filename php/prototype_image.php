@@ -5,6 +5,7 @@ $save_codes_dir = urldecode($_GET['save_codes_dir']);
 $image_file = $save_codes_dir."/image.php";
 require_once($image_file);
 
+
 if($pivbeg == 1) $pivot_pos = 0;
 if($pivcent == 1) $pivot_pos = $Duration / 2;
 if($pivend == 1) $pivot_pos = $Duration;
@@ -62,7 +63,14 @@ if(($alpha * $gapend) > 50) $more += ($alpha * $gapend);
 // Revise left and right margins to display pivot if position is outside object
 if($pivspec == 1) {
 	if($PivMode == -1) $pivot_pos = $PivPos;
-	if($PivMode == 0) $pivot_pos = $PivPos * $Duration / 100;
+	else if($PivMode == 0) {
+		if($Duration > 0)
+			$pivot_pos = $PivPos * $Duration / 100;
+		else {
+			if(isset($time_max_csound)) $pivot_pos = $PivPos * $time_max_csound / 100;
+			else $pivot_pos = 0;
+			}
+		}
 	if($pivot_pos < 0) {
 		$more = -($alpha * $pivot_pos);
 		$margin_left += $more;
@@ -130,24 +138,28 @@ if(isset($event_csound[0])) {
 $x2 = $x1 + ($alpha * $Duration);
 $y1 = 270;
 $y2 = $y1 + $height;
-imagefilledrectangle($im,$x1+($alpha*$PreRoll),$y1,$x2+($alpha*$PostRoll),$y2,$yellow);
-imagerectangle($im,$x1+($alpha*$PreRoll),$y1,$x2+($alpha*$PostRoll),$y2,$black);
+if($Duration > 0) {
+	imagefilledrectangle($im,$x1+($alpha*$PreRoll),$y1,$x2+($alpha*$PostRoll),$y2,$yellow);
+	imagerectangle($im,$x1+($alpha*$PreRoll),$y1,$x2+($alpha*$PostRoll),$y2,$black);
+	}
 
 // Draw MIDI events
-if(isset($event_midi[0])) {
-	for($i = 0; $i < count($event_midi); $i++) {
-		$time = $event_midi[$i];
-		$x = $margin_left + ($alpha * $time);
-		imageline($im,$x,$y1,$x,$y2+5,$red);
+if($Duration > 0) {
+	if(isset($event_midi[0])) {
+		for($i = 0; $i < count($event_midi); $i++) {
+			$time = $event_midi[$i];
+			$x = $margin_left + ($alpha * $time);
+			imageline($im,$x,$y1,$x,$y2+5,$red);
+			}
 		}
+	$text = "MIDI";
+	$center = ($x1+($alpha*$PreRoll) + $x2+($alpha*$PostRoll)) / 2;
+	$length = imagefontwidth(10) * strlen($text);
+	$text_start = $center - ($length / 2);
+	imagestring($im,10,$text_start,$y1 + 3,$text,$black);
+	
+	if($image_range == "midi") $x2max = $x2;
 	}
-$text = "MIDI";
-$center = ($x1+($alpha*$PreRoll) + $x2+($alpha*$PostRoll)) / 2;
-$length = imagefontwidth(10) * strlen($text);
-$text_start = $center - ($length / 2);
-imagestring($im,10,$text_start,$y1 + 3,$text,$black);
-
-if($image_range == "midi") $x2max = $x2;
 
 // Draw time line and time units
 imageline($im,$x1,110,$x2max+($alpha*$PostRoll),110,$black);
@@ -207,7 +219,7 @@ if($Tref > 0 AND $Tref <= $max_duration) {
 	}
 
 // Draw period if object is cyclic
-if(isset($PeriodMode)) {
+if(isset($PeriodMode) AND $Duration > 0) {
 	$before_period = -1;
 	if($PeriodMode == -1) $before_period = $BeforePeriod;
 	if($PeriodMode == 0) $before_period = $BeforePeriod * $Duration / 100;
@@ -223,7 +235,7 @@ if(isset($PeriodMode)) {
 	}
 
 // Draw pivot if object is striated
-if($Tref > 0 AND isset($pivot_pos)) {
+if($Tref > 0 AND isset($pivot_pos) AND $Duration > 0) {
 	arrow($im,$margin_left+($alpha*$pivot_pos),$y1 - 30,$margin_left+($alpha*$pivot_pos),$y1,17,5,$OkRelocate,$red);
 	}
 

@@ -4,7 +4,9 @@ require_once("_header.php");
 $url_this_page = $this_page = "index.php";
 
 if($path <> '') {
-	echo "<h2 style=\"text-align:center;\">Bol Processor ‘BP3’</h2>";
+	echo "<table style=\"background-color:inherit;\"><tr>";
+	echo "<td style=\"padding:4px; vertical-align:middle;\"><img src=\"pict/BP3-logo.png\" width=\"120px;\"/></td>";
+	echo "<td style=\"padding:4px; vertical-align:middle;\"><h2 style=\"text-align:center;\">Bol Processor ‘BP3’</h2>";
 	$url_this_page .= "?path=".urlencode($path);
 	$dir = $bp_application_path.$path;
 	$table = explode(SLASH,$path);
@@ -16,9 +18,11 @@ if($path <> '') {
 	if($upper_dir == '') $link = $this_page;
 	else $link = $this_page."?path=".urlencode($upper_dir);
 	if($test) echo "link = ".$link."<br />";
-	echo "<h3 style=\"text-align:center;\">[<a href=\"".$link."\">move up</a>]</h3>";
+	echo "<h3 style=\"text-align:center;\">[<a href=\"".$link."\">move up</a>]</h3></td>";
+	echo "</tr></table>";
 	}
 else {
+	echo "<div style=\"text-align:center;\"><img src=\"pict/BP3-logo.png\" width=\"150px;\"/></div>";
 	echo "<h2 style=\"text-align:center;\">Welcome to Bol Processor ‘BP3’</h2>";
 	$dir = $bp_application_path;
 	$command = $dir."bp --help";

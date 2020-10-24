@@ -185,7 +185,7 @@ function display_more_buttons($content,$url_this_page,$dir,$objects_file,$csound
 			echo $entries."<br />";
 			}
 		else {
-			echo "<div style=\"float:right; width:600px; margin-top:6px;\">";
+			echo "<div style=\"float:right; margin-top:6px;\">";
 			echo "<form method=\"post\" action=\"".$url_this_page."#help_entries\" enctype=\"multipart/form-data\">";
 			echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
 			echo "<input type=\"hidden\" name=\"file_format\" value=\"".$file_format."\">";
