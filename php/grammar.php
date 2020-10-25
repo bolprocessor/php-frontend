@@ -252,56 +252,59 @@ echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"savegramm
 $error = FALSE;
 if($templates) {
 	$action = "templates";
-	$link = "produce.php?instruction=".$action."&grammar=".urlencode($grammar_file);
-//	$link .= "&trace_production=1";
-	$link .= "&here=".urlencode($here);
-//	echo "link = ".$link."<br />";
+	$link_produce = "produce.php?instruction=".$action."&grammar=".urlencode($grammar_file);
+//	$link_produce .= "&trace_production=1";
+	$link_produce .= "&here=".urlencode($here);
+//	echo "link = ".$link_produce."<br />";
 	$window_name = window_name($filename);
-	echo "<input style=\"color:DarkBlue; background-color:azure;\" onclick=\"window.open('".$link."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"CHECK TEMPLATES\"><br /><br />";
+	echo "<input style=\"color:DarkBlue; background-color:azure;\" onclick=\"window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"CHECK TEMPLATES\"><br /><br />";
 	}
 	
 if($produce_all_items > 0) $action = "produce-all";
 else $action = "produce";
-$link = "produce.php?instruction=".$action."&grammar=".urlencode($grammar_file);
+$link_produce = "produce.php?instruction=".$action."&grammar=".urlencode($grammar_file);
+$error_mssg = '';
 if($alphabet_file <> '') {
 	if(!file_exists($dir.$alphabet_file)) {
-		echo "<font color=\"red\"><small>WARNING: ".$dir.$alphabet_file." not found.<small></font><br />";
+		$error_mssg .= "<font color=\"red\"><small>WARNING: ".$dir.$alphabet_file." not found.<small></font><br />";
 		$error = TRUE;
 		}
-	else $link .= "&alphabet=".urlencode($alphabet_file);
+	else $link_produce .= "&alphabet=".urlencode($alphabet_file);
 	}
 if($settings_file <> '') {
 	if(!file_exists($dir.$settings_file)) {
-		echo "<font color=\"red\"><small>WARNING: ".$dir.$settings_file." not found.<small></font><br />";
+		$error_mssg .= "<font color=\"red\"><small>WARNING: ".$dir.$settings_file." not found.<small></font><br />";
 		$error = TRUE;
 		}
-	else $link .= "&settings_file=".urlencode($settings_file);
+	else $link_produce .= "&settings_file=".urlencode($settings_file);
 	}
 if($objects_file <> '') {
 	if(!file_exists($dir.$objects_file)) {
-		echo "<font color=\"red\"><small>WARNING: ".$dir.$objects_file." not found.<small></font><br />";
+		$error_mssg .= "<font color=\"red\"><small>WARNING: ".$dir.$objects_file." not found.<small></font><br />";
 		$error = TRUE;
 		}
-	else $link .= "&objects_file=".urlencode($objects_file);
+	else $link_produce .= "&objects_file=".urlencode($objects_file);
 	}
 if($csound_file <> '') {
 	if(!file_exists($dir.$csound_file)) {
-		echo "<font color=\"red\"><small>WARNING: ".$dir.$csound_file." not found.<small></font><br />";
+		$error_mssg .= "<font color=\"red\"><small>WARNING: ".$dir.$csound_file." not found.<small></font><br />";
 		$error = TRUE;
 		}
-	else $link .= "&csound_file=".urlencode($csound_file);
+	else $link_produce .= "&csound_file=".urlencode($csound_file);
 	}
+if($error) echo $error_mssg;
 if($test) echo "output = ".$output."<br />";
 if($test) echo "output_file = ".$output_file."<br />";
-$link .= "&output=".urlencode($output.SLASH.$output_file)."&format=".$file_format;
+$link_produce .= "&output=".urlencode($output.SLASH.$output_file)."&format=".$file_format;
 if($show_production > 0)
-	$link .= "&show_production=1";
+	$link_produce .= "&show_production=1";
 if($trace_production > 0)
-	$link .= "&trace_production=1";
-$link .= "&random_seed=".$random_seed;
-$link .= "&here=".urlencode($here);
+	$link_produce .= "&trace_production=1";
+$link_produce .= "&random_seed=".$random_seed;
+$link_produce .= "&here=".urlencode($here);
 $window_name = window_name($filename);
-echo "<b>then…</b> <input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)\" title=\"Don't forget to save!\"";
+echo "<b>then…</b>";
+echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)\" title=\"Don't forget to save!\"";
 if($error) echo " disabled";
 echo ">";
 echo "</td></tr>";
@@ -355,9 +358,14 @@ echo "<input type=\"hidden\" name=\"trace_production\" value=\"".$trace_producti
 echo "<input type=\"hidden\" name=\"metronome\" value=\"".$metronome."\">";
 echo "<input type=\"hidden\" name=\"time_structure\" value=\"".$time_structure."\">";
 echo "<input type=\"hidden\" name=\"alphabet_file\" value=\"".$alphabet_file."\">";
-echo "<p><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"savegrammar\" value=\"SAVE ‘".$filename."’\"></p>";
+echo "<p id=\"topedit\"><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"savegrammar\" formaction=\"".$url_this_page."#topedit\" value=\"SAVE ‘".$filename."’\"></p>";
 echo "<textarea name=\"thisgrammar\" rows=\"50\" style=\"width:90%; background-color:Cornsilk;\">".$content."</textarea>";
-echo "<p style=\"width:90%; text-align:right;\"><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"savegrammar\" value=\"SAVE ‘".$filename."’\"></p>";
+echo "<div style=\"float:left; padding-top:12px;\"><input style=\"color:DarkBlue; background-color:Aquamarine; font-size:large;\" onclick=\"window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)\" title=\"Don't forget to save!\"";
+if($error) echo " disabled";
+echo ">";
+if($error) echo "&nbsp;".$error_mssg;
+echo "</div>";
+echo "<p style=\"width:90%; text-align:right;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" formaction=\"".$url_this_page."#topedit\" name=\"savegrammar\" value=\"SAVE ‘".$filename."’\"></p>";
 echo "</form>";
 
 display_more_buttons($content,$url_this_page,$dir,$objects_file,$csound_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
@@ -390,22 +398,22 @@ for($i = 0; $i < $imax; $i++) {
 
 echo "<form method=\"post\" action=\"".$url_this_page."#expression\" enctype=\"multipart/form-data\">";
 $action = "produce";
-$link = "produce.php?instruction=".$action."&grammar=".urlencode($grammar_file);
-if($alphabet_file <> '') $link .= "&alphabet=".urlencode($alphabet_file);
-if($settings_file <> '') $link .= "&settings_file=".urlencode($settings_file);
-$link .= "&output=".urlencode($output.SLASH.$output_file)."&format=".$file_format;
+$link_produce = "produce.php?instruction=".$action."&grammar=".urlencode($grammar_file);
+if($alphabet_file <> '') $link_produce .= "&alphabet=".urlencode($alphabet_file);
+if($settings_file <> '') $link_produce .= "&settings_file=".urlencode($settings_file);
+$link_produce .= "&output=".urlencode($output.SLASH.$output_file)."&format=".$file_format;
 if($show_production > 0)
-	$link .= "&show_production=1";
+	$link_produce .= "&show_production=1";
 if($trace_production > 0)
-	$link .= "&trace_production=1";
-$link .= "&random_seed=".$random_seed;
-$link .= "&here=".urlencode($here);
+	$link_produce .= "&trace_production=1";
+$link_produce .= "&random_seed=".$random_seed;
+$link_produce .= "&here=".urlencode($here);
 $window_name = window_name($filename);
 if(count($variable) > 0) {
 	echo "<h3>Variables (click to use as startup string):</h3>";
 	ksort($variable);
 	foreach($variable as $var => $val) {
-		$thislink = $link."&startup=".$var;
+		$thislink = $link_produce."&startup=".$var;
 		echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$thislink."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"startup_".$var."\" value=\"".$var."\"> ";
 		}
 	}

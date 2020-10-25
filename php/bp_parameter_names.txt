@@ -39,24 +39,24 @@ Opcode OMS (obsolete)		0	1
 Split terminal symbols		1	1
 Split |variables|		1	1
 Use text color		0	1
-Default buffer size	symbols	1
-Use color in graphics		1	1
-Use buffer limit		1	1
+Default buffer size	symbols	0
+Use color in graphics		0	1
+Use buffer limit		0	1
 Time max	ms	1
 Seed for randomization	(integer)	1
-Use keyboard tokens		1	1
+Use keyboard tokens		0	1
 Note convention	0 = English<br />1 = French<br />2 = Indian<br />3 = Keys	1
-StartFromOne		1	1
+StartFromOne		0	1
 Smart cursor		0
 GraphicScaleP		0
 GraphicScaleQ		0
 Input device		1
 Output ID and OMS output name		1
-Display bullets "&bull;"		1	1
-Play metronome ticks		1
+Display bullets "&bull;"		0	1
+Play metronome ticks		0
 File save mode	0 = Prompt for changing filename<br />1 = Save each item to a new file<br />2 = Store all items to same file	0
 File write mode	0 = Write item immediately<br />1 = Write item after playing on MIDI	0
-MIDI file format	(0, 1 or 2)	1
+MIDI file format	(0, 1 or 2)	0
 Csound file format	0 = MacOS<br />1 = Windows<br />2 = Unix	0
 ProgNrFrom		0
 MIDI fade-out	sec	1

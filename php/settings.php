@@ -53,6 +53,11 @@ if(isset($_POST['saveparameters'])) {
 			}
 		else
 			$value = trim($_POST[$index]);
+		if(($i == 7 OR $i == 8) AND (!is_numeric($value) OR $value < 1 OR intval($value) <> $value)) {
+			$newvalue = 1;
+			echo "<p><font color=\"red\">Values of Pclock and Qclock must be positive integers: “</font><font color=\"blue\">".$value."</font><font color=\"red\">” has been replaced with “</font><font color=\"blue\">".$newvalue."</font><font color=\"red\">”.</font></p>";
+			$value = $newvalue;
+			}
 		if($i == 52 AND $value == '')
 			$value = "<no input device>";
 		if($i == 53 AND $value == '')
@@ -63,9 +68,55 @@ if(isset($_POST['saveparameters'])) {
 				echo "<p><font color=\"red\">Seed for randomization must be an integer: “</font><font color=\"blue\">".$value."</font><font color=\"red\">” has been replaced with “</font><font color=\"blue\">".$newvalue."</font><font color=\"red\">”.</font></p>";
 			$value = $newvalue;
 			}
-		if(strlen($value) == 0) $value = ' ';
+		if($i == 47 AND (!is_numeric($value) OR $value < 0 OR $value > 3 OR intval($value) <> $value)) {
+			$newvalue = 0;
+			echo "<p><font color=\"red\">Note convention must be an integer from 0 to 3: “</font><font color=\"blue\">".$value."</font><font color=\"red\">” has been replaced with “</font><font color=\"blue\">".$newvalue."</font><font color=\"red\">”.</font></p>";
+			$value = $newvalue;
+			}
+		if($i == 58) $value = 1; // MIDI file format
+		if($i == 62 AND (!is_numeric($value) OR $value < 0 OR $value > 127 OR intval($value) <> $value)) {
+			$newvalue = 60;
+			echo "<p><font color=\"red\">C4 key number must be an integer from 0 to 127: “</font><font color=\"blue\">".$value."</font><font color=\"red\">” has been replaced with “</font><font color=\"blue\">".$newvalue."</font><font color=\"red\">”.</font></p>";
+			$value = $newvalue;
+			}
+		if($i == 65 AND (!is_numeric($value) OR $value < 0 OR $value > 127 OR intval($value) <> $value)) {
+			$newvalue = 90;
+			echo "<p><font color=\"red\">Default volume must be an integer from 0 to 127: “</font><font color=\"blue\">".$value."</font><font color=\"red\">” has been replaced with “</font><font color=\"blue\">".$newvalue."</font><font color=\"red\">”.</font></p>";
+			$value = $newvalue;
+			}
+		if($i == 66 AND (!is_numeric($value) OR $value < 0 OR $value > 127 OR intval($value) <> $value)) {
+			$newvalue = 7;
+			echo "<p><font color=\"red\">Volume controller must be an integer from 0 to 127: “</font><font color=\"blue\">".$value."</font><font color=\"red\">” has been replaced with “</font><font color=\"blue\">".$newvalue."</font><font color=\"red\">”.</font></p>";
+			$value = $newvalue;
+			}
+		if($i == 67 AND (!is_numeric($value) OR $value < 0 OR $value > 127 OR intval($value) <> $value)) {
+			$newvalue = 64;
+			echo "<p><font color=\"red\">Default velocity must be an integer from 0 to 127: “</font><font color=\"blue\">".$value."</font><font color=\"red\">” has been replaced with “</font><font color=\"blue\">".$newvalue."</font><font color=\"red\">”.</font></p>";
+			$value = $newvalue;
+			}
+		if($i == 68 AND (!is_numeric($value) OR $value < 0 OR $value > 127 OR intval($value) <> $value)) {
+			$newvalue = 64;
+			echo "<p><font color=\"red\">Default panoramic must be an integer from 0 to 127: “</font><font color=\"blue\">".$value."</font><font color=\"red\">” has been replaced with “</font><font color=\"blue\">".$newvalue."</font><font color=\"red\">”.</font></p>";
+			$value = $newvalue;
+			}
+		if($i == 69 AND (!is_numeric($value) OR $value < 0 OR $value > 127 OR intval($value) <> $value)) {
+			$newvalue = 10;
+			echo "<p><font color=\"red\">Panoramic controller must be an integer from 0 to 127: “</font><font color=\"blue\">".$value."</font><font color=\"red\">” has been replaced with “</font><font color=\"blue\">".$newvalue."</font><font color=\"red\">”.</font></p>";
+			$value = $newvalue;
+			}
+		if($i == 63 AND !is_numeric($value)) {
+			$newvalue = 440;
+			echo "<p><font color=\"red\">Metronome (A4 frequency) must be an integer: “</font><font color=\"blue\">".$value."</font><font color=\"red\">” has been replaced with “</font><font color=\"blue\">".$newvalue."</font><font color=\"red\">”.</font></p>";
+			$value = $newvalue;
+			}
+		if($i == 70 AND (!is_numeric($value) OR $value < 1 OR intval($value) <> $value)) {
+			$newvalue = 50;
+			echo "<p><font color=\"red\">Sampling rate must be a positive integer: “</font><font color=\"blue\">".$value."</font><font color=\"red\">” has been replaced with “</font><font color=\"blue\">".$newvalue."</font><font color=\"red\">”.</font></p>";
+			$value = $newvalue;
+			}
 		if($i == 71) $value = 39;
 		if($i > 71 AND $i < 111) $value = 10;
+		if(strlen($value) == 0) $value = ' ';
 		fwrite($handle,$value."\n");
 		}
 	fclose($handle);

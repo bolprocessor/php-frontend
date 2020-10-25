@@ -215,7 +215,7 @@ if($Tref > 0 AND $Tref <= $max_duration) {
 		if($t > ($max_duration + $PostRoll)) break;
 		}
 	// imageline($im,$x1,135,$x2 - $length_mssg - 10,135,$red);
-	imagestring($im,10,$x2 - $length_mssg,125,$mssg,$green);
+	imagestring($im,10,$x - $length_mssg,125,$mssg,$green);
 	}
 
 // Draw period if object is cyclic
