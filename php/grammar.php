@@ -152,7 +152,7 @@ if(isset($_POST['compilegrammar'])) {
 	if($n_messages > 0) {
 		for($i=0; $i < $n_messages; $i++) {
 			$mssg = $o[$i];
-			$mssg = clean_up_encoding(TRUE,$mssg);
+			$mssg = clean_up_encoding(FALSE,TRUE,$mssg);
 			if(is_integer($pos=strpos($mssg,"Errors: 0")) AND $pos == 0) $no_error = TRUE;
 			}
 		}
@@ -359,7 +359,7 @@ echo "<input type=\"hidden\" name=\"metronome\" value=\"".$metronome."\">";
 echo "<input type=\"hidden\" name=\"time_structure\" value=\"".$time_structure."\">";
 echo "<input type=\"hidden\" name=\"alphabet_file\" value=\"".$alphabet_file."\">";
 echo "<p id=\"topedit\"><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"savegrammar\" formaction=\"".$url_this_page."#topedit\" value=\"SAVE ‘".$filename."’\"></p>";
-echo "<textarea name=\"thisgrammar\" rows=\"50\" style=\"width:90%; background-color:Cornsilk;\">".$content."</textarea>";
+echo "<textarea name=\"thisgrammar\" rows=\"50\" style=\"width:90%;\">".$content."</textarea>";
 echo "<div style=\"float:left; padding-top:12px;\"><input style=\"color:DarkBlue; background-color:Aquamarine; font-size:large;\" onclick=\"window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)\" title=\"Don't forget to save!\"";
 if($error) echo " disabled";
 echo ">";
@@ -462,7 +462,7 @@ if(isset($_POST['playexpression'])) {
 		if($n_messages > 0) {
 			for($i=0; $i < $n_messages; $i++) {
 				$mssg[$i] = $o[$i];
-				$mssg[$i] = clean_up_encoding(TRUE,$mssg[$i]);
+				$mssg[$i] = clean_up_encoding(FALSE,TRUE,$mssg[$i]);
 				if(is_integer($pos=strpos($mssg[$i],"Errors: 0")) AND $pos == 0) $no_error = TRUE;
 				}
 			}

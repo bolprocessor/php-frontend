@@ -35,6 +35,6 @@ $content = $extract_data['content'];
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 
 echo "<p style=\"text-align:left;\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></p>";
-echo "<textarea name=\"thistext\" rows=\"40\" style=\"width:700px; background-color:Cornsilk;\">".$content."</textarea>";
+echo "<textarea name=\"thistext\" rows=\"40\" style=\"width:700px;\">".$content."</textarea>";
 echo "</form>";
 ?>

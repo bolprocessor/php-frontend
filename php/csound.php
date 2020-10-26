@@ -439,7 +439,7 @@ echo "<input type=\"hidden\" name=\"index_max\" value=\"".$index_max."\">";
 
 echo "<table style=\"background-color:white;\"><tr><td>";
 echo "<h4 style=\"text-align:center;\">Tables</h4>";
-echo "<textarea name=\"cstables\" rows=\"20\" style=\"width:400px; background-color:Cornsilk;\">";
+echo "<textarea name=\"cstables\" rows=\"20\" style=\"width:400px;\">";
 $cstables = '';
 for($i = $i + 1; $i < $imax_file; $i++) {
 	$line = trim($table[$i]);
@@ -525,7 +525,7 @@ if($verbose) {
 	echo "<hr>";
 	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 	// echo "<p style=\"text-align:left;\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></p>";
-	echo "<textarea name=\"thistext\" rows=\"20\" style=\"width:700px; background-color:Cornsilk;\">".$content."</textarea>";
+	echo "<textarea name=\"thistext\" rows=\"20\" style=\"width:700px;\">".$content."</textarea>";
 	echo "</form>";
 	}
 ?>

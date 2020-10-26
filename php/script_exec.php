@@ -82,7 +82,7 @@ function run_script($dir,$file,$script_variables,$note_convention,$grammar,$outp
 			if($n_messages > 0) {
 				for($k=0; $k < $n_messages; $k++) {
 					$mssg[$k] = $o[$k];
-					$mssg[$k] = clean_up_encoding(TRUE,$mssg[$k]);
+					$mssg[$k] = clean_up_encoding(FALSE,TRUE,$mssg[$k]);
 					if(is_integer($pos=strpos($mssg[$k],"Errors: 0")) AND $pos == 0) $no_error = TRUE;
 					}
 				}
@@ -140,7 +140,7 @@ function run_script($dir,$file,$script_variables,$note_convention,$grammar,$outp
 			if($n_messages > 0) {
 				for($k=0; $k < $n_messages; $k++) {
 					$mssg[$k] = $o[$k];
-					$mssg[$k] = clean_up_encoding(TRUE,$mssg[$k]);
+					$mssg[$k] = clean_up_encoding(FALSE,TRUE,$mssg[$k]);
 					if(is_integer($pos=strpos($mssg[$k],"Errors: 0")) AND $pos == 0) $no_error = TRUE;
 					}
 				}

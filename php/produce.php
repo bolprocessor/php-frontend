@@ -190,7 +190,7 @@ if($instruction <> "help") {
 
 for($i=0; $i < $n_messages; $i++) {
 	$mssg = $o[$i];
-	$mssg = clean_up_encoding(TRUE,$mssg);
+	$mssg = clean_up_encoding(FALSE,TRUE,$mssg);
 	echo $mssg."<br />";
 	}
 if($n_messages == 0) echo "No message produced…";

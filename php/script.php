@@ -131,7 +131,7 @@ $link .= "&temp_folder=".urlencode($temp_folder);
 $window_name = window_name($filename);
 echo "<p style=\"text-align:left;\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\">&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"checkscript\" value=\"CHECK THIS SCRIPT\">&nbsp;<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"script_".$filename."\" value=\"RUN THIS SCRIPT\"></p>";
 
-echo "<textarea name=\"thistext\" rows=\"30\" style=\"width:700px; background-color:Cornsilk;\">".$content."</textarea>";
+echo "<textarea name=\"thistext\" rows=\"30\" style=\"width:700px;\">".$content."</textarea>";
 echo "<p style=\"text-align:left;\"><input style=\"background-color:azure;\" type=\"submit\" name=\"listinstructions\" value=\"LIST ALL SCRIPT INSTRUCTIONS\"> ➡ including obsolete ones</p>";
 echo "</form>";
 echo "</td>";

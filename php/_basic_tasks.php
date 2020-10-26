@@ -82,7 +82,7 @@ function extract_data($compact,$content) {
 	$content = str_replace(chr(13).chr(10),chr(10),$content);
 	$content = str_replace(chr(13),chr(10),$content);
 	$content = str_replace(chr(9),' ',$content); // Remove tabulations
-	$content = clean_up_encoding(TRUE,$content);
+	$content = clean_up_encoding(TRUE,TRUE,$content);
 	if($compact) {
 		do $content = str_replace(chr(10).chr(10).chr(10),chr(10).chr(10),$content,$count);
 		while($count > 0);
@@ -442,7 +442,7 @@ function gcd_array($array,$a = 0) {
         gcd_array($array, gcd($a,$b));
 	}
 
-function clean_up_encoding($convert,$text) {
+function clean_up_encoding($create_bullets,$convert,$text) {
 	if($convert) $text = mb_convert_encoding($text, "UTF-8", mb_detect_encoding($text, "UTF-8, ISO-8859-1, ISO-8859-15", true));
 	$text = str_replace("¥","•",$text);
 	$text = str_replace("Ô","‘",$text);
@@ -453,8 +453,8 @@ function clean_up_encoding($convert,$text) {
 	$text = str_replace("Â","¬",$text);
 	$text = str_replace("¤","•",$text);
 	$text = str_replace("â¢","•",$text);
-	$text = preg_replace("/\s\\.$/u"," •",$text);
-	$text = preg_replace("/\s\\.([^0-9])/u"," •$1",$text);
+	if($create_bullets) $text = preg_replace("/\s\\.$/u"," •",$text);
+	if($create_bullets) $text = preg_replace("/\s\\.([^0-9])/u"," •$1",$text);
 	$text = str_replace("²","≤",$text);
 	$text = str_replace("³","≥",$text);
 	return $text;
@@ -486,7 +486,7 @@ function clean_up_file($file) {
 	$text = str_replace(chr(13),chr(10),$text);
 	$text = str_replace(chr(9),' ',$text);
 	$text = trim($text);
-	$text = clean_up_encoding(TRUE,$text);
+	$text = clean_up_encoding(TRUE,TRUE,$text);
 //	$text = str_replace("�","•",$text);
 	do $text = str_replace(chr(10).chr(10).chr(10),chr(10).chr(10),$text,$count);
 	while($count > 0);
@@ -1098,7 +1098,7 @@ function MIDIparameter_argument($i,$parameter,$StartIndex,$EndIndex,$TableIndex,
 	$r .= "</td>";
 	$r .= "</tr>";
 	$r .= "<tr>";
-	$r .= "<td rowspan = \"2\" style=\"padding:4px; vertical-align:middle; text-align:center; background-color:Cornsilk;\"><small>MIDI<br /><font color=\"red\">▼</font><br />Csound</small></td>";
+	$r .= "<td rowspan = \"2\" style=\"padding:4px; vertical-align:middle; text-align:center;\"><small>MIDI<br /><font color=\"red\">▼</font><br />Csound</small></td>";
 	$r .= "<td style=\"padding: 5px;\">";
 	$x = $param_value[0];
 	if($x > 1000000) $x = '';

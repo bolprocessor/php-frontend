@@ -492,7 +492,7 @@ if(isset($_POST['createcsound'])) {
 			if($n_messages > 0) {
 				for($i=0; $i < $n_messages; $i++) {
 					$mssg[$i] = $o[$i];
-					$mssg[$i] = clean_up_encoding(TRUE,$mssg[$i]);
+					$mssg[$i] = clean_up_encoding(FALSE,TRUE,$mssg[$i]);
 				//	echo $mssg[$i]."<br />";
 					if(is_integer($pos=strpos($mssg[$i],"Errors: 0")) AND $pos == 0) $no_error = TRUE;
 					}
@@ -540,7 +540,7 @@ if(isset($_POST['playexpression'])) {
 		if($n_messages > 0) {
 			for($i=0; $i < $n_messages; $i++) {
 				$mssg = $o[$i];
-				$mssg = clean_up_encoding(TRUE,$mssg);
+				$mssg = clean_up_encoding(FALSE,TRUE,$mssg);
 				if(is_integer($pos=strpos($mssg,"Errors: 0")) AND $pos == 0) $no_error = TRUE;
 				}
 			}
@@ -1202,7 +1202,7 @@ echo "<input type=\"hidden\" name=\"tempo\" value=\"".$tempo."\">";
 /* $csound_score = str_ireplace("<HTML>",'',$object_param[$j]);
 $csound_score = str_ireplace("</HTML>",'',$csound_score);
 $csound_score = str_ireplace("<BR>","\n",$csound_score);
-echo "<textarea name=\"object_param_".($j++)."\" rows=\"20\" style=\"width:700px; background-color:Cornsilk;\">".$csound_score."</textarea><br />"; */
+echo "<textarea name=\"object_param_".($j++)."\" rows=\"20\" style=\"width:700px;\">".$csound_score."</textarea><br />"; */
 //echo "<input type=\"hidden\" name=\"object_param_".$j."\" value=\"".$object_param[$j++]."\">";
 
 /* $csound_period = 0;
@@ -2016,7 +2016,7 @@ echo "<input type=\"hidden\" name=\"Duration\" value=\"".$Duration."\">";
 echo "<input type=\"hidden\" name=\"division\" value=\"".$division."\">";
 echo "<input type=\"hidden\" name=\"tempo\" value=\"".$tempo."\">";
 echo "<input type=\"hidden\" name=\"timesig\" value=\"".$timesig."\">";
-echo "<textarea name=\"csound_score\" rows=\"20\" style=\"width:700px; background-color:Cornsilk;\">".$csound_score."</textarea><br />";
+echo "<textarea name=\"csound_score\" rows=\"20\" style=\"width:700px;\">".$csound_score."</textarea><br />";
 echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"savecsound\" value=\"SAVE THIS CODE\"></p><p><input style=\"background-color:yellow;\" type=\"submit\" name=\"createcsound\" value=\"CREATE Csound CODE\"> from MIDI codes in “<font color=\"blue\">".$object_name."</font>”</p>";
 echo "</form>";
 ?>

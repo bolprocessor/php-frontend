@@ -53,7 +53,7 @@ if(isset($_POST['playitem']) OR isset($_POST['expanditem'])) {
 	if($n_messages > 0) {
 		for($i=0; $i < $n_messages; $i++) {
 			$mssg[$i] = $o[$i];
-			$mssg[$i] = clean_up_encoding(TRUE,$mssg[$i]);
+			$mssg[$i] = clean_up_encoding(TRUE,TRUE,$mssg[$i]);
 			if(is_integer($pos=strpos($mssg[$i],"Errors: 0")) AND $pos == 0) $no_error = TRUE;
 			}
 		}
@@ -119,7 +119,7 @@ echo "<td id=\"topedit\">";
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 
 echo "<p style=\"text-align:left;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></p>";
-echo "<textarea name=\"thistext\" rows=\"40\" style=\"width:700px; background-color:Cornsilk;\">".$content."</textarea>";
+echo "<textarea name=\"thistext\" rows=\"40\" style=\"width:700px;\">".$content."</textarea>";
 echo "</form>";
 
 display_more_buttons($content,$url_this_page,$dir,$objects_file,$csound_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
