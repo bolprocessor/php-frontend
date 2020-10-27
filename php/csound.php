@@ -141,6 +141,10 @@ if(isset($_POST['savealldata']) OR isset($_POST['delete_instrument']) OR isset($
 try_create_new_file($this_file,$filename);
 $content = @file_get_contents($this_file,TRUE);
 if($content === FALSE) ask_create_new_file($url_this_page,$filename);
+if(strlen(trim($content)) == 0) {
+	$template = "csound_template";
+	$content = @file_get_contents($template,TRUE);
+	}
 $extract_data = extract_data(FALSE,$content);
 echo "<p style=\"color:blue;\">".$extract_data['headers']."</p>";
 $content = $extract_data['content'];

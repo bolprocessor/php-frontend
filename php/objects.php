@@ -124,6 +124,10 @@ if(isset($_POST['savethisfile']) OR isset($_POST['create_object']) OR isset($_PO
 try_create_new_file($this_file,$filename);
 $content = @file_get_contents($this_file,TRUE);
 if($content === FALSE) ask_create_new_file($url_this_page,$filename);
+if(strlen(trim($content)) == 0) {
+	$template = "prototypes_template";
+	$content = @file_get_contents($template,TRUE);
+	}
 $objects_file = $csound_file = $alphabet_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = '';
 $extract_data = extract_data(TRUE,$content);
 echo "<p style=\"color:blue;\">".$extract_data['headers']."</p>";

@@ -3,10 +3,10 @@ require_once("_basic_tasks.php");
 require_once("_header.php");
 $url_this_page = $this_page = "index.php";
 
+echo "<table style=\"background-color:snow;\"><tr>";
+echo "<td style=\"padding:4px; vertical-align:middle;\"><img src=\"pict/BP3-logo.png\" width=\"120px;\"/></td><td style=\"padding:4px; vertical-align:middle;\">";
 if($path <> '') {
-	echo "<table style=\"background-color:inherit;\"><tr>";
-	echo "<td style=\"padding:4px; vertical-align:middle;\"><img src=\"pict/BP3-logo.png\" width=\"120px;\"/></td>";
-	echo "<td style=\"padding:4px; vertical-align:middle;\"><h2 style=\"text-align:center;\">Bol Processor ‘BP3’</h2>";
+	echo "<h2 style=\"text-align:center;\">Bol Processor ‘BP3’</h2>";
 	$url_this_page .= "?path=".urlencode($path);
 	$dir = $bp_application_path.$path;
 	$table = explode(SLASH,$path);
@@ -22,8 +22,8 @@ if($path <> '') {
 	echo "</tr></table>";
 	}
 else {
-	echo "<div style=\"text-align:center;\"><img src=\"pict/BP3-logo.png\" width=\"150px;\"/></div>";
 	echo "<h2 style=\"text-align:center;\">Welcome to Bol Processor ‘BP3’</h2>";
+	echo "</td></tr></table>";
 	$dir = $bp_application_path;
 	$command = $dir."bp --help";
 	$o = send_to_console($command);
@@ -123,6 +123,24 @@ if(isset($_POST['create_timebase'])) {
 			}
 		}
 	}
+if(isset($_POST['create_prototypes'])) {
+	$filename = trim($_POST['filename']);
+	$filename = good_name("mi",$filename);
+	if($filename <> '') {
+		$new_file = $filename;
+		if(file_exists($dir.SLASH.$filename)) {
+			echo "<p><font color=\"red\">This file already exists:</font> <font color=\"red\">".$filename."</font></p>";
+			unset($_POST['create_prototypes']);
+			}
+		else {
+			$handle = fopen($dir.SLASH.$filename,"w");
+			$template = "prototypes_template";
+			$template_content = @file_get_contents($template,TRUE);
+			fwrite($handle,$template_content."\n");
+			fclose($handle);
+			}
+		}
+	}
 if(isset($_POST['create_csound'])) {
 	$filename = trim($_POST['filename']);
 	$filename = good_name("cs",$filename);
@@ -183,12 +201,15 @@ if($dir <> $bp_application_path."php" AND $extension <> "temp") {
 	echo "<font color=\"blue\">".$folder.SLASH."</font>";
 	echo "<input type=\"text\" name=\"filename\" size=\"20\" style=\"background-color:CornSilk;\" value=\"name.bpho\"></p>";
 	echo "</form>";
+	
+	
 	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 	echo "<p style=\"text-align:left;\">";
-	echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"create_timebase\" value=\"CREATE NEW TIMEBASE IN THIS FOLDER\">&nbsp;➡&nbsp;";
+	echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"create_prototypes\" value=\"CREATE NEW SOUND-OBJECT PROTOOTYPE FILE IN THIS FOLDER\">&nbsp;➡&nbsp;";
 	echo "<font color=\"blue\">".$folder.SLASH."</font>";
-	echo "<input type=\"text\" name=\"filename\" size=\"20\" style=\"background-color:CornSilk;\" value=\"name.bptb\"></p>";
+	echo "<input type=\"text\" name=\"filename\" size=\"20\" style=\"background-color:CornSilk;\" value=\"name.bpmi\"></p>";
 	echo "</form>";
+	
 	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 	echo "<p style=\"text-align:left;\">";
 	echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"create_csound\" value=\"CREATE NEW CSOUND INSTRUMENT FILE IN THIS FOLDER\">&nbsp;➡&nbsp;";
@@ -200,6 +221,12 @@ if($dir <> $bp_application_path."php" AND $extension <> "temp") {
 	echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"create_script\" value=\"CREATE NEW SCRIPT IN THIS FOLDER\">&nbsp;➡&nbsp;";
 	echo "<font color=\"blue\">".$folder.SLASH."</font>";
 	echo "<input type=\"text\" name=\"filename\" size=\"20\" style=\"background-color:CornSilk;\" value=\"name.bpsc\"></p>";
+	echo "</form>";
+	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+	echo "<p style=\"text-align:left;\">";
+	echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"create_timebase\" value=\"CREATE NEW TIMEBASE IN THIS FOLDER\">&nbsp;➡&nbsp;";
+	echo "<font color=\"blue\">".$folder.SLASH."</font>";
+	echo "<input type=\"text\" name=\"filename\" size=\"20\" style=\"background-color:CornSilk;\" value=\"name.bptb\"></p>";
 	echo "</form>";
 	}
 

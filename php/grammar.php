@@ -266,28 +266,28 @@ $link_produce = "produce.php?instruction=".$action."&grammar=".urlencode($gramma
 $error_mssg = '';
 if($alphabet_file <> '') {
 	if(!file_exists($dir.$alphabet_file)) {
-		$error_mssg .= "<font color=\"red\"><small>WARNING: ".$dir.$alphabet_file." not found.<small></font><br />";
+		$error_mssg .= "<font color=\"red\"><small>WARNING: ".$dir.$alphabet_file." not found.</small></font><br />";
 		$error = TRUE;
 		}
 	else $link_produce .= "&alphabet=".urlencode($alphabet_file);
 	}
 if($settings_file <> '') {
 	if(!file_exists($dir.$settings_file)) {
-		$error_mssg .= "<font color=\"red\"><small>WARNING: ".$dir.$settings_file." not found.<small></font><br />";
+		$error_mssg .= "<font color=\"red\"><small>WARNING: ".$dir.$settings_file." not found.</small></font><br />";
 		$error = TRUE;
 		}
 	else $link_produce .= "&settings_file=".urlencode($settings_file);
 	}
 if($objects_file <> '') {
 	if(!file_exists($dir.$objects_file)) {
-		$error_mssg .= "<font color=\"red\"><small>WARNING: ".$dir.$objects_file." not found.<small></font><br />";
+		$error_mssg .= "<font color=\"red\"><small>WARNING: ".$dir.$objects_file." not found.</small></font><br />";
 		$error = TRUE;
 		}
 	else $link_produce .= "&objects_file=".urlencode($objects_file);
 	}
 if($csound_file <> '') {
 	if(!file_exists($dir.$csound_file)) {
-		$error_mssg .= "<font color=\"red\"><small>WARNING: ".$dir.$csound_file." not found.<small></font><br />";
+		$error_mssg .= "<font color=\"red\"><small>WARNING: ".$dir.$csound_file." not found.</small></font><br />";
 		$error = TRUE;
 		}
 	else $link_produce .= "&csound_file=".urlencode($csound_file);
@@ -363,7 +363,7 @@ echo "<textarea name=\"thisgrammar\" rows=\"50\" style=\"width:90%;\">".$content
 echo "<div style=\"float:left; padding-top:12px;\"><input style=\"color:DarkBlue; background-color:Aquamarine; font-size:large;\" onclick=\"window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)\" title=\"Don't forget to save!\"";
 if($error) echo " disabled";
 echo ">";
-if($error) echo "&nbsp;".$error_mssg;
+if($error) echo "<br />".$error_mssg;
 echo "</div>";
 echo "<p style=\"width:90%; text-align:right;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" formaction=\"".$url_this_page."#topedit\" name=\"savegrammar\" value=\"SAVE ‘".$filename."’\"></p>";
 echo "</form>";
