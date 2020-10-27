@@ -35,49 +35,24 @@ ctx.fillStyle = 'rgb(0, 255, 0)';
 ctx.fillRect(75, 75, 100, 100);
 
 ctx.fillStyle = 'rgba(255, 0, 255, 0.75)';
-ctx.fillRect(25, 100, 175, 50);
+ctx.fillRect(25, 100, 300, 50);
 
-ctx.strokeStyle = 'black';
+ctx.strokeStyle = 'white';
 ctx.lineWidth = 5;
 ctx.strokeRect(25, 25, 175, 200);
 
-// Draw triangle
-function degToRad(degrees) {
-  return degrees * Math.PI / 180;
-  };
+// Draw text
 
-ctx.fillStyle = 'lightgrey';
-ctx.beginPath();
-ctx.moveTo(50, 50);
-ctx.lineTo(150, 50);
-let triHeight = 50 * Math.tan(degToRad(60));
-ctx.lineTo(100, 50+triHeight);
-ctx.lineTo(50, 50);
-ctx.fill();
-
-// Draw arc
 ctx.fillStyle = 'yellow';
-ctx.beginPath();
-ctx.arc(200, 106, 50, degToRad(-45), degToRad(45), true);
-ctx.lineTo(200, 106);
-ctx.fill();
-
-// Draw texts
-ctx.strokeStyle = 'blue';
-ctx.lineWidth = 1;
-ctx.font = '36px arial';
-ctx.strokeText('Some text', 50, 50);
-
-ctx.fillStyle = 'brown';
 ctx.font = '48px georgia';
-ctx.fillText('Another text!', 50, 150);
+ctx.fillText('Yes it works!', 40, 140);
 
 // Draw picture
 let image2 = new Image();
 image2.src = 'pict/loudspeaker.png';
 
 image2.onload = function() {
- ctx.drawImage(image2, 50, -20, 500, 500, -200, 0, 300, 300);
+ ctx.drawImage(image2, 50, -20, 500, 500, -100, 50, 200, 200);
  }
 
 ctx.fillStyle = 'azure';
@@ -94,8 +69,8 @@ let sprite = 0;
 let posX = 0;
 
 function draw() {
-  ctx.fillRect(-(width/2),-74,width,148);
-  ctx.drawImage(image, (sprite*102), 0, 102, 148, 0+posX, -74, 102, 148);
+  ctx.fillRect(-(width/2),-64,width,148);
+  ctx.drawImage(image, (sprite*102), 0, 102, 148, 0+posX, -64, 102, 148);
 
   if(posX % 13 === 0) {
     if(sprite === 5) {
@@ -116,6 +91,6 @@ function draw() {
   window.requestAnimationFrame(draw);
   };
 </script>
-<h1 style="color:red; text-align:center;">My picture</h1>
+<h1 style="color:red; text-align:center;">Test picture</h1>
 </body>
 </html>

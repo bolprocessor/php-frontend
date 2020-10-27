@@ -134,6 +134,15 @@ if($instruction <> "help") {
 		if($trace_production OR $instruction == "templates" OR $show_production OR $trace_production) echo "<font color=\"red\">➡</font> Read the <a onclick=\"window.open('".$trace_link."','trace','width=800,height=800,left=400'); return false;\" href=\"".$trace_link."\">trace file</a>";
 		echo "</p>";
 		
+		if($file_format == "midi") {
+			$midi_file_link = $output;
+			if(file_exists($midi_file_link)) {
+				echo "<p><a href=\"#midi\" onClick=\"MIDIjs.play('".$midi_file_link."');\"><img src=\"pict/loudspeaker.png\" width=\"70px;\" style=\"vertical-align:middle;\" />Play MIDI file</a>";
+				echo " (<a href=\"#midi\" onClick=\"MIDIjs.stop();\">Stop playing</a>)";
+				echo "&nbsp;or <a href=\"".$midi_file_link."\">download it</a></p>";
+				}
+			}
+		
 		// Prepare images if any
 		$dircontent = scandir($temp_dir);
 		echo "<table style=\"background-color:inherit;\"><tr>";

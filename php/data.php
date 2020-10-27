@@ -19,6 +19,7 @@ echo "<h3>Data file “".$filename."”</h3>";
 if(isset($_POST['playitem']) OR isset($_POST['expanditem'])) {
 	$i = $_POST['i'];
 	$line = $_POST['line'];
+	$line = str_replace('•'," . ",$line);
 	$line_recoded = recode_tags($line);
 	echo "<p>Playing item: <font color=\"blue\">".$line_recoded."</font></p>";
 	$data = $temp_dir."temp_".session_id()."outdata.bpda";

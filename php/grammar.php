@@ -14,8 +14,8 @@ $dir = str_replace($filename,'',$grammar_file);
 if($test) echo "grammar_file = ".$grammar_file."<br />";
 
 if($output_folder == '') $output_folder = "my_output";
-$output_file = "out.sco";
-$file_format = "csound";
+$output_file = "out.mid";
+$file_format = "midi";
 if(isset($_POST['output_file'])) $output_file = $_POST['output_file'];
 if(isset($_POST['file_format'])) $file_format = $_POST['file_format'];
 
