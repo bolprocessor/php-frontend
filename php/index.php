@@ -183,6 +183,7 @@ if($folder <> '') echo "<h3>Content of folder <font color=\"red\">".$folder."</f
 $table = explode('_',$folder);
 $extension = end($table);
 if($dir <> $bp_application_path."php" AND $extension <> "temp") {
+	echo "<div style=\"float:right;\">";
 	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 	echo "<p style=\"text-align:left;\">";
 	echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"create_grammar\" value=\"CREATE NEW GRAMMAR FILE IN THIS FOLDER\">&nbsp;➡&nbsp;";
@@ -201,15 +202,12 @@ if($dir <> $bp_application_path."php" AND $extension <> "temp") {
 	echo "<font color=\"blue\">".$folder.SLASH."</font>";
 	echo "<input type=\"text\" name=\"filename\" size=\"20\" style=\"background-color:CornSilk;\" value=\"name.bpho\"></p>";
 	echo "</form>";
-	
-	
 	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 	echo "<p style=\"text-align:left;\">";
 	echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"create_prototypes\" value=\"CREATE NEW SOUND-OBJECT PROTOOTYPE FILE IN THIS FOLDER\">&nbsp;➡&nbsp;";
 	echo "<font color=\"blue\">".$folder.SLASH."</font>";
 	echo "<input type=\"text\" name=\"filename\" size=\"20\" style=\"background-color:CornSilk;\" value=\"name.bpmi\"></p>";
 	echo "</form>";
-	
 	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 	echo "<p style=\"text-align:left;\">";
 	echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"create_csound\" value=\"CREATE NEW CSOUND INSTRUMENT FILE IN THIS FOLDER\">&nbsp;➡&nbsp;";
@@ -228,6 +226,7 @@ if($dir <> $bp_application_path."php" AND $extension <> "temp") {
 	echo "<font color=\"blue\">".$folder.SLASH."</font>";
 	echo "<input type=\"text\" name=\"filename\" size=\"20\" style=\"background-color:CornSilk;\" value=\"name.bptb\"></p>";
 	echo "</form>";
+	echo "</div>";
 	}
 
 $dircontent = scandir($dir);

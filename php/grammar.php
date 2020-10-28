@@ -14,8 +14,15 @@ $dir = str_replace($filename,'',$grammar_file);
 if($test) echo "grammar_file = ".$grammar_file."<br />";
 
 if($output_folder == '') $output_folder = "my_output";
-$output_file = "out.mid";
-$file_format = "midi";
+$default_output_name = str_replace("-gr.",'',$filename);
+$default_output_name = str_replace(".bpgr",'',$default_output_name);
+$file_format = $default_output_format;
+switch($file_format) {
+	case "data": $output_file = $default_output_name.".bpda"; break;
+	case "midi": $output_file = $default_output_name.".mid"; break;
+	case "csound": $output_file = $default_output_name.".sco"; break;
+	}
+if($file_format == '') $output_file = '';
 if(isset($_POST['output_file'])) $output_file = $_POST['output_file'];
 if(isset($_POST['file_format'])) $file_format = $_POST['file_format'];
 
@@ -44,15 +51,15 @@ if(isset($_POST['savegrammar']) OR isset($_POST['compilegrammar'])) {
 	$output_file = trim(str_replace(".sco",'',$output_file));
 	$output_file = trim(str_replace(".mid",'',$output_file));
 	if($file_format == "data") {
-		if($output_file == '') $output_file = "out";
+		if($output_file == '') $output_file = $default_output_name;
 		$output_file .= ".bpda";
 		}
 	if($file_format == "csound") {
-		if($output_file == '') $output_file = "out";
+		if($output_file == '') $output_file = $default_output_name;
 		$output_file .= ".sco";
 		}
 	if($file_format == "midi") {
-		if($output_file == '') $output_file = "out";
+		if($output_file == '') $output_file = $default_output_name;
 		$output_file .= ".mid";
 		}
 	if($file_format == '') $output_file = '';
@@ -200,12 +207,14 @@ $glossary_file = $extract_data['glossary'];
 $metronome = $extract_data['metronome'];
 $time_structure = $extract_data['time_structure'];
 $templates = $extract_data['templates'];
-$found_elsewhere =FALSE;
+$found_elsewhere = FALSE;
 if($alphabet_file <> '' AND $objects_file == '') {
 	$objects_file = get_name_mi_file($dir.$alphabet_file);
 	if($objects_file <> '') $found_elsewhere = TRUE;
 	}
 
+if($csound_file <> '') $csound_orchestra = get_orchestra_filename($dir.$csound_file);
+else $csound_orchestra = '';
 if($settings_file <> '') $show_production = get_setting("show_production",$settings_file);
 else $show_production = 0;
 if($settings_file <> '') $trace_production = get_setting("trace_production",$settings_file);
@@ -292,6 +301,9 @@ if($csound_file <> '') {
 		}
 	else $link_produce .= "&csound_file=".urlencode($csound_file);
 	}
+if($csound_orchestra <> '') {
+	if(file_exists($dir.$csound_orchestra)) $link_produce .= "&csound_orchestra=".urlencode($csound_orchestra);
+	}
 if($error) echo $error_mssg;
 if($test) echo "output = ".$output."<br />";
 if($test) echo "output_file = ".$output_file."<br />";
@@ -338,7 +350,7 @@ else {
 	if($metronome > 0)
 		echo "<font color=\"red\">⏱ Metronome and structure of time indicated in this grammar will be ignored as they are set up by ‘".$settings_file."’</font><br />";
 	else
-		echo "<font color=\"blue\">⏱ Metronome (time base) and structure of time will be fixed by ‘".$settings_file."’</font><br />";
+		echo "⏱ Metronome (time base) and structure of time will be fixed by <font color=\"blue\">‘".$settings_file."’</font><br />";
 	$metronome = 0;
 	$time_structure = '';
 //	echo "<input type=\"hidden\" name=\"settings_file\" value=\"".$settings_file."\">";
@@ -350,6 +362,14 @@ if($produce_all_items == 1) echo "• Produce all items has been set ON by <font
 if($show_production == 1) echo "• Show production has been set ON by <font color=\"blue\">‘".$settings_file."’</font><br />";
 if($trace_production == 1) echo "• Trace production has been set ON by <font color=\"blue\">‘".$settings_file."’</font><br />";
 if(isset($random_seed)) echo "• Ransom seed has been set to ".$random_seed." by <font color=\"blue\">‘".$settings_file."’</font><br />";
+if($csound_orchestra <> '') {
+	echo "• Csound orchestra file ‘<font color=\"blue\">".$csound_orchestra."</font>’ is mentioned in <font color=\"blue\">‘".$csound_file."’</font>";
+	if(!file_exists($dir.$csound_orchestra)) echo "<br />&nbsp;&nbsp;<font color=\"red\">➡&nbsp;yet not in the current folder.</font> Therefore <font color=\"blue\">‘default.orc’</font> will be used instead</p>";
+	}
+else if($file_format == "csound") {
+	if(file_exists($dir."default.orc")) echo "• Csound files will be produced, which Csound will try to convert to sound files using orchestra <font color=\"blue\">‘default.orc’</font></p>";
+	else echo "• <font color=\"red\">➡</font> Csound files will be produced, but Csound not be able to convert them to sound files because the default orchestra <font color=\"blue\">‘".$dir."default.orc’</font> is not found.</p>";
+	}
 echo "</p>";
 
 echo "<input type=\"hidden\" name=\"produce_all_items\" value=\"".$produce_all_items."\">";

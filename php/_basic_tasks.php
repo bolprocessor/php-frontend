@@ -10,9 +10,10 @@ define('SLASH',DIRECTORY_SEPARATOR);
 $test = FALSE;
 // $test = TRUE;
 
-// $bp_application_path = dirname(getcwd()).DIRECTORY_SEPARATOR;
-// $bp_application_path = "..".DIRECTORY_SEPARATOR;
 $bp_application_path = "..".SLASH;
+$csound_path = "/usr/local/bin/";
+$max_sleep_time_after_bp_command = 10; // seconds. Maximum time required to finish Csound score
+$default_output_format = "csound";
 
 $temp_dir = $bp_application_path."temp_bolprocessor";
 if(!file_exists($temp_dir)) {
@@ -1416,7 +1417,22 @@ function send_to_console($command) {
 //	passthru($exec,$o);
 	return $table;
 	}
-	
+
+function get_orchestra_filename($csound_file) {
+	$csound_orchestra = '';
+	$content = @file_get_contents($csound_file,TRUE);
+	if($content != FALSE) {
+		$extract_data = extract_data(FALSE,$content);
+		$content = $extract_data['content'];
+		$content_no_br = str_replace("<br>",chr(10),$content);
+		$table = explode(chr(10),$content_no_br);
+		$imax_file = count($table);
+		$number_channels = $table[0];
+		$csound_orchestra = $table[$number_channels + 1];
+		}
+	return $csound_orchestra;
+	}
+
 function get_name_mi_file($this_file) {
 	$objects_file = '';
 	$content = @file_get_contents($this_file,TRUE);
@@ -1454,14 +1470,14 @@ function MIDIfiletype($file) {
 	}
 
 function copyemz($file1,$file2){
-          $contentx =@file_get_contents($file1);
-                   $openedfile = fopen($file2, "w");
-                   fwrite($openedfile, $contentx);
-                   fclose($openedfile);
-                    if ($contentx === FALSE) {
-                    $status=false;
-                    }else $status=true;
-                   
-                    return $status;
+	$contentx = @file_get_contents($file1);
+	$openedfile = fopen($file2, "w");
+	fwrite($openedfile, $contentx);
+	fclose($openedfile);
+	if($contentx === FALSE) {
+		$status = false;
+		}
+	else $status = true;
+	return $status;
     } 
 ?>

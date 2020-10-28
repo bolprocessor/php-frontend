@@ -5,7 +5,6 @@ $this_title = "BP console";
 require_once("_header.php");
 
 $application_path = $bp_application_path;
-// $application_path = $bp_application_path;
 
 if(isset($_GET['startup'])) $startup = $_GET['startup'];
 else $startup = '';
@@ -44,6 +43,8 @@ else {
 	else $trace_production = FALSE;
 	if(isset($_GET['random_seed'])) $random_seed = $_GET['random_seed'];
 	else $random_seed = 0;
+	if(isset($_GET['csound_orchestra'])) $csound_orchestra = $_GET['csound_orchestra'];
+	else $csound_orchestra = '';
 
 	$table = explode('/',$grammar_path);
 	$grammar_name = $table[count($table) - 1];
@@ -56,7 +57,6 @@ else {
 	if(is_integer(strpos($thisgrammar,' ')))
 		$thisgrammar = '"'.$thisgrammar.'"';
 	$command = $application_path."bp ".$instruction." -gr ".$thisgrammar;
-//	$command = "../bp ".$instruction." -gr ".$thisgrammar;
 
 	$thisalphabet = $alphabet_file;
 	if(is_integer(strpos($thisalphabet,' ')))
@@ -115,6 +115,16 @@ for($i = 0; $i < $n_messages; $i++) {
 echo "<hr>";
 
 if($instruction <> "help") {
+	$time_start = time();
+	$time_end = $time_start + $max_sleep_time_after_bp_command;
+	$donefile = $temp_dir."trace_".session_id()."_done.txt";
+//	echo $donefile."<br />";
+	while(TRUE) {
+		if(file_exists($donefile)) break;
+		if(time() > $time_end) break;
+		}
+//	echo "time = ".(time() - $time_start)."<br />";
+	@unlink($donefile);
 	$tracefile_html = clean_up_file($tracefile);
 	$trace_link = $tracefile_html;
 	$output_link = $output;
@@ -194,6 +204,42 @@ if($instruction <> "help") {
 			}
 		echo "</tr></table>";
 		echo "<br />";
+		}
+		
+	// Process Csound score if possible
+	if($file_format == "csound") {
+		if($csound_orchestra == '' AND $file_format == "csound") {
+			$csound_orchestra = "default.orc";
+			echo "<p><font color=\"red\">➡</font> Csound orchestra file was not specified. We'll try the default orchestra: <font color=\"blue\">".$dir.$csound_orchestra."</font>.</p>";
+			}
+		if(!file_exists($dir.$csound_orchestra)) {
+			echo "<p><font color=\"red\">➡</font> No orchestra file has been found here: <font color=\"blue\">".$dir.$csound_orchestra."</font>. Csound will not create a sound file.</p>";
+			}
+		else {
+			$csound_file_link = $output;
+			$sound_file_link = str_replace(".sco",".wav",$csound_file_link);
+			@unlink($sound_file_link);
+			$olddir = getcwd();
+			chdir($dir); // Strangely, Csound won't accept "$dir.$csound_orchestra"
+		//	sleep(4);
+			if(file_exists($csound_file_link)) {
+				$command = $csound_path."csound --wave -o ".$sound_file_link." ".$csound_orchestra." ".$csound_file_link;
+				echo "<p><small>command = <font color=\"red\">".$command."</font></small></p>";
+				exec($command,$result_csound);
+				$n_messages_csound = count($result_csound);
+				for($i=0; $i < $n_messages_csound; $i++) {
+					$mssg = $result_csound[$i];
+					echo $mssg."<br />";
+					}
+				}
+		//	sleep(2);
+			echo "<audio controls>";
+			echo "<source src=\"".$sound_file_link."\" type=\"audio/wav\">";
+			echo "Your browser does not support the audio tag.";
+			echo "</audio>";
+			echo "<p><a target=\"_blank\" href=\"".$sound_file_link."\">Download this sound file</a> (".$sound_file_link.")</p>";
+			echo "<p><font color=\"red\">➡</font> If you don't hear sounds it may be due to mismatch between Csound score and orchestra.</p>";
+			}
 		}
 	}
 
