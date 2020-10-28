@@ -121,7 +121,10 @@ if($instruction <> "help") {
 //	echo $donefile."<br />";
 	while(TRUE) {
 		if(file_exists($donefile)) break;
-		if(time() > $time_end) break;
+		if(time() > $time_end) {
+			echo "<p><font color=\"red\">Maximum time (".$max_sleep_time_after_bp_command." seconds) spent waiting for the 'done.txt' file… The process is incomplete!</p>";
+			break;
+			}
 		}
 //	echo "time = ".(time() - $time_start)."<br />";
 	@unlink($donefile);
@@ -144,12 +147,13 @@ if($instruction <> "help") {
 		if($trace_production OR $instruction == "templates" OR $show_production OR $trace_production) echo "<font color=\"red\">➡</font> Read the <a onclick=\"window.open('".$trace_link."','trace','width=800,height=800,left=400'); return false;\" href=\"".$trace_link."\">trace file</a>";
 		echo "</p>";
 		
+		// Show MIDI file
 		if($file_format == "midi") {
 			$midi_file_link = $output;
 			if(file_exists($midi_file_link)) {
 				echo "<p><a href=\"#midi\" onClick=\"MIDIjs.play('".$midi_file_link."');\"><img src=\"pict/loudspeaker.png\" width=\"70px;\" style=\"vertical-align:middle;\" />Play MIDI file</a>";
 				echo " (<a href=\"#midi\" onClick=\"MIDIjs.stop();\">Stop playing</a>)";
-				echo "&nbsp;or <a href=\"".$midi_file_link."\">download it</a></p>";
+				echo "&nbsp;or <a href=\"".$midi_file_link."\" download>download it</a></p>";
 				}
 			}
 		
@@ -210,7 +214,7 @@ if($instruction <> "help") {
 	if($file_format == "csound") {
 		if($csound_orchestra == '' AND $file_format == "csound") {
 			$csound_orchestra = "default.orc";
-			echo "<p><font color=\"red\">➡</font> Csound orchestra file was not specified. We'll try the default orchestra: <font color=\"blue\">".$dir.$csound_orchestra."</font>.</p>";
+			echo "<p><font color=\"red\">➡</font> Csound orchestra file was not specified. I tried the default orchestra: <font color=\"blue\">".$dir.$csound_orchestra."</font>.</p>";
 			}
 		if(!file_exists($dir.$csound_orchestra)) {
 			echo "<p><font color=\"red\">➡</font> No orchestra file has been found here: <font color=\"blue\">".$dir.$csound_orchestra."</font>. Csound will not create a sound file.</p>";
@@ -221,24 +225,37 @@ if($instruction <> "help") {
 			@unlink($sound_file_link);
 			$olddir = getcwd();
 			chdir($dir); // Strangely, Csound won't accept "$dir.$csound_orchestra"
-		//	sleep(4);
 			if(file_exists($csound_file_link)) {
-				$command = $csound_path."csound --wave -o ".$sound_file_link." ".$csound_orchestra." ".$csound_file_link;
-				echo "<p><small>command = <font color=\"red\">".$command."</font></small></p>";
-				exec($command,$result_csound);
-				$n_messages_csound = count($result_csound);
-				for($i=0; $i < $n_messages_csound; $i++) {
-					$mssg = $result_csound[$i];
-					echo $mssg."<br />";
+				$command = $csound_path."csound --version";
+				exec($command,$result_csound,$return_var);
+				if($return_var <> 0) {
+					echo "<p><font color=\"red\">➡</font> Test of Csound was unsuccessful. May be not installed? The command was: <font color=\"blue\">".$command."</font></p>";
+					}
+				else {
+					$time_start = time();
+					$command = $csound_path."csound --wave -o ".$sound_file_link." ".$csound_orchestra." ".$csound_file_link;
+					echo "<p><small>command = <font color=\"red\">".$command."</font></small></p>";
+					exec($command,$result_csound,$return_var);
+					if($return_var <> 0) {
+						echo "<p><font color=\"red\">➡</font> Csound returned error code <font color=\"blue\">‘".$return_var."’</font></p>";
+						}
+			/*		$n_messages_csound = count($result_csound);
+					for($i=0; $i < $n_messages_csound; $i++) {
+						$mssg = $result_csound[$i];
+						echo $mssg."<br />";
+						} */
+					$time_spent = time() - $time_start;
+					if($time_spent > 10)
+						echo "<p><font color=\"red\">➡</font> Sorry for the long time (".$time_spent." seconds) waiting for Csound to complete the conversion…</p>";
+					echo "<audio controls>";
+					echo "<source src=\"".$sound_file_link."\" type=\"audio/wav\">";
+					echo "Your browser does not support the audio tag.";
+					echo "</audio>";
+					echo "<p><a target=\"_blank\" href=\"".$sound_file_link."\" download>Download this sound file</a> (".$sound_file_link.")</p>";
+					echo "<p><font color=\"red\">➡</font> If you hear garbage sound or silence it may be due to mismatch between Csound score and orchestra, or some overflow in Csound…</p>";
 					}
 				}
-		//	sleep(2);
-			echo "<audio controls>";
-			echo "<source src=\"".$sound_file_link."\" type=\"audio/wav\">";
-			echo "Your browser does not support the audio tag.";
-			echo "</audio>";
-			echo "<p><a target=\"_blank\" href=\"".$sound_file_link."\">Download this sound file</a> (".$sound_file_link.")</p>";
-			echo "<p><font color=\"red\">➡</font> If you don't hear sounds it may be due to mismatch between Csound score and orchestra.</p>";
+			else echo "<p><font color=\"red\">➡</font> The score file (".$csound_file_link.") was not found and could not be processed by Csound.</p>";
 			}
 		}
 	}
