@@ -356,7 +356,7 @@ if($note_convention <> '') echo "• Note convention = <font color=\"blue\">‘"
 if($produce_all_items == 1) echo "• Produce all items has been set ON by <font color=\"blue\">‘".$settings_file."’</font><br />";
 if($show_production == 1) echo "• Show production has been set ON by <font color=\"blue\">‘".$settings_file."’</font><br />";
 if($trace_production == 1) echo "• Trace production has been set ON by <font color=\"blue\">‘".$settings_file."’</font><br />";
-if(isset($random_seed)) echo "• Ransom seed has been set to ".$random_seed." by <font color=\"blue\">‘".$settings_file."’</font><br />";
+if(isset($random_seed)) echo "• Random seed has been set to ".$random_seed." by <font color=\"blue\">‘".$settings_file."’</font><br />";
 if($csound_orchestra <> '') {
 	echo "• Csound orchestra file ‘<font color=\"blue\">".$csound_orchestra."</font>’ is mentioned in <font color=\"blue\">‘".$csound_file."’</font>";
 	if(!file_exists($dir.$csound_orchestra)) echo "<br />&nbsp;&nbsp;<font color=\"red\">➡&nbsp;yet not in the current folder.</font> Therefore <font color=\"blue\">‘default.orc’</font> will be used instead</p>";

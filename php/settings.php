@@ -62,17 +62,20 @@ if(isset($_POST['saveparameters'])) {
 			$value = "<no input device>";
 		if($i == 53 AND $value == '')
 			$value = "<no output device>";
+		if($i == 43) $value = 0; // Use buffer limit
 		if($i == 45) { // Seed for randomization
 			$newvalue = intval($value);
 			if(strcmp($newvalue,$value) <> 0)
 				echo "<p><font color=\"red\">Seed for randomization must be an integer: “</font><font color=\"blue\">".$value."</font><font color=\"red\">” has been replaced with “</font><font color=\"blue\">".$newvalue."</font><font color=\"red\">”.</font></p>";
 			$value = $newvalue;
 			}
+		if($i == 46) $value = 0; // Use buffer limit
 		if($i == 47 AND (!is_numeric($value) OR $value < 0 OR $value > 3 OR intval($value) <> $value)) {
 			$newvalue = 0;
 			echo "<p><font color=\"red\">Note convention must be an integer from 0 to 3: “</font><font color=\"blue\">".$value."</font><font color=\"red\">” has been replaced with “</font><font color=\"blue\">".$newvalue."</font><font color=\"red\">”.</font></p>";
 			$value = $newvalue;
 			}
+		if($i == 54) $value = 0; // Display bullets
 		if($i == 58) $value = 1; // MIDI file format
 		if($i == 62 AND (!is_numeric($value) OR $value < 0 OR $value > 127 OR intval($value) <> $value)) {
 			$newvalue = 60;
