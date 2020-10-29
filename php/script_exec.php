@@ -126,6 +126,8 @@ function run_script($dir,$file,$script_variables,$note_convention,$grammar,$outp
 			continue;
 			}
 		if($instruction == "Produce items" AND $grammar <> '') {
+			$trace_file = $temp_dir.SLASH."trace.txt";
+			$trace_done_file = $temp_dir.SLASH."trace_done.txt";
 			$command = $bp_application_path."bp produce";
 			$command .= " -gr ".$grammar;
 			if($note_convention <> '') $command .= " --".strtolower($note_convention);
@@ -133,6 +135,7 @@ function run_script($dir,$file,$script_variables,$note_convention,$grammar,$outp
 			if($output_format == "csound")
 				$command .= " --csoundout ".$output_file;
 			else $command .= " --rtmidi ";
+			$command .= " --traceout ".$trace_file;
 			echo "<p style=\"color:red;\">".$command."</p>";
 			$o = send_to_console($command);
 			$n_messages = count($o);
@@ -144,6 +147,8 @@ function run_script($dir,$file,$script_variables,$note_convention,$grammar,$outp
 					if(is_integer($pos=strpos($mssg[$k],"Errors: 0")) AND $pos == 0) $no_error = TRUE;
 					}
 				}
+			@unlink($trace_done_file);
+			@unlink($trace_file);
 			if($no_error AND $output_format == "csound") {
 				echo "<p><font color=\"red\">➡ </font> Read the <a onclick=\"window.open('".$output_file."','".$output_format."','width=600,height=400,left=300'); return false;\" href=\"".$output_file."\">output file</a></p>";
 				}
