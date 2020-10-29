@@ -13,18 +13,18 @@ $dir = str_replace($filename,'',$grammar_file);
 
 if($test) echo "grammar_file = ".$grammar_file."<br />";
 
-if($output_folder == '') $output_folder = "my_output";
+if(!isset($output_folder) OR $output_folder == '') $output_folder = "my_output";
 $default_output_name = str_replace("-gr.",'',$filename);
 $default_output_name = str_replace(".bpgr",'',$default_output_name);
 $file_format = $default_output_format;
+if(isset($_POST['file_format'])) $file_format = $_POST['file_format'];
 switch($file_format) {
 	case "data": $output_file = $default_output_name.".bpda"; break;
 	case "midi": $output_file = $default_output_name.".mid"; break;
 	case "csound": $output_file = $default_output_name.".sco"; break;
+	default: $output_file = ''; break;
 	}
-if($file_format == '') $output_file = '';
 if(isset($_POST['output_file'])) $output_file = $_POST['output_file'];
-if(isset($_POST['file_format'])) $file_format = $_POST['file_format'];
 
 $expression = '';
 if(isset($_POST['expression'])) $expression = trim($_POST['expression']);
@@ -87,15 +87,7 @@ if(isset($_POST['change_output_folder'])) {
 		echo "<p><font color=\"red\">Created folder:</font><font color=\"blue\"> ".$output."</font><br />";
 		mkdir($output);
 		}
-	$handle = fopen("_settings.php","w");
-	fwrite($handle,"<?php\n");
-	$line = "§output_folder = \"".$output_folder."\";\n";
-	$line = str_replace('§','$',$line);
-	fwrite($handle,$line);
-	$line = "§>\n";
-	$line = str_replace('§','?',$line);
-	fwrite($handle,$line);
-	fclose($handle);
+	save_settings("output_folder",$output_folder);
 	}
 else {
 	$output = $bp_application_path.SLASH.$output_folder;
@@ -232,6 +224,9 @@ else $random_seed = 0;
 
 if($test) echo "url_this_page = ".$url_this_page."<br />";
 
+if($file_format == "csound") {
+	echo "<div>".check_csound()."</div>";
+	}
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 echo "<table cellpadding=\"8px;\"><tr style=\"background-color:white;\">";
 echo "<td><p>Name of output file (with proper extension):<br /><input type=\"text\" name=\"output_file\" size=\"25\" value=\"".$output_file."\">&nbsp;";
@@ -379,6 +374,7 @@ echo "<input type=\"hidden\" name=\"metronome\" value=\"".$metronome."\">";
 echo "<input type=\"hidden\" name=\"time_structure\" value=\"".$time_structure."\">";
 echo "<input type=\"hidden\" name=\"alphabet_file\" value=\"".$alphabet_file."\">";
 echo "<p id=\"topedit\"><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"savegrammar\" formaction=\"".$url_this_page."#topedit\" value=\"SAVE ‘".$filename."’\"></p>";
+
 echo "<textarea name=\"thisgrammar\" rows=\"50\" style=\"width:90%;\">".$content."</textarea>";
 echo "<div style=\"float:left; padding-top:12px;\"><input style=\"color:DarkBlue; background-color:Aquamarine; font-size:large;\" onclick=\"window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)\" title=\"Don't forget to save!\"";
 if($error) echo " disabled";

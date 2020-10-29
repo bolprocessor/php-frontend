@@ -36,6 +36,11 @@ p {
 .milieu {
 	text-align:center;
 	}
+.shadow {
+	border-radius: 26px;
+	background-color: white !important;
+	box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+	}
 #cartouche {
 	background-color:Cyan !important;
 	border-radius:5%;

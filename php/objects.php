@@ -223,10 +223,6 @@ for($i = 0; $i < count($table); $i++) {
 			$i++; $line = $table[$i];
 			if(is_integer($pos=strpos($line,"_beginCsoundScore_"))) {
 				$i++; $line = $table[$i];
-			/*	if(is_integer($pos=strpos($line,"_endCsoundScore_"))) {
-					$score = "<HTML></HTML>";
-					}
-				else */
 				while(!is_integer($pos=strpos($line,"_endCsoundScore_"))) {
 					$test_csound = preg_replace("/i[0-9]\s/u","•§§§•",$line);
 					if(is_integer($pos=strpos($test_csound,"•§§§•")))
@@ -241,6 +237,7 @@ for($i = 0; $i < count($table); $i++) {
 					}
 				$i_start_midi = $i;
 				}
+				
 			// We send MIDI codes to separate file"midibytes.txt"
 			$number_codes = FALSE;
 			if($i_start_midi > 0 AND $i > $i_start_midi AND !is_integer(stripos($line,"<HTML>"))) {
@@ -287,8 +284,8 @@ $temp_alphabet_file = $temp_dir.$temp_folder.SLASH."temp.bpho";
 $handle = fopen($temp_alphabet_file,"w");
 $file_header = $top_header."\n// Alphabet saved as \"temp.bpho\". Date: ".gmdate('Y-m-d H:i:s');
 fwrite($handle,$file_header."\n");
-fwrite($handle,$filename."\n");
-fwrite($handle,"*\n");
+// fwrite($handle,$filename."\n");
+// fwrite($handle,"*\n");
 echo "<table style=\"background-color:lightgrey;\">";
 for($i = 0; $i <= $iobj; $i++) {
 	echo "<tr><td style=\"padding:4px; vertical-align:middle;\">";

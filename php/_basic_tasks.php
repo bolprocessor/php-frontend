@@ -11,15 +11,27 @@ $test = FALSE;
 // $test = TRUE;
 
 $bp_application_path = "..".SLASH;
-$csound_path = "/usr/local/bin/";
-$max_sleep_time_after_bp_command = 10; // seconds. Maximum time required to finish Csound score
-$default_output_format = "csound";
+if(!isset($csound_path) OR $csound_path == '') $csound_path = "/usr/local/bin/";
+$max_sleep_time_after_bp_command = 15; // seconds. Maximum time required for the console
+$default_output_format = "midi";
 
 $temp_dir = $bp_application_path."temp_bolprocessor";
 if(!file_exists($temp_dir)) {
 	mkdir($temp_dir);
 	}
 $temp_dir .= SLASH;
+
+if(isset($_POST['csound_path'])) {
+	$new_csound_path = trim($_POST['csound_path']);
+	if($new_csound_path <> '') {
+		if($new_csound_path[0] <> '/')
+			$new_csound_path = "/".$new_csound_path;
+		if($new_csound_path[strlen($new_csound_path) - 1] <> '/')
+			$new_csound_path .= "/";
+		save_settings("csound_path",$new_csound_path);
+		$csound_path = $new_csound_path;
+		}
+	}
 
 // Delete old temp directories and trace files
 $dircontent = scandir($temp_dir);
@@ -624,10 +636,15 @@ function SaveObjectPrototypes($verbose,$dir,$filename,$temp_folder) {
 		// We fetch MIDI codes from a separate "midibytes.txt" file
 		$all_bytes = @file_get_contents($midi_bytes,TRUE);
 		$table_bytes = explode(chr(10),$all_bytes);
+		$found = FALSE;
 		for($j = 0; $j < count($table_bytes); $j++) {
 			$byte = trim($table_bytes[$j]);
-			if($byte <> '') fwrite($handle,$byte."\n");
+			if($byte <> '') {
+				fwrite($handle,$byte."\n");
+				$found = TRUE;
+				}
 			}
+		if(!$found) fwrite($handle,"0\n"); // This is required because "midibytes.txt" might be empty when there is no MIDI code. The first number in the prototypes file is the number of MIDI codes that follow.
 		$comment_this_prototype = "<HTML>".$comment_this_prototype."</HTML>";
 		fwrite($handle,$comment_this_prototype."\n");
 		}
@@ -1036,15 +1053,16 @@ function store($handle,$varname,$var) {
 	return;
 	}
 
-function good_name($type,$filename) {
+function good_name($type,$filename,$name_mode) {
 	$filename = fix_new_name($filename);
 	$filename = trim($filename);
 //	echo "filename = ".$filename."<br />";
-	if(is_integer($pos=strpos($filename,"-".$type.".")) AND $pos == 0) return $filename;
-	$table = explode('.',$filename);
-	$extension = end($table);
-	if($extension == "bp".$type) return $filename;
-	$filename = $filename.".bp".$type;
+	$filename = str_replace("-".$type.".",'',$filename);
+	$filename = str_replace(".bp".$type,'',$filename);
+	if($name_mode == "extension")
+		$filename .= ".bp".$type;
+	else
+		$filename = "-".$type.".".$filename;
 	return $filename;
 	}
 
@@ -1479,5 +1497,64 @@ function copyemz($file1,$file2){
 		}
 	else $status = true;
 	return $status;
-    } 
+    }
+    
+ function save_settings($variable,$value) {
+	$this_file = "_settings.php";
+//	echo "value = ".$value."<br />";
+	$content = @file_get_contents($this_file,TRUE);
+	if($content != FALSE) {
+		$table = explode(chr(10),$content);
+		$imax = count($table);
+		$new_table = array();
+		$found = FALSE;
+		for($i = 0; $i < $imax; $i++) {
+			$line = trim($table[$i]);
+			if(is_integer($pos=strpos($line,"<")) AND $pos == 0) continue;
+			if(is_integer($pos=strpos($line,">"))) continue;
+		//	echo "line =  ".$line."<br />";
+			if(is_integer($pos=strpos($line,$variable))) {
+				$line = preg_replace("/=\s?\".+\"\s?;/u","= \"".$value."\";",$line);
+		//		echo "line2 =  ".$line."<br />";
+				$found = TRUE;
+				}
+			if(strlen($line) == 0) continue;
+			$new_table[$i] = $line;
+			}
+		if(!$found) {
+			$line = "§".$variable." = \"".$value."\";";
+			$line = str_replace('§','$',$line);
+			$new_table[$i] = $line;
+			}
+		$content = implode("\n",$new_table);
+	//	echo "content = ".$content."<br />";
+		$handle = fopen($this_file,"w");
+		fwrite($handle,"<?php\n");
+		fwrite($handle,$content);
+		$line = "\n§>\n";
+		$line = str_replace('§','?',$line);
+		fwrite($handle,$line);
+		fclose($handle);
+		}
+	else echo "<p><font color=\"red\">File ‘_settings.php’ could nor be opened!</p>";
+ 	return;
+ 	}
+ 
+function check_csound() {
+	global $csound_path, $url_this_page, $file_format;
+	$command = $csound_path."csound --version";
+	exec($command,$result_csound,$return_var);
+	if($return_var <> 0) {
+		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+		if(isset($file_format)) echo "<input type=\"hidden\" name=\"file_format\" value=\"".$file_format."\">";
+		echo "<p><img src=\"pict/logo_csound.jpg\" width=\"90px;\" style=\"vertical-align:middle;\" />&nbsp;is not installed or its path (<font color= \"blue\">".$csound_path."</font>) is incorrect.<br/>";
+		echo "Try this path: <input type=\"text\" name=\"csound_path\" size=\"30\" style=\"background-color:CornSilk;\" value=\"".$csound_path."\">";
+		echo "&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" value=\"TRY\">";
+		echo "<br />";
+		echo "<font color=\"red\">➡</font>&nbsp;<a target=\"_blank\" href=\"https://csound.com/download.html\">Follow this link</a> to install Csound and convert scores to sound files.</p>";
+		echo "</form>";
+		}
+	else echo "<p style=\"vertical-align:middle;\"><img src=\"pict/logo_csound.jpg\" width=\"90px;\" style=\"vertical-align:middle;\" />&nbsp;is installed and responsive.</p>";
+	return;
+	}
 ?>

@@ -1,10 +1,11 @@
 <?php
 require_once("_basic_tasks.php");
 require_once("_header.php");
+require_once("_settings.php");
 $url_this_page = $this_page = "index.php";
 
 echo "<table style=\"background-color:snow;\"><tr>";
-echo "<td style=\"padding:4px; vertical-align:middle;\"><img src=\"pict/BP3-logo.png\" width=\"120px;\"/></td><td style=\"padding:4px; vertical-align:middle;\">";
+echo "<td style=\"padding:4px; vertical-align:middle;\"><img src=\"pict/BP3-logo.png\" width=\"120px;\"/></td><td style=\"padding:4px; vertical-align:middle; white-space:nowrap;\">";
 if($path <> '') {
 	echo "<h2 style=\"text-align:center;\">Bol Processor ‘BP3’</h2>";
 	$url_this_page .= "?path=".urlencode($path);
@@ -23,7 +24,11 @@ if($path <> '') {
 	}
 else {
 	echo "<h2 style=\"text-align:center;\">Welcome to Bol Processor ‘BP3’</h2>";
-	echo "</td></tr></table>";
+	echo "</td>";
+	echo "<td style=\"padding-left:2em; vertical-align:middle;\">";
+	echo "<p><i>This is a evaluation version of the interface<br />running the ‘bp’ multi-platform console.</i></p>";
+	echo "</td>";
+	echo "</tr></table>";
 	$dir = $bp_application_path;
 	$command = $dir."bp --help";
 	$o = send_to_console($command);
@@ -55,8 +60,10 @@ if($test) echo "url_this_page = ".$url_this_page."<br />";
 
 $new_file = '';
 if(isset($_POST['create_grammar'])) {
+	$type = $_POST['type'];
+	$name_mode = $_POST['name_mode'];
 	$filename = trim($_POST['filename']);
-	$filename = good_name("gr",$filename);
+	$filename = good_name($type,$filename,$name_mode);
 	if($test) echo "filename = ".$filename."<br />";
 	if($filename <> '') {
 		$new_file = $filename;
@@ -72,8 +79,10 @@ if(isset($_POST['create_grammar'])) {
 		}
 	}
 if(isset($_POST['create_data'])) {
+	$type = $_POST['type'];
+	$name_mode = $_POST['name_mode'];
 	$filename = trim($_POST['filename']);
-	$filename = good_name("da",$filename);
+	$filename = good_name($type,$filename,$name_mode);
 	if($filename <> '') {
 		$new_file = $filename;
 		if(file_exists($dir.SLASH.$filename)) {
@@ -88,8 +97,10 @@ if(isset($_POST['create_data'])) {
 		}
 	}
 if(isset($_POST['create_alphabet'])) {
+	$type = $_POST['type'];
+	$name_mode = $_POST['name_mode'];
 	$filename = trim($_POST['filename']);
-	$filename = good_name("ho",$filename);
+	$filename = good_name($type,$filename,$name_mode);
 	if($filename <> '') {
 		$new_file = $filename;
 		if(file_exists($dir.SLASH.$filename)) {
@@ -106,8 +117,10 @@ if(isset($_POST['create_alphabet'])) {
 		}
 	}
 if(isset($_POST['create_timebase'])) {
+	$type = $_POST['type'];
+	$name_mode = $_POST['name_mode'];
 	$filename = trim($_POST['filename']);
-	$filename = good_name("tb",$filename);
+	$filename = good_name($type,$filename,$name_mode);
 	if($filename <> '') {
 		$new_file = $filename;
 		if(file_exists($dir.SLASH.$filename)) {
@@ -124,8 +137,10 @@ if(isset($_POST['create_timebase'])) {
 		}
 	}
 if(isset($_POST['create_prototypes'])) {
+	$type = $_POST['type'];
+	$name_mode = $_POST['name_mode'];
 	$filename = trim($_POST['filename']);
-	$filename = good_name("mi",$filename);
+	$filename = good_name($type,$filename,$name_mode);
 	if($filename <> '') {
 		$new_file = $filename;
 		if(file_exists($dir.SLASH.$filename)) {
@@ -142,8 +157,10 @@ if(isset($_POST['create_prototypes'])) {
 		}
 	}
 if(isset($_POST['create_csound'])) {
+	$type = $_POST['type'];
+	$name_mode = $_POST['name_mode'];
 	$filename = trim($_POST['filename']);
-	$filename = good_name("cs",$filename);
+	$filename = good_name($type,$filename,$name_mode);
 	if($filename <> '') {
 		$new_file = $filename;
 		if(file_exists($dir.SLASH.$filename)) {
@@ -160,9 +177,11 @@ if(isset($_POST['create_csound'])) {
 		}
 	}
 if(isset($_POST['create_script'])) {
+	$type = $_POST['type'];
+	$name_mode = $_POST['name_mode'];
 	$filename = trim($_POST['filename']);
 	echo $filename."<br />";
-	$filename = good_name("sc",$filename);
+	$filename = good_name($type,$filename,$name_mode);
 	echo $filename."<br />";
 	if($filename <> '') {
 		$new_file = $filename;
@@ -183,48 +202,77 @@ if($folder <> '') echo "<h3>Content of folder <font color=\"red\">".$folder."</f
 $table = explode('_',$folder);
 $extension = end($table);
 if($dir <> $bp_application_path."php" AND $extension <> "temp") {
-	echo "<div style=\"float:right;\">";
+	echo "<div style=\"float:right; background-color:white; padding:6px;\">";
+	check_csound();
 	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 	echo "<p style=\"text-align:left;\">";
 	echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"create_grammar\" value=\"CREATE NEW GRAMMAR FILE IN THIS FOLDER\">&nbsp;➡&nbsp;";
-	echo "<font color=\"blue\">".$folder.SLASH."</font>";
-	echo "<input type=\"text\" name=\"filename\" size=\"20\" style=\"background-color:CornSilk;\" value=\"name.bpgr\"></p>";
+	echo "<input type=\"text\" name=\"filename\" size=\"20\" style=\"background-color:CornSilk;\" value=\"\">";
+	$type = "gr";
+	echo "<br /><input type=\"radio\" name=\"name_mode\" value=\"prefix\" checked>with prefix ‘-".$type."’";
+	echo "<br /><input type=\"radio\" name=\"name_mode\" value=\"extension\">with extension ‘bp".$type."’";
+	echo "<input type=\"hidden\" name=\"type\" value=\"".$type."\">";
+	echo "</p>";
 	echo "</form>";
 	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 	echo "<p style=\"text-align:left;\">";
 	echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"create_data\" value=\"CREATE NEW DATA FILE IN THIS FOLDER\">&nbsp;➡&nbsp;";
-	echo "<font color=\"blue\">".$folder.SLASH."</font>";
-	echo "<input type=\"text\" name=\"filename\" size=\"20\" style=\"background-color:CornSilk;\" value=\"name.bpda\"></p>";
+	echo "<input type=\"text\" name=\"filename\" size=\"20\" style=\"background-color:CornSilk;\" value=\"\">";
+	$type = "da";
+	echo "<br /><input type=\"radio\" name=\"name_mode\" value=\"prefix\" checked>with prefix ‘-".$type."’";
+	echo "<br /><input type=\"radio\" name=\"name_mode\" value=\"extension\">with extension ‘bp".$type."’";
+	echo "<input type=\"hidden\" name=\"type\" value=\"".$type."\">";
+	echo "</p>";
 	echo "</form>";
 	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 	echo "<p style=\"text-align:left;\">";
 	echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"create_alphabet\" value=\"CREATE NEW ALPHABET FILE IN THIS FOLDER\">&nbsp;➡&nbsp;";
-	echo "<font color=\"blue\">".$folder.SLASH."</font>";
-	echo "<input type=\"text\" name=\"filename\" size=\"20\" style=\"background-color:CornSilk;\" value=\"name.bpho\"></p>";
+	echo "<input type=\"text\" name=\"filename\" size=\"20\" style=\"background-color:CornSilk;\" value=\"\">";
+	$type = "ho";
+	echo "<br /><input type=\"radio\" name=\"name_mode\" value=\"prefix\" checked>with prefix ‘-".$type."’";
+	echo "<br /><input type=\"radio\" name=\"name_mode\" value=\"extension\">with extension ‘bp".$type."’";
+	echo "<input type=\"hidden\" name=\"type\" value=\"".$type."\">";
+	echo "</p>";
 	echo "</form>";
 	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 	echo "<p style=\"text-align:left;\">";
 	echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"create_prototypes\" value=\"CREATE NEW SOUND-OBJECT PROTOOTYPE FILE IN THIS FOLDER\">&nbsp;➡&nbsp;";
-	echo "<font color=\"blue\">".$folder.SLASH."</font>";
-	echo "<input type=\"text\" name=\"filename\" size=\"20\" style=\"background-color:CornSilk;\" value=\"name.bpmi\"></p>";
+	echo "<input type=\"text\" name=\"filename\" size=\"20\" style=\"background-color:CornSilk;\" value=\"\">";
+	$type = "mi";
+	echo "<br /><input type=\"radio\" name=\"name_mode\" value=\"prefix\" checked>with prefix ‘-".$type."’";
+	echo "<br /><input type=\"radio\" name=\"name_mode\" value=\"extension\">with extension ‘bp".$type."’";
+	echo "<input type=\"hidden\" name=\"type\" value=\"".$type."\">";
+	echo "</p>";
 	echo "</form>";
 	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 	echo "<p style=\"text-align:left;\">";
 	echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"create_csound\" value=\"CREATE NEW CSOUND INSTRUMENT FILE IN THIS FOLDER\">&nbsp;➡&nbsp;";
-	echo "<font color=\"blue\">".$folder.SLASH."</font>";
-	echo "<input type=\"text\" name=\"filename\" size=\"20\" style=\"background-color:CornSilk;\" value=\"name.bpcs\"></p>";
+	echo "<input type=\"text\" name=\"filename\" size=\"20\" style=\"background-color:CornSilk;\" value=\"\">";
+	$type = "cs";
+	echo "<br /><input type=\"radio\" name=\"name_mode\" value=\"prefix\" checked>with prefix ‘-".$type."’";
+	echo "<br /><input type=\"radio\" name=\"name_mode\" value=\"extension\">with extension ‘bp".$type."’";
+	echo "<input type=\"hidden\" name=\"type\" value=\"".$type."\">";
+	echo "</p>";
 	echo "</form>";
 	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 	echo "<p style=\"text-align:left;\">";
 	echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"create_script\" value=\"CREATE NEW SCRIPT IN THIS FOLDER\">&nbsp;➡&nbsp;";
-	echo "<font color=\"blue\">".$folder.SLASH."</font>";
-	echo "<input type=\"text\" name=\"filename\" size=\"20\" style=\"background-color:CornSilk;\" value=\"name.bpsc\"></p>";
+	echo "<input type=\"text\" name=\"filename\" size=\"20\" style=\"background-color:CornSilk;\" value=\"\">";
+	$type = "sc";
+	echo "<br /><input type=\"radio\" name=\"name_mode\" value=\"prefix\" checked>with prefix ‘-".$type."’";
+	echo "<br /><input type=\"radio\" name=\"name_mode\" value=\"extension\">with extension ‘bp".$type."’";
+	echo "<input type=\"hidden\" name=\"type\" value=\"".$type."\">";
+	echo "</p>";
 	echo "</form>";
 	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 	echo "<p style=\"text-align:left;\">";
 	echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"create_timebase\" value=\"CREATE NEW TIMEBASE IN THIS FOLDER\">&nbsp;➡&nbsp;";
-	echo "<font color=\"blue\">".$folder.SLASH."</font>";
-	echo "<input type=\"text\" name=\"filename\" size=\"20\" style=\"background-color:CornSilk;\" value=\"name.bptb\"></p>";
+	echo "<input type=\"text\" name=\"filename\" size=\"20\" style=\"background-color:CornSilk;\" value=\"\">";
+	$type = "tb";
+	echo "<br /><input type=\"radio\" name=\"name_mode\" value=\"prefix\" checked>with prefix ‘-".$type."’";
+	echo "<br /><input type=\"radio\" name=\"name_mode\" value=\"extension\">with extension ‘bp".$type."’";
+	echo "<input type=\"hidden\" name=\"type\" value=\"".$type."\">";
+	echo "</p>";
 	echo "</form>";
 	echo "</div>";
 	}

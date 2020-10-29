@@ -1,5 +1,6 @@
 <?php
 require_once("_basic_tasks.php");
+require_once("_settings.php");
 $url_this_page = "produce.php";
 $this_title = "BP console";
 require_once("_header.php");
@@ -122,11 +123,10 @@ if($instruction <> "help") {
 	while(TRUE) {
 		if(file_exists($donefile)) break;
 		if(time() > $time_end) {
-			echo "<p><font color=\"red\">Maximum time (".$max_sleep_time_after_bp_command." seconds) spent waiting for the 'done.txt' file… The process is incomplete!</p>";
+			echo "<p><font color=\"red\">Maximum time (".$max_sleep_time_after_bp_command." seconds) spent waiting for the 'done.txt' file… The process is incomplete!</font></p>";
 			break;
 			}
 		}
-//	echo "time = ".(time() - $time_start)."<br />";
 	@unlink($donefile);
 	$tracefile_html = clean_up_file($tracefile);
 	$trace_link = $tracefile_html;
@@ -151,7 +151,7 @@ if($instruction <> "help") {
 		if($file_format == "midi") {
 			$midi_file_link = $output;
 			if(file_exists($midi_file_link)) {
-				echo "<p><a href=\"#midi\" onClick=\"MIDIjs.play('".$midi_file_link."');\"><img src=\"pict/loudspeaker.png\" width=\"70px;\" style=\"vertical-align:middle;\" />Play MIDI file</a>";
+				echo "<p class=\"shadow\" style=\"width:50%;\"><a href=\"#midi\" onClick=\"MIDIjs.play('".$midi_file_link."');\"><img src=\"pict/loudspeaker.png\" width=\"70px;\" style=\"vertical-align:middle;\" />Play MIDI file</a>";
 				echo " (<a href=\"#midi\" onClick=\"MIDIjs.stop();\">Stop playing</a>)";
 				echo "&nbsp;or <a href=\"".$midi_file_link."\" download>download it</a></p>";
 				}
@@ -159,7 +159,7 @@ if($instruction <> "help") {
 		
 		// Prepare images if any
 		$dircontent = scandir($temp_dir);
-		echo "<table style=\"background-color:inherit;\"><tr>";
+		echo "<table style=\"background-color:snow; padding:0px;\"><tr>";
 		$number_images = 0;
 		foreach($dircontent as $thisfile) {
 			$table = explode('_',$thisfile);
@@ -167,7 +167,7 @@ if($instruction <> "help") {
 			if($table[1] <> session_id()) continue;
 			if($table[2] <> "image") continue;
 			if(isset($table[4])) continue;
-			echo "<td style=\"background-color:white; border-radius: 6px; border: 4px solid Gold; vertical-align:middle; text-align: center; padding:8px;\>";
+			echo "<td style=\"background-color:white; border-radius: 6px; border: 4px solid Gold; vertical-align:middle; text-align: center; padding:8px; margin:0px;\>";
 			$number = intval(str_replace(".html",'',$table[3]));
 			$content = @file_get_contents($temp_dir.$thisfile,FALSE);
 			$table2 = explode(chr(10),$content);
@@ -224,7 +224,7 @@ if($instruction <> "help") {
 			$sound_file_link = str_replace(".sco",".wav",$csound_file_link);
 			@unlink($sound_file_link);
 			$olddir = getcwd();
-			chdir($dir); // Strangely, Csound won't accept "$dir.$csound_orchestra"
+		//	chdir($dir);
 			if(file_exists($csound_file_link)) {
 				$command = $csound_path."csound --version";
 				exec($command,$result_csound,$return_var);
@@ -233,7 +233,7 @@ if($instruction <> "help") {
 					}
 				else {
 					$time_start = time();
-					$command = $csound_path."csound --wave -o ".$sound_file_link." ".$csound_orchestra." ".$csound_file_link;
+					$command = $csound_path."csound --wave -o ".$sound_file_link." ".$dir.$csound_orchestra." ".$csound_file_link;
 					echo "<p><small>command = <font color=\"red\">".$command."</font></small></p>";
 					exec($command,$result_csound,$return_var);
 					if($return_var <> 0) {
@@ -247,12 +247,12 @@ if($instruction <> "help") {
 					$time_spent = time() - $time_start;
 					if($time_spent > 10)
 						echo "<p><font color=\"red\">➡</font> Sorry for the long time (".$time_spent." seconds) waiting for Csound to complete the conversion…</p>";
-					echo "<audio controls>";
+					echo "<audio controls class=\"shadow\">";
 					echo "<source src=\"".$sound_file_link."\" type=\"audio/wav\">";
 					echo "Your browser does not support the audio tag.";
 					echo "</audio>";
-					echo "<p><a target=\"_blank\" href=\"".$sound_file_link."\" download>Download this sound file</a> (".$sound_file_link.")</p>";
-					echo "<p><font color=\"red\">➡</font> If you hear garbage sound or silence it may be due to mismatch between Csound score and orchestra, or some overflow in Csound…</p>";
+					echo "<p><a target=\"_blank\" href=\"".$sound_file_link."\" download>Download this sound file</a> (<font color=\"blue\">".$sound_file_link."</font>)</p>";
+					echo "<p><font color=\"red\">➡</font> If you hear garbage sound or silence it may be due to mismatch between Csound score and orchestra<br />&nbsp;&nbsp;&nbsp;or some overflow in Csound…</p>";
 					}
 				}
 			else echo "<p><font color=\"red\">➡</font> The score file (".$csound_file_link.") was not found and could not be processed by Csound.</p>";
