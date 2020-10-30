@@ -64,8 +64,6 @@ if(isset($_POST['duplicate_object'])) {
 	$copy_object = str_replace('"','',$copy_object);
 	$this_object_file = $temp_dir.$temp_folder.SLASH.$object.".txt";
 	$copy_object_file = $temp_dir.$temp_folder.SLASH.$copy_object.".txt";
-//	$copy_object_file_deleted = $temp_dir.$temp_folder.SLASH.$copy_object.".txt.old";
-//	if(!file_exists($copy_object_file) AND !file_exists($copy_object_file_deleted)) {
 	if(!file_exists($copy_object_file)) {
 		copy($this_object_file,$copy_object_file);
 		@unlink($temp_dir.$temp_folder.SLASH.$copy_object.".txt.old");
@@ -138,7 +136,6 @@ $comment_on_file = '';
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 echo "<input type=\"hidden\" name=\"temp_dir\" value=\"".$temp_dir."\">";
 echo "<input type=\"hidden\" name=\"filename\" value=\"".$filename."\">";
-// echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";
 $table = explode(chr(10),$content);
 $iobj = -1;
 $handle_object = FALSE;
@@ -284,13 +281,12 @@ $temp_alphabet_file = $temp_dir.$temp_folder.SLASH."temp.bpho";
 $handle = fopen($temp_alphabet_file,"w");
 $file_header = $top_header."\n// Alphabet saved as \"temp.bpho\". Date: ".gmdate('Y-m-d H:i:s');
 fwrite($handle,$file_header."\n");
-// fwrite($handle,$filename."\n");
-// fwrite($handle,"*\n");
+fwrite($handle,$filename."\n");
+fwrite($handle,"*\n");
 echo "<table style=\"background-color:lightgrey;\">";
 for($i = 0; $i <= $iobj; $i++) {
 	echo "<tr><td style=\"padding:4px; vertical-align:middle;\">";
 	echo "<form method=\"post\" action=\"prototype.php\" enctype=\"multipart/form-data\">";
-//	echo "<input type=\"hidden\" name=\"temp_dir\" value=\"".$temp_dir."\">";
 	echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";
 	echo "<input type=\"hidden\" name=\"object_file\" value=\"".$object_file[$i]."\">";
 	echo "<input type=\"hidden\" name=\"prototypes_file\" value=\"".$dir.$filename."\">";
@@ -310,7 +306,6 @@ for($i = 0; $i <= $iobj; $i++) {
 	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 	echo "<input type=\"hidden\" name=\"dir\" value=\"".$dir."\">";
 	echo "<input type=\"hidden\" name=\"filename\" value=\"".$filename."\">";
-//	echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";
 	echo "<input type=\"hidden\" name=\"PrototypeTickKey\" value=\"".$PrototypeTickKey."\">";
 	echo "<input type=\"hidden\" name=\"PrototypeTickChannel\" value=\"".$PrototypeTickChannel."\">";
 	echo "<input type=\"hidden\" name=\"PrototypeTickVelocity\" value=\"".$PrototypeTickVelocity."\">";

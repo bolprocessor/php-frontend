@@ -576,6 +576,10 @@ function my_rmdir($src) {
 
 function SaveObjectPrototypes($verbose,$dir,$filename,$temp_folder) {
 	global $top_header, $test, $temp_dir;
+	$file_lock = $filename."_lock";
+	$handle = fopen($dir.$file_lock,"w");
+	fwrite($handle,"lock\n");
+	fclose($handle);
 	$handle = fopen($dir.$filename,"w");
 //	$handle = fopen($dir."essai.txt","w");
 	$file_header = $top_header."\n// Object prototypes file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
@@ -655,6 +659,7 @@ function SaveObjectPrototypes($verbose,$dir,$filename,$temp_folder) {
 	fwrite($handle,"_endSoundObjectFile_\n");
 	fclose($handle);
 	if($verbose) echo "</font></p><hr>";
+	unlink($dir.$file_lock);
 	return;
 	}
 
@@ -664,6 +669,10 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder) {
 	if($verbose) echo "dir = ".$dir."<br />";
 	if($verbose) echo "filename = ".$filename."<br />";
 	if($verbose) echo "temp_folder = ".$temp_folder."<br />";
+	$file_lock = $filename."_lock";
+	$handle = fopen($dir.$file_lock,"w");
+	fwrite($handle,"lock\n");
+	fclose($handle);
 	$handle = fopen($dir.$filename,"w");
 //	$handle = fopen($dir."essai.txt","w");
 	$file_header = $top_header."\n// Csound instrument file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
@@ -730,6 +739,7 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder) {
 	$cstables = $_POST['cstables'];
 	fwrite($handle,$cstables."\n");
 	fclose($handle);
+	unlink($dir.$file_lock);
 	return;
 	}
 	
@@ -1294,6 +1304,8 @@ function is_variable($note_convention,$word) {
 	if($word == "TEMPLATES") return '';
 	if($word == "COMMENT") return '';
 	if($word == '') return $word;
+	$word = str_replace(')','',$word);
+	$word = str_replace('(','',$word);
 	if($word[0] == '|' AND $word[count($word) - 1] == '|') {
 		$word = str_replace('|','',$word);
 		return $word;

@@ -106,6 +106,33 @@ foreach($dircontent as $thisfile) {
 
 echo "<p><small>command = <font color=\"red\">".$command."</font></small></p>";
 
+if($instruction <> "help") {
+	if($csound_file <> '') {
+		$lock_file = $dir.$csound_file."_lock";
+		$time_start = time();
+		$time_end = $time_start + 5;
+		while(TRUE) {
+			if(!file_exists($lock_file)) break;
+			if(time() > $time_end) {
+				echo "<p><font color=\"red\">Maximum time (5 seconds) spent waiting for the Csound instrument file to be unlocked:</font> <font color=\"blue\">".$dir.$csound_file."</font></p>";
+				break;
+				}
+			}
+		}
+	if($objects_file <> '') {
+		$lock_file = $dir.$objects_file."_lock";
+		$time_start = time();
+		$time_end = $time_start + 5;
+		while(TRUE) {
+			if(!file_exists($lock_file)) break;
+			if(time() > $time_end) {
+				echo "<p><font color=\"red\">Maximum time (5 seconds) spent waiting for the sound-object prototypes file to be unlocked:</font> <font color=\"blue\">".$dir.$objects_file."</font></p>";
+				break;
+				}
+			}
+		}
+	}
+		
 $o = send_to_console($command);
 $n_messages = count($o);
 $no_error = FALSE;

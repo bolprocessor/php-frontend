@@ -405,6 +405,7 @@ for($i = 0; $i < $imax; $i++) {
 	for($j = 0; $j < count($table2); $j++) {
 		$word = trim($table2[$j]);
 		if($word == '') continue;
+		$word = str_replace('"',"§",$word);
 		$word = is_variable($note_convention,$word);
 		if($word == '') continue;
 		if(isset($variable[$word])) continue;
