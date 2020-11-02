@@ -63,7 +63,7 @@ if(isset($_FILES['mid_upload']) AND $_FILES['mid_upload']['tmp_name'] <> '') {
 				$division = $_POST['division'] = $midi_text_bytes[0];
 				$tempo = $_POST['tempo'] = $midi_text_bytes[1];
 				$timesig = $_POST['timesig'] = "0 TimeSig ".$midi_text_bytes[2]." ".$midi_text_bytes[3]." ".$midi_text_bytes[4];
-				$message = fix_mf2t_file($midi_import_mf2t,"imported_");
+				$message = fix_mf2t_file($midi_import_mf2t,"imported_",0);
 			//	if($message <> '') echo $message."<br />";
 				}
 			}

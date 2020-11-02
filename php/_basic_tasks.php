@@ -499,6 +499,7 @@ function clean_up_file($file) {
 	$text = str_replace(chr(13),chr(10),$text);
 	$text = str_replace(chr(9),' ',$text);
 	$text = trim($text);
+	$text = recode_tags($text);
 	$text = clean_up_encoding(TRUE,TRUE,$text);
 //	$text = str_replace("�","•",$text);
 	do $text = str_replace(chr(10).chr(10).chr(10),chr(10).chr(10),$text,$count);
@@ -812,10 +813,10 @@ function clean_folder_name($name) {
 	}
 
 function convert_mf2t_to_bytes($verbose,$midi_import,$midi,$midi_file) {
-	// $verbose = TRUE;
+//	$verbose = TRUE;
 	// midi_file contains the code in MIDI format
 	$midi->importMid($midi_file);
-	$midi_text_bytes = array();
+	$midi_bytes = array();
 	$jcode = 5;
 	$tt = 0; // We ask for absolute time stamps
 	$old_tempo = $tempo = 1000000; // Default value
@@ -861,9 +862,9 @@ function convert_mf2t_to_bytes($verbose,$midi_import,$midi,$midi_file) {
 		$chan = str_replace("ch=",'',$table2[2]);
 		$code[0] = $code[1] = $code[2] = $code[3] = -1;
 		if(isset($table2[4]) AND $table2[1] == "TimeSig" AND $table2[0] == "0") {
-			$midi_text_bytes[2] = $table2[2];
-			$midi_text_bytes[3] = $table2[3];
-			$midi_text_bytes[4] = $table2[4];
+			$midi_bytes[2] = $table2[2];
+			$midi_bytes[3] = $table2[3];
+			$midi_bytes[4] = $table2[4];
 			}
 		else if(isset($table2[1]) AND $table2[1] == "ChPr") {
 			$val = str_replace("v=",'',$table2[3]);
@@ -906,13 +907,7 @@ function convert_mf2t_to_bytes($verbose,$midi_import,$midi,$midi_file) {
 			if($verbose) echo $time." (ch ".$chan.") Parameter ctrl ".$ctrl." ".$val."<br />";
 			$code[0] = 176 + $chan - 1;
 			$code[1] = $ctrl;
-			if($ctrl > 64) { // 7-bit controller/switch
-				$code[2] = $val;
-				}
-			else { // 14-bit controller
-				$code[2] = $val % 256;
-				$code[3] = ($val - $code[2]) / 256;
-				}
+			$code[2] = $val;
 			}
 		else if(isset($table2[1]) AND $table2[1] == "PoPr") {
 			$key = str_replace("n=",'',$table2[3]);
@@ -926,27 +921,28 @@ function convert_mf2t_to_bytes($verbose,$midi_import,$midi,$midi_file) {
 		for($j = 0; $j < 4; $j++) {
 			if($code[$j] >= 0) {
 				$byte = $time_signature + $code[$j];
-				$midi_text_bytes[$jcode++] = $byte;
+				$midi_bytes[$jcode++] = $byte;
 				}
 			}
 		}
-	$midi_text_bytes[0] = $division;
-	$midi_text_bytes[1] = $tempo;
+	$midi_bytes[0] = $division;
+	$midi_bytes[1] = $tempo;
 	fclose($handle);
 //	echo "ok3"; die();
-	return $midi_text_bytes;
+	return $midi_bytes;
 	}
 
-function fix_mf2t_file($mf2tfile,$tracknames) {
+function fix_mf2t_file($file,$tracknames) {
 	$said = $bad = FALSE;
-	if(!file_exists($mf2tfile)) {
-		echo "<p style=\"color:red;\">Cannot find: ".$mf2tfile."</p>";
-		return;
-		}
-	$header = "<span style=\"color:red;\">Fixing imported MIDI file:</span><ul>";
+	$header = "<br /><span style=\"color:red;\">Fixed imported MIDI file:</span><ul>";
 	$message = '';
-	$content = @file_get_contents($mf2tfile,TRUE);
-	$handle = fopen($mf2tfile,"w");
+	$said = $content = FALSE;
+	if(file_exists($file)) $content = @file_get_contents($file,TRUE);
+	if(!$content) {
+		$message .= "<br /><font color=\"red\">Cannot find or open:</font> <font color=\"blue\">".$file."</font>";
+		return $message;
+		}
+	$handle = fopen($file,"w");
 	$table = explode(chr(10),$content);
 	$i0 = 0;
 	if(!is_integer(strpos($content," Tempo "))) {
@@ -957,20 +953,23 @@ function fix_mf2t_file($mf2tfile,$tracknames) {
 		$table2[2] = $new_track_number;
 		$newline = implode(' ',$table2);
 		fwrite($handle,$newline."\n");
-		echo "<span style=\"color:red;\">Adding header:</span><ul><li>".$newline."</li>";
+		if(!$said) $message .= $header;
+		$said = TRUE;
+		$bad = TRUE;
+		$message .= "<li>Adding header:<ul><li>".$newline."</li>";
 		$line = "MTrk\n0 Meta TrkName \"header\"\n0 TimeSig 1/4 24 8\n0 Tempo 1000000\n0 KeySig 0 major\n0 Meta TrkEnd\nTrkEnd";
 		fwrite($handle,$line."\n");
-		echo "<li>".str_replace("\n","<br />",$line)."</li></ul>";
+		$message .= "<li>".str_replace("\n","<br />",$line)."</li></ul></li>";
 		}
-	$new_track_nr = 1;
+	$track_nr = 1;
 	for($i = $i0; $i < count($table); $i++) {
 		$line = trim($table[$i]);
 		if($line == "TrkEnd") {
 			$line2 = trim($table[$i - 1]);
 			if(!is_integer(strpos($line2,"TrkEnd"))) {
-				$bad = TRUE;
 				if(!$said) $message .= $header;
 				$said = TRUE;
+				$bad = TRUE;
 				$table2 = explode(' ',$line2);
 				$time = intval($table2[0]);
 				$newline = $time." Meta TrkEnd";
@@ -981,12 +980,12 @@ function fix_mf2t_file($mf2tfile,$tracknames) {
 		fwrite($handle,$line."\n");
 		if($line == "MTrk") {
 			$line2 = trim($table[$i + 1]);
+			$track_nr++;
 			if(!is_integer(strpos($line2,"TrkName"))) {
-				$bad = TRUE;
 				if(!$said) $message .= $header;
 				$said = TRUE;
-				$newline = "0 Meta TrkName \"".$tracknames.$new_track_nr."\"";
-				$new_track_nr++;
+				$bad = TRUE;
+				$newline = "0 Meta TrkName \"".$tracknames.$track_nr."\"";
 				fwrite($handle,$newline."\n");
 				$message .= "<li>Added: ".$newline."</li>";
 				}
@@ -997,6 +996,25 @@ function fix_mf2t_file($mf2tfile,$tracknames) {
 	return $message;
 	}
 
+function fix_number_bytes($midi_bytes) {
+	$content = @file_get_contents($midi_bytes,TRUE);
+	if($content) {
+		$table = explode(chr(10),$content);
+		$newtable = array();
+		for($i = $j = 0; $i < count($table); $i++) {
+			$line = trim($table[$i]);
+			if($line == '') continue;
+			$newtable[$j++] = $line;
+			}
+		$newtable[0] = $j - 1;
+		$content = implode(chr(10),$newtable);
+		$handle = fopen($midi_bytes,"w");
+		fwrite($handle,$content);
+		fclose($handle);
+		}
+	return;
+	}
+	
 function duration_of_midifile($mf2t_content) {
 	$duration = 0;
 	$table = explode(chr(10),$mf2t_content);
@@ -1294,6 +1312,8 @@ function polymetric_expression($mute,$TickKey,$TickCycle,$TickChannel,$TickVeloc
 
 function is_variable($note_convention,$word) {
 	$word = str_replace(":",'',$word);
+	if($word == '') return $word;
+//	echo "«".$word."»<br />";
 	if($word == "S") return ''; // We take only non-startup variables
 	if($word == "RND") return '';
 	if($word == "ORD") return '';
@@ -1306,6 +1326,7 @@ function is_variable($note_convention,$word) {
 	if($word == '') return $word;
 	$word = str_replace(')','',$word);
 	$word = str_replace('(','',$word);
+	if($word == '') return $word;
 	if($word[0] == '|' AND $word[count($word) - 1] == '|') {
 		$word = str_replace('|','',$word);
 		return $word;
@@ -1474,6 +1495,7 @@ function get_name_mi_file($this_file) {
 	}
 
 function MIDIfiletype($file) {
+//	return 1;
 	$test = TRUE;
 	$MIDIfiletype = -1;	
 	$fp = fopen($file,'rb');
@@ -1489,7 +1511,7 @@ function MIDIfiletype($file) {
 	    		}
 	    	if($test) {
 		 		if($value > 63) $value = chr($value);
-			    echo $i.") ".$key." = " .$value." = ". ord($value)."<br />";
+			  //  echo $i.") ".$key." = " .$value." = ". ord($value)."<br />";
 		    	}
 			$i++; 
 	    	}

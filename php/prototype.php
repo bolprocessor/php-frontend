@@ -52,8 +52,6 @@ if(isset($_FILES['mid_upload']) AND $_FILES['mid_upload']['tmp_name'] <> '') {
 		}
 	else {
 		$tmpFile = $_FILES['mid_upload']['tmp_name'];
-	//	@unlink($midi_file);
-	//	copyemz($tmpFile,$midi_file) or die('Problem uploading this MIDI file');
 		move_uploaded_file($tmpFile,$midi_file) or die('Problem uploading this MIDI file');
 		@chmod($midi_file,0666);
 		$table = explode('.',$upload_filename);
@@ -63,20 +61,20 @@ if(isset($_FILES['mid_upload']) AND $_FILES['mid_upload']['tmp_name'] <> '') {
 			@unlink($midi_file);
 			}
 		else {
-			$MIDIfiletype = MIDIfiletype($midi_import);
+			$MIDIfiletype = MIDIfiletype($midi_file);
+			echo "MIDI file type = ".$MIDIfiletype."<br />";
 			if($MIDIfiletype < 0) {
 				echo "<p><font color=\"red\">File </font>“<font color=\"blue\">".$upload_filename."” <font color=\"red\">is unreadable as a MIDI file.</font></p>";
 				$upload_filename = '';
 				@unlink($midi_file);
 				}
-			else if(FALSE AND $MIDIfiletype > 1) {
+			else if($MIDIfiletype > 1) {
 				echo "<h4><font color=\"red\">MIDI file </font>“<font color=\"blue\">".$upload_filename."</font>” <font color=\"red\"> of </font><font color=\"blue\">type ".$MIDIfiletype." </font><font color=\"red\">is not accepted. Only types 0 and 1 are compliant.</font></h4>";
 				$upload_filename = '';
-			//	@unlink($midi_file);
+				@unlink($midi_file);
 				}
 			else {
-				echo "MIDI filetype = ".$MIDIfiletype."<br />";
-				echo "<h3 id=\"timespan\"><font color=\"red\">Converting MIDI file:</font> <font color=\"blue\">".$upload_filename."</font></h3>";
+				@unlink($midi_text);
 				$midi = new Midi();
 				$midi_text_bytes = convert_mf2t_to_bytes(FALSE,$midi_import,$midi,$midi_file);
 				$division = $_POST['division'] = $midi_text_bytes[0];
@@ -85,10 +83,14 @@ if(isset($_FILES['mid_upload']) AND $_FILES['mid_upload']['tmp_name'] <> '') {
 			//	$tempo = $_POST['tempo'] = 1000000;
 				$timesig = $_POST['timesig'] = "0 TimeSig ".$midi_text_bytes[2]." ".$midi_text_bytes[3]." ".$midi_text_bytes[4];
 				$temp_bytes = array();
-				for($i = 5; $i < count($midi_text_bytes); $i++)
+				for($i = 5; $i < count($midi_text_bytes); $i++) {
 					$temp_bytes[] = $midi_text_bytes[$i];
+				//	echo $midi_text_bytes[$i]."<br />";
+					}
 				$midi_text_bytes = $temp_bytes;
-				fix_mf2t_file($midi_import,"unnamed_");
+				$message = fix_mf2t_file($midi_import,"unnamed_");
+				echo "<h3 id=\"timespan\"><font color=\"red\">Converted MIDI file:</font> <font color=\"blue\">".$upload_filename."</font></h3>";
+				if($message <> '') echo $message;
 				}
 			}
 		}
@@ -108,12 +110,11 @@ else $timesig = "0 TimeSig 4/4 24 8";
 if(isset($_POST['savecsound'])) {
 	$handle = fopen($csound_file,"w");
 	$csound_score = $_POST['csound_score'];
-//	$handle = fopen("test.txt","w");
 	fwrite($handle,$csound_score."\n");
 	fclose($handle);
 	}
 
-if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR isset($_POST['suppress_pitchbend']) OR isset($_POST['suppress_polyphonic_pressure']) OR isset($_POST['suppress_volume']) OR isset($_POST['adjust_duration']) OR isset($_POST['adjust_beats']) OR isset($_POST['adjust_duration']) OR isset($_POST['silence_before']) OR isset($_POST['silence_after']) OR isset($_POST['add_allnotes_off']) OR isset($_POST['suppress_allnotes_off']) OR isset($_POST['quantize_NoteOn']) OR isset($_POST['delete_midi']) OR isset($_POST['cancel'])) {
+if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR isset($_POST['suppress_pitchbend']) OR isset($_POST['suppress_polyphonic_pressure']) OR isset($_POST['suppress_volume']) OR isset($_POST['suppress_modulation']) OR isset($_POST['suppress_panoramic']) OR isset($_POST['suppress_program']) OR isset($_POST['adjust_duration']) OR isset($_POST['adjust_beats']) OR isset($_POST['adjust_duration']) OR isset($_POST['silence_before']) OR isset($_POST['silence_after']) OR isset($_POST['add_allnotes_off']) OR isset($_POST['suppress_allnotes_off']) OR isset($_POST['quantize_NoteOn']) OR isset($_POST['delete_midi']) OR isset($_POST['cancel'])) {
 	// if($test) echo "<br />object_file = ".$object_file."<br />";
 	echo "<span id=\"timespan\">&nbsp;&nbsp;<font color=\"red\">➡ Saving this file...</font></span>";
 	$prototype_file = $object_file;
@@ -1339,7 +1340,7 @@ if(isset($_POST['add_allnotes_off'])) {
 	}
 
 if(isset($_POST['quantize_NoteOn'])) {
-	$test = FALSE;
+	$test_quantize = FALSE;
 	$NoteOnQuantize = intval($_POST['NoteOnQuantize']);
 	if($NoteOnQuantize > 0) {
 		$step = $Tref / $NoteOnQuantize;
@@ -1350,24 +1351,24 @@ if(isset($_POST['quantize_NoteOn'])) {
 			$time = ($byte - $code) / 256;
 			if($code >= 128 AND $code < 160) { // NoteOn or NoteOff
 				$frames = intval($time / $step);
-				if($test) echo $time."ms -> ".$frames." frames<br />";
+				if($test_quantize) echo $time."ms -> ".$frames." frames<br />";
 				$time_this_event = round($frames * $step);
 				$byte = $code + (256 * $time_this_event);
-				if($test) echo "-> ".$time_this_event."ms -> ".$byte."<br />";
+				if($test_quantize) echo "-> ".$time_this_event."ms -> ".$byte."<br />";
 				$new_midi_code[] = $byte;
 				$byte = $midi_text_bytes[++$k];
 				$code = $byte % 256;
 				$byte = $code + (256 * $time_this_event);
-				if($test) echo "-> ".$time_this_event."ms -> ".$byte."<br />";
+				if($test_quantize) echo "-> ".$time_this_event."ms -> ".$byte."<br />";
 				$new_midi_code[] = $byte;
 				$byte = $midi_text_bytes[++$k];
 				$code = $byte % 256;
 				$byte = $code + (256 * $time_this_event);
-				if($test) echo "-> ".$time_this_event."ms -> ".$byte."<br />";
+				if($test_quantize) echo "-> ".$time_this_event."ms -> ".$byte."<br />";
 				$new_midi_code[] = $byte;
 				}
 			else {
-				if($test) echo "-> ".$byte."<br />";
+				if($test_quantize) echo "-> ".$byte."<br />";
 				$new_midi_code[] = $byte;
 				}
 			}
@@ -1396,9 +1397,7 @@ if($flatten_all OR isset($_POST['suppress_pressure'])) {
 	for($k = 0; $k < $kmax; $k++) {
 		$byte = $midi_text_bytes[$k];
 		$code = $byte % 256;
-		if($code >= 208 AND $code < 224) {
-			$k += 1;
-			}
+		if($code >= 208 AND $code < 224) $k += 1;
 		else $new_midi_code[] = $byte;
 		}
 	$kmax = count($new_midi_code);
@@ -1418,9 +1417,7 @@ if($flatten_all OR isset($_POST['suppress_pitchbend'])) {
 	for($k = 0; $k < $kmax; $k++) {
 		$byte = $midi_text_bytes[$k];
 		$code = $byte % 256;
-		if($code >= 224 AND $code < 240) {
-			$k += 2;
-			}
+		if($code >= 224 AND $code < 240) $k += 2;
 		else $new_midi_code[] = $byte;
 		}
 	$kmax = count($new_midi_code);
@@ -1440,8 +1437,32 @@ if($flatten_all OR isset($_POST['suppress_polyphonic_pressure'])) {
 	for($k = 0; $k < $kmax; $k++) {
 		$byte = $midi_text_bytes[$k];
 		$code = $byte % 256;
-		if($code >= 160 AND $code < 176) {
-			$k += 2;
+		if($code >= 160 AND $code < 176) $k += 2;
+		else $new_midi_code[] = $byte;
+		}
+	$kmax = count($new_midi_code);
+	$midi_text_bytes = array();
+	$handle_bytes = fopen($midi_bytes,"w");
+	fwrite($handle_bytes,$kmax."\n");
+	for($k = 0; $k < $kmax; $k++) {
+		$byte = $new_midi_code[$k];
+		fwrite($handle_bytes,$byte."\n");
+		$midi_text_bytes[$k] = $byte;
+		}
+	fclose($handle_bytes);
+	}
+
+if($flatten_all OR isset($_POST['suppress_volume'])) {
+	$new_midi_code = array();
+	for($k = 0; $k < $kmax; $k++) {
+		$byte = $midi_text_bytes[$k];
+		$code = $byte % 256;
+		$time = ($byte - $code) / 256;
+		if($code >= 176 AND $code < 192) {
+			$ctrl = $midi_text_bytes[$k + 1];
+			$ctrl = $ctrl % 256;
+			if($ctrl == 7 OR $ctrl == 39) $k += 2;
+			else $new_midi_code[] = $byte;
 			}
 		else $new_midi_code[] = $byte;
 		}
@@ -1466,9 +1487,56 @@ if($flatten_all OR isset($_POST['suppress_volume'])) {
 		if($code >= 176 AND $code < 192) {
 			$ctrl = $midi_text_bytes[$k + 1];
 			$ctrl = $ctrl % 256;
-			if($ctrl == 7) $k += 3;
+			if($ctrl == 7 OR $ctrl == 39) $k += 2;
 			else $new_midi_code[] = $byte;
 			}
+		else $new_midi_code[] = $byte;
+		}
+	$kmax = count($new_midi_code);
+	$midi_text_bytes = array();
+	$handle_bytes = fopen($midi_bytes,"w");
+	fwrite($handle_bytes,$kmax."\n");
+	for($k = 0; $k < $kmax; $k++) {
+		$byte = $new_midi_code[$k];
+		fwrite($handle_bytes,$byte."\n");
+		$midi_text_bytes[$k] = $byte;
+		}
+	fclose($handle_bytes);
+	}
+
+if($flatten_all OR isset($_POST['suppress_modulation'])) {
+	$new_midi_code = array();
+	for($k = 0; $k < $kmax; $k++) {
+		$byte = $midi_text_bytes[$k];
+		$code = $byte % 256;
+		$time = ($byte - $code) / 256;
+		if($code >= 176 AND $code < 192) {
+			$ctrl = $midi_text_bytes[$k + 1];
+			$ctrl = $ctrl % 256;
+			if($ctrl == 1 OR $ctrl == 33) $k += 2;
+			else $new_midi_code[] = $byte;
+			}
+		else $new_midi_code[] = $byte;
+		}
+	$kmax = count($new_midi_code);
+	$midi_text_bytes = array();
+	$handle_bytes = fopen($midi_bytes,"w");
+	fwrite($handle_bytes,$kmax."\n");
+	for($k = 0; $k < $kmax; $k++) {
+		$byte = $new_midi_code[$k];
+		fwrite($handle_bytes,$byte."\n");
+		$midi_text_bytes[$k] = $byte;
+		}
+	fclose($handle_bytes);
+	}
+
+if($flatten_all OR isset($_POST['suppress_program'])) {
+	$new_midi_code = array();
+	for($k = 0; $k < $kmax; $k++) {
+		$byte = $midi_text_bytes[$k];
+		$code = $byte % 256;
+		$time = ($byte - $code) / 256;
+		if($code >= 192 AND $code < 208) $k += 1;
 		else $new_midi_code[] = $byte;
 		}
 	$kmax = count($new_midi_code);
@@ -1599,7 +1667,7 @@ if(isset($_POST['CroppedDuration'])) {
 		$Duration = $CroppedDuration;
 		}
 	}
-	
+
 if(!$no_midi) {
 	if($new_midi) {
 		if(file_exists($midi_text)) copy($midi_text,$midi_text.".old");
@@ -1617,9 +1685,11 @@ if(!$no_midi) {
 		if($time > $time_max_midi) $time_max_midi = $time;
 		}
 	$trk = 1;
+	$handle_mf2t = $handle_text = FALSE;
 	$handle_text = fopen($midi_text,"w");
 	$handle_mf2t = fopen($mf2t,"w");
 	$number_of_tracks++;
+//	$number_of_tracks = 2; // Fixed 1st Nov. 2020
 	fwrite($handle_mf2t,"MFile 1 ".$number_of_tracks." ".$division."\n");
 	fwrite($handle_mf2t,"MTrk\n");
 	$track_name = $object_name."_track_".$trk++;
@@ -1632,28 +1702,42 @@ if(!$no_midi) {
 	fwrite($handle_mf2t,"MTrk\n");
 	$track_name = $object_name."_track_".$trk++;
 	fwrite($handle_mf2t,"0 Meta TrkName \"".$track_name."\"\n");
-	if($new_midi) $handle_bytes = fopen($midi_bytes,"w");
+	$handle_bytes = FALSE;
+	$handle_bytes = fopen($midi_bytes,"w");
 	$more = 0; $code_line = $mf2t_line = '';
-	if($new_midi) fwrite($handle_bytes,$kmax."\n");
+	if($handle_bytes) fwrite($handle_bytes,$kmax."\n");
 	$hide = 0; $oldtime = 0;
 	$first_note_on = TRUE;
 	$last_note_off = -1;
+//	echo "kmax = ".$kmax."<br />";
+	$kmax = count($midi_text_bytes);
+	$kmax1 = $kmax - 1;
+	$kmax2 = $kmax - 2;
 	for($k = 0; $k < $kmax; $k++) {
 		$byte = $midi_text_bytes[$k];
-		if($new_midi) fwrite($handle_bytes,$byte."\n");
+	//	echo $code."<br />";
 		$code = $byte % 256;
 		$time = ($byte - $code) / 256;
 		if($time < $oldtime) {
 			$trk++;
+			if($handle_bytes AND $trk > 2) {
+				fclose($handle_bytes);
+				$handle_bytes = FALSE;
+				}
+		//	if($trk > 2) break;
 			$track_name = $object_name."_track_".$trk;
 			fwrite($handle_mf2t,$oldtime." Meta TrkEnd\n");
 			fwrite($handle_mf2t,"TrkEnd\n");
 			fwrite($handle_mf2t,"MTrk\n");
 			fwrite($handle_mf2t,"0 Meta TrkName \"".$track_name."\"\n");
 			}
+		if($handle_bytes) {
+		//	echo $byte."<br />";
+			fwrite($handle_bytes,$byte."\n");
+			}
 		$oldtime = $time;
 	//	echo "(".$time.") ".$code."<br />";
-		if($code >= 144 AND $code < 160) {
+		if($code >= 144 AND $code < 160 AND $k < $kmax2) {
 			store($h_image,"event_midi[]",$time);
 			if($first_note_on) {
 				store($h_image,"first_note_on",$time);
@@ -1674,7 +1758,7 @@ if(!$no_midi) {
 				}
 			$more = 2;
 			}
-		else if($code >= 128 AND $code < 144) {
+		else if($code >= 128 AND $code < 144 AND $k < $kmax2) {
 			store($h_image,"event_midi[]",$time);
 			$last_note_off = $time;
 			$channel = $code - 128 + 1;
@@ -1687,7 +1771,7 @@ if(!$no_midi) {
 			$code_line = $time." (ch ".$channel.") NoteOff ";
 			$more = 2;
 			}
-		else if($code >= 160 AND $code < 176) {
+		else if($code >= 160 AND $code < 176 AND $k < $kmax2) {
 			store($h_image,"event_midi[]",$time);
 			$channel = $code - 160 + 1;
 			$byte = $midi_text_bytes[$k + 1];
@@ -1699,7 +1783,7 @@ if(!$no_midi) {
 			$code_line = $time." (ch ".$channel.") Poly pressure key ";
 			$more = 2;
 			}
-		else if($code >= 176 AND $code < 192) {
+		else if($code >= 176 AND $code < 192 AND $k < $kmax2) {
 			store($h_image,"event_midi[]",$time);
 			$channel = $code - 176 + 1;
 			$byte = $midi_text_bytes[$k + 1];
@@ -1708,7 +1792,7 @@ if(!$no_midi) {
 			$val = $byte % 256;
 			$mf2t_line = $time." Par ch=".$channel." c=".$ctrl." v=".$val;
 			fwrite($handle_mf2t,$mf2t_line."\n");
-			$code_line = $time." (ch ".$channel.") Parameter ctrl ";
+			$code_line = $time." (ch ".$channel.") Parameter ";
 			if($ctrl == 123) {
 				$code_line = $time." (ch ".$channel.") AllNotesOff ";
 				$hide = 2;
@@ -1813,11 +1897,9 @@ if(!$no_midi) {
 				$code_line = $time." (ch ".$channel.") Phase depth ";
 				$hide = 1;
 				}
-			if($ctrl > 64)
-				$more = 2; // 7-bit controller/switch
-			else $more = 3; // 14-bit controller/switch
+			$more = 2;
 			}
-		else if($code >= 208 AND $code < 224) {
+		else if($code >= 208 AND $code < 224 AND $k < $kmax1) {
 			store($h_image,"event_midi[]",$time);
 			$channel = $code - 208 + 1;
 			$byte = $midi_text_bytes[$k + 1];
@@ -1827,7 +1909,7 @@ if(!$no_midi) {
 			$code_line = $time." (ch ".$channel.") Channel pressure ";
 			$more = 1;
 			}
-		else if($code >= 224 AND $code < 240) {
+		else if($code >= 224 AND $code < 240 AND $k < $kmax2) {
 			store($h_image,"event_midi[]",$time);
 			$channel = $code - 224 + 1;
 			$byte = $midi_text_bytes[$k + 1];
@@ -1840,7 +1922,7 @@ if(!$no_midi) {
 			$code_line = $time." (ch ".$channel.") Pitchbend ";
 			$more = 2;
 			}
-		else if($code >= 192 AND $code < 208) {
+		else if($code >= 192 AND $code < 208 AND $k < $kmax1) {
 			store($h_image,"event_midi[]",$time);
 			$channel = $code - 192 + 1;
 			$byte = $midi_text_bytes[$k + 1];
@@ -1856,6 +1938,7 @@ if(!$no_midi) {
 				if($hide == 0) $code_line .= $code." ";
 				else $hide--;
 				fwrite($handle_text,$code_line."\n");
+			//	echo $code_line."<br />";
 				}
 			else {
 				if($hide == 0) $code_line .= $code." ";
@@ -1864,44 +1947,47 @@ if(!$no_midi) {
 			}
 		}
 	if($last_note_off >= 0) store($h_image,"last_note_off",$last_note_off);
-	fclose($handle_text);
-	fwrite($handle_mf2t,$time." Meta TrkEnd\n");
-	fwrite($handle_mf2t,"TrkEnd\n");
-	fclose($handle_mf2t);
-	if($new_midi) fclose($handle_bytes);
+	if($handle_text) fclose($handle_text);
+	if($handle_mf2t) {
+		fwrite($handle_mf2t,$time." Meta TrkEnd\n");
+		fwrite($handle_mf2t,"TrkEnd\n");
+		fclose($handle_mf2t);
+		}
+	if($handle_bytes) fclose($handle_bytes);
+	fix_number_bytes($midi_bytes);
 	}
 $Duration = $time_max_midi;
+// echo "time_max_midi = ".$time_max_midi."<br />";
 store($h_image,"time_max_midi",$time_max_midi);
-	
+
 echo "<input type=\"hidden\" name=\"jmax\" value=\"".$j."\">";
 if(!$no_midi) {
 	echo "<p>MIDI CODES</p>";
 	$mf2t_content = @file_get_contents($mf2t,TRUE);
-	$size_mf2t = strlen($mf2t_content);
-	if($size_mf2t < 1000000) {
-	//	echo "<p>Creating MIDI file for listening…</p>";
-		$midi = new Midi();
-		$midi->importTxt($mf2t_content);
-		$midi->saveMidFile($midi_file);
+	if($mf2t_content) {
+		$size_mf2t = strlen($mf2t_content);
+		if($size_mf2t < 1000000) {
+			echo "<p>Creating MIDI file for listening…</p>";
+			$midi = new Midi();
+			$midi->importTxt($mf2t_content);
+			$midi->saveMidFile($midi_file);
+			}
+		else echo "<p>Size of mf2t_content = ".$size_mf2t." bytes</p>";
 		}
-	else echo "<p>Size of mf2t_content = ".$size_mf2t." bytes</p>";
 	}
-
 if(!$no_midi AND file_exists($midi_text)) {
-	if($test) echo "midi_text = ".$midi_text."<br />";
-
 	$text_link = $midi_text;
 	$bytes_link = $midi_bytes;
 	$mf2t_link = $mf2t;
+	if($test) echo "midi_text = ".$midi_text."<br />";
 	if($test) echo "midi_bytes = ".$midi_bytes."<br />";
 	if($test) echo "text_link = ".$text_link."<br />";
 	if($test) echo "bytes_link = ".$bytes_link."<br />";
 	if($test) echo "midi_file = ".$midi_file."<br />";
-	
 	echo "<table id=\"midi\" style=\"background-color:white;\"><tr>";
 	echo "<td><div style=\"border:2px solid gray; background-color:azure; width:10em; padding:2px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$text_link."','MIDItext','width=300,height=300'); return false;\" href=\"".$text_link."\">EXPLICIT MIDI codes</a></div></td>";
 	echo "<td><div style=\"border:2px solid gray; background-color:azure; width:13em;  padding:2px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$bytes_link."','MIDIbytes','width=300,height=500,left=400'); return false;\" href=\"".$bytes_link."\">TIME-STAMPED MIDI bytes</a><br /><small>Top number is the number of bytes</small></div></td>";
-	echo "<td style=\"white-space:nowrap;\"><div style=\"border:2px solid gray; background-color:azure; width:15em;  padding:2px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$mf2t_link."','MIDIbytes','width=300,height=500,left=300'); return false;\" href=\"".$mf2t_link."\">MF2T code</a><br />";
+	echo "<td style=\"white-space:nowrap;\"><div style=\"border:2px solid gray; background-color:azure; width:15em;  padding:2px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$mf2t_link."','MF2T','width=300,height=500,left=300'); return false;\" href=\"".$mf2t_link."\">MF2T code</a><br />";
 	echo "<small>division = <input type=\"text\" name=\"division\" size=\"5\" value=\"".$division."\"><br />";
 	echo "<small>tempo = ".$tempo." µs<br />timesig = ".$timesig."</small>";
 	echo "</div></td>";
@@ -1920,7 +2006,7 @@ echo "➡ <i>If changes are not visible on these pop-up windows, juste clear the
 	}
 else echo "<p>No MIDI codes in this sound-object prototype</p>";
 
-if($new_midi) echo "<p style=\"color:red;\">You should save this prototype to preserve uploaded MIDI codes! ➡ <input style=\"background-color:yellow;\" type=\"submit\" name=\"savethisprototype\" value=\"SAVE IT\">&nbsp;<input style=\"background-color:azure;\" type=\"submit\" name=\"cancel\" value=\"CANCEL\"></p>";
+if($new_midi) echo "<p style=\"color:red;\">You should save this prototype to preserve uploaded MIDI codes! ➡ <input style=\"background-color:yellow;\" type=\"submit\" name=\"savethisprototype\" formaction=\"".$url_this_page."#midi\" value=\"SAVE IT\">&nbsp;<input style=\"background-color:azure;\" type=\"submit\" name=\"cancel\" formaction=\"".$url_this_page."#midi\" value=\"CANCEL\"></p>";
 
 echo "<font color=\"red\">➡</font> Create or replace MIDI codes loading a MIDI file (*.mid): <input type=\"file\" name=\"mid_upload\">&nbsp;<input type=\"submit\" value=\" send \">";
 
@@ -1947,11 +2033,11 @@ echo "<input style=\"background-color:azure;\" type=\"submit\" name=\"silence_af
 
 if(!$new_midi AND !$no_midi) {
 	echo "<p>CHANGE MIDI CONTROLS</p>";
-	echo "<p style=\"text-align:left;\"><input style=\"background-color:azure;\" type=\"submit\" name=\"suppress_pressure\" value=\"SUPPRESS channel pressure\">&nbsp;<input style=\"background-color:azure;\" type=\"submit\" name=\"suppress_polyphonic_pressure\" value=\"SUPPRESS polyphonic pressure\">&nbsp;<input style=\"background-color:azure;\" type=\"submit\" name=\"suppress_pitchbend\" value=\"SUPPRESS pitchbend\">&nbsp;<input style=\"background-color:azure;\" type=\"submit\" name=\"suppress_volume\" value=\"SUPPRESS volume control\"><br />";
-	echo "<input style=\"background-color:azure;\" type=\"submit\" name=\"add_allnotes_off\" value=\"APPEND AllNotesOff (all channels)\">&nbsp;<input style=\"background-color:azure;\" type=\"submit\" name=\"suppress_allnotes_off\" value=\"SUPPRESS AllNotesOff (all channels)\">&nbsp;<input style=\"background-color:azure;\" type=\"submit\" name=\"delete_midi\" value=\"SUPPRESS all MIDI codes\"><br />";
-	echo "<input style=\"background-color:azure;\" type=\"submit\" name=\"quantize_NoteOn\" value=\"QUANTIZE NoteOns\"> = 1 / <input type=\"text\" name=\"NoteOnQuantize\" size=\"4\" value=\"64\"> beat</p>";
+	echo "<p style=\"text-align:left;\"><input style=\"background-color:azure;\" type=\"submit\" name=\"suppress_pressure\" formaction=\"".$url_this_page."#midi\" value=\"SUPPRESS channel pressure\">&nbsp;<input style=\"background-color:azure;\" type=\"submit\" name=\"suppress_polyphonic_pressure\" formaction=\"".$url_this_page."#midi\" value=\"SUPPRESS polyphonic pressure\">&nbsp;<input style=\"background-color:azure;\" type=\"submit\" name=\"suppress_pitchbend\" formaction=\"".$url_this_page."#midi\" value=\"SUPPRESS pitchbend\">&nbsp;<input style=\"background-color:azure;\" type=\"submit\" name=\"suppress_volume\" formaction=\"".$url_this_page."#midi\" value=\"SUPPRESS volume control\"><br />";
+	echo "<input style=\"background-color:azure;\" type=\"submit\" name=\"suppress_modulation\" formaction=\"".$url_this_page."#midi\" value=\"SUPPRESS modulation\">&nbsp;<input style=\"background-color:azure;\" type=\"submit\" name=\"suppress_program\" formaction=\"".$url_this_page."#midi\" value=\"SUPPRESS program changes\">&nbsp;<input style=\"background-color:azure;\" type=\"submit\" name=\"suppress_panoramic\" formaction=\"".$url_this_page."#midi\" value=\"SUPPRESS panoramic\"><br /><input style=\"background-color:azure;\" type=\"submit\" name=\"add_allnotes_off\" formaction=\"".$url_this_page."#midi\" value=\"APPEND AllNotesOff (all channels)\">&nbsp;<input style=\"background-color:azure;\" type=\"submit\" name=\"suppress_allnotes_off\" formaction=\"".$url_this_page."#midi\" value=\"SUPPRESS AllNotesOff (all channels)\"><br /><input style=\"background-color:azure;\" type=\"submit\" name=\"delete_midi\" formaction=\"".$url_this_page."#midi\" value=\"SUPPRESS all MIDI codes\"><br />";
+	echo "<input style=\"background-color:azure;\" type=\"submit\" name=\"quantize_NoteOn\" formaction=\"".$url_this_page."#midi\" value=\"QUANTIZE NoteOns\"> = 1 / <input type=\"text\" name=\"NoteOnQuantize\" size=\"4\" formaction=\"".$url_this_page."#midi\" value=\"64\"> beat</p>";
 	}
-	
+
 store($h_image,"object_name",$object_name);
 store($h_image,"Duration",$Duration);
 store($h_image,"Tref",$Tref);
@@ -1960,8 +2046,9 @@ $link = "prototype_image.php?save_codes_dir=".urlencode($save_codes_dir);
 
 echo "<div class=\"shadow\" style=\"border:2px solid gray; background-color:azure; width:13em;  padding:8px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$link."','".clean_folder_name($object_name)."_image','width=800,height=625,left=100'); return false;\" href=\"".$link."\">IMAGE</a></div>";
 
-echo "<p style=\"text-align:center;\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"savethisprototype\" value=\"SAVE THIS PROTOTYPE\">&nbsp;<big> = <b><font color=\"red\">".$object_name."</font></b></big></p>";
+echo "<p style=\"text-align:center;\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"savethisprototype\" formaction=\"".$url_this_page."#midi\" value=\"SAVE THIS PROTOTYPE\">&nbsp;<big> = <b><font color=\"red\">".$object_name."</font></b></big></p>";
 echo "</form>";
+
 echo "<hr>";
 echo "<p id=\"csound\">CSOUND</p>";
 $csound_score = file_get_contents($csound_file,TRUE);

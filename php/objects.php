@@ -112,11 +112,28 @@ foreach($dircontent as $oldfile) {
 	}
 
 if(isset($_POST['savethisfile']) OR isset($_POST['create_object']) OR isset($_POST['delete_object']) OR isset($_POST['restore']) OR isset($_POST['duplicate_object'])) {
+	$maxsounds = $_POST['maxsounds'];
 	if($test) echo "SaveObjectPrototypes() dir = ".$dir."<br />";
 	if($test) echo "filename = ".$filename."<br />";
 	if($test) echo "temp_folder = ".$temp_folder."<br />";
-	echo "<p id=\"timespan\"><font color=\"red\">Saved file:</font> <font color=\"blue\">";
-	SaveObjectPrototypes(TRUE,$dir,$filename,$temp_dir.$temp_folder);
+	if($test) echo "maxsounds = ".$maxsounds."<br />";
+	
+	$lock_file = $dir.$filename."_lock";
+	$time_start = time();
+	$time_end = $time_start + 5;
+	$bad = FALSE;
+	while(TRUE) {
+		if(!file_exists($lock_file)) break;
+		if(time() > $time_end) {
+			echo "<p><font color=\"red\">Maximum time (5 seconds) spent waiting for the sound-object prototypes file to be unlocked:</font> <font color=\"blue\">".$dir.$filename."</font></p>";
+			$bad = TRUE;
+			break;
+			}
+		}			
+	if(!$bad) {
+		echo "<p id=\"timespan\"><font color=\"red\">Saved file:</font> <font color=\"blue\">";
+		SaveObjectPrototypes(TRUE,$dir,$filename,$temp_dir.$temp_folder);
+		}
 	}
 
 try_create_new_file($this_file,$filename);
@@ -173,10 +190,10 @@ for($i = 0; $i < count($table); $i++) {
 		else $CsoundInstruments_file = '';
 		echo "<br />";
 		}
-	if($i == 4) {
+/*	if($i == 4) {
 		$maxsounds = $line;
 		echo "<input type=\"hidden\" name=\"maxsounds\" value=\"".$maxsounds."\">";
-		}
+		} */
 	if($line == "TABLE:") break;
 	if($line == "DATA:") {
 		$comment_on_file = $table[$i+1];
@@ -261,6 +278,8 @@ for($i = 0; $i < count($table); $i++) {
 		fclose($handle_csound);
 		}
 	}
+$maxsounds = $iobj + 1;
+echo "<input type=\"hidden\" name=\"maxsounds\" value=\"".$maxsounds."\">";
 		
 if($handle_object) fclose($handle_object);
 echo "<p style=\"color:blue;\">".$comment_on_file."</p>";
@@ -275,7 +294,7 @@ if($deleted_objects <> '') echo "<p><input style=\"background-color:yellow;\" ty
 echo "</form>";
 
 echo "<hr>";
-echo "<h3>Click object prototypes below to edit them:</h3>";
+echo "<h3>Click any of these ".($iobj + 1)." object prototypes to edit it:</h3>";
 
 $temp_alphabet_file = $temp_dir.$temp_folder.SLASH."temp.bpho";
 $handle = fopen($temp_alphabet_file,"w");
