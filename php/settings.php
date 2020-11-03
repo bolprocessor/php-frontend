@@ -65,8 +65,9 @@ if(isset($_POST['saveparameters'])) {
 		if($i == 43) $value = 0; // Use buffer limit
 		if($i == 45) { // Seed for randomization
 			$newvalue = intval($value);
+			if($newvalue < 0) $newvalue = - $newvalue;
 			if(strcmp($newvalue,$value) <> 0)
-				echo "<p><font color=\"red\">Seed for randomization must be an integer: “</font><font color=\"blue\">".$value."</font><font color=\"red\">” has been replaced with “</font><font color=\"blue\">".$newvalue."</font><font color=\"red\">”.</font></p>";
+				echo "<p><font color=\"red\">Seed for randomization must be a positive integer: “</font><font color=\"blue\">".$value."</font><font color=\"red\">” has been replaced with “</font><font color=\"blue\">".$newvalue."</font><font color=\"red\">”.</font></p>";
 			$value = $newvalue;
 			}
 		if($i == 46) $value = 0; // Use buffer limit
@@ -145,7 +146,6 @@ if($imax_file <> $imax_parameters) {
 	echo "<p style=\"color:red;\">WARNING: imax_parameters = ".$imax_parameters.", imax_file = ".$imax_file."</p>";
 	}
 else echo "<p style=\"color:blue;\">".$imax_file." parameters</p>";
-// echo "<input type=\"hidden\" name=\"imax_parameters\" value=\"".$imax_parameters."\">";
 
 $imax = $imax_file;
 if($imax_file < $imax_parameters) $imax = $imax_parameters;
@@ -153,9 +153,9 @@ for($i = 0; $i < $imax; $i++) {
 	if(!isset($parameter_edit[$i]) OR !$parameter_edit[$i]) {
 		if(isset($table[$i])) $value = $table[$i];
 		else $value = '';
-		echo "<input type=\"hidden\" name=\"parameter_".$i."\" value=\"".$value."\">"; // $$$$
+		echo "<input type=\"hidden\" name=\"parameter_".$i."\" value=\"".$value."\">";
 		}
-	else { // $$$
+	else {
 		echo "<tr style=\"background-color:white;\">";
 		echo "<td>";
 		echo $i.") ";
@@ -194,15 +194,9 @@ for($i = 0; $i < $imax; $i++) {
 			}
 		echo "</td>";
 		echo "</tr>";
-		} // $$$
+		}
 	}
 echo "</table>";
-echo "<p style=\"text-align:left;\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"saveparameters\" value=\"SAVE PARAMETERS TO ‘".$filename."’\"></p>";
+echo "<p id=\"bottom\" style=\"text-align:left;\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"saveparameters\" formaction=\"".$url_this_page."#bottom\" value=\"SAVE PARAMETERS TO ‘".$filename."’\"></p>";
 echo "</form>";
-
-/*
-echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-echo "<p style=\"text-align:left;\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></p>";
-echo "<textarea name=\"thistext\" rows=\"10\" style=\"width:700px;\">".$content."</textarea>";
-echo "</form>"; */
 ?>

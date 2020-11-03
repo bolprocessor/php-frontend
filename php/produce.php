@@ -42,8 +42,11 @@ else {
 	else $show_production = FALSE;
 	if(isset($_GET['trace_production'])) $trace_production = TRUE;
 	else $trace_production = FALSE;
-	if(isset($_GET['random_seed'])) $random_seed = $_GET['random_seed'];
-	else $random_seed = 0;
+	$new_random_seed =  FALSE;
+	if(isset($_GET['random_seed'])) {
+		$random_seed = $_GET['random_seed'];
+		$new_random_seed = TRUE;
+		}
 	if(isset($_GET['csound_orchestra'])) $csound_orchestra = $_GET['csound_orchestra'];
 	else $csound_orchestra = '';
 
@@ -91,7 +94,7 @@ else {
 	if($tracefile <> '') $command .= " --traceout ".$tracefile;
 	if($show_production) $command .= " --show-production";
 	if($trace_production) $command .= " --trace-production";
-	$command .= " --seed ".$random_seed;
+	if($new_random_seed) $command .= " --seed ".$random_seed;
 	}
 
 $dircontent = scandir($temp_dir);

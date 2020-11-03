@@ -43,7 +43,7 @@ Default buffer size	symbols	0
 Use color in graphics		0	1
 Use buffer limit		0	1
 Time max	ms	1
-Seed for randomization	(integer)	1
+Seed for randomization	(positive integer or 0 for no seed)	1
 Use keyboard tokens		0	1
 Note convention	0 = English<br />1 = French<br />2 = Indian<br />3 = Keys	1
 StartFromOne		0	1
