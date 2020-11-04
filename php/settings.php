@@ -58,6 +58,7 @@ if(isset($_POST['saveparameters'])) {
 			echo "<p><font color=\"red\">Values of Pclock and Qclock must be positive integers: “</font><font color=\"blue\">".$value."</font><font color=\"red\">” has been replaced with “</font><font color=\"blue\">".$newvalue."</font><font color=\"red\">”.</font></p>";
 			$value = $newvalue;
 			}
+		if($i == 9) $value = 28; // Jbutt
 		if($i == 52 AND $value == '')
 			$value = "<no input device>";
 		if($i == 53 AND $value == '')
@@ -76,6 +77,7 @@ if(isset($_POST['saveparameters'])) {
 			echo "<p><font color=\"red\">Note convention must be an integer from 0 to 3: “</font><font color=\"blue\">".$value."</font><font color=\"red\">” has been replaced with “</font><font color=\"blue\">".$newvalue."</font><font color=\"red\">”.</font></p>";
 			$value = $newvalue;
 			}
+		if($i == 48 OR $i == 49) $value = 0; // StartFromOne and SmartCursor
 		if($i == 54) $value = 0; // Display bullets
 		if($i == 58) $value = 1; // MIDI file format
 		if($i == 62 AND (!is_numeric($value) OR $value < 0 OR $value > 127 OR intval($value) <> $value)) {
@@ -121,6 +123,7 @@ if(isset($_POST['saveparameters'])) {
 		if($i == 71) $value = 39;
 		if($i > 71 AND $i < 111) $value = 10;
 		if(strlen($value) == 0) $value = ' ';
+	//	echo "value = “".$value."”<br />";
 		fwrite($handle,$value."\n");
 		}
 	fclose($handle);
@@ -147,29 +150,36 @@ if($imax_file <> $imax_parameters) {
 	}
 else echo "<p style=\"color:blue;\">".$imax_file." parameters</p>";
 
-$imax = $imax_file;
+$imax = $imax_file; $start = TRUE;
 if($imax_file < $imax_parameters) $imax = $imax_parameters;
-for($i = 0; $i < $imax; $i++) {
-	if(!isset($parameter_edit[$i]) OR !$parameter_edit[$i]) {
+for($i = $j = 0; $i < $imax; $i++) {
+	$value = trim($table[$i]);
+//	echo "value = “".$value."”<br />";
+	if($start AND !ctype_digit($value)) {
+		echo "Skipping old header = “".$value."”<br />";
+		continue; // Eliminate old versions of headers
+		}
+	$start = FALSE;
+	if(!isset($parameter_edit[$j]) OR !$parameter_edit[$j]) {
 		if(isset($table[$i])) $value = $table[$i];
 		else $value = '';
-		echo "<input type=\"hidden\" name=\"parameter_".$i."\" value=\"".$value."\">";
+		echo "<input type=\"hidden\" name=\"parameter_".$j."\" value=\"".$value."\">";
 		}
 	else {
 		echo "<tr style=\"background-color:white;\">";
 		echo "<td>";
-		echo $i.") ";
-		if(isset($parameter_name[$i])) echo $parameter_name[$i];
+		echo $j.") ";
+		if(isset($parameter_name[$j])) echo $parameter_name[$j];
 		echo "</td>";
 		echo "<td>";
-		if(isset($parameter_edit[$i]) AND $parameter_edit[$i]) {
-			if($parameter_yesno[$i]) {
-				echo "<input type=\"checkbox\" name=\"parameter_".$i."\"";
+		if(isset($parameter_edit[$j]) AND $parameter_edit[$j]) {
+			if($parameter_yesno[$j]) {
+				echo "<input type=\"checkbox\" name=\"parameter_".$j."\"";
          		if(isset($table[$i]) AND $table[$i] > 0) echo " checked";
          		echo ">";
 				}
 			else {
-				echo "<input type=\"text\" name=\"parameter_".$i."\" size=\"20\" style=\"background-color:CornSilk; border: none;\" value=\"";
+				echo "<input type=\"text\" name=\"parameter_".$j."\" size=\"20\" style=\"background-color:CornSilk; border: none;\" value=\"";
 				if(isset($table[$i])) echo $table[$i];
 				echo "\">";
 				}
@@ -177,8 +187,8 @@ for($i = 0; $i < $imax; $i++) {
 		else if(isset($table[$i])) echo $table[$i];
 		echo "</td>";
 		echo "<td>";
-		if(isset($parameter_unit[$i])) {
-			echo $parameter_unit[$i];
+		if(isset($parameter_unit[$j])) {
+			echo $parameter_unit[$j];
 			if($i == 8) {
 				$Pclock = intval($table[$i - 1]);
 				if($Pclock == 0) {
@@ -195,6 +205,7 @@ for($i = 0; $i < $imax; $i++) {
 		echo "</td>";
 		echo "</tr>";
 		}
+	$j++;
 	}
 echo "</table>";
 echo "<p id=\"bottom\" style=\"text-align:left;\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"saveparameters\" formaction=\"".$url_this_page."#bottom\" value=\"SAVE PARAMETERS TO ‘".$filename."’\"></p>";

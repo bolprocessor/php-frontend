@@ -53,6 +53,8 @@ else {
 	$table = explode('/',$grammar_path);
 	$grammar_name = $table[count($table) - 1];
 	$dir = str_replace($grammar_name,'',$grammar_path);
+	
+//	echo "grammar_name = ".$grammar_name."<br />";
 
 	if($output <> '') @unlink($output);
 	if($tracefile <> '') @unlink($tracefile);
@@ -103,8 +105,10 @@ foreach($dircontent as $thisfile) {
 //	echo $thisfile." ➡ ".date('Y-m-d H\hi',$time_saved)."<br />";
 	$table = explode('_',$thisfile);
 	if($table[0] <> "trace") continue;
-	if($table[1] <> session_id()) continue;
-	if($table[2] == "image") unlink($temp_dir.$thisfile);
+	if(!isset($table[1]) OR $table[1] <> session_id()) continue;
+/*	echo "table[2] = ".$table[2]."<br />";
+	for($i = 2; $i < count($table); $i++)
+		if($table[$i] == "image") unlink($temp_dir.$thisfile); */
 	}
 
 echo "<p><small>command = <font color=\"red\">".$command."</font></small></p>";
@@ -195,10 +199,23 @@ if($instruction <> "help") {
 			$table = explode('_',$thisfile);
 			if($table[0] <> "trace") continue;
 			if($table[1] <> session_id()) continue;
-			if($table[2] <> "image") continue;
-			if(isset($table[4])) continue;
+			$found = FALSE; $this_name = '';
+			for($i = 2; $i < (count($table) - 1); $i++) {
+				if($table[$i] == "image") {
+					$found = TRUE;
+					break;
+					}
+				else {
+					if($this_name == '')
+						$this_name .= $table[$i];
+					else
+						$this_name .= "_".$table[$i];
+					}
+				}
+		//	echo "this_name = ".$this_name."<br />";
+			if(!$found OR $this_name <> $grammar_name OR isset($table[$i + 2])) continue;
 			echo "<td style=\"background-color:white; border-radius: 6px; border: 4px solid Gold; vertical-align:middle; text-align: center; padding:8px; margin:0px;\>";
-			$number = intval(str_replace(".html",'',$table[3]));
+			$number = intval(str_replace(".html",'',$table[$i + 1]));
 			$content = @file_get_contents($temp_dir.$thisfile,FALSE);
 			$table2 = explode(chr(10),$content);
 			$imax = count($table2);
@@ -227,7 +244,7 @@ if($instruction <> "help") {
 				$j++;
 				}
 			$link = $temp_dir.$thisfile;
-			$left = 10 + (30 * ($number - 1));
+			$left = 100 + (400 * ($number - 1));
 			$window_height = 600;
 			if($HeightMax < $window_height) $window_height = $HeightMax + 60;
 			$window_width = 1200;

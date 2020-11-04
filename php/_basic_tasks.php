@@ -557,6 +557,7 @@ function note_convention($i) {
 		case 0: $c = "english"; break;
 		case 1: $c = "french"; break;
 		case 2: $c = "indian"; break;
+		case 3: $c = "keys"; break;
 		}
 	return $c;
 	}
