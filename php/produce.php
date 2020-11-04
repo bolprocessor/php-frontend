@@ -54,6 +54,7 @@ else {
 	$grammar_name = $table[count($table) - 1];
 	$dir = str_replace($grammar_name,'',$grammar_path);
 	
+	$grammar_name = str_replace(" ","_",$grammar_name);
 //	echo "grammar_name = ".$grammar_name."<br />";
 
 	if($output <> '') @unlink($output);
@@ -63,6 +64,9 @@ else {
 	if(is_integer(strpos($thisgrammar,' ')))
 		$thisgrammar = '"'.$thisgrammar.'"';
 	$command = $application_path."bp ".$instruction." -gr ".$thisgrammar;
+	
+	if(is_integer(strpos($output,' ')))
+		$output = '"'.$output.'"';
 
 	$thisalphabet = $alphabet_file;
 	if(is_integer(strpos($thisalphabet,' ')))

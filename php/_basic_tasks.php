@@ -1088,6 +1088,7 @@ function good_name($type,$filename,$name_mode) {
 //	echo "filename = ".$filename."<br />";
 	$filename = str_replace("-".$type.".",'',$filename);
 	$filename = str_replace(".bp".$type,'',$filename);
+//	$filename = str_replace(" ","_",$filename);
 	if($name_mode == "extension")
 		$filename .= ".bp".$type;
 	else
