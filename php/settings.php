@@ -39,7 +39,7 @@ for($i = 0; $i < $imax; $i++) {
 	}
 
 if(isset($_POST['saveparameters'])) {
-	echo "<p id=\"timespan\" style=\"color:red;\">Saved ".$imax_parameters." parameters…</p>";
+	echo "<p id=\"timespan2\" style=\"color:red;\">Saved parameters ➡ don't forget to save again related grammar!</p>";
 	$handle = fopen($this_file,"w");
 	$file_header = $top_header."\n// Settings file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
 	fwrite($handle,$file_header."\n");
@@ -78,6 +78,15 @@ if(isset($_POST['saveparameters'])) {
 			$value = $newvalue;
 			}
 		if($i == 48 OR $i == 49) $value = 0; // StartFromOne and SmartCursor
+		if($i == 50 OR $i == 51) {
+			$value = intval($value);
+			if($value < 1) {
+				$newvalue = 1;
+				echo "<p><font color=\"red\">GraphicScaleP and GraphicScaleQ must be positive integers: “</font><font color=\"blue\">".$value."</font><font color=\"red\">” has been replaced with “</font><font color=\"blue\">".$newvalue."</font><font color=\"red\">”.</font></p>";
+				$value = $newvalue;
+				}
+			}
+			
 		if($i == 54) $value = 0; // Display bullets
 		if($i == 58) $value = 1; // MIDI file format
 		if($i == 62 AND (!is_numeric($value) OR $value < 0 OR $value > 127 OR intval($value) <> $value)) {
@@ -201,6 +210,12 @@ for($i = $j = 0; $i < $imax; $i++) {
 					echo "Metronome = <font color=\"red\">".$metronome."</font> <font color=\"blue\">beats/minute</font>";
 					}
 				}
+			if($i == 50) {
+				$GraphicScaleP = intval($table[$i]);
+				$GraphicScaleQ = intval($table[$i+1]);
+				echo "Graphic scale is <font color=\"red\">".$GraphicScaleP."/".$GraphicScaleQ."</font>";
+				}
+				
 			}
 		echo "</td>";
 		echo "</tr>";

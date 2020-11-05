@@ -164,6 +164,7 @@ function extract_data($compact,$content) {
 function fix_file_name($line,$type) {
 	// Detect for instance: "-se.:somefile.bpse"
 	$goodline = $line;
+	if(is_integer($pos=strpos($line,"<"))) return '';
 	if(is_integer($pos=strpos($line,":")) AND $pos == 4) {
 		$line = substr($line,5,strlen($line) - 5);
 		$extension = "bp".$type;
@@ -548,6 +549,10 @@ function get_setting($parameter,$settings_file) {
 	if($parameter == "trace_production") $i = 17;
 	if($parameter == "produce_all_items") $i = 13;
 	if($parameter == "random_seed") $i = 45;
+	if($parameter == "non_stop_improvize") $i = 10;
+	if($parameter == "striated_time") $i = 6;
+	if($parameter == "p_clock") $i = 7;
+	if($parameter == "q_clock") $i = 8;
 	if($i <> -1) return $table[$i];
 	else return '';
 	}

@@ -11,6 +11,7 @@ $here = $filename = end($table);
 // $grammar_file = "..".SLASH.$file;
 $grammar_file = $bp_application_path.$file;
 $dir = str_replace($filename,'',$grammar_file);
+$textarea_rows = 15;
 
 if($test) echo "grammar_file = ".$grammar_file."<br />";
 
@@ -197,8 +198,9 @@ $midisetup_file = $extract_data['midisetup'];
 $timebase_file = $extract_data['timebase'];
 $keyboard_file = $extract_data['keyboard'];
 $glossary_file = $extract_data['glossary'];
-$metronome = $extract_data['metronome'];
+$metronome = $metronome_in_grammar = $extract_data['metronome'];
 $time_structure = $extract_data['time_structure'];
+// echo "metronome = ".$metronome." time structure = ".$time_structure."<br />";
 $templates = $extract_data['templates'];
 $found_elsewhere = FALSE;
 if($alphabet_file <> '' AND $objects_file == '') {
@@ -208,13 +210,17 @@ if($alphabet_file <> '' AND $objects_file == '') {
 
 if($csound_file <> '') $csound_orchestra = get_orchestra_filename($dir.$csound_file);
 else $csound_orchestra = '';
-if($settings_file <> '') $show_production = get_setting("show_production",$settings_file);
-else $show_production = 0;
-if($settings_file <> '') $trace_production = get_setting("trace_production",$settings_file);
-else $trace_production = 0;
-
-if($settings_file <> '') $note_convention = get_setting("note_convention",$settings_file);
-else $note_convention = 0;
+$show_production = $trace_production = $note_convention = $non_stop_improvize = $p_clock = $q_clock = $striated_time = 0;
+if($settings_file <> '') {
+	$show_production = get_setting("show_production",$settings_file);
+	$trace_production = get_setting("trace_production",$settings_file);
+	$note_convention = get_setting("note_convention",$settings_file);
+	$non_stop_improvize = get_setting("non_stop_improvize",$settings_file);
+	$p_clock = get_setting("p_clock",$settings_file);
+	$q_clock = get_setting("q_clock",$settings_file);
+	$striated_time = get_setting("striated_time",$settings_file);
+	if($striated_time > 0) $time_structure = "striated";
+	}
 
 /* echo "show_production = ".$show_production."<br />";
 echo "trace_production = ".$trace_production."<br />"; */
@@ -321,47 +327,55 @@ echo "</table>";
 
 if($settings_file == '') {
 	if($metronome > 0) {
-		$p = intval($metronome * 10000);
-		$q = 600000;
-		$gcd = gcd($p,$q);
-		$p = $p / $gcd;
-		$q = $q / $gcd;
+		$p_clock = intval($metronome * 10000);
+		$q_clock = 600000;
+		$gcd = gcd($p_clock,$q_clock);
+		$p_clock = $p_clock / $gcd;
+		$q_clock = $q_clock / $gcd;
 		if(intval($metronome) == $metronome)
 			$metronome = intval($metronome);
-		else $metronome = sprintf("%.4f",$metronome);
-		echo "<p style=\"color:blue;\">⏱ Time base: ".$p." ticks in ".$q." seconds (metronome = ".$metronome." beats per minute)<br />";
+		else $metronome = sprintf("%.3f",$metronome);
+		echo "<p>⏱ Time base: <font color=\"red\">".$p_clock."</font> ticks in <font color=\"red\">".$q_clock."</font> seconds (metronome = <font color=\"red\">".$metronome."</font> beats/mn)<br />";
 		if($time_structure == '') $time_structure = "striated";
-		echo "⏱ Time structure: ".$time_structure."</p>";
+		echo "⏱ Time structure: <font color=\"red\">".$time_structure."</font></p>";
 		}
 	else {
-		$metronome = 60;
+		$metronome =  60;
+		$p_clock = $q_clock = 1;
 		if($time_structure <> '')
-			echo "<p style=\"color:blue;\">⏱ Metronome (time base) is not properly specified. It will be set to 60 beats per minute and time structure will be ".$time_structure.".</p>";
+			echo "<p>⏱ Metronome (time base) is not correctly specified. It will be set to <font color=\"red\">60</font> beats per minute. Time structure is <font color=\"red\">".$time_structure."</font> as indicated in this grammar.</p>";
 		else
-			echo "<p style=\"color:blue;\">⏱ Metronome (time base) and structure of time are neither specified nor set up by a ‘-se’ file.<br />Therefore they will be set to 60 beats per minute and striated.</p>";
+			echo "<p>⏱ Metronome (time base) and structure of time are neither specified nor set up by a ‘-se’ file.<br />Therefore they will be set to <font color=\"red\">60</font> beats per minute and <font color=\"red\">striated</font>.</p>";
 		$time_structure = "striated";
 		}
 	}
 else {
-	if($metronome > 0)
-		echo "<font color=\"red\">⏱ Metronome and structure of time indicated in this grammar will be ignored as they are set up by ‘".$settings_file."’</font><br />";
-	else
-		echo "⏱ Metronome (time base) and structure of time will be fixed by <font color=\"blue\">‘".$settings_file."’</font><br />";
 	$metronome = 0;
-	$time_structure = '';
-//	echo "<input type=\"hidden\" name=\"settings_file\" value=\"".$settings_file."\">";
+	if($p_clock > 0 AND $q_clock > 0) {
+		$metronome = 60 * $q_clock / $p_clock;
+		if($metronome <> intval($metronome)) $metronome = sprintf("%.3f",$metronome);
+		}
+	if($metronome > 0) {
+		echo "⏱ Metronome = <font color=\"red\">".$metronome."</font> beats/mn and time structure is <font color=\"red\">".$time_structure."</font> as per <font color=\"blue\">‘".$settings_file."’</font><br />";
+		if($metronome_in_grammar > 0) {
+			echo "• Metronome specification <b>_mm(".$metronome_in_grammar.")</b> in grammar  is ignored because it is set by <font color=\"blue\">‘".$settings_file."’</font><br />";
+			}
+		}
+	else
+		echo "⏱ No metronome value found in <font color=\"blue\">‘".$settings_file."’</font><br />";
 	}
+if($non_stop_improvize > 0) echo "• <font color=\"red\">Non-stop improvize</font> as set by <font color=\"blue\">‘".$settings_file."’</font>: <i>only 10 variations will be produced, no picture</i><br />";
 
 if($found_elsewhere AND $objects_file <> '') echo "• Sound-object prototype file = <font color=\"blue\">‘".$objects_file."’</font> found in <font color=\"blue\">‘".$alphabet_file."’</font><br />";
-if($note_convention <> '') echo "• Note convention = <font color=\"blue\">‘".note_convention(intval($note_convention))."’</font> found in <font color=\"blue\">‘".$settings_file."’</font><br />";
+if($note_convention <> '') echo "• Note convention is <font color=\"blue\">‘".ucfirst(note_convention(intval($note_convention)))."’</font> as per <font color=\"blue\">‘".$settings_file."’</font><br />";
 if($produce_all_items == 1) echo "• Produce all items has been set ON by <font color=\"blue\">‘".$settings_file."’</font><br />";
 if($show_production == 1) echo "• Show production has been set ON by <font color=\"blue\">‘".$settings_file."’</font><br />";
 if($trace_production == 1) echo "• Trace production has been set ON by <font color=\"blue\">‘".$settings_file."’</font><br />";
-if(isset($random_seed)) {
+if($settings_file <> '' AND isset($random_seed)) {
 	if($random_seed > 0)
 		echo "• Random seed has been set to ".$random_seed." by <font color=\"blue\">‘".$settings_file."’</font><br />";
 	else
-		echo "• Random seed has been set to ‘no seed’ by <font color=\"blue\">‘".$settings_file."’</font><br />";
+		echo "• Random seed is ‘no seed’ as per <font color=\"blue\">‘".$settings_file."’</font><br />";
 	}
 if($csound_orchestra <> '') {
 	echo "• Csound orchestra file ‘<font color=\"blue\">".$csound_orchestra."</font>’ is mentioned in <font color=\"blue\">‘".$csound_file."’</font>";
@@ -379,9 +393,13 @@ echo "<input type=\"hidden\" name=\"trace_production\" value=\"".$trace_producti
 echo "<input type=\"hidden\" name=\"metronome\" value=\"".$metronome."\">";
 echo "<input type=\"hidden\" name=\"time_structure\" value=\"".$time_structure."\">";
 echo "<input type=\"hidden\" name=\"alphabet_file\" value=\"".$alphabet_file."\">";
-echo "<p id=\"topedit\"><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"savegrammar\" formaction=\"".$url_this_page."#topedit\" value=\"SAVE ‘".$filename."’\"></p>";
+echo "<p id=\"topedit\"><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"savegrammar\" value=\"SAVE ‘".$filename."’\"></p>";
 
-echo "<textarea name=\"thisgrammar\" rows=\"50\" style=\"width:90%;\">".$content."</textarea>";
+$table = explode(chr(10),$content);
+$imax = count($table);
+if($imax > $textarea_rows) $textarea_rows = $imax + 1;
+
+echo "<textarea name=\"thisgrammar\" rows=\"".$textarea_rows."\" style=\"width:90%;\">".$content."</textarea>";
 
 echo "<div style=\"float:left; padding-top:12px;\"><input style=\"color:DarkBlue; background-color:Aquamarine; font-size:large;\" onclick=\"window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)\" title=\"Don't forget to save!\"";
 if($error) echo " disabled";
@@ -393,8 +411,6 @@ echo "</form>";
 
 display_more_buttons($content,$url_this_page,$dir,$objects_file,$csound_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
 
-$table = explode(chr(10),$content);
-$imax = count($table);
 $variable = array();
 for($i = 0; $i < $imax; $i++) {
 	$line = trim($table[$i]);

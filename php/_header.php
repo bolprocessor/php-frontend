@@ -29,10 +29,15 @@ echo "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.mi
 echo "</script>\n";
 
 echo "<script>\n";
-// Timing the display of a string tagged by id="timespan"
 echo "setTimeout(function() {
     $('#timespan').fadeOut('fast');
 	}, 3000);\n";
+echo "</script>\n";
+
+echo "<script>\n";
+echo "setTimeout(function() {
+    $('#timespan2').fadeOut('fast');
+	}, 8000);\n";
 echo "</script>\n";
 
 echo "</head>";

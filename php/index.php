@@ -74,6 +74,9 @@ if(isset($_POST['create_grammar'])) {
 			}
 		else {
 			$handle = fopen($dir.SLASH.$filename,"w");
+			$template = "grammar_template";
+			$template_content = @file_get_contents($template,TRUE);
+			fwrite($handle,$template_content."\n");
 			fclose($handle);
 			}
 		}

@@ -109,10 +109,18 @@ foreach($dircontent as $thisfile) {
 //	echo $thisfile." ➡ ".date('Y-m-d H\hi',$time_saved)."<br />";
 	$table = explode('_',$thisfile);
 	if($table[0] <> "trace") continue;
-	if(!isset($table[1]) OR $table[1] <> session_id()) continue;
-/*	echo "table[2] = ".$table[2]."<br />";
-	for($i = 2; $i < count($table); $i++)
-		if($table[$i] == "image") unlink($temp_dir.$thisfile); */
+	if(!isset($table[2]) OR $table[1] <> session_id()) continue;
+	$found = FALSE; $this_name = '';
+	for($i = 2; $i < (count($table) - 1); $i++) {
+		if($table[$i] == "image") {
+			$found = TRUE; break;
+			}
+		else {
+			if($this_name == '') $this_name .= $table[$i];
+			else $this_name .= "_".$table[$i];
+			}
+		}
+	if($this_name == $grammar_name) unlink($temp_dir.$thisfile);
 	}
 
 echo "<p><small>command = <font color=\"red\">".$command."</font></small></p>";
@@ -181,8 +189,8 @@ if($instruction <> "help") {
 		}
 	else {
 		echo "<p>";
-		if($output <> '' AND $file_format <> "midi") echo "<font color=\"red\">➡</font> Read the <a onclick=\"window.open('".$output_link."','".$file_format."','width=800,height=800,left=300'); return false;\" href=\"".$output_link."\">output file</a><br />";
-		if($trace_production OR $instruction == "templates" OR $show_production OR $trace_production) echo "<font color=\"red\">➡</font> Read the <a onclick=\"window.open('".$trace_link."','trace','width=800,height=800,left=400'); return false;\" href=\"".$trace_link."\">trace file</a>";
+		if($output <> '' AND $file_format <> "midi") echo "<font color=\"red\">➡</font> Read the <a onclick=\"window.open('".$output_link."','".$file_format."','width=800,height=800,left=300'); return false;\" href=\"".$output_link."\">output file</a> (or <a href=\"".$output_link."\" download>download it</a>)<br />";
+		if($trace_production OR $instruction == "templates" OR $show_production OR $trace_production) echo "<font color=\"red\">➡</font> Read the <a onclick=\"window.open('".$trace_link."','trace','width=800,height=800,left=400'); return false;\" href=\"".$trace_link."\">trace file</a> (or <a href=\"".$trace_link."\" download>download it</a>)";
 		echo "</p>";
 		
 		// Show MIDI file
@@ -202,18 +210,15 @@ if($instruction <> "help") {
 		foreach($dircontent as $thisfile) {
 			$table = explode('_',$thisfile);
 			if($table[0] <> "trace") continue;
-			if($table[1] <> session_id()) continue;
+			if(!isset($table[2]) OR $table[1] <> session_id()) continue;
 			$found = FALSE; $this_name = '';
 			for($i = 2; $i < (count($table) - 1); $i++) {
 				if($table[$i] == "image") {
-					$found = TRUE;
-					break;
+					$found = TRUE; break;
 					}
 				else {
-					if($this_name == '')
-						$this_name .= $table[$i];
-					else
-						$this_name .= "_".$table[$i];
+					if($this_name == '') $this_name .= $table[$i];
+					else $this_name .= "_".$table[$i];
 					}
 				}
 		//	echo "this_name = ".$this_name."<br />";
