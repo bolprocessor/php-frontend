@@ -59,11 +59,22 @@ if(isset($_POST['saveparameters'])) {
 			$value = $newvalue;
 			}
 		if($i == 9) $value = 28; // Jbutt
-		if($i == 52 AND $value == '')
-			$value = "<no input device>";
-		if($i == 53 AND $value == '')
-			$value = "<no output device>";
+		if($i == 41) { // Default buffer size
+			$newvalue = intval($value);
+			if($newvalue < 100) $newvalue = 1000;
+			if(strcmp($newvalue,$value) <> 0)
+				echo "<p><font color=\"red\">Default buffer size must be a (not too small) positive integer: “</font><font color=\"blue\">".$value."</font><font color=\"red\">” has been replaced with “</font><font color=\"blue\">".$newvalue."</font><font color=\"red\">”.</font></p>";
+			$value = $newvalue;
+			}
 		if($i == 43) $value = 0; // Use buffer limit
+		
+		if($i == 44) { // Max computation time
+			$newvalue = intval($value);
+			if($newvalue < 1) $newvalue = 15;
+			if(strcmp($newvalue,$value) <> 0)
+				echo "<p><font color=\"red\">Max computation time must be a positive integer: “</font><font color=\"blue\">".$value."</font><font color=\"red\">” has been replaced with “</font><font color=\"blue\">".$newvalue."</font><font color=\"red\">”.</font></p>";
+			$value = $newvalue;
+			}
 		if($i == 45) { // Seed for randomization
 			$newvalue = intval($value);
 			if($newvalue < 0) $newvalue = - $newvalue;
@@ -86,6 +97,10 @@ if(isset($_POST['saveparameters'])) {
 				$value = $newvalue;
 				}
 			}
+		if($i == 52 AND $value == '')
+			$value = "<no input device>";
+		if($i == 53 AND $value == '')
+			$value = "<no output device>";
 			
 		if($i == 54) $value = 0; // Display bullets
 		if($i == 58) $value = 1; // MIDI file format
@@ -213,7 +228,7 @@ for($i = $j = 0; $i < $imax; $i++) {
 			if($i == 50) {
 				$GraphicScaleP = intval($table[$i]);
 				$GraphicScaleQ = intval($table[$i+1]);
-				echo "Graphic scale is <font color=\"red\">".$GraphicScaleP."/".$GraphicScaleQ."</font>";
+				echo "Graphic scale is P/Q = <font color=\"red\">".$GraphicScaleP."/".$GraphicScaleQ."</font>";
 				}
 				
 			}

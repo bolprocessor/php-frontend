@@ -39,10 +39,10 @@ Opcode OMS (obsolete)		0	1
 Split terminal symbols		1	1
 Split |variables|		1	1
 Use text color		0	1
-Default buffer size	symbols	0
+Default buffer size	symbols	1
 Use color in graphics		0	1
 Use buffer limit		0	1
-Time max	ms	1
+Max computation time	seconds	1		Time assigned for console's work
 Seed for randomization	(positive integer or 0 for no seed)	1
 Use keyboard tokens		0	1
 Note convention	0 = English<br />1 = French<br />2 = Indian<br />3 = Keys	1
@@ -59,16 +59,16 @@ File write mode	0 = Write item immediately<br />1 = Write item after playing on 
 MIDI file format	(0, 1 or 2)	0
 Csound file format	0 = MacOS<br />1 = Windows<br />2 = Unix	0
 ProgNrFrom		0
-MIDI fade-out	sec	1
-C4 key number	(0..127)	1
-A4 frequency	Hz	1
+MIDI fade-out	sec (end of MIDI files)	1
+C4 key number	(0..127) usually 60	1
+A4 frequency	Hz (usally 440)	1
 Strike again NoteOn's		1	1
 Default volume	(1..127)	1
-Volume controller	(0..127)	1
+Volume controller	(0..127) usually 7	1
 Default velocity	(1..127)	1
 Default panoramic	(0..127)	1
-Panoramic controller	(0..127)	1
-SamplingRate		1
+Panoramic controller	(0..127) usually 10	1
+SamplingRate	samples per second, usually 50	1
 WMAX (39 windows)		0
 Font size		0
 Font size		0

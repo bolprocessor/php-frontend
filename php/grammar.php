@@ -210,7 +210,7 @@ if($alphabet_file <> '' AND $objects_file == '') {
 
 if($csound_file <> '') $csound_orchestra = get_orchestra_filename($dir.$csound_file);
 else $csound_orchestra = '';
-$show_production = $trace_production = $note_convention = $non_stop_improvize = $p_clock = $q_clock = $striated_time = 0;
+$show_production = $trace_production = $note_convention = $non_stop_improvize = $p_clock = $q_clock = $striated_time = $max_time_computing = 0;
 if($settings_file <> '') {
 	$show_production = get_setting("show_production",$settings_file);
 	$trace_production = get_setting("trace_production",$settings_file);
@@ -220,6 +220,7 @@ if($settings_file <> '') {
 	$q_clock = get_setting("q_clock",$settings_file);
 	$striated_time = get_setting("striated_time",$settings_file);
 	if($striated_time > 0) $time_structure = "striated";
+	$max_time_computing = get_setting("max_time_computing",$settings_file);
 	}
 
 /* echo "show_production = ".$show_production."<br />";
@@ -373,9 +374,12 @@ if($show_production == 1) echo "• Show production has been set ON by <font col
 if($trace_production == 1) echo "• Trace production has been set ON by <font color=\"blue\">‘".$settings_file."’</font><br />";
 if($settings_file <> '' AND isset($random_seed)) {
 	if($random_seed > 0)
-		echo "• Random seed has been set to ".$random_seed." by <font color=\"blue\">‘".$settings_file."’</font><br />";
+		echo "• Random seed has been set to <font color=\"red\">".$random_seed."</font> by <font color=\"blue\">‘".$settings_file."’</font><br />";
 	else
 		echo "• Random seed is ‘no seed’ as per <font color=\"blue\">‘".$settings_file."’</font><br />";
+	}
+if($max_time_computing > 0) {
+	echo "• Max computation time has been set to <font color=\"red\">".$max_time_computing."</font> seconds by <font color=\"blue\">‘".$settings_file."’</font><br />";
 	}
 if($csound_orchestra <> '') {
 	echo "• Csound orchestra file ‘<font color=\"blue\">".$csound_orchestra."</font>’ is mentioned in <font color=\"blue\">‘".$csound_file."’</font>";
@@ -397,7 +401,7 @@ echo "<p id=\"topedit\"><input style=\"background-color:yellow; font-size:larger
 
 $table = explode(chr(10),$content);
 $imax = count($table);
-if($imax > $textarea_rows) $textarea_rows = $imax + 1;
+if($imax > $textarea_rows) $textarea_rows = $imax + 10;
 
 echo "<textarea name=\"thisgrammar\" rows=\"".$textarea_rows."\" style=\"width:90%;\">".$content."</textarea>";
 

@@ -553,6 +553,7 @@ function get_setting($parameter,$settings_file) {
 	if($parameter == "striated_time") $i = 6;
 	if($parameter == "p_clock") $i = 7;
 	if($parameter == "q_clock") $i = 8;
+	if($parameter == "max_time_computing") $i = 44;
 	if($i <> -1) return $table[$i];
 	else return '';
 	}

@@ -20,6 +20,8 @@ if(isset($_GET['here'])) $here = urldecode($_GET['here']);
 else $here = '???';
 if(isset($_GET['csound_file'])) $csound_file = $_GET['csound_file'];
 else $csound_file = '';
+$max_sleep_time_after_bp_command = 15;
+
 if($instruction == "help")
 	$command = $application_path."bp --help";
 else {
@@ -49,6 +51,7 @@ else {
 		}
 	if(isset($_GET['csound_orchestra'])) $csound_orchestra = $_GET['csound_orchestra'];
 	else $csound_orchestra = '';
+	
 
 	$table = explode('/',$grammar_path);
 	$grammar_name = $table[count($table) - 1];
@@ -103,24 +106,37 @@ else {
 	if($new_random_seed) $command .= " --seed ".$random_seed;
 	}
 
-$dircontent = scandir($temp_dir);
-foreach($dircontent as $thisfile) {
-	$time_saved = filemtime($temp_dir.$thisfile);
-//	echo $thisfile." ➡ ".date('Y-m-d H\hi',$time_saved)."<br />";
-	$table = explode('_',$thisfile);
-	if($table[0] <> "trace") continue;
-	if(!isset($table[2]) OR $table[1] <> session_id()) continue;
-	$found = FALSE; $this_name = '';
-	for($i = 2; $i < (count($table) - 1); $i++) {
-		if($table[$i] == "image") {
-			$found = TRUE; break;
+if($instruction <> "help") {
+	$dircontent = scandir($temp_dir);
+	foreach($dircontent as $thisfile) {
+		$time_saved = filemtime($temp_dir.$thisfile);
+	//	echo $thisfile." ➡ ".date('Y-m-d H\hi',$time_saved)."<br />";
+		$table = explode('_',$thisfile);
+		if($table[0] <> "trace") continue;
+		if(!isset($table[2]) OR $table[1] <> session_id()) continue;
+		$found = FALSE; $this_name = '';
+		for($i = 2; $i < (count($table) - 1); $i++) {
+			if($table[$i] == "image") {
+				$found = TRUE; break;
+				}
+			else {
+				if($this_name == '') $this_name .= $table[$i];
+				else $this_name .= "_".$table[$i];
+				}
 			}
-		else {
-			if($this_name == '') $this_name .= $table[$i];
-			else $this_name .= "_".$table[$i];
+		// Delete this image to be replaced with the current one
+		if($this_name == $grammar_name) {
+			$rep = @unlink($temp_dir.$thisfile);
+			// Make sure deletion is complete before launcjhing the command
+			$time_start = time();
+			$time_end = $time_start + 5;
+			if($rep) while(TRUE) {
+				if(!file_exists($temp_dir.$thisfile)) break;
+				if(time() > $time_end) break;
+				sleep(1);
+				}
 			}
 		}
-	if($this_name == $grammar_name) unlink($temp_dir.$thisfile);
 	}
 
 echo "<p><small>command = <font color=\"red\">".$command."</font></small></p>";
@@ -280,7 +296,6 @@ if($instruction <> "help") {
 			$sound_file_link = str_replace(".sco",".wav",$csound_file_link);
 			@unlink($sound_file_link);
 			$olddir = getcwd();
-		//	chdir($dir);
 			if(file_exists($csound_file_link)) {
 				$command = $csound_path."csound --version";
 				exec($command,$result_csound,$return_var);
@@ -293,22 +308,19 @@ if($instruction <> "help") {
 					echo "<p><small>command = <font color=\"red\">".$command."</font></small></p>";
 					exec($command,$result_csound,$return_var);
 					if($return_var <> 0) {
-						echo "<p><font color=\"red\">➡</font> Csound returned error code <font color=\"blue\">‘".$return_var."’</font></p>";
+						echo "<p><font color=\"red\">➡</font> Csound returned error code <font color=\"red\">‘".$return_var."’</font>.<br /><i>Probably trying to use instruments that do not match</i> <font color=\"blue\">‘".$csound_orchestra."’</font></p>";
 						}
-			/*		$n_messages_csound = count($result_csound);
-					for($i=0; $i < $n_messages_csound; $i++) {
-						$mssg = $result_csound[$i];
-						echo $mssg."<br />";
-						} */
-					$time_spent = time() - $time_start;
-					if($time_spent > 10)
-						echo "<p><font color=\"red\">➡</font> Sorry for the long time (".$time_spent." seconds) waiting for Csound to complete the conversion…</p>";
-					echo "<audio controls class=\"shadow\">";
-					echo "<source src=\"".$sound_file_link."\" type=\"audio/wav\">";
-					echo "Your browser does not support the audio tag.";
-					echo "</audio>";
-					echo "<p><a target=\"_blank\" href=\"".$sound_file_link."\" download>Download this sound file</a> (<font color=\"blue\">".$sound_file_link."</font>)</p>";
-					echo "<p><font color=\"red\">➡</font> If you hear garbage sound or silence it may be due to mismatch between Csound score and orchestra<br />&nbsp;&nbsp;&nbsp;or some overflow in Csound…</p>";
+					else {
+						$time_spent = time() - $time_start;
+						if($time_spent > 10)
+							echo "<p><font color=\"red\">➡</font> Sorry for the long time (".$time_spent." seconds) waiting for Csound to complete the conversion…</p>";
+						echo "<audio controls class=\"shadow\">";
+						echo "<source src=\"".$sound_file_link."\" type=\"audio/wav\">";
+						echo "Your browser does not support the audio tag.";
+						echo "</audio>";
+						echo "<p><a target=\"_blank\" href=\"".$sound_file_link."\" download>Download this sound file</a> (<font color=\"blue\">".$sound_file_link."</font>)</p>";
+						echo "<p><font color=\"red\">➡</font> If you hear garbage sound or silence it may be due to mismatch between Csound score and orchestra<br />&nbsp;&nbsp;&nbsp;or some overflow in Csound…</p>";
+						}
 					}
 				}
 			else echo "<p><font color=\"red\">➡</font> The score file (".$csound_file_link.") was not found and could not be processed by Csound.</p>";
