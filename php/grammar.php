@@ -210,7 +210,8 @@ if($alphabet_file <> '' AND $objects_file == '') {
 
 if($csound_file <> '') $csound_orchestra = get_orchestra_filename($dir.$csound_file);
 else $csound_orchestra = '';
-$show_production = $trace_production = $note_convention = $non_stop_improvize = $p_clock = $q_clock = $striated_time = $max_time_computing = 0;
+$show_production = $trace_production = $note_convention = $non_stop_improvize = $p_clock = $q_clock = $striated_time = $max_time_computing = $produce_all_items = $random_seed = 0;
+$diapason = 440; $C4key = 60;
 if($settings_file <> '') {
 	$show_production = get_setting("show_production",$settings_file);
 	$trace_production = get_setting("trace_production",$settings_file);
@@ -221,14 +222,11 @@ if($settings_file <> '') {
 	$striated_time = get_setting("striated_time",$settings_file);
 	if($striated_time > 0) $time_structure = "striated";
 	$max_time_computing = get_setting("max_time_computing",$settings_file);
+	$produce_all_items = get_setting("produce_all_items",$settings_file);
+	$random_seed = get_setting("random_seed",$settings_file);
+	$diapason = get_setting("diapason",$settings_file);
+	$C4key = get_setting("C4key",$settings_file);
 	}
-
-/* echo "show_production = ".$show_production."<br />";
-echo "trace_production = ".$trace_production."<br />"; */
-if($settings_file <> '') $produce_all_items = get_setting("produce_all_items",$settings_file);
-else $produce_all_items = 0;
-if($settings_file <> '') $random_seed = get_setting("random_seed",$settings_file);
-else $random_seed = 0;
 
 if($test) echo "url_this_page = ".$url_this_page."<br />";
 
@@ -366,9 +364,10 @@ else {
 		echo "⏱ No metronome value found in <font color=\"blue\">‘".$settings_file."’</font><br />";
 	}
 if($non_stop_improvize > 0) echo "• <font color=\"red\">Non-stop improvize</font> as set by <font color=\"blue\">‘".$settings_file."’</font>: <i>only 10 variations will be produced, no picture</i><br />";
-
+if($diapason <> 440) echo "• Diapason (A4 frequency) is <font color=\"red\">".$diapason."</font> Hz as set by <font color=\"blue\">‘".$settings_file."’</font><br />";
+if($C4key <> 60) echo "• C4 key number is <font color=\"red\">".$C4key."</font> as set by <font color=\"blue\">‘".$settings_file."’</font><br />";
 if($found_elsewhere AND $objects_file <> '') echo "• Sound-object prototype file = <font color=\"blue\">‘".$objects_file."’</font> found in <font color=\"blue\">‘".$alphabet_file."’</font><br />";
-if($note_convention <> '') echo "• Note convention is <font color=\"blue\">‘".ucfirst(note_convention(intval($note_convention)))."’</font> as per <font color=\"blue\">‘".$settings_file."’</font><br />";
+if($note_convention <> '') echo "• Note convention is <font color=\"red\">‘".ucfirst(note_convention(intval($note_convention)))."’</font> as per <font color=\"blue\">‘".$settings_file."’</font><br />";
 if($produce_all_items == 1) echo "• Produce all items has been set ON by <font color=\"blue\">‘".$settings_file."’</font><br />";
 if($show_production == 1) echo "• Show production has been set ON by <font color=\"blue\">‘".$settings_file."’</font><br />";
 if($trace_production == 1) echo "• Trace production has been set ON by <font color=\"blue\">‘".$settings_file."’</font><br />";
@@ -401,13 +400,15 @@ echo "<p id=\"topedit\"><input style=\"background-color:yellow; font-size:larger
 
 $table = explode(chr(10),$content);
 $imax = count($table);
-if($imax > $textarea_rows) $textarea_rows = $imax + 10;
+if($imax > $textarea_rows) $textarea_rows = $imax + 5;
 
 echo "<textarea name=\"thisgrammar\" rows=\"".$textarea_rows."\" style=\"width:90%;\">".$content."</textarea>";
 
 echo "<div style=\"float:left; padding-top:12px;\"><input style=\"color:DarkBlue; background-color:Aquamarine; font-size:large;\" onclick=\"window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)\" title=\"Don't forget to save!\"";
 if($error) echo " disabled";
 echo ">";
+$link_test = $link_produce."&test";
+echo "&nbsp;<input style=\"color:DarkBlue; background-color:Azure; font-size:large;\" onclick=\"window.open('".$link_test."','checkCommand','width=1000,height=100,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Check command line\">";
 if($error) echo "<br />".$error_mssg;
 echo "</div>";
 echo "<p style=\"width:90%; text-align:right;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" formaction=\"".$url_this_page."#topedit\" name=\"savegrammar\" value=\"SAVE ‘".$filename."’\"></p>";

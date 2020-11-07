@@ -489,24 +489,25 @@ function recode_entities($text) {
 	return $text;
 	}
 
-function clean_up_file($file) {
+function clean_up_file_to_html($file) {
 	if(!file_exists($file)) {
 	//	echo "<p style=\"color:red;\">ERROR file not found: ".$file."</p>";
 		return '';
 		}
-	$tracefile_html = str_replace(".txt",".html",$file);
+	$file_html = str_replace(".txt",".html",$file);
+	$file_html = str_replace(".bpda",".html",$file_html);
 	$text = @file_get_contents($file,TRUE);
 	$text = str_replace(chr(13).chr(10),chr(10),$text);
 	$text = str_replace(chr(13),chr(10),$text);
 	$text = str_replace(chr(9),' ',$text);
 	$text = trim($text);
 	$text = recode_tags($text);
-	$text = clean_up_encoding(TRUE,TRUE,$text);
-//	$text = str_replace("�","•",$text);
+	$text = clean_up_encoding(FALSE,TRUE,$text);
+	$text = str_replace("¬",'',$text);
 	do $text = str_replace(chr(10).chr(10).chr(10),chr(10).chr(10),$text,$count);
 	while($count > 0);
 	$text = str_replace(chr(10),"<br />",$text);
-	$handle = fopen($tracefile_html,"w");
+	$handle = fopen($file_html,"w");
 	$header = "<head>\n";
 	$header .= "<meta content=\"text/html; charset=utf-8\" http-equiv=\"Content-Type\" />\n";
 	$header .= "</head><body>\n";
@@ -514,7 +515,27 @@ function clean_up_file($file) {
 	fwrite($handle,$text."\n");
 	fwrite($handle,"</body>\n");
 	fclose($handle);
-	return $tracefile_html;
+	return $file_html;
+	}
+
+function clean_up_file($file) { // NOT USED
+	if(!file_exists($file)) {
+	//	echo "<p style=\"color:red;\">ERROR file not found: ".$file."</p>";
+		return '';
+		}
+	$text = @file_get_contents($file,TRUE);
+	$text = str_replace(chr(13).chr(10),chr(10),$text);
+	$text = str_replace(chr(13),chr(10),$text);
+	$text = str_replace(chr(9),' ',$text);
+	$text = trim($text);
+	$text = recode_tags($text);
+	$text = clean_up_encoding(FALSE,TRUE,$text);
+	do $text = str_replace(chr(10).chr(10).chr(10),chr(10).chr(10),$text,$count);
+	while($count > 0);
+	$handle = fopen($file,"w");
+	fwrite($handle,$text."\n");
+	fclose($handle);
+	return $file;
 	}
 
 function get_setting($parameter,$settings_file) {
@@ -554,6 +575,8 @@ function get_setting($parameter,$settings_file) {
 	if($parameter == "p_clock") $i = 7;
 	if($parameter == "q_clock") $i = 8;
 	if($parameter == "max_time_computing") $i = 44;
+	if($parameter == "diapason") $i = 63;
+	if($parameter == "C4key") $i = 62;
 	if($i <> -1) return $table[$i];
 	else return '';
 	}

@@ -20,7 +20,9 @@ if(isset($_GET['here'])) $here = urldecode($_GET['here']);
 else $here = '???';
 if(isset($_GET['csound_file'])) $csound_file = $_GET['csound_file'];
 else $csound_file = '';
+
 $max_sleep_time_after_bp_command = 15;
+$check_command_line = FALSE;
 
 if($instruction == "help")
 	$command = $application_path."bp --help";
@@ -51,8 +53,8 @@ else {
 		}
 	if(isset($_GET['csound_orchestra'])) $csound_orchestra = $_GET['csound_orchestra'];
 	else $csound_orchestra = '';
+	if(isset($_GET['test'])) $check_command_line = TRUE;
 	
-
 	$table = explode('/',$grammar_path);
 	$grammar_name = $table[count($table) - 1];
 	$dir = str_replace($grammar_name,'',$grammar_path);
@@ -139,6 +141,11 @@ if($instruction <> "help") {
 		}
 	}
 
+if($check_command_line) {
+	echo "<p><i>Run this command in the “php” folder:</i></p>";
+	echo "<p><font color=\"red\">➡</font> ".$command."</p>";
+	die();
+	}
 echo "<p><small>command = <font color=\"red\">".$command."</font></small></p>";
 
 if($instruction <> "help") {
@@ -190,25 +197,32 @@ if($instruction <> "help") {
 			}
 		}
 	@unlink($donefile);
-	$tracefile_html = clean_up_file($tracefile);
+	$tracefile_html = clean_up_file_to_html($tracefile);
 	$trace_link = $tracefile_html;
 	$output_link = $output;
-	
+//	$test = TRUE;
 	if($test) echo "output = ".$output."<br />";
 	if($test) echo "tracefile_html = ".$tracefile_html."<br />";
 	if($test) echo "dir = ".$dir."<br />";
 	if($test) echo "trace_link = ".$trace_link."<br />";
 	if($test) echo "output_link = ".$output_link."<br />";
+	if($test) echo "file_format = ".$file_format."<br />";
 
 	if(!$no_error) {
 		echo "<p><font color=\"red\">Errors found… Check the </font> <a onclick=\"window.open('".$trace_link."','errors','width=800,height=800,left=400'); return false;\" href=\"".$trace_link."\">error trace</a> file!</p>";
 		}
 	else {
 		echo "<p>";
-		if($output <> '' AND $file_format <> "midi") echo "<font color=\"red\">➡</font> Read the <a onclick=\"window.open('".$output_link."','".$file_format."','width=800,height=800,left=300'); return false;\" href=\"".$output_link."\">output file</a> (or <a href=\"".$output_link."\" download>download it</a>)<br />";
-		if($trace_production OR $instruction == "templates" OR $show_production OR $trace_production) echo "<font color=\"red\">➡</font> Read the <a onclick=\"window.open('".$trace_link."','trace','width=800,height=800,left=400'); return false;\" href=\"".$trace_link."\">trace file</a> (or <a href=\"".$trace_link."\" download>download it</a>)";
+		if($output <> '' AND $file_format <> "midi") {
+			if($file_format <> "csound") {
+				$output_html = clean_up_file_to_html($output);
+				$output_link = $output_html;
+				}
+			echo "<font color=\"red\">➡</font> Read the <a onclick=\"window.open('".$output_link."','".$file_format."','width=800,height=700,left=300'); return false;\" href=\"".$output_link."\">output file</a> (or <a href=\"".$output_link."\" download>download it</a>)<br />";
+			}
+		if($trace_production OR $instruction == "templates" OR $show_production OR $trace_production) echo "<font color=\"red\">➡</font> Read the <a onclick=\"window.open('".$trace_link."','trace','width=800,height=600,left=400'); return false;\" href=\"".$trace_link."\">trace file</a> (or <a href=\"".$trace_link."\" download>download it</a>)";
 		echo "</p>";
-		
+		 
 		// Show MIDI file
 		if($file_format == "midi") {
 			$midi_file_link = $output;
@@ -284,7 +298,7 @@ if($instruction <> "help") {
 		
 	// Process Csound score if possible
 	if($file_format == "csound") {
-		if($csound_orchestra == '' AND $file_format == "csound") {
+		if($csound_orchestra == '') {
 			$csound_orchestra = "default.orc";
 			echo "<p><font color=\"red\">➡</font> Csound orchestra file was not specified. I tried the default orchestra: <font color=\"blue\">".$dir.$csound_orchestra."</font>.</p>";
 			}
@@ -294,8 +308,7 @@ if($instruction <> "help") {
 		else {
 			$csound_file_link = $output;
 			$sound_file_link = str_replace(".sco",".wav",$csound_file_link);
-			@unlink($sound_file_link);
-			$olddir = getcwd();
+			
 			if(file_exists($csound_file_link)) {
 				$command = $csound_path."csound --version";
 				exec($command,$result_csound,$return_var);
@@ -303,6 +316,8 @@ if($instruction <> "help") {
 					echo "<p><font color=\"red\">➡</font> Test of Csound was unsuccessful. May be not installed? The command was: <font color=\"blue\">".$command."</font></p>";
 					}
 				else {
+					@unlink($sound_file_link);
+					sleep(1);
 					$time_start = time();
 					$command = $csound_path."csound --wave -o ".$sound_file_link." ".$dir.$csound_orchestra." ".$csound_file_link;
 					echo "<p><small>command = <font color=\"red\">".$command."</font></small></p>";
@@ -328,10 +343,13 @@ if($instruction <> "help") {
 		}
 	}
 
-for($i=0; $i < $n_messages; $i++) {
-	$mssg = $o[$i];
-	$mssg = clean_up_encoding(FALSE,TRUE,$mssg);
-	echo $mssg."<br />";
+if($n_messages > 1000) echo "<p>Too many messages produced! (".$n_messages.")</p>";
+else {
+	for($i=0; $i < $n_messages; $i++) {
+		$mssg = $o[$i];
+		$mssg = clean_up_encoding(FALSE,TRUE,$mssg);
+		echo $mssg."<br />";
+		}
+	if($n_messages == 0) echo "No message produced…";
 	}
-if($n_messages == 0) echo "No message produced…";
 ?>

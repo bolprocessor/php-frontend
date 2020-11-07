@@ -60,8 +60,8 @@ MIDI file format	(0, 1 or 2)	0
 Csound file format	0 = MacOS<br />1 = Windows<br />2 = Unix	0
 ProgNrFrom		0
 MIDI fade-out	sec (end of MIDI files)	1
-C4 key number	(0..127) usually 60	1
-A4 frequency	Hz (usally 440)	1
+C4 (middle C) key number	(0..127) usually 60	1
+A4 frequency (diapason)	Hz (usally 440)	1
 Strike again NoteOn's		1	1
 Default volume	(1..127)	1
 Volume controller	(0..127) usually 7	1
