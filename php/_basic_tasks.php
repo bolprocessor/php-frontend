@@ -1352,6 +1352,8 @@ function is_variable($note_convention,$word) {
 	if($word == "SUB") return '';
 	if($word == "SUB1") return '';
 	if($word == "DATA") return '';
+	if($word == "LEFT") return '';
+	if($word == "RIGHT") return '';
 	if($word == "TEMPLATES") return '';
 	if($word == "COMMENT") return '';
 	if($word == '') return $word;

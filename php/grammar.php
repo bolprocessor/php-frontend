@@ -28,6 +28,9 @@ switch($file_format) {
 	}
 if(isset($_POST['output_file'])) $output_file = $_POST['output_file'];
 
+$project_name = preg_replace("/\.[a-z]+$/u",'',$output_file);
+$result_file = $bp_application_path.$output_folder.SLASH.$project_name."-result.html";
+
 $expression = '';
 if(isset($_POST['expression'])) $expression = trim($_POST['expression']);
 
@@ -149,7 +152,6 @@ if(isset($_POST['compilegrammar'])) {
 	$no_error = FALSE;
 	$o = send_to_console($command);
 	$n_messages = count($o);
-//	chdir($olddir);
 	if($n_messages > 0) {
 		for($i=0; $i < $n_messages; $i++) {
 			$mssg = $o[$i];
@@ -396,7 +398,12 @@ echo "<input type=\"hidden\" name=\"trace_production\" value=\"".$trace_producti
 echo "<input type=\"hidden\" name=\"metronome\" value=\"".$metronome."\">";
 echo "<input type=\"hidden\" name=\"time_structure\" value=\"".$time_structure."\">";
 echo "<input type=\"hidden\" name=\"alphabet_file\" value=\"".$alphabet_file."\">";
-echo "<p id=\"topedit\"><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"savegrammar\" value=\"SAVE ‘".$filename."’\"></p>";
+echo "<p id=\"topedit\"><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"savegrammar\" value=\"SAVE ‘".$filename."’\">";
+
+if((file_exists($output.SLASH.$default_output_name.".wav") OR file_exists($output.SLASH.$default_output_name.".mid") OR file_exists($output.SLASH.$default_output_name.".html") OR file_exists($output.SLASH.$default_output_name.".sco")) AND file_exists($result_file)) {
+	echo "&nbsp;&nbsp;&nbsp;<input style=\"color:DarkBlue; background-color:azure; font-size:large;\" onclick=\"window.open('".$result_file."','result','width=800,height=600,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Show latests results\">";
+	}
+echo "</p>";
 
 $table = explode(chr(10),$content);
 $imax = count($table);
@@ -463,7 +470,7 @@ if(count($variable) > 0) {
 		}
 	}
 $recoded_expression = recode_tags($expression);
-echo "<p id=\"expression\">Use this (polymetric) expression as startup&nbsp;➡&nbsp;<input type=\"text\" name=\"expression\" size=\"60\" value=\"".$recoded_expression."\">&nbsp;<input style=\"background-color:Aquamarine;\" type=\"submit\" name=\"playexpression\" value=\"PRODUCE ITEM…\"></p>";
+echo "<p id=\"expression\">Use this (polymetric) expression as startup&nbsp;➡&nbsp;<input type=\"text\" name=\"expression\" size=\"60\" value=\"".$recoded_expression."\">&nbsp;<input style=\"background-color:Aquamarine;\" type=\"submit\" name=\"playexpression\" value=\"PRODUCE ITEM\"></p>";
 if(isset($_POST['playexpression'])) {
 	if($expression == '') {
 		echo "<p id=\"timespan\"><font color=\"red\">➡ Cannot play empty expression…</font></p>";

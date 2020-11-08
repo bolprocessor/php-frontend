@@ -23,6 +23,7 @@ else $csound_file = '';
 
 $max_sleep_time_after_bp_command = 15;
 $check_command_line = FALSE;
+$sound_file_link = '';
 
 if($instruction == "help")
 	$command = $application_path."bp --help";
@@ -61,6 +62,9 @@ else {
 	
 	$grammar_name = str_replace(" ","_",$grammar_name);
 //	echo "grammar_name = ".$grammar_name."<br />";
+	$project_name = preg_replace("/\.[a-z]+$/u",'',$output);
+	$result_file = $project_name."-result.html";
+	@unlink($result_file);
 
 	if($output <> '') @unlink($output);
 	if($tracefile <> '') @unlink($tracefile);
@@ -227,6 +231,7 @@ if($instruction <> "help") {
 		if($file_format == "midi") {
 			$midi_file_link = $output;
 			if(file_exists($midi_file_link)) {
+		//		echo "midi_file_link = ".$midi_file_link."<br />";
 				echo "<p class=\"shadow\" style=\"width:50%;\"><a href=\"#midi\" onClick=\"MIDIjs.play('".$midi_file_link."');\"><img src=\"pict/loudspeaker.png\" width=\"70px;\" style=\"vertical-align:middle;\" />Play MIDI file</a>";
 				echo " (<a href=\"#midi\" onClick=\"MIDIjs.stop();\">Stop playing</a>)";
 				echo "&nbsp;or <a href=\"".$midi_file_link."\" download>download it</a></p>";
@@ -329,10 +334,11 @@ if($instruction <> "help") {
 						$time_spent = time() - $time_start;
 						if($time_spent > 10)
 							echo "<p><font color=\"red\">➡</font> Sorry for the long time (".$time_spent." seconds) waiting for Csound to complete the conversion…</p>";
-						echo "<audio controls class=\"shadow\">";
-						echo "<source src=\"".$sound_file_link."\" type=\"audio/wav\">";
-						echo "Your browser does not support the audio tag.";
-						echo "</audio>";
+						$audio_tag = "<audio controls class=\"shadow\">";
+						$audio_tag .= "<source src=\"".$sound_file_link."\" type=\"audio/wav\">";
+						$audio_tag .= "Your browser does not support the audio tag.";
+						$audio_tag .= "</audio>";
+						echo $audio_tag;
 						echo "<p><a target=\"_blank\" href=\"".$sound_file_link."\" download>Download this sound file</a> (<font color=\"blue\">".$sound_file_link."</font>)</p>";
 						echo "<p><font color=\"red\">➡</font> If you hear garbage sound or silence it may be due to mismatch between Csound score and orchestra<br />&nbsp;&nbsp;&nbsp;or some overflow in Csound…</p>";
 						}
@@ -345,11 +351,56 @@ if($instruction <> "help") {
 
 if($n_messages > 1000) echo "<p>Too many messages produced! (".$n_messages.")</p>";
 else {
+//	echo "result_file = ".$result_file."<br />";
+//	echo $bp_application_path."<br />";
+	$handle = fopen($result_file,"w");
+	$header = "<!DOCTYPE HTML>";
+	$header .= "<html lang=\"en\">";
+	$header .= "<head>\n";
+	$header .= "<meta content=\"text/html; charset=utf-8\" http-equiv=\"Content-Type\" />\n";
+	$header .= "<link rel=\"stylesheet\" href=\"".$bp_application_path."php/bp.css\" />\n";
+	$header .= "<title>".$result_file."</title>\n";
+	$header .= "<script type='text/javascript' src='https://www.midijs.net/lib/midi.js'></script>\n";
+	$header .= "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js\"></script>\n";
+	$header .= "</head><body>\n";
+	fwrite($handle,$header."\n");
+	fwrite($handle,"<h2 id=\"midi\">".$grammar_name."</h2>\n");
+	fwrite($handle,"<small>Results as per ".date('Y-m-d H:i:s')."</small><br />\n");
+	if(file_exists($project_name.".wav")) {
+		$audio_tag = "<p><b>Csound:</b></p><audio controls class=\"shadow\">";
+		$audio_tag .= "<source src=\"".$project_name.".wav\" type=\"audio/wav\">";
+		$audio_tag .= "Your browser does not support the audio tag.";
+		$audio_tag .= "</audio>";
+		fwrite($handle,$audio_tag."<p>\n");
+		if(file_exists($project_name.".sco")) {
+			fwrite($handle,"<br /><a target=\"_blank\" href=\"".$project_name.".sco\" download>Download Csound score</a> (<font color=\"blue\">".$project_name.".sco</font>)<br />");
+			}
+		fwrite($handle,"<a target=\"_blank\" href=\"".$project_name.".wav\" download>Download this sound file</a> (<font color=\"blue\">".$project_name.".wav</font>)</p>");
+		}
+	if(file_exists($project_name.".mid")) {
+	//	echo "mid = ".$project_name.".mid<br />";
+		$audio_tag = "<p><b>MIDI file:</b></p><p class=\"shadow\" style=\"width:50%;\"><a href=\"#midi\" onClick=\"MIDIjs.play('".$project_name.".mid');\"><img src=\"".$bp_application_path."php/pict/loudspeaker.png\" width=\"70px;\" style=\"vertical-align:middle;\" />Play MIDI file</a>";
+		$audio_tag .= " (<a href=\"#midi\" onClick=\"MIDIjs.stop();\">Stop playing</a>)";
+		$audio_tag .= "&nbsp;or <a href=\"".$project_name.".mid\" download>download it</a></p>";
+		fwrite($handle,$audio_tag."\n");
+		}
+	if(file_exists($project_name.".html")) {
+		fwrite($handle,"<p><font color=\"red\">➡</font> Read the <a onclick=\"window.open('".$project_name.".html','".$file_format."','width=800,height=700,left=300'); return false;\" href=\"".$project_name.".html\">data file</a> (or <a href=\"".$project_name.".bpda\" download>download it</a>)</p>\n");
+		}
+	fwrite($handle,"<hr><p><b>Messages:</b></p>\n");
 	for($i=0; $i < $n_messages; $i++) {
 		$mssg = $o[$i];
 		$mssg = clean_up_encoding(FALSE,TRUE,$mssg);
-		echo $mssg."<br />";
+		fwrite($handle,$mssg."<br />\n");
+		if($i < 7) echo $mssg."<br />";
 		}
 	if($n_messages == 0) echo "No message produced…";
+	else {
+		echo "<p>…&nbsp;";
+		echo "<input style=\"color:DarkBlue; background-color:yellow; font-size:large;\" onclick=\"window.open('".$result_file."','result','width=800,height=600,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"show all messages…\">";
+		echo "</p>";
+		}
+	fwrite($handle,"</body>\n");
+	fclose($handle);
 	}
 ?>
