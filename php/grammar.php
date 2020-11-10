@@ -213,6 +213,7 @@ if($alphabet_file <> '' AND $objects_file == '') {
 if($csound_file <> '') $csound_orchestra = get_orchestra_filename($dir.$csound_file);
 else $csound_orchestra = '';
 $show_production = $trace_production = $note_convention = $non_stop_improvize = $p_clock = $q_clock = $striated_time = $max_time_computing = $produce_all_items = $random_seed = 0;
+$csound_default_orchestra = '';
 $diapason = 440; $C4key = 60;
 if($settings_file <> '') {
 	$show_production = get_setting("show_production",$settings_file);
@@ -228,12 +229,16 @@ if($settings_file <> '') {
 	$random_seed = get_setting("random_seed",$settings_file);
 	$diapason = get_setting("diapason",$settings_file);
 	$C4key = get_setting("C4key",$settings_file);
+	$csound_default_orchestra = get_setting("csound_default_orchestra",$settings_file);
 	}
 
 if($test) echo "url_this_page = ".$url_this_page."<br />";
 
+$csound_is_responsive = FALSE;
 if($file_format == "csound") {
-	echo "<div>".check_csound()."</div>";
+	echo "<div>";
+	$csound_is_responsive = check_csound();
+	echo "</div>";
 	}
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 echo "<table cellpadding=\"8px;\"><tr style=\"background-color:white;\">";
@@ -366,8 +371,12 @@ else {
 		echo "⏱ No metronome value found in <font color=\"blue\">‘".$settings_file."’</font><br />";
 	}
 if($non_stop_improvize > 0) echo "• <font color=\"red\">Non-stop improvize</font> as set by <font color=\"blue\">‘".$settings_file."’</font>: <i>only 10 variations will be produced, no picture</i><br />";
-if($diapason <> 440) echo "• Diapason (A4 frequency) is <font color=\"red\">".$diapason."</font> Hz as set by <font color=\"blue\">‘".$settings_file."’</font><br />";
-if($C4key <> 60) echo "• C4 key number is <font color=\"red\">".$C4key."</font> as set by <font color=\"blue\">‘".$settings_file."’</font><br />";
+if($diapason <> 440) echo "• <font color=\"red\">Diapason</font> (A4 frequency) = <font color=\"red\">".$diapason."</font> Hz as set by <font color=\"blue\">‘".$settings_file."’</font><br />";
+if($C4key <> 60) {
+	echo "• <font color=\"red\">C4 key number</font> = <font color=\"red\">".$C4key."</font> as set by <font color=\"blue\">‘".$settings_file."’</font>";
+	if($file_format == "csound") echo " ➡ this has no incidence on Csound scores";
+	echo "<br />";
+	}
 if($found_elsewhere AND $objects_file <> '') echo "• Sound-object prototype file = <font color=\"blue\">‘".$objects_file."’</font> found in <font color=\"blue\">‘".$alphabet_file."’</font><br />";
 if($note_convention <> '') echo "• Note convention is <font color=\"red\">‘".ucfirst(note_convention(intval($note_convention)))."’</font> as per <font color=\"blue\">‘".$settings_file."’</font><br />";
 if($produce_all_items == 1) echo "• Produce all items has been set ON by <font color=\"blue\">‘".$settings_file."’</font><br />";
@@ -382,13 +391,34 @@ if($settings_file <> '' AND isset($random_seed)) {
 if($max_time_computing > 0) {
 	echo "• Max computation time has been set to <font color=\"red\">".$max_time_computing."</font> seconds by <font color=\"blue\">‘".$settings_file."’</font><br />";
 	}
-if($csound_orchestra <> '') {
-	echo "• Csound orchestra file ‘<font color=\"blue\">".$csound_orchestra."</font>’ is mentioned in <font color=\"blue\">‘".$csound_file."’</font>";
-	if(!file_exists($dir.$csound_orchestra)) echo "<br />&nbsp;&nbsp;<font color=\"red\">➡&nbsp;yet not in the current folder.</font> Therefore <font color=\"blue\">‘default.orc’</font> will be used instead</p>";
-	}
-else if($file_format == "csound") {
-	if(file_exists($dir."default.orc")) echo "• Csound files will be produced, which Csound will try to convert to sound files using orchestra <font color=\"blue\">‘default.orc’</font></p>";
-	else echo "• <font color=\"red\">➡</font> Csound files will be produced, but Csound not be able to convert them to sound files because the default orchestra <font color=\"blue\">‘".$dir."default.orc’</font> is not found.</p>";
+
+if($file_format == "csound") {
+	if($csound_is_responsive) {
+		if($csound_orchestra <> '' AND file_exists($dir.$csound_orchestra)) {
+			echo "• <font color=\"red\">Csound scores</font> will be produced and converted to sound files using ‘<font color=\"blue\">".$csound_orchestra."</font>’ as specified in <font color=\"blue\">‘".$csound_file."’</font>";
+			}
+		else if($csound_orchestra <> '') {
+			$csound_orchestra = '';
+			echo "<font color=\"red\">➡</font> Csound scores will be produced yet conversion to sound files will not be possible because ‘<font color=\"blue\">".$csound_orchestra."</font>’ specified in <font color=\"blue\">‘".$csound_file."’</font> was not found in the work folder";
+			}
+		else if($csound_default_orchestra <> '' AND file_exists($dir.$csound_default_orchestra)) {
+			$csound_orchestra = $csound_default_orchestra;
+			echo "• <font color=\"red\">Csound scores</font> will be produced and converted to sound files using orchestra <font color=\"blue\">‘".$csound_default_orchestra."’</font> as specified in <font color=\"blue\">‘".$settings_file."’</font>";
+			}
+		else if($csound_default_orchestra <> '') {
+			$csound_orchestra = '';
+			echo "<font color=\"red\">➡</font> Csound scores will be produced yet not converted to sound files by orchestra <font color=\"blue\">‘".$csound_default_orchestra."’</font> as specified in <font color=\"blue\">‘".$settings_file."’</font> because this file was not found in the work folder";
+			}
+		else if(file_exists($dir."default.orc")) {
+			$csound_orchestra = "default.orc";
+			echo "• <font color=\"red\">Csound scores</font> will be produced and converted to sound files using default orchestra file <font color=\"blue\">‘default.orc’</font>";
+			}
+		else {
+			$csound_orchestra = '';
+			echo "<font color=\"red\">➡</font> Csound scores will be produced yet not converted to sound files</font> because default orchestra file <font color=\"blue\">‘default.orc’</font> was not found in the work folder";
+			}
+		}
+	else echo "<font color=\"red\">➡</font> Csound scores will be produced yet not converted to sound files because Csound is not installed or not responsive";
 	}
 echo "</p>";
 

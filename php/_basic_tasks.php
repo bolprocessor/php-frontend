@@ -577,6 +577,7 @@ function get_setting($parameter,$settings_file) {
 	if($parameter == "max_time_computing") $i = 44;
 	if($parameter == "diapason") $i = 63;
 	if($parameter == "C4key") $i = 62;
+	if($parameter == "csound_default_orchestra") $i = 1;
 	if($i <> -1) return $table[$i];
 	else return '';
 	}
@@ -716,6 +717,11 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder) {
 		fwrite($handle,$whichCsoundInstrument."\n");
 		}
 	$CsoundOrchestraName = $_POST['CsoundOrchestraName'];
+	$warn_not_empty = FALSE;
+	if($CsoundOrchestraName == '') {
+		$CsoundOrchestraName = "default.orc";
+		$warn_not_empty = TRUE;
+		}
 	fwrite($handle,$CsoundOrchestraName."\n");
 	$number_instruments = $_POST['number_instruments'];
 	fwrite($handle,$number_instruments."\n");
@@ -771,7 +777,7 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder) {
 	fwrite($handle,$cstables."\n");
 	fclose($handle);
 	unlink($dir.$file_lock);
-	return;
+	return $warn_not_empty;
 	}
 	
 function reformat_grammar($verbose,$grammar_file) {
@@ -1620,8 +1626,9 @@ function check_csound() {
 		echo "<br />";
 		echo "<font color=\"red\">➡</font>&nbsp;<a target=\"_blank\" href=\"https://csound.com/download.html\">Follow this link</a> to install Csound and convert scores to sound files.</p>";
 		echo "</form>";
+		return FALSE;
 		}
-	else echo "<p style=\"vertical-align:middle;\"><img src=\"pict/logo_csound.jpg\" width=\"90px;\" style=\"vertical-align:middle;\" />&nbsp;is installed and responsive.</p>";
-	return;
+	echo "<p style=\"vertical-align:middle;\"><img src=\"pict/logo_csound.jpg\" width=\"90px;\" style=\"vertical-align:middle;\" />&nbsp;is installed and responsive.</p>";
+	return TRUE;
 	}
 ?>

@@ -16,6 +16,7 @@ $table = explode(SLASH,$file);
 $filename = end($table);
 $this_file = $bp_application_path.$file;
 $dir = str_replace($filename,'',$this_file);
+$warn_not_empty = FALSE;
 
 require_once("_header.php");
 echo "<p><small>Current directory = ".$dir;
@@ -135,7 +136,7 @@ if(isset($_POST['duplicate_instrument'])) {
 	
 if(isset($_POST['savealldata']) OR isset($_POST['delete_instrument']) OR isset($_POST['restore']) OR isset($_POST['create_instrument']) OR isset($_POST['duplicate_instrument'])) {
 	echo "<p id=\"timespan\"><font color=\"red\">Saving file:</font> <font color=\"blue\">".$filename."</font>";
-	SaveCsoundInstruments(FALSE,$dir,$filename,$temp_dir.$temp_folder);
+	$warn_not_empty = SaveCsoundInstruments(FALSE,$dir,$filename,$temp_dir.$temp_folder);
 	}
 
 try_create_new_file($this_file,$filename);
@@ -176,20 +177,22 @@ for($j = 0; $j < $number_channels; $j++) {
 	if($verbose) echo "MIDI channel #".$ch." => instrument [index ".$whichCsoundInstrument[$j]."]<br />";
 	}
 $CsoundOrchestraName = preg_replace("/<\/?html>/u",'',$table[++$j]);
+if($CsoundOrchestraName == '') {
+	$CsoundOrchestraName = "default.orc";
+	$warn_not_empty = TRUE;
+	}
 echo "Csound orchestra file = <input type=\"text\" name=\"CsoundOrchestraName\" size=\"30\" value=\"".$CsoundOrchestraName."\">";
 	echo " ➡ ";
-if(trim($CsoundOrchestraName) == '')
-	echo "<font color=\"red\">WARNING: this field should never be empty. Try for instance ‘default.orc’</font>";
+if($warn_not_empty)
+	echo "<font color=\"red\">WARNING: this field should never be empty. By default it has been set to ‘default.orc’</font>";
+$orchestra_filename = $dir.$CsoundOrchestraName;
+// echo $orchestra_filename."<br />";
+$path = str_replace($bp_application_path,'',$dir);
+if(file_exists($orchestra_filename)) {
+	echo "<a target=\"_blank\" href=\"csorchestra.php?file=".urlencode($path.$CsoundOrchestraName)."\">edit this file</a>";
+	}
 else {
-	$orchestra_filename = $dir.$CsoundOrchestraName;
-	// echo $orchestra_filename."<br />";
-		$path = str_replace($bp_application_path,'',$dir);
-	if(file_exists($orchestra_filename)) {
-		echo "<a target=\"_blank\" href=\"csorchestra.php?file=".urlencode($path.$CsoundOrchestraName)."\">edit this file</a>";
-		}
-	else {
-		echo "File not found: <a target=\"_blank\" href=\"csorchestra.php?file=".urlencode($path.$CsoundOrchestraName)."\">create it!</a>";
-		}
+	echo "File not found: <a target=\"_blank\" href=\"csorchestra.php?file=".urlencode($path.$CsoundOrchestraName)."\">create it!</a>";
 	}
 echo "<br />";
 $number_instruments = $table[++$j];
