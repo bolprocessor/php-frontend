@@ -65,10 +65,18 @@ else {
 //	echo "grammar_name = ".$grammar_name."<br />";
 	$project_name = preg_replace("/\.[a-z]+$/u",'',$output);
 	$result_file = $project_name."-result.html";
+//	echo "result_file = ".$result_file."<br />";
+	
 	@unlink($result_file);
-
 	if($output <> '') @unlink($output);
 	if($tracefile <> '') @unlink($tracefile);
+	$time_start = time();
+	$time_end = $time_start + 5;
+	while(TRUE) {
+		if(!file_exists($output) AND !file_exists($tracefile) AND !file_exists($result_file)) break;
+		if(time() > $time_end) break;
+		sleep(1);
+		}
 
 	$thisgrammar = $grammar_path;
 	if(is_integer(strpos($thisgrammar,' ')))
@@ -323,7 +331,13 @@ if($instruction <> "help") {
 		else {
 			$csound_file_link = $output;
 			$sound_file_link = str_replace(".sco",".wav",$csound_file_link);
-			
+			@unlink($sound_file_link);
+			$time_start = time();
+			$time_end = $time_start + 5;
+			while(TRUE) {
+				if(!file_exists($sound_file_link)) break;
+				if(time() > $time_end) break;
+				}
 			if(file_exists($csound_file_link)) {
 				$command = $csound_path."csound --version";
 				exec($command,$result_csound,$return_var);
@@ -331,7 +345,6 @@ if($instruction <> "help") {
 					echo "<p><font color=\"red\">➡</font> Test of Csound was unsuccessful. May be not installed? The command was: <font color=\"blue\">".$command."</font></p>";
 					}
 				else {
-					@unlink($sound_file_link);
 					sleep(1);
 					$time_start = time();
 					$command = $csound_path."csound --wave -o ".$sound_file_link." ".$dir.$csound_orchestra." ".$csound_file_link;
@@ -354,7 +367,7 @@ if($instruction <> "help") {
 						}
 					}
 				}
-			else echo "<p><font color=\"red\">➡</font> The score file (".$csound_file_link.") was not found and could not be processed by Csound.</p>";
+			else echo "<p><font color=\"red\">➡</font> The score file (".$csound_file_link.") was not found by Csound.</p>";
 			}
 		}
 	}
@@ -405,12 +418,12 @@ else {
 		$mssg = $o[$i];
 		$mssg = clean_up_encoding(FALSE,TRUE,$mssg);
 		if($handle) fwrite($handle,$mssg."<br />\n");
-		if($i < 7) echo $mssg."<br />";
+		if($i == 7) echo "…<br />";
+		if($i < 7 OR $i > ($n_messages - 4)) echo $mssg."<br />";
 		}
 	if($n_messages == 0) echo "No message produced…";
 	else {
-		echo "<p>…&nbsp;";
-		echo "<input style=\"color:DarkBlue; background-color:yellow; font-size:large;\" onclick=\"window.open('".$result_file."','result','width=800,height=600,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"show all messages…\">";
+		echo "<p><font color=\"red\">➡</font>&nbsp;<input style=\"color:DarkBlue; background-color:yellow; font-size:large;\" onclick=\"window.open('".$result_file."','result','width=800,height=600,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Show all ".$n_messages." messages…\">";
 		echo "</p>";
 		}
 	if($handle) fwrite($handle,"</body>\n");
