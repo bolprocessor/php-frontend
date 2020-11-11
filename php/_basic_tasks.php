@@ -12,6 +12,7 @@ $test = FALSE;
 
 $bp_application_path = "..".SLASH;
 if(!isset($csound_path) OR $csound_path == '') $csound_path = "/usr/local/bin/";
+if(!isset($csound_resources) OR $csound_resources == '') $csound_resources = "csound_resources";
 $max_sleep_time_after_bp_command = 15; // seconds. Maximum time required for the console
 $default_output_format = "midi";
 
@@ -20,6 +21,11 @@ if(!file_exists($temp_dir)) {
 	mkdir($temp_dir);
 	}
 $temp_dir .= SLASH;
+
+if(!file_exists($bp_application_path.$csound_resources)) {
+	mkdir($bp_application_path.$csound_resources);
+	}
+$dir_csound_resources = $bp_application_path.$csound_resources.SLASH;
 
 if(isset($_POST['csound_path'])) {
 	$new_csound_path = trim($_POST['csound_path']);

@@ -59,7 +59,7 @@ File write mode	0 = Write item immediately<br />1 = Write item after playing on 
 MIDI file format	(0, 1 or 2)	0
 Csound file format	0 = MacOS<br />1 = Windows<br />2 = Unix	0
 ProgNrFrom		0
-MIDI fade-out	sec (end of MIDI files)	1
+Fade-out time	seconds (end of MIDI files and Csound scores)	1
 C4 (middle C) key number	(0..127) usually 60	1
 A4 frequency (diapason)	Hz (usally 440)	1
 Strike again NoteOn's		1	1

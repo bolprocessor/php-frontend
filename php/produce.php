@@ -53,13 +53,19 @@ else {
 		$random_seed = $_GET['random_seed'];
 		$new_random_seed = TRUE;
 		}
-	if(isset($_GET['csound_orchestra'])) $csound_orchestra = $_GET['csound_orchestra'];
-	else $csound_orchestra = '';
 	if(isset($_GET['test'])) $check_command_line = TRUE;
 	
 	$table = explode('/',$grammar_path);
 	$grammar_name = $table[count($table) - 1];
 	$dir = str_replace($grammar_name,'',$grammar_path);
+	if(isset($_GET['csound_orchestra'])) {
+		$csound_orchestra = $_GET['csound_orchestra'];
+		if($csound_orchestra <> '' AND file_exists($dir.$csound_orchestra)) {
+			rename($dir.$csound_orchestra,$dir_csound_resources.$csound_orchestra);
+			sleep(1);
+			}
+		}
+	else $csound_orchestra = '';
 	
 	$grammar_name = str_replace(" ","_",$grammar_name);
 //	echo "grammar_name = ".$grammar_name."<br />";
@@ -323,10 +329,10 @@ if($instruction <> "help") {
 	if($file_format == "csound") {
 		if($csound_orchestra == '') {
 			$csound_orchestra = "default.orc";
-			echo "<p><font color=\"red\">➡</font> Csound orchestra file was not specified. I tried the default orchestra: <font color=\"blue\">".$dir.$csound_orchestra."</font>.</p>";
+			echo "<p><font color=\"red\">➡</font> Csound orchestra file was not specified. I tried the default orchestra: <font color=\"blue\">".$dir_csound_resources.$csound_orchestra."</font>.</p>";
 			}
-		if(!file_exists($dir.$csound_orchestra)) {
-			echo "<p><font color=\"red\">➡</font> No orchestra file has been found here: <font color=\"blue\">".$dir.$csound_orchestra."</font>. Csound will not create a sound file.</p>";
+		if(!file_exists($dir_csound_resources.$csound_orchestra)) {
+			echo "<p><font color=\"red\">➡</font> No orchestra file has been found here: <font color=\"blue\">".$dir_csound_resources.$csound_orchestra."</font>. Csound will not create a sound file.</p>";
 			}
 		else {
 			$csound_file_link = $output;
@@ -347,7 +353,7 @@ if($instruction <> "help") {
 				else {
 					sleep(1);
 					$time_start = time();
-					$command = $csound_path."csound --wave -o ".$sound_file_link." ".$dir.$csound_orchestra." ".$csound_file_link;
+					$command = $csound_path."csound --wave -o ".$sound_file_link." ".$dir_csound_resources.$csound_orchestra." ".$csound_file_link;
 					echo "<p><small>command = <font color=\"red\">".$command."</font></small></p>";
 					exec($command,$result_csound,$return_var);
 					if($return_var <> 0) {

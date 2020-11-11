@@ -215,6 +215,7 @@ else $csound_orchestra = '';
 $show_production = $trace_production = $note_convention = $non_stop_improvize = $p_clock = $q_clock = $striated_time = $max_time_computing = $produce_all_items = $random_seed = 0;
 $csound_default_orchestra = '';
 $diapason = 440; $C4key = 60;
+$found_orchestra_in_settings = FALSE;
 if($settings_file <> '') {
 	$show_production = get_setting("show_production",$settings_file);
 	$trace_production = get_setting("trace_production",$settings_file);
@@ -230,6 +231,7 @@ if($settings_file <> '') {
 	$diapason = get_setting("diapason",$settings_file);
 	$C4key = get_setting("C4key",$settings_file);
 	$csound_default_orchestra = get_setting("csound_default_orchestra",$settings_file);
+	if($csound_default_orchestra <> '') $found_orchestra_in_settings = TRUE;
 	}
 
 if($test) echo "url_this_page = ".$url_this_page."<br />";
@@ -309,9 +311,15 @@ if($csound_file <> '') {
 		}
 	else $link_produce .= "&csound_file=".urlencode($csound_file);
 	}
+if($csound_orchestra == '') $csound_orchestra = $csound_default_orchestra;
 if($csound_orchestra <> '') {
-	if(file_exists($dir.$csound_orchestra)) $link_produce .= "&csound_orchestra=".urlencode($csound_orchestra);
+	if(file_exists($dir.$csound_orchestra)) {
+		rename($dir.$csound_orchestra,$dir_csound_resources.$csound_orchestra);
+		sleep(1);
+		}
+	if(file_exists($dir_csound_resources.$csound_orchestra)) $link_produce .= "&csound_orchestra=".urlencode($csound_orchestra);
 	}
+
 if($error) echo $error_mssg;
 if($test) echo "output = ".$output."<br />";
 if($test) echo "output_file = ".$output_file."<br />";
@@ -393,15 +401,23 @@ if($max_time_computing > 0) {
 	}
 
 if($file_format == "csound") {
+	if($csound_orchestra <> '' AND file_exists($dir.$csound_orchestra)) {
+		rename($dir.$csound_orchestra,$dir_csound_resources.$csound_orchestra);
+		sleep(1);
+		}
+	if($csound_default_orchestra <> '' AND file_exists($dir.$csound_default_orchestra)) {
+		rename($dir.$csound_default_orchestra,$dir_csound_resources.$csound_default_orchestra);
+		sleep(1);
+		}
 	if($csound_is_responsive) {
-		if($csound_orchestra <> '' AND file_exists($dir.$csound_orchestra)) {
+		if(!$found_orchestra_in_settings AND $csound_orchestra <> '' AND file_exists($dir_csound_resources.$csound_orchestra)) {
 			echo "• <font color=\"red\">Csound scores</font> will be produced and converted to sound files using ‘<font color=\"blue\">".$csound_orchestra."</font>’ as specified in <font color=\"blue\">‘".$csound_file."’</font>";
 			}
-		else if($csound_orchestra <> '') {
+		else if(!$found_orchestra_in_settings AND $csound_orchestra <> '') {
 			$csound_orchestra = '';
 			echo "<font color=\"red\">➡</font> Csound scores will be produced yet conversion to sound files will not be possible because ‘<font color=\"blue\">".$csound_orchestra."</font>’ specified in <font color=\"blue\">‘".$csound_file."’</font> was not found in the work folder";
 			}
-		else if($csound_default_orchestra <> '' AND file_exists($dir.$csound_default_orchestra)) {
+		else if($csound_default_orchestra <> '' AND file_exists($dir_csound_resources.$csound_default_orchestra)) {
 			$csound_orchestra = $csound_default_orchestra;
 			echo "• <font color=\"red\">Csound scores</font> will be produced and converted to sound files using orchestra <font color=\"blue\">‘".$csound_default_orchestra."’</font> as specified in <font color=\"blue\">‘".$settings_file."’</font>";
 			}
@@ -417,6 +433,7 @@ if($file_format == "csound") {
 			$csound_orchestra = '';
 			echo "<font color=\"red\">➡</font> Csound scores will be produced yet not converted to sound files</font> because default orchestra file <font color=\"blue\">‘default.orc’</font> was not found in the work folder";
 			}
+		if(file_exists($dir_csound_resources.$csound_orchestra)) $link_produce .= "&csound_orchestra=".urlencode($csound_orchestra);
 		}
 	else echo "<font color=\"red\">➡</font> Csound scores will be produced yet not converted to sound files because Csound is not installed or not responsive";
 	}
