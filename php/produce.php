@@ -170,6 +170,7 @@ echo "<p><small>command = <font color=\"red\">".$command."</font></small></p>";
 if($instruction <> "help") {
 	if($csound_file <> '') {
 		$lock_file = $dir.$csound_file."_lock";
+	//	echo "Csound instruments lock_file = ".$lock_file."<br />";
 		$time_start = time();
 		$time_end = $time_start + 5;
 		while(TRUE) {
@@ -182,6 +183,7 @@ if($instruction <> "help") {
 		}
 	if($objects_file <> '') {
 		$lock_file = $dir.$objects_file."_lock";
+	//	echo "Sound-object prototypes lock_file = ".$lock_file."<br />";
 		$time_start = time();
 		$time_end = $time_start + 5;
 		while(TRUE) {
@@ -237,7 +239,11 @@ if($instruction <> "help") {
 	if($test) echo "file_format = ".$file_format."<br />";
 
 	if(!$no_error) {
-		echo "<p><font color=\"red\">Errors found… Check the </font> <a onclick=\"window.open('".$trace_link."','errors','width=800,height=800,left=400'); return false;\" href=\"".$trace_link."\">error trace</a> file!</p>";
+		echo "<p><font color=\"red\">Errors found… ";
+		$content_trace = @file_get_contents($trace_link,TRUE);
+		if($content_trace AND strlen($content_trace) > 4)
+			echo "Check the </font> <a onclick=\"window.open('".$trace_link."','errors','width=800,height=500,left=400'); return false;\" href=\"".$trace_link."\">error trace</a> file!";
+		echo "</p>";
 		}
 	else {
 		echo "<p>";
@@ -284,7 +290,7 @@ if($instruction <> "help") {
 			if(!$found OR $this_name <> $grammar_name OR isset($table[$i + 2])) continue;
 			echo "<td style=\"background-color:white; border-radius: 6px; border: 4px solid Gold; vertical-align:middle; text-align: center; padding:8px; margin:0px;\>";
 			$number = intval(str_replace(".html",'',$table[$i + 1]));
-			$content = @file_get_contents($temp_dir.$thisfile,FALSE);
+			$content = @file_get_contents($temp_dir.$thisfile,TRUE);
 			$table2 = explode(chr(10),$content);
 			$imax = count($table2);
 			$table3 = array();

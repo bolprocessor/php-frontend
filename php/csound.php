@@ -185,9 +185,13 @@ echo "Csound orchestra file = <input type=\"text\" name=\"CsoundOrchestraName\" 
 	echo " ➡ ";
 if($warn_not_empty)
 	echo "<font color=\"red\">WARNING: this field should never be empty. By default it has been set to ‘default.orc’</font>";
-$orchestra_filename = $dir.$CsoundOrchestraName;
+$orchestra_filename = $dir_csound_resources.$CsoundOrchestraName;
+if(file_exists($dir.$CsoundOrchestraName)) {
+	rename($dir.$CsoundOrchestraName,$orchestra_filename);
+	sleep(1);
+	}
 // echo $orchestra_filename."<br />";
-$path = str_replace($bp_application_path,'',$dir);
+$path = str_replace($bp_application_path,'',$dir_csound_resources);
 if(file_exists($orchestra_filename)) {
 	echo "<a target=\"_blank\" href=\"csorchestra.php?file=".urlencode($path.$CsoundOrchestraName)."\">edit this file</a>";
 	}
@@ -457,7 +461,9 @@ for($i = $i + 1; $i < $imax_file; $i++) {
 	$line = trim($table[$i]);
 	if($line == '') continue;
 	$cstables .= $line."\n";
-	echo preg_replace("/<\/?html>/u",'',$line)."\n";
+	$clean_line = preg_replace("/<\/?html>/u",'',$line);
+	$clean_line = relocate_function_table($dir,$clean_line);
+	echo $clean_line."\n";
 	}
 echo "</textarea>";
 echo "<p style=\"text-align:center;\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"savealldata\" value=\"SAVE ‘".$filename."’\"></p>";

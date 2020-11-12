@@ -317,6 +317,7 @@ if($csound_orchestra <> '') {
 		rename($dir.$csound_orchestra,$dir_csound_resources.$csound_orchestra);
 		sleep(1);
 		}
+	check_function_tables($dir,$csound_file);
 	if(file_exists($dir_csound_resources.$csound_orchestra)) $link_produce .= "&csound_orchestra=".urlencode($csound_orchestra);
 	}
 
@@ -409,6 +410,7 @@ if($file_format == "csound") {
 		rename($dir.$csound_default_orchestra,$dir_csound_resources.$csound_default_orchestra);
 		sleep(1);
 		}
+	check_function_tables($dir,$csound_file);
 	if($csound_is_responsive) {
 		if(!$found_orchestra_in_settings AND $csound_orchestra <> '' AND file_exists($dir_csound_resources.$csound_orchestra)) {
 			echo "• <font color=\"red\">Csound scores</font> will be produced and converted to sound files using ‘<font color=\"blue\">".$csound_orchestra."</font>’ as specified in <font color=\"blue\">‘".$csound_file."’</font>";

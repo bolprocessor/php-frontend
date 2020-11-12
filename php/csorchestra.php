@@ -20,8 +20,6 @@ if(isset($_POST['savethisfile'])) {
 	echo "<p id=\"timespan\" style=\"color:red;\">Saved file…</p>";
 	$content = $_POST['thistext'];
 	$handle = fopen($this_file,"w");
-	$file_header = $top_header."\n// Orchestra saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
-	fwrite($handle,$file_header."\n");
 	fwrite($handle,$content);
 	fclose($handle);
 	}
@@ -30,10 +28,13 @@ try_create_new_file($this_file,$filename);
 $content = @file_get_contents($this_file,TRUE);
 if($content === FALSE) ask_create_new_file($url_this_page,$filename);
 $extract_data = extract_data(TRUE,$content);
-echo "<p style=\"color:blue;\">".$extract_data['headers']."</p>";
 $content = $extract_data['content'];
+$textarea_rows = 15;
+$table = explode(chr(10),$content);
+$imax = count($table);
+if($imax > $textarea_rows) $textarea_rows = $imax;
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 echo "<p style=\"text-align:left;\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></p>";
-echo "<textarea name=\"thistext\" rows=\"40\" style=\"width:700px;\">".$content."</textarea>";
+echo "<textarea name=\"thistext\" rows=\"".$textarea_rows."\" style=\"width:700px;\">".$content."</textarea>";
 echo "</form>";
 ?>

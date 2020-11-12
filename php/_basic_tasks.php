@@ -13,6 +13,7 @@ $test = FALSE;
 $bp_application_path = "..".SLASH;
 if(!isset($csound_path) OR $csound_path == '') $csound_path = "/usr/local/bin/";
 if(!isset($csound_resources) OR $csound_resources == '') $csound_resources = "csound_resources";
+save_settings("csound_resources",$csound_resources);
 $max_sleep_time_after_bp_command = 15; // seconds. Maximum time required for the console
 $default_output_format = "midi";
 
@@ -1636,5 +1637,40 @@ function check_csound() {
 		}
 	echo "<p style=\"vertical-align:middle;\"><img src=\"pict/logo_csound.jpg\" width=\"90px;\" style=\"vertical-align:middle;\" />&nbsp;is installed and responsive.</p>";
 	return TRUE;
+	}
+
+function relocate_function_table($dir,$line) {
+	// Look for mention of external file in a ‘f1’ statement of Csound function table
+	global $dir_csound_resources;
+	$line = preg_replace("/\s+/u"," ",$line);
+	$clean_line = preg_replace("/f\s([0-9])/u","f$1",$line);
+	$table = explode(' ',$clean_line);
+	if(count($table) < 5) return $clean_line;
+	$p3 = abs(intval($table[3]));
+	if($p3 <> 1 AND $p3 <> 23 AND $p3 <> 28 AND $p3 <> 49)
+		// Doc: https://www.csounds.com/manual/html/ScoreGenRef.html
+		return $clean_line;
+	$filename = str_replace('"','',$table[4],$count);
+	if($count > 0 AND file_exists($dir.$filename))
+		rename($dir.$filename,$dir_csound_resources.$filename);
+	return $clean_line;
+	}
+
+function check_function_tables($dir,$csound_file) {
+	if($csound_file == '') return;
+	$content = @file_get_contents($dir.$csound_file,TRUE);
+	if($content == '') return;
+	$table = explode(chr(10),$content);
+	$imax = count($table);
+	$found = FALSE;
+	for($i = 0; $i < $imax; $i++) {
+		$line = trim($table[$i]);
+		if($line == '') continue;
+		if($line == "_begin tables") {
+			$found = TRUE; continue;
+			}
+		if($found) relocate_function_table($dir,$line);
+		}
+	return;
 	}
 ?>
