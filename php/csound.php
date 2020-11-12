@@ -135,12 +135,15 @@ if(isset($_POST['duplicate_instrument'])) {
 	}
 	
 if(isset($_POST['savealldata']) OR isset($_POST['delete_instrument']) OR isset($_POST['restore']) OR isset($_POST['create_instrument']) OR isset($_POST['duplicate_instrument'])) {
-	echo "<p id=\"timespan\"><font color=\"red\">Saving file:</font> <font color=\"blue\">".$filename."</font>";
+	echo "<p id=\"timespan\"><font color=\"red\">Saving file:</font> <font color=\"blue\">".$filename."</font></p>";
 	$warn_not_empty = SaveCsoundInstruments(FALSE,$dir,$filename,$temp_dir.$temp_folder);
+	@flush();
+	@ob_flush();
+	sleep(1);
 	}
 
 try_create_new_file($this_file,$filename);
-$content = @file_get_contents($this_file,TRUE);
+$content = @file_get_contents($this_file);
 if($content === FALSE) ask_create_new_file($url_this_page,$filename);
 if(strlen(trim($content)) == 0) {
 	$template = "csound_template";

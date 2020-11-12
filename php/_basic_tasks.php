@@ -620,7 +620,6 @@ function SaveObjectPrototypes($verbose,$dir,$filename,$temp_folder) {
 	fwrite($handle,"lock\n");
 	fclose($handle);
 	$handle = fopen($dir.$filename,"w");
-//	$handle = fopen($dir."essai.txt","w");
 	$file_header = $top_header."\n// Object prototypes file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
 	fwrite($handle,$file_header."\n");
 	$PrototypeTickKey = $_POST['PrototypeTickKey'];
@@ -698,6 +697,7 @@ function SaveObjectPrototypes($verbose,$dir,$filename,$temp_folder) {
 	fwrite($handle,"_endSoundObjectFile_\n");
 	fclose($handle);
 	if($verbose) echo "</font></p><hr>";
+	sleep(1);
 	unlink($dir.$file_lock);
 	return;
 	}
@@ -712,8 +712,8 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder) {
 	$handle = fopen($dir.$file_lock,"w");
 	fwrite($handle,"lock\n");
 	fclose($handle);
+	unlink($dir.$filename);
 	$handle = fopen($dir.$filename,"w");
-//	$handle = fopen($dir."essai.txt","w");
 	$file_header = $top_header."\n// Csound instrument file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
 	fwrite($handle,$file_header."\n");
 	$number_channels = $_POST['number_channels'];
@@ -781,8 +781,14 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder) {
 	$begin_tables = $_POST['begin_tables'];
 	fwrite($handle,$begin_tables."\n");
 	$cstables = $_POST['cstables'];
-	fwrite($handle,$cstables."\n");
+	$table = explode(chr(10),$cstables);
+	for($i = 0; $i < count($table); $i++) {
+		$line = trim($table[$i]);
+		if($line == '') continue;
+		fwrite($handle,$line."\n");
+		}
 	fclose($handle);
+	sleep(1);
 	unlink($dir.$file_lock);
 	return $warn_not_empty;
 	}
