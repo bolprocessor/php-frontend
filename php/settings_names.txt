@@ -108,8 +108,8 @@ Font size		0
 Font size		0
 Font size		0
 Font size		0
-Font size		0
-MIDI output filter	(will be explained later)	1
+Block frequency of key	(when changing scale in Csound) usually 60 = C4 or 69 = A4	1
+MIDI output filter	(will be explained later)	0
 B# instead of C		1	1
 Db instead of C#		1	1
 NameChoice		0	1
@@ -122,7 +122,7 @@ Ab instead of G#		1	1
 NameChoice		0	1
 Bb instead of A#		1	1
 Cb instead of B		1	1
-MIDI input filter	(will be explained later)	1
+MIDI input filter	(will be explained later)	0
 ShowObjectGraph		1	1
 ShowPianoRoll		1	1
 -- end --

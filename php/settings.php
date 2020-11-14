@@ -17,8 +17,8 @@ echo link_to_help();
 echo "<h3>Settings file “".$filename."”</h3>";
 echo "<p><i>This temporary layout will remain until the set of relevant parameters has been finalised.</i></p>";
 
-$bp_parameter_names = @file_get_contents("bp_parameter_names.txt",TRUE);
-if($bp_parameter_names === FALSE) echo "ERROR reading ‘bp_parameter_names.txt’";
+$bp_parameter_names = @file_get_contents("settings_names.txt",TRUE);
+if($bp_parameter_names === FALSE) echo "ERROR reading ‘settings_names.txt’";
 $table = explode(chr(10),$bp_parameter_names);
 $imax = count($table);
 $imax_parameters = 0;
@@ -145,7 +145,12 @@ if(isset($_POST['saveparameters'])) {
 			$value = $newvalue;
 			}
 		if($i == 71) $value = 39;
-		if($i > 71 AND $i < 111) $value = 10;
+		if($i == 110 AND (!is_numeric($value) OR intval($value) <> $value OR $value <= 10 OR $value > 127)) {
+			$newvalue = 60;
+			echo "<p><font color=\"red\">“Block frequency of key” must be an integer from 0 to 127: “</font><font color=\"blue\">".$value."</font><font color=\"red\">” has been replaced with “</font><font color=\"blue\">".$newvalue."</font><font color=\"red\">” (C4).</font></p>";
+			$value = $newvalue;
+			}
+		if($i > 71 AND $i < 110) $value = 10;
 		if(strlen($value) == 0) $value = ' ';
 	//	echo "value = “".$value."”<br />";
 		fwrite($handle,$value."\n");

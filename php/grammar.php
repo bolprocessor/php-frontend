@@ -119,7 +119,7 @@ if(isset($_POST['compilegrammar'])) {
 	else $settings_file = '';
 	if(isset($_POST['csound_file'])) $csound_file = $_POST['csound_file'];
 	else $csound_file = '';
-	echo "<p id=\"timespan\">Compiling ‘".$filename."’</p>";
+//	echo "<p id=\"timespan\">Compiling ‘".$filename."’</p>";
 	$application_path = $bp_application_path;
 	$command = $application_path."bp compile";
 	$thisgrammar = $dir.$filename;
@@ -148,7 +148,7 @@ if(isset($_POST['compilegrammar'])) {
 		else $command .= " -cs ".$dir.$csound_file;
 		}
 	$command .= " --traceout ".$tracefile;
-	echo "<p style=\"color:red;\"><small>".$command."</small></p>";
+	echo "<p style=\"color:red;\" id=\"timespan\"><small>".$command."</small></p>";
 	$no_error = FALSE;
 	$o = send_to_console($command);
 	$n_messages = count($o);
@@ -160,7 +160,7 @@ if(isset($_POST['compilegrammar'])) {
 			}
 		}
 	if(!$no_error) {
-		$trace_link = clean_up_file($dir.$tracefile);
+		$trace_link = clean_up_file_to_html($dir.$tracefile);
 		if($trace_link == '') echo "<p><font color=\"red\">Errors found, but no trace file has been created.</font></p>";
 		else echo "<p><font color=\"red\">Errors found! Open the </font> <a onclick=\"window.open('".$trace_link."','trace','width=800,height=800'); return false;\" href=\"".$trace_link."\">trace file</a>!</p>";
 		}
@@ -209,8 +209,11 @@ if($alphabet_file <> '' AND $objects_file == '') {
 	$objects_file = get_name_mi_file($dir.$alphabet_file);
 	if($objects_file <> '') $found_elsewhere = TRUE;
 	}
-
-if($csound_file <> '') $csound_orchestra = get_orchestra_filename($dir.$csound_file);
+$found_orchestra_in_instruments = FALSE;
+if($csound_file <> '') {
+	$csound_orchestra = get_orchestra_filename($dir.$csound_file);
+	if($csound_orchestra <> '') $found_orchestra_in_instruments = TRUE;
+	}
 else $csound_orchestra = '';
 $show_production = $trace_production = $note_convention = $non_stop_improvize = $p_clock = $q_clock = $striated_time = $max_time_computing = $produce_all_items = $random_seed = 0;
 $csound_default_orchestra = '';
@@ -412,28 +415,29 @@ if($file_format == "csound") {
 		}
 	check_function_tables($dir,$csound_file);
 	if($csound_is_responsive) {
-		if(!$found_orchestra_in_settings AND $csound_orchestra <> '' AND file_exists($dir_csound_resources.$csound_orchestra)) {
-			echo "• <font color=\"red\">Csound scores</font> will be produced and converted to sound files using ‘<font color=\"blue\">".$csound_orchestra."</font>’ as specified in <font color=\"blue\">‘".$csound_file."’</font>";
+		if($found_orchestra_in_instruments AND file_exists($dir_csound_resources.$csound_orchestra)) {
+			echo "• <font color=\"red\">Csound scores</font> will be produced and converted to sound files (including scales) using orchestra ‘<font color=\"blue\">".$csound_orchestra."</font>’ as specified in <font color=\"blue\">‘".$csound_file."’</font>";
+			if($found_orchestra_in_settings AND file_exists($dir_csound_resources.$csound_default_orchestra)) echo "<br />&nbsp;&nbsp;<font color=\"red\">➡</font> Orchestra ‘<font color=\"blue\">".$csound_default_orchestra."</font>’ specified in <font color=\"blue\">‘".$settings_file."’</font> will be ignored</font>";
 			}
-		else if(!$found_orchestra_in_settings AND $csound_orchestra <> '') {
+		else if($found_orchestra_in_instruments AND !$found_orchestra_in_settings AND $csound_orchestra <> '') {
+			echo "<font color=\"red\">➡</font> Csound scores will be produced, yet conversion to sound files will not be possible because orchestra ‘<font color=\"blue\">".$csound_orchestra."</font>’ specified in ‘<font color=\"blue\">".$csound_file."</font>’ was not found in the Csound resources folder";
 			$csound_orchestra = '';
-			echo "<font color=\"red\">➡</font> Csound scores will be produced yet conversion to sound files will not be possible because ‘<font color=\"blue\">".$csound_orchestra."</font>’ specified in <font color=\"blue\">‘".$csound_file."’</font> was not found in the work folder";
 			}
 		else if($csound_default_orchestra <> '' AND file_exists($dir_csound_resources.$csound_default_orchestra)) {
 			$csound_orchestra = $csound_default_orchestra;
-			echo "• <font color=\"red\">Csound scores</font> will be produced and converted to sound files using orchestra <font color=\"blue\">‘".$csound_default_orchestra."’</font> as specified in <font color=\"blue\">‘".$settings_file."’</font>";
+			echo "• <font color=\"red\">Csound scores</font> will be produced and converted to sound files (including scales) using orchestra ‘<font color=\"blue\">".$csound_default_orchestra."</font>’ as specified in <font color=\"blue\">‘".$settings_file."’</font>";
 			}
 		else if($csound_default_orchestra <> '') {
+			echo "<font color=\"red\">➡</font> Csound scores will be produced yet not converted to sound files by orchestra ‘<font color=\"blue\">".$csound_default_orchestra."</font>’ as specified in ‘<font color=\"blue\">".$settings_file."</font>’ because this file was not found in the Csound resources folder";
 			$csound_orchestra = '';
-			echo "<font color=\"red\">➡</font> Csound scores will be produced yet not converted to sound files by orchestra <font color=\"blue\">‘".$csound_default_orchestra."’</font> as specified in <font color=\"blue\">‘".$settings_file."’</font> because this file was not found in the work folder";
 			}
-		else if(file_exists($dir."default.orc")) {
+		else if(file_exists($dir_csound_resources."default.orc")) {
 			$csound_orchestra = "default.orc";
-			echo "• <font color=\"red\">Csound scores</font> will be produced and converted to sound files using default orchestra file <font color=\"blue\">‘default.orc’</font>";
+			echo "• <font color=\"red\">Csound scores</font> will be produced and converted to sound files using default orchestra file ‘<font color=\"blue\">".$csound_orchestra."</font>’ found in the Csound resources folder";
 			}
 		else {
+			echo "<font color=\"red\">➡</font> Csound scores will be produced yet not converted to sound files</font> because default orchestra file ‘<font color=\"blue\">default.orc</font>’ was not found in the Csound resources folder";
 			$csound_orchestra = '';
-			echo "<font color=\"red\">➡</font> Csound scores will be produced yet not converted to sound files</font> because default orchestra file <font color=\"blue\">‘default.orc’</font> was not found in the work folder";
 			}
 		if(file_exists($dir_csound_resources.$csound_orchestra)) $link_produce .= "&csound_orchestra=".urlencode($csound_orchestra);
 		}

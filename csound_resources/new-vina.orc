@@ -36,13 +36,12 @@ ipitchscale = log(2.0) / 1200.0
 ; sound duration
 idur  = p3
 
+; interpret p4 as frequency or octave point pitch-class
 if (p4 < 15.0) then
- icpspitch = cpspch(p4)
+icpspitch = cpspch(p4)
 else
- icpspitch = p4
+icpspitch = p4
 endif
-
-; icpspitch  = cpspch(p4)
 
 ; set function table numbers
 ifdiscontpb = p13

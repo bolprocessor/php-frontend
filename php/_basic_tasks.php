@@ -547,8 +547,8 @@ function clean_up_file($file) { // NOT USED
 
 function get_setting($parameter,$settings_file) {
 	global $dir;
-	$bp_parameter_names = @file_get_contents("bp_parameter_names.txt",TRUE);
-	if($bp_parameter_names == FALSE) return "error reading bp_parameter_names.txt";
+	$bp_parameter_names = @file_get_contents("settings_names.txt",TRUE);
+	if($bp_parameter_names == FALSE) return "error reading settings_names.txt";
 	$table = explode(chr(10),$bp_parameter_names);
 	$imax = count($table);
 	$imax_parameters = 0;
