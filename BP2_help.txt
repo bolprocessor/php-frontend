@@ -1,7 +1,7 @@
 // This is the help file for Bol Processor.
 // When editing it, beware that BP2 looks for prefixes. Therefore, if an item is
 // the prefix of another one then it should precede it in this file.
-### Help
+### Help 
 • To access on-line help, type cmd-? or select "Help" in the "Action" menu.
 The cursor becomes a question mark.  Select a menu command, click a button or
 select any word or group of words you need information about.
@@ -788,6 +788,14 @@ When checked, BP2 will use the quantization setting (in milliseconds) to simplif
 ### _script(scriptline) [Performance control]
 The script line will be executed at "performance time". Note that the line may be
     a call to another script, etc...
+### _scale(name,blockkey) [Performance control]
+If microtonal scales have been defined in the Csound instruments file, they can be selected as follows:
+• By default, a 12-tone equal-tempered scale is used.
+• "name" is the label of the scale, by default "scale_1", "scale_2" etc. (no space)
+• "blockkey" specifies the key of a note whose frequency should keep matching equal-temperament. For instance, if blockkey = 69 then 'A4' will always match the diapason. The default value of 'blockkey' is stored in the settings.
+• _scale(0,blockkey) will reset the scale to equal-tempered, in which case 'blockkey' is irrelevant.
+• If exactly 1 scale has been loaded from the Csound instruments file, it will be used by default, i.e. even if no _scale(name,blockkey) instruction is used.
+• Values of 'scale' and 'blockkey' are carried through fields of polymetric expressions and not influenced by _chan() nor _ins() instructions.
 ### New Project
 "New project" erases the current project (grammar and "terminal alphabet").
 • This is also a script command.

@@ -592,7 +592,7 @@ function get_setting($parameter,$settings_file) {
 function note_convention($i) {
 	switch($i) {
 		case 0: $c = "english"; break;
-		case 1: $c = "french"; break;
+		case 1: $c = "italian/French"; break;
 		case 2: $c = "indian"; break;
 		case 3: $c = "keys"; break;
 		}
@@ -1299,7 +1299,7 @@ function octave($convention,$key) {
 		case "English":
 			$octave = intdiv($key,12) - 1;
 			break;
-		case "French":
+		case "Italian/French":
 		case "Indian":
 			$octave = intdiv($key,12) - 2;
 			break;
@@ -1309,7 +1309,7 @@ function octave($convention,$key) {
 
 function key_to_note($convention,$key) {
 	$name["English"] = array("C","Db","D","Eb","E","F","F#","G","Ab","A","Bb","B");
-	$name["French"] = array("do","reb","re","mib","mi","fa","fa#","sol","lab","la","sib","si");
+	$name["Italian/French"] = array("do","reb","re","mib","mi","fa","fa#","sol","lab","la","sib","si");
 	$name["Indian"] = array("sa","rek","re","gak","ga","ma","ma#","pa","dhak","dha","nik","ni");
 	$octave = octave($convention,$key);
 	$class = $key - (12 * intdiv($key,12));
