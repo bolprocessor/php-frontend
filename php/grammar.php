@@ -343,6 +343,7 @@ echo "</td></tr>";
 echo "<tr><td colspan=\"2\"><p style=\"text-align:center;\">➡ <i>You can change above settings, then save the grammar…</i></p></td></tr>";
 echo "</table>";
 
+echo "<div  id=\"topedit\">&nbsp;</div>";
 if($settings_file == '') {
 	if($metronome > 0) {
 		$p_clock = intval($metronome * 10000);
@@ -445,17 +446,36 @@ if($file_format == "csound") {
 	}
 echo "</p>";
 
+if($file_format == "csound") {
+	$list_of_tonal_scales = list_of_tonal_scales($dir.$csound_file);
+	// echo $dir_csound_resources.$csound_orchestra."<br />";
+	if(($max_scales = count($list_of_tonal_scales)) > 0) {
+		if($max_scales > 1) echo "<p style=\"margin-bottom:0px;\">The Csound orchestra file contains the definition of tonal scales:";
+		else echo "<p style=\"margin-bottom:0px;\">The Csound orchestra file contains the definition of tonal scale:";
+		echo "<ul style=\"margin-top:0px; margin-bottom:0px\">";
+		for($i_scale = 1; $i_scale <= $max_scales; $i_scale++)
+			echo "<li><font color=\"red\">".$list_of_tonal_scales[$i_scale - 1]."</font></li>";
+		echo "</ul>A scale may be called in “_scale()” instructions";
+		echo "</p>";
+		}
+	}
+
 echo "<input type=\"hidden\" name=\"produce_all_items\" value=\"".$produce_all_items."\">";
 echo "<input type=\"hidden\" name=\"show_production\" value=\"".$show_production."\">";
 echo "<input type=\"hidden\" name=\"trace_production\" value=\"".$trace_production."\">";
 echo "<input type=\"hidden\" name=\"metronome\" value=\"".$metronome."\">";
 echo "<input type=\"hidden\" name=\"time_structure\" value=\"".$time_structure."\">";
 echo "<input type=\"hidden\" name=\"alphabet_file\" value=\"".$alphabet_file."\">";
-echo "<p id=\"topedit\"><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"savegrammar\" value=\"SAVE ‘".$filename."’\">";
+echo "<p><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"savegrammar\" value=\"SAVE ‘".$filename."’\">";
 
 if((file_exists($output.SLASH.$default_output_name.".wav") OR file_exists($output.SLASH.$default_output_name.".mid") OR file_exists($output.SLASH.$default_output_name.".html") OR file_exists($output.SLASH.$default_output_name.".sco")) AND file_exists($result_file)) {
 	echo "&nbsp;&nbsp;&nbsp;<input style=\"color:DarkBlue; background-color:azure; font-size:large;\" onclick=\"window.open('".$result_file."','result','width=800,height=600,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Show latests results\">";
 	}
+echo "&nbsp;<input style=\"color:DarkBlue; background-color:Aquamarine; font-size:large;\" onclick=\"window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)";
+if($error) echo " - disabled because of missing files";
+echo "\" title=\"Don't forget to save!\"";
+if($error) echo " disabled";
+echo ">";
 echo "</p>";
 
 $table = explode(chr(10),$content);
@@ -464,7 +484,9 @@ if($imax > $textarea_rows) $textarea_rows = $imax + 5;
 
 echo "<textarea name=\"thisgrammar\" rows=\"".$textarea_rows."\" style=\"width:90%;\">".$content."</textarea>";
 
-echo "<div style=\"float:left; padding-top:12px;\"><input style=\"color:DarkBlue; background-color:Aquamarine; font-size:large;\" onclick=\"window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)\" title=\"Don't forget to save!\"";
+echo "<div style=\"float:left; padding-top:12px;\"><input style=\"color:DarkBlue; background-color:Aquamarine; font-size:large;\" onclick=\"window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)";
+if($error) echo " - disabled because of missing files";
+echo "\" title=\"Don't forget to save!\"";
 if($error) echo " disabled";
 echo ">";
 $link_test = $link_produce."&test";

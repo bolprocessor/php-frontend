@@ -108,7 +108,7 @@ Font size		0
 Font size		0
 Font size		0
 Font size		0
-Block frequency of key	(when changing scale in Csound) e.g. 60 = 'C4' or 69 = 'A4'	1
+Block key for scale in Csound	(0..127) e.g. 60 for 'C4' or 69 for 'A4'	1
 MIDI output filter	(will be explained later)	0
 B# instead of C		1	1
 Db instead of C#		1	1

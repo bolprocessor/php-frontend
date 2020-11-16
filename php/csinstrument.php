@@ -11,7 +11,7 @@ if(isset($_POST['instrument_name'])) {
 	$instrument_index = $_POST['instrument_index'];
 	}
 else {
-	"Csound instrument's name is not known. First open the ‘-cs’ file!"; die();
+	echo "Csound instrument's name is not known. First open the ‘-cs’ file!"; die();
 	}
 
 $this_title = $instrument_name;
@@ -94,7 +94,6 @@ if(isset($_POST['saveinstrument'])) {
 	$csfilename = $_POST['csfilename'];
 	echo "<p id=\"timespan\"><font color=\"red\">Saving this instrument…</font>";
 	$handle = fopen($instrument_file,"w");
-//	$handle = fopen("essai.txt","w");
 	$file_header = $top_header."\n// Object prototype saved as \"".$instrument_name."\". Date: ".gmdate('Y-m-d H:i:s');
 	fwrite($handle,$file_header."\n");
 	fwrite($handle,$csfilename."\n");

@@ -787,6 +787,21 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder) {
 		if($line == '') continue;
 		fwrite($handle,$line."\n");
 		}
+	$folder_scales = $temp_dir.$temp_folder.SLASH."scales";
+	$dir_scale = scandir($folder_scales);
+	foreach($dir_scale as $this_scale) {
+		if($this_scale == '.' OR $this_scale == ".." OR $this_scale == ".DS_Store") continue;
+		$table = explode(".",$this_scale);
+		$extension = end($table);
+		if($extension <> "txt") continue;
+		$content_scale = file_get_contents($folder_scales.SLASH.$this_scale,TRUE);
+		$table = explode(chr(10),$content_scale);
+		for($i = 0; $i < count($table); $i++) {
+			$line = trim($table[$i]);
+			if($line <> '') fwrite($handle,$line."\n");
+			}
+		}
+	fwrite($handle,"_end tables\n");
 	fclose($handle);
 	sleep(1);
 	unlink($dir.$file_lock);
@@ -1678,5 +1693,35 @@ function check_function_tables($dir,$csound_file) {
 		if($found) relocate_function_table($dir,$line);
 		}
 	return;
+	}
+	
+function html_to_text($text,$type) {
+	if($type == "textarea") $return = "\n";
+	else $return = "<br />";
+	$text = preg_replace("/<\/?html>/u",'',$text);
+	$text = preg_replace("/<br\s?\/?>/u","§§§",$text);
+	$text = str_replace('<','',$text);
+	$text = str_replace('>','',$text);
+	$text = str_replace("§§§",$return,$text);
+	return $text;
+	}
+
+function list_of_tonal_scales($csound_orchestra_file) {
+	$list = array();
+	if(!file_exists($csound_orchestra_file)) return $list;
+	$content = @file_get_contents($csound_orchestra_file,TRUE);
+	$table = explode(chr(10),$content);
+	$imax = count($table);
+	$found = FALSE;
+	for($i = 0; $i < $imax; $i++) {
+		$line = trim($table[$i]);
+		if($line == '') continue;
+		if($line == "_begin tables") $found = TRUE;
+		if($line == "_end tables") break;
+		if($found AND $line[0] == "\"") {
+			$list[] = str_replace('"','',$line);
+			}
+		}
+	return $list;
 	}
 ?>
