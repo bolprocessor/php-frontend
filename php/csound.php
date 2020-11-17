@@ -83,7 +83,7 @@ if(isset($_POST['max_scales'])) $max_scales = $_POST['max_scales'];
 else $max_scales = 0;
 for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
 	if(isset($_POST['delete_scale_'.$i_scale])) {
-		$scalefilename = $_GET['scalefilename'];
+		$scalefilename = urldecode($_GET['scalefilename']);
 		echo "Deleted scale ".$i_scale." (".$scalefilename.")<br />";
 		$file_link = $dir_scales.$scalefilename.".txt";
 		$new_file_link = $dir_scales.$scalefilename.".old";
@@ -619,9 +619,7 @@ if($max_scales > 0) {
 	for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
 		$link_edit = "scale.php";
 		echo "<li><font color=\"green\"><b>".$scale_name[$i_scale]."</b></font> ";
-//		echo "➡ <input type=\"submit\" style=\"background-color:Aquamarine;\" name=\"edit_scale\" formaction=\"".$link_edit."?scalefilename=".urlencode(clean_folder_name($scale_name[$i_scale]))."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT this scale\">";
 		echo "➡ <input type=\"submit\" style=\"background-color:Aquamarine;\" name=\"edit_scale\" formaction=\"".$link_edit."?scalefilename=".urlencode($scale_name[$i_scale])."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT this scale\">";
-	//	echo "&nbsp;<input type=\"submit\" style=\"background-color:yellow;\" name=\"delete_scale_".$i_scale."\" formaction=\"".$url_this_page."&scalefilename=".urlencode(clean_folder_name($scale_name[$i_scale]))."\" onclick=\"this.form.target='_self';return true;\" value=\"DELETE this scale (can be reversed)\">";
 		echo "&nbsp;<input type=\"submit\" style=\"background-color:yellow;\" name=\"delete_scale_".$i_scale."\" formaction=\"".$url_this_page."&scalefilename=".urlencode($scale_name[$i_scale])."\" onclick=\"this.form.target='_self';return true;\" value=\"DELETE this scale (can be reversed)\">";
 		echo "<br /><small>".$scale_table[$i_scale]."</small>";
 		if(isset($scale_note_names[$i_scale])) echo "<br />&nbsp;&nbsp;=&nbsp;<font color=\"blue\">".str_replace('/','',$scale_note_names[$i_scale])."</font>";

@@ -10,7 +10,7 @@ else {
 	echo "Csound instrument file is not known. First open the ‘-cs’ file!"; die();
 	}
 if(isset($_GET['scalefilename'])) {
-	$filename = $_GET['scalefilename'];
+	$filename = urldecode($_GET['scalefilename']);
 	}
 else {
 	echo "Scale name is not known. Call it from the ‘-cs’ file!"; die();
@@ -27,13 +27,84 @@ if(!file_exists($file_link)) {
 	echo "<br />Return to the ‘-cs’ file to restore it!"; die();
 	}
 
-if(isset($_POST['savethisfile'])) {
-	echo "<p id=\"timespan\"><font color=\"red\">Saving this scale...</font></p>";
-	$scale_name = $_POST['scale_name'];
+if(isset($_POST['interpolate']) OR isset($_POST['savethisfile'])) {
+	$new_scale_name = trim($_POST['scale_name']);
+	if($new_scale_name == '') $new_scale_name = $filename;
+	$result1 = check_duplicate_name($dir_scales,$new_scale_name.".txt");
+	$result2 = check_duplicate_name($dir_scales,$new_scale_name.".old");
+	if($new_scale_name <> $filename AND ($result1 OR $result2)) {
+		echo "<p><font color=\"red\">WARNING</font>: This name <font color=\"blue\">‘".$new_scale_name."’</font> already exists</p>";
+		$scale_name = $filename;
+		}
+	else $scale_name = $new_scale_name;
 	$numgrades = $_POST['numgrades'];
-	$interval = $_POST['interval'];
+	$interval = trim($_POST['interval']);
+	if($interval == '') $interval = 2;
+	$cents = round(1200 * log($interval) / log(2));
+	if(isset($_POST['interval_cents'])) {
+		$new_cents = round($_POST['interval_cents']);
+		if($new_cents > 1 AND $new_cents <> $cents)
+			$interval = round(exp($new_cents / 1200 * log(2)),4);
+		}
 	$basefreq = $_POST['basefreq'];
 	$basekey = $_POST['basekey'];
+	for($i = 0; $i <= $numgrades; $i++) {
+		if(!isset($_POST['p_'.$i])) $p[$i] = 0;
+		else $p[$i] = intval($_POST['p_'.$i]);
+		if(!isset($_POST['p_'.$i])) $q[$i] = 0;
+		else $q[$i] = intval($_POST['q_'.$i]);
+		
+		if(!isset($_POST['ratio_'.$i])) $ratio[$i] = 1;
+		else $ratio[$i] = trim($_POST['ratio_'.$i]);
+		if($ratio[$i] == '') {
+			$ratio[$i] = 1;
+			}
+		if(!isset($_POST['name_'.$i])) $name[$i] = "•";
+		else $name[$i] = trim($_POST['name_'.$i]);
+		if($name[$i] == '') {
+			$name[$i] = "•";
+			}
+		}
+	if($p[0] == 0 OR $q[0] == 0) {
+		$pmax = intval($ratio[0] * 1000);
+		$qmax = 1000;
+		$gcd = gcd($pmax,$qmax);
+		$pmax = $pmax / $gcd;
+		$qmax = $qmax / $gcd;
+		$p[0] = $pmax;
+		$q[0] = $qmax;
+		}
+	}
+
+if(isset($_POST['interpolate'])) {
+	$i1 = $i2 = 0;
+	while(TRUE) {
+		$found = FALSE;
+		while(TRUE) {
+			$i2++;
+			if($i2 > $numgrades) break;
+			if($p[$i2] > 0 AND $q[$i2] > 0) {
+				$found = TRUE; break;
+				}
+			}
+		if(!$found) break;
+		if(($i2 - $i1) > 1) {
+			$ratio1 = $p[$i1] / $q[$i1];
+			$ratio2 = $p[$i2] / $q[$i2];
+			$step = exp(log($ratio2/$ratio1) / ($i2 - $i1));
+			$x = $ratio1;
+			for($i = $i1 + 1; $i < $i2; $i ++) {
+				$x = $x * $step;
+				$ratio[$i] = round($x,3);
+				}
+			}
+		$i1 = $i2;
+		}
+	}
+
+$message = '';
+if(isset($_POST['savethisfile']) OR isset($_POST['interpolate'])) {
+	$message = "&nbsp;<span id=\"timespan\"><font color=\"red\">... Saving this scale ...</font></span>";
 	$scale_comment = $_POST['scale_comment'];
 	$table = explode(chr(10),$scale_comment);
 	$imax = count($table); $empty = TRUE;
@@ -46,27 +117,6 @@ if(isset($_POST['savethisfile'])) {
 		}
 	$scale_comment .= "</html>";
 	if($empty) $scale_comment = '';
-	$bad = FALSE;
-	for($i = 0; $i <= $numgrades; $i++) {
-		if(!isset($_POST['ratio_'.$i])) $ratio[$i] = 0;
-		else $ratio[$i] = trim($_POST['ratio_'.$i]);
-		if($ratio[$i] == '') {
-			$ratio[$i] = 0;
-		//	$bad = TRUE;
-			}
-		if(!isset($_POST['name_'.$i])) $name[$i] = "???";
-		else $name[$i] = trim($_POST['name_'.$i]);
-		if($name[$i] == '') {
-			$name[$i] = "???";
-		//	$bad = TRUE;
-			}
-		}
-	for($i = 0; $i <= $numgrades; $i++) {
-		if(!isset($_POST['p_'.$i])) $p[$i] = 0;
-		else $p[$i] =intval($_POST['p_'.$i]);
-		if(!isset($_POST['p_'.$i])) $q[$i] = 0;
-		else $q[$i] =intval($_POST['q_'.$i]);
-		}
 	$handle = fopen($file_link,"w");
 	fwrite($handle,"\"".$scale_name."\"\n");
 	$line_table = "f2 0 128 -51 ".$numgrades." ".$interval." ".$basefreq." ".$basekey;
@@ -86,7 +136,6 @@ if(isset($_POST['savethisfile'])) {
 	if($scale_comment <> '')
 		fwrite($handle,$scale_comment);
 	fclose($handle);
-	if($bad) echo "<p><font color=\"red\">WARNING:</font> A few boxes are empty</p>";
 	}
 
 $content = file_get_contents($file_link,TRUE);
@@ -120,7 +169,8 @@ for($i = 0; $i < $imax; $i++) {
 		echo "<p>This function table is not a microtonal scale:<br />".$line;
 		die();
 		}
-	echo "<p>Function table: <font color=\"blue\">".$line."</font></p>";
+	echo "Function table: <font color=\"blue\">".$line."</font>";
+	if($message <> '') echo $message;
 	echo "<p>➡ <a target=\"_blank\" href=\"https://www.csounds.com/manual/html/GEN51.html\">Read the documentation</a></p>";
 	$numgrades = $table2[4];
 	$interval = $table2[5];
@@ -152,14 +202,23 @@ if($scale_fraction <> '') {
 		$q[$i / 2] = $table[$i+1];
 		}
 	}
+
+$pmax = intval($interval * 1000);
+$qmax = 1000;
+$gcd = gcd($pmax,$qmax);
+$pmax = $pmax / $gcd;
+$qmax = $qmax / $gcd;
+$p[$numgrades] = $pmax;
+$q[$numgrades] = $qmax;
+
 $table = explode(' ',$scale_note_names);
 for($i = 0; $i <= $numgrades; $i++) {
-	if(isset($table[$i]) AND $table[$i] <> "???") $name[$i] = trim($table[$i]);
+	if(isset($table[$i]) AND $table[$i] <> "•") $name[$i] = trim($table[$i]);
 	else $name[$i] = '';
 	if(!isset($p[$i])) $p[$i] = 0;
 	if(!isset($q[$i])) $q[$i] = 0;
 	if($p[$i] > 0 AND $q[$i] > 0)
-		$ratio[$i] = $p[$i] / $q[$i];
+		$ratio[$i] = round($p[$i] / $q[$i],3);
 //	echo $i." ".$name[$i]."<br />";
 	}
 	
@@ -170,39 +229,64 @@ echo "<p>Name of this tonal scale: ";
 echo "<input type=\"text\" name=\"scale_name\" size=\"20\" value=\"".$scale_name."\">";
 if(is_integer(strpos($scale_name,' '))) echo " ➡ avoiding spaces is prefered";
 echo "</p>";
-echo "<p><font color=\"red\">numgrades</font> = <input type=\"text\" name=\"numgrades\" size=\"5\" value=\"".$numgrades."\"></p>";
-echo "<p><font color=\"red\">interval</font> = <input type=\"text\" name=\"interval\" size=\"5\" value=\"".$interval."\"></p>";
-echo "<p><font color=\"red\">basefreq</font> = <input type=\"text\" name=\"basefreq\" size=\"5\" value=\"".$basefreq."\"> (not used by BP3)</p>";
-echo "<p><font color=\"red\">basekey</font> = <input type=\"text\" name=\"basekey\" size=\"5\" value=\"".$basekey."\"></p>";
+echo "<p><font color=\"blue\">numgrades</font> = <input type=\"text\" name=\"numgrades\" size=\"5\" value=\"".$numgrades."\"></p>";
+echo "<p><font color=\"blue\">interval</font> = <input type=\"text\" name=\"interval\" size=\"5\" value=\"".$interval."\">";
+$cents = round(1200 * log($interval) / log(2));
+echo " or <input type=\"text\" name=\"interval_cents\" size=\"5\" value=\"".$cents."\"> cents (typically 1200)";
+echo "</p>";
+echo "<p><font color=\"blue\">basefreq</font> = <input type=\"text\" name=\"basefreq\" size=\"5\" value=\"".$basefreq."\"> (not used by BP3)</p>";
+echo "<p><font color=\"blue\">basekey</font> = <input type=\"text\" name=\"basekey\" size=\"5\" value=\"".$basekey."\"></p>";
 echo "<h3>Ratios and names of this tonal scale:</h3>";
-echo "<table style=\"background-color:white;\">";
-echo "<tr><th>fraction</th>";
+echo "<table style=\"background-color:white; table-layout:fixed ; width:100%;\">";
+echo "<tr><th style=\"width:7%; background-color:azure; padding:4px;\">fraction</th>";
 for($i = 0; $i <= $numgrades; $i++) {
-	echo "<td style=\"white-space:nowrap;\">";
+	echo "<td style=\"white-space:nowrap;\" colspan=\"2\">";
 	if($p[$i] == 0 OR $q[$i] == 0)
 		$p_txt = $q_txt = '';
 	else {
 		$p_txt = $p[$i];
 		$q_txt = $q[$i];
 		}
-	echo "<input type=\"text\" name=\"p_".$i."\" size=\"2\" value=\"".$p_txt."\">&nbsp;/&nbsp;<input type=\"text\" name=\"q_".$i."\" size=\"2\" value=\"".$q_txt."\">";
+	echo "<input type=\"text\" name=\"p_".$i."\" size=\"3\" value=\"".$p_txt."\">&nbsp;/&nbsp;<input type=\"text\" name=\"q_".$i."\" size=\"3\" value=\"".$q_txt."\">";
 	echo "</td>";
 	}
 echo "</tr>";
-echo "<tr><th>ratio</th>";
+echo "<tr><th style=\"width:7%; background-color:azure; padding:4px;\">ratio</th>";
 for($i = 0; $i <= $numgrades; $i++) {
-	echo "<td style=\"text-align:center;\">";
+	echo "<td style=\"text-align:center;\" colspan=\"2\">";
 	echo "<input type=\"text\" name=\"ratio_".$i."\" size=\"6\" value=\"".$ratio[$i]."\">";
 	echo "</td>";
 	}
 echo "</tr>";
-echo "<tr><th>name</th>";
+echo "<tr><th style=\"width:7%; background-color:azure; padding:4px;\">name</th>";
 for($i = 0; $i <= $numgrades; $i++) {
-	echo "<td style=\"text-align:center;\">";
+	echo "<td style=\"text-align:center;\" colspan=\"2\">";
 	echo "<input type=\"text\" name=\"name_".$i."\" size=\"6\" value=\"".$name[$i]."\">";
 	echo "</td>";
 	}
+echo "</tr>";
+
+
+echo "<tr><th style=\"width:7%; background-color:azure; padding:4px;\">cents</th><td></td>";
+for($i = 0; $i < $numgrades; $i++) {
+	echo "<td style=\"text-align:center;\" colspan=\"2\">";
+	$cents = round(1200 * log($ratio[$i + 1] / $ratio[$i]) / log(2));
+	echo "<- ".$cents." ->";
+	echo "</td>";
+	}
+echo "<td></td></tr>";
+	
+	
+echo "<tr><th style=\"width:7%; background-color:azure; padding:4px;\">key</th>";
+$key = $basekey;
+for($i = 0; $i <= $numgrades; $i++) {
+	echo "<td style=\"text-align:center;\" colspan=\"2\">";
+	echo $key++;
+	echo "</td>";
+	}
+echo "</tr>";
 echo "</table>";
+echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"interpolate\" value=\"INTERPOLATE\"> ➡ Replace no-ratio values with interpolated intervals (local temperament)</p>";
 
 $text = html_to_text($scale_comment,"textarea");
 echo "<h3>Comment:</h3>";
