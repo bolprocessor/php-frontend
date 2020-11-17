@@ -4,7 +4,7 @@ require_once("_basic_tasks.php");
 $url_this_page = "csound.php";
 
 $autosave = TRUE;
-$autosave = FALSE;
+// $autosave = FALSE;
 $verbose = TRUE;
 $verbose = FALSE;
 
@@ -30,13 +30,68 @@ echo "<h3>Csound instrument file “".$filename."”</h3>";
 if($test) echo "dir = ".$dir."<br />";
 
 $temp_folder = str_replace(' ','_',$filename)."_".session_id()."_temp";
-// echo "temp_folder = ".$temp_folder."<br />";
 if(!file_exists($temp_dir.$temp_folder)) {
 	mkdir($temp_dir.$temp_folder);
 	}
 if(!file_exists($temp_dir.$temp_folder.SLASH."scales")) {
 	mkdir($temp_dir.$temp_folder.SLASH."scales");
 	}
+$dir_scales = $temp_dir.$temp_folder.SLASH."scales".SLASH;
+$need_to_save = FALSE;
+
+if(isset($_POST['create_scale'])) {
+	$new_scale_name = trim($_POST['scale_name']);
+	$new_scale_name = preg_replace("/\s+/u",' ',$new_scale_name);
+	if($new_scale_name <> '') {
+		$new_scale_file = $new_scale_name.".txt";
+		$old_scale_file = $new_scale_name.".old";
+		$result1 = check_duplicate_name($dir_scales,$new_scale_file);
+		$result2 = check_duplicate_name($dir_scales,$old_scale_file);
+		if($result1 OR $result2) {
+			echo "<p><font color=\"red\">WARNING</font>: This name <font color=\"blue\">‘".$new_scale_name."’</font> already exists</p>";
+			}
+		else {
+			$handle = fopen($dir_scales.$new_scale_file,"w");
+			fwrite($handle,"\"".$new_scale_name."\"\n");
+			$any_scale = "f2 0 128 -51 12 2 261.63 60 1 1.066 1.125 1.2 1.25 1.333 1.42 1.5 1.6 1.666 1.777 1.875 2.000";
+			fwrite($handle,$any_scale."\n");
+			$any_comment = "<html>This is a new scale for BP3.  Creation ".date('Y-m-d H:i:s')."</html>";
+			fwrite($handle,$any_comment."\n");
+			fclose($handle);
+			$need_to_save = TRUE;
+			}
+		}
+	}
+	
+if(isset($_POST['undelete_scales'])) {
+	$dircontent = scandir($dir_scales);
+	foreach($dircontent as $some_scale) {
+		if($some_scale == '.' OR $some_scale == ".." OR $some_scale == ".DS_Store") continue;
+		$table = explode(".",$some_scale);
+		$extension = end($table);
+		if($extension == "old") {
+			$some_scale = str_replace(".old",'',$some_scale);
+			$file_link = $dir_scales.$some_scale.".old";
+			$new_file_link = $dir_scales.$some_scale.".txt";
+			rename($file_link,$new_file_link);
+			$need_to_save = TRUE;
+			}
+		}
+	}
+
+if(isset($_POST['max_scales'])) $max_scales = $_POST['max_scales'];
+else $max_scales = 0;
+for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
+	if(isset($_POST['delete_scale_'.$i_scale])) {
+		$scalefilename = $_GET['scalefilename'];
+		echo "Deleted scale ".$i_scale." (".$scalefilename.")<br />";
+		$file_link = $dir_scales.$scalefilename.".txt";
+		$new_file_link = $dir_scales.$scalefilename.".old";
+		rename($file_link,$new_file_link);
+		$need_to_save = TRUE;
+		}
+	}
+
 
 if(isset($_POST['delete_instrument'])) {
 	$instrument = $_POST['instrument_name'];
@@ -138,7 +193,7 @@ if(isset($_POST['duplicate_instrument'])) {
 		}
 	}
 	
-if(isset($_POST['savealldata']) OR isset($_POST['delete_instrument']) OR isset($_POST['restore']) OR isset($_POST['create_instrument']) OR isset($_POST['duplicate_instrument'])) {
+if($need_to_save OR isset($_POST['savealldata']) OR isset($_POST['delete_instrument']) OR isset($_POST['restore']) OR isset($_POST['create_instrument']) OR isset($_POST['duplicate_instrument'])) {
 	echo "<p id=\"timespan\"><font color=\"red\">Saving file:</font> <font color=\"blue\">".$filename."</font></p>";
 	$warn_not_empty = SaveCsoundInstruments(FALSE,$dir,$filename,$temp_dir.$temp_folder);
 	@flush();
@@ -158,7 +213,7 @@ echo "<p style=\"color:blue;\">".$extract_data['headers']."</p>";
 $content = $extract_data['content'];
 
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-echo "<p style=\"text-align:left;\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"savealldata\" onclick=\"this.form.target='_self';return true;\" value=\"SAVE ‘".$filename."’\"></p>";
+echo "<p style=\"text-align:left;\"><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"savealldata\" onclick=\"this.form.target='_self';return true;\" value=\"SAVE ‘".$filename."’\"></p>";
 
 if($autosave) {
 	echo "<p><font color=\"red\">➡</font> This file is <font color=\"red\">autosaved</font> every 30 seconds. Keep this page open as long as you are editing instruments!</p>";
@@ -399,7 +454,6 @@ for($j = 0; $j < $number_instruments; $j++) {
 		if($verbose) echo "Instrument Panoramic[".$ii."] = ".$InstrumentPanoramic[$j][$ii]."<br />";
 		fwrite($handle_instrument,$InstrumentPanoramic[$j][$ii]."\n");
 		}
-//	echo $CsoundInstrumentName[$j]." argmax = ".$argmax[$j]."<br />";
 	set_argmax_argument($argmax_file,$CsoundInstrumentName[$j],$argmax[$j]);
 	
 	// Line 655
@@ -466,17 +520,17 @@ echo "<textarea name=\"cstables\" rows=\"5\" style=\"width:400px;\">";
 $cstables = '';
 $handle = FALSE; $i_scale = 0;
 $done_table = TRUE;
-$scale_name = $scale_table = $scale_note_names = $scale_comment = array();
-$dir_scales = $temp_dir.$temp_folder.SLASH."scales".SLASH;
+$scale_name = $scale_table = $scale_fraction = $scale_note_names = $scale_comment = array();
+// $dir_scales = $temp_dir.$temp_folder.SLASH."scales".SLASH;
 for($i = $i + 1; $i < $imax_file; $i++) {
 	$line = trim($table[$i]);
 	if($line == '') continue;
 	if($line == "_end tables") break;
 	if($line[0] == '"') {
 		$i_scale++;
-	//	echo "1) i_scale = ".$i_scale."<br />";
 		$scale_name[$i_scale] = str_replace('"','',$line);
-		$table_name = $dir_scales.clean_folder_name($scale_name[$i_scale]).".txt";
+//		$table_name = $dir_scales.clean_folder_name($scale_name[$i_scale]).".txt";
+		$table_name = $dir_scales.$scale_name[$i_scale].".txt";
 		if(!file_exists($table_name)) {
 			$handle = fopen($table_name,"w");
 			fclose($handle);
@@ -501,6 +555,13 @@ for($i = $i + 1; $i < $imax_file; $i++) {
 			}
 		continue;
 		}
+	if($line[0] == '[') {
+	//	if($done_table) {
+			fwrite($handle,$line."\n");
+			$scale_fraction[$i_scale] = $line;
+	//		}
+		continue;
+		}
 	$table2 = explode(' ',$line);
 	if(count($table2) < 5) continue;
 	$p3 = abs(intval($table2[3]));
@@ -510,7 +571,8 @@ for($i = $i + 1; $i < $imax_file; $i++) {
 		//	echo "2) i_scale = ".$i_scale."<br />";
 			$scale_name[$i_scale] = "scale_".$i_scale;
 			}
-		$table_name = $dir_scales.clean_folder_name($scale_name[$i_scale]).".txt";
+	//	$table_name = $dir_scales.clean_folder_name($scale_name[$i_scale]).".txt";
+		$table_name = $dir_scales.$scale_name[$i_scale].".txt";
 		if(!file_exists($table_name)) {
 			$handle = fopen($table_name,"w");
 			fclose($handle);
@@ -519,6 +581,8 @@ for($i = $i + 1; $i < $imax_file; $i++) {
 		fwrite($handle,"\"".$scale_name[$i_scale]."\"\n");
 		if(isset($scale_note_names[$i_scale]))
 			fwrite($handle,$scale_note_names[$i_scale]."\n");
+		if(isset($scale_fraction[$i_scale]))
+			fwrite($handle,$scale_fraction[$i_scale]."\n");
 		$scale_table[$i_scale] = $line;
 		fwrite($handle,$line."\n");
 		$done_table = TRUE;
@@ -531,21 +595,44 @@ for($i = $i + 1; $i < $imax_file; $i++) {
 echo "</textarea><br />";
 echo "<input type=\"hidden\" name=\"dir_scales\" value=\"".$dir_scales."\">";
 $max_scales = $i_scale; // Beware that we count scales from 1 
+if($max_scales > 0) echo "<h2>Tonal scales:</h2>";
+echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"create_scale\" onclick=\"this.form.target='_self';return true;\" value=\"CREATE A NEW TONAL SCALE\">&nbsp;with name <input type=\"text\" name=\"scale_name\" size=\"20\" value=\"\">";
 if($max_scales > 0) {
-	echo "<h2>Tonal scales:<ul></h2>";
+	$dircontent = scandir($dir_scales);
+	$deleted_scales = 0;
+	foreach($dircontent as $some_scale) {
+		if($some_scale == '.' OR $some_scale == ".." OR $some_scale == ".DS_Store") continue;
+		$table = explode(".",$some_scale);
+		$extension = end($table);
+		if($extension == "old") {
+			if($deleted_scales == 0) echo "<p>Deleted scale(s): <font color=\"green\">";
+			$deleted_scales++;
+			echo str_replace(".old",'',$some_scale)." ";
+			}
+		}
+	if($deleted_scales > 0) {
+		echo "</font>&nbsp;";
+		echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"undelete_scales\" onclick=\"this.form.target='_self';return true;\" value=\"UNDELETE all scales\">";
+		echo "</p>";
+		}
+	echo "<ol>";
 	for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
 		$link_edit = "scale.php";
 		echo "<li><font color=\"green\"><b>".$scale_name[$i_scale]."</b></font> ";
-		echo "➡ <input type=\"submit\" style=\"background-color:Aquamarine;\" name=\"edit_scale\" formaction=\"".$link_edit."?filename=".urlencode(clean_folder_name($scale_name[$i_scale]))."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT this scale\">";
+//		echo "➡ <input type=\"submit\" style=\"background-color:Aquamarine;\" name=\"edit_scale\" formaction=\"".$link_edit."?scalefilename=".urlencode(clean_folder_name($scale_name[$i_scale]))."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT this scale\">";
+		echo "➡ <input type=\"submit\" style=\"background-color:Aquamarine;\" name=\"edit_scale\" formaction=\"".$link_edit."?scalefilename=".urlencode($scale_name[$i_scale])."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT this scale\">";
+	//	echo "&nbsp;<input type=\"submit\" style=\"background-color:yellow;\" name=\"delete_scale_".$i_scale."\" formaction=\"".$url_this_page."&scalefilename=".urlencode(clean_folder_name($scale_name[$i_scale]))."\" onclick=\"this.form.target='_self';return true;\" value=\"DELETE this scale (can be reversed)\">";
+		echo "&nbsp;<input type=\"submit\" style=\"background-color:yellow;\" name=\"delete_scale_".$i_scale."\" formaction=\"".$url_this_page."&scalefilename=".urlencode($scale_name[$i_scale])."\" onclick=\"this.form.target='_self';return true;\" value=\"DELETE this scale (can be reversed)\">";
 		echo "<br /><small>".$scale_table[$i_scale]."</small>";
 		if(isset($scale_note_names[$i_scale])) echo "<br />&nbsp;&nbsp;=&nbsp;<font color=\"blue\">".str_replace('/','',$scale_note_names[$i_scale])."</font>";
 		if(isset($scale_comment[$i_scale])) echo "<br />&nbsp;&nbsp;<i>".html_to_text($scale_comment[$i_scale],'txt')."</i>";
 		echo "</li>";
 		}
-	echo "<ul>";
+	echo "</ol>";
 	}
+echo "<input type=\"hidden\" name=\"max_scales\" value=\"".$max_scales."\">";
 
-echo "<p style=\"text-align:center;\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"savealldata\" onclick=\"this.form.target='_self';return true;\" value=\"SAVE ‘".$filename."’\"></p>";
+echo "<p><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"savealldata\" onclick=\"this.form.target='_self';return true;\" value=\"SAVE ‘".$filename."’\"></p>";
 echo "</td><td>";
 echo "<h4 style=\"text-align:center;\">MIDI channel association of instruments</h4>";
 echo "<table>";

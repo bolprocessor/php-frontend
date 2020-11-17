@@ -798,6 +798,7 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder) {
 		$table = explode(chr(10),$content_scale);
 		for($i = 0; $i < count($table); $i++) {
 			$line = trim($table[$i]);
+		//	echo "line = ".$line."<br />";
 			if($line <> '') fwrite($handle,$line."\n");
 			}
 		}
@@ -1723,5 +1724,14 @@ function list_of_tonal_scales($csound_orchestra_file) {
 			}
 		}
 	return $list;
+	}
+
+function check_duplicate_name($dir,$file) {
+	$dircontent = scandir($dir);
+	foreach($dircontent as $some_file) {
+		if($some_file == $file) return TRUE;
+	//	echo $some_file."<br />".$file."<br />";
+		}
+	return FALSE;
 	}
 ?>
