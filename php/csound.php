@@ -149,7 +149,6 @@ foreach($dircontent as $oldfile) {
 
 if(isset($_POST['create_instrument'])) {
 	$new_index = $_POST['index_max'] + 1;
-//	$new_index = $index_max + 1;
 	$new_instrument = trim($_POST['new_instrument']);
 	$new_instrument = str_replace(' ','_',$new_instrument);
 	$new_instrument = str_replace('"','',$new_instrument);
@@ -225,7 +224,6 @@ echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"create
 $content_no_br = str_replace("<br>",chr(10),$content);
 $table = explode(chr(10),$content_no_br);
 $imax_file = count($table);
-// Line 509 in SaveLoads1.c
 if($verbose) echo "imax_file = ".$imax_file."<br />";
 $number_channels = $table[0];
 if($verbose) echo "number_channels = ".$number_channels."<br />";
@@ -233,7 +231,6 @@ echo "<input type=\"hidden\" name=\"number_channels\" value=\"".$number_channels
 
 for($j = 0; $j < $number_channels; $j++) {
 	$which = $table[$j + 1];
-//	if($which < 0) continue;
 	$ch = $j + 1;
 	$whichCsoundInstrument[$j] = $which;
 	if($verbose) echo "MIDI channel #".$ch." => instrument [index ".$whichCsoundInstrument[$j]."]<br />";
@@ -252,7 +249,6 @@ if(file_exists($dir.$CsoundOrchestraName)) {
 	rename($dir.$CsoundOrchestraName,$orchestra_filename);
 	sleep(1);
 	}
-// echo $orchestra_filename."<br />";
 $path = str_replace($bp_application_path,'',$dir_csound_resources);
 if(file_exists($orchestra_filename)) {
 	echo "<a target=\"_blank\" href=\"csorchestra.php?file=".urlencode($path.$CsoundOrchestraName)."\">edit this file</a>";
@@ -521,7 +517,6 @@ $cstables = '';
 $handle = FALSE; $i_scale = 0;
 $done_table = TRUE;
 $scale_name = $scale_table = $scale_fraction = $scale_note_names = $scale_comment = array();
-// $dir_scales = $temp_dir.$temp_folder.SLASH."scales".SLASH;
 for($i = $i + 1; $i < $imax_file; $i++) {
 	$line = trim($table[$i]);
 	if($line == '') continue;
@@ -529,7 +524,6 @@ for($i = $i + 1; $i < $imax_file; $i++) {
 	if($line[0] == '"') {
 		$i_scale++;
 		$scale_name[$i_scale] = str_replace('"','',$line);
-//		$table_name = $dir_scales.clean_folder_name($scale_name[$i_scale]).".txt";
 		$table_name = $dir_scales.$scale_name[$i_scale].".txt";
 		if(!file_exists($table_name)) {
 			$handle = fopen($table_name,"w");
