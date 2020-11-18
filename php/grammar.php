@@ -11,7 +11,7 @@ $here = $filename = end($table);
 // $grammar_file = "..".SLASH.$file;
 $grammar_file = $bp_application_path.$file;
 $dir = str_replace($filename,'',$grammar_file);
-$textarea_rows = 15;
+$textarea_rows = 20;
 
 if($test) echo "grammar_file = ".$grammar_file."<br />";
 

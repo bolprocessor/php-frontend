@@ -426,9 +426,14 @@ else {
 			}
 		fwrite($handle,"<hr><p><b>Messages:</b></p>\n");
 		}
+	$warnings = 0;
 	for($i=0; $i < $n_messages; $i++) {
 		$mssg = $o[$i];
 		$mssg = clean_up_encoding(FALSE,TRUE,$mssg);
+		if(is_integer($pos=strpos($mssg,"=> "))) {
+			$warnings++;
+			$mssg = "<font color=red>".$mssg."</font>";
+			}
 		if($handle) fwrite($handle,$mssg."<br />\n");
 		if($i == 7) echo "…<br />";
 		if($i < 7 OR $i > ($n_messages - 4)) echo $mssg."<br />";
@@ -436,7 +441,9 @@ else {
 	if($n_messages == 0) echo "No message produced…";
 	else {
 		$window_name = $grammar_name."_result";
-		echo "<p><font color=\"red\">➡</font>&nbsp;<input style=\"color:DarkBlue; background-color:yellow; font-size:large;\" onclick=\"window.open('".$result_file."','".$window_name."','width=800,height=600,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Show all ".$n_messages." messages…\">";
+		echo "<p style=\"font-size:larger;\"><input style=\"color:DarkBlue; background-color:yellow; font-size:large;\" onclick=\"window.open('".$result_file."','".$window_name."','width=800,height=600,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Show all ".$n_messages." messages\">";
+		if($warnings == 1) echo " <span class=\"blinking\">=> ".$warnings." warning</span>";
+		if($warnings > 1) echo " <span class=\"blinking\">=> ".$warnings." warnings</span>";
 		echo "</p>";
 		}
 	if($handle) fwrite($handle,"</body>\n");
