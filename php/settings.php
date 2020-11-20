@@ -83,9 +83,9 @@ if(isset($_POST['saveparameters'])) {
 			$value = $newvalue;
 			}
 		if($i == 46) $value = 0; // Use buffer limit
-		if($i == 47 AND (!is_numeric($value) OR $value < 0 OR $value > 3 OR intval($value) <> $value)) {
+		if($i == 47 AND (!is_numeric($value) OR $value < 0 OR $value > 4 OR intval($value) <> $value)) {
 			$newvalue = 0;
-			echo "<p><font color=\"red\">Note convention must be an integer from 0 to 3: “</font><font color=\"blue\">".$value."</font><font color=\"red\">” has been replaced with “</font><font color=\"blue\">".$newvalue."</font><font color=\"red\">”.</font></p>";
+			echo "<p><font color=\"red\">Note convention must be an integer from 0 to 4: “</font><font color=\"blue\">".$value."</font><font color=\"red\">” has been replaced with “</font><font color=\"blue\">".$newvalue."</font><font color=\"red\">”.</font></p>";
 			$value = $newvalue;
 			}
 		if($i == 48 OR $i == 49) $value = 0; // StartFromOne and SmartCursor

@@ -14,7 +14,7 @@ $bp_application_path = "..".SLASH;
 if(!isset($csound_path) OR $csound_path == '') $csound_path = "/usr/local/bin/";
 if(!isset($csound_resources) OR $csound_resources == '') $csound_resources = "csound_resources";
 save_settings("csound_resources",$csound_resources);
-$max_sleep_time_after_bp_command = 15; // seconds. Maximum time required for the console
+$max_sleep_time_after_bp_command = 15; // seconds. Maximum time allowed to the console
 $default_output_format = "midi";
 
 $temp_dir = $bp_application_path."temp_bolprocessor";
@@ -595,6 +595,7 @@ function note_convention($i) {
 		case 1: $c = "italian/French"; break;
 		case 2: $c = "indian"; break;
 		case 3: $c = "keys"; break;
+		case 4: $c = "custom"; break;
 		}
 	return $c;
 	}
@@ -708,13 +709,21 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder) {
 	if($verbose) echo "dir = ".$dir."<br />";
 	if($verbose) echo "filename = ".$filename."<br />";
 	if($verbose) echo "temp_folder = ".$temp_folder."<br />";
+	$file_lock2 = $dir.$filename."_lock2";
+	$time_start = time();
+	$time_end = $time_start + 10;
+	while(TRUE) {
+		if(!file_exists($file_lock2)) break;
+		if(time() > $time_end) unlink($file_lock2);
+		sleep(1);
+		}
 	$file_lock = $filename."_lock";
 	$handle = fopen($dir.$file_lock,"w");
 	fwrite($handle,"lock\n");
 	fclose($handle);
 	unlink($dir.$filename);
 	$handle = fopen($dir.$filename,"w");
-	$file_header = $top_header."\n// Csound instrument file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
+	$file_header = $top_header."\n// Csound resource file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
 	fwrite($handle,$file_header."\n");
 	$number_channels = $_POST['number_channels'];
 	fwrite($handle,$number_channels."\n");

@@ -7,7 +7,7 @@ if(isset($_POST['dir_scales'])) {
 	$dir_scales = $_POST['dir_scales'];
 	}
 else {
-	echo "Csound instrument file is not known. First open the ‘-cs’ file!"; die();
+	echo "=> Csound resource file is not known. First open the ‘-cs’ file!"; die();
 	}
 if(isset($_GET['scalefilename'])) {
 	$filename = urldecode($_GET['scalefilename']);
@@ -19,7 +19,7 @@ $this_title = $filename;
 $url_this_page = "scale.php?".$_SERVER["QUERY_STRING"];
 require_once("_header.php");
 
-// echo $url_this_page."<br />";
+$csound_source = $_POST['csound_source'];
 
 $file_link = $dir_scales.$filename.".txt";
 if(!file_exists($file_link)) {
@@ -219,7 +219,7 @@ for($i = 0; $i < $imax; $i++) {
 	}
 echo "Csound function table: <font color=\"blue\">".$scale_table."</font>";
 if($message <> '') echo $message;
-echo "<div style=\"float:right; margin-top:1em;\"><h1>Scale “".$filename."”</h1></div>";
+echo "<div style=\"float:right; margin-top:1em;\"><h1>Scale “".$filename."”</h1><h3>Stored in <font color=\"blue\">‘".$csound_source."’</font></h3></div>";
 echo "<p>➡ <a target=\"_blank\" href=\"https://www.csounds.com/manual/html/GEN51.html\">Read the documentation</a></p>";
 $numgrades = $table2[4];
 $interval = $table2[5];
@@ -273,6 +273,7 @@ for($i = 0; $i <= $numgrades; $i++) {
 	
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 echo "<input type=\"hidden\" name=\"dir_scales\" value=\"".$dir_scales."\">";
+echo "<input type=\"hidden\" name=\"csound_source\" value=\"".$csound_source."\">";
 
 echo "<p>Name of this tonal scale: ";
 echo "<input type=\"text\" name=\"scale_name\" size=\"20\" value=\"".$scale_name."\">";
@@ -283,7 +284,7 @@ echo "<p><font color=\"blue\">interval</font> = <input type=\"text\" name=\"inte
 $cents = round(1200 * log($interval) / log(2));
 echo " or <input type=\"text\" name=\"interval_cents\" size=\"5\" value=\"".$cents."\"> cents (typically 1200)";
 echo "</p>";
-echo "<p><font color=\"blue\">basefreq</font> = <input type=\"text\" name=\"basefreq\" size=\"5\" value=\"".$basefreq."\"> (not used by BP3)</p>";
+echo "<p><font color=\"blue\">basefreq</font> = <input type=\"text\" name=\"basefreq\" size=\"5\" value=\"".$basefreq."\"></p>";
 echo "<p><font color=\"blue\">basekey</font> = <input type=\"text\" name=\"basekey\" size=\"5\" value=\"".$basekey."\">&nbsp;&nbsp;&nbsp;&nbsp;<input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"savethisfile\" formaction=\"scale.php?scalefilename=".urlencode($filename)."\" value=\"SAVE “".$filename."”\"></p>";
 echo "<h3>Ratios and names of this tonal scale:</h3>";
 echo "<table style=\"background-color:white; table-layout:fixed ; width:100%;\">";
@@ -296,7 +297,7 @@ for($i = 0; $i <= $numgrades; $i++) {
 		$p_txt = $p[$i];
 		$q_txt = $q[$i];
 		}
-	echo "<input type=\"text\" style=\"border:none;\" name=\"p_".$i."\" size=\"3\" value=\"".$p_txt."\">&nbsp;<b>/</b>&nbsp;<input type=\"text\" style=\"border:none;\" name=\"q_".$i."\" size=\"3\" value=\"".$q_txt."\">";
+	echo "<input type=\"text\" style=\"border:none; text-align:right;\" name=\"p_".$i."\" size=\"3\" value=\"".$p_txt."\">&nbsp;<b>/</b>&nbsp;<input type=\"text\" style=\"border:none;\" name=\"q_".$i."\" size=\"3\" value=\"".$q_txt."\">";
 	echo "</td>";
 	}
 echo "</tr>";
@@ -310,7 +311,7 @@ echo "</tr>";
 echo "<tr><th style=\"width:7%; background-color:azure; padding:4px;\">name</th>";
 for($i = 0; $i <= $numgrades; $i++) {
 	echo "<td style=\"text-align:center; background-color:gold;\" colspan=\"2\">";
-	echo "<input type=\"text\" style=\"border:none; text-align:center;\" name=\"name_".$i."\" size=\"6\" value=\"".$name[$i]."\">";
+	echo "<input type=\"text\" style=\"border:none; text-align:center; color:red; font-weight:bold;\" name=\"name_".$i."\" size=\"6\" value=\"".$name[$i]."\">";
 	echo "</td>";
 	}
 echo "</tr>";

@@ -455,7 +455,7 @@ if($file_format == "csound") {
 		echo "<ul style=\"margin-top:0px; margin-bottom:0px\">";
 		for($i_scale = 1; $i_scale <= $max_scales; $i_scale++)
 			echo "<li><font color=\"red\">".$list_of_tonal_scales[$i_scale - 1]."</font></li>";
-		echo "</ul>A scale may be called in “_scale()” instructions";
+		echo "</ul>These scales may be called in “_scale()” instructions";
 		echo "</p>";
 		}
 	}
@@ -466,7 +466,7 @@ echo "<input type=\"hidden\" name=\"trace_production\" value=\"".$trace_producti
 echo "<input type=\"hidden\" name=\"metronome\" value=\"".$metronome."\">";
 echo "<input type=\"hidden\" name=\"time_structure\" value=\"".$time_structure."\">";
 echo "<input type=\"hidden\" name=\"alphabet_file\" value=\"".$alphabet_file."\">";
-echo "<p><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"savegrammar\" value=\"SAVE ‘".$filename."’\">";
+echo "<p><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"savegrammar\" formaction=\"".$url_this_page."#topedit\" value=\"SAVE ‘".$filename."’\">";
 
 if((file_exists($output.SLASH.$default_output_name.".wav") OR file_exists($output.SLASH.$default_output_name.".mid") OR file_exists($output.SLASH.$default_output_name.".html") OR file_exists($output.SLASH.$default_output_name.".sco")) AND file_exists($result_file)) {
 	echo "&nbsp;&nbsp;&nbsp;<input style=\"color:DarkBlue; background-color:azure; font-size:large;\" onclick=\"window.open('".$result_file."','result','width=800,height=600,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Show latests results\">";

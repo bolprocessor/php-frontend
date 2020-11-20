@@ -176,7 +176,7 @@ if($instruction <> "help") {
 		while(TRUE) {
 			if(!file_exists($lock_file)) break;
 			if(time() > $time_end) {
-				echo "<p><font color=\"red\">Maximum time (5 seconds) spent waiting for the Csound instrument file to be unlocked:</font> <font color=\"blue\">".$dir.$csound_file."</font></p>";
+				echo "<p><font color=\"red\">Maximum time (5 seconds) spent waiting for the Csound resource file to be unlocked:</font> <font color=\"blue\">".$dir.$csound_file."</font></p>";
 				break;
 				}
 			}
@@ -239,10 +239,10 @@ if($instruction <> "help") {
 	if($test) echo "file_format = ".$file_format."<br />";
 
 	if(!$no_error) {
-		echo "<p><font color=\"red\">Errors found… ";
+		echo "<p><font color=\"red\">Errors found… </font> ";
 		$content_trace = @file_get_contents($trace_link,TRUE);
 		if($content_trace AND strlen($content_trace) > 4)
-			echo "Check the </font> <a onclick=\"window.open('".$trace_link."','errors','width=800,height=500,left=400'); return false;\" href=\"".$trace_link."\">error trace</a> file!";
+			echo "Check the <a onclick=\"window.open('".$trace_link."','errors','width=800,height=500,left=400'); return false;\" href=\"".$trace_link."\">error trace</a> file!";
 		echo "</p>";
 		}
 	else {
@@ -332,7 +332,7 @@ if($instruction <> "help") {
 		}
 		
 	// Process Csound score if possible
-	if($file_format == "csound") {
+	if($no_error AND $file_format == "csound") {
 		if($csound_orchestra == '') {
 			$csound_orchestra = "default.orc";
 			echo "<p><font color=\"red\">➡</font> Csound orchestra file was not specified. I tried the default orchestra: <font color=\"blue\">".$dir_csound_resources.$csound_orchestra."</font>.</p>";
@@ -383,13 +383,10 @@ if($instruction <> "help") {
 			}
 		}
 	}
-
-if($n_messages > 1000) echo "<p>Too many messages produced! (".$n_messages.")</p>";
+$handle = FALSE;
+if($n_messages > 3000) echo "<p><font color=\"red\">➡</font> Too many messages produced! (".$n_messages.")</p>";
 else {
-//	echo "result_file = ".$result_file."<br />";
-//	echo $bp_application_path."<br />";
 	if($result_file <> '') $handle = fopen($result_file,"w");
-	else $handle = FALSE;
 	if($handle) {
 		$header = "<!DOCTYPE HTML>";
 		$header .= "<html lang=\"en\">";
@@ -426,6 +423,8 @@ else {
 			}
 		fwrite($handle,"<hr><p><b>Messages:</b></p>\n");
 		}
+	}
+if($n_messages > 0) {
 	$warnings = 0;
 	for($i=0; $i < $n_messages; $i++) {
 		$mssg = $o[$i];
@@ -439,7 +438,7 @@ else {
 		if($i < 7 OR $i > ($n_messages - 4)) echo $mssg."<br />";
 		}
 	if($n_messages == 0) echo "No message produced…";
-	else {
+	else if($handle) {
 		$window_name = $grammar_name."_result";
 		echo "<p style=\"font-size:larger;\"><input style=\"color:DarkBlue; background-color:yellow; font-size:large;\" onclick=\"window.open('".$result_file."','".$window_name."','width=800,height=600,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Show all ".$n_messages." messages\">";
 		if($warnings == 1) echo " <span class=\"blinking\">=> ".$warnings." warning</span>";

@@ -239,7 +239,7 @@ if($dir <> $bp_application_path."php" AND $extension <> "temp") {
 	echo "</form>";
 	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 	echo "<p style=\"text-align:left;\">";
-	echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"create_prototypes\" value=\"CREATE NEW SOUND-OBJECT PROTOOTYPE FILE IN THIS FOLDER\">&nbsp;➡&nbsp;";
+	echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"create_prototypes\" value=\"CREATE NEW SOUND-OBJECT PROTOTYPE FILE IN THIS FOLDER\">&nbsp;➡&nbsp;";
 	echo "<input type=\"text\" name=\"filename\" size=\"20\" style=\"background-color:CornSilk;\" value=\"\">";
 	$type = "mi";
 	echo "<br /><input type=\"radio\" name=\"name_mode\" value=\"prefix\" checked>with prefix ‘-".$type."’";
@@ -249,7 +249,7 @@ if($dir <> $bp_application_path."php" AND $extension <> "temp") {
 	echo "</form>";
 	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 	echo "<p style=\"text-align:left;\">";
-	echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"create_csound\" value=\"CREATE NEW CSOUND INSTRUMENT FILE IN THIS FOLDER\">&nbsp;➡&nbsp;";
+	echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"create_csound\" value=\"CREATE NEW CSOUND RESOURCE FILE IN THIS FOLDER\">&nbsp;➡&nbsp;";
 	echo "<input type=\"text\" name=\"filename\" size=\"20\" style=\"background-color:CornSilk;\" value=\"\">";
 	$type = "cs";
 	echo "<br /><input type=\"radio\" name=\"name_mode\" value=\"prefix\" checked>with prefix ‘-".$type."’";
