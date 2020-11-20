@@ -142,10 +142,10 @@ if(isset($_POST['compilegrammar'])) {
 		else $command .= " -ho ".$dir.$alphabet_file;
 		}
 	if($csound_file <> '') {
-		if(!file_exists($dir.$csound_file)) {
-			echo "<p style=\"color:red;\">WARNING: ".$dir.$csound_file." not found.</p>";
+		if(!file_exists($dir_csound_resources.$csound_file)) {
+			echo "<p style=\"color:red;\">WARNING: ".$dir_csound_resources.$csound_file." not found.</p>";
 			}
-		else $command .= " -cs ".$dir.$csound_file;
+		else $command .= " -cs ".$dir_csound_resources.$csound_file;
 		}
 	$command .= " --traceout ".$tracefile;
 	echo "<p style=\"color:red;\" id=\"timespan\"><small>".$command."</small></p>";
@@ -177,7 +177,7 @@ else {
 	echo "<input type=\"hidden\" name=\"random_seed\" value=\"".$random_seed."\">";
 	echo "Location of output files: <font color=\"blue\">".$bp_application_path."</font>";
 	echo "<input type=\"text\" name=\"output_folder\" size=\"25\" value=\"".$output_folder."\">";
-	echo "&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"change_output_folder\" value=\"SAVE THIS LOCATION\"><br />➡ global setting for all projects in this session.<br /><i>Folder will be created if necessary…</i>";
+	echo "&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"change_output_folder\" value=\"SAVE THIS LOCATION\"><br />➡ global setting for all projects in this session<br /><i>Folder will be created if necessary…</i>";
 	echo "</form>";
 	}
 
@@ -211,7 +211,9 @@ if($alphabet_file <> '' AND $objects_file == '') {
 	}
 $found_orchestra_in_instruments = FALSE;
 if($csound_file <> '') {
-	$csound_orchestra = get_orchestra_filename($dir.$csound_file);
+	if(file_exists($dir.$csound_file))
+		rename($dir.$csound_file,$dir_csound_resources.$csound_file);
+	$csound_orchestra = get_orchestra_filename($dir_csound_resources.$csound_file);
 	if($csound_orchestra <> '') $found_orchestra_in_instruments = TRUE;
 	}
 else $csound_orchestra = '';
@@ -308,8 +310,8 @@ if($objects_file <> '') {
 	else $link_produce .= "&objects_file=".urlencode($objects_file);
 	}
 if($csound_file <> '') {
-	if(!file_exists($dir.$csound_file)) {
-		$error_mssg .= "<font color=\"red\"><small>WARNING: ".$dir.$csound_file." not found.</small></font><br />";
+	if(!file_exists($dir_csound_resources.$csound_file)) {
+		$error_mssg .= "<font color=\"red\"><small>WARNING: ".$dir_csound_resources.$csound_file." not found.</small></font><br />";
 		$error = TRUE;
 		}
 	else $link_produce .= "&csound_file=".urlencode($csound_file);
@@ -447,7 +449,7 @@ if($file_format == "csound") {
 echo "</p>";
 
 if($file_format == "csound") {
-	$list_of_tonal_scales = list_of_tonal_scales($dir.$csound_file);
+	$list_of_tonal_scales = list_of_tonal_scales($dir_csound_resources.$csound_file);
 	// echo $dir_csound_resources.$csound_orchestra."<br />";
 	if(($max_scales = count($list_of_tonal_scales)) > 0) {
 		if($max_scales > 1) echo "<p style=\"margin-bottom:0px;\">The Csound orchestra file contains the definition of tonal scales:";
@@ -567,7 +569,7 @@ if(isset($_POST['playexpression'])) {
 		if($settings_file <> '') $command .= " -se \"".$dir.$settings_file."\"";
 		if($alphabet_file<> '') $command .= " -ho \"".$dir.$alphabet_file."\"";
 		if($objects_file <> '') $command .= " -mi \"".$dir.$objects_file."\"";
-		if($csound_file <> '') $command .= " -cs \"".$dir.$csound_file."\"";
+		if($csound_file <> '') $command .= " -cs \"".$dir_csound_resources.$csound_file."\"";
 		switch($file_format) {
 			case "data":
 				$command .= " -d -o ".$result_file;

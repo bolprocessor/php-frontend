@@ -193,7 +193,7 @@ function window_name($text) {
 	}
 	
 function display_more_buttons($content,$url_this_page,$dir,$objects_file,$csound_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file) {
-	global $bp_application_path, $output_file, $file_format, $test;
+	global $bp_application_path, $csound_resources, $output_file, $file_format, $test;
 	$page_type = str_replace(".php",'',$url_this_page);
 	$page_type = preg_replace("/\.php.*/u",'',$url_this_page);
 	
@@ -231,7 +231,7 @@ function display_more_buttons($content,$url_this_page,$dir,$objects_file,$csound
 		echo "</td></form>";
 		}
 	if($csound_file <> '') {
-		$url_this_page = "csound.php?file=".urlencode($dir.$csound_file);
+		$url_this_page = "csound.php?file=".urlencode($csound_resources.SLASH.$csound_file);
 		echo "<td><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$csound_file."’\">&nbsp;";
 		echo "</td></form>";
@@ -1652,7 +1652,7 @@ function copyemz($file1,$file2){
  	}
  
 function check_csound() {
-	global $csound_path, $url_this_page, $file_format;
+	global $csound_path, $dir_csound_resources, $url_this_page, $file_format;
 	$command = $csound_path."csound --version";
 	exec($command,$result_csound,$return_var);
 	if($return_var <> 0) {
@@ -1663,11 +1663,15 @@ function check_csound() {
 		echo "&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" value=\"TRY\">";
 		echo "<br />";
 		echo "<font color=\"red\">➡</font>&nbsp;<a target=\"_blank\" href=\"https://csound.com/download.html\">Follow this link</a> to install Csound and convert scores to sound files.</p>";
-		echo "</form>";
-		return FALSE;
+		echo "</form><p>";
+		$result = FALSE;
 		}
-	echo "<p style=\"vertical-align:middle;\"><img src=\"pict/logo_csound.jpg\" width=\"90px;\" style=\"vertical-align:middle;\" />&nbsp;is installed and responsive.</p>";
-	return TRUE;
+	else {
+		echo "<p style=\"vertical-align:middle;\"><img src=\"pict/logo_csound.jpg\" width=\"90px;\" style=\"vertical-align:middle;\" />&nbsp;is installed and responsive.<br />";
+		$result = TRUE;
+		}
+	echo "<font color=\"red\">➡</font>&nbsp;<a target=\"_blank\" href=\"index.php?path=csound_resources\">Visit BP3’s Csound resources folder</a></p>";
+	return $result;
 	}
 
 function relocate_function_table($dir,$line) {

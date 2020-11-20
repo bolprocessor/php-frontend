@@ -97,7 +97,8 @@ if(isset($_POST['copy_this_scale'])) {
 	if(isset($_POST['file_choice'])) {
 		$destination = $_POST['file_choice'];
 		echo "<hr>";
-		echo "<p style=\"font-size:large;\"><font color=\"red\">Copying</font> <font color=\"blue\">‘".$scalefilename."’</font> <font color=\"red\">to </font><font color=\"blue\">‘".$destination."’</font><br />";
+		echo "<p><font color=\"red\">Copying</font> <font color=\"blue\">‘".$scalefilename."’</font> <font color=\"red\">to </font><font color=\"blue\">‘".$destination."’</font></p>";
+		echo "<p><font color=\"red\">➡</font> <a target=\"_blank\" href=\"csound.php?file=".urlencode($csound_resources.SLASH.$destination)."\">Edit ‘".$destination."’</a></p>";
 		$file_lock = $dir.$destination."_lock";
 		$time_start = time();
 		$time_end = $time_start + 10;
@@ -604,6 +605,7 @@ echo "<input type=\"hidden\" name=\"index_max\" value=\"".$index_max."\">";
 
 echo "<table style=\"background-color:white;\"><tr><td>";
 echo "<h2>Tables:</h2>";
+echo "<p><i>These will be put on top of Csound scores</i></p>";
 echo "<textarea name=\"cstables\" rows=\"5\" style=\"width:400px;\">";
 $cstables = '';
 $handle = FALSE; $i_scale = 0;
@@ -711,8 +713,8 @@ if($max_scales > 0) {
 		echo "&nbsp;<input type=\"submit\" style=\"background-color:yellow;\" name=\"copy_scale_".$i_scale."\" formaction=\"".$url_this_page."&scalefilename=".urlencode($scale_name[$i_scale])."\" onclick=\"this.form.target='_self';return true;\" value=\"COPY this scale to another resource file\">";
 		
 		echo "<br /><small>".$scale_table[$i_scale]."</small>";
-		if(isset($scale_note_names[$i_scale])) echo "<br />&nbsp;&nbsp;=&nbsp;<font color=\"blue\">".str_replace('/','',$scale_note_names[$i_scale])."</font>";
-		if(isset($scale_comment[$i_scale])) echo "<br />&nbsp;&nbsp;<i>".html_to_text($scale_comment[$i_scale],'txt')."</i>";
+		if(isset($scale_note_names[$i_scale])) echo "<br />&nbsp;&nbsp;&nbsp;<font color=\"blue\">".str_replace('/','',$scale_note_names[$i_scale])."</font>";
+		if(isset($scale_comment[$i_scale])) echo "<br /><i>".html_to_text($scale_comment[$i_scale],'txt')."</i>";
 		echo "</li>";
 		}
 	echo "</ol>";
@@ -750,7 +752,7 @@ echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";
 echo "</form>";
 
 if($number_instruments > 0) {
-	echo "<h3>Click instruments below to edit them:</h3>";
+	echo "<h3>Click Csound instruments below to edit them:</h3>";
 	echo "<table>";
 	for($j = 0; $j < $number_instruments; $j++) {
 		echo "<tr><td style=\"padding: 5px; vertical-align:middle; white-space:nowrap\">";

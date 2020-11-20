@@ -101,7 +101,7 @@ else {
 
 	if($note_convention <> '') $command .= " --".$note_convention;
 	if($settings_file <> '') $command .= " -se ".$dir.$settings_file;
-	if($csound_file <> '') $command .= " -cs ".$dir.$csound_file;
+	if($csound_file <> '') $command .= " -cs ".$dir_csound_resources.$csound_file;
 	if($objects_file <> '') $command .= " -mi ".$dir.$objects_file;
 	
 	if($startup <> '') $command .= " --start ".$startup;
@@ -169,14 +169,14 @@ echo "<p><small>command = <font color=\"red\">".$command."</font></small></p>";
 
 if($instruction <> "help") {
 	if($csound_file <> '') {
-		$lock_file = $dir.$csound_file."_lock";
+		$lock_file = $dir_csound_resources.$csound_file."_lock";
 	//	echo "Csound instruments lock_file = ".$lock_file."<br />";
 		$time_start = time();
 		$time_end = $time_start + 5;
 		while(TRUE) {
 			if(!file_exists($lock_file)) break;
 			if(time() > $time_end) {
-				echo "<p><font color=\"red\">Maximum time (5 seconds) spent waiting for the Csound resource file to be unlocked:</font> <font color=\"blue\">".$dir.$csound_file."</font></p>";
+				echo "<p><font color=\"red\">Maximum time (5 seconds) spent waiting for the Csound resource file to be unlocked:</font> <font color=\"blue\">".$dir_csound_resources.$csound_file."</font></p>";
 				break;
 				}
 			}
@@ -375,7 +375,7 @@ if($instruction <> "help") {
 						$audio_tag .= "</audio>";
 						echo $audio_tag;
 						echo "<p><a target=\"_blank\" href=\"".$sound_file_link."\" download>Download this sound file</a> (<font color=\"blue\">".$sound_file_link."</font>)</p>";
-						echo "<p><font color=\"red\">➡</font> If you hear garbage sound or silence it may be due to mismatch between Csound score and orchestra<br />&nbsp;&nbsp;&nbsp;or some overflow in Csound…</p>";
+						echo "<p><font color=\"red\">➡</font> If you hear garbage sound or silence it may be due to a mismatch between Csound score and orchestra<br />&nbsp;&nbsp;&nbsp;or some overflow in Csound…</p>";
 						}
 					}
 				}
