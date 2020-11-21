@@ -617,6 +617,13 @@ function my_rmdir($src) {
 function SaveObjectPrototypes($verbose,$dir,$filename,$temp_folder) {
 	global $top_header, $test, $temp_dir;
 	$file_lock = $filename."_lock";
+	$time_start = time();
+	$time_end = $time_start + 3;
+	while(TRUE) {
+		if(!file_exists($file_lock)) break;
+		if(time() > $time_end) unlink($file_lock);
+		sleep(1);
+		}
 	$handle = fopen($dir.$file_lock,"w");
 	fwrite($handle,"lock\n");
 	fclose($handle);
@@ -698,7 +705,7 @@ function SaveObjectPrototypes($verbose,$dir,$filename,$temp_folder) {
 	fwrite($handle,"_endSoundObjectFile_\n");
 	fclose($handle);
 	if($verbose) echo "</font></p><hr>";
-	sleep(1);
+//	sleep(1);
 	unlink($dir.$file_lock);
 	return;
 	}
@@ -710,14 +717,15 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder) {
 	if($verbose) echo "filename = ".$filename."<br />";
 	if($verbose) echo "temp_folder = ".$temp_folder."<br />";
 	$file_lock2 = $dir.$filename."_lock2";
+	if(file_exists($file_lock2)) return "locked";
+	$file_lock = $filename."_lock";
 	$time_start = time();
-	$time_end = $time_start + 10;
+	$time_end = $time_start + 3;
 	while(TRUE) {
-		if(!file_exists($file_lock2)) break;
-		if(time() > $time_end) unlink($file_lock2);
+		if(!file_exists($file_lock)) break;
+		if(time() > $time_end) unlink($file_lock);
 		sleep(1);
 		}
-	$file_lock = $filename."_lock";
 	$handle = fopen($dir.$file_lock,"w");
 	fwrite($handle,"lock\n");
 	fclose($handle);
@@ -813,7 +821,7 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder) {
 		}
 	fwrite($handle,"_end tables\n");
 	fclose($handle);
-	sleep(1);
+//	sleep(1);
 	unlink($dir.$file_lock);
 	return $warn_not_empty;
 	}

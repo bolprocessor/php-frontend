@@ -219,7 +219,7 @@ for($i = 0; $i < $imax; $i++) {
 	}
 echo "Csound function table: <font color=\"blue\">".$scale_table."</font>";
 if($message <> '') echo $message;
-echo "<div style=\"float:right; margin-top:1em;\"><h1>Scale “".$filename."”</h1><h3>Stored in <font color=\"blue\">‘".$csound_source."’</font></h3></div>";
+echo "<div style=\"float:right; margin-top:1em;\"><h1>Scale “".$filename."”</h1><h3>This version is stored in <font color=\"blue\">‘".$csound_source."’</font></h3></div>";
 echo "<p>➡ <a target=\"_blank\" href=\"https://www.csounds.com/manual/html/GEN51.html\">Read the documentation</a></p>";
 $numgrades = $table2[4];
 $interval = $table2[5];

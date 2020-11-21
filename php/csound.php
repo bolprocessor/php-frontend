@@ -153,7 +153,7 @@ if(isset($_POST['copy_this_scale'])) {
 			//	echo $line."<br />";
 				}
 			fclose($handle);
-			unlink($file_lock2);
+		//	unlink($file_lock2);
 			if(!$can_copy) {
 				echo "<p><font color=\"red\">A scale with the same name</font> <font color=\"blue\">‘".$scalefilename."’</font> <font color=\"red\">already exists in</font> <font color=\"blue\">‘".$destination."’</font><font color=\"red\">. You need to delete it before copying this version</font></p>";
 				}
@@ -282,14 +282,20 @@ if(isset($_POST['duplicate_instrument'])) {
 			}
 		}
 	}
-	
+
+$lock2 = $dir.$filename."_lock2";
 if($need_to_save OR isset($_POST['savealldata']) OR isset($_POST['delete_instrument']) OR isset($_POST['restore']) OR isset($_POST['create_instrument']) OR isset($_POST['duplicate_instrument'])) {
-	echo "<p id=\"timespan\"><font color=\"red\">Saving file:</font> <font color=\"blue\">".$filename."</font></p>";
-	$warn_not_empty = SaveCsoundInstruments(FALSE,$dir,$filename,$temp_dir.$temp_folder);
-//	@flush();
-//	@ob_flush();
-	sleep(1);
+	if(file_exists($lock2)) {
+		echo "<p><font color=\"red\">Saving file</font> <font color=\"blue\">".$filename."</font> <font color=\"red\">was not possible this time because it has been modified by an external procedure…<br />Probably importing microtonal scales from another resource.<br />➡</font> Now the page has been refreshed and it can be saved</p>";
+		unlink($lock2);
+		}
+	else {
+		echo "<p id=\"timespan\"><font color=\"red\">Saving file:</font> <font color=\"blue\">".$filename."</font></p>";
+		$warn_not_empty = SaveCsoundInstruments(FALSE,$dir,$filename,$temp_dir.$temp_folder);
+		sleep(1);
+		}
 	}
+else @unlink($lock2);
 
 try_create_new_file($this_file,$filename);
 $content = @file_get_contents($this_file);
@@ -334,9 +340,10 @@ if($CsoundOrchestraName == '') {
 	$warn_not_empty = TRUE;
 	}
 echo "Csound orchestra file = <input type=\"text\" name=\"CsoundOrchestraName\" size=\"30\" value=\"".$CsoundOrchestraName."\">";
+echo " <input style=\"color:DarkBlue; background-color:Azure;\" onclick=\"window.open('csound_resources_list.php','listorchestra','width=200,height=300,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"which one?\">";
 	echo " ➡ ";
 if($warn_not_empty)
-	echo "<font color=\"red\">WARNING: this field should never be empty. By default it has been set to ‘default.orc’</font>";
+	echo "<font color=\"red\">WARNING: this field should’nt be empty. By default it has been set to ‘default.orc’. </font>";
 $orchestra_filename = $dir_csound_resources.$CsoundOrchestraName;
 if(file_exists($dir.$CsoundOrchestraName)) {
 	rename($dir.$CsoundOrchestraName,$orchestra_filename);
@@ -344,7 +351,7 @@ if(file_exists($dir.$CsoundOrchestraName)) {
 	}
 $path = str_replace($bp_application_path,'',$dir_csound_resources);
 if(file_exists($orchestra_filename)) {
-	echo "<a target=\"_blank\" href=\"csorchestra.php?file=".urlencode($path.$CsoundOrchestraName)."\">edit this file</a>";
+	echo "<a target=\"_blank\" href=\"csorchestra.php?file=".urlencode($path.$CsoundOrchestraName)."\">Edit this file</a>";
 	}
 else {
 	echo "File not found: <a target=\"_blank\" href=\"csorchestra.php?file=".urlencode($path.$CsoundOrchestraName)."\">create it!</a>";
