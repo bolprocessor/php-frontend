@@ -14,7 +14,7 @@ function getData2() {
 	var CsoundOrchestraName = document.getElementsByName('CsoundOrchestraName')[0].value;
 	var number_instruments = document.getElementsByName('number_instruments')[0].value;
 	var begin_tables = document.getElementsByName('begin_tables')[0].value;
-	var cstables = document.getElementsByName('cstables')[0].value;
+	var cstables = document.getElementsByName('the_tables')[0].value;
 	fd.append('temp_folder',temp_folder);
 	fd.append('dir',dir);
 	fd.append('filename',filename);

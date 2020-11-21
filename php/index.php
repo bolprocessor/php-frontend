@@ -329,8 +329,9 @@ else $delete_checked_files = FALSE;
 	
 if($delete_files OR $delete_checked_files)
 	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-if($delete_files)
-	echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"delete_checked_files\" value=\"DELETE CHECKED FILES\"> <font color=\"red\">➡</font> cannot be reversed!</p>";
+if($delete_files) {
+	echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"delete_checked_files\" value=\"DELETE CHECKED FILES\"> <font color=\"red\">➡</font> cannot be reversed! <input style=\"background-color:azure;\" type=\"submit\" name=\"cancel\" value=\"CANCEL\"></p>";
+	}
 
 $dircontent = scandir($dir);
 $i_file = 0;
@@ -429,7 +430,7 @@ foreach($dircontent as $thisfile) {
 		}
 	}
 if($delete_files)
-	echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"delete_checked_files\" value=\"DELETE CHECKED FILES\"> <font color=\"red\">➡</font> cannot be reversed!</p>";
+	echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"delete_checked_files\" value=\"DELETE CHECKED FILES\"> <font color=\"red\">➡</font> cannot be reversed! <input style=\"background-color:azure;\" type=\"submit\" name=\"cancel\" value=\"CANCEL\"></p>";
 if($delete_files OR $delete_checked_files) echo "</form>";
 
 $os_platform = getOS();

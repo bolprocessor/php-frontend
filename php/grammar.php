@@ -420,7 +420,7 @@ if($file_format == "csound") {
 	if($csound_is_responsive) {
 		if($found_orchestra_in_instruments AND file_exists($dir_csound_resources.$csound_orchestra)) {
 			echo "• <font color=\"red\">Csound scores</font> will be produced and converted to sound files (including scales) using orchestra ‘<font color=\"blue\">".$csound_orchestra."</font>’ as specified in <font color=\"blue\">‘".$csound_file."’</font>";
-			if($found_orchestra_in_settings AND file_exists($dir_csound_resources.$csound_default_orchestra)) echo "<br />&nbsp;&nbsp;<font color=\"red\">➡</font> Orchestra ‘<font color=\"blue\">".$csound_default_orchestra."</font>’ specified in <font color=\"blue\">‘".$settings_file."’</font> will be ignored</font>";
+			if($found_orchestra_in_settings AND file_exists($dir_csound_resources.$csound_default_orchestra) AND $csound_orchestra <> $csound_default_orchestra) echo "<br />&nbsp;&nbsp;<font color=\"red\">➡</font> Orchestra ‘<font color=\"blue\">".$csound_default_orchestra."</font>’ specified in <font color=\"blue\">‘".$settings_file."’</font> will be ignored</font>";
 			}
 		else if($found_orchestra_in_instruments AND !$found_orchestra_in_settings AND $csound_orchestra <> '') {
 			echo "<font color=\"red\">➡</font> Csound scores will be produced, yet conversion to sound files will not be possible because orchestra ‘<font color=\"blue\">".$csound_orchestra."</font>’ specified in ‘<font color=\"blue\">".$csound_file."</font>’ was not found in the Csound resources folder";
@@ -492,7 +492,8 @@ echo "\" title=\"Don't forget to save!\"";
 if($error) echo " disabled";
 echo ">";
 $link_test = $link_produce."&test";
-echo "&nbsp;<input style=\"color:DarkBlue; background-color:Azure; font-size:large;\" onclick=\"window.open('".$link_test."','checkCommand','width=1000,height=100,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Check command line\">";
+$display_command_title = "DisplayCommand".$filename;
+echo "&nbsp;<input style=\"color:DarkBlue; background-color:Azure; font-size:large;\" onclick=\"window.open('".$link_test."','".$display_command_title."','width=1000,height=100,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Display command line\">";
 if($error) echo "<br />".$error_mssg;
 echo "</div>";
 echo "<p style=\"width:90%; text-align:right;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" formaction=\"".$url_this_page."#topedit\" name=\"savegrammar\" value=\"SAVE ‘".$filename."’\"></p>";

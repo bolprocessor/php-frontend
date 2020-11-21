@@ -797,10 +797,12 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder) {
 		}
 	$begin_tables = $_POST['begin_tables'];
 	fwrite($handle,$begin_tables."\n");
+	if($verbose) echo "<br />".$begin_tables."<br />";
 	$cstables = $_POST['cstables'];
 	$table = explode(chr(10),$cstables);
 	for($i = 0; $i < count($table); $i++) {
 		$line = trim($table[$i]);
+		if($verbose) echo $line."<br />";
 		if($line == '') continue;
 		fwrite($handle,$line."\n");
 		}
