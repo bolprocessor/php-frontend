@@ -1660,7 +1660,7 @@ function copyemz($file1,$file2){
  	}
  
 function check_csound() {
-	global $csound_path, $dir_csound_resources, $url_this_page, $file_format;
+	global $csound_path, $csound_resources, $dir_csound_resources, $path, $url_this_page, $file_format;
 	$command = $csound_path."csound --version";
 	exec($command,$result_csound,$return_var);
 	if($return_var <> 0) {
@@ -1678,7 +1678,7 @@ function check_csound() {
 		echo "<p style=\"vertical-align:middle;\"><img src=\"pict/logo_csound.jpg\" width=\"90px;\" style=\"vertical-align:middle;\" />&nbsp;is installed and responsive.<br />";
 		$result = TRUE;
 		}
-	echo "<font color=\"red\">➡</font>&nbsp;<a target=\"_blank\" href=\"index.php?path=csound_resources\">Visit BP3’s Csound resources folder</a></p>";
+	if($path <> $csound_resources) echo "<font color=\"red\">➡</font>&nbsp;<a target=\"_blank\" href=\"index.php?path=csound_resources\">Visit Csound resource folder</a></p>";
 	return $result;
 	}
 

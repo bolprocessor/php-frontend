@@ -21,7 +21,7 @@ if($path <> '') {
 	if($upper_dir == '') $link = $this_page;
 	else $link = $this_page."?path=".urlencode($upper_dir);
 	if($test) echo "link = ".$link."<br />";
-	echo "<h3 style=\"text-align:center;\">[<a href=\"".$link."\">move up</a>]</h3></td>";
+	echo "<h3 style=\"text-align:center;\">[<a href=\"".$link."\">move to upper folder</a>]</h3></td>";
 	echo "</tr></table>";
 	}
 else {
@@ -220,12 +220,22 @@ if(isset($_POST['create_script'])) {
 		}
 	}
 
+if(isset($_POST['delete_files'])) $delete_files = TRUE;
+else $delete_files = FALSE;
 $folder = str_replace($bp_application_path,'',$dir);
-if($folder <> '') echo "<h3>Content of folder <font color=\"red\">".$folder."</font></h3>";
+if($folder <> '') {
+	echo "<h3>Content of folder <font color=\"red\">".$folder."</font>";
+	if(!$delete_files) {
+		echo "<br /><br /><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+		echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"delete_files\" value=\"DELETE SOME FILES\">";
+		echo "</form>";
+		}
+	echo "</h3>";
+	}
 // echo "dir = ".$dir."<br />";
 $table = explode('_',$folder);
 $extension = end($table);
-if($dir <> $bp_application_path."php" AND $extension <> "temp") {
+if($dir <> $bp_application_path."php" AND $extension <> "temp" AND !$delete_files) {
 	echo "<div style=\"float:right; background-color:white; padding:6px;\">";
 	check_csound();
 	if($path <> $csound_resources AND $path <> '') {
@@ -311,7 +321,19 @@ if($dir <> $bp_application_path."php" AND $extension <> "temp") {
 	echo "</div>";
 	}
 
+if(isset($_POST['delete_checked_files'])) {
+	$delete_files = FALSE;
+	$delete_checked_files = TRUE;
+	}
+else $delete_checked_files = FALSE;
+	
+if($delete_files OR $delete_checked_files)
+	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+if($delete_files)
+	echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"delete_checked_files\" value=\"DELETE CHECKED FILES\"> <font color=\"red\">➡</font> cannot be reversed!</p>";
+
 $dircontent = scandir($dir);
+$i_file = 0;
 foreach($dircontent as $thisfile) {
 	if($thisfile == '.' OR $thisfile == ".." OR $thisfile == ".DS_Store" OR $thisfile == "php") continue;
 	if(is_dir($dir.SLASH.$thisfile)) {
@@ -380,6 +402,13 @@ foreach($dircontent as $thisfile) {
 		rename($dir.SLASH.$thisfile,$dir_csound_resources.$thisfile);
 		}
 	else {
+		$i_file++;
+		if($delete_checked_files AND isset($_POST['delete_'.$i_file])) {
+			echo "<p><font color=\"red\">➡</font> Deleted <font color=\"blue\">‘".$thisfile."’</font> (cannot be reversed)</p>";
+			unlink($dir.SLASH.$thisfile);
+			continue;
+			}
+		if($delete_files) echo "<input type=\"checkbox\" name=\"delete_".$i_file."\"> ";
 		if($type <> '') {
 			$link = $type.".php?file=".urlencode($path.SLASH.$thisfile);
 			if($new_file == $thisfile) echo "<font color=\"red\">➡</font> ";
@@ -394,9 +423,14 @@ foreach($dircontent as $thisfile) {
 			echo " <small>➡ ".gmdate('Y-m-d H\hi',$time_saved)."</small>";
 			echo "<br />";
 			}
-		else echo $thisfile."<br />";
+		else {
+			echo $thisfile."<br />";
+			}
 		}
 	}
+if($delete_files)
+	echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"delete_checked_files\" value=\"DELETE CHECKED FILES\"> <font color=\"red\">➡</font> cannot be reversed!</p>";
+if($delete_files OR $delete_checked_files) echo "</form>";
 
 $os_platform = getOS();
 if(PHP_OS <> "WINNT" AND !is_integer(strpos($os_platform,"Windows")) AND $path <> $csound_resources) {
