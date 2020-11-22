@@ -450,13 +450,12 @@ echo "</p>";
 
 if($file_format == "csound") {
 	$list_of_tonal_scales = list_of_tonal_scales($dir_csound_resources.$csound_file);
-	// echo $dir_csound_resources.$csound_orchestra."<br />";
 	if(($max_scales = count($list_of_tonal_scales)) > 0) {
-		if($max_scales > 1) echo "<p style=\"margin-bottom:0px;\">The Csound orchestra file contains the definition of tonal scales:";
+		if($max_scales > 1) echo "<p style=\"margin-bottom:0px;\">The Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains definitions of tonal scales:";
 		else echo "<p style=\"margin-bottom:0px;\">The Csound orchestra file contains the definition of tonal scale:";
 		echo "<ul style=\"margin-top:0px; margin-bottom:0px\">";
 		for($i_scale = 1; $i_scale <= $max_scales; $i_scale++)
-			echo "<li><font color=\"red\">".$list_of_tonal_scales[$i_scale - 1]."</font></li>";
+			echo "<li><font color=\"blue\">".$list_of_tonal_scales[$i_scale - 1]."</font></li>";
 		echo "</ul>These scales may be called in “_scale()” instructions";
 		echo "</p>";
 		}

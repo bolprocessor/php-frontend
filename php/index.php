@@ -1,5 +1,7 @@
 <?php
 require_once("_basic_tasks.php");
+if($path <> '') $filename = $path;
+else $filename = "Bol Processor";
 require_once("_header.php");
 require_once("_settings.php");
 $url_this_page = $this_page = "index.php";
@@ -225,7 +227,7 @@ else $delete_files = FALSE;
 $folder = str_replace($bp_application_path,'',$dir);
 if($folder <> '') {
 	echo "<h3>Content of folder <font color=\"red\">".$folder."</font>";
-	if(!$delete_files) {
+	if(!$delete_files AND $path <> $trash_folder) {
 		echo "<br /><br /><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"delete_files\" value=\"DELETE SOME FILES\">";
 		echo "</form>";
@@ -235,7 +237,7 @@ if($folder <> '') {
 // echo "dir = ".$dir."<br />";
 $table = explode('_',$folder);
 $extension = end($table);
-if($dir <> $bp_application_path."php" AND $extension <> "temp" AND !$delete_files) {
+if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension <> "temp" AND !$delete_files) {
 	echo "<div style=\"float:right; background-color:white; padding:6px;\">";
 	check_csound();
 	if($path <> $csound_resources AND $path <> '') {
@@ -398,15 +400,15 @@ foreach($dircontent as $thisfile) {
 		case "bpsc": $type = "script"; break;
 		case "orc": $type = "csorchestra"; break;
 		}
-	if($path <> $csound_resources AND ($type == "csound" OR $type == "csorchestra")) {
+	if($path <> $csound_resources AND $path <> $trash_folder AND ($type == "csound" OR $type == "csorchestra")) {
 		echo "Moved <font color=\"blue\">‘".$dir.SLASH.$thisfile."’</font> to <font color=\"blue\">‘".$dir_csound_resources.$thisfile."’</font><br />";
 		rename($dir.SLASH.$thisfile,$dir_csound_resources.$thisfile);
 		}
 	else {
 		$i_file++;
 		if($delete_checked_files AND isset($_POST['delete_'.$i_file])) {
-			echo "<p><font color=\"red\">➡</font> Deleted <font color=\"blue\">‘".$thisfile."’</font> (cannot be reversed)</p>";
-			unlink($dir.SLASH.$thisfile);
+			echo "<p><font color=\"red\">➡</font> Deleted <font color=\"blue\">‘".$thisfile."’</font> (moved to <a target=\"_blank\" href=\"index.php?path=".$trash_folder."\">trash folder</a>)</p>";
+			rename($dir.SLASH.$thisfile,$dir_trash_folder.$thisfile);
 			continue;
 			}
 		if($delete_files) echo "<input type=\"checkbox\" name=\"delete_".$i_file."\"> ";
