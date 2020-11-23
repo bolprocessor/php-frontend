@@ -3,10 +3,13 @@
 
 ; Instruments:
 ;		1	Plucked string (outputs to StereoDelay)
+;		2	Plucked string (outputs to StereoChorus)
+;		3	Synth brass (outputs to GlobalReverb)
 ;		10	Sine wave (outputs to GlobalReverb)
 ;
 ; Effects:
 ;		StereoDelay (outputs to GlobalReverb)
+;		StereoChorus (outputs to GlobalReverb)
 ;		GlobalReverb (outputs to file/speakers)
 
 ; Default instrument parameters used by BP3:
@@ -24,6 +27,8 @@
 ;		p10		a table number containing the pitchbend function (or 0)
 ;	When p10 is positive, the table is used instead of the beginning & end values
 
+; This file looks best with a tab size = 4 spaces.
+
 sr = 44100
 kr = 4410
 ksmps = 10
@@ -32,7 +37,7 @@ nchnls = 2
 
 ; Maximum amplitude of individual notes (adjust if samples overflow)
 ; Default value 1/12 should allow at least 12 simultaneous notes.
-giMaxAmp = 1.0/12.0
+giMaxNoteAmp = 1.0/12.0
 
 ; -- WAVE TABLES --
 
@@ -40,16 +45,30 @@ giSine	ftgen  0, 0, 32769, 10, 1	; sine wave
 
 ; -- EFFECTS ROUTING --
 
-connect	 "1", "delaySend", "StereoDelay", "delayin" 
-connect	 "10", "reverbSendL", "GlobalReverb", "reverbinL" 
-connect	 "10", "reverbSendR", "GlobalReverb", "reverbinR" 
+connect	 "1", "delaySend", "StereoDelay", "delayin"
 
-connect	 "StereoDelay", "reverbSendL", "GlobalReverb", "reverbinL" 
-connect	 "StereoDelay", "reverbSendR", "GlobalReverb", "reverbinR" 
+; these extra routings allow any instrument to be renumbered as instr 1
+connect	 "1", "chorusSendL", "StereoChorus", "chorusinL"
+connect	 "1", "chorusSendR", "StereoChorus", "chorusinR"
+connect	 "1", "reverbSendL", "GlobalReverb", "reverbinL"
+connect	 "1", "reverbSendR", "GlobalReverb", "reverbinR"
+
+connect	 "2", "chorusSendL", "StereoChorus", "chorusinL"
+connect	 "2", "chorusSendR", "StereoChorus", "chorusinR"
+connect	 "3", "reverbSendL", "GlobalReverb", "reverbinL"
+connect	 "3", "reverbSendR", "GlobalReverb", "reverbinR"
+connect	 "10", "reverbSendL", "GlobalReverb", "reverbinL"
+connect	 "10", "reverbSendR", "GlobalReverb", "reverbinR"
+
+connect	 "StereoDelay", "reverbSendL", "GlobalReverb", "reverbinL"
+connect	 "StereoDelay", "reverbSendR", "GlobalReverb", "reverbinR"
+connect	 "StereoChorus", "reverbSendL", "GlobalReverb", "reverbinL"
+connect	 "StereoChorus", "reverbSendR", "GlobalReverb", "reverbinR"
 
 ; -- CREATE EFFECTS --
 
 alwayson "StereoDelay", 0.05, 0.08, 0.25
+alwayson "StereoChorus", 0.4, 0.5, 0.333, 0.80
 alwayson "GlobalReverb", 0.7, 16000, 0.3
 
 ; -- USER DEFINED OPCODES --
@@ -101,7 +120,7 @@ endop
 
 ; -- INSTRUMENTS --
 
-; Simple plucked string instrument
+; Plucked string instrument with delay
 instr 1
 	idur 	= p3
 	icps  	bp_pitch  p4
@@ -109,12 +128,70 @@ instr 1
 	kpitch, kvol  bp_control  idur, p4, p5, p6, p7, p8, p9, p10
 	
 	kdclick	linseg	1.0, idur - 0.05, 1.0, 0.05, 0		; declick envelope
-	kamp	=		kvol * kdclick * giMaxAmp
+	kamp	=		kvol * kdclick * giMaxNoteAmp
 
 	a1		pluck	kamp, kpitch, icps, 0, 1
 		
 			; outs	a1, a1
 			outleta	"delaySend", a1
+endin
+
+; Plucked string instrument with chorus
+instr 2
+	idur 	= p3
+	icps  	bp_pitch  p4
+	
+	kpitch, kvol  bp_control  idur, p4, p5, p6, p7, p8, p9, p10
+	
+	kdclick	linseg	1.0, idur - 0.05, 1.0, 0.05, 0		; declick envelope
+	kamp	=		kvol * kdclick * giMaxNoteAmp
+
+	a1		pluck	kamp, kpitch, icps, 0, 1
+		
+			; outs	a1, a1
+			outleta	"chorusSendL", a1
+			outleta	"chorusSendR", a1
+endin
+
+; Synth Brass instrument
+instr 3
+	idur 	= p3
+	iStereo = 0.7												; stereo separation (0 to 1)
+	iDetune = 0.25												; detune amount in Hz
+	
+	; BP's default score parameters don't include "attack velocity",
+	; but with a custom setup we could plug it in here to make the shape
+	; and max amplitude of the amplitude envelope dynamic.
+	iAttVel		= 127											; Midi Attack Velocity
+	iAttDelta	= 1.0 - (iAttVel/127)							; diff btw max attack and this note's
+	iamp		= iAttVel/127
+	
+	; parameters for the ADSR envelope controlling amplitude
+	iAttTime	= 0.1 + 0.2 * iAttDelta							; envelope attack time
+	iDecTime	= 1.5 * iAttTime								; envelope decay time
+	iRelTime	= 0.1 * iAttDelta								; envelope release time
+	iSusTime	= idur - (iAttTime + iDecTime)					; envelope sustain time
+	iSusLevel	= 0.7
+	
+	kpitch, kvol  bp_control  idur, p4, p5, p6, p7, p8, p9, p10
+	
+	kaenv	xadsr	iAttTime, iDecTime, iSusLevel, iRelTime		; amplitude envelope
+	kdclick	linseg	1.0, idur - 0.05, 1.0, 0.05, 0				; declick envelope
+	kamp 	=		iamp * kvol * kaenv * kdclick * giMaxNoteAmp
+
+	; a pair of detuned sawtooth oscillators
+	a1		vco2	kamp, kpitch + iDetune, 0					; 0 = sawtooth wave
+	a2		vco2	kamp, kpitch - iDetune, 0					; 0 = sawtooth wave
+	
+	; mix the oscillators based on stereo separation amount
+	imain 	=		0.5 * (iStereo + 1.0)
+	icross	=		1.0 - imain
+	aleft 	=		imain*a1 + icross*a2
+	aright 	=		imain*a2 + icross*a1
+		
+			; outs	aleft, aright
+			outleta	"reverbSendL", aleft
+			outleta	"reverbSendR", aright
 endin
 
 ; Simple sine wave instrument
@@ -124,13 +201,15 @@ instr 10
 	kpitch, kvol  bp_control  idur, p4, p5, p6, p7, p8, p9, p10
 	
 	kdclick	 linseg  0, 0.02, 1.0, idur - 0.07, 1.0, 0.05, 0	; declick envelope
-	kamp = kvol * kdclick * giMaxAmp
+	kamp = kvol * kdclick * giMaxNoteAmp
 
 	a1	oscili	kamp, kpitch, giSine
 		; outs	a1, a1
 		outleta	"reverbSendL", a1
 		outleta	"reverbSendR", a1
 endin
+
+; -- EFFECTS INSTRUMENTS --
 
 ; Stereo delay effect (mono input)
 ;	p4	left delay time (in seconds)
@@ -157,6 +236,46 @@ instr StereoDelay
 			outleta	"reverbSendR", aright
 endin
 
+; Dual stereo chorus effect
+;	p4	chorus depth (range 0-1)
+;	p5	chorus rate 1 (in Hz)
+;	p6	chorus rate 2 (in Hz)
+;	p7	wet/dry mix (range 0-1)
+instr StereoChorus
+	idepth = p4
+	iLFOrate1 = p5
+	iLFOrate2 = p6
+	iwet = p7
+	idry = 1.0 - iwet
+	
+	ainl	inleta	"chorusinL"
+	ainr	inleta	"chorusinR"
+	
+	; delay times and max variability (in milliseconds)
+	ideltime1 = 37
+	idelvar1  = 5
+	ideltime2 = 23
+	idelvar2  = 1.75
+	
+	; LFOs (low-frequency oscillators) modulate the delay times
+	alfo1	oscili	idepth*idelvar1, iLFOrate1, giSine
+	alfo2	oscili	idepth*idelvar2, iLFOrate2, giSine
+	
+	; left channel delays
+	aldel1	vdelay	ainl, ideltime1+alfo1, ideltime1+idelvar1
+	aldel2	vdelay	ainl, ideltime2-alfo2, ideltime2+idelvar2
+	
+	; right channel delays
+	ardel1	vdelay	ainr, ideltime1-alfo1, ideltime1+idelvar1
+	ardel2	vdelay	ainr, ideltime2+alfo2, ideltime2+idelvar2
+
+	aleft	=		ainl*idry + (aldel1+aldel2)*iwet*0.5
+	aright	=		ainr*idry + (ardel1+ardel2)*iwet*0.5
+	
+			outleta	"reverbSendL", aleft
+			outleta	"reverbSendR", aright
+endin
+
 ; Global reverb effect
 ;	p4	feedback level (range 0-1)
 ; 	p5	filter cutoff frequency
@@ -170,7 +289,11 @@ instr GlobalReverb
 	ainl	inleta	"reverbinL"
 	ainr	inleta	"reverbinR"
 	
-	aoutl, aoutr  reverbsc  ainl, ainr, ifeedbk, icutoff
+	arevl, arevr  reverbsc  ainl, ainr, ifeedbk, icutoff
 	
-			outs	idry*ainl + iwet*aoutl, idry*ainr + iwet*aoutr
+	aoutl	dcblock2	idry*ainl + iwet*arevl
+	aoutr	dcblock2	idry*ainr + iwet*arevr
+	
+			; outs		idry*ainl + iwet*arevl, idry*ainr + iwet*arevr
+			outs		aoutl, aoutr
 endin
