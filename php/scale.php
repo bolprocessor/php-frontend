@@ -29,6 +29,8 @@ if(!file_exists($file_link)) {
 
 $key_start = $key_step = $p_step = $q_step = $p_cents = $q_cents = '';
 $error_meantone = '';
+$basekey = 60;
+$baseoctave = 4;
 
 if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST['create_meantone'])) {
 	$new_scale_name = trim($_POST['scale_name']);
@@ -54,7 +56,9 @@ if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST
 			$interval = round(exp($new_cents / 1200 * log(2)),4);
 		}
 	$basefreq = $_POST['basefreq'];
-	$basekey = $_POST['basekey'];
+	$basekey = intval($_POST['basekey']);
+	$baseoctave = intval($_POST['baseoctave']);
+	if($baseoctave <= 0 OR $baseoctave > 14) $baseoctave = 4;
 	for($i = 0; $i <= $numgrades; $i++) {
 		if(!isset($_POST['p_'.$i])) $p[$i] = 0;
 		else $p[$i] = intval($_POST['p_'.$i]);
@@ -179,6 +183,7 @@ if(isset($_POST['savethisfile']) OR isset($_POST['interpolate']) OR isset($_POST
 	if($scale_note_names <> '')
 		fwrite($handle,"/".$scale_note_names."/\n");
 	fwrite($handle,"[".$scale_fractions."]\n");
+	fwrite($handle,"|".$baseoctave."|\n");
 	fwrite($handle,$line_table."\n");
 	if($scale_comment <> '')
 		fwrite($handle,$scale_comment);
@@ -198,6 +203,10 @@ for($i = 0; $i < $imax; $i++) {
 		}
 	if($line[0] == '/') {
 		$scale_note_names = str_replace('/','',$line);
+		continue;
+		}
+	if($line[0] == '|') {
+		$baseoctave = str_replace('|','',$line);
 		continue;
 		}
 	if($line[0] == '<') {
@@ -285,7 +294,7 @@ $cents = round(1200 * log($interval) / log(2));
 echo " or <input type=\"text\" name=\"interval_cents\" size=\"5\" value=\"".$cents."\"> cents (typically 1200)";
 echo "</p>";
 echo "<p><font color=\"blue\">basefreq</font> = <input type=\"text\" name=\"basefreq\" size=\"5\" value=\"".$basefreq."\"></p>";
-echo "<p><font color=\"blue\">basekey</font> = <input type=\"text\" name=\"basekey\" size=\"5\" value=\"".$basekey."\">&nbsp;&nbsp;&nbsp;&nbsp;<input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"savethisfile\" formaction=\"scale.php?scalefilename=".urlencode($filename)."\" value=\"SAVE “".$filename."”\"></p>";
+echo "<p><font color=\"blue\">basekey</font> = <input type=\"text\" name=\"basekey\" size=\"5\" value=\"".$basekey."\">&nbsp;&nbsp;<font color=\"blue\">baseoctave</font> = <input type=\"text\" name=\"baseoctave\" size=\"5\" value=\"".$baseoctave."\">&nbsp;&nbsp;&nbsp;&nbsp;<input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"savethisfile\" formaction=\"scale.php?scalefilename=".urlencode($filename)."\" value=\"SAVE “".$filename."”\"></p>";
 echo "<h3>Ratios and names of this tonal scale:</h3>";
 echo "<table style=\"background-color:white; table-layout:fixed ; width:100%;\">";
 echo "<tr><th style=\"width:7%; background-color:azure; padding:4px;\">fraction</th>";

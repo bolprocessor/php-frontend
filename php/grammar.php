@@ -19,7 +19,9 @@ if(!isset($output_folder) OR $output_folder == '') $output_folder = "my_output";
 $default_output_name = str_replace("-gr.",'',$filename);
 $default_output_name = str_replace(".bpgr",'',$default_output_name);
 $file_format = $default_output_format;
+if(isset($grammar_file_format[$filename])) $file_format = $grammar_file_format[$filename]; // From _settings.php
 if(isset($_POST['file_format'])) $file_format = $_POST['file_format'];
+save_settings2("grammar_file_format",$filename,$file_format); // To _settings.php
 switch($file_format) {
 	case "data": $output_file = $default_output_name.".bpda"; break;
 	case "midi": $output_file = $default_output_name.".mid"; break;

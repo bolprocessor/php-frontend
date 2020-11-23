@@ -431,6 +431,7 @@ if($n_messages > 0) {
 		$mssg = clean_up_encoding(FALSE,TRUE,$mssg);
 		if(is_integer($pos=strpos($mssg,"=> "))) {
 			$warnings++;
+			$mssg = preg_replace("/^=>\s/u"," ",$mssg);
 			$mssg = "<font color=red>".$mssg."</font>";
 			}
 		if($handle) fwrite($handle,$mssg."<br />\n");

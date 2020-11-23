@@ -1628,9 +1628,9 @@ function copyemz($file1,$file2){
     }
     
  function save_settings($variable,$value) {
-	$this_file = "_settings.php";
+	$settings_file = "_settings.php";
 //	echo "value = ".$value."<br />";
-	$content = @file_get_contents($this_file,TRUE);
+	$content = @file_get_contents($settings_file,TRUE);
 	if($content != FALSE) {
 		$table = explode(chr(10),$content);
 		$imax = count($table);
@@ -1656,7 +1656,7 @@ function copyemz($file1,$file2){
 			}
 		$content = implode("\n",$new_table);
 	//	echo "content = ".$content."<br />";
-		$handle = fopen($this_file,"w");
+		$handle = fopen($settings_file,"w");
 		fwrite($handle,"<?php\n");
 		fwrite($handle,$content);
 		$line = "\n§>\n";
@@ -1665,6 +1665,74 @@ function copyemz($file1,$file2){
 		fclose($handle);
 		}
 	else echo "<p><font color=\"red\">File ‘_settings.php’ could nor be opened!</p>";
+ 	return;
+ 	}
+    
+ function save_settings2($variable,$index,$value) {
+	$settings_file = "_settings.php";
+	$content = @file_get_contents($settings_file,TRUE);
+	if($content != FALSE) {
+		$table = explode(chr(10),$content);
+		$imax = count($table);
+		$new_table = array();
+		$found = FALSE;
+		for($i = 0; $i < $imax; $i++) {
+			$line = trim($table[$i]);
+			if(is_integer($pos=strpos($line,"<")) AND $pos == 0) continue;
+			if(is_integer($pos=strpos($line,">"))) continue;
+	//		echo "line =  ".$line."<br />";
+			if(is_integer($pos=strpos($line,$variable."[\"".$index."\"]"))) {
+				$line = preg_replace("/=\s?\".+\"\s?;/u","= \"".$value."\";",$line);
+		//		echo "line2 =  ".$line."<br />";
+				$found = TRUE;
+				}
+			if(strlen($line) == 0) continue;
+			$new_table[$i] = $line;
+			}
+		if(!$found) {
+			$line = "§".$variable."[\"".$index."\"] = \"".$value."\";";
+			$line = str_replace('§','$',$line);
+			$new_table[$i] = $line;
+			}
+		$content = implode("\n",$new_table);
+	//	echo "content = ".$content."<br />";
+		$handle = fopen($settings_file,"w");
+		fwrite($handle,"<?php\n");
+		fwrite($handle,$content);
+		$line = "\n§>\n";
+		$line = str_replace('§','?',$line);
+		fwrite($handle,$line);
+		fclose($handle);
+		}
+	else echo "<p><font color=\"red\">File ‘_settings.php’ could nor be opened!</p>";
+ 	return;
+ 	}
+ 	
+ function delete_settings($file) {
+	$settings_file = "_settings.php";
+	$content = @file_get_contents($settings_file,TRUE);
+ 	if($content != FALSE) {
+		$table = explode(chr(10),$content);
+		$imax = count($table);
+		$new_table = array();
+		$found = FALSE;
+		for($i = 0; $i < $imax; $i++) {
+			$line = trim($table[$i]);
+			if(strlen($line) == 0) continue;
+			if(is_integer($pos=strpos($line,"<")) AND $pos == 0) continue;
+			if(is_integer($pos=strpos($line,">"))) continue;
+			if(is_integer($pos=strpos($line,"[\"".$file."\"]"))) continue;
+			$new_table[$i] = $line;
+			}
+		$content = implode("\n",$new_table);
+		$handle = fopen($settings_file,"w");
+		fwrite($handle,"<?php\n");
+		fwrite($handle,$content);
+		$line = "\n§>\n";
+		$line = str_replace('§','?',$line);
+		fwrite($handle,$line);
+		fclose($handle);
+ 		}
  	return;
  	}
  

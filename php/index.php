@@ -409,6 +409,7 @@ foreach($dircontent as $thisfile) {
 		if($delete_checked_files AND isset($_POST['delete_'.$i_file])) {
 			echo "<p><font color=\"red\">➡</font> Deleted <font color=\"blue\">‘".$thisfile."’</font> (moved to <a target=\"_blank\" href=\"index.php?path=".$trash_folder."\">trash folder</a>)</p>";
 			rename($dir.SLASH.$thisfile,$dir_trash_folder.$thisfile);
+			delete_settings($thisfile);
 			continue;
 			}
 		if($delete_files) echo "<input type=\"checkbox\" name=\"delete_".$i_file."\"> ";

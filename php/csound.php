@@ -617,7 +617,7 @@ echo "<textarea name=\"cstables\" rows=\"5\" style=\"width:400px;\">";
 $cstables = '';
 $handle = FALSE; $i_scale = 0;
 $done_table = TRUE;
-$scale_name = $scale_table = $scale_fraction = $scale_note_names = $scale_comment = array();
+$scale_name = $scale_table = $scale_fraction = $scale_note_names = $scale_comment = $baseoctave = array();
 for($i = $i + 1; $i < $imax_file; $i++) {
 	$line = trim($table[$i]);
 //	if($verbose) echo $line."<br />";
@@ -656,6 +656,11 @@ for($i = $i + 1; $i < $imax_file; $i++) {
 			$scale_fraction[$i_scale] = $line;
 		continue;
 		}
+	if($line[0] == '|') {
+			fwrite($handle,$line."\n");
+			$baseoctave[$i_scale] = $line;
+		continue;
+		}
 	$table2 = explode(' ',$line);
 	if(count($table2) < 5) continue;
 	$p3 = abs(intval($table2[3]));
@@ -676,6 +681,8 @@ for($i = $i + 1; $i < $imax_file; $i++) {
 			fwrite($handle,$scale_note_names[$i_scale]."\n");
 		if(isset($scale_fraction[$i_scale]))
 			fwrite($handle,$scale_fraction[$i_scale]."\n");
+		if(isset($baseoctave[$i_scale]))
+			fwrite($handle,$baseoctave[$i_scale]."\n");
 		$scale_table[$i_scale] = $line;
 		fwrite($handle,$line."\n");
 		$done_table = TRUE;
