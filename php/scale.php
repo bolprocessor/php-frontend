@@ -72,9 +72,9 @@ if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST
 			}
 		if(!isset($_POST['name_'.$i])) $name[$i] = "•";
 		else $name[$i] = trim($_POST['name_'.$i]);
-		if($name[$i] == '') {
-			$name[$i] = "•";
-			}
+		// Slash is reserved for beginning and end of scale_note_names
+		$name[$i] = str_replace("/",'',$name[$i]);
+		if($name[$i] == '') $name[$i] = "•";
 		}
 	if($p[0] == 0 OR $q[0] == 0) {
 		$pmax = intval($ratio[0] * 1000);

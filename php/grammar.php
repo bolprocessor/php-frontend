@@ -457,8 +457,9 @@ if($file_format == "csound") {
 		else echo "<p style=\"margin-bottom:0px;\">The Csound orchestra file contains the definition of tonal scale:";
 		echo "<ul style=\"margin-top:0px; margin-bottom:0px\">";
 		for($i_scale = 1; $i_scale <= $max_scales; $i_scale++)
-			echo "<li><font color=\"blue\">".$list_of_tonal_scales[$i_scale - 1]."</font></li>";
-		echo "</ul>These scales may be called in “_scale()” instructions";
+			echo "<li>".$list_of_tonal_scales[$i_scale - 1]."</li>";
+		if($max_scales > 1) echo "</ul>These scales may be called in “_scale()” instructions";
+		else echo "</ul>This scale may be called in a “_scale()” instruction, but it will also be used by default in replacement of the equal-tempered scale<br />➡ Use “_scale(0,0)” to force equal-tempered";
 		echo "</p>";
 		}
 	}

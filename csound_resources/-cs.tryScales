@@ -1,5 +1,5 @@
 // Bol Processor BP3 compatible with version BP2.9.8
-// Csound resource file saved as "-cs.tryScales". Date: 2020-11-23 14:03:56
+// Csound resource file saved as "-cs.tryScales". Date: 2020-11-24 15:37:56
 16
 -1
 -1
@@ -36,8 +36,14 @@ f2 0 128 -51 12 2 261.63 60 1 1.066 1.125 1.2 1.25 1.333 1.42 1.5 1.6 1.666 1.77
 [1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1011 500]
 f2 0 128 -51 12 2.0226 261.63 60 1 1.0664 1.1246 1.1993 1.2647 1.3487 1.4222 1.4997 1.5993 1.6865 1.7986 1.8966 2.022
 <html>This is a new scale for BP3.  Creation 2020-11-17 22:55:31<br /></html>
+"meantone1"
+/do • re • mi fa • sol • la • si do/
+[1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1011 500]
+|3|
+f2 0 128 -51 12 2.0226 261.63 60 1 1.0664 1.1246 1.1993 1.2647 1.3487 1.4222 1.4997 1.5993 1.6865 1.7986 1.8966 2.022
+<html>This is a new scale for BP3.  Creation 2020-11-17 22:55:31<br /></html>
 "piano"
-/do do# re mib mi fa fa# sol sol# la sib si do/
+/dop dop# rep mibp mip fap fap# solp solp# lap sibp sip dop/
 [1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 501 250]
 |3|
 f2 0 128 -51 12 2.0046 261.63 60 1 1.06 1.123 1.19 1.261 1.336 1.416 1.5 1.59 1.684 1.785 1.891 2.004

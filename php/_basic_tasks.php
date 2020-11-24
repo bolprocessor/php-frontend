@@ -1812,13 +1812,18 @@ function list_of_tonal_scales($csound_orchestra_file) {
 	$table = explode(chr(10),$content);
 	$imax = count($table);
 	$found = FALSE;
-	for($i = 0; $i < $imax; $i++) {
+	for($i = 0, $j = -1; $i < $imax; $i++) {
 		$line = trim($table[$i]);
 		if($line == '') continue;
 		if($line == "_begin tables") $found = TRUE;
 		if($line == "_end tables") break;
-		if($found AND $line[0] == "\"") {
-			$list[] = str_replace('"','',$line);
+		if($found) {
+			if($line[0] == "\"")
+				$list[++$j] = "<font color=\"red\">".str_replace('"','',$line);
+			if($line[0] == "/")
+				$list[$j] .= "</font> = <font color=\"darkmagenta\"><b>".str_replace("/",'',$line)."</b></font>";
+			if($line[0] == "|")
+				$list[$j] .= " <font color=\"blue\">baseoctave</font> = <font color=\"red\">".str_replace("|",'',$line)."</font>";
 			}
 		}
 	return $list;

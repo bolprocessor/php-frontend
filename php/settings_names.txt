@@ -45,7 +45,7 @@ Use buffer limit		0	1
 Max computation time	seconds	1		Time assigned for console's work
 Seed for randomization	(positive integer or 0 for no seed)	1
 Use keyboard tokens		0	1
-Note convention	0 = English<br />1 = Italian/French<br />2 = Indian<br />3 = Keys<br />4 = custom scale	1
+Note convention	0 = English<br />1 = Italian/French<br />2 = Indian<br />3 = Keys<br />4 = Only from imported scales(s) with Csound	1
 StartFromOne		0	1
 Smart cursor		0
 GraphicScaleP		1
@@ -108,7 +108,7 @@ Font size		0
 Font size		0
 Font size		0
 Font size		0
-Block key for scale in Csound	(0..127) e.g. 60 for 'C4' or 69 for 'A4'	1
+Default block key for scale in Csound	(0..127) e.g. 60 for 'C4' or 69 for 'A4'	1
 MIDI output filter	(will be explained later)	0
 B# instead of C		1	1
 Db instead of C#		1	1
