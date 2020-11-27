@@ -805,7 +805,11 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder) {
 	$begin_tables = $_POST['begin_tables'];
 	fwrite($handle,$begin_tables."\n");
 	if($verbose) echo "<br />".$begin_tables."<br />";
-	$cstables = $_POST['cstables'];
+	if(isset($_POST['cstables'])) $cstables = $_POST['cstables'];
+	else {
+		if($verbose) echo "Used 'the_tables'<br />";
+		$cstables = $_POST['the_tables']; // We need a different POST used by autosave
+		}
 	$table = explode(chr(10),$cstables);
 	for($i = 0; $i < count($table); $i++) {
 		$line = trim($table[$i]);
@@ -1836,5 +1840,20 @@ function check_duplicate_name($dir,$file) {
 	//	echo $some_file."<br />".$file."<br />";
 		}
 	return FALSE;
+	}
+
+function modulo($a, $b) {
+	$c = $a % $b;
+	if($c < 0) $c +=  $b;
+	return $c;
+	}
+
+function create_fraction($ratio) {
+	$p = 10000 * $ratio;
+	$q = 10000;
+	$gcd = gcd($p,$q);
+	$result['p'] = $p / $gcd;
+	$result['q'] = $q / $gcd;
+	return $result;
 	}
 ?>

@@ -1,5 +1,5 @@
 // Bol Processor BP3 compatible with version BP2.9.8
-// Csound resource file saved as "-cs.tryShruti". Date: 2020-11-23 12:19:07
+// Csound resource file saved as "-cs.tryShruti". Date: 2020-11-25 13:51:15
 16
 1
 -1
@@ -121,9 +121,10 @@ f2 0 128 -51 15 2 263 60 1 1.066 1.125 1.2 1.25 1.333 1.42 1.5 1.6 1.666 1.777 1
 f2 0 128 -51 23 2 261.63 60 1 1.053 1.067 1.111 1.125 1.185 1.2 1.25 1.266 1.333 1.35 1.406 1.422 1.481 1.5 1.58 1.6 1.667 1.688 1.778 1.8 1.875 1.898 2
 <html>The Indian grama scale as conceptualized by E. J. Arnold.<br />Publication: ‘L'intonation juste dans la théorie ancienne de l'Inde : les applications aux musiques modale et harmonique’. Revue de Musicologie, vol. 71c n° 1-2, 1985, p. 11-38. Edited and translated by Bernard Bel<br /></html>
 "just intonation"
-/C C# D D# E F F# G G# A A# B C/
-[1 1 0 0 0 0 6 5 5 4 4 3 0 0 3 2 0 0 5 3 0 0 0 0 2 1]
-f2 0 128 -51 12 2 261.63 60 1 1.066 1.125 1.2 1.25 1.333 1.42 1.5 1.6 1.666 1.777 1.875 2
+/Cj Cj# Dj Dj# Ej Fj Fj# Gj Gj# Aj Aj# Bj Cj/
+[1 1 16 15 9 8 6 5 5 4 4 3 64 45 3 2 8 5 5 3 16 9 15 8 2 1]
+|4|
+f2 0 128 -51 12 2 261.63 60 1 1.066 1.125 1.2 1.25 1.333 1.42 1.5 1.6 1.667 1.777 1.875 2
 <html>A traditional scale constructed with simple integer ratios<br /></html>
 "meantone1"
 /do • re • mi fa • sol • la • si do/

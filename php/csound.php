@@ -4,7 +4,7 @@ require_once("_basic_tasks.php");
 $url_this_page = "csound.php";
 
 $autosave = TRUE;
-// $autosave = FALSE;
+$autosave = FALSE;
 $verbose = TRUE;
 $verbose = FALSE;
 
@@ -39,6 +39,7 @@ if(!file_exists($temp_dir.$temp_folder.SLASH."scales")) {
 $dir_scales = $temp_dir.$temp_folder.SLASH."scales".SLASH;
 $need_to_save = FALSE;
 
+$error_create = '';
 if(isset($_POST['create_scale'])) {
 	$new_scale_name = trim($_POST['scale_name']);
 	$new_scale_name = preg_replace("/\s+/u",' ',$new_scale_name);
@@ -48,14 +49,14 @@ if(isset($_POST['create_scale'])) {
 		$result1 = check_duplicate_name($dir_scales,$new_scale_file);
 		$result2 = check_duplicate_name($dir_scales,$old_scale_file);
 		if($result1 OR $result2) {
-			echo "<p><font color=\"red\">WARNING</font>: This name <font color=\"blue\">‘".$new_scale_name."’</font> already exists</p>";
+			$error_create = "<p><font color=\"red\">ERROR: This name</font> <font color=\"blue\">‘".$new_scale_name."’</font> <font color=\"red\">already exists</font></p>";
 			}
 		else {
 			$handle = fopen($dir_scales.$new_scale_file,"w");
 			fwrite($handle,"\"".$new_scale_name."\"\n");
 			$any_scale = "f2 0 128 -51 12 2 261.63 60 1 1.066 1.125 1.2 1.25 1.333 1.42 1.5 1.6 1.666 1.777 1.875 2.000";
 			fwrite($handle,$any_scale."\n");
-			$any_comment = "<html>This is a new tonal scale for BP3.  Creation ".date('Y-m-d H:i:s')."</html>";
+			$any_comment = "<html>This is a new tonal scale for BP3.<br />Created ".date('Y-m-d H:i:s')."</html>";
 			fwrite($handle,$any_comment."\n");
 			fclose($handle);
 			$need_to_save = TRUE;
@@ -205,17 +206,6 @@ for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
 		echo "<input type=\"submit\" style=\"background-color:aquamarine; font-size:large;\" name=\"\" onclick=\"this.form.target='_self';return true;\" value=\"Click to copy scale ‘".$scalefilename."’ to:\"><br />";
 		echo "<blockquote>";
 		echo "<input type=\"hidden\" name=\"copy_this_scale\" value=\"1\">";
-		
-	/*	$number_channels = $_POST['number_channels'];
-		$CsoundOrchestraName = $_POST['CsoundOrchestraName'];
-		$number_instruments = $_POST['number_instruments'];
-		$begin_tables = $_POST['begin_tables'];
-		$cstables = $_POST['cstables'];
-		echo "<input type=\"hidden\" name=\"number_channels\" value=\"".$number_channels."\">";
-		echo "<input type=\"hidden\" name=\"CsoundOrchestraName\" value=\"".$CsoundOrchestraName."\">";
-		echo "<input type=\"hidden\" name=\"number_instruments\" value=\"".$number_instruments."\">";
-		echo "<input type=\"hidden\" name=\"begin_tables\" value=\"".$begin_tables."\">";
-		echo "<input type=\"hidden\" name=\"cstables\" value=\"".$cstables."\">"; */
 		$dircontent = scandir($dir);
 		$folder = str_replace($bp_application_path,'',$dir);
 		foreach($dircontent as $thisfile) {
@@ -751,10 +741,11 @@ for($i = $i + 1; $i < $imax_file; $i++) {
 		}
 	}
 echo "</textarea><br />";
-echo "<input type=\"hidden\" name=\"the_tables\" value=\"".$cstables."\">";  // For autosave
+echo "<input type=\"hidden\" name=\"the_tables\" value='".$cstables."'>";  // For autosave
 echo "<input type=\"hidden\" name=\"dir_scales\" value=\"".$dir_scales."\">";
 $max_scales = $i_scale; // Beware that we count scales from 1 because 0 is equal-tempered
 
+echo "<div id=\"topscales\"></div>";
 if($max_scales > 0) echo "<h2>Tonal scales:</h2>";
 $dircontent = scandir($dir_scales);
 $deleted_scales = 0;
@@ -772,7 +763,9 @@ if($deleted_scales > 0) {
 	echo "</font>&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"undelete_scales\" onclick=\"this.form.target='_self';return true;\" value=\"UNDELETE all scales\">";
 	echo "</p>";
 	}
-echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"create_scale\" onclick=\"this.form.target='_self';return true;\" value=\"CREATE A NEW TONAL SCALE\">&nbsp;with name <input type=\"text\" name=\"scale_name\" size=\"20\" value=\"\"></p>";
+echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"create_scale\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#topscales\" value=\"CREATE A NEW TONAL SCALE\">&nbsp;with name <input type=\"text\" name=\"scale_name\" size=\"20\" value=\"\"></p>";
+if($error_create <> '') echo $error_create;
+
 if($max_scales > 0) {
 	echo "<ol>";
 	for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
@@ -792,28 +785,39 @@ if($max_scales > 0) {
 	}
 echo "<input type=\"hidden\" name=\"max_scales\" value=\"".$max_scales."\">";
 
-echo "<p><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"savealldata\" onclick=\"this.form.target='_self';return true;\" value=\"SAVE ‘".$filename."’\"></p>";
-echo "</td><td>";
-echo "<h4 style=\"text-align:center;\">MIDI channel association of instruments</h4>";
-echo "<table>";
-echo "<tr>";
-echo "<td style=\"padding: 5px; vertical-align:middle;\">MIDI<br />channel</td><td>Instrument index</td>";
-echo "</tr>";
-for($ch = 0; $ch < 16; $ch++) {
+echo "<p><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"savealldata\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#topscales\" value=\"SAVE ‘".$filename."’\"></p>";
+echo "</td>";
+if($number_instruments > 0) {
+	echo "<td>";
+	echo "<h4 style=\"text-align:center;\">MIDI channel association of instruments</h4>";
+	echo "<table>";
 	echo "<tr>";
-	echo "<td>".($ch + 1)."</td>";
-	echo "<td style=\"padding: 5px; vertical-align:middle;\">";
-	$arg = "whichCsoundInstrument_".$ch;
-	$x = $whichCsoundInstrument[$ch];
-	$name = '';
-	if($x < 0) $x = '';
-	else if(isset($index_name[$x])) $name = $index_name[$x];
-	echo "<input type=\"text\" name=\"".$arg."\" size=\"4\" value=\"".$x."\"> <i>".$name."</i>";
-	echo "</td>";
+	echo "<td style=\"padding: 5px; vertical-align:middle;\">MIDI<br />channel</td><td>Instrument index</td>";
 	echo "</tr>";
+	for($ch = 0; $ch < 16; $ch++) {
+		echo "<tr>";
+		echo "<td>".($ch + 1)."</td>";
+		echo "<td style=\"padding: 5px; vertical-align:middle;\">";
+		$arg = "whichCsoundInstrument_".$ch;
+		$x = $whichCsoundInstrument[$ch];
+		$name = '';
+		if($x < 0) $x = '';
+		else if(isset($index_name[$x])) $name = $index_name[$x];
+		echo "<input type=\"text\" name=\"".$arg."\" size=\"4\" value=\"".$x."\"> <i>".$name."</i>";
+		echo "</td></tr>";
+		}
+	echo "</table>";
+	echo "</td>";
 	}
-echo "</table>";
-echo "</td></tr></table>";
+else {
+	for($ch = 0; $ch < 16; $ch++) {
+		$arg = "whichCsoundInstrument_".$ch;
+		$x = $whichCsoundInstrument[$ch];
+		if($x < 0) $x = '';
+		echo "<input type=\"hidden\" name=\"".$arg."\" value=\"".$x."\">";
+		}
+	}
+echo "</tr></table>";
 
 if($deleted_instruments <> '') echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"restore\" onclick=\"this.form.target='_self';return true;\" value=\"RESTORE ALL DELETED INSTRUMENTS\"> = <font color=\"blue\"><big>".$deleted_instruments."</big></font></p>";
 echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";
@@ -850,7 +854,7 @@ if($number_instruments > 0) {
 		echo "<input type=\"hidden\" name=\"CsoundOrchestraName\" value=\"".$CsoundOrchestraName."\">";
 		echo "<input type=\"hidden\" name=\"number_instruments\" value=\"".$number_instruments."\">";
 		echo "<input type=\"hidden\" name=\"begin_tables\" value=\"".$begin_tables."\">";
-		echo "<input type=\"hidden\" name=\"the_tables\" value=\"".$cstables."\">"; // For autosave
+		echo "<input type=\"hidden\" name=\"the_tables\" value='".$cstables."'>"; // For autosave
 		for($ch = 0; $ch < $number_channels; $ch++) {
 			$arg = "whichCsoundInstrument_".$ch;
 			echo "<input type=\"hidden\" name=\"".$arg."\" value=\"".$whichCsoundInstrument[$ch]."\">";

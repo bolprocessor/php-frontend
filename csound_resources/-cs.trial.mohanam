@@ -1,5 +1,5 @@
 // Bol Processor BP3 compatible with version BP2.9.8
-// Csound instrument file saved as "-cs.trial.mohanam". Date: 2020-11-16 15:42:57
+// Csound resource file saved as "-cs.trial.mohanam". Date: 2020-11-25 14:05:24
 16
 -1
 -1
@@ -305,4 +305,10 @@ Default instrument created by template
 0
 _begin tables
 f1 0 256 10 1 ; This table may be changed
+"just intonation"
+/sa sa# re re# ga ma ma# pa pa# dha dha# ni sa/
+[1 1 16 15 9 8 6 5 5 4 4 3 64 45 3 2 8 5 5 3 16 9 15 8 2 1]
+|4|
+f2 0 128 -51 12 2 261.63 60 1 1.067 1.125 1.2 1.25 1.333 1.422 1.5 1.6 1.667 1.8 1.875 2
+<html>A traditional scale constructed with simple integer ratios<br /></html>
 _end tables
