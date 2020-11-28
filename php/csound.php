@@ -54,9 +54,11 @@ if(isset($_POST['create_scale'])) {
 		else {
 			$handle = fopen($dir_scales.$new_scale_file,"w");
 			fwrite($handle,"\"".$new_scale_name."\"\n");
-			$any_scale = "f2 0 128 -51 12 2 261.63 60 1 1.066 1.125 1.2 1.25 1.333 1.42 1.5 1.6 1.666 1.777 1.875 2.000";
+			$any_fractions = "[1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1]";
+			fwrite($handle,$any_fractions."\n");
+			$any_scale = "f2 0 128 -51 12 2 261.63 60 1 1.059 1.122 1.189 1.26 1.335 1.414 1.498 1.587 1.682 1.782 1.888 2";
 			fwrite($handle,$any_scale."\n");
-			$any_comment = "<html>This is a new tonal scale for BP3.<br />Created ".date('Y-m-d H:i:s')."</html>";
+			$any_comment = "<html>This is an equal-tempered scale for BP3 + Csound.<br />Created ".date('Y-m-d H:i:s')."</html>";
 			fwrite($handle,$any_comment."\n");
 			fclose($handle);
 			$need_to_save = TRUE;
@@ -700,13 +702,13 @@ for($i = $i + 1; $i < $imax_file; $i++) {
 		continue;
 		}
 	if($line[0] == '[') {
-			fwrite($handle,$line."\n");
-			$scale_fraction[$i_scale] = $line;
+		fwrite($handle,$line."\n");
+		$scale_fraction[$i_scale] = $line;
 		continue;
 		}
 	if($line[0] == '|') {
-			fwrite($handle,$line."\n");
-			$baseoctave[$i_scale] = $line;
+		fwrite($handle,$line."\n");
+		$baseoctave[$i_scale] = $line;
 		continue;
 		}
 	$table2 = explode(' ',$line);
@@ -768,6 +770,7 @@ if($error_create <> '') echo $error_create;
 
 if($max_scales > 0) {
 	echo "<ol>";
+	$table_names = $p_interval = $q_interval = array();
 	for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
 		$link_edit = "scale.php";
 		echo "<li><font color=\"green\"><b>".$scale_name[$i_scale]."</b></font> ";
@@ -776,12 +779,77 @@ if($max_scales > 0) {
 		
 		echo "&nbsp;<input type=\"submit\" style=\"background-color:yellow;\" name=\"copy_scale_".$i_scale."\" formaction=\"".$url_this_page."&scalefilename=".urlencode($scale_name[$i_scale])."\" onclick=\"this.form.target='_self';return true;\" value=\"COPY or DUPLICATE this scale\">";
 		
-		echo "<br /><small>".$scale_table[$i_scale]."</small>";
-		if(isset($scale_note_names[$i_scale])) echo "<br />&nbsp;&nbsp;&nbsp;<font color=\"blue\">".str_replace('/','',$scale_note_names[$i_scale])."</font>";
-		if(isset($scale_comment[$i_scale])) echo "<br /><i>".html_to_text($scale_comment[$i_scale],'txt')."</i>";
+		echo "<br /><small><font color=\"blue\">".$scale_table[$i_scale]."</font></small>";
+		if(isset($scale_fraction[$i_scale])) {
+			echo "<br />&nbsp;&nbsp;&nbsp;";
+			$fraction_string = str_replace('[','',str_replace(']','',$scale_fraction[$i_scale]));
+			$fraction_string = preg_replace("/\s+/u",' ',$fraction_string);
+			$table_fraction = explode(' ',$fraction_string);
+			
+			$names_string = trim(str_replace('/','',$scale_note_names[$i_scale]));
+			$names_string = preg_replace("/\s+/u",' ',$names_string);
+			$table_names[$i_scale] = explode(' ',$names_string);
+			
+			$p_interval[$i_scale] = array();
+			$p_old = $q_old = 0;
+			for($i_fraction = $k = 0; $i_fraction < (count($table_fraction) - 1); $i_fraction += 2) {
+				if(!isset($table_names[$i_scale][$i_fraction / 2]) OR $table_names[$i_scale][$i_fraction / 2] == "•") continue;
+				$p = intval($table_fraction[$i_fraction]);
+				$q = intval($table_fraction[$i_fraction + 1]);
+				if(($p * $q) > 0) {
+					echo $p."/".$q." ";
+					if($i_fraction > 1) {
+						$p_this_interval = $p * $q_old;
+						$q_this_interval = $q * $p_old;
+					//	echo "(".$q_old." ".$p_old." # ".$p_this_interval."/".$q_this_interval.") ";
+						$simple_fraction = simplify_fraction($p_this_interval,$q_this_interval);
+						if($simple_fraction['p'] <> $p_this_interval) {
+							$p_this_interval = $simple_fraction['p'];
+							$q_this_interval = $simple_fraction['q'];
+							}
+						$p_interval[$i_scale][$k] = $p_this_interval;
+						$q_interval[$i_scale][$k] = $q_this_interval;
+					//	echo "[".$p_this_interval."/".$q_this_interval."] ";
+						$k++;
+						}
+					$p_old = $p;
+					$q_old = $q;
+					}
+				else {
+					echo "•/• ";
+					$p_interval[$i_scale][$i_fraction / 2] = $q_interval[$i_scale][$i_fraction / 2] = 0;
+					}
+				}
+			}
+		if(isset($scale_note_names[$i_scale])) echo "<br />&nbsp;&nbsp;&nbsp;<font color=\"red\">".str_replace('/','',$scale_note_names[$i_scale])."</font>";
+		if(isset($scale_comment[$i_scale])) echo "<br /><i>".str_replace("<br />",' ',html_to_text($scale_comment[$i_scale],'txt'))."</i>";
 		echo "</li>";
 		}
 	echo "</ol>";
+	for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
+		if(isset($scale_fraction[$i_scale])) {
+			$kmaxi = count($p_interval[$i_scale]);
+			echo "<font color=\"blue\">".$scale_name[$i_scale]."</font> ";
+			for($k = 0; $k < $kmaxi; $k++) {
+				echo $p_interval[$i_scale][$k]."/".$q_interval[$i_scale][$k]." ";
+				}
+			echo "<br />";
+		//	for($j_scale = ($i_scale + 1); $j_scale <= $max_scales; $j_scale++) {
+			for($j_scale = 1; $j_scale <= $max_scales; $j_scale++) {
+				if($i_scale == $j_scale) continue;
+				$kmaxj = count($p_interval[$i_scale]);
+				if($kmaxj <> $kmaxi) continue;
+				for($k = 0; $k < $kmaxi; $k++) {
+					if($p_interval[$i_scale][$k] <> $p_interval[$j_scale][$k]) break;
+					if($q_interval[$i_scale][$k] <> $q_interval[$j_scale][$k]) break;
+					}
+				if($k == $kmaxi) {
+					echo "This scale is identical to <font color=\"blue\">".$scale_name[$j_scale]."</font><br />";
+					}
+				}
+			}
+		echo "<br />";
+		}
 	}
 echo "<input type=\"hidden\" name=\"max_scales\" value=\"".$max_scales."\">";
 

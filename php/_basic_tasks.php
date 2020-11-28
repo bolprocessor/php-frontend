@@ -1856,4 +1856,31 @@ function create_fraction($ratio) {
 	$result['q'] = $q / $gcd;
 	return $result;
 	}
+	
+function simplify_fraction($p,$q) {
+	if(($p * $q) <> 0) {
+		$gcd = gcd($p,$q);
+		$p = $p / $gcd;
+		$q = $q / $gcd;
+		if($p == 1024 AND $q == 729) { // P1
+			$p = 45;
+			$q = 32;
+			}
+		if($p == 729 AND $q == 512) { // M4
+			$p = 64;
+			$q = 45;
+			}
+		if($p == 81920 AND $q == 59049) { // P1--
+			$p = 325;
+			$q = 234;
+			}
+		if($p == 59049 AND $q == 40960) { // M4++
+			$p = 36;
+			$q = 25;
+			}
+		}
+	$result['p'] = $p;
+	$result['q'] = $q;
+	return $result;
+	}
 ?>
