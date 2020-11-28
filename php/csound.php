@@ -4,7 +4,7 @@ require_once("_basic_tasks.php");
 $url_this_page = "csound.php";
 
 $autosave = TRUE;
-$autosave = FALSE;
+// $autosave = FALSE;
 $verbose = TRUE;
 $verbose = FALSE;
 
