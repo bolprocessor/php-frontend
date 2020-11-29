@@ -770,7 +770,7 @@ if($error_create <> '') echo $error_create;
 
 if($max_scales > 0) {
 	echo "<ol>";
-	$table_names = $p_interval = $q_interval = array();
+	$table_names = $p_interval = $q_interval = $cent_position = $ratio_interval = array();
 	for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
 		$link_edit = "scale.php";
 		echo "<li><font color=\"green\"><b>".$scale_name[$i_scale]."</b></font> ";
@@ -785,24 +785,35 @@ if($max_scales > 0) {
 			$fraction_string = str_replace('[','',str_replace(']','',$scale_fraction[$i_scale]));
 			$fraction_string = preg_replace("/\s+/u",' ',$fraction_string);
 			$table_fraction = explode(' ',$fraction_string);
+			$csound_line = $scale_table[$i_scale];
+			$csound_line = preg_replace("/\s+/u",' ',$csound_line);
+			$table_csound_line = explode(' ',$csound_line);
 			
 			$names_string = trim(str_replace('/','',$scale_note_names[$i_scale]));
 			$names_string = preg_replace("/\s+/u",' ',$names_string);
 			$table_names[$i_scale] = explode(' ',$names_string);
 			
-			$p_interval[$i_scale] = array();
+			$p_interval[$i_scale] = $q_interval[$i_scale] = $ratio_interval[$i_scale] = array();
 			$p_old = $q_old = 0;
+			$oldratio = 1;
+			$note_name[$i_scale][0] = $table_names[$i_scale][0];
 			for($i_fraction = $k = 0; $i_fraction < (count($table_fraction) - 1); $i_fraction += 2) {
-				if(!isset($table_names[$i_scale][$i_fraction / 2]) OR $table_names[$i_scale][$i_fraction / 2] == "•") continue;
+				if($table_names[$i_scale][$i_fraction / 2] == "•") continue;
+				$note_name[$i_scale][$k + 1] = $table_names[$i_scale][$i_fraction / 2];
+				$ratio[$i_scale][$k] = $table_csound_line[($i_fraction / 2) + 8];
+				$ratio_interval[$i_scale][$k] = 1;
+				$p_interval[$i_scale][$k] = $q_interval[$i_scale][$k] = 0;
 				$p = intval($table_fraction[$i_fraction]);
 				$q = intval($table_fraction[$i_fraction + 1]);
 				if(($p * $q) > 0) {
 					echo $p."/".$q." ";
+					if($i_fraction  == 0)
+						$cent_position[$i_scale] = 1200 * log($p/$q) /log(2);
 					if($i_fraction > 1) {
 						$p_this_interval = $p * $q_old;
 						$q_this_interval = $q * $p_old;
 					//	echo "(".$q_old." ".$p_old." # ".$p_this_interval."/".$q_this_interval.") ";
-						$simple_fraction = simplify_fraction($p_this_interval,$q_this_interval);
+						$simple_fraction = simplify_fraction_eliminate_schisma($p_this_interval,$q_this_interval);
 						if($simple_fraction['p'] <> $p_this_interval) {
 							$p_this_interval = $simple_fraction['p'];
 							$q_this_interval = $simple_fraction['q'];
@@ -816,8 +827,13 @@ if($max_scales > 0) {
 					$q_old = $q;
 					}
 				else {
-					echo "•/• ";
-					$p_interval[$i_scale][$i_fraction / 2] = $q_interval[$i_scale][$i_fraction / 2] = 0;
+					echo " <small>".round($ratio[$i_scale][$k],4)." </small>";
+					if($i_fraction > 1) {
+						$ratio_interval[$i_scale][$k] = $ratio[$i_scale][$k] / $oldratio;
+						}
+					$oldratio = $ratio[$i_scale][$k];
+					$p_interval[$i_scale][$k] = $q_interval[$i_scale][$k] = 0;
+					$k++;
 					}
 				}
 			}
@@ -826,30 +842,57 @@ if($max_scales > 0) {
 		echo "</li>";
 		}
 	echo "</ol>";
+	echo "<h3>Scale intervals (only labeled notes)</h3>";
+	echo "<ol>";
 	for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
-		if(isset($scale_fraction[$i_scale])) {
+		if(isset($scale_fraction[$i_scale]) AND isset($table_names[$i_scale])) {
 			$kmaxi = count($p_interval[$i_scale]);
-			echo "<font color=\"blue\">".$scale_name[$i_scale]."</font> ";
-			for($k = 0; $k < $kmaxi; $k++) {
-				echo $p_interval[$i_scale][$k]."/".$q_interval[$i_scale][$k]." ";
+			if($kmaxi == 0) continue;
+			echo "<li><font color=\"blue\">".$scale_name[$i_scale]."</font> = ";
+			$p_prod = $q_prod = 1;
+			for($i_fraction = $k = 0; $k < $kmaxi; $i_fraction += 2) {
+				if($table_names[$i_scale][$i_fraction / 2] == "•") continue;
+				echo "<font color=\"red\">".$note_name[$i_scale][$k]."</font> ";
+				if(($p_interval[$i_scale][$k] * $q_interval[$i_scale][$k]) > 0) {
+					echo "<small>".$p_interval[$i_scale][$k]."/".$q_interval[$i_scale][$k]."</small> ";
+					$p_prod = $p_prod * $p_interval[$i_scale][$k]; // Only required for checking
+					$q_prod = $q_prod * $q_interval[$i_scale][$k]; // Only required for checking
+					$k++;
+					}
+				else {
+					$cents = round(1200 * log($ratio_interval[$i_scale][$k]) / log(2));
+					echo "<small>".$cents."¢</small> ";
+					$k++;
+					}
 				}
-			echo "<br />";
 		//	for($j_scale = ($i_scale + 1); $j_scale <= $max_scales; $j_scale++) {
 			for($j_scale = 1; $j_scale <= $max_scales; $j_scale++) {
 				if($i_scale == $j_scale) continue;
 				$kmaxj = count($p_interval[$i_scale]);
-				if($kmaxj <> $kmaxi) continue;
+				if(($kmaxj <> $kmaxi) OR $kmaxj == 0) continue;
+				if(count($p_interval[$j_scale]) == 0) continue;
 				for($k = 0; $k < $kmaxi; $k++) {
-					if($p_interval[$i_scale][$k] <> $p_interval[$j_scale][$k]) break;
-					if($q_interval[$i_scale][$k] <> $q_interval[$j_scale][$k]) break;
+					if(($p_interval[$i_scale][$k] * $p_interval[$j_scale][$k]) == 0) {
+						$cents_i = round(1200 * log($ratio_interval[$i_scale][$k]) / log(2));
+						$cents_j = round(1200 * log($ratio_interval[$j_scale][$k]) / log(2));
+						if($cents_i <> $cents_j) break;
+						}
+					else {
+						if($p_interval[$i_scale][$k] <> $p_interval[$j_scale][$k]) break;
+						if($q_interval[$i_scale][$k] <> $q_interval[$j_scale][$k]) break;
+						}
 					}
 				if($k == $kmaxi) {
-					echo "This scale is identical to <font color=\"blue\">".$scale_name[$j_scale]."</font><br />";
+					$cent_drift = round($cent_position[$i_scale]) - round($cent_position[$j_scale]);
+					echo "<br >&nbsp;&nbsp;=> this scale is identical to <font color=\"blue\">".$scale_name[$j_scale]."</font>";
+					if($cent_drift > 0) echo " raised by <font color=\"red\">".$cent_drift."</font> cents";
+					if($cent_drift < 0) echo " lowered by <font color=\"red\">".(-$cent_drift)."</font> cents";
 					}
 				}
+			echo "</li>";
 			}
-		echo "<br />";
 		}
+	echo "</ol>";
 	}
 echo "<input type=\"hidden\" name=\"max_scales\" value=\"".$max_scales."\">";
 

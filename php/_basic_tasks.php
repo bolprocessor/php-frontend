@@ -1857,26 +1857,38 @@ function create_fraction($ratio) {
 	return $result;
 	}
 	
-function simplify_fraction($p,$q) {
+function simplify_fraction_eliminate_schisma($p,$q) {
 	if(($p * $q) <> 0) {
 		$gcd = gcd($p,$q);
 		$p = $p / $gcd;
 		$q = $q / $gcd;
-		if($p == 1024 AND $q == 729) { // P1
-			$p = 45;
+		if($p == 1024 AND $q == 729) { // 1.404 p1
+			$p = 45; // 1.406
 			$q = 32;
 			}
-		if($p == 729 AND $q == 512) { // M4
-			$p = 64;
+		if($p == 729 AND $q == 512) { // 1.4238 m4
+			$p = 64; // 1.422
 			$q = 45;
 			}
-		if($p == 81920 AND $q == 59049) { // P1--
-			$p = 325;
+		if($p == 81920 AND $q == 59049) { // 1.387 p1 - 1 syntonic comma
+			$p = 325; // 1.388
 			$q = 234;
 			}
-		if($p == 59049 AND $q == 40960) { // M4++
-			$p = 36;
+		if($p == 59049 AND $q == 40960) { // 1.441 m4 + 1 syntonic comma
+			$p = 36; // 1.440
 			$q = 25;
+			}
+		if($p == 2187 AND $q == 2048) { // 1.0678 limma + syntonic comma
+			$p = 16; // 1.0666
+			$q = 15;
+			}
+		if($p == 135 AND $q == 128) { // 1.05468 minor semitone + syntonic comma = limma
+			$p = 256; // 1.0535 (this is the Pythagorean value)
+			$q = 243;
+			}
+		if($p == 2048 AND $q == 2025) { // 1.0113 syntonic comma
+			$p = 81; // 1.0125
+			$q = 80;
 			}
 		}
 	$result['p'] = $p;

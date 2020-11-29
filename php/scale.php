@@ -318,7 +318,7 @@ echo "<tr><td style=\"padding-top:4px; padding-bottom:4px;\" colspan=\"5\">";
 if(!isset($_SESSION['scroll']) OR $_SESSION['scroll'] == 1)
 	$scroll_value = "DO NOT SCROLL THIS TABLE";
 else $scroll_value = "SCROLL THIS TABLE";
-echo "<input type=\"submit\" style=\"background-color:yellow; \" name=\"scroll\" onclick=\"this.form.target='_self';return true;\" value=\"".$scroll_value."\">";
+echo "<input type=\"submit\" style=\"background-color:yellow; \" name=\"scroll\" onclick=\"this.form.target='_self';return true;\" formaction=\"scale.php?scalefilename=".urlencode($filename)."#toptable\" value=\"".$scroll_value."\">";
 echo "</td></tr>";
 
 echo "<tr><th style=\"background-color:azure; padding:4px;\">fraction</th>";
@@ -364,10 +364,31 @@ echo "<tr><th style=\"background-color:azure; padding:4px;\">interval</th><td st
 for($i = 0; $i < $numgrades_fullscale; $i++) {
 	if(($ratio[$i] * $ratio[$i + 1]) == 0) $cents = '';
 	else $cents = round(1200 * log($ratio[$i + 1] / $ratio[$i]) / log(2));
-	echo "<td style=\"text-align:center; padding-top:4px; padding-bottom:4px; padding-left:0px; padding-right:0px; margin-left:0px; margin-right:0px;\" colspan=\"2\">";
-	echo "<font color=\"blue\">«—&nbsp;".$cents."&nbsp;—»</font>";
+	echo "<td style=\"white-space:nowrap; text-align:center; padding-top:4px; padding-bottom:4px; padding-left:0px; padding-right:0px; margin-left:0px; margin-right:0px;\" colspan=\"2\">";
+	echo "<font color=\"blue\">«—&nbsp;".$cents."¢&nbsp;—»</font>";
 	echo "</td>";
 	}
+	
+echo "<tr><th style=\"background-color:azure; padding:4px;\">delta</th><td style=\"padding:0px;\"></td>";
+for($i = 0; $i < $numgrades_fullscale; $i++) {
+	echo "<td style=\"white-space:nowrap; text-align:center; padding-top:4px; padding-bottom:4px; padding-left:0px; padding-right:0px; margin-left:0px; margin-right:0px;\" colspan=\"2\">";
+	if(($p[$i+1] * $q[$i] * $q[$i+1] * $p[$i]) > 0) {
+		$p_int = $p[$i+1] * $q[$i];
+		$q_int = $q[$i+1] * $p[$i];
+		$fraction = simplify_fraction_eliminate_schisma($p_int,$q_int);
+		if($fraction['p'] <> $p_int) {
+			$p_int = $fraction['p'];
+			$q_int = $fraction['q'];
+			}			
+		echo "<small>".$p_int."/".$q_int."</small>";
+		}
+	else {
+		echo "<small>".round(($ratio[$i + 1] / $ratio[$i]),3)."</small>";
+		}
+	echo "</td>";
+	}
+echo "</tr>";
+
 echo "</tr>";
 echo "<tr><th style=\"background-color:azure; padding:4px;\">key</th>";
 $key = $basekey;
@@ -566,7 +587,7 @@ if($numgrades_with_labels > 2) {
 						$p_transpose = $p_transpose / $gcd;
 						$q_transpose = $q_transpose / $gcd;
 						}
-					$fraction = simplify_fraction($p_transpose,$q_transpose);
+					$fraction = simplify_fraction_eliminate_schisma($p_transpose,$q_transpose);
 					if($fraction['p'] <> $p_transpose) {
 						echo "=> ".$p_transpose."/".$q_transpose." simplified to ".$fraction['p']."/".$fraction['q']."<br />";
 						$p_transpose = $fraction['p'];
@@ -605,7 +626,7 @@ if($numgrades_with_labels > 2) {
 							$this_ratio = $p_new/$q_new;
 							}
 						
-						$fraction = simplify_fraction($p_new,$q_new);
+						$fraction = simplify_fraction_eliminate_schisma($p_new,$q_new);
 						if($fraction['p'] <> $p_new) {
 							echo "=> ".$p_new."/".$q_new." simplified to ".$fraction['p']."/".$fraction['q']."<br />";
 							$p_new = $fraction['p'];
@@ -647,6 +668,9 @@ if($numgrades_with_labels > 2) {
 							if(abs($cents - $cents_new_this_grade[$jj]) < 4) {
 								if($name[$j] <> $name_this_grade[$jj]) {
 									echo "➡ Note <font color=\"blue\">‘".$name_this_grade[$jj]."’</font> relocated to position ".$j."<br />";
+									
+								
+								
 									}
 								$new_name[$j] = $name_this_grade[$jj];
 								$p[$j] = $p_new_this_grade[$jj];
@@ -673,7 +697,6 @@ if($numgrades_with_labels > 2) {
 							for($j = $jold; $j <= $numgrades_fullscale; $j++) {
 								$cents = 1200 * log($ratio[$j]) / log(2);
 								$dist = abs($cents - $search_cents);
-						//		echo "j = ".$j." dist = ".$dist."<br />";
 								if($dist < $minimum_dist) {
 									$minimum_dist = $dist;
 									$closest_j = $j;
@@ -683,8 +706,12 @@ if($numgrades_with_labels > 2) {
 								$new_name[$closest_j] = $search_name;
 								$p[$closest_j] = $p_new_this_grade[$jj];
 								$q[$closest_j] = $q_new_this_grade[$jj];
+								$old_ratio = round($ratio_this_grade[$jj],3);
 								$ratio[$closest_j] = $ratio_this_grade[$jj];
-								echo "➡ Assigned location of ‘".$search_name."’ to ".$closest_j."th position with ratio ".$p[$closest_j]."/".$q[$closest_j]." = ".round($ratio[$closest_j],3)."<br />";
+								echo "➡ Assigned location of ‘".$search_name."’ to ".$closest_j."th position";
+								if(round($ratio[$closest_j],3) <> $old_ratio)
+									echo " with ratio ".$p[$closest_j]."/".$q[$closest_j]." = ".round($ratio[$closest_j],3);
+								echo "<br />";
 								$jold = $closest_j + 1;
 								}
 							}
@@ -708,12 +735,26 @@ if($numgrades_with_labels > 2) {
 						$q_new = $q_new / $gcd;
 						$new_ratio = $p_new / $q_new;
 						}
-					$fraction = simplify_fraction($p_new,$q_new);
+					$fraction = simplify_fraction_eliminate_schisma($p_new,$q_new);
 					if($fraction['p'] <> $p_new) {
 						echo "=> ".$p_new."/".$q_new." simplified to ".$fraction['p']."/".$fraction['q']."<br />";
 						$p_new = $fraction['p'];
 						$q_new = $fraction['q'];
 						$new_ratio = $p_new / $q_new;
+						}
+					if($new_ratio > 2) {
+						$q_new = $q_new * 2;
+						$gcd = gcd($p_new,$q_new);
+						$p_new = $p_new / $gcd;
+						$q_new = $q_new / $gcd;
+						$new_ratio = $new_ratio / 2;
+						}
+					if($new_ratio < 1) {
+						$p_new = $p_new * 2;
+						$gcd = gcd($p_new,$q_new);
+						$p_new = $p_new / $gcd;
+						$q_new = $q_new / $gcd;
+						$new_ratio = $new_ratio * 2;
 						}
 					$p_new_this_grade[$jj] = $p_new;
 					$q_new_this_grade[$jj] = $q_new;
@@ -727,12 +768,13 @@ if($numgrades_with_labels > 2) {
 				for($j = 0; $j <= $numgrades_fullscale; $j++) {
 					$new_name[$j] = '';
 					}
-				$jold = 0;
+				$jold = -1;
 				for($jj = 0; $jj <= $numgrades_with_labels; $jj++) {
 					$minimum_dist = 1200;
 					$closest_j = -1;
 					$search_cents = round($cents_new_this_grade[$jj]);
-					for($j = $jold; $j <= $numgrades_fullscale; $j++) {
+					for($j = 0; $j <= $numgrades_fullscale; $j++) {
+						if($j == $jold) continue;
 						$cents = 1200 * log($ratio[$j]) / log(2);
 						$dist = abs($cents - $search_cents);
 						if($dist < $minimum_dist) {
@@ -744,14 +786,21 @@ if($numgrades_with_labels > 2) {
 						$new_name[$closest_j] = $name_this_grade[$jj];
 						$p[$closest_j] = $p_new_this_grade[$jj];
 						$q[$closest_j] = $q_new_this_grade[$jj];
+						$old_ratio = round($ratio[$closest_j],3);
 						$ratio[$closest_j] = $ratio_this_grade[$jj];
-						if($new_name[$closest_j] <> $name[$closest_j])
-							echo "➡ Assigned location of ‘".$name_this_grade[$jj]."’ to ".$closest_j."th position with ratio ".$p[$closest_j]."/".$q[$closest_j]." = ".round($ratio[$closest_j],3)."<br />";
-						$jold = $closest_j + 1;
+						if($new_name[$closest_j] <> $name[$closest_j]) {
+							echo "➡ Assigned location of <font color=\"blue\">‘".$name_this_grade[$jj]."’</font> to ".$closest_j."th position";
+							if(round($ratio[$closest_j],3) <> $old_ratio)
+								echo " with ratio ".$p[$closest_j]."/".$q[$closest_j]." = ".round($ratio[$closest_j],3);
+							echo "<br />";
+							}
+						$jold = $closest_j;
 						}
 					}
 				for($j = 0; $j <= $numgrades_fullscale; $j++)
 					$name[$j] = $new_name[$j];
+				if($name[0] == '') $name[0] = $name[$numgrades_fullscale];
+				if($name[$numgrades_fullscale] == '') $name[$numgrades_fullscale] = $name[0];
 				}
 			
 			// Now save to file	
