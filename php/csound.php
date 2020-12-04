@@ -39,6 +39,9 @@ if(!file_exists($temp_dir.$temp_folder.SLASH."scales")) {
 $dir_scales = $temp_dir.$temp_folder.SLASH."scales".SLASH;
 $need_to_save = FALSE;
 
+if(isset($_POST['max_scales'])) $max_scales = $_POST['max_scales'];
+else $max_scales = 0;
+
 $error_create = '';
 if(isset($_POST['create_scale'])) {
 	$new_scale_name = trim($_POST['scale_name']);
@@ -82,8 +85,6 @@ if(isset($_POST['undelete_scales'])) {
 		}
 	}
 
-if(isset($_POST['max_scales'])) $max_scales = $_POST['max_scales'];
-else $max_scales = 0;
 for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
 	if(isset($_POST['delete_scale_'.$i_scale])) {
 		$scalefilename = urldecode($_GET['scalefilename']);
@@ -114,7 +115,6 @@ if(isset($_POST['copy_this_scale'])) {
 			else {
 				echo "<p>Copied <font color=\"blue\">‘".$scalefilename."’</font> ";
 				echo "to: <font color=\"blue\">‘".$new_scale_file."’</font></p>";
-			//	copy($dir_scales.$scalefilename.".txt", $dir_scales.$new_scale_file);
 				$content = file_get_contents($dir_scales.$scalefilename.".txt",TRUE);
 				$table = explode("\n",$content);
 				$im = count($table);
@@ -128,7 +128,6 @@ if(isset($_POST['copy_this_scale'])) {
 					}
 				fclose($handle);
 				$file_lock = $dir.$filename."_lock2";
-			//	echo  $file_lock."<br />";
 				$handle_lock = fopen($file_lock,"w");
 				fwrite($handle_lock,"lock\n");
 				fclose($handle_lock);
@@ -769,6 +768,8 @@ echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"create
 if($error_create <> '') echo $error_create;
 
 if($max_scales > 0) {
+	echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"export_scales\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#export\" value=\"EXPORT TONAL SCALES\"></p>";
+	
 	echo "<ol>";
 	$table_names = $p_interval = $q_interval = $cent_position = $ratio_interval = array();
 	for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
@@ -842,6 +843,104 @@ if($max_scales > 0) {
 		echo "</li>";
 		}
 	echo "</ol>";
+	
+	echo "<div id=\"export\"></div>";
+	
+	if(isset($_POST['export_to']) AND isset($_POST['file_choice'])) {
+		$destination = $_POST['file_choice'];
+		echo "<h3>Exporting to <font color=\"blue\">‘".$destination."’</font>:</h3>";
+		$file_lock = $dir.$destination."_lock";
+		$time_start = time();
+		$time_end = $time_start + 10;
+		while(TRUE) {
+			if(!file_exists($file_lock)) break;
+			if(time() > $time_end) {
+				echo "<p><font color=\"red\">For an unknown reason the destination file is blocked by a trace file</font> <font color=\"blue\">‘".$file_lock."’</font>. You should delete it by hand!</p>";
+				break;
+				}
+			sleep(1);
+			}
+		$content = file_get_contents($dir.$destination,TRUE);
+		if(!$content) echo "<p><font color=\"red\">For an unknown reason the destination file </font> <font color=\"blue\">‘".$file_lock."’</font> is empty</p>";
+		else {
+			echo "<ul>";
+			$table = explode("\n",$content);
+			$found_scale = FALSE;
+			$some_scale = array();
+			$handle = fopen($dir.$destination,"w");
+			for($i = $k = 0; $i < count($table); $i++) {
+				$line = trim($table[$i]);
+				if($found_scale AND $line <> '' AND $line[0] == "\"") {
+					$some_scale[$k++] = trim(str_replace("\"",'',$line));
+					}
+				if($line == "_begin tables") $found_scale = TRUE;
+				if($line == "_end tables") {
+					for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
+						if(isset($_POST['export_'.$i_scale])) {
+							$scalefilename = $scale_name[$i_scale];
+							echo "<li>".$scalefilename;
+							
+							if(in_array($scalefilename,$some_scale)) {
+								echo "<br />&nbsp;&nbsp;<font color=\"red\">➡ A scale with the same name</font> <font color=\"blue\">‘".$scalefilename."’</font> <font color=\"red\">already exists in</font> <font color=\"blue\">‘".$destination."’</font><font color=\"red\">. You need to delete it before copying this version</font>";
+								}
+							else {
+								$content2 = file_get_contents($dir_scales.$scalefilename.".txt",TRUE);
+								$table2 = explode("\n",$content2);
+								$jm = count($table2);
+								fwrite($handle,"\"".$scalefilename."\"\n");
+								for($j = 1; $j < $jm; $j++) {
+									$line2 = trim($table2[$j]);
+									if($line2 == '') continue;
+									if($line2[0] == "\"") continue;
+									fwrite($handle,$line2."\n");
+								//	echo $line2."<br />";
+									}
+								}
+							echo "</li>";
+							}
+						}
+					}
+				fwrite($handle,$line."\n");
+			//	echo $line."<br />";
+				}
+			fclose($handle);
+			$file_lock2 = $dir.$destination."_lock2";
+			$handle_lock2 = fopen($file_lock2,"w");
+			fwrite($handle_lock2,"lock\n");
+			fclose($handle_lock2);
+			echo "</ul>";
+			}
+		}
+		
+	if(isset($_POST['export_scales'])) {
+		echo "<form method=\"post\" action=\"".$url_this_page."#export\" enctype=\"multipart/form-data\">";
+		echo "<table style=\"background-color:white;\">";
+		echo "<tr>";
+		echo "<td>";
+		echo "<input type=\"submit\" style=\"background-color:aquamarine; \" name=\"export_to\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#export\" value=\"EXPORT:\"><br />";
+		for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
+			echo "<input type=\"checkbox\" name=\"export_".$i_scale."\"><font color=\"blue\">".$scale_name[$i_scale]."</font><br />";
+			}
+		echo "</td>";
+		echo "<td>";
+		echo "<h3>TO:</h3>";
+		$dircontent = scandir($dir);
+		$folder = str_replace($bp_application_path,'',$dir);
+		foreach($dircontent as $thisfile) {
+			$prefix = substr($thisfile,0,3);
+			$table = explode(".",$thisfile);
+			$extension = end($table);
+			if($thisfile == $filename) continue;
+			if(($prefix <> "-cs" AND $extension <> "bpcs") OR is_integer(strpos($thisfile,"_lock"))) continue;
+			echo "<input type=\"radio\" name=\"file_choice\" value=\"".$thisfile."\">".$thisfile;
+			echo "<br />";
+			}
+		echo "</td>";
+		echo "</tr>";
+		echo "</table>";
+		echo "</form>";
+		}
+		
 	echo "<h3>Scale intervals (only labeled notes)</h3>";
 	echo "<ol>";
 	for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
