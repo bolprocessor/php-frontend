@@ -1,5 +1,5 @@
 // Bol Processor BP3 compatible with version BP2.9.8
-// Csound resource file saved as "-cs.Mozart". Date: 2020-12-05 12:56:53
+// Csound resource file saved as "-cs.Mozart". Date: 2020-12-05 18:11:08
 16
 -1
 -1
@@ -153,4 +153,10 @@ f2 0 128 -51 12 2 261.63 60 0.988 1.04 1.111 1.171 1.235 1.317 1.389 1.481 1.561
 |4|
 f2 0 128 -51 12 2 261.63 60 0.988 1.053 1.111 1.185 1.25 1.333 1.406 1.481 1.58 1.667 1.778 1.875 1.975
 <html>This is a reduction of scale "Ma03" (23 grades)<br />Created 2020-11-29 18:20:22</html>
+"piano"
+/do do# re re# mi fa fa# sol sol# la la# si do/
+[1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 501 250]
+|3|
+f2 0 128 -51 12 2.0046 261.63 60 1 1.06 1.123 1.19 1.261 1.336 1.416 1.5 1.59 1.684 1.785 1.891 2.004
+<html>Tuning of a piano with perfect fifths and stretched octave<br /></html>
 _end tables

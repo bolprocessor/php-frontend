@@ -770,6 +770,7 @@ if($error_create <> '') echo $error_create;
 if($max_scales > 0) {
 	$done = TRUE;
 	if(isset($_POST['use_convention'])) {
+		$new_convention = $_POST['new_convention'];
 		$scale_notes_string = "/";
 		for($i = 0; $i <= 12; $i++) {
 			if(!isset($_POST['new_note_'.$i]))
@@ -796,6 +797,7 @@ if($max_scales > 0) {
 					$line = preg_replace("/\s+/u",' ',$line);
 					$table2 = explode(' ',$line);
 					$num_grades_this_scale = intval($table2[4]);
+					$basekey = intval($table2[7]);
 					break;
 					}
 				}
@@ -806,7 +808,13 @@ if($max_scales > 0) {
 					$line = trim($table[$i]);
 					if($line == '') continue;
 					if($line[0] == '/') {
-						$line = $scale_notes_string;
+						if($new_convention == 3) {
+							$line = "/"; $key = $basekey;
+							for($j = 0; $j <= 12; $j++)
+								$line .= $KeyString.($key++)." ";
+							$line = trim($line)."/";
+							}
+						else $line = $scale_notes_string;
 						}
 					fwrite($handle,$line."\n");
 					}
@@ -814,11 +822,12 @@ if($max_scales > 0) {
 				}
 			}
 		echo "</font></b><br />";
-		echo "<p><font color=\"red\">➡</font> Click SAVE ‘".$filename."’ to display fixed scales</p>";
+		echo "<p><font color=\"red\">➡ Click SAVE ‘".$filename."’ to display fixed scales</font></p>";
 		}
 	
 	if(isset($_POST['change_convention']) AND isset($_POST['new_convention'])) {
 		$new_convention = $_POST['new_convention'];
+		echo "<input type=\"hidden\" name=\"new_convention\" value=\"".$new_convention."\">";
 		$done = FALSE;
 		echo "<hr>";
 		switch($new_convention) {
@@ -843,7 +852,10 @@ if($max_scales > 0) {
 			}
 		if($new_convention == 3) {
 			echo "<p>(Will be adjusted to base key)</p><p><font color=\"red\">";
-			for($i = 0; $i <= 12; $i++) echo $standard_note[$i]." ";
+			for($i = 0; $i <= 12; $i++) {
+				echo "<input type=\"hidden\" name=\"new_note_".$i."\" value=\"".$standard_note[$i]."\">";
+				echo $standard_note[$i]." ";
+				}
 			echo "</font></p>";
 			}
 		else {

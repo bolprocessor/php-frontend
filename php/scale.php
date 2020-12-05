@@ -518,81 +518,120 @@ if($done AND $numgrades_with_labels > 2) {
 			}
 		else {
 			$link_edit = "scale.php";
-			echo "<p><font color=\"red\">Exported to</font> <font color=\"blue\">‘".$new_scale_name."’</font> <input style=\"background-color:Aquamarine;\" type=\"submit\" name=\"edit_new_scale\" formaction=\"".$link_edit."?scalefilename=".urlencode($new_scale_name)."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$new_scale_name."’\"></p>";
-			$new_scale_mode = $_POST['major_minor'];
-			if($new_scale_mode <> "none") {
-				$sensitive_note = trim($_POST['sensitive_note']);
-				if($sensitive_note == '') {
-					$error_create = "<br /><font color=\"red\"> ➡ A sensitive note should be specified for the major/minor adjustment</font>";
-					}
-				else {
-					for($j = 0; $j < $numgrades_fullscale; $j++) {
-						if($name[$j] == $sensitive_note) break;
+			if(isset($_POST['major_minor'])) {
+				echo "<p><font color=\"red\">Exported to</font> <font color=\"blue\">‘".$new_scale_name."’</font> <input style=\"background-color:Aquamarine;\" type=\"submit\" name=\"edit_new_scale\" formaction=\"".$link_edit."?scalefilename=".urlencode($new_scale_name)."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$new_scale_name."’\"></p>";
+				$new_scale_mode = $_POST['major_minor'];
+				if($new_scale_mode <> "none") {
+					$sensitive_note = trim($_POST['sensitive_note']);
+					if($sensitive_note == '') {
+						$error_create = "<br /><font color=\"red\"> ➡ A sensitive note should be specified for the major/minor adjustment</font>";
 						}
-					if($j >= $numgrades_fullscale)
-						$error_create = "<br /><font color=\"red\"> ➡ ERROR: Sensitive note <font color=\"blue\">‘".$sensitive_note."’</font> <font color=\"red\">was not found in this scale</font>";
-				
-					}
-				}
-			if($error_create == '') {
-				$handle = fopen($dir_scales.$new_scale_file,"w");
-				fwrite($handle,"\"".$new_scale_name."\"\n");
-				$the_notes = $the_fractions = $the_ratios = '';
-				for($j = 0; $j <= $numgrades_fullscale; $j++) {
-					if(!$full_scale AND $name[$j] == '') continue;
-					if($name[$j] <> '') $the_notes .= $name[$j]." ";
-					else $the_notes .= "• ";
-					$newp[$j] = $p[$j];
-					$newq[$j] = $q[$j];
-					$newratio[$j] = $ratio[$j];
-					if($name[$j] == $sensitive_note) {
-						if($new_scale_mode == "major") {
-							$newp[$j] = $newp[$j] * 81;
-							$newq[$j] = $newq[$j] * 80;
-							$newratio[$j] = $newratio[$j] * 81.0 / 80.0;
+					else {
+						for($j = 0; $j < $numgrades_fullscale; $j++) {
+							if($name[$j] == $sensitive_note) {
+								if($new_scale_mode == "major") {
+									$p_transpose = $p[$j] * 81;
+									$q_transpose = $q[$j] * 80;
+									$ratio_transpose = round($ratio[$j] * 81.0 / 80.0,3);
+									}
+								else {
+									$p_transpose = $p[$j] * 80;
+									$q_transpose = $q[$j] * 81;
+									$ratio_transpose = round($ratio[$j] * 80.0 / 81.0,3);
+									}
+								break;
+								}
 							}
-						if($new_scale_mode == "minor") {
-							$newp[$j] = $newp[$j] * 80;
-							$newq[$j] = $newq[$j] * 81;
-							$newratio[$j] = $newratio[$j] * 80.0 / 81.0;
-							}
-						if(($newp[$j] * $newq[$j]) > 0) {
-							$gcd = gcd($newp[$j],$newq[$j]);
-							$newp[$j] = $newp[$j] / $gcd;
-							$newq[$j] = $newq[$j] / $gcd;
+						if($j >= $numgrades_fullscale)
+							$error_create = "<br /><font color=\"red\"> ➡ ERROR: Sensitive note <font color=\"blue\">‘".$sensitive_note."’</font> <font color=\"red\">was not found in this scale</font>";
+						else {
+							if(($p_transpose * $q_transpose) <> 0) {
+								$gcd = gcd($p_transpose,$q_transpose);
+								$p_transpose = $p_transpose / $gcd;
+								$q_transpose = $q_transpose / $gcd;
+								}
+							$fraction = simplify_fraction_eliminate_schisma($p_transpose,$q_transpose);
+							if($fraction['p'] <> $p_transpose) {
+								echo "=> ".$p_transpose."/".$q_transpose." simplified to ".$fraction['p']."/".$fraction['q']."<br />";
+								$p_transpose = $fraction['p'];
+								$q_transpose = $fraction['q'];
+								$ratio_transpose = round($p_transpose/$q_transpose,3);
+								}
+							$found = FALSE;
+						//	echo $p_transpose."/".$q_transpose." = ".$ratio_transpose."<br />";
+							for($j = 0; $j <= $numgrades_fullscale; $j++) {  // $$$$$
+								if($name[$j] == $sensitive_note) $name[$j] = '';
+								if(!$found AND ((round($ratio[$j],3) >= $ratio_transpose) OR ($ratio[$j] < 1 AND $ratio_transpose == 1.0))) {
+									$p[$j] = $p_transpose;
+									$q[$j] = $q_transpose;
+									$ratio[$j] = $ratio_transpose;
+									$name[$j] = $sensitive_note;
+									$j_transpose = $j;
+									$found = TRUE;
+									}
+								}
+							if($j_transpose == 0) {
+								$p_transpose = 2 * $p_transpose;
+								if(($p_transpose * $q_transpose) <> 0) {
+									$gcd = gcd($p_transpose,$q_transpose);
+									$p_transpose = $p_transpose / $gcd;
+									$q_transpose = $q_transpose / $gcd;
+									}
+								$fraction = simplify_fraction_eliminate_schisma($p_transpose,$q_transpose);
+								if($fraction['p'] <> $p_transpose) {
+									echo "=> ".$p_transpose."/".$q_transpose." simplified to ".$fraction['p']."/".$fraction['q']."<br />";
+									$p_transpose = $fraction['p'];
+									$q_transpose = $fraction['q'];
+									}
+								$p[$numgrades_fullscale] = $p_transpose;
+								$q[$numgrades_fullscale] = $q_transpose;
+								$ratio[$numgrades_fullscale] = 2 * $ratio_transpose;
+								$name[$numgrades_fullscale] = $sensitive_note;
+								}
 							}
 						}
-					$the_fractions .= $newp[$j]." ".$newq[$j]." ";
 					}
-				$the_notes = "/".trim($the_notes)."/";
-				$the_fractions = "[".trim($the_fractions)."]";
-				fwrite($handle,$the_notes."\n");
-				fwrite($handle,$the_fractions."\n");
-				fwrite($handle,"|".$baseoctave."|\n");
-				$the_scale = "f2 0 128 -51 ";
-				$the_scale .= $numgrades." ".$interval." ".$basefreq." ".$basekey." ";
-				for($j = 0; $j <= $numgrades_fullscale; $j++) {
-					if(!$full_scale AND $name[$j] == '') continue;
-					if(($newp[$j] * $newq[$j]) > 0)
-						$the_scale .= round($newp[$j]/$newq[$j],3)." ";
+				if($error_create == '') {
+					$handle = fopen($dir_scales.$new_scale_file,"w");
+					fwrite($handle,"\"".$new_scale_name."\"\n");
+					$the_notes = $the_fractions = $the_ratios = '';
+					for($j = 0; $j <= $numgrades_fullscale; $j++) {
+						if(!$full_scale AND $name[$j] == '') continue;
+						if($name[$j] <> '') $the_notes .= $name[$j]." ";
+						else $the_notes .= "• ";
+						$the_fractions .= $p[$j]." ".$q[$j]." ";
+						}
+					$the_notes = "/".trim($the_notes)."/";
+					$the_fractions = "[".trim($the_fractions)."]";
+					fwrite($handle,$the_notes."\n");
+					fwrite($handle,$the_fractions."\n");
+					fwrite($handle,"|".$baseoctave."|\n");
+					$the_scale = "f2 0 128 -51 ";
+					$the_scale .= $numgrades." ".$interval." ".$basefreq." ".$basekey." ";
+					for($j = 0; $j <= $numgrades_fullscale; $j++) {
+						if(!$full_scale AND $name[$j] == '') continue;
+						if(($p[$j] * $q[$j]) > 0)
+							$the_scale .= round($p[$j]/$q[$j],3)." ";
+						else
+							$the_scale .= $ratio[$j]." ";
+						}
+					fwrite($handle,$the_scale."\n");
+					if($full_scale)
+						$some_comment = "<html>This is a derivation of scale \"".$filename."\" (".$numgrades_fullscale." grades)";
 					else
-						$the_scale .= $newratio[$j]." ";
+						$some_comment = "<html>This is a reduction of scale \"".$filename."\" (".$numgrades_fullscale." grades)";
+					if($new_scale_mode == "major")
+						$some_comment .= " in major tonality.";
+					else if($new_scale_mode == "minor")
+						$some_comment .= " in relative minor tonality";
+					if($sensitive_note <> '') $some_comment .= "<br />Sensitive note = '".$sensitive_note."'";
+					$some_comment .= "<br />Created ".date('Y-m-d H:i:s')."</html>";
+					fwrite($handle,$some_comment."\n");
+					fclose($handle);
+					$new_scale_name = $sensitive_note = '';
 					}
-				fwrite($handle,$the_scale."\n");
-				if($full_scale)
-					$some_comment = "<html>This is a derivation of scale \"".$filename."\" (".$numgrades_fullscale." grades)";
-				else
-					$some_comment = "<html>This is a reduction of scale \"".$filename."\" (".$numgrades_fullscale." grades)";
-				if($new_scale_mode == "major")
-					$some_comment .= " in major tonality.";
-				else if($new_scale_mode == "minor")
-					$some_comment .= " in relative minor tonality";
-				if($sensitive_note <> '') $some_comment .= "<br />Sensitive note = '".$sensitive_note."'";
-				$some_comment .= "<br />Created ".date('Y-m-d H:i:s')."</html>";
-				fwrite($handle,$some_comment."\n");
-				fclose($handle);
-				$new_scale_name = $sensitive_note = '';
 				}
+			else $error_create = "<br /><font color=\"red\"> ➡ ERROR: unknown ‘relative major/minor’ option</font>";
 			}
 		}
 
@@ -607,7 +646,7 @@ if($done AND $numgrades_with_labels > 2) {
 	if($error_create <> '') echo $error_create;
 	$error_create = '';
 	echo "</td>";
-	echo "<td style=\"vertical-align:middle; padding:4px;\"><input type=\"radio\" name=\"major_minor\" value=\"none\" checked>don’t change ratios<br />";
+	echo "<td style=\"vertical-align:middle; padding:4px;\"><input type=\"radio\" name=\"major_minor\" value=\"none\">don’t change ratios<br />";
 	echo "<input type=\"radio\" name=\"major_minor\" value=\"major\">raise to relative major<br />";
 	echo "<input type=\"radio\" name=\"major_minor\" value=\"minor\">lower to relative minor</td>";
 	echo "<td style=\"vertical-align:middle; padding:4px;\"><b>Sensitive note</b><br />(major/minor enharmony)<br />Raise/lower note by 1 comma: <input type=\"text\" name=\"sensitive_note\" size=\"4\" value=\"".$sensitive_note."\"></td>";
@@ -975,7 +1014,7 @@ echo "</td>";
 // Analyze scale
 if($numgrades_with_labels > 2) {
 	echo "<td>";
-	if($transpose_scale_name == '')
+	if($transpose_scale_name == '' AND $new_scale_name == '')
 		echo "<h3 style=\"text-align:center;\">Harmonic structure of this tonal scale</h3>";
 	else
 		echo "<h3 style=\"text-align:center;\">Structure of transposed tonal scale <font color=\"blue\">‘".$transpose_scale_name."’</font></h3>";
