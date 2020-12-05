@@ -323,6 +323,16 @@ else $scroll_value = "SCROLL THIS TABLE";
 echo "<input type=\"submit\" style=\"background-color:yellow; \" name=\"scroll\" onclick=\"this.form.target='_self';return true;\" formaction=\"scale.php?scalefilename=".urlencode($filename)."#toptable\" value=\"".$scroll_value."\">";
 echo "</td></tr>";
 
+if($numgrades_with_labels == 12 AND isset($_POST['use_convention'])) {
+	for($i = $j = 0; $i <= $numgrades_fullscale; $i++) {
+		if($name[$i] == '') continue;
+		if(!isset($_POST['new_note_'.$j]))
+			$name[$i] = $_POST['new_note_0'];
+		else $name[$i] = $_POST['new_note_'.$j];
+		$j++;
+		}
+	}
+
 echo "<tr><th style=\"background-color:azure; padding:4px;\">fraction</th>";
 for($i = 0; $i <= $numgrades_fullscale; $i++) {
 	echo "<td style=\"white-space:nowrap; background-color:cornsilk; text-align:center; padding-top:4px; padding-bottom:4px; padding-left:0px; padding-right:0px; margin-left:0px; margin-right:0px;\" colspan=\"2\">";
@@ -406,11 +416,92 @@ if(!isset($_SESSION['scroll']) OR $_SESSION['scroll'] == 1) echo "</div>";
 echo "<table style=\"background-color:white;\">";
 echo "<tr>";
 echo "<td>";
-echo "<p><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"interpolate\" value=\"INTERPOLATE\"> ➡ Replace missing ratio values with equal intervals (local temperament)</p>";
 
 $new_scale_name = $transpose_scale_name = $error_create = $error_transpose = $sensitive_note = $transpose_from_note = $transpose_to_note = '';
+$done = TRUE;
+	
+if($numgrades_with_labels == 12) {
+	if(isset($_POST['change_convention']) AND isset($_POST['new_convention'])) {
+		$new_convention = $_POST['new_convention'];
+		$done = FALSE;
+		echo "<hr>";
+		switch($new_convention) {
+			case '0':
+				$standard_note = $Englishnote;
+				$alt_note = $AltEnglishnote;
+				break;
+			case '1':
+				$standard_note = $Frenchnote;
+				$alt_note = $AltFrenchnote;
+				break;
+			case '2':
+				$standard_note = $Indiannote;
+				$alt_note = $AltIndiannote;
+				break;
+			case '3':
+				$key = $basekey;
+				for($i = 0; $i <= 13; $i++) {
+					$standard_note[$i] = $KeyString.($key++);
+					}
+				break;
+			}
+		if($new_convention == 3) {
+			echo "<font color=\"red\">";
+			for($i = 0; $i <= 12; $i++) {
+				echo "<input type=\"hidden\" name=\"new_note_".$i."\" value=\"".$standard_note[$i]."\">";
+				echo $standard_note[$i]." ";
+				}
+			echo "</font><br />";
+			}
+		else {
+			echo "<table style=\"background-color:white;\">";
+			echo "<tr>";
+			for($i = 0; $i < 12; $i++) {
+				echo "<td>";
+				echo "<input type=\"radio\" name=\"new_note_".$i."\" value=\"".$standard_note[$i]."\" checked><br /><b><font color=\"red\">".$standard_note[$i];
+				echo "</font></b></td>";
+				}
+			echo "</tr>";
+			echo "<tr>";
+			for($i = 0; $i < 12; $i++) {
+				echo "<td>";
+				if($alt_note[$i] <> $standard_note[$i]) {
+					echo "<input type=\"radio\" name=\"new_note_".$i."\" value=\"".$alt_note[$i]."\"><br /><b><font color=\"red\">".$alt_note[$i];
+					echo "</font></b>";
+					}
+				echo "</td>";
+				}
+			echo "</tr>";
+			echo "</table>";
+			}
+		echo "&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\">";
+		echo "&nbsp;<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"use_convention\" value=\"USE THIS CONVENTION\">";
+		echo "<hr>";
+		}
+	if($done) {
+		echo "<table style=\"background-color:white;\">";
+		echo "<tr>";
+		echo "<td style=\"vertical-align:middle; white-space:nowrap;\"><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"change_convention\" value=\"CHANGE NOTE CONVENTION\"> ➡</td>";
+		echo "<td style=\"vertical-align:middle; white-space:nowrap;\">";
+		echo "<input type=\"radio\" name=\"new_convention\" value=\"0\">English<br />";
+		echo "<input type=\"radio\" name=\"new_convention\" value=\"1\">Italian/Spanish/French<br />";
+		echo "<input type=\"radio\" name=\"new_convention\" value=\"2\">Indian<br />";
+		echo "<input type=\"radio\" name=\"new_convention\" value=\"3\">Key numbers<br />";
+		echo "</td>";
+		echo "</tr>";
+		echo "</table>";
+		}
+	}
 
-if($numgrades_with_labels > 2) {
+if($done) {
+	echo "<table style=\"background-color:white;\">";
+	echo "<tr>";
+	echo "<td><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"interpolate\" value=\"INTERPOLATE\"></td><td>➡ Replace missing ratio values with equal intervals (local temperament)</td>";
+	echo "</tr>";
+	echo "</table>";
+	}
+
+if($done AND $numgrades_with_labels > 2) {
 	if(isset($_POST['reduce']) AND isset($_POST['reduce_scale_name']) AND trim($_POST['reduce_scale_name']) <> '') {
 		if($_POST['scale_choice'] == "full_scale") $full_scale = TRUE;
 		else $full_scale =  FALSE;
@@ -867,15 +958,18 @@ if($numgrades_with_labels > 2) {
 	echo "</tr></table>";
 	}
 
-echo "<p><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"create_meantone\" value=\"CREATE\"> a meantone temperament scale (<a target=\"_blank\" href=\"https://en.wikipedia.org/wiki/Meantone_temperament\">follow this link</a>) with the following data:";
-if($error_meantone <> '') echo "<font color=\"red\">".$error_meantone."</font>";
-echo "</p>";
-echo "<ul>";
-echo "<li>Start from key: <input type=\"text\" name=\"key_start\" size=\"4\" value=\"".$key_start."\"> (typically 60)</li>";
-echo "<li>Step by <input type=\"text\" name=\"key_step\" size=\"4\" value=\"".$key_step."\"> keys (typically 7 for cycles of fifths)</li>";
-echo "<li>Integer ratio of each step <input type=\"text\" name=\"p_step\" size=\"3\" value=\"".$p_step."\">&nbsp;/&nbsp;<input type=\"text\" name=\"q_step\" size=\"3\" value=\"".$q_step."\"> (typically 3/2)</li>";
-echo "<li>Add <input type=\"text\" name=\"p_cents\" size=\"3\" value=\"".$p_cents."\">&nbsp;/&nbsp;<input type=\"text\" name=\"q_cents\" size=\"3\" value=\"".$q_cents."\"> cent to each step (can be negative, typically -1/3)</li>";
-echo "</ul>";
+if($done) {
+	echo "<p><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"create_meantone\" value=\"CREATE\"> a meantone temperament scale (<a target=\"_blank\" href=\"https://en.wikipedia.org/wiki/Meantone_temperament\">follow this link</a>) with the following data:";
+	if($error_meantone <> '') echo "<font color=\"red\">".$error_meantone."</font>";
+	echo "</p>";
+	echo "<ul>";
+	echo "<li>Start from key: <input type=\"text\" name=\"key_start\" size=\"4\" value=\"".$key_start."\"> (typically 60)</li>";
+	echo "<li>Step by <input type=\"text\" name=\"key_step\" size=\"4\" value=\"".$key_step."\"> keys (typically 7 for cycles of fifths)</li>";
+	echo "<li>Integer ratio of each step <input type=\"text\" name=\"p_step\" size=\"3\" value=\"".$p_step."\">&nbsp;/&nbsp;<input type=\"text\" name=\"q_step\" size=\"3\" value=\"".$q_step."\"> (typically 3/2)</li>";
+	echo "<li>Add <input type=\"text\" name=\"p_cents\" size=\"3\" value=\"".$p_cents."\">&nbsp;/&nbsp;<input type=\"text\" name=\"q_cents\" size=\"3\" value=\"".$q_cents."\"> cent to each step (can be negative, typically -1/3)</li>";
+	echo "</ul>";
+	}
+
 echo "</td>";
 
 // Analyze scale

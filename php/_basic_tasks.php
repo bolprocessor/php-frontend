@@ -104,6 +104,16 @@ $help = compile_help($text_help_file,$html_help_file);
 $tracefile = $temp_dir."trace_".session_id().".txt";
 $top_header = "// Bol Processor BP3 compatible with version BP2.9.8";
 
+$KeyString = "key#";
+$Englishnote = array("C","C#","D","D#","E","F","F#","G","G#","A","A#","B","C");
+$Frenchnote = array("do","do#","re","re#","mi","fa","fa#","sol","sol#","la","la#","si","do");
+$Indiannote = array("sa","rek","re","gak","ga","ma","ma#","pa","dhak","dha","nik","ni","sa");
+$AltEnglishnote = array("B#","Db","D","Eb","Fb","E#","Gb","G","Ab","A","Bb","Cb","B#");
+$AltFrenchnote = array("si#","reb","re","mib","fab","mi#","solb","sol","lab","la","sib","dob","si#");
+$AltIndiannote = array("ni#","sa#","re","re#","mak","ga#","pak","pa","pa#","dha","dha#","sak","ni#");
+
+// --------- FUNCTIONS ------------
+
 function extract_data($compact,$content) {
 	$content = trim($content);
 	$content = str_replace(chr(13).chr(10),chr(10),$content);
@@ -599,7 +609,7 @@ function get_setting($parameter,$settings_file) {
 function note_convention($i) {
 	switch($i) {
 		case 0: $c = "english"; break;
-		case 1: $c = "italian/French"; break;
+		case 1: $c = "italian/Spanish/French"; break;
 		case 2: $c = "indian"; break;
 		case 3: $c = "keys"; break;
 		case 4: $c = "custom"; break;
@@ -828,7 +838,6 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder) {
 		$table = explode(chr(10),$content_scale);
 		for($i = 0; $i < count($table); $i++) {
 			$line = trim($table[$i]);
-		//	echo "line = ".$line."<br />";
 			if($line <> '') fwrite($handle,$line."\n");
 			}
 		}
@@ -1345,7 +1354,7 @@ function octave($convention,$key) {
 		case "English":
 			$octave = intdiv($key,12) - 1;
 			break;
-		case "Italian/French":
+		case "Italian/Spanish/French":
 		case "Indian":
 			$octave = intdiv($key,12) - 2;
 			break;
@@ -1355,7 +1364,7 @@ function octave($convention,$key) {
 
 function key_to_note($convention,$key) {
 	$name["English"] = array("C","Db","D","Eb","E","F","F#","G","Ab","A","Bb","B");
-	$name["Italian/French"] = array("do","reb","re","mib","mi","fa","fa#","sol","lab","la","sib","si");
+	$name["Italian/Spanish/French"] = array("do","reb","re","mib","mi","fa","fa#","sol","lab","la","sib","si");
 	$name["Indian"] = array("sa","rek","re","gak","ga","ma","ma#","pa","dhak","dha","nik","ni");
 	$octave = octave($convention,$key);
 	$class = $key - (12 * intdiv($key,12));

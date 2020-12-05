@@ -766,10 +766,125 @@ if($deleted_scales > 0) {
 	}
 echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"create_scale\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#topscales\" value=\"CREATE A NEW TONAL SCALE\">&nbsp;with name <input type=\"text\" name=\"scale_name\" size=\"20\" value=\"\"></p>";
 if($error_create <> '') echo $error_create;
-
-if($max_scales > 0) {
-	echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"export_scales\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#export\" value=\"EXPORT TONAL SCALES\"></p>";
 	
+if($max_scales > 0) {
+	$done = TRUE;
+	if(isset($_POST['use_convention'])) {
+		$scale_notes_string = "/";
+		for($i = 0; $i <= 12; $i++) {
+			if(!isset($_POST['new_note_'.$i]))
+				$scale_notes_string .= $_POST['new_note_0']." ";
+			else $scale_notes_string .= $_POST['new_note_'.$i]." ";
+			}
+		$scale_notes_string = trim($scale_notes_string)."/";
+		echo "<p>New note names in the following 12-grade scales: <font color=\"red\">".$scale_notes_string."</font></p><font color=\"green\"><b>";
+	//	echo $folder_scales." ".$dir_scales."<br />";
+		$dircontent = scandir($dir_scales);
+		foreach($dircontent as $this_file) {
+			if($this_file == '.' OR $this_file == ".." OR $this_file == ".DS_Store") continue;
+			$table = explode(".",$this_file);
+			$extension = end($table);
+			if($extension <> "txt") continue;
+			$this_filename = str_replace(".txt",'',$this_file);
+			$content_scale = file_get_contents($dir_scales.$this_file,TRUE);
+			$table = explode(chr(10),$content_scale);
+			$num_grades_this_scale = 0;
+			for($i = 0; $i < count($table); $i++) {
+				$line = trim($table[$i]);
+				if($line == '') continue;
+				if($line[0] == 'f') {
+					$line = preg_replace("/\s+/u",' ',$line);
+					$table2 = explode(' ',$line);
+					$num_grades_this_scale = intval($table2[4]);
+					break;
+					}
+				}
+			if($num_grades_this_scale == 12) {
+				echo $this_filename." ";
+				$handle = fopen($dir_scales.$this_file,"w");
+				for($i = 0; $i < count($table); $i++) {
+					$line = trim($table[$i]);
+					if($line == '') continue;
+					if($line[0] == '/') {
+						$line = $scale_notes_string;
+						}
+					fwrite($handle,$line."\n");
+					}
+				fclose($handle);
+				}
+			}
+		echo "</font></b><br />";
+		echo "<p><font color=\"red\">➡</font> Click SAVE ‘".$filename."’ to display fixed scales</p>";
+		}
+	
+	if(isset($_POST['change_convention']) AND isset($_POST['new_convention'])) {
+		$new_convention = $_POST['new_convention'];
+		$done = FALSE;
+		echo "<hr>";
+		switch($new_convention) {
+			case '0':
+				$standard_note = $Englishnote;
+				$alt_note = $AltEnglishnote;
+				break;
+			case '1':
+				$standard_note = $Frenchnote;
+				$alt_note = $AltFrenchnote;
+				break;
+			case '2':
+				$standard_note = $Indiannote;
+				$alt_note = $AltIndiannote;
+				break;
+			case '3':
+				$key = 60;
+				for($i = 0; $i <= 13; $i++) {
+					$standard_note[$i] = $KeyString.($key++);
+					}
+				break;
+			}
+		if($new_convention == 3) {
+			echo "<p>(Will be adjusted to base key)</p><p><font color=\"red\">";
+			for($i = 0; $i <= 12; $i++) echo $standard_note[$i]." ";
+			echo "</font></p>";
+			}
+		else {
+			echo "<table style=\"background-color:white;\">";
+			echo "<tr>";
+			for($i = 0; $i < 12; $i++) {
+				echo "<td>";
+				echo "<input type=\"radio\" name=\"new_note_".$i."\" value=\"".$standard_note[$i]."\" checked><br /><b><font color=\"red\">".$standard_note[$i];
+				echo "</font></b></td>";
+				}
+			echo "</tr>";
+			echo "<tr>";
+			for($i = 0; $i < 12; $i++) {
+				echo "<td>";
+				if($alt_note[$i] <> $standard_note[$i]) {
+					echo "<input type=\"radio\" name=\"new_note_".$i."\" value=\"".$alt_note[$i]."\"><br /><b><font color=\"red\">".$alt_note[$i];
+					echo "</font></b>";
+					}
+				echo "</td>";
+				}
+			echo "</tr>";
+			echo "</table>";
+			}
+		echo "<p><input style=\"background-color:yellow;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\">";
+		echo "&nbsp;<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"use_convention\" value=\"USE THIS CONVENTION IN ALL 12-GRADE SCALES\"></p>";
+		echo "<hr>";
+		}
+	if($done) {
+		echo "<table style=\"background-color:white;\">";
+		echo "<tr>";
+		echo "<td style=\"vertical-align:middle; white-space:nowrap;\"><input style=\"background-color:yellow;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"change_convention\" value=\"CHANGE NOTE CONVENTION IN ALL SCALES\"> ➡</td>";
+		echo "<td style=\"vertical-align:middle; white-space:nowrap;\">";
+		echo "<input type=\"radio\" name=\"new_convention\" value=\"0\">English<br />";
+		echo "<input type=\"radio\" name=\"new_convention\" value=\"1\">Italian/Spanish/French<br />";
+		echo "<input type=\"radio\" name=\"new_convention\" value=\"2\">Indian<br />";
+		echo "<input type=\"radio\" name=\"new_convention\" value=\"3\">Key numbers<br />";
+		echo "</td>";
+		echo "</tr>";
+		echo "</table>";
+		}
+	if($done) echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"export_scales\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#export\" value=\"EXPORT TONAL SCALES\"></p>";
 	echo "<ol>";
 	$table_names = $p_interval = $q_interval = $cent_position = $ratio_interval = array();
 	for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
@@ -984,8 +1099,8 @@ if($max_scales > 0) {
 				if($k == $kmaxi) {
 					$cent_drift = round($cent_position[$i_scale]) - round($cent_position[$j_scale]);
 					echo "<br >&nbsp;&nbsp;=> this scale is identical to <font color=\"blue\">".$scale_name[$j_scale]."</font>";
-					if($cent_drift > 0) echo " raised by <font color=\"red\">".$cent_drift."</font> cents";
-					if($cent_drift < 0) echo " lowered by <font color=\"red\">".(-$cent_drift)."</font> cents";
+					if($cent_drift > 0) echo " <font color=\"green\">➡ raised by ".$cent_drift." cents</font>";
+					if($cent_drift < 0) echo " <font color=\"green\">➡ lowered by ".(-$cent_drift)." cents</font>";
 					}
 				}
 			echo "</li>";

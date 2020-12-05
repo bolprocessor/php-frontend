@@ -1,5 +1,5 @@
 // Bol Processor BP3 compatible with version BP2.9.8
-// Csound resource file saved as "-cs.12_scales". Date: 2020-12-04 14:26:03
+// Csound resource file saved as "-cs.12_scales". Date: 2020-12-05 11:44:36
 16
 4
 3
@@ -369,6 +369,12 @@ f2 0 128 -51 23 2 261.63 60 0.975 1.04 1.067 1.097 1.125 1.171 1.2 1.235 1.266 1
 |4|
 f2 0 128 -51 23 2 261.63 60 1 1.053 1.067 1.111 1.125 1.185 1.2 1.25 1.266 1.333 1.35 1.406 1.422 1.481 1.5 1.58 1.6 1.667 1.688 1.778 1.8 1.875 1.898 2
 <html>A "5-limit" tuning framework for constructing chromatic scales using exclusively ratios of integers 2, 3, 5.<br />Read: http://www.tonalsoft.com/enc/j/just.aspx<br /></html>
+"bobo"
+/C Db D Eb E F F# G Ab A Bb B C/
+[80 81 20480 19683 10 9 2560 2187 100 81 320 243 325 234 40 27 10240 6561 400 243 1280 729 50 27 160 81]
+|4|
+f2 0 128 -51 12 2 261.63 60 0.988 1.04 1.111 1.171 1.235 1.317 1.389 1.481 1.561 1.646 1.756 1.852 1.975
+<html>This is a reduction of scale "Ma12" (23 grades)<br />Created 2020-12-05 12:44:19</html>
 "grama"
 /sa_ r1_ r2_ r3_ r4_ g1_ g2_ g3_ g4_ m1_ m2_ m3p1_ m4p2_ p3_ p4_ d1_ d2_ d3_ d4_ n1_ n2_ n3_ n4_ sa_/
 [1 1 256 243 16 15 10 9 9 8 32 27 6 5 5 4 81 64 4 3 27 20 45 32 64 45 40 27 3 2 128 81 8 5 5 3 27 16 16 9 9 5 15 8 243 128 2 1]
