@@ -558,10 +558,12 @@ if($done AND $numgrades_with_labels > 2) {
 								$ratio_transpose = round($p_transpose/$q_transpose,3);
 								}
 							$found = FALSE;
+							$j_transpose = -1;
 						//	echo $p_transpose."/".$q_transpose." = ".$ratio_transpose."<br />";
 							for($j = 0; $j <= $numgrades_fullscale; $j++) {  // $$$$$
 								if($name[$j] == $sensitive_note) $name[$j] = '';
-								if(!$found AND ((round($ratio[$j],3) >= $ratio_transpose) OR ($ratio[$j] < 1 AND $ratio_transpose == 1.0))) {
+								if($found) continue;
+								if((round($ratio[$j],3) >= $ratio_transpose) OR ($ratio[$j] < 1 AND $ratio_transpose == 1.0)) {
 									$p[$j] = $p_transpose;
 									$q[$j] = $q_transpose;
 									$ratio[$j] = $ratio_transpose;
@@ -628,7 +630,6 @@ if($done AND $numgrades_with_labels > 2) {
 					$some_comment .= "<br />Created ".date('Y-m-d H:i:s')."</html>";
 					fwrite($handle,$some_comment."\n");
 					fclose($handle);
-					$new_scale_name = $sensitive_note = '';
 					}
 				}
 			else $error_create = "<br /><font color=\"red\"> ➡ ERROR: unknown ‘relative major/minor’ option</font>";
@@ -636,7 +637,8 @@ if($done AND $numgrades_with_labels > 2) {
 		}
 
 	echo "<table><tr id=\"toptranspose\">";
-	echo "<td style=\"vertical-align:middle; padding:4px;\"><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"reduce\" value=\"REDUCE or ADJUST\"> to create scale named <input type=\"text\" name=\"reduce_scale_name\" size=\"8\" value=\"".$new_scale_name."\"><br />";
+	$link_edit = "scale.php";
+	echo "<td style=\"vertical-align:middle; padding:4px;\"><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#toptable\" name=\"reduce\" value=\"REDUCE or ADJUST\"> to create scale named <input type=\"text\" name=\"reduce_scale_name\" size=\"8\" value=\"".$new_scale_name."\"><br />";
 	
 	echo "<input type=\"radio\" name=\"scale_choice\" value=\"full_scale\" checked>with ".$numgrades_fullscale." grades<br />";
 	if($numgrades_with_labels < $numgrades_fullscale)
@@ -1017,7 +1019,7 @@ if($numgrades_with_labels > 2) {
 	if($transpose_scale_name == '' AND $new_scale_name == '')
 		echo "<h3 style=\"text-align:center;\">Harmonic structure of this tonal scale</h3>";
 	else
-		echo "<h3 style=\"text-align:center;\">Structure of transposed tonal scale <font color=\"blue\">‘".$transpose_scale_name."’</font></h3>";
+		echo "<h3 style=\"text-align:center;\">Structure of transposed tonal scale <font color=\"blue\">‘".$transpose_scale_name.$new_scale_name."’</font></h3>";
 	echo "<table>";
 	echo "<tr><td></td>";
 	$num = $sum = array();
