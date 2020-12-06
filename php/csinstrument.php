@@ -105,8 +105,8 @@ if(isset($_POST['saveinstrument'])) {
 	
 	fwrite($handle,$argmax."\n");
 	$argmax = 0;
-	$InstrumentIndex = $_POST['InstrumentIndex'];
-	fwrite($handle,$InstrumentIndex."\n");
+	$instrument_index = $_POST['InstrumentIndex'];
+	fwrite($handle,$instrument_index."\n");
 	$InstrumentDilationRatioIndex = convert_empty($_POST['InstrumentDilationRatioIndex']);
 	fwrite($handle,$InstrumentDilationRatioIndex."\n");
 	$InstrumentAttackVelocityIndex = convert_empty($_POST['InstrumentAttackVelocityIndex']);
@@ -243,7 +243,7 @@ echo "<input type=\"hidden\" name=\"instrument_index\" value=\"".$instrument_ind
 $table = explode(chr(10),$content);
 $csfilename = $table[0];
 echo "<input type=\"hidden\" name=\"csfilename\" value=\"".$csfilename."\">";
-echo "<p>Part of file “<font color=blue>".$csfilename."</font>”</p>";
+echo "<h3>Part of file “<font color=blue>".$csfilename."</font>”</h3>";
 $verbose = TRUE;
 $verbose = FALSE;
 $i = 1;
@@ -252,8 +252,9 @@ $instrument_argmax = max_argument($argmax_file);
 if($instrument_argmax > $argmax) $argmax = $instrument_argmax;
 if($verbose) echo "argmax = ".$argmax."<br />";
 echo "<input type=\"hidden\" name=\"argmax\" value=\"".$argmax."\">";
-$InstrumentIndex = $table[++$i];
-if($verbose) echo "Instrument index = ".$InstrumentIndex."<br />";
+$instrument_index = $table[++$i];
+if(isset($_POST['instrument_index'])) $instrument_index = $_POST['instrument_index'];
+if($verbose) echo "Instrument index = ".$instrument_index."<br />";
 $InstrumentDilationRatioIndex = $table[++$i];
 if($verbose) echo "Instrument dilation ratio argument = ".$InstrumentDilationRatioIndex."<br />";
 $InstrumentAttackVelocityIndex = $table[++$i];
@@ -345,7 +346,8 @@ echo "<p>Comment: <input type=\"text\" name=\"comment\" size=\"90\" value=\"".$c
 echo "<table style=\"background-color: white;\">";
 echo "<tr>";
 echo "<td>";
-echo "<p style=\"text-align:right;\">Index of this instrument: <input type=\"text\" name=\"InstrumentIndex\" size=\"4\" value=\"".$InstrumentIndex."\"><br/>";
+echo "<p style=\"text-align:right;\">Index of this instrument: <input type=\"text\" name=\"InstrumentIndex\" size=\"4\" value=\"".$instrument_index."\"><br/>";
+// echo "<p style=\"text-align:right;\">Index of this instrument: <input type=\"text\" name=\"InstrumentIndex\" size=\"4\" value=\"".$instrument_index."\"><br/>";
 $x = $InstrumentDilationRatioIndex;
 if($x == -1) $x = '';
 echo "Dilation ratio argument: <input type=\"text\" name=\"InstrumentDilationRatioIndex\" size=\"4\" value=\"".$x."\"><br/>";
