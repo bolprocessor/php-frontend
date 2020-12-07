@@ -347,7 +347,6 @@ echo "</td></tr>";
 echo "<tr><td colspan=\"2\"><p style=\"text-align:center;\">➡ <i>You can change above settings, then save the grammar…</i></p></td></tr>";
 echo "</table>";
 
-echo "<div  id=\"topedit\">&nbsp;</div>";
 if($settings_file == '') {
 	if($metronome > 0) {
 		$p_clock = intval($metronome * 10000);
@@ -470,6 +469,9 @@ echo "<input type=\"hidden\" name=\"trace_production\" value=\"".$trace_producti
 echo "<input type=\"hidden\" name=\"metronome\" value=\"".$metronome."\">";
 echo "<input type=\"hidden\" name=\"time_structure\" value=\"".$time_structure."\">";
 echo "<input type=\"hidden\" name=\"alphabet_file\" value=\"".$alphabet_file."\">";
+
+echo "<div  id=\"topedit\">&nbsp;</div>";
+
 echo "<p><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"savegrammar\" formaction=\"".$url_this_page."#topedit\" value=\"SAVE ‘".$filename."’\">";
 
 if((file_exists($output.SLASH.$default_output_name.".wav") OR file_exists($output.SLASH.$default_output_name.".mid") OR file_exists($output.SLASH.$default_output_name.".html") OR file_exists($output.SLASH.$default_output_name.".sco")) AND file_exists($result_file)) {

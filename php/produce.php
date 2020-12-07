@@ -342,8 +342,21 @@ if($instruction <> "help") {
 			}
 		else {
 			$csound_file_link = $output;
-			$sound_file_link = str_replace(".sco",".wav",$csound_file_link);
-			@unlink($sound_file_link);
+			$sound_file_link = str_replace(".sco",'',$csound_file_link);
+			// We change the name of the sound file every time to force the browser to refresh the audio tag
+			$sound_file_link .= "@".rand(10000,99999).".wav";
+			$table = explode('/',$csound_file_link);
+			$csound_file_name = end($table);
+			$project_name = str_replace(".sco",'',$csound_file_name);
+			$dir = str_replace($csound_file_name,'',$csound_file_link);
+			$dircontent = scandir($dir);
+			foreach($dircontent as $thisfile) {
+				$table = explode('.',$thisfile);
+				$extension = end($table);
+				if($extension <> "wav") continue;
+				$table = explode('@',$table[0]);
+				if($table[0] == $project_name) @unlink($dir.$thisfile);
+				}
 			$time_start = time();
 			$time_end = $time_start + 5;
 			while(TRUE) {
