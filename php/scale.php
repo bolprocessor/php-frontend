@@ -33,6 +33,8 @@ $basekey = 60;
 $baseoctave = 4;
 $transposition_mode = '';
 $p_raise = $q_raise = '';
+$scale_choice = $selected_grades = '';
+$selected_grade_name = array();
 
 if(isset($_POST['scroll'])) {
 	if(!isset($_SESSION['scroll']) OR $_SESSION['scroll'] == 1) $_SESSION['scroll'] = 0;
@@ -150,10 +152,10 @@ if(isset($_POST['interpolate'])) {
 			$ratio1 = $p[$i1] / $q[$i1];
 			$ratio2 = $p[$i2] / $q[$i2];
 			$step = exp(log($ratio2/$ratio1) / ($i2 - $i1));
-			$x = $ratio1;
+			$new_ratio = $ratio1;
 			for($i = $i1 + 1; $i < $i2; $i ++) {
-				$x = $x * $step;
-				$ratio[$i] = round($x,3);
+				$new_ratio = $new_ratio * $step;
+				$ratio[$i] = round($new_ratio,3);
 				}
 			}
 		$i1 = $i2;
@@ -340,6 +342,11 @@ for($i = 0; $i <= $numgrades_fullscale; $i++) {
 	if($p[$i] == 0 OR $q[$i] == 0)
 		$p_txt = $q_txt = '';
 	else {
+		$fraction = simplify_fraction_eliminate_schisma($p[$i],$q[$i]);
+		if($fraction['p'] <> $p[$i]) {
+			$p[$i] = $fraction['p'];
+			$q[$i] = $fraction['q'];
+			}
 		$p_txt = $p[$i];
 		$q_txt = $q[$i];
 		}
@@ -369,7 +376,7 @@ for($i = 0; $i <= $numgrades_fullscale; $i++) {
 	if($ratio[$i] == 0) $cents = '';
 	else $cents = round(1200 * log($ratio[$i]) / log(2));
 	echo "<td style=\"text-align:center; padding-top:4px; padding-bottom:4px; padding-left:0px; padding-right:0px; margin-left:0px; margin-right:0px; background-color:azure;\" colspan=\"2\">";
-	echo "<b>".$cents."¢</b>";
+	echo "<b>".$cents."</b>";
 	echo "</td>";
 	}
 echo "</tr>";
@@ -504,7 +511,8 @@ if($done) {
 
 if($done AND $numgrades_with_labels > 2) {
 	if(isset($_POST['reduce']) AND isset($_POST['reduce_scale_name']) AND trim($_POST['reduce_scale_name']) <> '') {
-		if($_POST['scale_choice'] == "full_scale") $full_scale = TRUE;
+		$scale_choice = $_POST['scale_choice'];
+		if($scale_choice == "full_scale") $full_scale = TRUE;
 		else $full_scale =  FALSE;
 		if($full_scale) $numgrades = $numgrades_fullscale;
 		else {
@@ -512,6 +520,16 @@ if($done AND $numgrades_with_labels > 2) {
 			$selected_grades = preg_replace("/\s+/u",' ',$selected_grades);
 			$selected_grade_name = explode(' ',$selected_grades);
 			$numgrades = count($selected_grade_name) - 1;
+			for($i = 0; $i <= $numgrades; $i++) {
+				$some_name = $selected_grade_name[$i];
+				$found = FALSE;
+				for($j = 0; $j < $numgrades_fullscale; $j++) {
+					if($name[$j] == $some_name) {
+						$found = TRUE; break;
+						}
+					}
+				if(!$found) $error_create .= "<br /><font color=\"red\"> ➡ ERROR: This note</font> <font color=\"blue\">‘".$some_name."’</font> <font color=\"red\">does not belong to the current scale</font>";
+				}
 			}
 		
 		$new_scale_name = trim($_POST['reduce_scale_name']);
@@ -523,7 +541,7 @@ if($done AND $numgrades_with_labels > 2) {
 		if($result1 OR $result2) {
 			$error_create = "<br /><font color=\"red\"> ➡ ERROR: This name</font> <font color=\"blue\">‘".$new_scale_name."’</font> <font color=\"red\">already exists</font>";
 			}
-		else {
+		if($error_create == '') {
 			$link_edit = "scale.php";
 			if(isset($_POST['major_minor'])) {
 				echo "<p><font color=\"red\">Exported to</font> <font color=\"blue\">‘".$new_scale_name."’</font> <input style=\"background-color:Aquamarine;\" type=\"submit\" name=\"edit_new_scale\" formaction=\"".$link_edit."?scalefilename=".urlencode($new_scale_name)."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$new_scale_name."’\"></p>";
@@ -580,7 +598,8 @@ if($done AND $numgrades_with_labels > 2) {
 									}
 								}
 							if($j_transpose == 0) {
-								$p_transpose = 2 * $p_transpose;
+							//	echo "@@@ ".$p[0]." ".$p_transpose."<br />";
+								$p_transpose = $interval * $p_transpose;
 								if(($p_transpose * $q_transpose) <> 0) {
 									$gcd = gcd($p_transpose,$q_transpose);
 									$p_transpose = $p_transpose / $gcd;
@@ -594,7 +613,7 @@ if($done AND $numgrades_with_labels > 2) {
 									}
 								$p[$numgrades_fullscale] = $p_transpose;
 								$q[$numgrades_fullscale] = $q_transpose;
-								$ratio[$numgrades_fullscale] = 2 * $ratio_transpose;
+								$ratio[$numgrades_fullscale] = $interval * $ratio_transpose;
 								$name[$numgrades_fullscale] = $sensitive_note;
 								}
 							}
@@ -634,9 +653,9 @@ if($done AND $numgrades_with_labels > 2) {
 						}
 					fwrite($handle,$the_scale."\n");
 					if($full_scale)
-						$some_comment = "<html>This is a derivation of scale \"".$filename."\" (".$numgrades_fullscale." grades)";
+						$some_comment = "<html>This is a derivation of scale \"".$filename."\" (".$numgrades_fullscale." grades) in ‘".$csound_source."’";
 					else
-						$some_comment = "<html>This is a reduction of scale \"".$filename."\" (".$numgrades_fullscale." grades)";
+						$some_comment = "<html>This is a reduction to ".$numgrades." grades of scale \"".$filename."\" (".$numgrades_fullscale." grades) in ‘".$csound_source."’";
 					if($new_scale_mode == "major")
 						$some_comment .= " in major tonality.";
 					else if($new_scale_mode == "minor")
@@ -647,39 +666,48 @@ if($done AND $numgrades_with_labels > 2) {
 					fclose($handle);
 					}
 				}
-			else $error_create = "<br /><font color=\"red\"> ➡ ERROR: unknown ‘relative major/minor’ option</font>";
+			else $error_create .= "<br /><font color=\"red\"> ➡ ERROR: unknown ‘sensitive note’ option</font>";
 			}
 		}
 
 	echo "<table><tr id=\"toptranspose\">";
 	$link_edit = "scale.php";
-	echo "<td style=\"vertical-align:middle; padding:4px;\"><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#toptable\" name=\"reduce\" value=\"REDUCE or ADJUST\"> to create scale named <input type=\"text\" name=\"reduce_scale_name\" size=\"8\" value=\"".$new_scale_name."\"><br />";
+	echo "<td colspan=\"2\" style=\"vertical-align:middle; padding:4px; white-space:nowrap;\"><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#toptable\" name=\"reduce\" value=\"REDUCE or ADJUST\"> to create a  scale named <input type=\"text\" name=\"reduce_scale_name\" size=\"20\" value=\"".$new_scale_name."\">";
 	
-	echo "<input type=\"radio\" name=\"scale_choice\" value=\"full_scale\" checked>with ".$numgrades_fullscale." grades<br />";
-	$selected_grades = '';
-	for($j = 0; $j < $numgrades_fullscale; $j++) {
-		if($name[$j] == '') continue;
-		$selected_grades .= $name[$j]." ";
+	echo "</td></tr><tr><td colspan=\"2\" style=\"vertical-align:middle; padding:6px; white-space:nowrap;\">";
+	echo "<input type=\"radio\" name=\"scale_choice\" value=\"full_scale\"";
+	if($scale_choice == "full_scale") echo " checked";
+	echo ">with ".$numgrades_fullscale." grades<br />";
+	if($selected_grades == '' AND $scale_choice <> "full_scale") {
+		for($j = 0; $j < $numgrades_fullscale; $j++) {
+			if($name[$j] == '') continue;
+			$selected_grades .= $name[$j]." ";
+			}
+		$selected_grades .= $name[0];
 		}
-	$selected_grades .= $name[0];
 	$size = strlen($selected_grades);
-	echo "<input type=\"radio\" name=\"scale_choice\" value=\"small_scale\">with grades:&nbsp;<input type=\"text\" name=\"selected_grades\" size=\"".$size."\" value=\"".$selected_grades."\"></td>";
-	
-	
+	echo "<input type=\"radio\" name=\"scale_choice\" value=\"small_scale\"";
+	if($scale_choice == "small_scale") echo " checked";
+	echo ">only grades:&nbsp;<input type=\"text\" name=\"selected_grades\" size=\"".$size."\" value=\"".$selected_grades."\"></td>";
 	if($error_create <> '') echo $error_create;
-	$error_create = '';
-	echo "</td>";
-	echo "<td style=\"vertical-align:middle; padding:4px;\"><input type=\"radio\" name=\"major_minor\" value=\"none\" checked>don’t change ratios<br />";
+	
+	echo "</td></tr><tr>";
+	echo "<td style=\"vertical-align:middle; padding:6px; white-space:nowrap;\"><input type=\"radio\" name=\"major_minor\" value=\"none\" checked>don’t change ratios<br />";
 	echo "<input type=\"radio\" name=\"major_minor\" value=\"major\">raise to relative major<br />";
 	echo "<input type=\"radio\" name=\"major_minor\" value=\"minor\">lower to relative minor</td>";
-	echo "<td style=\"vertical-align:middle; padding:4px;\"><b>Sensitive note</b><br />(major/minor enharmony)<br />Raise/lower note by 1 comma: <input type=\"text\" name=\"sensitive_note\" size=\"4\" value=\"".$sensitive_note."\"></td>";
+	echo "<td style=\"text-align:center; vertical-align:middle; padding:4px;\"><b>Sensitive note (1 comma)</b><br /><br />➡ adjust note by 81/80: <input type=\"text\" name=\"sensitive_note\" size=\"4\" value=\"".$sensitive_note."\"></td>";
 	echo "</tr></table><br />";
-		
-	if(isset($_POST['transpose']) AND trim($_POST['transpose_scale_name']) <> '') {
+	if(isset($_POST['transpose'])) {
 		$transpose_from_note = trim($_POST['transpose_from_note']);
 		$transpose_to_note = trim($_POST['transpose_to_note']);
-		$transposition_mode = $_POST['transposition_mode'];
+		$transposition_mode = '';
+		if(isset($_POST['transposition_mode']))
+			$transposition_mode = $_POST['transposition_mode'];
+		else
+			$error_transpose .= "<font color=\"red\"> ➡ ERROR: Transposition mode has not been selected</font><br />";
 		$new_scale_name = trim($_POST['transpose_scale_name']);
+		if($new_scale_name == '')
+			$error_transpose .= "<font color=\"red\"> ➡ ERROR: Name of new scale has not been entered</font><br />";
 		$new_scale_name = preg_replace("/\s+/u",' ',$new_scale_name);
 		$new_scale_file = $new_scale_name.".txt";
 		$old_scale_file = $new_scale_name.".old";
@@ -692,7 +720,7 @@ if($done AND $numgrades_with_labels > 2) {
 		$q_raise = abs(intval($_POST['q_raise']));
 		if($transposition_mode == "ratio" AND ($p_raise * $q_raise) == 0)
 			$error_transpose .= "<font color=\"red\"> ➡ ERROR: Ratio for raising notes has not been entered</font><br />";
-		else {
+		if($error_transpose == '') {
 			if($transposition_mode == "murcchana") {
 				for($j = $jj = 0, $j_transpose_from = $j_transpose_to = -1; $j <= $numgrades_fullscale; $j++) {
 					if($name[$j] == '') continue;
@@ -780,7 +808,6 @@ if($done AND $numgrades_with_labels > 2) {
 							$q_new = $q_new / $gcd;
 							$this_ratio = $p_new/$q_new;
 							}
-						
 						$fraction = simplify_fraction_eliminate_schisma($p_new,$q_new);
 						if($fraction['p'] <> $p_new) {
 							echo "=> ".$p_new."/".$q_new." simplified to ".$fraction['p']."/".$fraction['q']."<br />";
@@ -823,9 +850,6 @@ if($done AND $numgrades_with_labels > 2) {
 							if(abs($cents - $cents_new_this_grade[$jj]) < 4) {
 								if($name[$j] <> $name_this_grade[$jj]) {
 									echo "➡ Note <font color=\"blue\">‘".$name_this_grade[$jj]."’</font> relocated to position ".$j."<br />";
-									
-								
-								
 									}
 								$new_name[$j] = $name_this_grade[$jj];
 								$p[$j] = $p_new_this_grade[$jj];
@@ -881,9 +905,16 @@ if($done AND $numgrades_with_labels > 2) {
 				echo "<p><font color=\"green\">Transposition</font> by raising all notes, ratio = ".$p_raise."/".$q_raise." = ".round($this_ratio,3)."</p>";
 				for($j = $jj = 0; $j <= $numgrades_fullscale; $j++) {
 					if($name[$j] == '') continue;
-					$p_new = $p[$j] * $p_raise;
-					$q_new  = $q[$j] * $q_raise;
-					$new_ratio = $ratio[$j];
+					if($j == $numgrades_fullscale) {
+						$p_new = $p_new_this_grade[0] * $interval;
+						$q_new  = $q_new_this_grade[0];
+						$new_ratio = $ratio_this_grade[0] * $interval;
+						}
+					else {
+						$p_new = $p[$j] * $p_raise;
+						$q_new  = $q[$j] * $q_raise;
+						$new_ratio = $this_ratio * $ratio[$j];
+						}
 					if(($p_new * $q_new) > 0) {
 						$gcd = gcd($p_new,$q_new);
 						$p_new = $p_new / $gcd;
@@ -897,19 +928,19 @@ if($done AND $numgrades_with_labels > 2) {
 						$q_new = $fraction['q'];
 						$new_ratio = $p_new / $q_new;
 						}
-					if($new_ratio > 2) {
-						$q_new = $q_new * 2;
+					if($new_ratio > $interval AND $j <> $numgrades_fullscale) {
+						$q_new = $q_new * $interval;
 						$gcd = gcd($p_new,$q_new);
 						$p_new = $p_new / $gcd;
 						$q_new = $q_new / $gcd;
-						$new_ratio = $new_ratio / 2;
+						$new_ratio = $new_ratio / $interval;
 						}
 					if($new_ratio < 1) {
-						$p_new = $p_new * 2;
+						$p_new = $p_new * $interval;
 						$gcd = gcd($p_new,$q_new);
 						$p_new = $p_new / $gcd;
 						$q_new = $q_new / $gcd;
-						$new_ratio = $new_ratio * 2;
+						$new_ratio = $new_ratio * $interval;
 						}
 					$p_new_this_grade[$jj] = $p_new;
 					$q_new_this_grade[$jj] = $q_new;
@@ -994,28 +1025,25 @@ if($done AND $numgrades_with_labels > 2) {
 			fwrite($handle,$some_comment."\n");
 			fclose($handle);
 			$transpose_from_note = $transpose_to_note  = '';
-			
-			
 			}
 		}
 	echo "<table><tr>";
 	$link_edit = "scale.php";
 	echo "<td style=\"vertical-align:middle; padding:4px;\">";
-	echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#toptranspose\" name=\"transpose\" value=\"TRANSPOSITION\"><br />";
-	echo "Save the new scale under name <input type=\"text\" name=\"transpose_scale_name\" size=\"8\" value=\"\"><br />";
+	echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#toptranspose\" name=\"transpose\" value=\"TRANSPOSITION\"> to create a  scale named <input type=\"text\" name=\"transpose_scale_name\" size=\"20\" value=\"\"><br />";
+	echo "</td></tr><tr><td style=\"vertical-align:middle; padding:4px;\">";
 	echo "<input type=\"radio\" name=\"transposition_mode\" value=\"murcchana\"";
 	if($transposition_mode == "murcchana") echo " checked";
 	echo "><b>Murcchana</b><br />";
-	
-	echo "Move note <input type=\"text\" name=\"transpose_from_note\" size=\"4\" value=\"".$transpose_from_note."\"> to note <input type=\"text\" name=\"transpose_to_note\" size=\"4\" value=\"".$transpose_to_note."\"> of this basic scale (<i>grama</i>)<br /><i>Example: On a Ma-grama scale model, move ‘C’ to ‘Eb’ (32/27)<br />to create the minor chromatic scale of same tonality<br />or one perfect fifth down to create the next chromatic scale in the series</i><br />";
-	
+	echo "Move note <input type=\"text\" name=\"transpose_from_note\" size=\"4\" value=\"".$transpose_from_note."\"> to note <input type=\"text\" name=\"transpose_to_note\" size=\"4\" value=\"".$transpose_to_note."\"> of this basic scale (<i>grama</i>)<br /><i>Example: On a Ma-grama scale model, move ‘C’ to ‘Eb’ (32/27)<br />to create the minor chromatic scale of same tonality<br />or one perfect fifth down to create the next chromatic scale in the series</i>";
+	echo "</td></tr><tr><td style=\"vertical-align:middle; padding:4px;\">";
 	echo "<input type=\"radio\" name=\"transposition_mode\" value=\"ratio\"";
 	if($transposition_mode == "ratio") echo " checked";
 	if($p_raise == 0) $p_raise = $q_raise = '';
 	echo "><b>Raise all notes</b> by (integer) ratio <input type=\"text\" name=\"p_raise\" size=\"3\" value=\"".$p_raise."\"><b> / </b><input type=\"text\" name=\"q_raise\" size=\"3\" value=\"".$q_raise."\">";
 	
 	if($error_transpose <> '') echo "<br /><br />".$error_transpose;
-	$error_transpose = '';
+	
 	echo "</td>";
 	echo "</tr></table>";
 	}
@@ -1035,20 +1063,24 @@ if($done) {
 echo "</td>";
 
 // Analyze scale
-echo "numgrades_with_labels = ".$numgrades_with_labels."<br />";
-if($numgrades_with_labels > 2) {
+if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == '') {
 	echo "<td>";
 	if($transpose_scale_name == '' AND $new_scale_name == '')
-		echo "<h3 style=\"text-align:center;\">Harmonic structure of this tonal scale (cents)</h3>";
-	else
-		echo "<h3 style=\"text-align:center;\">Structure of transposed tonal scale <font color=\"blue\">‘".$transpose_scale_name.$new_scale_name."’</font> (cents)</h3>";
+		echo "<h3>Harmonic structure of this tonal scale (cents):</h3>";
+	else {
+		if($transpose_scale_name <> '') $this_name = $transpose_scale_name;
+		else if($new_scale_name <> '') $this_name = $new_scale_name;
+		echo "<h3>Structure of transposed tonal scale <font color=\"blue\">‘".$this_name."’</font> (cents):</h3>";
+		}
 	echo "<table>";
 	echo "<tr><td></td>";
 	$num = $sum = array();
 	for($j = $jj = 0; $j <= $numgrades_fullscale; $j++) {
 		if($name[$j] == '') continue;
+		if($scale_choice == "small_scale" AND $selected_grades <> '' AND !in_array($name[$j],$selected_grade_name)) continue;
 		for($k = $kk = 0; $k <= $numgrades_fullscale; $k++) {
 			if($name[$k] == '') continue;
+			if($scale_choice == "small_scale" AND $selected_grades <> '' AND !in_array($name[$k],$selected_grade_name)) continue;
 			$class = modulo(($kk - $jj),$numgrades_with_labels);
 			if(($p[$j] * $p[$k] * $q[$j] * $q[$k]) > 0) {
 				if($k < $j) $a = 2 * $p[$k] * $q[$j] / $q[$k] / $p[$j];
@@ -1066,7 +1098,7 @@ if($numgrades_with_labels > 2) {
 			$sum[$class] += $x[$j][$k];
 			$kk++;
 			}
-		echo "<td style=\"background-color:azure;\"><b>".$name[$j]."</b></td>";
+		echo "<td style=\"background-color:azure; text-align:center; vertical-align:middle; padding:2px;\"><b>".$name[$j]."</b></td>";
 		$jj++;
 		}
 	echo "</tr>";
@@ -1077,10 +1109,12 @@ if($numgrades_with_labels > 2) {
 		
 	for($j = $jj = 0; $j <= $numgrades_fullscale; $j++) {
 		if($name[$j] == '') continue;
+		if($scale_choice == "small_scale" AND $selected_grades <> '' AND !in_array($name[$j],$selected_grade_name)) continue;
 		echo "<tr>";
-		echo "<td style=\"background-color:azure;\"><b>".$name[$j]."</b></td>";
+		echo "<td style=\"background-color:azure; text-align:center; vertical-align:middle; padding:2px;\"><b>".$name[$j]."</b></td>";
 		for($k = $kk = 0; $k <= $numgrades_fullscale; $k++) {
 			if($name[$k] == '') continue;
+			if($scale_choice == "small_scale" AND $selected_grades <> '' AND !in_array($name[$k],$selected_grade_name)) continue;
 			$class = modulo(($kk - $jj),$numgrades_with_labels);
 			$class = round($x[$j][$k] / 100);
 		//	if($jj == 0) $val_ref[$class] = $x[$j][$k];
@@ -1093,7 +1127,7 @@ if($numgrades_with_labels > 2) {
 			if($class == 7 OR $class == 4) $show = "<b>".$show."</b>";
 			if(round($x[$j][$k]) == 0) $show = '';
 			$kk++;
-			echo "<td>".$show."</td>";
+			echo "<td style=\"text-align:right; vertical-align:middle; padding:4px;\">".$show."</td>";
 			}
 		$jj++;
 		echo "</tr>";

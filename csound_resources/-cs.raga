@@ -1,5 +1,5 @@
 // Bol Processor BP3 compatible with version BP2.9.8
-// Csound resource file saved as "-cs.raga". Date: 2020-12-06 17:58:10
+// Csound resource file saved as "-cs.raga". Date: 2020-12-07 13:46:55
 16
 -1
 -1
@@ -21,76 +21,274 @@ default.orc
 0
 _begin tables
 f1 0 256 10 1 ; This table may be changed
-"Ma01"
+"Dha1_murcchana"
+/sa rek • • re gak • • ga ma • ma# • • pa dhak • • dha nik • • ni sa/
+[1 1 256 243 16 15 10 9 9 8 32 27 6 5 5 4 81 64 4 3 27 20 45 32 64 45 40 27 3 2 128 81 8 5 5 3 27 16 16 9 9 5 15 8 243 128 2 1]
+|4|
+f2 0 128 -51 23 2 261.63 60 1 1.053 1.067 1.111 1.125 1.185 1.2 1.25 1.266 1.333 1.35 1.406 1.422 1.481 1.5 1.58 1.6 1.667 1.688 1.778 1.8 1.875 1.898 2
+<html>This is a transposition of scale "Sa_murcchana" (23 grades).<br />From ‘dhak’ to ‘sa’.<br />Created 2020-12-07 11:10:21<br /></html>
+"Dha3_murcchana"
+/sa • rek • re • gak • ga ma • • ma# • pa • dhak • dha • nik • ni sa/
+[1 1 256 243 16 15 10 9 9 8 32 27 6 5 5 4 81 64 4 3 27 20 45 32 64 45 40 27 3 2 128 81 8 5 5 3 27 16 16 9 9 5 15 8 256 135 2 1]
+|4|
+f2 0 128 -51 23 2 261.63 60 1 1.053 1.067 1.111 1.125 1.185 1.2 1.25 1.266 1.333 1.35 1.406 1.422 1.481 1.5 1.58 1.6 1.667 1.688 1.778 1.8 1.875 1.896 2
+<html>This is a transposition of scale "Sa_murcchana" (23 grades).<br />From ‘dha’ to ‘sa’.<br />Created 2020-12-07 14:20:33</html>
+"Ga1_murcchana"
+/sa rek • • re gak • • ga ma • ma# • • pa dhak • • dha nik • ni • sa/
+[1 1 256 243 16 15 10 9 9 8 32 27 6 5 5 4 81 64 4 3 27 20 45 32 64 45 40 27 3 2 128 81 8 5 5 3 27 16 16 9 9 5 15 8 243 128 2 1]
+|4|
+f2 0 128 -51 23 2 261.63 60 1 1.053 1.067 1.111 1.125 1.185 1.2 1.25 1.266 1.333 1.35 1.406 1.422 1.481 1.5 1.58 1.6 1.667 1.688 1.778 1.8 1.875 1.898 2
+<html>This is a transposition of scale "Sa_murcchana" (23 grades).<br />From ‘gak’ to ‘sa’.<br />Created 2020-12-07 10:08:29</html>
+"Ga3_murcchana"
+/sa • rek • re • gak • ga ma • • ma# • pa • dhak • dha nik • • ni sa/
+[1 1 256 243 16 15 10 9 9 8 32 27 6 5 5 4 81 64 4 3 27 20 45 32 64 45 40 27 3 2 128 81 8 5 5 3 2048 1215 16 9 9 5 15 8 256 135 2 1]
+|4|
+f2 0 128 -51 23 2 261.63 60 1 1.053 1.067 1.111 1.125 1.185 1.2 1.25 1.266 1.333 1.35 1.406 1.422 1.481 1.5 1.58 1.6 1.667 1.686 1.778 1.8 1.875 1.896 2
+<html>This is a transposition of scale "Sa_murcchana" (23 grades).<br />From ‘ga’ to ‘sa’.<br />Created 2020-12-07 14:12:58</html>
+"Ma1_murcchana"
+/sa rek • • re gak • ga • ma • ma# • • pa dhak • dha • nik • ni • sa/
+[1 1 256 243 16 15 10 9 9 8 32 27 6 5 5 4 81 64 4 3 27 20 45 32 64 45 40 27 3 2 128 81 8 5 5 3 27 16 16 9 9 5 15 8 243 128 2 1]
+|4|
+f2 0 128 -51 23 2 261.63 60 1 1.053 1.067 1.111 1.125 1.185 1.2 1.25 1.266 1.333 1.35 1.406 1.422 1.481 1.5 1.58 1.6 1.667 1.688 1.778 1.8 1.875 1.898 2
+<html>This is a transposition of scale "Sa_murcchana" (23 grades).<br />From ‘ma’ to ‘sa’.<br />Created 2020-12-07 09:32:28</html>
+"Ma3_murcchana"
+/sa • rek • re gak • • ga ma • • ma# • pa dhak • • dha nik • • ni sa/
+[1 1 256 243 16 15 10 9 4096 3645 32 27 6 5 5 4 512 405 4 3 27 20 45 32 64 45 40 27 3 2 128 81 8 5 5 3 2048 1215 16 9 9 5 15 8 256 135 2 1]
+|4|
+f2 0 128 -51 23 2 261.63 60 1 1.053 1.067 1.111 1.124 1.185 1.2 1.25 1.264 1.333 1.35 1.406 1.422 1.481 1.5 1.58 1.6 1.667 1.686 1.778 1.8 1.875 1.896 2
+<html>This is a transposition of scale "Sa_murcchana" (23 grades).<br />From ‘ma#’ to ‘sa’.<br />Created 2020-12-07 12:25:21</html>
+"Ni1_murcchana"
+/sa rek • • re gak • ga • ma • ma# • • pa dhak • • dha nik • ni • sa/
+[1 1 256 243 16 15 10 9 9 8 32 27 6 5 5 4 81 64 4 3 27 20 45 32 64 45 40 27 3 2 128 81 8 5 5 3 27 16 16 9 9 5 15 8 243 128 2 1]
+|4|
+f2 0 128 -51 23 2 261.63 60 1 1.053 1.067 1.111 1.125 1.185 1.2 1.25 1.266 1.333 1.35 1.406 1.422 1.481 1.5 1.58 1.6 1.667 1.688 1.778 1.8 1.875 1.898 2
+<html>This is a transposition of scale "Sa_murcchana" (23 grades).<br />From ‘nik’ to ‘sa’.<br />Created 2020-12-07 09:57:46</html>
+"Ni3_murcchana"
+/sa • rek • re gak • • ga ma • • ma# • pa • dhak • dha nik • • ni sa/
+[1 1 256 243 16 15 10 9 9 8 32 27 6 5 5 4 81 64 4 3 27 20 45 32 64 45 40 27 3 2 128 81 8 5 5 3 2048 1215 16 9 9 5 15 8 256 135 2 1]
+|4|
+f2 0 128 -51 23 2 261.63 60 1 1.053 1.067 1.111 1.125 1.185 1.2 1.25 1.266 1.333 1.35 1.406 1.422 1.481 1.5 1.58 1.6 1.667 1.686 1.778 1.8 1.875 1.896 2
+<html>This is a transposition of scale "Sa_murcchana" (23 grades).<br />From ‘ni’ to ‘sa’.<br />Created 2020-12-07 13:37:31<br /></html>
+"Pa3_murcchana"
+/sa rek • re • gak • ga • ma • ma# • pa • dhak • dha • nik • ni • sa/
+[1 1 256 243 16 15 10 9 9 8 32 27 6 5 5 4 81 64 4 3 27 20 45 32 64 45 40 27 3 2 128 81 8 5 5 3 27 16 16 9 9 5 15 8 243 128 2 1]
+|4|
+f2 0 128 -51 23 2 261.63 60 1 1.053 1.067 1.111 1.125 1.185 1.2 1.25 1.266 1.333 1.35 1.406 1.422 1.481 1.5 1.58 1.6 1.667 1.688 1.778 1.8 1.875 1.898 2
+<html>This is a transposition of scale "Sa_murcchana" (23 grades).<br />From ‘pa’ to ‘sa’.<br />Created 2020-12-07 14:32:57</html>
+"Re1_murcchana"
+/sa rek • • re gak • • ga ma • • ma# • pa dhak • • dha nik • • ni sa/
+[1 1 256 243 16 15 10 9 9 8 32 27 6 5 5 4 81 64 4 3 27 20 45 32 64 45 40 27 3 2 128 81 8 5 5 3 27 16 16 9 9 5 15 8 243 128 2 1]
+|4|
+f2 0 128 -51 23 2 261.63 60 1 1.053 1.067 1.111 1.125 1.185 1.2 1.25 1.266 1.333 1.35 1.406 1.422 1.481 1.5 1.58 1.6 1.667 1.688 1.778 1.8 1.875 1.898 2
+<html>This is a transposition of scale "Sa_murcchana" (23 grades).<br />From ‘rek’ to ‘sa’.<br />Created 2020-12-07 12:13:53</html>
+"Re3_murcchana"
+/sa • rek • re • gak • ga • ma • ma# • pa • dhak • dha • nik • ni sa/
+[1 1 256 243 16 15 10 9 9 8 32 27 6 5 5 4 81 64 4 3 27 20 45 32 64 45 40 27 3 2 128 81 8 5 5 3 27 16 16 9 9 5 15 8 256 135 2 1]
+|4|
+f2 0 128 -51 23 2 261.63 60 1 1.053 1.067 1.111 1.125 1.185 1.2 1.25 1.266 1.333 1.35 1.406 1.422 1.481 1.5 1.58 1.6 1.667 1.688 1.778 1.8 1.875 1.896 2
+<html>This is a transposition of scale "Sa_murcchana" (23 grades).<br />From ‘re’ to ‘sa’.<br />Created 2020-12-07 14:27:08</html>
+"Sa_murcchana"
 /sa rek • re • gak • ga • ma • ma# • • pa dhak • dha • nik • ni • sa/
 [1 1 256 243 16 15 10 9 9 8 32 27 6 5 5 4 81 64 4 3 27 20 45 32 64 45 40 27 3 2 128 81 8 5 5 3 27 16 16 9 9 5 15 8 243 128 2 1]
 |4|
 f2 0 128 -51 23 2 261.63 60 1 1.053 1.067 1.111 1.125 1.185 1.2 1.25 1.266 1.333 1.35 1.406 1.422 1.481 1.5 1.58 1.6 1.667 1.688 1.778 1.8 1.875 1.898 2
-<html>Ma-grama suitable for generating the 'A minor' scale<br />Raise 'D' to adjust it to 'C major' relative major mode<br /></html>
-"Ma02"
-/sa rek • re • gak • ga • ma • ma# • pa • dhak • dha • nik • ni • sa/
-[1 1 256 243 16 15 10 9 9 8 32 27 6 5 5 4 81 64 4 3 27 20 45 32 64 45 40 27 3 2 128 81 8 5 5 3 27 16 16 9 9 5 15 8 243 128 2 1]
+<html>This is a derivation of scale "Ma01" (23 grades) in ‘-cs.raga’<br />Created 2020-12-07 09:27:54</html>
+"asavari"
+/sa re gak ma pa dhak nik sa/
+[1 1 9 8 6 5 4 3 3 2 8 5 9 5 2 1]
 |4|
-f2 0 128 -51 23 2 261.63 60 1 1.053 1.067 1.111 1.125 1.185 1.2 1.25 1.266 1.333 1.35 1.406 1.422 1.481 1.5 1.58 1.6 1.667 1.688 1.778 1.8 1.875 1.898 2
-<html>This is a transposition of scale "Ma01" (23 grades).<br />From ‘C’ to ‘F’.<br />Created 2020-11-28 16:51:26<br /></html>
-"Ma03"
-/sa rek • re • gak • ga • ma • ma# • pa • dhak • dha • nik • ni • sa/
-[80 81 256 243 16 15 10 9 9 8 32 27 6 5 5 4 81 64 4 3 27 20 45 32 64 45 40 27 3 2 128 81 8 5 5 3 27 16 16 9 9 5 15 8 243 128 160 81]
+f2 0 128 -51 7 2 261.63 60 1 1.125 1.2 1.333 1.5 1.6 1.8 2
+<html>This is a reduction to 7 grades of scale "Dha3_murcchana" (23 grades) in ‘-cs.raga’<br />Created 2020-12-07 14:25:52<br /></html>
+"asavari2"
+/sa re gak ma pa dhak nik sa/
+[1 1 9 8 6 5 27 20 3 2 8 5 9 5 2 1]
 |4|
-f2 0 128 -51 23 2 261.63 60 0.988 1.053 1.067 1.111 1.125 1.185 1.2 1.25 1.266 1.333 1.35 1.406 1.422 1.481 1.5 1.58 1.6 1.667 1.688 1.778 1.8 1.875 1.898 1.975
-<html>This is a transposition of scale "Ma2" (23 grades)<br />From ‘C’ to ‘F’<br />Created 2020-11-27 18:26:51<br /></html>
-"Ma04"
-/sa rek • re • gak • ga • ma • ma# • pa • dhak • dha • nik • ni • sa/
-[80 81 256 243 16 15 10 9 9 8 32 27 6 5 5 4 81 64 320 243 27 20 45 32 64 45 40 27 3 2 128 81 8 5 5 3 27 16 16 9 9 5 15 8 243 128 160 81]
+f2 0 128 -51 7 2 261.63 60 1 1.125 1.2 1.35 1.5 1.6 1.8 2
+<html>This is a reduction to 7 grades of scale "Re3_murcchana" (23 grades) in ‘-cs.raga’<br />Created 2020-12-07 14:31:16<br /></html>
+"asavari3"
+/sa re gak ma pa dhak nik sa/
+[1 1 10 9 32 27 4 3 40 27 128 81 16 9 2 1]
 |4|
-f2 0 128 -51 23 2 261.63 60 0.988 1.053 1.067 1.111 1.125 1.185 1.2 1.25 1.266 1.317 1.35 1.406 1.422 1.481 1.5 1.58 1.6 1.667 1.688 1.778 1.8 1.875 1.898 1.975
-<html>This is a transposition of scale "Ma3" (23 grades)<br />From ‘E’ to ‘A’<br />Created 2020-11-27 19:34:18<br /></html>
-"Ma05"
-/sa rek • re • gak • ga • ma • ma# • pa • dhak • dha • nik • ni • sa/
-[80 81 256 243 16 15 10 9 9 8 32 27 6 5 5 4 81 64 320 243 27 20 45 32 64 45 40 27 3 2 128 81 8 5 5 3 27 16 1280 729 9 5 15 8 243 128 160 81]
+f2 0 128 -51 7 2 261.63 60 1 1.111 1.185 1.333 1.481 1.58 1.778 2
+<html>This is a reduction to 7 grades of scale "Pa3_murcchana" (23 grades) in ‘-cs.raga’<br />Created 2020-12-07 14:34:38<br /></html>
+"bhairao"
+/sa rek ga ma pa dhak ni sa/
+[1 1 16 15 81 64 4 3 3 2 128 81 256 135 2 1]
 |4|
-f2 0 128 -51 23 2 261.63 60 0.988 1.053 1.067 1.111 1.125 1.185 1.2 1.25 1.266 1.317 1.35 1.406 1.422 1.481 1.5 1.58 1.6 1.667 1.688 1.756 1.8 1.875 1.898 1.975
-<html>This is a transposition of scale "Ma4" (23 grades)<br />From ‘Eb’ to ‘Ab’<br />Created 2020-11-28 07:25:59<br /></html>
-"Ma06"
-/sa rek • re • gak • ga • ma • ma# • pa • dhak • dha • nik • ni • sa/
-[80 81 256 243 16 15 10 9 9 8 2560 2187 6 5 5 4 81 64 320 243 27 20 45 32 64 45 40 27 3 2 128 81 8 5 5 3 27 16 1280 729 9 5 15 8 243 128 160 81]
+f2 0 128 -51 7 2 261.63 60 1 1.067 1.264 1.333 1.5 1.58 1.896 2
+<html>This is a reduction to 7 grades of scale "Ma3_murcchana" (23 grades) in ‘-cs.raga’<br />Created 2020-12-07 13:25:40<br /></html>
+"bhairao2"
+/sa rek ga ma pa dhak ni sa/
+[1 1 16 15 81 64 4 3 3 2 8 5 256 135 2 1]
 |4|
-f2 0 128 -51 23 2 261.63 60 0.988 1.053 1.067 1.111 1.125 1.171 1.2 1.25 1.266 1.317 1.35 1.406 1.422 1.481 1.5 1.58 1.6 1.667 1.688 1.756 1.8 1.875 1.898 1.975
-<html>This is a transposition of scale "Ma5" (23 grades)<br />From ‘D’ to ‘G’<br />Created 2020-11-28 07:48:18<br /></html>
-"Ma07"
-/sa rek • re • gak • ga • ma • ma# • pa • dhak • dha • nik • ni • sa/
-[80 81 256 243 16 15 10 9 9 8 2560 2187 6 5 5 4 81 64 320 243 27 20 45 32 64 45 40 27 3 2 10240 6561 8 5 5 3 27 16 1280 729 9 5 15 8 243 128 160 81]
+f2 0 128 -51 7 2 261.63 60 1 1.067 1.266 1.333 1.5 1.6 1.896 2
+<html>This is a reduction to 7 grades of scale "Ni3_murcchana" (23 grades) in ‘-cs.raga’<br />Created 2020-12-07 14:09:50<br /></html>
+"bhairavi"
+/sa rek gak ma pa dhak nik sa/
+[1 1 16 15 32 27 4 3 3 2 8 5 16 9 2 1]
 |4|
-f2 0 128 -51 23 2 261.63 60 0.988 1.053 1.067 1.111 1.125 1.171 1.2 1.25 1.266 1.317 1.35 1.406 1.422 1.481 1.5 1.561 1.6 1.667 1.688 1.756 1.8 1.875 1.898 1.975
-<html>This is a transposition of scale "Ma6" (23 grades)<br />From ‘D’ to ‘G’<br />Created 2020-11-28 08:01:21<br /></html>
-"Ma08"
-/sa rek • re • gak • ga • ma • ma# • pa • dhak • dha • nik • ni • sa/
-[80 81 20480 19683 16 15 10 9 9 8 2560 2187 6 5 5 4 81 64 320 243 27 20 45 32 64 45 40 27 3 2 10240 6561 8 5 5 3 27 16 1280 729 9 5 15 8 243 128 160 81]
+f2 0 128 -51 7 2 261.63 60 1 1.067 1.185 1.333 1.5 1.6 1.778 2
+<html>This is a reduction to 7 grades of scale "Ni3_murcchana" (23 grades) in ‘-cs.raga’<br />Created 2020-12-07 14:11:27<br /></html>
+"bhairavi2"
+/sa rek gak ma pa dhak nik sa/
+[1 1 16 15 6 5 4 3 3 2 8 5 16 9 2 1]
 |4|
-f2 0 128 -51 23 2 261.63 60 0.988 1.04 1.067 1.111 1.125 1.171 1.2 1.25 1.266 1.317 1.35 1.406 1.422 1.481 1.5 1.561 1.6 1.667 1.688 1.756 1.8 1.875 1.898 1.975
-<html>This is a transposition of scale "Ma7" (23 grades)<br />From ‘C’ to ‘F’<br />Created 2020-11-28 08:11:34<br /></html>
-"Ma09"
-/sa rek • re • gak • ga • ma • ma# • pa • dhak • dha • nik • ni • sa/
-[80 81 20480 19683 16 15 10 9 9 8 2560 2187 6 5 5 4 81 64 320 243 27 20 325 234 64 45 40 27 3 2 10240 6561 8 5 5 3 27 16 1280 729 9 5 15 8 243 128 160 81]
+f2 0 128 -51 7 2 261.63 60 1 1.067 1.2 1.333 1.5 1.6 1.778 2
+<html>This is a reduction to 7 grades of scale "Ga3_murcchana" (23 grades) in ‘-cs.raga’<br />Created 2020-12-07 14:17:50<br /></html>
+"bhairavi3"
+/sa rek gak ma pa dhak nik sa/
+[1 1 16 15 6 5 4 3 3 2 8 5 9 5 2 1]
 |4|
-f2 0 128 -51 23 2 261.63 60 0.988 1.04 1.067 1.111 1.125 1.171 1.2 1.25 1.266 1.317 1.35 1.389 1.422 1.481 1.5 1.561 1.6 1.667 1.688 1.756 1.8 1.875 1.898 1.975
-<html>This is a transposition of scale "Ma08" (23 grades).<br />From ‘C’ to ‘F’.<br />Created 2020-11-28 19:09:43</html>
-"Ma10"
-/sa rek • re • gak • ga • ma • ma# • pa • dhak • dha • nik • ni • sa/
-[80 81 20480 19683 16 15 10 9 9 8 2560 2187 6 5 5 4 81 64 320 243 27 20 325 234 64 45 40 27 3 2 10240 6561 8 5 5 3 27 16 1280 729 9 5 50 27 243 128 160 81]
+f2 0 128 -51 7 2 261.63 60 1 1.067 1.2 1.333 1.5 1.6 1.8 2
+<html>This is a reduction to 7 grades of scale "Dha3_murcchana" (23 grades) in ‘-cs.raga’<br />Created 2020-12-07 14:22:15<br /></html>
+"bhairavi4"
+/sa rek gak ma pa dhak nik sa/
+[1 1 16 15 6 5 27 20 3 2 8 5 9 5 2 1]
 |4|
-f2 0 128 -51 23 2 261.63 60 0.988 1.04 1.067 1.111 1.125 1.171 1.2 1.25 1.266 1.317 1.35 1.389 1.422 1.481 1.5 1.561 1.6 1.667 1.688 1.756 1.8 1.852 1.898 1.975
-<html>This is a transposition of scale "Ma9" (23 grades)<br />From ‘C’ to ‘F’<br />Created 2020-11-28 10:26:23</html>
-"Ma11"
-/sa rek • re • gak • ga • ma • ma# • pa • dhak • dha • nik • ni • sa/
-[80 81 20480 19683 16 15 10 9 9 8 2560 2187 6 5 100 81 81 64 320 243 27 20 325 234 64 45 40 27 3 2 10240 6561 8 5 5 3 27 16 1280 729 9 5 50 27 243 128 160 81]
+f2 0 128 -51 7 2 261.63 60 1 1.067 1.2 1.35 1.5 1.6 1.8 2
+<html>This is a reduction to 7 grades of scale "Re3_murcchana" (23 grades) in ‘-cs.raga’<br />Created 2020-12-07 14:29:25<br /></html>
+"bilaval"
+/sa re ga ma pa dha ni sa/
+[1 1 10 9 5 4 4 3 3 2 5 3 15 8 2 1]
 |4|
-f2 0 128 -51 23 2 261.63 60 0.988 1.04 1.067 1.111 1.125 1.171 1.2 1.235 1.266 1.317 1.35 1.389 1.422 1.481 1.5 1.561 1.6 1.667 1.688 1.756 1.8 1.852 1.898 1.975
-<html>This is a transposition of scale "Ma10" (23 grades)<br />From ‘C’ to ‘F’<br />Created 2020-11-28 10:46:48<br /></html>
-"Ma12"
-/sa rek • re • gak • ga • ma • ma# • pa • dhak • dha • nik • ni • sa/
-[80 81 20480 19683 16 15 10 9 9 8 2560 2187 6 5 100 81 81 64 320 243 27 20 325 234 64 45 40 27 3 2 10240 6561 8 5 400 243 27 16 1280 729 9 5 50 27 243 128 160 81]
+f2 0 128 -51 7 2 261.63 60 1 1.111 1.25 1.333 1.5 1.667 1.875 2
+<html>This is a reduction to 7 grades of scale "Sa_murcchana" (23 grades) in ‘-cs.raga’<br />➡ This is not Zarlino's scale.<br /></html>
+"bilaval2"
+/sa re ga ma pa dha ni sa/
+[1 1 9 8 5 4 4 3 3 2 5 3 15 8 2 1]
 |4|
-f2 0 128 -51 23 2 261.63 60 0.988 1.04 1.067 1.111 1.125 1.171 1.2 1.235 1.266 1.317 1.35 1.389 1.422 1.481 1.5 1.561 1.6 1.646 1.688 1.756 1.8 1.852 1.898 1.975
-<html>This is a transposition of scale "Ma11" (23 grades)<br />From ‘C’ to ‘F’<br />Created 2020-11-28 10:57:38<br /></html>
+f2 0 128 -51 7 2 261.63 60 1 1.125 1.25 1.333 1.5 1.667 1.875 2
+<html>This is a reduction to 7 grades of scale "Ma1_murcchana" (23 grades) in ‘-cs.raga’<br />Created 2020-12-07 09:40:55<br /></html>
+"bilaval3"
+/sa re ga ma pa dha ni sa/
+[1 1 9 8 5 4 4 3 3 2 27 16 15 8 2 1]
+|4|
+f2 0 128 -51 7 2 261.63 60 1 1.125 1.25 1.333 1.5 1.688 1.875 2
+<html>This is a reduction to 7 grades of scale "Ni1_murcchana" (23 grades) in ‘-cs.raga’<br />Created 2020-12-07 09:59:49<br /></html>
+"kalyan"
+/sa re ga ma# pa dha ni sa/
+[1 1 9 8 5 4 45 32 3 2 5 3 15 8 2 1]
+|4|
+f2 0 128 -51 7 2 261.63 60 1 1.125 1.25 1.406 1.5 1.667 1.875 2
+<html>This is a reduction to 7 grades of scale "Ma1_murcchana" (23 grades) in ‘-cs.raga’<br />Created 2020-12-07 09:43:53<br /></html>
+"kalyan2"
+/sa re ga ma# pa dha ni sa/
+[1 1 9 8 5 4 45 32 3 2 27 16 15 8 2 1]
+|4|
+f2 0 128 -51 7 2 261.63 60 1 1.125 1.25 1.406 1.5 1.688 1.875 2
+<html>This is a reduction to 7 grades of scale "Ni1_murcchana" (23 grades) in ‘-cs.raga’<br />Created 2020-12-07 10:02:54<br /></html>
+"kalyan3"
+/sa re ga ma# pa dha ni sa/
+[1 1 9 8 81 64 45 32 3 2 27 16 15 8 2 1]
+|4|
+f2 0 128 -51 7 2 261.63 60 1 1.125 1.266 1.406 1.5 1.688 1.875 2
+<html>This is a reduction to 7 grades of scale "Ga1_murcchana" (23 grades) in ‘-cs.raga’<br />Created 2020-12-07 10:11:40<br /></html>
+"kaphi"
+/sa re gak ma pa dha nik sa/
+[1 1 10 9 32 27 4 3 3 2 5 3 16 9 2 1]
+|4|
+f2 0 128 -51 7 2 261.63 60 1 1.111 1.185 1.333 1.5 1.667 1.778 2
+<html>This is a reduction of scale "Sa_murcchana" (23 grades) in ‘-cs.raga’<br />Created 2020-12-07 06:32:58<br /></html>
+"kaphi2"
+/sa re gak ma pa dha nik sa/
+[1 1 9 8 6 5 27 20 3 2 27 16 9 5 2 1]
+|4|
+f2 0 128 -51 7 2 261.63 60 1 1.125 1.2 1.35 1.5 1.688 1.8 2
+<html>This is a reduction to 7 grades of scale "Re3_murcchana" (23 grades) in ‘-cs.raga’<br />Created 2020-12-07 14:32:19<br /></html>
+"kaphi3"
+/sa re gak ma pa dha nik sa/
+[1 1 10 9 32 27 4 3 40 27 5 3 16 9 2 1]
+|4|
+f2 0 128 -51 7 2 261.63 60 1 1.111 1.185 1.333 1.481 1.667 1.778 2
+<html>This is a reduction to 7 grades of scale "Pa3_murcchana" (23 grades) in ‘-cs.raga’<br />Created 2020-12-07 14:36:05<br /></html>
+"khamaj"
+/sa re ga ma pa dha nik sa/
+[1 1 10 9 5 4 4 3 3 2 5 3 16 9 2 1]
+|4|
+f2 0 128 -51 7 2 261.63 60 1 1.111 1.25 1.333 1.5 1.667 1.778 2
+<html>This is a reduction to 7 grades of scale "Sa_murcchana" (23 grades) in ‘-cs.raga’<br />Created 2020-12-07 06:51:32<br /></html>
+"khamaj2"
+/sa re ga ma pa dha nik sa/
+[1 1 9 8 5 4 4 3 3 2 5 3 16 9 2 1]
+|4|
+f2 0 128 -51 7 2 261.63 60 1 1.125 1.25 1.333 1.5 1.667 1.778 2
+<html>This is a reduction to 7 grades of scale "Ma1_murcchana" (23 grades) in ‘-cs.raga’<br />Created 2020-12-07 09:38:48<br /></html>
+"khamaj3"
+/sa re ga ma pa dha nik sa/
+[1 1 10 9 5 4 4 3 40 27 5 3 16 9 2 1]
+|4|
+f2 0 128 -51 7 2 261.63 60 1 1.111 1.25 1.333 1.481 1.667 1.778 2
+<html>This is a reduction to 7 grades of scale "Pa3_murcchana" (23 grades) in ‘-cs.raga’<br />Created 2020-12-07 14:36:43<br /></html>
+"lalit"
+/sa rek ga ma ma# pa dhak ni sa/
+[1 1 16 15 81 64 4 3 64 45 3 2 128 81 256 135 2 1]
+|4|
+f2 0 128 -51 8 2 261.63 60 1 1.067 1.264 1.333 1.422 1.5 1.58 1.896 2
+<html>This is a reduction to 8 grades of scale "Ma3_murcchana" (23 grades) in ‘-cs.raga’<br />Created 2020-12-07 13:16:37<br /></html>
+"lalit2"
+/sa rek ga ma ma# pa dhak ni sa/
+[1 1 16 15 81 64 4 3 64 45 3 2 8 5 256 135 2 1]
+|4|
+f2 0 128 -51 8 2 261.63 60 1 1.067 1.266 1.333 1.422 1.5 1.6 1.896 2
+<html>This is a reduction to 8 grades of scale "Ni3_murcchana" (23 grades) in ‘-cs.raga’<br />Created 2020-12-07 13:58:51<br /></html>
+"marva"
+/sa rek ga ma# pa dha ni sa/
+[1 1 256 243 5 4 45 32 3 2 27 16 15 8 2 1]
+|4|
+f2 0 128 -51 7 2 261.63 60 1 1.053 1.25 1.406 1.5 1.688 1.875 2
+<html>This is a reduction to 7 grades of scale "Ni1_murcchana" (23 grades) in ‘-cs.raga’<br />Created 2020-12-07 10:06:28<br /></html>
+"marva2"
+/sa rek ga ma# pa dha ni sa/
+[1 1 256 243 81 64 45 32 3 2 27 16 15 8 2 1]
+|4|
+f2 0 128 -51 7 2 261.63 60 1 1.053 1.266 1.406 1.5 1.688 1.875 2
+<html>This is a reduction to 7 grades of scale "Ga1_murcchana" (23 grades) in ‘-cs.raga’<br />Created 2020-12-07 10:23:17<br /></html>
+"marva3"
+/sa rek ga ma# pa dha ni sa/
+[1 1 256 243 81 64 45 32 3 2 27 16 243 128 2 1]
+|4|
+f2 0 128 -51 7 2 261.63 60 1 1.053 1.266 1.406 1.5 1.688 1.898 2
+<html>This is a reduction to 7 grades of scale "Dha1_murcchana" (23 grades) in ‘-cs.raga’<br />Created 2020-12-07 11:19:52<br /></html>
+"purvi"
+/sa rek ga ma# pa dhak ni sa/
+[1 1 256 243 81 64 45 32 3 2 128 81 15 8 2 1]
+|4|
+f2 0 128 -51 7 2 261.63 60 1 1.053 1.266 1.406 1.5 1.58 1.875 2
+<html>This is a reduction to 7 grades of scale "Ga1_murcchana" (23 grades) in ‘-cs.raga’<br />Created 2020-12-07 11:03:23<br /></html>
+"purvi2"
+/sa rek ga ma# pa dhak ni sa/
+[1 1 256 243 81 64 45 32 3 2 128 81 243 128 2 1]
+|4|
+f2 0 128 -51 7 2 261.63 60 1 1.053 1.266 1.406 1.5 1.58 1.898 2
+<html>This is a reduction to 7 grades of scale "Dha1_murcchana" (23 grades) in ‘-cs.raga’<br />Created 2020-12-07 11:49:21<br /></html>
+"purvi3"
+/sa rek ga ma# pa dhak ni sa/
+[1 1 256 243 81 64 64 45 3 2 128 81 243 128 2 1]
+|4|
+f2 0 128 -51 7 2 261.63 60 1 1.053 1.266 1.422 1.5 1.58 1.898 2
+<html>This is a reduction to 7 grades of scale "Re1_murcchana" (23 grades) in ‘-cs.raga’<br />Created 2020-12-07 12:18:09<br /></html>
+"todi"
+/sa rek gak ma# pa dhak ni sa/
+[1 1 256 243 32 27 45 32 3 2 128 81 243 128 2 1]
+|4|
+f2 0 128 -51 7 2 261.63 60 1 1.053 1.185 1.406 1.5 1.58 1.898 2
+<html>This is a reduction to 7 grades of scale "Dha1_murcchana" (23 grades) in ‘-cs.raga’<br />Created 2020-12-07 11:55:49<br /></html>
+"todi2"
+/sa rek gak ma# pa dhak ni sa/
+[1 1 256 243 32 27 64 45 3 2 128 81 243 128 2 1]
+|4|
+f2 0 128 -51 7 2 261.63 60 1 1.053 1.185 1.422 1.5 1.58 1.898 2
+<html>This is a reduction to 7 grades of scale "Re1_murcchana" (23 grades) in ‘-cs.raga’<br />Created 2020-12-07 12:23:33<br /></html>
+"todi3"
+/sa rek gak ma# pa dhak ni sa/
+[1 1 16 15 32 27 64 45 3 2 128 81 256 135 2 1]
+|4|
+f2 0 128 -51 7 2 261.63 60 1 1.067 1.185 1.422 1.5 1.58 1.896 2
+<html>This is a reduction to 7 grades of scale "Ma3_murcchana" (23 grades) in ‘-cs.raga’<br />Created 2020-12-07 12:27:06<br /></html>
+"todi4"
+/sa rek gak ma# pa dhak ni sa/
+[1 1 16 15 6 5 64 45 3 2 8 5 256 135 2 1]
+|4|
+f2 0 128 -51 7 2 261.63 60 1 1.067 1.2 1.422 1.5 1.6 1.896 2
+<html>This is a reduction to 7 grades of scale "Ga3_murcchana" (23 grades) in ‘-cs.raga’<br />Created 2020-12-07 14:15:39<br /></html>
 _end tables
