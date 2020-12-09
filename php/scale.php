@@ -377,13 +377,21 @@ echo "<input type=\"submit\" style=\"background-color:yellow; \" name=\"scroll\"
 echo "</td></tr>";
 
 
-if($numgrades_with_labels == 12 AND isset($_POST['use_convention'])) {
-// if(isset($_POST['use_convention'])) {
+// if($numgrades_with_labels == 12 AND isset($_POST['use_convention'])) {
+if(isset($_POST['use_convention'])) {
 	for($i = $j = 0; $i <= $numgrades_fullscale; $i++) {
 		if($name[$i] == '') continue;
-		if(!isset($_POST['new_note_'.$j]))
+		$this_note = $name[$i];
+		if(($kfound = array_search($this_note,$Indiannote)) !== FALSE) $k = $kfound;
+		else if(($kfound = array_search($this_note,$AltIndiannote)) !== FALSE) $k = $kfound;
+		else if(($kfound = array_search($this_note,$Englishnote)) !== FALSE) $k = $kfound;
+		else if(($kfound = array_search($this_note,$AltEnglishnote)) !== FALSE) $k = $kfound;
+		else if(($kfound = array_search($this_note,$Frenchnote)) !== FALSE) $k = $kfound;
+		else if(($kfound = array_search($this_note,$AltFrenchnote)) !== FALSE) $k = $kfound;
+		else $k = $j;
+		if(!isset($_POST['new_note_'.$k]))
 			$name[$i] = $_POST['new_note_0'];
-		else $name[$i] = $_POST['new_note_'.$j];
+		else $name[$i] = $_POST['new_note_'.$k];
 		$j++;
 		}
 	}
@@ -485,7 +493,7 @@ echo "<td>";
 $new_scale_name = $transpose_scale_name = $error_create = $error_transpose = $sensitive_note = $transpose_from_note = $transpose_to_note = '';
 $done = TRUE;
 	
-if($numgrades_with_labels == 12) {
+// if($numgrades_with_labels == 12) {
 	if(isset($_POST['change_convention']) AND isset($_POST['new_convention'])) {
 		$new_convention = $_POST['new_convention'];
 		$done = FALSE;
@@ -542,7 +550,6 @@ if($numgrades_with_labels == 12) {
 		echo "&nbsp;<input style=\"background-color:cornsilk;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\">";
 		echo "&nbsp;<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"use_convention\" value=\"USE THIS CONVENTION\">";
 		echo "<hr>";
-		
 		}
 	if($done) {
 		echo "<table style=\"background-color:white;\">";
@@ -557,7 +564,7 @@ if($numgrades_with_labels == 12) {
 		echo "</tr>";
 		echo "</table>";
 		}
-	}
+//	}
 
 if($done) {
 	echo "<table style=\"background-color:white;\">";

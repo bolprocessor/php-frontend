@@ -848,7 +848,15 @@ if($max_scales > 0) {
 							else {
 								if(!isset($_POST['new_note_'.$k]))
 									$new_note = $_POST['new_note_0'];
-								else $new_note = $_POST['new_note_'.$k];
+								else {
+									if(($kfound = array_search($this_note,$Indiannote)) !== FALSE) $k = $kfound;
+									else if(($kfound = array_search($this_note,$AltIndiannote)) !== FALSE) $k = $kfound;
+									else if(($kfound = array_search($this_note,$Englishnote)) !== FALSE) $k = $kfound;
+									else if(($kfound = array_search($this_note,$AltEnglishnote)) !== FALSE) $k = $kfound;
+									else if(($kfound = array_search($this_note,$Frenchnote)) !== FALSE) $k = $kfound;
+									else if(($kfound = array_search($this_note,$AltFrenchnote)) !== FALSE) $k = $kfound;
+									$new_note = $_POST['new_note_'.$k];
+									}
 								}
 							$newline .= $new_note." ";
 							$k++;
