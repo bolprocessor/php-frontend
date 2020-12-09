@@ -878,6 +878,90 @@ if($max_scales > 0) {
 		echo "<p><font color=\"red\">➡ Click SAVE ‘".$filename."’ to display fixed scales</font></p>";
 		}
 	
+	if(isset($_POST['record_new_keys'])) {
+		for($i = 0; $i <= 12; $i++) {
+			$newkey[$i] = $_POST['new_key_'.$i] - 60;
+			}
+		echo "<br />";
+		$dircontent = scandir($dir_scales);
+		foreach($dircontent as $some_scale) {
+			if($some_scale == '.' OR $some_scale == ".." OR $some_scale == ".DS_Store") continue;
+			$table = explode(".",$some_scale);
+			$extension = end($table);
+			if($extension == "old" OR $extension == "txt") {
+				$content_scale = file_get_contents($dir_scales.$some_scale,TRUE);
+				$table = explode(chr(10),$content_scale);
+				$new_keys_line = ''; $found = FALSE;
+				$handle = fopen($dir_scales.$some_scale,"w");
+				for($i = 0; $i < count($table); $i++) {
+					$line = trim($table[$i]);
+					if($line == '') continue;
+					if($line[0] == '/') {
+						$line_content = str_replace("/",'',$line);
+						$line_content = preg_replace("/\s+/u",' ',$line_content);
+						$table2 = explode(' ',$line_content);
+						$k = -1;
+						for($j = 0; $j < count($table2); $j++) {
+							$this_note = $table2[$j];
+							if(($kfound = array_search($this_note,$Indiannote)) !== FALSE) $k = $kfound;
+							else if(($kfound = array_search($this_note,$AltIndiannote)) !== FALSE) $k = $kfound;
+							else if(($kfound = array_search($this_note,$Englishnote)) !== FALSE) $k = $kfound;
+							else if(($kfound = array_search($this_note,$AltEnglishnote)) !== FALSE) $k = $kfound;
+							else if(($kfound = array_search($this_note,$Frenchnote)) !== FALSE) $k = $kfound;
+							else if(($kfound = array_search($this_note,$AltFrenchnote)) !== FALSE) $k = $kfound;
+							if($j == (count($table2) - 1)) $k = 12;
+							$this_key = $newkey[$k];
+							if($this_note == '•') $this_key = "0";
+							$new_keys_line .= $this_key." ";
+							}
+						fwrite($handle,$line."\n");
+						continue;
+						}
+					if($line[0] == 'k') {
+						$new_keys_line = "k".trim($new_keys_line)."k";
+						fwrite($handle,$new_keys_line."\n");
+						$found = TRUE;
+						continue;
+						}
+					if($line[0] == '<' AND !$found) {
+						$new_keys_line = "k".trim($new_keys_line)."k";
+						fwrite($handle,$new_keys_line."\n");
+						$found = TRUE;
+						}
+					fwrite($handle,$line."\n");
+					}
+				fclose($handle);
+				}
+			}
+		}
+	
+	if(isset($_POST['reassign_keys'])) {
+		$done = FALSE;
+		echo "<p><font color=\"red\">➡</font> <input style=\"background-color:cornsilk;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\">";
+		echo "&nbsp;<input type=\"submit\" style=\"background-color:yellow; font-size:large;\" name=\"record_new_keys\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#topscales\" value=\"REASSIGN:\"> a key to each note (<b>basekey</b> = 60):</p>";
+		echo "<table>";
+		echo "<tr>";
+		for($i = 0; $i <= 12; $i++) {
+			echo "<td style=\"text-align:center; padding:6px; vertical-align:middle;\">";
+			echo $Englishnote[$i]."<br />".$Frenchnote[$i]."<br />".$Indiannote[$i];
+			echo "</td>";
+			}
+		echo "</tr>";
+		echo "<tr>";
+		for($i = 0; $i <= 12; $i++) {
+			echo "<td style=\"text-align:center; padding:6px; vertical-align:middle;\">";
+			if($i == 0) {
+				echo "60";
+				echo "<input type=\"hidden\" name=\"new_key_0\" value=\"60\">";
+				}
+			else
+				echo "<input type=\"text\" style=\"text-align:center;\" name=\"new_key_".$i."\" size=\"4\" value=\"".($i + 60)."\">";
+			echo "</td>";
+			}
+		echo "</tr>";
+		echo "</table>";
+		}
+	
 	if(isset($_POST['change_convention']) AND isset($_POST['new_convention'])) {
 		$new_convention = $_POST['new_convention'];
 		echo "<input type=\"hidden\" name=\"new_convention\" value=\"".$new_convention."\">";
@@ -949,7 +1033,7 @@ if($max_scales > 0) {
 		echo "</tr>";
 		echo "</table>";
 		}
-	if($done) echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"export_scales\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#export\" value=\"EXPORT TONAL SCALES\">&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"delete_scales\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#export\" value=\"DELETE SEVERAL SCALES\"></p>";
+	if($done) echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"export_scales\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#export\" value=\"EXPORT TONAL SCALES\">&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"delete_scales\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#export\" value=\"DELETE SEVERAL SCALES\">&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"reassign_keys\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#topscales\" value=\"REASSIGN KEYS\"></p>";
 	echo "<ol>";
 	$table_names = $p_interval = $q_interval = $cent_position = $ratio_interval = array();
 	for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {

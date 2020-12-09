@@ -195,7 +195,10 @@ if(isset($_POST['savethisfile']) OR isset($_POST['interpolate']) OR isset($_POST
 		$line_table .= " ".$ratio[$i];
 		$scale_note_names .= $name[$i]." ";
 		$scale_fractions .= $p[$i]." ".$q[$i]." ";
-		$scale_keys .= $key[$i]." ";
+		if($key[$i] > 0)
+			$scale_keys .= ($key[$i]- $basekey)." ";
+		else
+			$scale_keys .= "0 ";
 		}
 	$scale_note_names = trim($scale_note_names);
 	$scale_fractions = trim($scale_fractions);
@@ -311,9 +314,15 @@ for($i = 0; $i <= $numgrades_fullscale; $i++) {
 	}
 $table = explode(' ',$scale_keys);
 for($i = 0; $i <= $numgrades_fullscale; $i++) {
-	if(isset($table[$i]) AND $table[$i] <> '') $key[$i] = intval($table[$i]);
+	if(isset($table[$i]) AND $table[$i] <> '') {
+		$key[$i] = intval($table[$i]);
+		echo $key[$i]." ";
+		if($key[$i] > 0 AND $key[$i] < $basekey) $key[$i] += $basekey;
+		}
 	else $key[$i] = 0;
 	}
+$key[0] = $basekey;
+echo "<br />";
 
 for($j = $numgrades_with_labels = 0; $j < $numgrades_fullscale; $j++) {
 	if($name[$j] == '') continue;
@@ -324,11 +333,12 @@ echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/fo
 echo "<input type=\"hidden\" name=\"dir_scales\" value=\"".$dir_scales."\">";
 echo "<input type=\"hidden\" name=\"csound_source\" value=\"".$csound_source."\">";
 
-echo "<p>Name of this tonal scale: ";
-echo "<input type=\"text\" name=\"scale_name\" size=\"20\" value=\"".$scale_name."\">";
-if(is_integer(strpos($scale_name,' '))) echo " ➡ avoiding spaces is prefered";
-echo "</p>";
-echo "<table>";
+// echo "<p style=\"font-size:large;\">Name of this tonal scale: ";
+echo "<h3>Name of this tonal scale: ";
+echo "<input type=\"text\" style=\"font-size:large;\" name=\"scale_name\" size=\"20\" value=\"".$scale_name."\">";
+if(is_integer(strpos($scale_name,' '))) echo " <font color=\"red\">➡</font> avoiding spaces is prefered";
+echo "</h3>";
+echo "<table style=\"background-color:cornsilk;\">";
 echo "<tr>";
 echo "<td style=\"white-space:nowrap; padding:6px; vertical-align:middle;\"><font color=\"blue\">numgrades</font> = <input type=\"text\" name=\"numgrades\" size=\"5\" value=\"".$numgrades_fullscale."\"></td>";
 echo "<td rowspan=\"2\" style=\"white-space:nowrap; padding:6px; vertical-align:middle;\">";
@@ -477,7 +487,11 @@ for($i = 0; $i <= $numgrades_fullscale; $i++) {
 	echo "<td style=\"text-align:center; padding-top:4px; padding-bottom:4px; padding-left:0px; padding-right:0px; margin-left:0px; margin-right:0px; background-color:cornsilk;\" colspan=\"2\">";
 	if(isset($key[$i]) AND $key[$i] > 0)
 		$this_key = $thekey = $key[$i];
-	else $thekey = $this_key++;
+	else {
+		if(!isset($key[$i])) $thekey = $this_key;
+		else $thekey = '';
+		$this_key++;
+		}
 	echo "<input type=\"text\" style=\"border:none; text-align:center; color:green; font-weight:bold; font-size:large;\" name=\"key_".$i."\" size=\"6\" value=\"".$thekey ."\">";
 	echo "</td>";
 	}
