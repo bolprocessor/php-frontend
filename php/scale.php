@@ -581,21 +581,30 @@ if($done AND $numgrades_with_labels > 2) {
 		else $full_scale =  FALSE;
 		if($full_scale) $numgrades = $numgrades_fullscale;
 		else {
+			$preserve_numbers = isset($_POST['preserve_numbers']);
 			$selected_grades = trim($_POST['selected_grades']);
 			$selected_grades = preg_replace("/\s+/u",' ',$selected_grades);
 			$selected_grade_name = explode(' ',$selected_grades);
 			$numgrades = count($selected_grade_name) - 1;
+			$done = $new_selected_grade_name = array();
 			for($i = 0; $i <= $numgrades; $i++) {
 				$some_name = $selected_grade_name[$i];
 				if($some_name == '-') $some_name = $selected_grade_name[$i] = '•';
-				$found = FALSE;
-				for($j = 0; $j < $numgrades_fullscale; $j++) {
-					if(($name[$j] == $some_name) OR $some_name == '•') {
-						$found = TRUE; break;
+				if($some_name == '•' OR !isset($done[$some_name])) {
+					if($i > 0) $done[$some_name] = TRUE;
+					$new_selected_grade_name[] = $some_name;
+					$found = FALSE;
+					for($j = 0; $j < $numgrades_fullscale; $j++) {
+						if(($name[$j] == $some_name) OR $some_name == '•') {
+							$found = TRUE; break;
+							}
 						}
+					if(!$found) $error_create .= "<br /><font color=\"red\"> ➡ ERROR: This note</font> <font color=\"blue\">‘".$some_name."’</font> <font color=\"red\">does not belong to the current scale</font>";
 					}
-				if(!$found) $error_create .= "<br /><font color=\"red\"> ➡ ERROR: This note</font> <font color=\"blue\">‘".$some_name."’</font> <font color=\"red\">does not belong to the current scale</font>";
+			//	else $numgrades--;
 				}
+			$selected_grade_name = $new_selected_grade_name;
+			$numgrades = count($selected_grade_name) - 1;
 			}
 		$new_scale_name = trim($_POST['reduce_scale_name']);
 		$new_scale_name = preg_replace("/\s+/u",' ',$new_scale_name);
@@ -687,15 +696,18 @@ if($done AND $numgrades_with_labels > 2) {
 				if($error_create == '') {
 					$handle = fopen($dir_scales.$new_scale_file,"w");
 					fwrite($handle,"\"".$new_scale_name."\"\n");
-					$the_notes = $the_fractions = $the_ratios = '';
+					$the_notes = $the_fractions = $the_ratios = $the_numbers = '';
 					for($j = $k = 0; $j <= $numgrades_fullscale; $j++) {
 						if(!$full_scale) {
 							if(!isset($selected_grade_name[$k])) continue;
+							if($preserve_numbers AND ($selected_grade_name[$k] == '•' OR $name[$j] == $selected_grade_name[$k]))
+								$the_numbers .= $key[$j]." ";
 							if($selected_grade_name[$k] == '•') {
 								$the_notes .= "• ";
 								$the_fractions .= "0 0 ";
 								$j--;
-								$k++; continue;
+								$k++;
+								continue;
 								}
 							if($name[$j] <> $selected_grade_name[$k]) continue;
 							else $k++;
@@ -707,6 +719,10 @@ if($done AND $numgrades_with_labels > 2) {
 					$the_notes = "/".trim($the_notes)."/";
 					$the_fractions = "[".trim($the_fractions)."]";
 					fwrite($handle,$the_notes."\n");
+					if($preserve_numbers) {
+						$the_numbers = "k".trim($the_numbers)."k";
+						fwrite($handle,$the_numbers."\n");
+						}
 					fwrite($handle,$the_fractions."\n");
 					fwrite($handle,"|".$baseoctave."|\n");
 					$the_scale = "f2 0 128 -51 ";
@@ -765,7 +781,8 @@ if($done AND $numgrades_with_labels > 2) {
 	echo "<input type=\"radio\" name=\"scale_choice\" value=\"small_scale\"";
 	if($scale_choice == "small_scale") echo " checked";
 	echo ">with grades:&nbsp;<input type=\"text\" name=\"selected_grades\" size=\"".$size."\" value=\"".$selected_grades."\">";
-	echo "<br />➡ Unnamed grades can be inserted as hyphens between spaces ‘ - ’";
+	echo "<br />➡ Unnamed grades can be inserted as hyphens between spaces ‘ - ’<br />";
+	echo "<input type=\"checkbox\" name=\"preserve_numbers\">Preserve key numbers";
 	echo "</td>";
 	if($error_create <> '') echo $error_create;
 	echo "</td></tr><tr>";
