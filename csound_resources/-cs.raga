@@ -1,5 +1,5 @@
 // Bol Processor BP3 compatible with version BP2.9.8
-// Csound resource file saved as "-cs.raga". Date: 2020-12-07 13:46:55
+// Csound resource file saved as "-cs.raga". Date: 2020-12-09 04:55:29
 16
 -1
 -1
@@ -17,10 +17,10 @@
 -1
 -1
 -1
-default.orc
+new-vina.orc
 0
 _begin tables
-f1 0 256 10 1 ; This table may be changed
+f1 0 256 1 "vina-wave-table.aiff" 0 4 0
 "Dha1_murcchana"
 /sa rek • • re gak • • ga ma • ma# • • pa dhak • • dha nik • • ni sa/
 [1 1 256 243 16 15 10 9 9 8 32 27 6 5 5 4 81 64 4 3 27 20 45 32 64 45 40 27 3 2 128 81 8 5 5 3 27 16 16 9 9 5 15 8 243 128 2 1]
@@ -149,6 +149,7 @@ f2 0 128 -51 7 2 261.63 60 1 1.067 1.2 1.35 1.5 1.6 1.8 2
 <html>This is a reduction to 7 grades of scale "Re3_murcchana" (23 grades) in ‘-cs.raga’<br />Created 2020-12-07 14:29:25<br /></html>
 "bilaval"
 /sa re ga ma pa dha ni sa/
+k60 62 64 65 67 69 71 72k
 [1 1 10 9 5 4 4 3 3 2 5 3 15 8 2 1]
 |4|
 f2 0 128 -51 7 2 261.63 60 1 1.111 1.25 1.333 1.5 1.667 1.875 2
@@ -269,6 +270,7 @@ f2 0 128 -51 7 2 261.63 60 1 1.053 1.266 1.422 1.5 1.58 1.898 2
 <html>This is a reduction to 7 grades of scale "Re1_murcchana" (23 grades) in ‘-cs.raga’<br />Created 2020-12-07 12:18:09<br /></html>
 "todi"
 /sa rek gak ma# pa dhak ni sa/
+k60 61 63 66 67 68 71 72k
 [1 1 256 243 32 27 45 32 3 2 128 81 243 128 2 1]
 |4|
 f2 0 128 -51 7 2 261.63 60 1 1.053 1.185 1.406 1.5 1.58 1.898 2

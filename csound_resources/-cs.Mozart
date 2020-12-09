@@ -1,5 +1,5 @@
 // Bol Processor BP3 compatible with version BP2.9.8
-// Csound resource file saved as "-cs.Mozart". Date: 2020-12-05 18:11:08
+// Csound resource file saved as "-cs.Mozart". Date: 2020-12-09 04:38:48
 16
 -1
 -1
@@ -59,10 +59,11 @@ f2 0 128 -51 12 2 261.63 60 0.988 1.053 1.111 1.171 1.25 1.317 1.406 1.481 1.58 
 <html>This is a reduction of scale "Ma06" (23 grades)<br />Created 2020-11-29 18:22:52</html>
 "Cmaj"
 /do do# re re# mi fa fa# sol sol# la la# si do/
+k60 61 62 63 64 65 66 67 68 69 70 71 72k
 [1 1 256 243 9 8 32 27 5 4 4 3 45 32 3 2 128 81 5 3 16 9 15 8 2 1]
 |4|
 f2 0 128 -51 12 2 261.63 60 1 1.053 1.125 1.185 1.25 1.333 1.406 1.5 1.58 1.667 1.778 1.875 2
-<html>This is a reduction of scale "Sa01" (23 grades)<br />Created 2020-11-29 18:35:25</html>
+<html>This is a reduction of scale "Sa01" (23 grades)<br />Created 2020-11-29 18:35:25<br /></html>
 "Cmin"
 /do do# re re# mi fa fa# sol sol# la la# si do/
 [80 81 256 243 10 9 32 27 5 4 320 243 45 32 40 27 128 81 5 3 16 9 15 8 160 81]

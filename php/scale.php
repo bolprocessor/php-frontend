@@ -41,7 +41,7 @@ if(isset($_POST['scroll'])) {
 	else $_SESSION['scroll'] = 1;
 	}
 
-if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST['create_meantone'])) {
+if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST['create_meantone']) OR isset($_POST['modifynames'])) {
 	$new_scale_name = trim($_POST['scale_name']);
 	if($new_scale_name == '') $new_scale_name = $filename;
 	$result1 = check_duplicate_name($dir_scales,$new_scale_name.".txt");
@@ -76,15 +76,25 @@ if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST
 		
 		if(!isset($_POST['ratio_'.$i])) $ratio[$i] = 0;
 		else $ratio[$i] = trim($_POST['ratio_'.$i]);
-		if($ratio[$i] == '') {
-			$ratio[$i] = 0;
-			}
+		if($ratio[$i] == '') $ratio[$i] = 0;
+		
+		if(!isset($_POST['key_'.$i])) $key[$i] = 0;
+		else $key[$i] = trim($_POST['key_'.$i]);
+		if($key[$i] == '') $key[$i] = 0;
+		
+		if(isset($_POST['modifynames']) AND isset($_POST['new_name_'.$i]) AND $_POST['new_name_'.$i] <> '')
+			$_POST['name_'.$i] = $_POST['new_name_'.$i];
 		if(!isset($_POST['name_'.$i])) $name[$i] = "•";
 		else $name[$i] = trim($_POST['name_'.$i]);
 		// Slash is reserved for beginning and end of scale_note_names
 		$name[$i] = str_replace("/",'',$name[$i]);
 		if($name[$i] == '') $name[$i] = "•";
 		}
+	if($key[0] <> $basekey) {
+		echo "<p><font color=\"red\">WARNING</font>: the first key has been set to <font color=\"blue\">‘".$basekey."’</font> which is the value of <b>basekey</b></p>";
+		$key[0] = $basekey;
+		}
+	$name[$numgrades_fullscale] = $name[0];
 	if($p[0] == 0 OR $q[0] == 0) {
 		$pmax = intval($ratio[0] * 1000);
 		$qmax = 1000;
@@ -118,13 +128,13 @@ if(isset($_POST['create_meantone'])) {
 		$ratio_meantone = $ratio[$key_start_meantone];
 		while(TRUE) {
 			$key_meantone += $key_step;
-			$key = $key_meantone;
+			$this_key = $key_meantone;
 			$k = $ratio_meantone = $ratio_meantone * $p_step / $q_step * $cent_ratio;
 			$key_meantone = $key_meantone % $numgrades_fullscale;
 			$oldinterval = $interval;
 			while($k > $oldinterval) $k = $k / $oldinterval;
-		//	echo $key." = ".$key_meantone." => ".$k."<br />";
-			if($key == $numgrades_fullscale) {
+		//	echo $this_key." = ".$key_meantone." => ".$k."<br />";
+			if($this_key == $numgrades_fullscale) {
 				$interval = $ratio_meantone;
 				while(($interval / $oldinterval) > $oldinterval) $interval = $interval / $oldinterval;
 				$cents = round(1200 * log($interval) / log(2));
@@ -163,7 +173,7 @@ if(isset($_POST['interpolate'])) {
 	}
 
 $message = '';
-if(isset($_POST['savethisfile']) OR isset($_POST['interpolate']) OR isset($_POST['create_meantone'])) {
+if(isset($_POST['savethisfile']) OR isset($_POST['interpolate']) OR isset($_POST['create_meantone']) OR isset($_POST['modifynames'])) {
 	$message = "&nbsp;<span id=\"timespan\"><font color=\"red\">... Saving this scale ...</font></span>";
 	$scale_comment = $_POST['scale_comment'];
 	$table = explode(chr(10),$scale_comment);
@@ -180,17 +190,20 @@ if(isset($_POST['savethisfile']) OR isset($_POST['interpolate']) OR isset($_POST
 	$handle = fopen($file_link,"w");
 	fwrite($handle,"\"".$scale_name."\"\n");
 	$line_table = "f2 0 128 -51 ".$numgrades_fullscale." ".$interval." ".$basefreq." ".$basekey;
-	$scale_note_names = '';
-	$scale_fractions = '';
+	$scale_note_names = $scale_fractions = $scale_keys = '';
 	for($i = 0; $i <= $numgrades_fullscale; $i++) {
 		$line_table .= " ".$ratio[$i];
 		$scale_note_names .= $name[$i]." ";
 		$scale_fractions .= $p[$i]." ".$q[$i]." ";
+		$scale_keys .= $key[$i]." ";
 		}
 	$scale_note_names = trim($scale_note_names);
 	$scale_fractions = trim($scale_fractions);
+	$scale_keys = trim($scale_keys);
 	if($scale_note_names <> '')
 		fwrite($handle,"/".$scale_note_names."/\n");
+	if($scale_keys <> '')
+		fwrite($handle,"k".$scale_keys."k\n");
 	fwrite($handle,"[".$scale_fractions."]\n");
 	fwrite($handle,"|".$baseoctave."|\n");
 	fwrite($handle,$line_table."\n");
@@ -202,7 +215,7 @@ if(isset($_POST['savethisfile']) OR isset($_POST['interpolate']) OR isset($_POST
 $content = file_get_contents($file_link,TRUE);
 $table = explode(chr(10),$content);
 $imax = count($table);
-$scale_name = $scale_table = $scale_fraction = $scale_note_names = $scale_comment = '';
+$scale_name = $scale_table = $scale_fraction = $scale_note_names = $scale_keys = $scale_comment = '';
 for($i = 0; $i < $imax; $i++) {
 	$line = trim($table[$i]);
 	if($line == '') continue;
@@ -212,6 +225,10 @@ for($i = 0; $i < $imax; $i++) {
 		}
 	if($line[0] == '/') {
 		$scale_note_names = str_replace('/','',$line);
+		continue;
+		}
+	if($line[0] == 'k') {
+		$scale_keys = str_replace('k','',$line);
 		continue;
 		}
 	if($line[0] == '|') {
@@ -261,6 +278,13 @@ if($scale_note_names <> '') {
 		echo "<p><font color=\"red\">WARNING:</font> the number of note names (".($imax - 1).") is not <font color=\"red\">numgrades</font> (".$numgrades_fullscale.").</p>";
 		}
 	}
+if($scale_keys <> '') {
+	$table = explode(' ',$scale_keys);
+	$imax = count($table);
+	if($imax <> ($numgrades_fullscale + 1)) {
+		echo "<p><font color=\"red\">WARNING:</font> the number of keys (".($imax - 1).") is not <font color=\"red\">numgrades</font> (".$numgrades_fullscale.").</p>";
+		}
+	}
 if($scale_fraction <> '') {
 	$table = explode(' ',$scale_fraction);
 	$imax = count($table);
@@ -285,6 +309,11 @@ for($i = 0; $i <= $numgrades_fullscale; $i++) {
 	if($p[$i] > 0 AND $q[$i] > 0)
 		$ratio[$i] = round($p[$i] / $q[$i],3);
 	}
+$table = explode(' ',$scale_keys);
+for($i = 0; $i <= $numgrades_fullscale; $i++) {
+	if(isset($table[$i]) AND $table[$i] <> '') $key[$i] = intval($table[$i]);
+	else $key[$i] = 0;
+	}
 
 for($j = $numgrades_with_labels = 0; $j < $numgrades_fullscale; $j++) {
 	if($name[$j] == '') continue;
@@ -299,15 +328,38 @@ echo "<p>Name of this tonal scale: ";
 echo "<input type=\"text\" name=\"scale_name\" size=\"20\" value=\"".$scale_name."\">";
 if(is_integer(strpos($scale_name,' '))) echo " ➡ avoiding spaces is prefered";
 echo "</p>";
-echo "<p><font color=\"blue\">numgrades</font> = <input type=\"text\" name=\"numgrades\" size=\"5\" value=\"".$numgrades_fullscale."\"></p>";
-echo "<p><font color=\"blue\">interval</font> = <input type=\"text\" name=\"interval\" size=\"5\" value=\"".$interval."\">";
+echo "<table>";
+echo "<tr>";
+echo "<td style=\"white-space:nowrap; padding:6px; vertical-align:middle;\"><font color=\"blue\">numgrades</font> = <input type=\"text\" name=\"numgrades\" size=\"5\" value=\"".$numgrades_fullscale."\"></td>";
+echo "<td rowspan=\"2\" style=\"white-space:nowrap; padding:6px; vertical-align:middle;\">";
+echo "<table style=\"background-color:white;\">";
+echo "<tr>";
+echo "<td colspan=\"".$numgrades_with_labels."\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"modifynames\" onclick=\"this.form.target='_self';return true;\" formaction=\"scale.php?scalefilename=".urlencode($filename)."\" value=\"SAVE NEW NAMES\">&nbsp;Modify the names of these notes:</td>";
+echo "</tr>";
+echo "<tr>";
+for($j = 0; $j < $numgrades_fullscale; $j++) {
+	if($name[$j] == '') continue;
+	echo "<td>";
+	echo "<input style=\"text-align:center;\" type=\"text\" name=\"new_name_".$j."\" size=\"5\" value=\"".$name[$j]."\">";
+	echo "</td>";
+	}
+echo "</tr>"; 
+echo "</table>";
+echo "</td>";
+echo "</tr><tr>";
+echo "<td style=\"white-space:nowrap; padding:6px; vertical-align:middle;\"><font color=\"blue\">interval</font> = <input type=\"text\" name=\"interval\" size=\"5\" value=\"".$interval."\">";
 $cents = round(1200 * log($interval) / log(2));
 echo " or <input type=\"text\" name=\"interval_cents\" size=\"5\" value=\"".$cents."\"> cents (typically 1200)";
-echo "</p>";
-echo "<p><font color=\"blue\">basefreq</font> = <input type=\"text\" name=\"basefreq\" size=\"5\" value=\"".$basefreq."\"> Hz. This is the frequency for ratio 1/1, assuming a 440 Hz diapason.";
-if($ratio[0] <> 1 AND $name[0] <> '') echo " Here, the frequency of <font color=\"blue\">‘".$name[0]."’</font> would be <font color=\"red\">".round(($basefreq * $ratio[0]),2)."</font> Hz if it is the <i>block key</i>.";
-echo "</p>";
-echo "<p><font color=\"blue\">basekey</font> = <input type=\"text\" name=\"basekey\" size=\"5\" value=\"".$basekey."\">&nbsp;&nbsp;<font color=\"blue\">baseoctave</font> = <input type=\"text\" name=\"baseoctave\" size=\"5\" value=\"".$baseoctave."\">&nbsp;&nbsp;&nbsp;&nbsp;<input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"savethisfile\" onclick=\"this.form.target='_self';return true;\" formaction=\"scale.php?scalefilename=".urlencode($filename)."\" value=\"SAVE “".$filename."”\"></p>";
+echo "</td>";
+echo "</tr><tr>";
+echo "<td style=\"white-space:nowrap; padding:6px; vertical-align:middle;\"><font color=\"blue\">basekey</font> = <input type=\"text\" name=\"basekey\" size=\"5\" value=\"".$basekey."\">";
+echo "&nbsp;&nbsp;<font color=\"blue\">baseoctave</font> = <input type=\"text\" name=\"baseoctave\" size=\"5\" value=\"".$baseoctave."\"></td>";
+echo "<td style=\"padding:6px; vertical-align:middle;\"><font color=\"blue\">basefreq</font> = <input type=\"text\" name=\"basefreq\" size=\"5\" value=\"".$basefreq."\"> Hz.<br />This is the frequency for ratio 1/1, assuming a 440 Hz diapason.";
+if($ratio[0] <> 1 AND $name[0] <> '') echo "<br />Here, the frequency of <font color=\"blue\">‘".$name[0]."’</font> would be <font color=\"red\">".round(($basefreq * $ratio[0]),2)."</font> Hz if it is the <i>block key</i>.";
+echo "</td>";
+echo "</tr></table>";
+
+echo "<p><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"savethisfile\" onclick=\"this.form.target='_self';return true;\" formaction=\"scale.php?scalefilename=".urlencode($filename)."\" value=\"SAVE “".$filename."”\"></p>";
 
 echo "<h2 id=\"toptable\">Ratios and names of tonal scale <font color=\"blue\">“".$scale_name."”</font></h2>";
 
@@ -371,7 +423,7 @@ for($i = 0; $i <= $numgrades_fullscale; $i++) {
 	}
 echo "</tr>";
 echo "<tr><th style=\"background-color:azure; padding:4px;\">cents</th>";
-$key = $basekey;
+// $this_key = $basekey;
 for($i = 0; $i <= $numgrades_fullscale; $i++) {
 	if($ratio[$i] == 0) $cents = '';
 	else $cents = round(1200 * log($ratio[$i]) / log(2));
@@ -383,9 +435,9 @@ echo "</tr>";
 echo "<tr><th style=\"background-color:azure; padding:4px;\">interval</th><td style=\"padding:0px;\"></td>";
 for($i = 0; $i < $numgrades_fullscale; $i++) {
 	if(($ratio[$i] * $ratio[$i + 1]) == 0) $cents = '';
-	else $cents = round(1200 * log($ratio[$i + 1] / $ratio[$i]) / log(2));
+	else $cents = "«—&nbsp;".round(1200 * log($ratio[$i + 1] / $ratio[$i]) / log(2))."¢&nbsp;—»";
 	echo "<td style=\"white-space:nowrap; text-align:center; padding-top:4px; padding-bottom:4px; padding-left:0px; padding-right:0px; margin-left:0px; margin-right:0px;\" colspan=\"2\">";
-	echo "<font color=\"blue\">«—&nbsp;".$cents."¢&nbsp;—»</font>";
+	echo "<font color=\"blue\">".$cents."</font>";
 	echo "</td>";
 	}
 	
@@ -403,7 +455,8 @@ for($i = 0; $i < $numgrades_fullscale; $i++) {
 		echo "<small>".$p_int."/".$q_int."</small>";
 		}
 	else {
-		echo "<small>".round(($ratio[$i + 1] / $ratio[$i]),3)."</small>";
+		if(($ratio[$i + 1] * $ratio[$i]) > 0)
+			echo "<small>".round(($ratio[$i + 1] / $ratio[$i]),3)."</small>";
 		}
 	echo "</td>";
 	}
@@ -411,12 +464,16 @@ echo "</tr>";
 
 echo "</tr>";
 echo "<tr><th style=\"background-color:azure; padding:4px;\">key</th>";
-$key = $basekey;
+$this_key = $basekey;
 for($i = 0; $i <= $numgrades_fullscale; $i++) {
 	echo "<td style=\"text-align:center; padding-top:4px; padding-bottom:4px; padding-left:0px; padding-right:0px; margin-left:0px; margin-right:0px; background-color:cornsilk;\" colspan=\"2\">";
-	echo "<font color=\"green\"><b>".($key++)."</b></font>";
+	if(isset($key[$i]) AND $key[$i] > 0)
+		$this_key = $thekey = $key[$i];
+	else $thekey = $this_key++;
+	echo "<input type=\"text\" style=\"border:none; text-align:center; color:green; font-weight:bold; font-size:large;\" name=\"key_".$i."\" size=\"6\" value=\"".$thekey ."\">";
 	echo "</td>";
 	}
+$key[0] = $basekey;
 echo "</tr>";
 echo "</table>";
 if(!isset($_SESSION['scroll']) OR $_SESSION['scroll'] == 1) echo "</div>";
@@ -447,9 +504,9 @@ if($numgrades_with_labels == 12) {
 				$alt_note = $AltIndiannote;
 				break;
 			case '3':
-				$key = $basekey;
+				$this_key = $basekey;
 				for($i = 0; $i <= 13; $i++) {
-					$standard_note[$i] = $KeyString.($key++);
+					$standard_note[$i] = $KeyString.($this_key++);
 					}
 				break;
 			}
@@ -485,6 +542,7 @@ if($numgrades_with_labels == 12) {
 		echo "&nbsp;<input style=\"background-color:cornsilk;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\">";
 		echo "&nbsp;<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"use_convention\" value=\"USE THIS CONVENTION\">";
 		echo "<hr>";
+		
 		}
 	if($done) {
 		echo "<table style=\"background-color:white;\">";
@@ -522,16 +580,16 @@ if($done AND $numgrades_with_labels > 2) {
 			$numgrades = count($selected_grade_name) - 1;
 			for($i = 0; $i <= $numgrades; $i++) {
 				$some_name = $selected_grade_name[$i];
+				if($some_name == '-') $some_name = $selected_grade_name[$i] = '•';
 				$found = FALSE;
 				for($j = 0; $j < $numgrades_fullscale; $j++) {
-					if($name[$j] == $some_name) {
+					if(($name[$j] == $some_name) OR $some_name == '•') {
 						$found = TRUE; break;
 						}
 					}
 				if(!$found) $error_create .= "<br /><font color=\"red\"> ➡ ERROR: This note</font> <font color=\"blue\">‘".$some_name."’</font> <font color=\"red\">does not belong to the current scale</font>";
 				}
 			}
-		
 		$new_scale_name = trim($_POST['reduce_scale_name']);
 		$new_scale_name = preg_replace("/\s+/u",' ',$new_scale_name);
 		$new_scale_file = $new_scale_name.".txt";
@@ -626,6 +684,12 @@ if($done AND $numgrades_with_labels > 2) {
 					for($j = $k = 0; $j <= $numgrades_fullscale; $j++) {
 						if(!$full_scale) {
 							if(!isset($selected_grade_name[$k])) continue;
+							if($selected_grade_name[$k] == '•') {
+								$the_notes .= "• ";
+								$the_fractions .= "0 0 ";
+								$j--;
+								$k++; continue;
+								}
 							if($name[$j] <> $selected_grade_name[$k]) continue;
 							else $k++;
 							}
@@ -643,6 +707,11 @@ if($done AND $numgrades_with_labels > 2) {
 					for($j = $k = 0; $j <= $numgrades_fullscale; $j++) {
 						if(!$full_scale) {
 							if(!isset($selected_grade_name[$k])) continue;
+							if($selected_grade_name[$k] == '•') {
+								$the_scale .= "1.0 ";
+								$j--;
+								$k++; continue;
+								}
 							if($name[$j] <> $selected_grade_name[$k]) continue;
 							else $k++;
 							}
@@ -677,7 +746,7 @@ if($done AND $numgrades_with_labels > 2) {
 	echo "</td></tr><tr><td colspan=\"2\" style=\"vertical-align:middle; padding:6px; white-space:nowrap;\">";
 	echo "<input type=\"radio\" name=\"scale_choice\" value=\"full_scale\"";
 	if($scale_choice == "full_scale") echo " checked";
-	echo ">with ".$numgrades_fullscale." grades<br />";
+	echo ">with all ".$numgrades_fullscale." grades<br />";
 	if($selected_grades == '' AND $scale_choice <> "full_scale") {
 		for($j = 0; $j < $numgrades_fullscale; $j++) {
 			if($name[$j] == '') continue;
@@ -685,12 +754,13 @@ if($done AND $numgrades_with_labels > 2) {
 			}
 		$selected_grades .= $name[0];
 		}
-	$size = strlen($selected_grades);
+	$size = 5 + strlen($selected_grades);
 	echo "<input type=\"radio\" name=\"scale_choice\" value=\"small_scale\"";
 	if($scale_choice == "small_scale") echo " checked";
-	echo ">only grades:&nbsp;<input type=\"text\" name=\"selected_grades\" size=\"".$size."\" value=\"".$selected_grades."\"></td>";
+	echo ">with grades:&nbsp;<input type=\"text\" name=\"selected_grades\" size=\"".$size."\" value=\"".$selected_grades."\">";
+	echo "<br />➡ Unnamed grades can be inserted as hyphens between spaces ‘ - ’";
+	echo "</td>";
 	if($error_create <> '') echo $error_create;
-	
 	echo "</td></tr><tr>";
 	echo "<td style=\"vertical-align:middle; padding:6px; white-space:nowrap;\"><input type=\"radio\" name=\"major_minor\" value=\"none\" checked>don’t change ratios<br />";
 	echo "<input type=\"radio\" name=\"major_minor\" value=\"major\">raise to relative major<br />";
@@ -1034,13 +1104,13 @@ if($done AND $numgrades_with_labels > 2) {
 	echo "</td></tr><tr><td style=\"vertical-align:middle; padding:4px;\">";
 	echo "<input type=\"radio\" name=\"transposition_mode\" value=\"murcchana\"";
 	if($transposition_mode == "murcchana") echo " checked";
-	echo "><b>Murcchana</b><br />";
+	echo "><b>&nbsp;Murcchana</b><br />";
 	echo "Move note <input type=\"text\" name=\"transpose_from_note\" size=\"4\" value=\"".$transpose_from_note."\"> to note <input type=\"text\" name=\"transpose_to_note\" size=\"4\" value=\"".$transpose_to_note."\"> of this basic scale (<i>grama</i>)<br /><i>Example: On a Ma-grama scale model, move ‘C’ to ‘Eb’ (32/27)<br />to create the minor chromatic scale of same tonality<br />or one perfect fifth down to create the next chromatic scale in the series</i>";
 	echo "</td></tr><tr><td style=\"vertical-align:middle; padding:4px;\">";
 	echo "<input type=\"radio\" name=\"transposition_mode\" value=\"ratio\"";
 	if($transposition_mode == "ratio") echo " checked";
 	if($p_raise == 0) $p_raise = $q_raise = '';
-	echo "><b>Raise all notes</b> by (integer) ratio <input type=\"text\" name=\"p_raise\" size=\"3\" value=\"".$p_raise."\"><b> / </b><input type=\"text\" name=\"q_raise\" size=\"3\" value=\"".$q_raise."\">";
+	echo "><b>&nbsp;Raise all notes</b> by (integer) ratio <input type=\"text\" name=\"p_raise\" size=\"3\" value=\"".$p_raise."\"><b> / </b><input type=\"text\" name=\"q_raise\" size=\"3\" value=\"".$q_raise."\">";
 	
 	if($error_transpose <> '') echo "<br /><br />".$error_transpose;
 	

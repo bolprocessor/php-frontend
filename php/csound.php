@@ -676,13 +676,13 @@ echo "<input type=\"hidden\" name=\"begin_tables\" value=\"".$begin_tables."\">"
 echo "<input type=\"hidden\" name=\"index_max\" value=\"".$index_max."\">";
 
 echo "<table style=\"background-color:white;\"><tr><td>";
-echo "<h2>Tables:</h2>";
+echo "<h2>Tables</h2>";
 echo "<p><i>These will be put on top of Csound scores</i></p>";
 echo "<textarea name=\"cstables\" rows=\"5\" style=\"width:400px;\">";
 $cstables = '';
 $handle = FALSE; $i_scale = 0;
 $done_table = TRUE;
-$scale_name = $scale_table = $scale_fraction = $scale_note_names = $scale_comment = $baseoctave = array();
+$scale_name = $scale_table = $scale_fraction = $scale_note_names = $scale_keys = $scale_comment = $baseoctave = array();
 for($i = $i + 1; $i < $imax_file; $i++) {
 	$line = trim($table[$i]);
 //	if($verbose) echo $line."<br />";
@@ -721,6 +721,11 @@ for($i = $i + 1; $i < $imax_file; $i++) {
 		$scale_fraction[$i_scale] = $line;
 		continue;
 		}
+	if($line[0] == 'k') {
+		fwrite($handle,$line."\n");
+		$scale_keys[$i_scale] = $line;
+		continue;
+		}
 	if($line[0] == '|') {
 		fwrite($handle,$line."\n");
 		$baseoctave[$i_scale] = $line;
@@ -744,6 +749,8 @@ for($i = $i + 1; $i < $imax_file; $i++) {
 		fwrite($handle,"\"".$scale_name[$i_scale]."\"\n");
 		if(isset($scale_note_names[$i_scale]))
 			fwrite($handle,$scale_note_names[$i_scale]."\n");
+		if(isset($scale_keys[$i_scale]))
+			fwrite($handle,$scale_keys[$i_scale]."\n");
 		if(isset($scale_fraction[$i_scale]))
 			fwrite($handle,$scale_fraction[$i_scale]."\n");
 		if(isset($baseoctave[$i_scale]))
@@ -763,7 +770,7 @@ echo "<input type=\"hidden\" name=\"dir_scales\" value=\"".$dir_scales."\">";
 $max_scales = $i_scale; // Beware that we count scales from 1 because 0 is equal-tempered
 
 echo "<div id=\"topscales\"></div>";
-if($max_scales > 0) echo "<h2>Tonal scales:</h2>";
+/* if($max_scales > 0) */ echo "<h2>Tonal scales</h2>";
 $dircontent = scandir($dir_scales);
 $deleted_scales = 0;
 foreach($dircontent as $some_scale) {
@@ -1188,6 +1195,7 @@ echo "<input type=\"hidden\" name=\"max_scales\" value=\"".$max_scales."\">";
 echo "<p><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"savealldata\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#topscales\" value=\"SAVE ‘".$filename."’\"></p>";
 echo "</td>";
 echo "<td>";
+echo "<h2>Instruments</h2>";
 if($number_instruments > 0) {
 	echo "<h3>MIDI channel association of instruments:</h3>";
 	echo "<table>";

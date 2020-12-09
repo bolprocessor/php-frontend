@@ -447,6 +447,9 @@ if($n_messages > 0) {
 			$mssg = preg_replace("/^=>\s/u"," ",$mssg);
 			$mssg = "<font color=red>".$mssg."</font>";
 			}
+		if(is_integer($pos=strpos($mssg,"../"))) {
+			$mssg = preg_replace("/(\.\.\/.+)$/u","<font color=blue><small>$1</small></font>",$mssg);
+			}
 		if($handle) fwrite($handle,$mssg."<br />\n");
 		if($i == 7) echo "…<br />";
 		if($i < 7 OR $i > ($n_messages - 4)) echo $mssg."<br />";
