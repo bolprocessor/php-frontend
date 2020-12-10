@@ -1920,4 +1920,35 @@ function simplify_fraction_eliminate_schisma($p,$q) {
 	$result['q'] = $q;
 	return $result;
 	}
+
+function cents($ratio) {
+	$cents = 1200 * log($ratio) / log(2);
+	return $cents;
+	}
+
+function assign_default_keys($name,$basekey,$numgrades_fullscale) {
+	global $Indiannote,$AltIndiannote,$Englishnote,$AltEnglishnote,$Frenchnote,$AltFrenchnote;
+	$found = FALSE;
+	if(count($name) > 0) {
+		for($j = 0; $j < count($name); $j++) {
+			$this_note = $name[$j];
+			if($this_note == '' OR $this_note == '•') $key[$j] = 0;
+			else {
+				$found = TRUE;
+				if(($kfound = array_search($this_note,$Indiannote)) !== FALSE) $k = $kfound;
+				else if(($kfound = array_search($this_note,$AltIndiannote)) !== FALSE) $k = $kfound;
+				else if(($kfound = array_search($this_note,$Englishnote)) !== FALSE) $k = $kfound;
+				else if(($kfound = array_search($this_note,$AltEnglishnote)) !== FALSE) $k = $kfound;
+				else if(($kfound = array_search($this_note,$Frenchnote)) !== FALSE) $k = $kfound;
+				else if(($kfound = array_search($this_note,$AltFrenchnote)) !== FALSE) $k = $kfound;
+				if($j == (count($name) - 1)) $k = 12;
+				$key[$j] = $basekey + $k;
+				}
+			}
+		}
+	if(!$found) for($k = 0; $k <= $numgrades_fullscale; $k++) {
+		$key[$k] = $basekey + $k;
+		}
+	return $key;
+	}
 ?>

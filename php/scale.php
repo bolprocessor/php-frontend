@@ -58,7 +58,8 @@ if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST
 	$numgrades_fullscale = $_POST['numgrades'];
 	$interval = trim($_POST['interval']);
 	if($interval == '') $interval = 2;
-	$cents = round(1200 * log($interval) / log(2));
+//	$cents = round(1200 * log($interval) / log(2));
+	$cents = round(cents($interval));
 	if(isset($_POST['interval_cents'])) {
 		$new_cents = round($_POST['interval_cents']);
 		if($new_cents > 1 AND $new_cents <> $cents)
@@ -137,7 +138,8 @@ if(isset($_POST['create_meantone'])) {
 			if($this_key == $numgrades_fullscale) {
 				$interval = $ratio_meantone;
 				while(($interval / $oldinterval) > $oldinterval) $interval = $interval / $oldinterval;
-				$cents = round(1200 * log($interval) / log(2));
+				// $cents = round(1200 * log($interval) / log(2));
+				$cents = round(cents($interval));
 				$interval = round($interval,4);
 				}
 			$ratio[$key_meantone] = round($k,4);
@@ -312,16 +314,19 @@ for($i = 0; $i <= $numgrades_fullscale; $i++) {
 	if($p[$i] > 0 AND $q[$i] > 0)
 		$ratio[$i] = round($p[$i] / $q[$i],3);
 	}
-$table = explode(' ',$scale_keys);
-for($i = 0; $i <= $numgrades_fullscale; $i++) {
-	if(isset($table[$i]) AND $table[$i] <> '') {
-		$key[$i] = intval($table[$i]);
-		echo $key[$i]." ";
-		if($key[$i] > 0 AND $key[$i] < $basekey) $key[$i] += $basekey;
+if($scale_keys <> '') {
+	$table = explode(' ',$scale_keys);
+	for($i = 0; $i <= $numgrades_fullscale; $i++) {
+		if(isset($table[$i]) AND $table[$i] <> '') {
+			$key[$i] = intval($table[$i]);
+			echo $key[$i]." ";
+			if($key[$i] > 0 AND $key[$i] < $basekey) $key[$i] += $basekey;
+			}
+		else $key[$i] = 0;
 		}
-	else $key[$i] = 0;
+	$key[0] = $basekey;
 	}
-$key[0] = $basekey;
+else $key = assign_default_keys($name,$basekey,$numgrades_fullscale);
 echo "<br />";
 
 for($j = $numgrades_with_labels = 0; $j < $numgrades_fullscale; $j++) {
@@ -358,7 +363,8 @@ echo "</table>";
 echo "</td>";
 echo "</tr><tr>";
 echo "<td style=\"white-space:nowrap; padding:6px; vertical-align:middle;\"><font color=\"blue\">interval</font> = <input type=\"text\" name=\"interval\" size=\"5\" value=\"".$interval."\">";
-$cents = round(1200 * log($interval) / log(2));
+// $cents = round(1200 * log($interval) / log(2));
+$cents = round(cents($interval));
 echo " or <input type=\"text\" name=\"interval_cents\" size=\"5\" value=\"".$cents."\"> cents (typically 1200)";
 echo "</td>";
 echo "</tr><tr>";
@@ -387,10 +393,11 @@ echo "<input type=\"submit\" style=\"background-color:yellow; \" name=\"scroll\"
 echo "</td></tr>";
 
 
-// if($numgrades_with_labels == 12 AND isset($_POST['use_convention'])) {
 if(isset($_POST['use_convention'])) {
+	$found = FALSE;
 	for($i = $j = 0; $i <= $numgrades_fullscale; $i++) {
 		if($name[$i] == '') continue;
+		$found = TRUE;
 		$this_note = $name[$i];
 		if(($kfound = array_search($this_note,$Indiannote)) !== FALSE) $k = $kfound;
 		else if(($kfound = array_search($this_note,$AltIndiannote)) !== FALSE) $k = $kfound;
@@ -403,6 +410,10 @@ if(isset($_POST['use_convention'])) {
 			$name[$i] = $_POST['new_note_0'];
 		else $name[$i] = $_POST['new_note_'.$k];
 		$j++;
+		}
+	if(!$found) {
+		for($i = 0; $i < $numgrades_fullscale; $i++) $name[$i] = $_POST['new_note_'.$i];
+		$name[$numgrades_fullscale] = $_POST['new_note_0'];
 		}
 	}
 
@@ -444,7 +455,8 @@ echo "<tr><th style=\"background-color:azure; padding:4px;\">cents</th>";
 // $this_key = $basekey;
 for($i = 0; $i <= $numgrades_fullscale; $i++) {
 	if($ratio[$i] == 0) $cents = '';
-	else $cents = round(1200 * log($ratio[$i]) / log(2));
+//	else $cents = round(1200 * log($ratio[$i]) / log(2));
+	else $cents = round(cents($ratio[$i]));
 	echo "<td style=\"text-align:center; padding-top:4px; padding-bottom:4px; padding-left:0px; padding-right:0px; margin-left:0px; margin-right:0px; background-color:azure;\" colspan=\"2\">";
 	echo "<b>".$cents."</b>";
 	echo "</td>";
@@ -453,7 +465,8 @@ echo "</tr>";
 echo "<tr><th style=\"background-color:azure; padding:4px;\">interval</th><td style=\"padding:0px;\"></td>";
 for($i = 0; $i < $numgrades_fullscale; $i++) {
 	if(($ratio[$i] * $ratio[$i + 1]) == 0) $cents = '';
-	else $cents = "«—&nbsp;".round(1200 * log($ratio[$i + 1] / $ratio[$i]) / log(2))."¢&nbsp;—»";
+//	else $cents = "«—&nbsp;".round(1200 * log($ratio[$i + 1] / $ratio[$i]) / log(2))."¢&nbsp;—»";
+	else $cents = "«—&nbsp;".round(cents($ratio[$i + 1] / $ratio[$i]))."¢&nbsp;—»";
 	echo "<td style=\"white-space:nowrap; text-align:center; padding-top:4px; padding-bottom:4px; padding-left:0px; padding-right:0px; margin-left:0px; margin-right:0px;\" colspan=\"2\">";
 	echo "<font color=\"blue\">".$cents."</font>";
 	echo "</td>";
@@ -593,9 +606,9 @@ if($done AND $numgrades_with_labels > 2) {
 		$scale_choice = $_POST['scale_choice'];
 		if($scale_choice == "full_scale") $full_scale = TRUE;
 		else $full_scale =  FALSE;
+		$preserve_numbers = isset($_POST['preserve_numbers']);
 		if($full_scale) $numgrades = $numgrades_fullscale;
 		else {
-			$preserve_numbers = isset($_POST['preserve_numbers']);
 			$selected_grades = trim($_POST['selected_grades']);
 			$selected_grades = preg_replace("/\s+/u",' ',$selected_grades);
 			$selected_grade_name = explode(' ',$selected_grades);
@@ -899,12 +912,15 @@ if($done AND $numgrades_with_labels > 2) {
 						if(($p_new * $q_new) > 0)
 							$this_ratio = $p_new / $q_new;
 						else $this_ratio = $ratio_new;
-						$cents_this_grade[$jj] = 1200 * log($ratio_this_grade[$jj]) / log(2);
-						$cents_new = 1200 * log($this_ratio) / log(2);
+					//	$cents_this_grade[$jj] = 1200 * log($ratio_this_grade[$jj]) / log(2);
+						$cents_this_grade[$jj] = cents($ratio_this_grade[$jj]);
+					//	$cents_new = 1200 * log($this_ratio) / log(2);
+						$cents_new = cents($this_ratio);
 						if(($cents_new - $cents_this_grade[$jj]) > 50) {
 							$q_new = 2 * $q_new;
 							$this_ratio = $this_ratio / 2.0;
-							$cents_new = 1200 * log($this_ratio) / log(2);
+					//		$cents_new = 1200 * log($this_ratio) / log(2);
+							$cents_new = cents($this_ratio);
 							}
 						if(($cents_this_grade[$jj] - $cents_new) > 50) {
 							$p_new = 2 * $p_new;
@@ -923,7 +939,8 @@ if($done AND $numgrades_with_labels > 2) {
 							$q_new = $fraction['q'];
 							$this_ratio = $p_new/$q_new;
 							}
-						$cents_new = 1200 * log($this_ratio) / log(2);
+					//	$cents_new = 1200 * log($this_ratio) / log(2);
+						$cents_new = cents($this_ratio);
 						echo "<font color=\"blue\">".$name_this_grade[$jj]."</font> ratio ";
 						if(($p_new * $q_new) > 0) echo $p_new."/".$q_new." = ";
 						echo round($this_ratio,3);
@@ -949,10 +966,13 @@ if($done AND $numgrades_with_labels > 2) {
 						
 					// Reassign positions of notes
 					$new_name = array();
+				//	$new_key = array();
 					echo "<br />";
 					for($j = 0; $j < $numgrades_fullscale; $j++) {
 						$new_name[$j] = '';
-						$cents = 1200 * log($ratio[$j]) / log(2);
+					//	$new_key[$j] = $key[$j];
+				//		$cents = 1200 * log($ratio[$j]) / log(2);
+						$cents = cents($ratio[$j]);
 					//	echo "‘".$name[$j]."’ = ".$p[$j]."/".$q[$j]." ".round($cents)." cents<br />";
 						for($jj = 0; $jj <= $numgrades_with_labels; $jj++) {
 							if(abs($cents - $cents_new_this_grade[$jj]) < 4) {
@@ -963,6 +983,7 @@ if($done AND $numgrades_with_labels > 2) {
 								$p[$j] = $p_new_this_grade[$jj];
 								$q[$j] = $q_new_this_grade[$jj];
 								$ratio[$j] = $ratio_this_grade[$jj];
+							//	$new_key[$j] = $key[$jj];
 								break;
 								}
 							}
@@ -982,7 +1003,8 @@ if($done AND $numgrades_with_labels > 2) {
 							$closest_j = -1;
 							$search_cents = round($cents_new_this_grade[$jj]);
 							for($j = $jold; $j <= $numgrades_fullscale; $j++) {
-								$cents = 1200 * log($ratio[$j]) / log(2);
+							//	$cents = 1200 * log($ratio[$j]) / log(2);
+								$cents = cents($ratio[$j]);
 								$dist = abs($cents - $search_cents);
 								if($dist < $minimum_dist) {
 									$minimum_dist = $dist;
@@ -991,6 +1013,7 @@ if($done AND $numgrades_with_labels > 2) {
 								}
 							if($closest_j >= 0) {
 								$new_name[$closest_j] = $search_name;
+							//	$new_key[$closest_j] = $key[$jj];
 								$p[$closest_j] = $p_new_this_grade[$jj];
 								$q[$closest_j] = $q_new_this_grade[$jj];
 								$old_ratio = round($ratio_this_grade[$jj],3);
@@ -1003,8 +1026,10 @@ if($done AND $numgrades_with_labels > 2) {
 								}
 							}
 						}
-					for($j = 0; $j < $numgrades_fullscale; $j++)
+					for($j = 0; $j < $numgrades_fullscale; $j++) {
 						$name[$j] = $new_name[$j];
+						// $key[$j] = $new_key[$j];
+						}
 					}
 				}
 			else {
@@ -1054,7 +1079,8 @@ if($done AND $numgrades_with_labels > 2) {
 					$q_new_this_grade[$jj] = $q_new;
 					$name_this_grade[$jj] = $name[$j];
 					$ratio_this_grade[$jj] = $new_ratio;
-					$cents_new_this_grade[$jj] = 1200 * log($new_ratio) / log(2);
+				//	$cents_new_this_grade[$jj] = 1200 * log($new_ratio) / log(2);
+					$cents_new_this_grade[$jj] = cents($new_ratio);
 					echo "<font color=\"blue\">‘".$name[$j]."’</font> new ratio = ".$p_new."/".$q_new." = ".round($new_ratio,3)."<br />";
 					$jj++;
 					}
@@ -1069,7 +1095,8 @@ if($done AND $numgrades_with_labels > 2) {
 					$search_cents = round($cents_new_this_grade[$jj]);
 					for($j = 0; $j <= $numgrades_fullscale; $j++) {
 						if($j == $jold) continue;
-						$cents = 1200 * log($ratio[$j]) / log(2);
+				//		$cents = 1200 * log($ratio[$j]) / log(2);
+						$cents = cents($ratio[$j]);
 						$dist = abs($cents - $search_cents);
 						if($dist < $minimum_dist) {
 							$minimum_dist = $dist;
@@ -1105,14 +1132,23 @@ if($done AND $numgrades_with_labels > 2) {
 			$handle = fopen($dir_scales.$new_scale_file,"w");
 			fwrite($handle,"\"".$new_scale_name."\"\n");
 			$the_notes = $the_fractions = $the_ratios = '';
+			// $the_numbers = '';
 			for($j = 0; $j <= $numgrades_fullscale; $j++) {
-				if($name[$j] <> '') $the_notes .= $name[$j]." ";
-				else $the_notes .= "• ";
+				if($name[$j] <> '') {
+					$the_notes .= $name[$j]." ";
+				//	$the_numbers .= $key[$j]." ";
+					}
+				else {
+					$the_notes .= "• ";
+				//	$the_numbers .= "0 ";
+					}
 				$the_fractions .= $p[$j]." ".$q[$j]." ";
 				}
 			$the_notes = "/".trim($the_notes)."/";
 			$the_fractions = "[".trim($the_fractions)."]";
+		//	$the_numbers = "k".trim($the_numbers)."k";
 			fwrite($handle,$the_notes."\n");
+		//	fwrite($handle,$the_numbers."\n");
 			fwrite($handle,$the_fractions."\n");
 			fwrite($handle,"|".$baseoctave."|\n");
 			$the_scale = "f2 0 128 -51 ";
@@ -1148,7 +1184,7 @@ if($done AND $numgrades_with_labels > 2) {
 	echo "<input type=\"radio\" name=\"transposition_mode\" value=\"ratio\"";
 	if($transposition_mode == "ratio") echo " checked";
 	if($p_raise == 0) $p_raise = $q_raise = '';
-	echo "><b>&nbsp;Raise all notes</b> by (integer) ratio <input type=\"text\" name=\"p_raise\" size=\"3\" value=\"".$p_raise."\"><b> / </b><input type=\"text\" name=\"q_raise\" size=\"3\" value=\"".$q_raise."\">";
+	echo "><b>&nbsp;Raise all notes</b> by (integer) ratio <input type=\"text\" name=\"p_raise\" size=\"3\" value=\"".$p_raise."\"><b> / </b><input type=\"text\" name=\"q_raise\" size=\"3\" value=\"".$q_raise."\"> (needs revision)";
 	
 	if($error_transpose <> '') echo "<br /><br />".$error_transpose;
 	
@@ -1198,7 +1234,8 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 				if($k < $j) $a = 2 * $ratio[$k] / $ratio[$j];
 				else $a = $ratio[$k] / $ratio[$j];
 				}
-			$x[$j][$k] = 1200 * log($a) / log(2);
+		//	$x[$j][$k] = 1200 * log($a) / log(2);
+			$x[$j][$k] = cents($a);
 			if(!isset($num[$class])) {
 				$num[$class] = $sum[$class] = 0;
 				}
@@ -1242,6 +1279,86 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 		}
 	echo "</table>";
 	echo "<p style=\"text-align:center;\"><b>Colors: <font color=\"blue\">Perfect fifth</font> / <font color=\"red\">Wolf fifth</font> — <font color=\"green\">Harmonic major third</font> / <font color=\"brown\">Pythagorean major third</font></b><br /><i>Wolf fifths point at sensitive notes</i>";
+	$fifth = $harmthird = $pyththird = array();
+	for($j = 0; $j < $numgrades_fullscale; $j++) {
+		if($name[$j] == '' OR $ratio[$j] == 0) continue; // By security
+		for($k = 0; $k < $numgrades_fullscale; $k++) {
+			if($j == $k OR $name[$k] == '') continue;
+			$pos = cents($ratio[$k] / $ratio[$j]);
+			if($pos < 0) $pos += 1200;
+			$dist = abs($pos - 701.9);
+			if($dist < 5) {
+			//	echo $name[$j]." ".$name[$k]."<br />";
+				$fifth[$j] = $k;
+				}
+			$dist = abs($pos - 386);
+			if($dist < 5) {
+		//		echo $name[$j]." (harm) ".$name[$k]."<br />";
+				$harmthird[$j] = $k;
+				$harmthird[$k] = $j;
+				}
+			$dist = abs($pos - 408);
+			if($dist < 5) {
+		//		echo $name[$j]." (pyth) ".$name[$k]."<br />";
+				$pyththird[$j] = $k;
+				$pyththird[$k] = $j;
+				}
+			}
+		}
+	$max_length = $j_max_length = 0;
+//	echo "<br />"; 
+	echo "<h3>Cycles of fifths:</h3>"; 
+	for($j = 0; $j < $numgrades_fullscale; $j++) {
+		$cycle[$j] = array();
+		$cycle[$j][] = $j;
+		$cycle[$j] = cycle_of_fifths($fifth,$cycle[$j],$j);
+		if(count($cycle[$j]) > $max_length) {
+			$max_length = count($cycle[$j]);
+			$j_max_length = $j;
+			}
+		if(count($cycle[$j]) > 1) {
+			for($i = 0; $i < count($cycle[$j]); $i++) echo $name[$cycle[$j][$i]]." ";
+			echo "<br />";
+			}
+		}
+	echo "<h3>Tuning scheme:</h3>";
+	echo "<table style=\"background-color:azure;\">";
+	$j = $j_max_length;
+	$done = $col = array();
+	$shift = ''; $posnext = 0;
+	while($j >= 0) {
+		echo "<tr>";
+		$jnext = -1;
+		$this_shift = $shift;
+		echo "<td>".$this_shift."</td>";
+		for($i = 0; $i < $posnext; $i++) echo "<td></td>";
+	//	for($i = 0; $i < count($cycle[$j]); $i++) {
+		for($i = 0; $i < count($cycle[$j]) AND $i <= ($max_length - $posnext +1); $i++) {
+			$jcurr = $cycle[$j][$i];
+			if(isset($done[$jcurr])) continue;
+			$col[$jcurr] = $i;
+			echo "<td style=\"text-align:center; vertical-align:middle; padding:6px;\"><b>".$name[$jcurr]."</td>";
+			if(isset($harmthird[$jcurr]) AND $jnext == -1) {
+				if(!isset($col[$harmthird[$jcurr]]) OR $col[$harmthird[$jcurr]] <> $i) {
+					$jnext = $harmthird[$jcurr];
+					$posnext += $i;
+					$shift = "<font color=\"green\">Harmonic 3d</font>";
+					}
+				}
+			if(isset($pyththird[$jcurr]) AND $jnext == -1) {
+				if(!isset($col[$pyththird[$jcurr]]) OR $col[$pyththird[$jcurr]] <> $i) {
+					$jnext = $pyththird[$jcurr];
+					$posnext += $i;
+					$shift = "<font color=\"brown\">Pythagorean 3d</font>";
+					}
+				}
+			}
+		echo "</tr>";
+		$done[$j] = TRUE;
+		$j = $jnext;
+		}
+	echo "</table>";
+		
 	echo "</td>";
 	}
 echo "</tr>";
@@ -1250,7 +1367,16 @@ echo "</table>";
 $text = html_to_text($scale_comment,"textarea");
 echo "<h3>Comment:</h3>";
 echo "<textarea name=\"scale_comment\" rows=\"5\" style=\"width:700px;\">".$text."</textarea>";
-
 echo "<p><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" formaction=\"scale.php?scalefilename=".urlencode($filename)."#toptable\" onclick=\"this.form.target='_self';return true;\" name=\"savethisfile\" value=\"SAVE “".$filename."”\"></p>";
 echo "</form>";
+echo "</body>";
+echo "</html>";
+
+function cycle_of_fifths($fifth,$cycle,$j) {
+	if(isset($fifth[$j])) {
+		$cycle[] = $fifth[$j];
+		$cycle = cycle_of_fifths($fifth,$cycle,$fifth[$j]);
+		}
+	return $cycle;
+	}
 ?>
