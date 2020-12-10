@@ -1307,7 +1307,7 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 		}
 	$max_length = $j_max_length = 0;
 //	echo "<br />"; 
-	echo "<h3>Cycles of fifths:</h3>"; 
+	echo "<h3>Cycles of perfect fifths:</h3>"; 
 	for($j = 0; $j < $numgrades_fullscale; $j++) {
 		$cycle[$j] = array();
 		$cycle[$j][] = $j;
@@ -1321,8 +1321,8 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 			echo "<br />";
 			}
 		}
-	echo "<h3>Tuning scheme:</h3>";
-	echo "<table style=\"background-color:azure;\">";
+	echo "<h3>Tuning scheme (ignoring syntonic comma in major thirds):</h3>";
+/*	echo "<table style=\"background-color:azure;\">";
 	$j = $j_max_length;
 	$done = $col = array();
 	$shift = ''; $posnext = 0;
@@ -1332,7 +1332,6 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 		$this_shift = $shift;
 		echo "<td>".$this_shift."</td>";
 		for($i = 0; $i < $posnext; $i++) echo "<td></td>";
-	//	for($i = 0; $i < count($cycle[$j]); $i++) {
 		for($i = 0; $i < count($cycle[$j]) AND $i <= ($max_length - $posnext +1); $i++) {
 			$jcurr = $cycle[$j][$i];
 			if(isset($done[$jcurr])) continue;
@@ -1357,8 +1356,45 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 		$done[$j] = TRUE;
 		$j = $jnext;
 		}
+	echo "</table>"; */
+	
+	$table = array();
+	for($i = 0; $i < $numgrades_fullscale; $i++) $done_note[$i] = FALSE;
+	for($i = 0; $i < 2 * $numgrades_fullscale; $i++) {
+		for($j = 0; $j < 2 * $numgrades_fullscale; $j++) {
+			$table[$i][$j] = -1;
+			}
+		}
+	$i = $j = $j0 = $numgrades_fullscale;
+	$startnote = $cycle[$j_max_length][0];
+	$table = find_neighbours($table,0,$ratio,$name,$i,$j,$numgrades_fullscale,$j0);
+	$lines = count($table);
+	$imin = $jmin = 2 * $numgrades_fullscale;
+	$imax = $jmax = -1;
+	for($j = 0; $j < $lines; $j++) {
+		$cols = count($table[$j]);
+		for($i = 0; $i < $cols; $i++) {
+			if($table[$i][$j] >= 0) {
+				if($i < $imin) $imin = $i;
+				if($i > $imax) $imax = $i;
+				if($j < $jmin) $jmin = $j;
+				if($j > $jmax) $jmax = $j;
+				}
+			}
+		}
+	echo "<table>";
+	for($j = $jmin; $j <= $jmax; $j++) {
+		echo "<tr>";
+		for($i = $imin; $i <= $imax; $i++) {
+				echo "<td style=\"text-align:center; vertical-align:middle; padding:6px;\">";
+				if($table[$i][$j] >= 0) {
+					echo "<b>".$name[$table[$i][$j]]."</b>";
+					}
+				echo "</td>";
+			}
+		echo "</tr>";
+		}
 	echo "</table>";
-		
 	echo "</td>";
 	}
 echo "</tr>";
@@ -1371,6 +1407,48 @@ echo "<p><input style=\"background-color:yellow; font-size:larger;\" type=\"subm
 echo "</form>";
 echo "</body>";
 echo "</html>";
+
+function find_neighbours($table,$note,$ratio,$name,$i,$j,$numgrades_fullscale,$j0) {
+	global $done_note;
+	$nmax = (2 * $numgrades_fullscale) - 2;
+	$table[$i][$j] = $note;
+	if($ratio[$note] == 0) return $table;
+	for($k = 0; $k < $numgrades_fullscale; $k++) {
+		if($note == $k OR $name[$k] == '') continue;
+		$pos = cents($ratio[$k] / $ratio[$note]);
+		if($pos < 0) $pos += 1200;
+		$dist = abs($pos - 702);
+		if($dist < 5 AND $i < $nmax) {
+			if($table[$i+1][$j] == -1 AND !$done_note[$k]) {
+				$table = find_neighbours($table,$k,$ratio,$name,$i+1,$j,$numgrades_fullscale,$j0);
+				}
+			continue;
+			}
+		$dist = abs($pos - 498);
+		if($dist < 5 AND $i > 0) {
+			if($table[$i-1][$j] == -1 AND !$done_note[$k]) {
+				$table = find_neighbours($table,$k,$ratio,$name,$i-1,$j,$numgrades_fullscale,$j0);
+				}
+			continue;
+			}
+		$dist = abs($pos - 400);
+		if($dist < 50 AND $j < ($j0 + 1)) {
+			if($table[$i][$j+1] == -1 AND !$done_note[$k]) {
+				$table = find_neighbours($table,$k,$ratio,$name,$i,$j+1,$numgrades_fullscale,$j0);
+				}
+			continue;
+			}
+		$dist = abs($pos - 800);
+		if($dist < 50 AND $j > ($j0 - 1)) {
+			if($table[$i][$j-1] == -1 AND !$done_note[$k]) {
+				$table = find_neighbours($table,$k,$ratio,$name,$i,$j-1,$numgrades_fullscale,$j0);
+				}
+			continue;
+			}
+		$done_note[$note] = TRUE;
+		}
+	return $table;
+	}
 
 function cycle_of_fifths($fifth,$cycle,$j) {
 	if(isset($fifth[$j])) {
