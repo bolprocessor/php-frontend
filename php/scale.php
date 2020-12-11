@@ -1278,86 +1278,104 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 		echo "</tr>";
 		}
 	echo "</table>";
-	echo "<p style=\"text-align:center;\"><b>Colors: <font color=\"blue\">Perfect fifth</font> / <font color=\"red\">Wolf fifth</font> — <font color=\"green\">Harmonic major third</font> / <font color=\"brown\">Pythagorean major third</font></b><br /><i>Wolf fifths point at sensitive notes</i>";
-	$fifth = $harmthird = $pyththird = array();
+	echo "<p style=\"\"><b>Colors: <font color=\"blue\">Perfect fifth</font> / <font color=\"red\">Wolf fifth</font> — <font color=\"green\">Harmonic major third</font> / <font color=\"brown\">Pythagorean major third</font></b><br />➡ <i>Wolf fifths indicate ‘sensitive notes’</i></p>";
+	
+	
+	$fifth = $wolthfifth = $harmthird = $pyththird = array();
+	$nr_wolth = $sum_comma = 0;
+	echo "<table>";
+	echo "<tr><td style=\"vertical-align:middle; padding:4px;\"><b>Perfect 5th</b></td><td><b>Wolf 5th</b></td><td><b>Harm. maj. 3d</b></td><td><b>Pyth. maj. 3d</b></td></tr>";
+	echo "<tr><td style=\"vertical-align:middle; text-align:center; padding:4px;\">";
 	for($j = 0; $j < $numgrades_fullscale; $j++) {
 		if($name[$j] == '' OR $ratio[$j] == 0) continue; // By security
 		for($k = 0; $k < $numgrades_fullscale; $k++) {
 			if($j == $k OR $name[$k] == '') continue;
-			$pos = cents($ratio[$k] / $ratio[$j]);
+			if(($p[$j] * $p[$k] * $q[$j] * $q[$k]) > 0)
+				$pos = cents($p[$k] * $q[$j] / $q[$k] / $p[$j]);
+			else $pos = cents($ratio[$k] / $ratio[$j]);
 			if($pos < 0) $pos += 1200;
-			$dist = abs($pos - 701.9);
+			$dist = abs($pos - 702);
 			if($dist < 5) {
-			//	echo $name[$j]." ".$name[$k]."<br />";
+				echo "<font color=\"blue\">".$name[$j]." ".$name[$k]."</font><br />";
 				$fifth[$j] = $k;
-				}
-			$dist = abs($pos - 386);
-			if($dist < 5) {
-		//		echo $name[$j]." (harm) ".$name[$k]."<br />";
-				$harmthird[$j] = $k;
-				$harmthird[$k] = $j;
-				}
-			$dist = abs($pos - 408);
-			if($dist < 5) {
-		//		echo $name[$j]." (pyth) ".$name[$k]."<br />";
-				$pyththird[$j] = $k;
-				$pyththird[$k] = $j;
 				}
 			}
 		}
+	echo "<td style=\"vertical-align:middle; text-align:center; padding:4px;\">";
+	for($j = 0; $j < $numgrades_fullscale; $j++) {
+		if($name[$j] == '' OR $ratio[$j] == 0) continue; // By security
+		for($k = 0; $k < $numgrades_fullscale; $k++) {
+			if($j == $k OR $name[$k] == '') continue;
+			if(($p[$j] * $p[$k] * $q[$j] * $q[$k]) > 0)
+				$pos = cents($p[$k] * $q[$j] / $q[$k] / $p[$j]);
+			else $pos = cents($ratio[$k] / $ratio[$j]);
+			if($pos < 0) $pos += 1200;
+			$dist = abs($pos - 680);
+			if($dist < 10) {
+				echo "<font color=\"red\">".$name[$j]." ".$name[$k]."</font><br />";
+				$wolthfifth[$j] = $k;
+				$nr_wolth++;
+				$sum_comma += 701.9 - $pos;
+				}
+			}
+		}
+	echo "</td><td style=\"vertical-align:middle; text-align:center; padding:4px;\">";	
+	for($j = 0; $j < $numgrades_fullscale; $j++) {
+		if($name[$j] == '' OR $ratio[$j] == 0) continue; // By security
+		for($k = 0; $k < $numgrades_fullscale; $k++) {
+			if($j == $k OR $name[$k] == '') continue;
+			if(($p[$j] * $p[$k] * $q[$j] * $q[$k]) > 0)
+				$pos = cents($p[$k] * $q[$j] / $q[$k] / $p[$j]);
+			else $pos = cents($ratio[$k] / $ratio[$j]);
+			if($pos < 0) $pos += 1200;
+			$dist = abs($pos - 386);
+			if($dist < 5) {
+				echo "<font color=\"green\">".$name[$j]." ".$name[$k]."</font><br />";
+				$harmthird[$j] = $k;
+				}
+			}
+		}
+	echo "</td><td style=\"vertical-align:middle; text-align:center; padding:4px;\">";
+	for($j = 0; $j < $numgrades_fullscale; $j++) {
+		if($name[$j] == '' OR $ratio[$j] == 0) continue; // By security
+		for($k = 0; $k < $numgrades_fullscale; $k++) {
+			if($j == $k OR $name[$k] == '') continue;
+			if(($p[$j] * $p[$k] * $q[$j] * $q[$k]) > 0)
+				$pos = cents($p[$k] * $q[$j] / $q[$k] / $p[$j]);
+			else $pos = cents($ratio[$k] / $ratio[$j]);
+			if($pos < 0) $pos += 1200;
+			$dist = abs($pos - 408);
+			if($dist < 10) {
+				echo "<font color=\"brown\">".$name[$j]." ".$name[$k]."</font><br />";
+				$pyththird[$j] = $k;
+				}
+			}
+		}
+	echo "</td></tr>";
+	echo "</table>";
+	
+	if($nr_wolth > 0) {
+		$comma = $sum_comma / $nr_wolth;
+		echo "<p><b>Syntonic comma = <font color=\"red\">".round($comma,1)."</font> cents</b></p>";
+		}
+		
+//	Cycles of perfect fifths
 	$max_length = $j_max_length = 0;
-//	echo "<br />"; 
-	echo "<h3>Cycles of perfect fifths:</h3>"; 
 	for($j = 0; $j < $numgrades_fullscale; $j++) {
 		$cycle[$j] = array();
 		$cycle[$j][] = $j;
-		$cycle[$j] = cycle_of_fifths($fifth,$cycle[$j],$j);
+		$cycle[$j] = cycle_of_intervals($fifth,$cycle[$j],$j);
 		if(count($cycle[$j]) > $max_length) {
 			$max_length = count($cycle[$j]);
 			$j_max_length = $j;
 			}
 		if(count($cycle[$j]) > 1) {
-			for($i = 0; $i < count($cycle[$j]); $i++) echo $name[$cycle[$j][$i]]." ";
-			echo "<br />";
+	//		for($i = 0; $i < count($cycle[$j]); $i++) echo $name[$cycle[$j][$i]]." ";
+	//		echo "<br />";
 			}
 		}
-	echo "<h3>Tuning scheme (ignoring syntonic comma in major thirds):</h3>";
-/*	echo "<table style=\"background-color:azure;\">";
-	$j = $j_max_length;
-	$done = $col = array();
-	$shift = ''; $posnext = 0;
-	while($j >= 0) {
-		echo "<tr>";
-		$jnext = -1;
-		$this_shift = $shift;
-		echo "<td>".$this_shift."</td>";
-		for($i = 0; $i < $posnext; $i++) echo "<td></td>";
-		for($i = 0; $i < count($cycle[$j]) AND $i <= ($max_length - $posnext +1); $i++) {
-			$jcurr = $cycle[$j][$i];
-			if(isset($done[$jcurr])) continue;
-			$col[$jcurr] = $i;
-			echo "<td style=\"text-align:center; vertical-align:middle; padding:6px;\"><b>".$name[$jcurr]."</td>";
-			if(isset($harmthird[$jcurr]) AND $jnext == -1) {
-				if(!isset($col[$harmthird[$jcurr]]) OR $col[$harmthird[$jcurr]] <> $i) {
-					$jnext = $harmthird[$jcurr];
-					$posnext += $i;
-					$shift = "<font color=\"green\">Harmonic 3d</font>";
-					}
-				}
-			if(isset($pyththird[$jcurr]) AND $jnext == -1) {
-				if(!isset($col[$pyththird[$jcurr]]) OR $col[$pyththird[$jcurr]] <> $i) {
-					$jnext = $pyththird[$jcurr];
-					$posnext += $i;
-					$shift = "<font color=\"brown\">Pythagorean 3d</font>";
-					}
-				}
-			}
-		echo "</tr>";
-		$done[$j] = TRUE;
-		$j = $jnext;
-		}
-	echo "</table>"; */
-	
+		
+	echo "<h3>Tuning scheme (ignoring syntonic comma in major thirds):</h3>";	
 	$table = array();
 	for($i = 0; $i < $numgrades_fullscale; $i++) $done_note[$i] = FALSE;
 	for($i = 0; $i < 2 * $numgrades_fullscale; $i++) {
@@ -1367,7 +1385,8 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 		}
 	$i = $j = $j0 = $numgrades_fullscale;
 	$startnote = $cycle[$j_max_length][0];
-	$table = find_neighbours($table,0,$ratio,$name,$i,$j,$numgrades_fullscale,$j0);
+	$level = 0;
+	$table = find_neighbours($table,0,$ratio,$name,$i,$j,$numgrades_fullscale,$level,$j0);
 	$lines = count($table);
 	$imin = $jmin = 2 * $numgrades_fullscale;
 	$imax = $jmax = -1;
@@ -1408,7 +1427,7 @@ echo "</form>";
 echo "</body>";
 echo "</html>";
 
-function find_neighbours($table,$note,$ratio,$name,$i,$j,$numgrades_fullscale,$j0) {
+function find_neighbours($table,$note,$ratio,$name,$i,$j,$numgrades_fullscale,$level,$j0) {
 	global $done_note;
 	$nmax = (2 * $numgrades_fullscale) - 2;
 	$table[$i][$j] = $note;
@@ -1418,30 +1437,30 @@ function find_neighbours($table,$note,$ratio,$name,$i,$j,$numgrades_fullscale,$j
 		$pos = cents($ratio[$k] / $ratio[$note]);
 		if($pos < 0) $pos += 1200;
 		$dist = abs($pos - 702);
-		if($dist < 5 AND $i < $nmax) {
+		if($level < 4 AND $dist < 5 AND $i < $nmax) {
 			if($table[$i+1][$j] == -1 AND !$done_note[$k]) {
-				$table = find_neighbours($table,$k,$ratio,$name,$i+1,$j,$numgrades_fullscale,$j0);
+				$table = find_neighbours($table,$k,$ratio,$name,$i+1,$j,$numgrades_fullscale,$level+1,$j0);
 				}
 			continue;
 			}
 		$dist = abs($pos - 498);
-		if($dist < 5 AND $i > 0) {
+		if($level < 4 AND $dist < 5 AND $i > 0) {
 			if($table[$i-1][$j] == -1 AND !$done_note[$k]) {
-				$table = find_neighbours($table,$k,$ratio,$name,$i-1,$j,$numgrades_fullscale,$j0);
+				$table = find_neighbours($table,$k,$ratio,$name,$i-1,$j,$numgrades_fullscale,$level+1,$j0);
 				}
 			continue;
 			}
 		$dist = abs($pos - 400);
-		if($dist < 50 AND $j < ($j0 + 1)) {
+		if($level < 4 AND $dist < 50 AND $j < ($j0 + 1)) {
 			if($table[$i][$j+1] == -1 AND !$done_note[$k]) {
-				$table = find_neighbours($table,$k,$ratio,$name,$i,$j+1,$numgrades_fullscale,$j0);
+				$table = find_neighbours($table,$k,$ratio,$name,$i,$j+1,$numgrades_fullscale,$level+1,$j0);
 				}
 			continue;
 			}
 		$dist = abs($pos - 800);
-		if($dist < 50 AND $j > ($j0 - 1)) {
+		if($level < 4 AND $dist < 50 AND $j > ($j0 - 1)) {
 			if($table[$i][$j-1] == -1 AND !$done_note[$k]) {
-				$table = find_neighbours($table,$k,$ratio,$name,$i,$j-1,$numgrades_fullscale,$j0);
+				$table = find_neighbours($table,$k,$ratio,$name,$i,$j-1,$numgrades_fullscale,$level+1,$j0);
 				}
 			continue;
 			}
@@ -1450,10 +1469,10 @@ function find_neighbours($table,$note,$ratio,$name,$i,$j,$numgrades_fullscale,$j
 	return $table;
 	}
 
-function cycle_of_fifths($fifth,$cycle,$j) {
-	if(isset($fifth[$j])) {
-		$cycle[] = $fifth[$j];
-		$cycle = cycle_of_fifths($fifth,$cycle,$fifth[$j]);
+function cycle_of_intervals($interval,$cycle,$j) {
+	if(isset($interval[$j])) {
+		$cycle[] = $interval[$j];
+		$cycle = cycle_of_intervals($interval,$cycle,$interval[$j]);
 		}
 	return $cycle;
 	}
