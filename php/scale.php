@@ -35,6 +35,7 @@ $transposition_mode = '';
 $p_raise = $q_raise = '';
 $scale_choice = $selected_grades = '';
 $selected_grade_name = array();
+$syntonic_comma = cents(81/80);
 
 if(isset($_POST['scroll'])) {
 	if(!isset($_SESSION['scroll']) OR $_SESSION['scroll'] == 1) $_SESSION['scroll'] = 0;
@@ -178,6 +179,7 @@ $message = '';
 if(isset($_POST['savethisfile']) OR isset($_POST['interpolate']) OR isset($_POST['create_meantone']) OR isset($_POST['modifynames'])) {
 	$message = "&nbsp;<span id=\"timespan\"><font color=\"red\">... Saving this scale ...</font></span>";
 	$scale_comment = $_POST['scale_comment'];
+	if(isset($_POST['syntonic_comma'])) $syntonic_comma = $_POST['syntonic_comma'];
 	$table = explode(chr(10),$scale_comment);
 	$imax = count($table); $empty = TRUE;
 	$scale_comment = "<html>";
@@ -205,6 +207,8 @@ if(isset($_POST['savethisfile']) OR isset($_POST['interpolate']) OR isset($_POST
 	$scale_note_names = trim($scale_note_names);
 	$scale_fractions = trim($scale_fractions);
 	$scale_keys = trim($scale_keys);
+	$comma_line = $syntonic_comma;
+	fwrite($handle,"c".$comma_line."c\n");
 	if($scale_note_names <> '')
 		fwrite($handle,"/".$scale_note_names."/\n");
 	if($scale_keys <> '')
@@ -220,7 +224,7 @@ if(isset($_POST['savethisfile']) OR isset($_POST['interpolate']) OR isset($_POST
 $content = file_get_contents($file_link,TRUE);
 $table = explode(chr(10),$content);
 $imax = count($table);
-$scale_name = $scale_table = $scale_fraction = $scale_note_names = $scale_keys = $scale_comment = '';
+$scale_name = $scale_table = $scale_fraction = $comma_line = $scale_note_names = $scale_keys = $scale_comment = '';
 for($i = 0; $i < $imax; $i++) {
 	$line = trim($table[$i]);
 	if($line == '') continue;
@@ -234,6 +238,10 @@ for($i = 0; $i < $imax; $i++) {
 		}
 	if($line[0] == 'k') {
 		$scale_keys = str_replace('k','',$line);
+		continue;
+		}
+	if($line[0] == 'c') {
+		$comma_line = str_replace('c','',$line);
 		continue;
 		}
 	if($line[0] == '|') {
@@ -283,6 +291,10 @@ if($scale_note_names <> '') {
 		echo "<p><font color=\"red\">WARNING:</font> the number of note names (".($imax - 1).") is not <font color=\"red\">numgrades</font> (".$numgrades_fullscale.").</p>";
 		}
 	}
+if($comma_line <> '') {
+	$table = explode(' ',$comma_line);
+	if($table[0] > 0) $syntonic_comma = $table[0];
+	}
 if($scale_keys <> '') {
 	$table = explode(' ',$scale_keys);
 	$imax = count($table);
@@ -319,7 +331,7 @@ if($scale_keys <> '') {
 	for($i = 0; $i <= $numgrades_fullscale; $i++) {
 		if(isset($table[$i]) AND $table[$i] <> '') {
 			$key[$i] = intval($table[$i]);
-			echo $key[$i]." ";
+		//	echo $key[$i]." ";
 			if($key[$i] > 0 AND $key[$i] < $basekey) $key[$i] += $basekey;
 			}
 		else $key[$i] = 0;
@@ -327,7 +339,6 @@ if($scale_keys <> '') {
 	$key[0] = $basekey;
 	}
 else $key = assign_default_keys($name,$basekey,$numgrades_fullscale);
-echo "<br />";
 
 for($j = $numgrades_with_labels = 0; $j < $numgrades_fullscale; $j++) {
 	if($name[$j] == '') continue;
@@ -376,6 +387,27 @@ echo "</td>";
 echo "</tr></table>";
 
 echo "<p><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"savethisfile\" onclick=\"this.form.target='_self';return true;\" formaction=\"scale.php?scalefilename=".urlencode($filename)."\" value=\"SAVE “".$filename."”\"></p>";
+
+if(isset($_POST['syntonic_comma'])) $syntonic_comma = $_POST['syntonic_comma'];
+
+if(isset($_POST['change_comma']) AND isset($_POST['sensitive_note']) AND $_POST['sensitive_note'] >= 0) {
+	$new_comma = trim($_POST['new_comma']);
+	$sensitive_note = $_POST['sensitive_note'];
+	if($new_comma < 0 OR $new_comma > 56.8) echo "<p>➡ Cannot set comma to: <font color=\"red\">".$new_comma."</font> cents because it should be in range 0 ... 56.8 cents</p>";
+	else {
+		if(round($new_comma,1) <> round($syntonic_comma,1)) {
+			if($new_comma < $syntonic_comma) $change_str = "raising";
+			else $change_str = "lowering";
+			$comma_ratio = exp(($syntonic_comma - $new_comma) / 1200 * log(2));
+			echo "<p>➡ Changed value of comma to: <b><font color=\"red\">".$new_comma."</font></b> cents (* ".round($comma_ratio,5).") by ".$change_str." notes:<br />";
+			$changed_ratio = array();
+			change_ratio_in_cycle_of_fifths($sensitive_note,$comma_ratio,$numgrades_fullscale);
+			echo "</p>";
+			$syntonic_comma = $new_comma;
+			}
+		}
+	}
+
 
 echo "<h2 id=\"toptable\">Ratios and names of tonal scale <font color=\"blue\">“".$scale_name."”</font></h2>";
 
@@ -438,7 +470,7 @@ echo "</tr>";
 echo "<tr><th style=\"background-color:azure; padding:4px;\">ratio</th>";
 for($i = 0; $i <= $numgrades_fullscale; $i++) {
 	if($ratio[$i] == 0) $show = '';
-	else $show = $ratio[$i];
+	else $show = round($ratio[$i],3);
 	echo "<td style=\"text-align:center; padding-top:4px; padding-bottom:4px; padding-left:0px; padding-right:0px; margin-left:0px; margin-right:0px; background-color:gold;\" colspan=\"2\">";
 	echo "<input type=\"text\" style=\"border:none; text-align:center;\" name=\"ratio_".$i."\" size=\"6\" value=\"".$show."\">";
 	echo "</td>";
@@ -1207,6 +1239,10 @@ if($done) {
 echo "</td>";
 
 // Analyze scale
+$pythagorean_fifth = cents(81/64);
+$harmonic_fifth = $pythagorean_fifth - $syntonic_comma;
+$perfect_fifth = cents(3/2);
+$wolf_fifth = $perfect_fifth - $syntonic_comma;
 if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == '') {
 	echo "<td>";
 	if($transpose_scale_name == '' AND $new_scale_name == '')
@@ -1219,6 +1255,7 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 	echo "<table>";
 	echo "<tr><td></td>";
 	$num = $sum = array();
+	$sensitive_note = -1;
 	for($j = $jj = 0; $j <= $numgrades_fullscale; $j++) {
 		if($name[$j] == '') continue;
 		if($scale_choice == "small_scale" AND $selected_grades <> '' AND !in_array($name[$j],$selected_grade_name)) continue;
@@ -1234,7 +1271,6 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 				if($k < $j) $a = 2 * $ratio[$k] / $ratio[$j];
 				else $a = $ratio[$k] / $ratio[$j];
 				}
-		//	$x[$j][$k] = 1200 * log($a) / log(2);
 			$x[$j][$k] = cents($a);
 			if(!isset($num[$class])) {
 				$num[$class] = $sum[$class] = 0;
@@ -1260,14 +1296,16 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 		for($k = $kk = 0; $k <= $numgrades_fullscale; $k++) {
 			if($name[$k] == '') continue;
 			if($scale_choice == "small_scale" AND $selected_grades <> '' AND !in_array($name[$k],$selected_grade_name)) continue;
-			$class = modulo(($kk - $jj),$numgrades_with_labels);
 			$class = round($x[$j][$k] / 100);
-		//	if($jj == 0) $val_ref[$class] = $x[$j][$k];
 			$color = "black";
 			if($class == 7) $color = "blue";
 			if($class == 4) $color = "green";
-			if(($class == 7) AND (abs($x[$j][$k] - 702) > 15)) $color = "red";
-			if(($class == 4) AND (abs($x[$j][$k] - 386) > 15)) $color = "brown";
+			if(($class == 7) AND (abs($x[$j][$k] - $perfect_fifth) > 15)) {
+				// Wolf fifth
+				$sensitive_note = $k;
+				$color = "red";
+				}
+			if(($class == 4) AND (abs($x[$j][$k] - $harmonic_fifth) > 15)) $color = "brown";
 			$show = "<font color=\"".$color."\">".round($x[$j][$k])."</font>";
 			if($class == 7 OR $class == 4) $show = "<b>".$show."</b>";
 			if(round($x[$j][$k]) == 0) $show = '';
@@ -1278,11 +1316,13 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 		echo "</tr>";
 		}
 	echo "</table>";
-	echo "<p style=\"\"><b>Colors: <font color=\"blue\">Perfect fifth</font> / <font color=\"red\">Wolf fifth</font> — <font color=\"green\">Harmonic major third</font> / <font color=\"brown\">Pythagorean major third</font></b><br />➡ <i>Wolf fifths indicate ‘sensitive notes’</i></p>";
-	
+	echo "<p style=\"\"><b>Colors: <font color=\"blue\">Perfect fifth</font> / <font color=\"red\">Wolf fifth</font> — <font color=\"green\">Harmonic major third</font> / <font color=\"brown\">Pythagorean major third</font></b><br />➡ <i>Wolf fifths indicate ‘sensitive notes’";
+	if($sensitive_note >= 0) echo ", here: </i><b><font color=\"red\">".$name[$sensitive_note]."</font></b><i>";
+	echo "</i></p>";
+	echo "<input type=\"hidden\" name=\"sensitive_note\" value=\"".$sensitive_note."\">";
 	
 	$fifth = $wolthfifth = $harmthird = $pyththird = array();
-	$nr_wolth = $sum_comma = 0;
+	$nr_wolf = $sum_comma = 0;
 	echo "<table>";
 	echo "<tr><td style=\"vertical-align:middle; padding:4px;\"><b>Perfect 5th</b></td><td><b>Wolf 5th</b></td><td><b>Harm. maj. 3d</b></td><td><b>Pyth. maj. 3d</b></td></tr>";
 	echo "<tr><td style=\"vertical-align:middle; text-align:center; padding:4px;\">";
@@ -1294,9 +1334,16 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 				$pos = cents($p[$k] * $q[$j] / $q[$k] / $p[$j]);
 			else $pos = cents($ratio[$k] / $ratio[$j]);
 			if($pos < 0) $pos += 1200;
-			$dist = abs($pos - 702);
-			if($dist < 5) {
-				echo "<font color=\"blue\">".$name[$j]." ".$name[$k]."</font><br />";
+			$dist = $pos - $perfect_fifth;
+			if(abs($dist) < 5) {
+				$deviation = '';
+				if($dist > 1) {
+					$deviation = " (+".round(abs($dist)).")";
+					}
+				if($dist < -1) {
+					$deviation = " (-".round(abs($dist)).")";
+					}
+				echo "<font color=\"blue\">".$name[$j]." ".$name[$k]."</font><small>".$deviation."</small><br />";
 				$fifth[$j] = $k;
 				}
 			}
@@ -1310,12 +1357,19 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 				$pos = cents($p[$k] * $q[$j] / $q[$k] / $p[$j]);
 			else $pos = cents($ratio[$k] / $ratio[$j]);
 			if($pos < 0) $pos += 1200;
-			$dist = abs($pos - 680);
-			if($dist < 10) {
-				echo "<font color=\"red\">".$name[$j]." ".$name[$k]."</font><br />";
+			$dist = $pos - $wolf_fifth;
+			if(abs($dist) < 10) {
+				$deviation = '';
+				if($dist > 1) {
+					$deviation = " (+".round(abs($dist)).")";
+					}
+				if($dist < -1) {
+					$deviation = " (-".round(abs($dist)).")";
+					}
+				echo "<font color=\"red\">".$name[$j]." ".$name[$k]."</font><small>".$deviation."</small><br />";
 				$wolthfifth[$j] = $k;
-				$nr_wolth++;
-				$sum_comma += 701.9 - $pos;
+				$nr_wolf++;
+				$sum_comma += $perfect_fifth - $pos;
 				}
 			}
 		}
@@ -1328,9 +1382,16 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 				$pos = cents($p[$k] * $q[$j] / $q[$k] / $p[$j]);
 			else $pos = cents($ratio[$k] / $ratio[$j]);
 			if($pos < 0) $pos += 1200;
-			$dist = abs($pos - 386);
-			if($dist < 5) {
-				echo "<font color=\"green\">".$name[$j]." ".$name[$k]."</font><br />";
+			$dist = $pos - $harmonic_fifth;
+			if(abs($dist) < 5) {
+				$deviation = '';
+				if($dist > 1) {
+					$deviation = " (+".round(abs($dist)).")";
+					}
+				if($dist < -1) {
+					$deviation = " (-".round(abs($dist)).")";
+					}
+				echo "<font color=\"green\">".$name[$j]." ".$name[$k]."</font><small>".$deviation."</small><br />";
 				$harmthird[$j] = $k;
 				}
 			}
@@ -1344,9 +1405,16 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 				$pos = cents($p[$k] * $q[$j] / $q[$k] / $p[$j]);
 			else $pos = cents($ratio[$k] / $ratio[$j]);
 			if($pos < 0) $pos += 1200;
-			$dist = abs($pos - 408);
-			if($dist < 10) {
-				echo "<font color=\"brown\">".$name[$j]." ".$name[$k]."</font><br />";
+			$dist = $pos - $pythagorean_fifth;
+			if(abs($dist) < 10) {
+				$deviation = '';
+				if($dist > 1) {
+					$deviation = " (+".round(abs($dist)).")";
+					}
+				if($dist < -1) {
+					$deviation = " (-".round(abs($dist)).")";
+					}
+				echo "<font color=\"brown\">".$name[$j]." ".$name[$k]."</font><small>".$deviation."</small><br />";
 				$pyththird[$j] = $k;
 				}
 			}
@@ -1354,10 +1422,12 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 	echo "</td></tr>";
 	echo "</table>";
 	
-	if($nr_wolth > 0) {
-		$comma = $sum_comma / $nr_wolth;
-		echo "<p><b>Syntonic comma = <font color=\"red\">".round($comma,1)."</font> cents</b></p>";
-		}
+/*	if($nr_wolf > 0) {
+		$comma = $sum_comma / $nr_wolf; */
+		echo "<p><b>Syntonic comma = <font color=\"red\">".round($syntonic_comma,1)."</font> cents</b>";
+		echo "&nbsp;➡&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"change_comma\" onclick=\"this.form.target='_self';return true;\" value=\"CHANGE VALUE TO:\">&nbsp;<input type=\"text\" name=\"new_comma\" size=\"5\" value=\"".round($syntonic_comma,1)."\"> cents";
+		echo "</p>";
+	//	}
 		
 //	Cycles of perfect fifths
 	$max_length = $j_max_length = 0;
@@ -1369,24 +1439,33 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 			$max_length = count($cycle[$j]);
 			$j_max_length = $j;
 			}
-		if(count($cycle[$j]) > 1) {
-	//		for($i = 0; $i < count($cycle[$j]); $i++) echo $name[$cycle[$j][$i]]." ";
-	//		echo "<br />";
-			}
 		}
 		
-	echo "<h3>Tuning scheme (ignoring syntonic comma in major thirds):</h3>";	
-	$table = array();
-	for($i = 0; $i < $numgrades_fullscale; $i++) $done_note[$i] = FALSE;
-	for($i = 0; $i < 2 * $numgrades_fullscale; $i++) {
-		for($j = 0; $j < 2 * $numgrades_fullscale; $j++) {
-			$table[$i][$j] = -1;
+	echo "<h3>Tuning scheme:</h3>";	
+	$levelmax = 3; // Number of allowed successive jumps. We'll increase it until all notes appear on the scheme
+	while(TRUE) {
+		$table = array();
+		for($i = 0; $i < $numgrades_fullscale; $i++) $done_note[$i] = FALSE;
+		for($i = 0; $i < 2 * $numgrades_fullscale; $i++) {
+			for($j = 0; $j < 2 * $numgrades_fullscale; $j++) {
+				$table[$i][$j] = -1;
+				}
+			}
+		$i = $j = $numgrades_fullscale;
+	//	$startnote = $cycle[$j_max_length][0];
+		$startnote = 0;
+		$level = 0;
+		$table = find_neighbours($table,0,$ratio,$name,$i,$j,$numgrades_fullscale,$level,$levelmax);
+		for($i = $number_done = 0; $i < $numgrades_fullscale; $i++) {
+			if($done_note[$i]) $number_done++;
+			}
+		if($number_done >= $numgrades_with_labels) break;
+		$levelmax++;
+		if($levelmax > $numgrades_fullscale) {
+			echo "<p><font color=\"red\">For an unknown reason, only ".$number_done." notes out of ".$numgrades_with_labels." appear on the scheme.</font></p>";
+			break;
 			}
 		}
-	$i = $j = $j0 = $numgrades_fullscale;
-	$startnote = $cycle[$j_max_length][0];
-	$level = 0;
-	$table = find_neighbours($table,0,$ratio,$name,$i,$j,$numgrades_fullscale,$level,$j0);
 	$lines = count($table);
 	$imin = $jmin = 2 * $numgrades_fullscale;
 	$imax = $jmax = -1;
@@ -1414,11 +1493,13 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 		echo "</tr>";
 		}
 	echo "</table>";
+	echo "➡ <i>ignoring syntonic comma in major thirds and fifths</i><br /><br />";
 	echo "</td>";
 	}
 echo "</tr>";
 echo "</table>";
-
+echo "<input type=\"hidden\" name=\"syntonic_comma\" value=\"".$syntonic_comma."\">";
+		
 $text = html_to_text($scale_comment,"textarea");
 echo "<h3>Comment:</h3>";
 echo "<textarea name=\"scale_comment\" rows=\"5\" style=\"width:700px;\">".$text."</textarea>";
@@ -1427,7 +1508,7 @@ echo "</form>";
 echo "</body>";
 echo "</html>";
 
-function find_neighbours($table,$note,$ratio,$name,$i,$j,$numgrades_fullscale,$level,$j0) {
+function find_neighbours($table,$note,$ratio,$name,$i,$j,$numgrades_fullscale,$level,$levelmax) {
 	global $done_note;
 	$nmax = (2 * $numgrades_fullscale) - 2;
 	$table[$i][$j] = $note;
@@ -1436,31 +1517,31 @@ function find_neighbours($table,$note,$ratio,$name,$i,$j,$numgrades_fullscale,$l
 		if($note == $k OR $name[$k] == '') continue;
 		$pos = cents($ratio[$k] / $ratio[$note]);
 		if($pos < 0) $pos += 1200;
-		$dist = abs($pos - 702);
-		if($level < 4 AND $dist < 5 AND $i < $nmax) {
+		$dist = abs($pos - 700);
+		if($level < $levelmax AND $dist < 50 AND $i < $nmax) {
 			if($table[$i+1][$j] == -1 AND !$done_note[$k]) {
-				$table = find_neighbours($table,$k,$ratio,$name,$i+1,$j,$numgrades_fullscale,$level+1,$j0);
+				$table = find_neighbours($table,$k,$ratio,$name,$i+1,$j,$numgrades_fullscale,$level+1,$levelmax);
 				}
 			continue;
 			}
-		$dist = abs($pos - 498);
-		if($level < 4 AND $dist < 5 AND $i > 0) {
+		$dist = abs($pos - 500);
+		if($level < $levelmax AND $dist < 50 AND $i > 0) {
 			if($table[$i-1][$j] == -1 AND !$done_note[$k]) {
-				$table = find_neighbours($table,$k,$ratio,$name,$i-1,$j,$numgrades_fullscale,$level+1,$j0);
+				$table = find_neighbours($table,$k,$ratio,$name,$i-1,$j,$numgrades_fullscale,$level+1,$levelmax);
 				}
 			continue;
 			}
 		$dist = abs($pos - 400);
-		if($level < 4 AND $dist < 50 AND $j < ($j0 + 1)) {
+		if($level < $levelmax AND $dist < 50) {
 			if($table[$i][$j+1] == -1 AND !$done_note[$k]) {
-				$table = find_neighbours($table,$k,$ratio,$name,$i,$j+1,$numgrades_fullscale,$level+1,$j0);
+				$table = find_neighbours($table,$k,$ratio,$name,$i,$j+1,$numgrades_fullscale,$level+1,$levelmax);
 				}
 			continue;
 			}
 		$dist = abs($pos - 800);
-		if($level < 4 AND $dist < 50 AND $j > ($j0 - 1)) {
+		if($level < $levelmax AND $dist < 50) {
 			if($table[$i][$j-1] == -1 AND !$done_note[$k]) {
-				$table = find_neighbours($table,$k,$ratio,$name,$i,$j-1,$numgrades_fullscale,$level+1,$j0);
+				$table = find_neighbours($table,$k,$ratio,$name,$i,$j-1,$numgrades_fullscale,$level+1,$levelmax);
 				}
 			continue;
 			}
@@ -1475,5 +1556,30 @@ function cycle_of_intervals($interval,$cycle,$j) {
 		$cycle = cycle_of_intervals($interval,$cycle,$interval[$j]);
 		}
 	return $cycle;
+	}
+
+function change_ratio_in_cycle_of_fifths($this_note,$change_ratio,$numgrades_fullscale) {
+	global $name,$p,$q,$ratio,$changed_ratio;
+	if(isset($changed_ratio[$this_note])) return;
+	$changed_ratio[$this_note] = TRUE;
+	echo "<font color=\"blue\">".$name[$this_note]."</font><br />";
+	for($j = 0; $j < $numgrades_fullscale; $j++) {
+		if($j == $this_note OR $name[$j] == '') continue;
+		if(($p[$j] * $p[$this_note] * $q[$j] * $q[$this_note]) > 0)
+			$pos = cents($p[$this_note] * $q[$j] / $q[$this_note] / $p[$j]);
+		else $pos = cents($ratio[$this_note] / $ratio[$j]);
+		if($pos < 0) $pos += 1200;
+		$dist1 = $pos - 700;
+		if(abs($dist1) < 5) {
+			change_ratio_in_cycle_of_fifths($j,$change_ratio,$numgrades_fullscale);
+			}
+		$dist2 = $pos - 500;
+		if(abs($dist2) < 5) {
+			change_ratio_in_cycle_of_fifths($j,$change_ratio,$numgrades_fullscale);
+			}
+		}
+	$p[$this_note] = $q[$this_note] = 0;
+	$ratio[$this_note] = $ratio[$this_note] * $change_ratio;
+	return;
 	}
 ?>
