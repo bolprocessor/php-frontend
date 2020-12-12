@@ -1,6 +1,5 @@
 <?php
 header("Content-type: image/png");
-// require_once("_basic_tasks.php");
 $save_codes_dir = urldecode($_GET['save_codes_dir']);
 $image_file = $save_codes_dir."/image.php";
 require_once($image_file);

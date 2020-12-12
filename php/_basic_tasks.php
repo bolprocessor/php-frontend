@@ -1185,6 +1185,13 @@ function store($handle,$varname,$var) {
 	return;
 	}
 
+function store2($handle,$varname,$index,$var) {
+	$line = "$".$varname."[".$index."] = \"".$var."\";\n";
+	// echo $varname."<br />";
+	fwrite($handle,$line);
+	return;
+	}
+
 function good_name($type,$filename,$name_mode) {
 	$filename = fix_new_name($filename);
 	$filename = trim($filename);

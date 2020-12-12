@@ -27,6 +27,13 @@ if(!file_exists($file_link)) {
 	echo "<br />Return to the ‘-cs’ file to restore it!"; die();
 	}
 
+$save_codes_dir = $dir_scales.$filename."_codes";
+if(!is_dir($save_codes_dir)) mkdir($save_codes_dir);
+$image_file = $save_codes_dir.SLASH."image.php";
+$h_image = fopen($image_file,"w");
+fwrite($h_image,"<?php\n");
+store($h_image,"filename",$filename);
+
 $key_start = $key_step = $p_step = $q_step = $p_cents = $q_cents = '';
 $error_meantone = '';
 $basekey = 60;
@@ -277,6 +284,9 @@ for($i = 0; $i < $imax; $i++) {
 echo "Csound function table: <font color=\"blue\">".$scale_table."</font>";
 if($message <> '') echo $message;
 echo "<div style=\"float:right; margin-top:1em; background-color:white; padding:1em; border-radius:5%;\"><h1>Scale “".$filename."”</h1><h3>This version is stored in <font color=\"blue\">‘".$csound_source."’</font></h3>";
+$link = "scale_image.php?save_codes_dir=".urlencode($save_codes_dir);
+echo "<div class=\"shadow\" style=\"border:2px solid gray; background-color:azure; width:13em;  padding:8px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$link."','".clean_folder_name($filename)."_image','width=800,height=800,left=100'); return false;\" href=\"".$link."\">IMAGE</a></div>";
+
 echo "</div>";
 echo "<p>➡ <a target=\"_blank\" href=\"https://www.csounds.com/manual/html/GEN51.html\">Read the documentation</a></p>";
 $numgrades_fullscale = $table2[4];
@@ -413,6 +423,9 @@ if(isset($_POST['change_comma']) AND isset($_POST['list_sensitive_notes']) AND $
 	if(isset($_POST['new_p_comma']) AND isset($_POST['new_q_comma']) AND $_POST['new_p_comma'] > 0  AND $_POST['new_q_comma'] > 0) {
 		$new_p_comma = $_POST['new_p_comma'];
 		$new_q_comma = $_POST['new_q_comma'];
+		$gcd = gcd($new_p_comma,$new_q_comma);
+		$new_p_comma = $new_p_comma / $gcd;
+		$new_q_comma = $new_q_comma / $gcd;
 		$new_comma = cents($new_p_comma/$new_q_comma);
 		}
 	else if(isset($_POST['new_comma']) AND is_numeric($_POST['new_comma'])) {
@@ -491,8 +504,11 @@ if(isset($_POST['use_convention'])) {
 		}
 	}
 
+store($h_image,"numgrades_fullscale",$numgrades_fullscale);
 echo "<tr><th style=\"background-color:azure; padding:4px;\">fraction</th>";
 for($i = 0; $i <= $numgrades_fullscale; $i++) {
+	store2($h_image,"p",$i,$p[$i]);
+	store2($h_image,"q",$i,$q[$i]);
 	echo "<td style=\"white-space:nowrap; background-color:cornsilk; text-align:center; padding-top:4px; padding-bottom:4px; padding-left:0px; padding-right:0px; margin-left:0px; margin-right:0px;\" colspan=\"2\">";
 	if($p[$i] == 0 OR $q[$i] == 0)
 		$p_txt = $q_txt = '';
@@ -511,6 +527,7 @@ for($i = 0; $i <= $numgrades_fullscale; $i++) {
 echo "</tr>";
 echo "<tr><th style=\"background-color:azure; padding:4px;\">ratio</th>";
 for($i = 0; $i <= $numgrades_fullscale; $i++) {
+	store2($h_image,"ratio",$i,$ratio[$i]);
 	if($ratio[$i] == 0) $show = '';
 	else $show = round($ratio[$i],3);
 	echo "<td style=\"text-align:center; padding-top:4px; padding-bottom:4px; padding-left:0px; padding-right:0px; margin-left:0px; margin-right:0px; background-color:gold;\" colspan=\"2\">";
@@ -520,6 +537,7 @@ for($i = 0; $i <= $numgrades_fullscale; $i++) {
 echo "</tr>";
 echo "<tr><th style=\"background-color:azure; padding:4px;\">name</th>";
 for($i = 0; $i <= $numgrades_fullscale; $i++) {
+	store2($h_image,"name",$i,$name[$i]);
 	echo "<td style=\"text-align:center; padding-top:4px; padding-bottom:4px; padding-left:0px; padding-right:0px; margin-left:0px; margin-right:0px; background-color:gold;\" colspan=\"2\">";
 	echo "<input type=\"text\" style=\"border:none; text-align:center; color:red; font-weight:bold;\" name=\"name_".$i."\" size=\"6\" value=\"".$name[$i]."\">";
 	echo "</td>";
@@ -528,7 +546,6 @@ echo "</tr>";
 echo "<tr><th style=\"background-color:azure; padding:4px;\">cents</th>";
 for($i = 0; $i <= $numgrades_fullscale; $i++) {
 	if($ratio[$i] == 0) $cents = '';
-//	if($ratio[$i] == 0 OR ($p[$i] == 0 AND $q[$i] == 0)) $cents = '';
 	else $cents = round(cents($ratio[$i]));
 	echo "<td style=\"text-align:center; padding-top:4px; padding-bottom:4px; padding-left:0px; padding-right:0px; margin-left:0px; margin-right:0px; background-color:azure;\" colspan=\"2\">";
 	echo "<b>".$cents."</b>";
@@ -763,7 +780,7 @@ if($done AND $numgrades_with_labels > 2) {
 							$found = FALSE;
 							$j_transpose = -1;
 						//	echo $p_transpose."/".$q_transpose." = ".$ratio_transpose."<br />";
-							for($j = 0; $j <= $numgrades_fullscale; $j++) {  // $$$$$
+							for($j = 0; $j <= $numgrades_fullscale; $j++) {  // $$$$$   REVISE!
 								if($name[$j] == $name_sensitive_note) $name[$j] = '';
 								if($found) continue;
 								if((round($ratio[$j],3) >= $ratio_transpose) OR ($ratio[$j] < 1 AND $ratio_transpose == 1.0)) {
@@ -1008,14 +1025,11 @@ if($done AND $numgrades_with_labels > 2) {
 						if(($p_new * $q_new) > 0)
 							$this_ratio = $p_new / $q_new;
 						else $this_ratio = $ratio_new;
-					//	$cents_this_grade[$jj] = 1200 * log($ratio_this_grade[$jj]) / log(2);
 						$cents_this_grade[$jj] = cents($ratio_this_grade[$jj]);
-					//	$cents_new = 1200 * log($this_ratio) / log(2);
 						$cents_new = cents($this_ratio);
 						if(($cents_new - $cents_this_grade[$jj]) > 50) {
 							$q_new = 2 * $q_new;
 							$this_ratio = $this_ratio / 2.0;
-					//		$cents_new = 1200 * log($this_ratio) / log(2);
 							$cents_new = cents($this_ratio);
 							}
 						if(($cents_this_grade[$jj] - $cents_new) > 50) {
@@ -1035,7 +1049,6 @@ if($done AND $numgrades_with_labels > 2) {
 							$q_new = $fraction['q'];
 							$this_ratio = $p_new/$q_new;
 							}
-					//	$cents_new = 1200 * log($this_ratio) / log(2);
 						$cents_new = cents($this_ratio);
 						echo "<font color=\"blue\">".$name_this_grade[$jj]."</font> ratio ";
 						if(($p_new * $q_new) > 0) echo $p_new."/".$q_new." = ";
@@ -1067,7 +1080,6 @@ if($done AND $numgrades_with_labels > 2) {
 					for($j = 0; $j < $numgrades_fullscale; $j++) {
 						$new_name[$j] = '';
 					//	$new_key[$j] = $key[$j];
-				//		$cents = 1200 * log($ratio[$j]) / log(2);
 						$cents = cents($ratio[$j]);
 					//	echo "‘".$name[$j]."’ = ".$p[$j]."/".$q[$j]." ".round($cents)." cents<br />";
 						for($jj = 0; $jj <= $numgrades_with_labels; $jj++) {
@@ -1582,8 +1594,14 @@ echo "<h3>Comment:</h3>";
 echo "<textarea name=\"scale_comment\" rows=\"5\" style=\"width:700px;\">".$text."</textarea>";
 echo "<p><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" formaction=\"scale.php?scalefilename=".urlencode($filename)."#toptable\" onclick=\"this.form.target='_self';return true;\" name=\"savethisfile\" value=\"SAVE “".$filename."”\"></p>";
 echo "</form>";
+$line = "§>\n";
+$line = str_replace('§','?',$line);
+fwrite($h_image,$line);
+fclose($h_image);
 echo "</body>";
 echo "</html>";
+
+/* ===========  FUNCTIONS ============== */
 
 function find_neighbours($table,$note,$ratio,$name,$i,$j,$numgrades_fullscale,$level,$levelmax) {
 	global $done_note;

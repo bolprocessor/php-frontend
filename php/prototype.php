@@ -550,8 +550,6 @@ if(isset($_POST['playexpression'])) {
 
 // ---------- EDIT THIS PROTOTYPE ------------
 
-
-	
 $h_image = fopen($image_file,"w");
 fwrite($h_image,"<?php\n");
 
