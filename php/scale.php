@@ -388,7 +388,6 @@ echo "</table>";
 echo "</td>";
 echo "</tr><tr>";
 echo "<td style=\"white-space:nowrap; padding:6px; vertical-align:middle;\"><font color=\"blue\">interval</font> = <input type=\"text\" name=\"interval\" size=\"5\" value=\"".$interval."\">";
-// $cents = round(1200 * log($interval) / log(2));
 $cents = round(cents($interval));
 echo " or <input type=\"text\" name=\"interval_cents\" size=\"5\" value=\"".$cents."\"> cents (typically 1200)";
 echo "</td>";
@@ -451,7 +450,6 @@ if(isset($_POST['change_comma']) AND isset($_POST['list_sensitive_notes']) AND $
 			}
 		}
 	}
-
 
 echo "<h2 id=\"toptable\">Ratios and names of tonal scale <font color=\"blue\">“".$scale_name."”</font></h2>";
 
@@ -528,10 +526,9 @@ for($i = 0; $i <= $numgrades_fullscale; $i++) {
 	}
 echo "</tr>";
 echo "<tr><th style=\"background-color:azure; padding:4px;\">cents</th>";
-// $this_key = $basekey;
 for($i = 0; $i <= $numgrades_fullscale; $i++) {
 	if($ratio[$i] == 0) $cents = '';
-//	else $cents = round(1200 * log($ratio[$i]) / log(2));
+//	if($ratio[$i] == 0 OR ($p[$i] == 0 AND $q[$i] == 0)) $cents = '';
 	else $cents = round(cents($ratio[$i]));
 	echo "<td style=\"text-align:center; padding-top:4px; padding-bottom:4px; padding-left:0px; padding-right:0px; margin-left:0px; margin-right:0px; background-color:azure;\" colspan=\"2\">";
 	echo "<b>".$cents."</b>";
@@ -541,7 +538,6 @@ echo "</tr>";
 echo "<tr><th style=\"background-color:azure; padding:4px;\">interval</th><td style=\"padding:0px;\"></td>";
 for($i = 0; $i < $numgrades_fullscale; $i++) {
 	if(($ratio[$i] * $ratio[$i + 1]) == 0) $cents = '';
-//	else $cents = "«—&nbsp;".round(1200 * log($ratio[$i + 1] / $ratio[$i]) / log(2))."¢&nbsp;—»";
 	else $cents = "«—&nbsp;".round(cents($ratio[$i + 1] / $ratio[$i]))."¢&nbsp;—»";
 	echo "<td style=\"white-space:nowrap; text-align:center; padding-top:4px; padding-bottom:4px; padding-left:0px; padding-right:0px; margin-left:0px; margin-right:0px;\" colspan=\"2\">";
 	echo "<font color=\"blue\">".$cents."</font>";
@@ -678,6 +674,7 @@ if($done) {
 if($done AND $numgrades_with_labels > 2) {
 	if(isset($_POST['reduce']) AND isset($_POST['scale_choice']) AND isset($_POST['reduce_scale_name']) AND trim($_POST['reduce_scale_name']) <> '') {
 		$scale_choice = $_POST['scale_choice'];
+		$name_sensitive_note = '';
 		if($scale_choice == "full_scale") $full_scale = TRUE;
 		else $full_scale =  FALSE;
 		$preserve_numbers = isset($_POST['preserve_numbers']);
@@ -811,8 +808,11 @@ if($done AND $numgrades_with_labels > 2) {
 					for($j = $k = 0; $j <= $numgrades_fullscale; $j++) {
 						if(!$full_scale) {
 							if(!isset($selected_grade_name[$k])) continue;
-							if($preserve_numbers AND ($selected_grade_name[$k] == '•' OR $name[$j] == $selected_grade_name[$k]))
-								$the_numbers .= $key[$j]." ";
+							if($preserve_numbers AND ($selected_grade_name[$k] == '•' OR $name[$j] == $selected_grade_name[$k])) {
+								if($selected_grade_name[$k] <> '•')
+									$the_numbers .= ($key[$j] - $basekey)." ";
+								else $the_numbers .= "0 ";
+								}
 							if($selected_grade_name[$k] == '•') {
 								$the_notes .= "• ";
 								$the_fractions .= "0 0 ";
@@ -823,7 +823,14 @@ if($done AND $numgrades_with_labels > 2) {
 							if($name[$j] <> $selected_grade_name[$k]) continue;
 							else $k++;
 							}
-						if($name[$j] <> '') $the_notes .= $name[$j]." ";
+						else if($preserve_numbers) {
+							if($name[$j] <> '')
+								$the_numbers .= ($key[$j] - $basekey)." ";
+							else $the_numbers .= "0 ";
+							}
+						if($name[$j] <> '') {
+							$the_notes .= $name[$j]." ";
+							}
 						else $the_notes .= "• ";
 						$the_fractions .= $p[$j]." ".$q[$j]." ";
 						}
@@ -1327,8 +1334,11 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 				else $a = $p[$k] * $q[$j] / $q[$k] / $p[$j];
 				}
 			else {
-				if($k < $j) $a = 2 * $ratio[$k] / $ratio[$j];
-				else $a = $ratio[$k] / $ratio[$j];
+				if(($ratio[$k] * $ratio[$j]) <> 0) {
+					if($k < $j) $a = 2 * $ratio[$k] / $ratio[$j];
+					else $a = $ratio[$k] / $ratio[$j];
+					}
+				else $a = 1;
 				}
 			$x[$j][$k] = cents($a);
 			if(!isset($num[$class])) {
