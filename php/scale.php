@@ -35,7 +35,8 @@ $transposition_mode = '';
 $p_raise = $q_raise = '';
 $scale_choice = $selected_grades = '';
 $selected_grade_name = array();
-$syntonic_comma = cents(81/80);
+$p_comma = 81; $q_comma = 80;
+$syntonic_comma = cents($p_comma/$q_comma);
 
 if(isset($_POST['scroll'])) {
 	if(!isset($_SESSION['scroll']) OR $_SESSION['scroll'] == 1) $_SESSION['scroll'] = 0;
@@ -179,7 +180,12 @@ $message = '';
 if(isset($_POST['savethisfile']) OR isset($_POST['interpolate']) OR isset($_POST['create_meantone']) OR isset($_POST['modifynames'])) {
 	$message = "&nbsp;<span id=\"timespan\"><font color=\"red\">... Saving this scale ...</font></span>";
 	$scale_comment = $_POST['scale_comment'];
-	if(isset($_POST['syntonic_comma'])) $syntonic_comma = $_POST['syntonic_comma'];
+	if(isset($_POST['p_comma']) AND isset($_POST['q_comma'])) {
+		$p_comma = $_POST['p_comma'];
+		$q_comma = $_POST['q_comma'];
+		if(($p_comma * $q_comma) > 0) $syntonic_comma = cents($p_comma/$q_comma);
+		}
+	else if(isset($_POST['syntonic_comma'])) $syntonic_comma = $_POST['syntonic_comma'];
 	$table = explode(chr(10),$scale_comment);
 	$imax = count($table); $empty = TRUE;
 	$scale_comment = "<html>";
@@ -208,6 +214,7 @@ if(isset($_POST['savethisfile']) OR isset($_POST['interpolate']) OR isset($_POST
 	$scale_fractions = trim($scale_fractions);
 	$scale_keys = trim($scale_keys);
 	$comma_line = $syntonic_comma;
+	if(($p_comma * $q_comma) > 0) $comma_line .= " ".$p_comma." ".$q_comma;
 	fwrite($handle,"c".$comma_line."c\n");
 	if($scale_note_names <> '')
 		fwrite($handle,"/".$scale_note_names."/\n");
@@ -294,6 +301,11 @@ if($scale_note_names <> '') {
 if($comma_line <> '') {
 	$table = explode(' ',$comma_line);
 	if($table[0] > 0) $syntonic_comma = $table[0];
+	if(isset($table[1]) AND isset($table[2])) {
+		$p_comma = intval($table[1]); $q_comma = intval($table[2]);
+		if(($p_comma * $q_comma) > 0) $syntonic_comma = cents($p_comma/$q_comma);
+		}
+	else $p_comma = $q_comma = 0;
 	}
 if($scale_keys <> '') {
 	$table = explode(' ',$scale_keys);
@@ -388,22 +400,46 @@ echo "</tr></table>";
 
 echo "<p><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"savethisfile\" onclick=\"this.form.target='_self';return true;\" formaction=\"scale.php?scalefilename=".urlencode($filename)."\" value=\"SAVE “".$filename."”\"></p>";
 
-if(isset($_POST['syntonic_comma'])) $syntonic_comma = $_POST['syntonic_comma'];
+if(isset($_POST['p_comma']) AND isset($_POST['q_comma'])) {
+	$p_comma = $_POST['p_comma'];
+	$q_comma = $_POST['q_comma'];
+	$syntonic_comma = cents($p_comma/$q_comma);
+	}
+else if(isset($_POST['syntonic_comma'])) $syntonic_comma = $_POST['syntonic_comma'];
 
 if(isset($_POST['change_comma']) AND isset($_POST['sensitive_note']) AND $_POST['sensitive_note'] >= 0) {
-	$new_comma = trim($_POST['new_comma']);
+	if(isset($_POST['new_p_comma']) AND isset($_POST['new_q_comma']) AND $_POST['new_p_comma'] > 0  AND $_POST['new_q_comma'] > 0) {
+		$new_p_comma = $_POST['new_p_comma'];
+		$new_q_comma = $_POST['new_q_comma'];
+		$new_comma = cents($new_p_comma/$new_q_comma);
+		}
+	else if(isset($_POST['new_comma']) AND is_numeric($_POST['new_comma'])) {
+		$new_comma = trim($_POST['new_comma']);
+		$new_p_comma = $new_q_comma = 0;
+		}
+	else $new_comma = $syntonic_comma;
 	$sensitive_note = $_POST['sensitive_note'];
 	if($new_comma < 0 OR $new_comma > 56.8) echo "<p>➡ Cannot set comma to: <font color=\"red\">".$new_comma."</font> cents because it should be in range 0 ... 56.8 cents</p>";
 	else {
 		if(round($new_comma,1) <> round($syntonic_comma,1)) {
 			if($new_comma < $syntonic_comma) $change_str = "raising";
 			else $change_str = "lowering";
-			$comma_ratio = exp(($syntonic_comma - $new_comma) / 1200 * log(2));
+			if(($new_p_comma * $new_q_comma * $p_comma * $q_comma) > 0)
+				$comma_ratio = $new_p_comma * $q_comma / $new_q_comma / $p_comma;
+			else $comma_ratio = exp(($syntonic_comma - $new_comma) / 1200 * log(2));
 			echo "<p>➡ Changed value of comma to: <b><font color=\"red\">".$new_comma."</font></b> cents (* ".round($comma_ratio,5).") by ".$change_str." notes:<br />";
 			$changed_ratio = array();
 			change_ratio_in_cycle_of_fifths($sensitive_note,$comma_ratio,$numgrades_fullscale);
 			echo "</p>";
-			$syntonic_comma = $new_comma;
+			if(($new_p_comma * $new_q_comma) > 0) {
+				$p_comma = $new_p_comma;
+				$q_comma = $new_q_comma;
+				$syntonic_comma = cents($p_comma/$q_comma);
+				}
+			else {
+				$p_comma = $q_comma = 0;
+				$syntonic_comma = $new_comma;
+				}
 			}
 		}
 	}
@@ -1244,7 +1280,7 @@ $harmonic_fifth = $pythagorean_fifth - $syntonic_comma;
 $perfect_fifth = cents(3/2);
 $wolf_fifth = $perfect_fifth - $syntonic_comma;
 if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == '') {
-	echo "<td>";
+	echo "<td id=\"topstruct\">";
 	if($transpose_scale_name == '' AND $new_scale_name == '')
 		echo "<h3>Harmonic structure of this tonal scale (cents):</h3>";
 	else {
@@ -1422,12 +1458,10 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 	echo "</td></tr>";
 	echo "</table>";
 	
-/*	if($nr_wolf > 0) {
-		$comma = $sum_comma / $nr_wolf; */
-		echo "<p><b>Syntonic comma = <font color=\"red\">".round($syntonic_comma,1)."</font> cents</b>";
-		echo "&nbsp;➡&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"change_comma\" onclick=\"this.form.target='_self';return true;\" value=\"CHANGE VALUE TO:\">&nbsp;<input type=\"text\" name=\"new_comma\" size=\"5\" value=\"".round($syntonic_comma,1)."\"> cents";
-		echo "</p>";
-	//	}
+	echo "<p><b>Syntonic comma = <font color=\"red\">".round($syntonic_comma,1)."¢</font></b>";
+	if(($p_comma * $q_comma) > 0) echo "<b> = <font color=\"red\">".$p_comma."/".$q_comma."</font></b>";
+	echo "<br /><input style=\"background-color:aquamarine;\" type=\"submit\" name=\"change_comma\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#toptable\" value=\"CHANGE COMMA VALUE TO:\">&nbsp;ratio&nbsp;<input type=\"text\" name=\"new_p_comma\" size=\"3\" value=\"\">/<input type=\"text\" name=\"new_q_comma\" size=\"3\" value=\"\">&nbsp;or&nbsp;<input type=\"text\" name=\"new_comma\" size=\"5\" value=\"\"> cents";
+	echo "</p>";
 		
 //	Cycles of perfect fifths
 	$max_length = $j_max_length = 0;
