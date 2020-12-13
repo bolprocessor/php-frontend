@@ -285,7 +285,8 @@ echo "Csound function table: <font color=\"blue\">".$scale_table."</font>";
 if($message <> '') echo $message;
 echo "<div style=\"float:right; margin-top:1em; background-color:white; padding:1em; border-radius:5%;\"><h1>Scale “".$filename."”</h1><h3>This version is stored in <font color=\"blue\">‘".$csound_source."’</font></h3>";
 $link = "scale_image.php?save_codes_dir=".urlencode($save_codes_dir);
-echo "<div class=\"shadow\" style=\"border:2px solid gray; background-color:azure; width:13em;  padding:8px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$link."','".clean_folder_name($filename)."_image','width=800,height=800,left=100'); return false;\" href=\"".$link."\">IMAGE</a></div>";
+$image_name = clean_folder_name($filename)."_".round($syntonic_comma)."_image";
+echo "<div class=\"shadow\" style=\"border:2px solid gray; background-color:azure; width:13em;  padding:8px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$link."','".$image_name."','width=800,height=800,left=100'); return false;\" href=\"".$link."\">IMAGE</a></div>";
 
 echo "</div>";
 echo "<p>➡ <a target=\"_blank\" href=\"https://www.csounds.com/manual/html/GEN51.html\">Read the documentation</a></p>";
@@ -414,9 +415,12 @@ echo "<p><input style=\"background-color:yellow; font-size:larger;\" type=\"subm
 if(isset($_POST['p_comma']) AND isset($_POST['q_comma'])) {
 	$p_comma = $_POST['p_comma'];
 	$q_comma = $_POST['q_comma'];
+	store($h_image,"p_comma",$p_comma);
+	store($h_image,"q_comma",$q_comma);
 	if(($p_comma * $q_comma) > 0) $syntonic_comma = cents($p_comma/$q_comma);
 	}
 else if(isset($_POST['syntonic_comma'])) $syntonic_comma = $_POST['syntonic_comma'];
+store($h_image,"syntonic_comma",$syntonic_comma);
 
 echo "<div id=\"topcomma\"></div>";
 if(isset($_POST['change_comma']) AND isset($_POST['list_sensitive_notes']) AND $_POST['list_sensitive_notes'] <> '') {
@@ -547,6 +551,7 @@ echo "<tr><th style=\"background-color:azure; padding:4px;\">cents</th>";
 for($i = 0; $i <= $numgrades_fullscale; $i++) {
 	if($ratio[$i] == 0) $cents = '';
 	else $cents = round(cents($ratio[$i]));
+	store2($h_image,"cents",$i,$cents);
 	echo "<td style=\"text-align:center; padding-top:4px; padding-bottom:4px; padding-left:0px; padding-right:0px; margin-left:0px; margin-right:0px; background-color:azure;\" colspan=\"2\">";
 	echo "<b>".$cents."</b>";
 	echo "</td>";
@@ -1434,6 +1439,7 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 					}
 				echo "<font color=\"blue\">".$name[$j]." ".$name[$k]."</font><small>".$deviation."</small><br />";
 				$fifth[$j] = $k;
+				store2($h_image,"fifth",$j,$k);
 				}
 			}
 		}
@@ -1457,6 +1463,7 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 					}
 				echo "<font color=\"red\">".$name[$j]." ".$name[$k]."</font><small>".$deviation."</small><br />";
 				$wolthfifth[$j] = $k;
+				store2($h_image,"wolthfifth",$j,$k);
 				$nr_wolf++;
 				$sum_comma += $perfect_fifth - $pos;
 				}
@@ -1482,6 +1489,7 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 					}
 				echo "<font color=\"green\">".$name[$j]." ".$name[$k]."</font><small>".$deviation."</small><br />";
 				$harmthird[$j] = $k;
+				store2($h_image,"harmthird",$j,$k);
 				}
 			}
 		}
@@ -1505,6 +1513,7 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 					}
 				echo "<font color=\"brown\">".$name[$j]." ".$name[$k]."</font><small>".$deviation."</small><br />";
 				$pyththird[$j] = $k;
+				store2($h_image,"pyththird",$j,$k);
 				}
 			}
 		}
