@@ -1,9 +1,9 @@
 <?php
-header('Content-Type: image/png; charset=utf-8');
 $save_codes_dir = urldecode($_GET['save_codes_dir']);
 $image_file = $save_codes_dir."/image.php";
 require_once($image_file);
-
+header('Content-Type: image/png; charset=utf-8');
+header('Title: "'.$filename.'"');
 $margin_left = 50;
 $width = 600;
 $height = 130;
@@ -27,12 +27,15 @@ imagefilledrectangle($im,0,0,$image_width,800,$white);
 
 $text = "Scale \"".$filename."\"";
 imagestring($im,10,$margin_left,30,$text,$black);
+if(isset($syntonic_comma)) $text = "Comma = \"".round($syntonic_comma,1)." cents\"";
+imagestring($im,10,$margin_left,50,$text,$black);
 
 $radius = 230;
 $x_center = $image_width /  2;
 $y_center = $radius + $height;
 $crown_thickness = 15;
 
+// imagesetthickness($im, 2);
 circle($im,$x_center,$y_center,$radius,$black);
 circle($im,$x_center,$y_center,$radius + $crown_thickness,$black);
 
@@ -81,20 +84,18 @@ for($j = 0; $j <= $numgrades_fullscale; $j++) {
 		}
 	}
 
-if(isset($fifth)) foreach($fifth as $j => $k) {
-	connect($im,$j,$k,$radius,$blue,3);
-	}
 
-if(isset($wolthfifth)) foreach($wolthfifth as $j => $k) {
+if(isset($wolffifth)) foreach($wolffifth as $j => $k) {
 	connect($im,$j,$k,$radius,$red,1);
 	}
-
+if(isset($pyththird)) foreach($pyththird as $j => $k) {
+	connect($im,$j,$k,$radius,$olive,1);
+	}
 if(isset($harmthird)) foreach($harmthird as $j => $k) {
 	connect($im,$j,$k,$radius,$green,3);
 	}
-
-if(isset($pyththird)) foreach($pyththird as $j => $k) {
-	connect($im,$j,$k,$radius,$olive,1);
+if(isset($fifth)) foreach($fifth as $j => $k) {
+	connect($im,$j,$k,$radius,$blue,3);
 	}
 	
 // mark($im,1.25,$black);
@@ -193,22 +194,19 @@ function imagelinedotted ($im, $x1, $y1, $x2, $y2, $dist, $col) {
 
 function circle($im,$x_center,$y_center,$radius,$color) {
 // https://www.php.net/manual/en/function.imagearc.php
-	imagearcthick($im,$x_center,$y_center,2 * $radius,2 * $radius,0,360,$color,2);
+	imagearcthick($im,$x_center,$y_center,2 * $radius,2 * $radius,0,360,$color,5);
 	return;
 	}
 
-function imagearcthick($image, $x, $y, $w, $h, $s, $e, $color, $thick = 1)
-{
+function imagearcthick($image, $x, $y, $w, $h, $s, $e, $color, $thick) {
     if($thick == 1)
-    {
         return imagearc($image, $x, $y, $w, $h, $s, $e, $color);
-    }
-    for($i = 1;$i<($thick+1);$i++)
-    {
+    for($i = 1;$i<($thick+1);$i++) {
         imagearc($image, $x, $y, $w-($i/5), $h-($i/5),$s,$e,$color);
         imagearc($image, $x, $y, $w+($i/5), $h+($i/5), $s, $e, $color);
-    }
-}
+    	}
+    return;
+	}
 
 function cents($ratio) {
 	$cents = 1200 * log($ratio) / log(2);
