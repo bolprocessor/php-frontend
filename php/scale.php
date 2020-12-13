@@ -285,7 +285,29 @@ echo "Csound function table: <font color=\"blue\">".$scale_table."</font>";
 if($message <> '') echo $message;
 echo "<div style=\"float:right; margin-top:1em; background-color:white; padding:1em; border-radius:5%;\"><h1>Scale “".$filename."”</h1><h3>This version is stored in <font color=\"blue\">‘".$csound_source."’</font></h3>";
 $link = "scale_image.php?save_codes_dir=".urlencode($save_codes_dir);
-$image_name = clean_folder_name($filename)."_".round($syntonic_comma)."_image";
+
+if(isset($_POST['new_p_comma']) AND isset($_POST['new_q_comma']) AND $_POST['new_p_comma'] > 0  AND $_POST['new_q_comma'] > 0) {
+	$new_p_comma = $_POST['new_p_comma'];
+	$new_q_comma = $_POST['new_q_comma'];
+	$gcd = gcd($new_p_comma,$new_q_comma);
+	$new_p_comma = $new_p_comma / $gcd;
+	$new_q_comma = $new_q_comma / $gcd;
+	$new_comma = cents($new_p_comma/$new_q_comma);
+	}
+else if(isset($_POST['new_comma']) AND is_numeric($_POST['new_comma'])) {
+	$new_comma = trim($_POST['new_comma']);
+	$new_p_comma = $new_q_comma = 0;
+	}
+else {
+	$new_comma = $syntonic_comma;
+	$new_p_comma = $p_comma;
+	$new_q_comma = $q_comma;
+	}
+store($h_image,"syntonic_comma",$new_comma);
+store($h_image,"p_comma",$new_p_comma);
+store($h_image,"q_comma",$new_q_comma);
+	
+$image_name = clean_folder_name($filename)."_".round(10 * $new_comma)."_image";
 echo "<div class=\"shadow\" style=\"border:2px solid gray; background-color:azure; width:13em;  padding:8px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$link."','".$image_name."','width=800,height=800,left=100'); return false;\" href=\"".$link."\">IMAGE</a></div>";
 
 echo "</div>";
@@ -415,12 +437,10 @@ echo "<p><input style=\"background-color:yellow; font-size:larger;\" type=\"subm
 if(isset($_POST['p_comma']) AND isset($_POST['q_comma'])) {
 	$p_comma = $_POST['p_comma'];
 	$q_comma = $_POST['q_comma'];
-	store($h_image,"p_comma",$p_comma);
-	store($h_image,"q_comma",$q_comma);
 	if(($p_comma * $q_comma) > 0) $syntonic_comma = cents($p_comma/$q_comma);
 	}
 else if(isset($_POST['syntonic_comma'])) $syntonic_comma = $_POST['syntonic_comma'];
-store($h_image,"syntonic_comma",$syntonic_comma);
+
 
 echo "<div id=\"topcomma\"></div>";
 if(isset($_POST['change_comma']) AND isset($_POST['list_sensitive_notes']) AND $_POST['list_sensitive_notes'] <> '') {

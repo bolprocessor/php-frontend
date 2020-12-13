@@ -35,7 +35,6 @@ $crown_thickness = 15;
 
 circle($im,$x_center,$y_center,$radius,$black);
 circle($im,$x_center,$y_center,$radius + $crown_thickness,$black);
-circle($im,$x_center,$y_center,$radius + $crown_thickness + 1,$black);
 
 for($j = 0; $j <= $numgrades_fullscale; $j++) {
 	$angle = 2 * M_PI * cents($ratio[$j]) / 1200 + (M_PI / 2);
@@ -43,15 +42,13 @@ for($j = 0; $j <= $numgrades_fullscale; $j++) {
 	$coord = set_point($radius,$ratio[$j]);
 	$x_note = $coord['x'];
 	$y_note = $coord['y'];
-	
 	$x1 = $x_note;
 	$y1 = $y_note;
-	
 	$coord = set_point($radius + $crown_thickness + 10,$ratio[$j]);
 	$x2 = $coord['x'];
 	$y2 = $coord['y'];
-	
-	imageline($im,$x1,$y1,$x2,$y2,$black);
+//	imageline($im,$x1,$y1,$x2,$y2,$black);
+	imagesmoothline($im,$x1,$y1,$x2,$y2,$black);
 	
 	$text = $name[$j];
 	$length_text = imagefontwidth(10) * strlen($text);
@@ -67,7 +64,7 @@ for($j = 0; $j <= $numgrades_fullscale; $j++) {
 			$fraction = $p[$j]."/".$q[$j];
 			$text = $fraction;
 			}
-		else $text = $ratio[$j];
+		else $text = round($ratio[$j],3);
 		$length_text = imagefontwidth(10) * strlen($text);
 		$height_text = imagefontheight(10);
 		$coord = set_point(50 + $length_text,$ratio[$j]);
@@ -108,14 +105,14 @@ else
 	
 $mark_ratio = 1;
 for($i = 0; $i < 7; $i++) {
-	mark($im,$mark_ratio,$black);
-	if($i > 0 AND isset($comma_ratio)) mark($im,$mark_ratio / $comma_ratio,$black);
+	mark($im,$mark_ratio,$red);
+	if($i > 0 AND isset($comma_ratio)) mark($im,$mark_ratio / $comma_ratio,$green);
 	$mark_ratio = $mark_ratio * 3;
 	}
 $mark_ratio = 1;
 for($i = 0; $i < 7; $i++) {
-	mark($im,$mark_ratio,$black);
-	if($i > 0 AND isset($comma_ratio)) mark($im,$mark_ratio * $comma_ratio,$black);
+	mark($im,$mark_ratio,$red);
+	if($i > 0 AND isset($comma_ratio)) mark($im,$mark_ratio * $comma_ratio,$green);
 	$mark_ratio = $mark_ratio / 3;
 	}
 		
@@ -186,136 +183,41 @@ function imagelinedotted ($im, $x1, $y1, $x2, $y2, $dist, $col) {
     $transp = imagecolortransparent($im);
    	$style = array ($col);
    	for ($i=0; $i<$dist; $i++) {
-        array_push($style, $transp);        // Generate style array - loop needed for customisable distance between the dots
+        array_push($style, $transp); // Generate style array - loop needed for customisable distance between the dots
     	}
    	imagesetstyle ($im, $style);
     return (integer) imageline ($im, $x1, $y1, $x2, $y2, IMG_COLOR_STYLED);
-    imagesetstyle ($im, array($col));        // Reset style - just in case...
+    imagesetstyle ($im, array($col)); // Reset style - just in case...
 	}
 
 
 function circle($im,$x_center,$y_center,$radius,$color) {
 // https://www.php.net/manual/en/function.imagearc.php
-	imagearc($im,$x_center,$y_center,2 * $radius,2 * $radius,0,360,$color);
+	imagearcthick($im,$x_center,$y_center,2 * $radius,2 * $radius,0,360,$color,2);
 	return;
 	}
 
-function ImageRectangleWithRoundedCorners($im, $x1, $y1, $x2, $y2, $radius, $color) {
-	// draw rectangle without corners
-	imagefilledrectangle($im, $x1+$radius, $y1, $x2-$radius, $y2, $color);
-	imagefilledrectangle($im, $x1, $y1+$radius, $x2, $y2-$radius, $color);
-	// draw circled corners
-	imagefilledellipse($im, $x1+$radius, $y1+$radius, $radius*2, $radius*2, $color);
-	imagefilledellipse($im, $x2-$radius, $y1+$radius, $radius*2, $radius*2, $color);
-	imagefilledellipse($im, $x1+$radius, $y2-$radius, $radius*2, $radius*2, $color);
-	imagefilledellipse($im, $x2-$radius, $y2-$radius, $radius*2, $radius*2, $color);
-	}
-
-function arrow($im,$x1,$y1,$x2,$y2,$alength,$awidth,$relocate,$color) {
-    $distance = sqrt(pow($x1 - $x2, 2) + pow($y1 - $y2, 2));
-    $dx = $x2 + ($x1 - $x2) * $alength / $distance;
-    $dy = $y2 + ($y1 - $y2) * $alength / $distance;
-    $k = $awidth / $alength;
-    $x2o = $x2 - $dx;
-    $y2o = $dy - $y2;
-    $x3 = $y2o * $k + $dx;
-    $y3 = $x2o * $k + $dy;
-    $x4 = $dx - $y2o * $k;
-    $y4 = $dy - $x2o * $k;
-    if(!$relocate) imagefilledrectangle($im,$x1-1,$y1,$x1+1,$y2-2,$color);
-    imagefilledpolygon($im, array($x2, $y2, $x3, $y3, $x4, $y4), 3, $color);
-	}
+function imagearcthick($image, $x, $y, $w, $h, $s, $e, $color, $thick = 1)
+{
+    if($thick == 1)
+    {
+        return imagearc($image, $x, $y, $w, $h, $s, $e, $color);
+    }
+    for($i = 1;$i<($thick+1);$i++)
+    {
+        imagearc($image, $x, $y, $w-($i/5), $h-($i/5),$s,$e,$color);
+        imagearc($image, $x, $y, $w+($i/5), $h+($i/5), $s, $e, $color);
+    }
+}
 
 function cents($ratio) {
 	$cents = 1200 * log($ratio) / log(2);
 	return $cents;
 	}
 
-/**
-* function imageSmoothAlphaLine() - version 1.0
-* Draws a smooth line with alpha-functionality
-*
-* @param   ident    the image to draw on
-* @param   integer  x1
-* @param   integer  y1
-* @param   integer  x2
-* @param   integer  y2
-* @param   integer  red (0 to 255)
-* @param   integer  green (0 to 255)
-* @param   integer  blue (0 to 255)
-* @param   integer  alpha (0 to 127)
-*
-* @access  public
-*
-* @author  DASPRiD <d@sprid.de>
-*/
-function imageSmoothAlphaLine ($image, $x1, $y1, $x2, $y2, $r, $g, $b, $alpha=0) {
-  $icr = $r;
-  $icg = $g;
-  $icb = $b;
-  $dcol = imagecolorallocatealpha($image, $icr, $icg, $icb, $alpha);
- 
-  if ($y1 == $y2 || $x1 == $x2)
-    imageline($image, $x1, $y2, $x1, $y2, $dcol);
-  else {
-    $m = ($y2 - $y1) / ($x2 - $x1);
-    $b = $y1 - $m * $x1;
-
-    if (abs ($m) <2) {
-      $x = min($x1, $x2);
-      $endx = max($x1, $x2) + 1;
-
-      while ($x < $endx) {
-        $y = $m * $x + $b;
-        $ya = ($y == floor($y) ? 1: $y - floor($y));
-        $yb = ceil($y) - $y;
-  
-        $trgb = ImageColorAt($image, $x, floor($y));
-        $tcr = ($trgb >> 16) & 0xFF;
-        $tcg = ($trgb >> 8) & 0xFF;
-        $tcb = $trgb & 0xFF;
-        imagesetpixel($image, $x, floor($y), imagecolorallocatealpha($image, ($tcr * $ya + $icr * $yb), ($tcg * $ya + $icg * $yb), ($tcb * $ya + $icb * $yb), $alpha));
- 
-        $trgb = ImageColorAt($image, $x, ceil($y));
-        $tcr = ($trgb >> 16) & 0xFF;
-        $tcg = ($trgb >> 8) & 0xFF;
-        $tcb = $trgb & 0xFF;
-        imagesetpixel($image, $x, ceil($y), imagecolorallocatealpha($image, ($tcr * $yb + $icr * $ya), ($tcg * $yb + $icg * $ya), ($tcb * $yb + $icb * $ya), $alpha));
- 
-        $x++;
-      }
-    } else {
-      $y = min($y1, $y2);
-      $endy = max($y1, $y2) + 1;
-
-      while ($y < $endy) {
-        $x = ($y - $b) / $m;
-        $xa = ($x == floor($x) ? 1: $x - floor($x));
-        $xb = ceil($x) - $x;
- 
-        $trgb = ImageColorAt($image, floor($x), $y);
-        $tcr = ($trgb >> 16) & 0xFF;
-        $tcg = ($trgb >> 8) & 0xFF;
-        $tcb = $trgb & 0xFF;
-        imagesetpixel($image, floor($x), $y, imagecolorallocatealpha($image, ($tcr * $xa + $icr * $xb), ($tcg * $xa + $icg * $xb), ($tcb * $xa + $icb * $xb), $alpha));
- 
-        $trgb = ImageColorAt($image, ceil($x), $y);
-        $tcr = ($trgb >> 16) & 0xFF;
-        $tcg = ($trgb >> 8) & 0xFF;
-        $tcb = $trgb & 0xFF;
-        imagesetpixel ($image, ceil($x), $y, imagecolorallocatealpha($image, ($tcr * $xb + $icr * $xa), ($tcg * $xb + $icg * $xa), ($tcb * $xb + $icb * $xa), $alpha));
- 
-        $y ++;
-      }
-    }
-  }
-}
-
-function imagesmoothline ( $image , $x1 , $y1 , $x2 , $y2 , $color )
-{
-  $colors = imagecolorsforindex ( $image , $color );
-  if ( $x1 == $x2 )
-  {
+function imagesmoothline($image,$x1,$y1,$x2,$y2,$color) {
+  $colors = imagecolorsforindex($image,$color);
+  if ( $x1 == $x2 ) {
    imageline ( $image , $x1 , $y1 , $x2 , $y2 , $color ); // Vertical line
   }
   else
