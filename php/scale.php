@@ -607,7 +607,7 @@ if(isset($_POST['use_convention'])) {
 	}
 
 store($h_image,"numgrades_fullscale",$numgrades_fullscale);
-echo "<tr><th style=\"background-color:azure; padding:4px;\">fraction</th>";
+echo "<tr><th style=\"background-color:azure; padding:4px; position: absolute;\">fraction</th>";
 for($i = 0; $i <= $numgrades_fullscale; $i++) {
 	if(($p[$i] * $q[$i]) == 0 AND $series[$i] <> '') {
 		// Try to guess closest fraction
@@ -636,22 +636,22 @@ for($i = 0; $i <= $numgrades_fullscale; $i++) {
 	store2($h_image,"q",$i,$q[$i]);
 	}
 echo "</tr>";
-echo "<tr><th style=\"background-color:azure; padding:4px;\">ratio</th>";
+echo "<tr><th style=\"background-color:azure; padding:4px; position: absolute;\">ratio<br /><small>pyth/harm</small></th>";
 for($i = 0; $i <= $numgrades_fullscale; $i++) {
 	store2($h_image,"ratio",$i,$ratio[$i]);
 	if($ratio[$i] == 0) $show = '';
 	else $show = round($ratio[$i],3);
 	echo "<td style=\"text-align:center; padding-top:4px; padding-bottom:4px; padding-left:0px; padding-right:0px; margin-left:0px; margin-right:0px; background-color:gold;\" colspan=\"2\">";
-	echo "<input type=\"text\" style=\"border:none; text-align:center;\" name=\"ratio_".$i."\" size=\"6\" value=\"".$show."\">&nbsp;&nbsp;";
+	echo "<input type=\"text\" style=\"border:none; text-align:center;\" name=\"ratio_".$i."\" size=\"6\" value=\"".$show."\"><br /><small>";
 	if(($p[$i] * $p[$i]) == 0) echo "<input type=\"text\" style=\"border:none; text-align:center;\" name=\"series_".$i."\" size=\"1\" value=\"".$series[$i]."\">";
 	else {
 		echo $series[$i];
 		echo "<input type=\"hidden\" name=\"series_".$i."\" value=\"".$series[$i]."\">";
 		}
-	echo "</td>";
+	echo "</small></td>";
 	}
 echo "</tr>";
-echo "<tr><th style=\"background-color:azure; padding:4px;\">name</th>";
+echo "<tr><th style=\"background-color:azure; padding:4px; position: absolute;\">name</th>";
 for($i = 0; $i <= $numgrades_fullscale; $i++) {
 	store2($h_image,"name",$i,$name[$i]);
 	echo "<td style=\"text-align:center; padding-top:4px; padding-bottom:4px; padding-left:0px; padding-right:0px; margin-left:0px; margin-right:0px; background-color:gold;\" colspan=\"2\">";
@@ -659,7 +659,7 @@ for($i = 0; $i <= $numgrades_fullscale; $i++) {
 	echo "</td>";
 	}
 echo "</tr>";
-echo "<tr><th style=\"background-color:azure; padding:4px;\">cents</th>";
+echo "<tr><th style=\"background-color:azure; padding:4px; position: absolute;\">cents</th>";
 for($i = 0; $i <= $numgrades_fullscale; $i++) {
 	if($ratio[$i] == 0) $cents = '';
 	else $cents = round(cents($ratio[$i]));
@@ -669,7 +669,7 @@ for($i = 0; $i <= $numgrades_fullscale; $i++) {
 	echo "</td>";
 	}
 echo "</tr>";
-echo "<tr><th style=\"background-color:azure; padding:4px;\">interval</th><td style=\"padding:0px;\"></td>";
+echo "<tr><th style=\"background-color:azure; padding:4px; position: absolute;\">interval</th><td style=\"padding:0px;\"></td>";
 for($i = 0; $i < $numgrades_fullscale; $i++) {
 	if(($ratio[$i] * $ratio[$i + 1]) == 0) $cents = '';
 	else $cents = "«—&nbsp;".round(cents($ratio[$i + 1] / $ratio[$i]))."c&nbsp;—»";
@@ -678,7 +678,7 @@ for($i = 0; $i < $numgrades_fullscale; $i++) {
 	echo "</td>";
 	}
 	
-echo "<tr><th style=\"background-color:azure; padding:4px;\">delta</th><td style=\"padding:0px;\"></td>";
+echo "<tr><th style=\"background-color:azure; padding:4px; position: absolute;\">delta</th><td style=\"padding:0px;\"></td>";
 for($i = 0; $i < $numgrades_fullscale; $i++) {
 	echo "<td style=\"white-space:nowrap; text-align:center; padding-top:4px; padding-bottom:4px; padding-left:0px; padding-right:0px; margin-left:0px; margin-right:0px;\" colspan=\"2\">";
 	if(($p[$i+1] * $q[$i] * $q[$i+1] * $p[$i]) > 0) {
@@ -700,7 +700,7 @@ for($i = 0; $i < $numgrades_fullscale; $i++) {
 echo "</tr>";
 
 echo "</tr>";
-echo "<tr><th style=\"background-color:azure; padding:4px;\">key</th>";
+echo "<tr><th style=\"background-color:azure; padding:4px; position: absolute;\">key</th>";
 $this_key = $basekey;
 for($i = 0; $i <= $numgrades_fullscale; $i++) {
 	echo "<td style=\"text-align:center; padding-top:4px; padding-bottom:4px; padding-left:0px; padding-right:0px; margin-left:0px; margin-right:0px; background-color:cornsilk;\" colspan=\"2\">";

@@ -4,7 +4,7 @@ $image_file = $save_codes_dir."/image.php";
 require_once($image_file);
 header('Content-Type: image/png; charset=utf-8');
 header('Title: "'.$filename.'"');
-$margin_left = 50;
+$margin_left = 15;
 $width = 600;
 $height = 130;
 
@@ -27,40 +27,41 @@ $lemonchiffon = imagecolorallocate($im,255,250,205);
 $lightcyan = imagecolorallocate($im,224,255,255);
 $papayawhip = imagecolorallocate($im,255,239,213);
 
-
-
 imagefilledrectangle($im,0,0,$image_width,800,$white);
 
 $text = "Scale \"".$filename."\"";
-imagestring($im,10,$margin_left,30,$text,$black);
+imagestring($im,10,$margin_left,10,$text,$black);
 if(isset($syntonic_comma)) $text = "Comma = ".round($syntonic_comma,1)." cents";
-imagestring($im,10,$margin_left,50,$text,$black);
+imagestring($im,10,$margin_left,30,$text,$black);
 
-$radius = 230;
+$radius = 220;
 $x_center = $image_width /  2;
 $y_center = $radius + $height;
-$crown_thickness = 15;
+$crown_thickness = 30;
 
-// imagesetthickness($im, 2);
+for($j = $numgrades_with_labels = 0; $j < $numgrades_fullscale; $j++) {
+	if($name[$j] == '') continue;
+	$numgrades_with_labels++;
+	}
+
 circle($im,$x_center,$y_center,$radius,$black);
 circle($im,$x_center,$y_center,$radius + $crown_thickness,$black);
 
 imagefilltoborder($im,$x_center + $radius + 4,$y_center,$black,$papayawhip);
 
 if(isset($wolffifth)) foreach($wolffifth as $j => $k) {
-	connect($im,$j,$k,$radius,$red,2);
+	connect($im,$j,$k,$radius - 1,$red,2);
 	}
 if(isset($pyththird)) foreach($pyththird as $j => $k) {
-	connect($im,$j,$k,$radius,$brown,1);
+	connect($im,$j,$k,$radius - 1,$brown,1);
 	}
 if(isset($harmthird)) foreach($harmthird as $j => $k) {
-	connect($im,$j,$k,$radius,$green,3);
+	connect($im,$j,$k,$radius - 1,$green,3);
 	}
 if(isset($fifth)) foreach($fifth as $j => $k) {
-	connect($im,$j,$k,$radius,$blue,3);
+	connect($im,$j,$k,$radius - 1,$blue,3);
 	}
-	
-// mark($im,1.25,$black);
+
 if(isset($p_comma) AND isset($q_comma) AND ($p_comma * $q_comma) > 0)
 	$comma_ratio = $p_comma / $q_comma;
 else 
@@ -92,9 +93,9 @@ for($j = 0; $j <= $numgrades_fullscale; $j++) {
 	$color = $black;
 	if($series[$j] == 'p') $color = $blue;
 	if($series[$j] == 'h') $color = $green;
-//	imagesmoothline($im,$x1,$y1,$x2,$y2,$color);
-	imagelinethick($im,$x1,$y1,$x2,$y2,$color,4);
+	imagesmoothline($im,$x1,$y1,$x2,$y2,$color);
 	
+	// Print names
 	$text = $name[$j];
 	$length_text = imagefontwidth(10) * strlen($text);
 	$height_text = imagefontheight(10);
@@ -117,24 +118,62 @@ for($j = 0; $j <= $numgrades_fullscale; $j++) {
 		
 		// Print cents
 		$text2 = $cents[$j];
-		if($text2 <> '') $text2 .= 'c'; // &#162;
+		if($text2 <> '') $text2 .= 'c';
 		$y_text2 = $y_text + imagefontheight(10) + 2;
 		$length_text_cents = imagefontwidth(10) * strlen($text2);
+		if($numgrades_fullscale > 8 AND ($ratio[$j] < 1.126 OR ($ratio[$j] > 1.281 AND $ratio[$j] < 1.414))) $x_text -= $length_text_cents;
+		if($numgrades_fullscale > 8 AND ($ratio[$j] > 1.77 OR ($ratio[$j] >= 1.414 AND $ratio[$j] < 1.57))) $x_text += $length_text_cents;
 		if(isset($cents[$j]) AND $cents[$j] > 0) {
 			imagefilledrectangle($im,$x_text - 5,$y_text2,$x_text + $length_text_cents + 5,$y_text2 + imagefontheight(10),$white);
-			imagestring($im,10,$x_text,$y_text2,$text2,$blue);
+			imagestring($im,10,$x_text,$y_text2,$text2,$black);
 			}
+		}
+	}
+
+$end_x = $end_y = $old_x = $old_y = 0;
+for($j = 0; $j <= $numgrades_fullscale; $j++) {
+	$angle = 2 * M_PI * cents($ratio[$j]) / 1200 + (M_PI / 2);
+	$coord = set_point($radius + 2,$ratio[$j]);
+	$x_note = $coord['x'];
+	$y_note = $coord['y'];
+	$x1 = $x_note;
+	$y1 = $y_note;
+	$coord = set_point($radius + $crown_thickness + 12,$ratio[$j]);
+	$x2 = $coord['x'];
+	$y2 = $coord['y'];
+	if($j < $numgrades_fullscale) {
+		$height_text = imagefontheight(10);
+		$coord = set_point(50 + $height_text / 2,$ratio[$j]);
+		$y_text = $y2 - $y_center + $coord['y'] - $height_text / 2;
+		if(($p[$j] * $q[$j]) > 0) {
+			$fraction = $p[$j]."/".$q[$j];
+			$text = $fraction;
+			}
+		else $text = round($ratio[$j],3);
+		$length_text = imagefontwidth(10) * strlen($text);
+		$coord = set_point(50 + $length_text,$ratio[$j]);
+		$x_text = $x2 - $x_center + $coord['x'] - $length_text / 2;
 		
-		// Print fraction or ratio
-		imagefilledrectangle($im,$x_text - 5,$y_text,$x_text + $length_text + 5,$y_text + imagefontheight(10), $azure);
+		// Print fractions or ratios
+		if($y_text <= $end_y AND $y_text >= ($end_y - 2 * imagefontheight(10)) AND $x_text <= $end_x) {
+			$y_text -= imagefontheight(10) - 2;
+			}
+		$end_x = $x_text + $length_text + 5;
+		if($y_text <= $old_y AND $y_text >= ($old_y + imagefontheight(10)) AND $end_x >= $old_x) {
+			$y_text += imagefontheight(10) + 2;
+			}
+		$end_y = $y_text + imagefontheight(10);
+		$old_x = $x_text;
+		$old_y = $y_text;
+		imagefilledrectangle($im,$x_text - 5,$y_text,$end_x,$end_y,$azure);
 		imagestring($im,10,$x_text,$y_text,$text,$black);
 		}
 	}
 	
-$x1 = 20;
+$x1 = $margin_left;
 $x2 = 60;
 $x_text = $x2 + 15;
-$y1 = 2 * $radius + 240;
+$y1 = 2 * $radius + 260;
 $y_text = $y1 - imagefontheight(10) / 2;
 
 imagestring($im,10,$x1,$y_text,"For this value of the comma:",$black);
@@ -143,7 +182,6 @@ $y1 += 2 * imagefontheight(10);
 $y_text = $y1 - imagefontheight(10) / 2;
 imagelinethick($im,$x1,$y1,$x2,$y1,$blue,4);
 $text = "Perfect fifth (".round($perfect_fifth)." cents)";
-// imagestring($im,10,$x_text,$y_text,$text,$black);
 imagestring($im,10,$x_text,$y_text,$text,$black);
 
 $y1 += 1 * imagefontheight(10);
@@ -163,11 +201,28 @@ $y_text = $y1 - imagefontheight(10) / 2;
 imagelinethick($im,$x1,$y1,$x2,$y1,$brown,2);
 $text = "Pythagorean major third (".round($pythagorean_third)." cents)";
 imagestring($im,10,$x_text,$y_text,$text,$brown);
+
+$x1 = $image_width - 230;
+$y1 = 2 * $radius + 260;
+$x_text = $x1 + 10;
+$x2 = $x1;
+$y2 = $y1 + 25;
+$y_text = $y1 + 5;
+imagelinethick($im,$x1,$y1,$x2,$y2,$blue,3);
+$text = "Pythagorean position";
+imagestring($im,10,$x_text,$y_text,$text,$blue);
+
+$y1 = $y2 + 25;
+$y2 = $y1 + 25;
+$y_text = $y1 + 5;
+imagelinethick($im,$x1,$y1,$x2,$y2,$green,3);
+$text = "Harmonic position";
+imagestring($im,10,$x_text,$y_text,$text,$green);
 		
 imagepng($im);
 imagedestroy($im);
 
-// ------- functions ---------
+// ======================= FUNCTIONS =======================
 
 function set_point($radius,$ratio) {
 	global $x_center,$y_center;
@@ -200,7 +255,7 @@ function connect($im,$j,$k,$radius,$color,$thick) {
 	$x2 = $coord['x'];
 	$y2 = $coord['y'];
 	if($thick > 1) imagelinethick($im,$x1,$y1,$x2,$y2,$color,$thick);
-//	else imagelinedotted($im, $x1, $y1, $x2, $y2,2 ,$color);
+//	else imagelinedotted($im, $x1, $y1, $x2, $y2,2,$color);
 	else imagesmoothline($im,$x1,$y1,$x2,$y2,$color);
 	}
 
@@ -228,15 +283,15 @@ function imagelinethick($image,$x1,$y1,$x2,$y2,$color,$thick) {
     return imagepolygon($image, $points, 4, $color);
 	}
 
-function imagelinedotted ($im, $x1, $y1, $x2, $y2, $dist, $col) {
+function imagelinedotted($im, $x1, $y1, $x2, $y2, $dist, $col) {
     $transp = imagecolortransparent($im);
-   	$style = array ($col);
+   	$style = array($col);
    	for ($i=0; $i<$dist; $i++) {
         array_push($style, $transp); // Generate style array - loop needed for customisable distance between the dots
     	}
-   	imagesetstyle ($im, $style);
-    return (integer) imageline ($im, $x1, $y1, $x2, $y2, IMG_COLOR_STYLED);
-    imagesetstyle ($im, array($col)); // Reset style - just in case...
+   	imagesetstyle($im, $style);
+    return (integer) imageline($im, $x1, $y1, $x2, $y2, IMG_COLOR_STYLED);
+    imagesetstyle($im, array($col)); // Reset style - just in case...
 	}
 
 
@@ -263,58 +318,58 @@ function cents($ratio) {
 
 function imagesmoothline($image,$x1,$y1,$x2,$y2,$color) {
   $colors = imagecolorsforindex($image,$color);
-  if ( $x1 == $x2 ) {
-   imageline ( $image , $x1 , $y1 , $x2 , $y2 , $color ); // Vertical line
+  if($x1 == $x2) {
+   imageline($image, $x1, $y1, $x2, $y2, $color); // Vertical line
   }
   else
   {
-   $m = ( $y2 - $y1 ) / ( $x2 - $x1 );
+   $m = ($y2 - $y1) / ($x2 - $x1);
    $b = $y1 - $m * $x1;
-   if ( abs ( $m ) <= 1 )
+   if(abs($m) <= 1)
    {
-    $x = min ( $x1 , $x2 );
-    $endx = max ( $x1 , $x2 );
-    while ( $x <= $endx )
+    $x = min($x1, $x2);
+    $endx = max($x1, $x2);
+    while($x <= $endx)
     {
      $y = $m * $x + $b;
-     $y == floor ( $y ) ? $ya = 1 : $ya = $y - floor ( $y );
-     $yb = ceil ( $y ) - $y;
-     $tempcolors = imagecolorsforindex ( $image , imagecolorat ( $image , $x , floor ( $y ) ) );
+     $y == floor($y) ? $ya = 1 : $ya = $y - floor($y);
+     $yb = ceil($y) - $y;
+     $tempcolors = imagecolorsforindex($image, imagecolorat($image, $x, floor($y)));
      $tempcolors['red'] = $tempcolors['red'] * $ya + $colors['red'] * $yb;
      $tempcolors['green'] = $tempcolors['green'] * $ya + $colors['green'] * $yb;
      $tempcolors['blue'] = $tempcolors['blue'] * $ya + $colors['blue'] * $yb;
-     if ( imagecolorexact ( $image , $tempcolors['red'] , $tempcolors['green'] , $tempcolors['blue'] ) == -1 ) imagecolorallocate ( $image , $tempcolors['red'] , $tempcolors['green'] , $tempcolors['blue'] );
-     imagesetpixel ( $image , $x , floor ( $y ) , imagecolorexact ( $image , $tempcolors['red'] , $tempcolors['green'] , $tempcolors['blue'] ) );
-     $tempcolors = imagecolorsforindex ( $image , imagecolorat ( $image , $x , ceil ( $y ) ) );
+     if(imagecolorexact($image, $tempcolors['red'], $tempcolors['green'], $tempcolors['blue']) == -1) imagecolorallocate($image, $tempcolors['red'], $tempcolors['green'], $tempcolors['blue']);
+     imagesetpixel($image, $x, floor($y), imagecolorexact($image, $tempcolors['red'], $tempcolors['green'], $tempcolors['blue']));
+     $tempcolors = imagecolorsforindex($image, imagecolorat($image, $x, ceil($y)));
      $tempcolors['red'] = $tempcolors['red'] * $yb + $colors['red'] * $ya;
       $tempcolors['green'] = $tempcolors['green'] * $yb + $colors['green'] * $ya;
      $tempcolors['blue'] = $tempcolors['blue'] * $yb + $colors['blue'] * $ya;
-     if ( imagecolorexact ( $image , $tempcolors['red'] , $tempcolors['green'] , $tempcolors['blue'] ) == -1 ) imagecolorallocate ( $image , $tempcolors['red'] , $tempcolors['green'] , $tempcolors['blue'] );
-     imagesetpixel ( $image , $x , ceil ( $y ) , imagecolorexact ( $image , $tempcolors['red'] , $tempcolors['green'] , $tempcolors['blue'] ) );
+     if(imagecolorexact($image, $tempcolors['red'], $tempcolors['green'], $tempcolors['blue']) == -1) imagecolorallocate($image, $tempcolors['red'], $tempcolors['green'], $tempcolors['blue']);
+     imagesetpixel($image, $x, ceil($y), imagecolorexact($image, $tempcolors['red'], $tempcolors['green'], $tempcolors['blue']));
      $x ++;
     }
    }
    else
    {
-    $y = min ( $y1 , $y2 );
-    $endy = max ( $y1 , $y2 );
-    while ( $y <= $endy )
+    $y = min($y1, $y2);
+    $endy = max($y1, $y2);
+    while($y <= $endy)
     {
-     $x = ( $y - $b ) / $m;
-     $x == floor ( $x ) ? $xa = 1 : $xa = $x - floor ( $x );
-     $xb = ceil ( $x ) - $x;
-     $tempcolors = imagecolorsforindex ( $image , imagecolorat ( $image , floor ( $x ) , $y ) );
+     $x = ($y - $b) / $m;
+     $x == floor($x) ? $xa = 1 : $xa = $x - floor($x);
+     $xb = ceil($x) - $x;
+     $tempcolors = imagecolorsforindex($image, imagecolorat($image, floor($x), $y));
      $tempcolors['red'] = $tempcolors['red'] * $xa + $colors['red'] * $xb;
      $tempcolors['green'] = $tempcolors['green'] * $xa + $colors['green'] * $xb;
      $tempcolors['blue'] = $tempcolors['blue'] * $xa + $colors['blue'] * $xb;
-     if ( imagecolorexact ( $image , $tempcolors['red'] , $tempcolors['green'] , $tempcolors['blue'] ) == -1 ) imagecolorallocate ( $image , $tempcolors['red'] , $tempcolors['green'] , $tempcolors['blue'] );
-     imagesetpixel ( $image , floor ( $x ) , $y , imagecolorexact ( $image , $tempcolors['red'] , $tempcolors['green'] , $tempcolors['blue'] ) );
-     $tempcolors = imagecolorsforindex ( $image , imagecolorat ( $image , ceil ( $x ) , $y ) );
+     if(imagecolorexact($image, $tempcolors['red'], $tempcolors['green'], $tempcolors['blue']) == -1) imagecolorallocate($image, $tempcolors['red'], $tempcolors['green'], $tempcolors['blue']);
+     imagesetpixel($image, floor($x), $y, imagecolorexact($image, $tempcolors['red'], $tempcolors['green'], $tempcolors['blue']));
+     $tempcolors = imagecolorsforindex($image, imagecolorat($image, ceil($x), $y));
      $tempcolors['red'] = $tempcolors['red'] * $xb + $colors['red'] * $xa;
      $tempcolors['green'] = $tempcolors['green'] * $xb + $colors['green'] * $xa;
      $tempcolors['blue'] = $tempcolors['blue'] * $xb + $colors['blue'] * $xa;
-     if ( imagecolorexact ( $image , $tempcolors['red'] , $tempcolors['green'] , $tempcolors['blue'] ) == -1 ) imagecolorallocate ( $image , $tempcolors['red'] , $tempcolors['green'] , $tempcolors['blue'] );
-     imagesetpixel ( $image , ceil ( $x ) , $y , imagecolorexact ( $image , $tempcolors['red'] , $tempcolors['green'] , $tempcolors['blue'] ) );
+     if(imagecolorexact($image, $tempcolors['red'], $tempcolors['green'], $tempcolors['blue']) == -1) imagecolorallocate($image, $tempcolors['red'], $tempcolors['green'], $tempcolors['blue']);
+     imagesetpixel($image, ceil($x), $y, imagecolorexact($image, $tempcolors['red'], $tempcolors['green'], $tempcolors['blue']));
      $y ++;
     }
    }
@@ -326,7 +381,7 @@ function whitespaces_imagestring($image, $font, $x, $y, $string, $color) {
     $font_width = imagefontwidth($font);
     $image_height = imagesy($image);
     $image_width = imagesx($image);
-    $max_characters = (int) ($image_width - $x) / $font_width ;
+    $max_characters = (int)($image_width - $x) / $font_width ;
     $next_offset_y = $y;
 
     for($i = 0, $exploded_string = explode("\n", $string), $i_count = count($exploded_string); $i < $i_count; $i++) {
