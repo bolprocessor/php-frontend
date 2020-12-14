@@ -682,7 +682,7 @@ echo "<textarea name=\"cstables\" rows=\"5\" style=\"width:400px;\">";
 $cstables = '';
 $handle = FALSE; $i_scale = 0;
 $done_table = TRUE;
-$scale_name = $scale_table = $scale_fraction = $comma_line = $scale_note_names = $scale_keys = $scale_comment = $baseoctave = array();
+$scale_name = $scale_table = $scale_fraction = $scale_series = $comma_line = $scale_note_names = $scale_keys = $scale_comment = $baseoctave = array();
 for($i = $i + 1; $i < $imax_file; $i++) {
 	$line = trim($table[$i]);
 //	if($verbose) echo $line."<br />";
@@ -726,6 +726,11 @@ for($i = $i + 1; $i < $imax_file; $i++) {
 		$scale_keys[$i_scale] = $line;
 		continue;
 		}
+	if($line[0] == 's') {
+		fwrite($handle,$line."\n");
+		$scale_series[$i_scale] = $line;
+		continue;
+		}
 	if($line[0] == 'c') {
 		fwrite($handle,$line."\n");
 		$comma_line[$i_scale] = $line;
@@ -760,6 +765,8 @@ for($i = $i + 1; $i < $imax_file; $i++) {
 			fwrite($handle,$scale_keys[$i_scale]."\n");
 		if(isset($scale_fraction[$i_scale]))
 			fwrite($handle,$scale_fraction[$i_scale]."\n");
+		if(isset($scale_series[$i_scale]))
+			fwrite($handle,$scale_series[$i_scale]."\n");
 		if(isset($baseoctave[$i_scale]))
 			fwrite($handle,$baseoctave[$i_scale]."\n");
 		$scale_table[$i_scale] = $line;
@@ -1256,7 +1263,7 @@ if($max_scales > 0) {
 					}
 				else {
 					$cents = round(1200 * log($ratio_interval[$i_scale][$k]) / log(2));
-					echo "<small>".$cents."¢</small> ";
+					echo "<small>".$cents."c</small> ";
 					$k++;
 					}
 				}

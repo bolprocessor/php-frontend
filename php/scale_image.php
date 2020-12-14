@@ -19,15 +19,21 @@ $red = imagecolorallocate($im,233,14,91);
 $olive = imagecolorallocate($im,220,210,60);
 $yellow = imagecolorallocate($im,255,255,5);
 $blue = imagecolorallocate($im,1,13,245);
+$azure = imagecolorallocate($im,240,255,255);
 $green = imagecolorallocate($im,0,255,127);
 $brown = imagecolorallocate($im,202,110,101);
 $purple = imagecolorallocate($im,219,125,214);
+$lemonchiffon = imagecolorallocate($im,255,250,205);
+$lightcyan = imagecolorallocate($im,224,255,255);
+$papayawhip = imagecolorallocate($im,255,239,213);
+
+
 
 imagefilledrectangle($im,0,0,$image_width,800,$white);
 
 $text = "Scale \"".$filename."\"";
 imagestring($im,10,$margin_left,30,$text,$black);
-if(isset($syntonic_comma)) $text = "Comma = \"".round($syntonic_comma,1)." cents\"";
+if(isset($syntonic_comma)) $text = "Comma = ".round($syntonic_comma,1)." cents";
 imagestring($im,10,$margin_left,50,$text,$black);
 
 $radius = 230;
@@ -39,57 +45,13 @@ $crown_thickness = 15;
 circle($im,$x_center,$y_center,$radius,$black);
 circle($im,$x_center,$y_center,$radius + $crown_thickness,$black);
 
-for($j = 0; $j <= $numgrades_fullscale; $j++) {
-	$angle = 2 * M_PI * cents($ratio[$j]) / 1200 + (M_PI / 2);
-	
-	$coord = set_point($radius,$ratio[$j]);
-	$x_note = $coord['x'];
-	$y_note = $coord['y'];
-	$x1 = $x_note;
-	$y1 = $y_note;
-	$coord = set_point($radius + $crown_thickness + 10,$ratio[$j]);
-	$x2 = $coord['x'];
-	$y2 = $coord['y'];
-//	imageline($im,$x1,$y1,$x2,$y2,$black);
-	imagesmoothline($im,$x1,$y1,$x2,$y2,$black);
-	
-	$text = $name[$j];
-	$length_text = imagefontwidth(10) * strlen($text);
-	$height_text = imagefontheight(10);
-	$x_text = $x2 + 20 * cos($angle) - $length_text /  2;
-	$y_text = $y2 + 20 * sin($angle) - $height_text / 2;
-	imagestring($im,10,$x_text,$y_text,$text,$red);
-	
-	if($j < $numgrades_fullscale) {
-		
-		// Print fraction or ratio
-		if(($p[$j] * $q[$j]) > 0) {
-			$fraction = $p[$j]."/".$q[$j];
-			$text = $fraction;
-			}
-		else $text = round($ratio[$j],3);
-		$length_text = imagefontwidth(10) * strlen($text);
-		$height_text = imagefontheight(10);
-		$coord = set_point(50 + $length_text,$ratio[$j]);
-		$x_text = $x2 - $x_center + $coord['x'] - $length_text / 2;
-		$coord = set_point(50 + $height_text / 2,$ratio[$j]);
-		$y_text = $y2 - $y_center + $coord['y'] - $height_text / 2;
-		imagestring($im,10,$x_text,$y_text,$text,$black);
-		
-		// Print cents
-		$y_text += imagefontheight(10) + 2;
-		$text = $cents[$j];
-		if($text <> '') $text .= 'c'; // &#162;
-		if(isset($cents[$j]) AND $cents[$j] > 0) imagestring($im,10,$x_text,$y_text,$text,$blue);
-		}
-	}
-
+imagefilltoborder($im,$x_center + $radius + 4,$y_center,$black,$papayawhip);
 
 if(isset($wolffifth)) foreach($wolffifth as $j => $k) {
-	connect($im,$j,$k,$radius,$red,1);
+	connect($im,$j,$k,$radius,$red,2);
 	}
 if(isset($pyththird)) foreach($pyththird as $j => $k) {
-	connect($im,$j,$k,$radius,$olive,1);
+	connect($im,$j,$k,$radius,$brown,1);
 	}
 if(isset($harmthird)) foreach($harmthird as $j => $k) {
 	connect($im,$j,$k,$radius,$green,3);
@@ -106,16 +68,101 @@ else
 	
 $mark_ratio = 1;
 for($i = 0; $i < 7; $i++) {
-	mark($im,$mark_ratio,$red);
+	mark($im,$mark_ratio,$blue);
 	if($i > 0 AND isset($comma_ratio)) mark($im,$mark_ratio / $comma_ratio,$green);
 	$mark_ratio = $mark_ratio * 3;
 	}
 $mark_ratio = 1;
 for($i = 0; $i < 7; $i++) {
-	mark($im,$mark_ratio,$red);
+	mark($im,$mark_ratio,$blue);
 	if($i > 0 AND isset($comma_ratio)) mark($im,$mark_ratio * $comma_ratio,$green);
 	$mark_ratio = $mark_ratio / 3;
 	}
+
+for($j = 0; $j <= $numgrades_fullscale; $j++) {
+	$angle = 2 * M_PI * cents($ratio[$j]) / 1200 + (M_PI / 2);
+	$coord = set_point($radius + 2,$ratio[$j]);
+	$x_note = $coord['x'];
+	$y_note = $coord['y'];
+	$x1 = $x_note;
+	$y1 = $y_note;
+	$coord = set_point($radius + $crown_thickness + 12,$ratio[$j]);
+	$x2 = $coord['x'];
+	$y2 = $coord['y'];
+	$color = $black;
+	if($series[$j] == 'p') $color = $blue;
+	if($series[$j] == 'h') $color = $green;
+//	imagesmoothline($im,$x1,$y1,$x2,$y2,$color);
+	imagelinethick($im,$x1,$y1,$x2,$y2,$color,4);
+	
+	$text = $name[$j];
+	$length_text = imagefontwidth(10) * strlen($text);
+	$height_text = imagefontheight(10);
+	$x_text = $x2 + 20 * cos($angle) - $length_text /  2;
+	$y_text = $y2 + 20 * sin($angle) - $height_text / 2;
+	imagestring($im,10,$x_text,$y_text,$text,$red);
+	
+	if($j < $numgrades_fullscale) {
+		$height_text = imagefontheight(10);
+		$coord = set_point(50 + $height_text / 2,$ratio[$j]);
+		$y_text = $y2 - $y_center + $coord['y'] - $height_text / 2;
+		if(($p[$j] * $q[$j]) > 0) {
+			$fraction = $p[$j]."/".$q[$j];
+			$text = $fraction;
+			}
+		else $text = round($ratio[$j],3);
+		$length_text = imagefontwidth(10) * strlen($text);
+		$coord = set_point(50 + $length_text,$ratio[$j]);
+		$x_text = $x2 - $x_center + $coord['x'] - $length_text / 2;
+		
+		// Print cents
+		$text2 = $cents[$j];
+		if($text2 <> '') $text2 .= 'c'; // &#162;
+		$y_text2 = $y_text + imagefontheight(10) + 2;
+		$length_text_cents = imagefontwidth(10) * strlen($text2);
+		if(isset($cents[$j]) AND $cents[$j] > 0) {
+			imagefilledrectangle($im,$x_text - 5,$y_text2,$x_text + $length_text_cents + 5,$y_text2 + imagefontheight(10),$white);
+			imagestring($im,10,$x_text,$y_text2,$text2,$blue);
+			}
+		
+		// Print fraction or ratio
+		imagefilledrectangle($im,$x_text - 5,$y_text,$x_text + $length_text + 5,$y_text + imagefontheight(10), $azure);
+		imagestring($im,10,$x_text,$y_text,$text,$black);
+		}
+	}
+	
+$x1 = 20;
+$x2 = 60;
+$x_text = $x2 + 15;
+$y1 = 2 * $radius + 240;
+$y_text = $y1 - imagefontheight(10) / 2;
+
+imagestring($im,10,$x1,$y_text,"For this value of the comma:",$black);
+
+$y1 += 2 * imagefontheight(10);
+$y_text = $y1 - imagefontheight(10) / 2;
+imagelinethick($im,$x1,$y1,$x2,$y1,$blue,4);
+$text = "Perfect fifth (".round($perfect_fifth)." cents)";
+// imagestring($im,10,$x_text,$y_text,$text,$black);
+imagestring($im,10,$x_text,$y_text,$text,$black);
+
+$y1 += 1 * imagefontheight(10);
+$y_text = $y1 - imagefontheight(10) / 2;
+imagelinethick($im,$x1,$y1,$x2,$y1,$red,2);
+$text = "Wolf fifth (".round($wolf_fifth)." cents)";
+imagestring($im,10,$x_text,$y_text,$text,$red);
+
+$y1 += 1 * imagefontheight(10);
+$y_text = $y1 - imagefontheight(10) / 2;
+imagelinethick($im,$x1,$y1,$x2,$y1,$green,4);
+$text = "Harmonic major third (".round($harmonic_third)." cents)";
+imagestring($im,10,$x_text,$y_text,$text,$green);
+
+$y1 += 1 * imagefontheight(10);
+$y_text = $y1 - imagefontheight(10) / 2;
+imagelinethick($im,$x1,$y1,$x2,$y1,$brown,2);
+$text = "Pythagorean major third (".round($pythagorean_third)." cents)";
+imagestring($im,10,$x_text,$y_text,$text,$brown);
 		
 imagepng($im);
 imagedestroy($im);
@@ -133,13 +180,14 @@ function set_point($radius,$ratio) {
 
 function mark($im,$ratio,$color) {
 	global $radius,$crown_thickness;
-	$coord = set_point($radius,$ratio);
+	$coord = set_point($radius + 1,$ratio);
 	$x1 = $coord['x'];
 	$y1 = $coord['y'];
-	$coord = set_point($radius + $crown_thickness,$ratio);
+	$coord = set_point($radius + $crown_thickness - 2,$ratio);
 	$x2 = $coord['x'];
 	$y2 = $coord['y'];
-	imagesmoothline($im,$x1,$y1,$x2,$y2,$color);
+//	imagesmoothline($im,$x1,$y1,$x2,$y2,$color);
+	imagelinethick($im,$x1,$y1,$x2,$y2,$color,3);
 	return;
 	}
 
@@ -156,7 +204,7 @@ function connect($im,$j,$k,$radius,$color,$thick) {
 	else imagesmoothline($im,$x1,$y1,$x2,$y2,$color);
 	}
 
-function imagelinethick($image, $x1, $y1, $x2, $y2, $color, $thick) {
+function imagelinethick($image,$x1,$y1,$x2,$y2,$color,$thick) {
     /* this way it works well only for orthogonal lines
     imagesetthickness($image, $thick);
     return imageline($image, $x1, $y1, $x2, $y2, $color);
@@ -271,5 +319,27 @@ function imagesmoothline($image,$x1,$y1,$x2,$y2,$color) {
     }
    }
   }
+}
+
+function whitespaces_imagestring($image, $font, $x, $y, $string, $color) {
+    $font_height = imagefontheight($font);
+    $font_width = imagefontwidth($font);
+    $image_height = imagesy($image);
+    $image_width = imagesx($image);
+    $max_characters = (int) ($image_width - $x) / $font_width ;
+    $next_offset_y = $y;
+
+    for($i = 0, $exploded_string = explode("\n", $string), $i_count = count($exploded_string); $i < $i_count; $i++) {
+        $exploded_wrapped_string = explode("\n", wordwrap(str_replace("\t", "    ", $exploded_string[$i]), $max_characters, "\n"));
+        $j_count = count($exploded_wrapped_string);
+        for($j = 0; $j < $j_count; $j++) {
+            imagestring($image, $font, $x, $next_offset_y, $exploded_wrapped_string[$j], $color);
+            $next_offset_y += $font_height;
+
+            if($next_offset_y >= $image_height - $y) {
+                return;
+            }
+        }
+    }
 }
 ?>

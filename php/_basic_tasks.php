@@ -112,6 +112,69 @@ $AltEnglishnote = array("B#","Db","D","Eb","Fb","E#","Gb","G","Ab","A","Bb","Cb"
 $AltFrenchnote = array("si#","reb","re","mib","fab","mi#","solb","sol","lab","la","sib","dob","si#");
 $AltIndiannote = array("ni#","sa#","re","re#","mak","ga#","pak","pa","pa#","dha","dha#","sak","ni#");
 
+// Create a list of fractions eligible for frequency ratios in just intonation
+// Numerator or denominator may be a power of 3 multiplied by 5 multiplied by a power of 2
+$i_ratio = 0;
+$x_three = 1;
+for($i = 0; $i < 7; $i++) {
+	$x_five = 1;
+	for($j = 0;  $j < 2; $j++) {
+		$num = $x_three * $x_five;
+		if($j == 0) $serie = "p"; // Pythagorean
+		else $serie = "h"; // Harmonic
+		$den = 1;
+		$the_ratio = $num / $den;
+		if($num == 1 AND $den == 1) continue;
+		while($the_ratio < 0.5) {
+			$num = 2 * $num;
+			$the_ratio = $num / $den;
+			}
+		while($the_ratio > 2) {
+			$den = 2 * $den;
+			$the_ratio = $num / $den;
+			}
+		$p_fract[$i_ratio] = $num;
+		$q_fract[$i_ratio] = $den;
+		$serie_fract[$i_ratio] = $serie;
+		$ratio_fract[$i_ratio++] = $the_ratio;
+		//echo $num."/".$den." = ".$the_ratio." (1)<br />";
+		if($the_ratio < 1) $num = 2 * $num;
+		if($the_ratio > 1) $den = 2 * $den;
+		$the_ratio = $num / $den;
+		$p_fract[$i_ratio] = $num;
+		$q_fract[$i_ratio] = $den;
+		$serie_fract[$i_ratio] = $serie;
+		$ratio_fract[$i_ratio++] = $the_ratio;
+		//echo $num."/".$den." = ".$the_ratio." (2)<br />";
+		$num = 1;
+		$den = $x_three * $x_five;
+		$the_ratio = $num / $den;
+		while($the_ratio < 0.5) {
+			$num = 2 * $num;
+			$the_ratio = $num / $den;
+			}
+		while($the_ratio > 2) {
+			$den = 2 * $den;
+			$the_ratio = $num / $den;
+			}
+		$p_fract[$i_ratio] = $num;
+		$q_fract[$i_ratio] = $den;
+		$serie_fract[$i_ratio] = $serie;
+		$ratio_fract[$i_ratio++] = $the_ratio;
+		//echo $num."/".$den." = ".$the_ratio." (3)<br />";
+		if($the_ratio < 1) $num = 2 * $num;
+		if($the_ratio > 1) $den = 2 * $den;
+		$the_ratio = $num / $den;
+		$p_fract[$i_ratio] = $num;
+		$q_fract[$i_ratio] = $den;
+		$serie_fract[$i_ratio] = $serie;
+		$ratio_fract[$i_ratio++] = $the_ratio;
+		//echo $num."/".$den." = ".$the_ratio." (4)<br />";
+		$x_five = $x_five * 5;
+		}
+	$x_three = $x_three * 3;
+	}
+
 // --------- FUNCTIONS ------------
 
 function extract_data($compact,$content) {
@@ -1878,14 +1941,14 @@ function simplify_fraction_eliminate_schisma($p,$q) {
 		$gcd = gcd($p,$q);
 		$p = $p / $gcd;
 		$q = $q / $gcd;
-		if($p == 1024 AND $q == 729) { // 1.404 p1
+	/*	if($p == 1024 AND $q == 729) { // 1.404 p1
 			$p = 45; // 1.406
 			$q = 32;
 			}
 		if($p == 729 AND $q == 512) { // 1.4238 m4
 			$p = 64; // 1.422
 			$q = 45;
-			}
+			} */
 		if($p == 81920 AND $q == 59049) { // 1.387 p1 - 1 syntonic comma
 			$p = 325; // 1.388
 			$q = 234;
@@ -1898,11 +1961,11 @@ function simplify_fraction_eliminate_schisma($p,$q) {
 			$p = 16; // 1.0666
 			$q = 15;
 			}
-		if($p == 135 AND $q == 128) { // 1.05468 minor semitone + syntonic comma = limma
+		if($p == 135 AND $q == 128) { // 1.05468 minor semitone + syntonic comma = limma + schisma
 			$p = 256; // 1.0535 (this is the Pythagorean value)
 			$q = 243;
 			}
-		if($p == 2048 AND $q == 2025) { // 1.0113 syntonic comma
+		if($p == 2048 AND $q == 2025) { // 1.0113 syntonic comma - schisma
 			$p = 81; // 1.0125
 			$q = 80;
 			}
@@ -1926,6 +1989,24 @@ function simplify_fraction_eliminate_schisma($p,$q) {
 	$result['p'] = $p;
 	$result['q'] = $q;
 	return $result;
+	}
+	
+function get_fraction($number,$serie) {
+	global $p_fract,$q_fract,$ratio_fract,$serie_fract;
+	$imax = count($ratio_fract);
+	$fraction['found'] = FALSE;
+	$fraction['p'] = $fraction['q'] = 0;
+	for($i = 0; $i < $imax; $i++) {
+		if($serie <> '' AND $serie_fract[$i] <> $serie) continue;
+		$dif = abs($number - $ratio_fract[$i]) / $number;
+		if($dif < 0.0015) {
+			$fraction['p'] = $p_fract[$i];
+			$fraction['q'] = $q_fract[$i];
+			$fraction['found'] = TRUE;
+			return $fraction;
+			} 
+		}
+	return $fraction;
 	}
 
 function cents($ratio) {
