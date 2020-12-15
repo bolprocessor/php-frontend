@@ -337,7 +337,7 @@ else {
 	
 $image_name = clean_folder_name($filename)."_".round(10 * $new_comma).$more."_image";
 // echo $image_name."<br />";
-echo "<div class=\"shadow\" style=\"border:2px solid gray; background-color:azure; width:13em;  padding:8px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$link."','".$image_name."','width=1100,height=800,left=100'); return false;\" href=\"".$link."\">IMAGE</a></div>";
+echo "<div class=\"shadow\" style=\"border:2px solid gray; background-color:azure; width:13em;  padding:8px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$link."','".$image_name."','width=1000,height=800,left=100'); return false;\" href=\"".$link."\">IMAGE</a></div>";
 
 echo "</div>";
 echo "<p>➡ <a target=\"_blank\" href=\"https://www.csounds.com/manual/html/GEN51.html\">Read the documentation</a></p>";
@@ -1598,7 +1598,7 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 			else $pos = cents($ratio[$k] / $ratio[$j]);
 			if($pos < 0) $pos += 1200;
 			$dist = $pos - $wolf_fifth;
-			if(abs($dist) < 10 AND !isset($fifth[$j])) {
+			if(abs($dist) < 10 /* AND !isset($fifth[$j]) */) {
 				$deviation = '';
 				if($dist > 1) {
 					$deviation = " (+".round(abs($dist)).")";
@@ -1648,7 +1648,7 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 			else $pos = cents($ratio[$k] / $ratio[$j]);
 			if($pos < 0) $pos += 1200;
 			$dist = $pos - $pythagorean_third;
-			if(abs($dist) < 10 AND !isset($harmthird[$j])) {
+			if(abs($dist) < 10 /* AND !isset($harmthird[$j]) */) {
 				$deviation = '';
 				if($dist > 1) {
 					$deviation = " (+".round(abs($dist)).")";

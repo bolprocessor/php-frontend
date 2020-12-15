@@ -9,7 +9,7 @@ $width = 900;
 $height = 130;
 
 $image_width = $width + 100;
-if($image_width < 800) $image_width = 800;
+if($image_width < 1000) $image_width = 1000;
 $im = @imagecreatetruecolor($image_width,800)
       or die('Cannot Initialize new GD image stream');
 $white = imagecolorallocate($im,255,255,255);
