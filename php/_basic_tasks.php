@@ -1957,34 +1957,34 @@ function simplify_fraction_eliminate_schisma($p,$q) {
 			$p = 36; // 1.440
 			$q = 25;
 			}
-		if($p == 2187 AND $q == 2048) { // 1.0678 limma + syntonic comma
+	/*	if($p == 2187 AND $q == 2048) { // 1.0678 limma + syntonic comma
 			$p = 16; // 1.0666
 			$q = 15;
-			}
-		if($p == 135 AND $q == 128) { // 1.05468 minor semitone + syntonic comma = limma + schisma
+			} */
+	/*	if($p == 135 AND $q == 128) { // 1.05468 minor semitone + syntonic comma = limma + schisma
 			$p = 256; // 1.0535 (this is the Pythagorean value)
 			$q = 243;
-			}
-		if($p == 2048 AND $q == 2025) { // 1.0113 syntonic comma - schisma
+			} */
+	/*	if($p == 2048 AND $q == 2025) { // 1.0113 syntonic comma - schisma
 			$p = 81; // 1.0125
 			$q = 80;
-			}
+			} */
 		if($p == 19683 AND $q == 16384) { // 1.2013 
 			$p = 6; // 1.2
 			$q = 5;
 			}
-		if($p == 4096 AND $q == 3645) { // 1.1237
+	/*	if($p == 4096 AND $q == 3645) { // 1.1237
 			$p = 9; // 1.125
 			$q = 8;
-			}
-		if($p == 512 AND $q == 405) { // 1.264
+			} */
+	/*	if($p == 512 AND $q == 405) { // 1.264
 			$p = 81; // 1.126
 			$q = 64;
-			}
-		if($p == 1215 AND $q == 1024) { // 1.1865
+			} */
+	/*	if($p == 1215 AND $q == 1024) { // 1.1865
 			$p = 32; // 1.1851
 			$q = 27;
-			}
+			} */
 		}
 	$result['p'] = $p;
 	$result['q'] = $q;

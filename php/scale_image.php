@@ -5,7 +5,7 @@ require_once($image_file);
 header('Content-Type: image/png; charset=utf-8');
 header('Title: "'.$filename.'"');
 $margin_left = 15;
-$width = 600;
+$width = 900;
 $height = 130;
 
 $image_width = $width + 100;
@@ -156,7 +156,7 @@ for($j = 0; $j <= $numgrades_fullscale; $j++) {
 		
 		// Print fractions or ratios
 		if($y_text <= $end_y AND $y_text >= ($end_y - 2 * imagefontheight(10)) AND $x_text <= $end_x) {
-			$y_text -= imagefontheight(10) - 2;
+			$y_text += imagefontheight(10) + 2;
 			}
 		$end_x = $x_text + $length_text + 5;
 		if($y_text <= $old_y AND $y_text >= ($old_y + imagefontheight(10)) AND $end_x >= $old_x) {

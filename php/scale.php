@@ -337,7 +337,7 @@ else {
 	
 $image_name = clean_folder_name($filename)."_".round(10 * $new_comma).$more."_image";
 // echo $image_name."<br />";
-echo "<div class=\"shadow\" style=\"border:2px solid gray; background-color:azure; width:13em;  padding:8px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$link."','".$image_name."','width=800,height=800,left=100'); return false;\" href=\"".$link."\">IMAGE</a></div>";
+echo "<div class=\"shadow\" style=\"border:2px solid gray; background-color:azure; width:13em;  padding:8px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$link."','".$image_name."','width=1100,height=800,left=100'); return false;\" href=\"".$link."\">IMAGE</a></div>";
 
 echo "</div>";
 echo "<p>➡ <a target=\"_blank\" href=\"https://www.csounds.com/manual/html/GEN51.html\">Read the documentation</a></p>";
@@ -531,8 +531,19 @@ if(isset($_POST['change_comma']) AND isset($_POST['list_sensitive_notes']) AND $
 	else $new_comma = $syntonic_comma;
 	$list_sensitive_notes = $_POST['list_sensitive_notes'];
 	$list_wolffifth_notes = $_POST['list_wolffifth_notes'];
-
-	if($new_comma < 0 OR $new_comma > 56.8) echo "<p>➡ Cannot set comma to: <font color=\"red\">".$new_comma."</font> cents because it should be in range 0 ... 56.8 cents</p>";
+	if($list_sensitive_notes <> '') {
+		$table_sensitive_notes = explode(' ',$list_sensitive_notes);
+	/*	echo "<p>Sensitive notes: ";
+		for($i = 0; $i < count($table_sensitive_notes); $i++) echo $name[$table_sensitive_notes[$i]]." ";
+		echo "</p>"; */
+		}
+	if($list_wolffifth_notes <> '') {
+		$table_wolffifth_notes = explode(' ',$list_wolffifth_notes);
+	/*	echo "<p>Wolffifth notes: ";
+		for($i = 0; $i < count($table_sensitive_notes); $i++) echo $name[$table_wolffifth_notes[$i]]." ";
+		echo "</p>"; */
+		}
+	if($new_comma < 0 OR $new_comma > 56.8) echo "<p>➡ Cannot set syntonic comma to: <font color=\"red\">".$new_comma."</font> cents because it should stay in range 0 ... 56.8 cents</p>";
 	else {
 		if(round($new_comma,1) <> round($syntonic_comma,1)) {
 			if($new_comma < $syntonic_comma) $change_str = "lowering";
@@ -540,13 +551,26 @@ if(isset($_POST['change_comma']) AND isset($_POST['list_sensitive_notes']) AND $
 			if(($new_q_comma * $new_p_comma * $q_comma * $p_comma) > 0)
 				$comma_ratio = $new_p_comma * $q_comma / $new_q_comma / $p_comma;
 			else $comma_ratio = exp(($new_comma - $syntonic_comma) / 1200 * log(2));
+			$changed_ratio = array();
 			if($list_wolffifth_notes <> '') {
-				echo "<p>➡ Changed value of comma to: <b><font color=\"red\">".round($new_comma,1)."</font></b> cents (* ".round($comma_ratio,4).") by ".$change_str." notes:<br />";
-				$table_wolffifth_notes = explode(' ',$list_wolffifth_notes);
+				echo "<p>➡ Changed value of comma to: <b><font color=\"red\">".round($new_comma,1)."</font></b> cents by ".$change_str." notes (ratio ".round($comma_ratio,4)."):<br />";
 				for($i = 0; $i < count($table_wolffifth_notes); $i++) {
-					$changed_ratio = array();
 					$wolffifth_note = $table_wolffifth_notes[$i];
 					change_ratio_in_harmonic_cycle_of_fifths($wolffifth_note,$comma_ratio,$numgrades_fullscale);
+					}
+				echo "</p>";
+				}
+				
+			if($change_str == "lowering") $change_str = "raising";
+			else $change_str = "lowering";
+			$comma_ratio = 1./ $comma_ratio;
+			if($list_sensitive_notes <> '') {
+				if($list_wolffifth_notes == '')
+					echo "<p>➡ Changed value of comma to: <b><font color=\"red\">".round($new_comma,1)."</font></b> cents by ".$change_str." notes (ratio ".round($comma_ratio,4)."):<br />";
+				else echo "<p>and ".$change_str." notes (ratio ".round($comma_ratio,4)."):<br />";
+				for($i = 0; $i < count($table_sensitive_notes); $i++) {
+					$sensitive_note = $table_sensitive_notes[$i];
+					change_ratio_in_harmonic_cycle_of_fifths($sensitive_note,$comma_ratio,$numgrades_fullscale);
 					}
 				echo "</p>";
 				}
@@ -1791,7 +1815,7 @@ function change_ratio_in_harmonic_cycle_of_fifths($this_note,$change_ratio,$numg
 	if(isset($changed_ratio[$this_note])) return;
 	$changed_ratio[$this_note] = TRUE;
 	if($series[$this_note] <> 'h') return;
-	echo "<font color=\"blue\">".$name[$this_note]."</font><br />";
+	echo "<font color=\"blue\">".$name[$this_note]."</font> ";
 	for($j = 0; $j < $numgrades_fullscale; $j++) {
 		if($j == $this_note OR $name[$j] == '') continue;
 		if(($p[$j] * $p[$this_note] * $q[$j] * $q[$this_note]) > 0)
