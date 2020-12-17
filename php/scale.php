@@ -46,6 +46,7 @@ $p_comma = 81; $q_comma = 80;
 $syntonic_comma = cents($p_comma/$q_comma);
 $list_sensitive_notes = $list_wolffifth_notes = '';
 $pythagorean_third = cents(81/64);
+$pythagorean_minor_sixth = 1200 - $pythagorean_third;
 $perfect_fifth = cents(3/2);
 $perfect_fourth = cents(4/3);
 $series = array();
@@ -59,8 +60,8 @@ $the_fraction = get_fraction($number,$serie);
 echo $the_fraction['p']."/".$the_fraction['q']."<br />"; */
 
 if(isset($_POST['scroll'])) {
-	if(!isset($_SESSION['scroll']) OR $_SESSION['scroll'] == 1) $_SESSION['scroll'] = 0;
-	else $_SESSION['scroll'] = 1;
+	if(!isset($_SESSION['scroll']) OR $_SESSION['scroll'] == 0) $_SESSION['scroll'] = 1;
+	else $_SESSION['scroll'] = 0;
 	}
 
 if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST['create_meantone']) OR isset($_POST['modifynames'])) {
@@ -435,28 +436,6 @@ for($j = $numgrades_with_labels = 0; $j < $numgrades_fullscale; $j++) {
 	if($name[$j] == '') continue;
 	$numgrades_with_labels++;
 	}
-
-for($i = 0; $i <= $numgrades_fullscale; $i++) {
-	if(!isset($series[$i])) $series[$i] = '';
-	if(($p[$i] * $q[$i]) <> 0) {
-		$p_simple = $p[$i]; $q_simple = $q[$i];
-		while(modulo($p_simple,2) == 0) $p_simple = $p_simple / 2;
-		while(modulo($q_simple,2) == 0) $q_simple = $q_simple / 2;
-		while(modulo($p_simple,3) == 0) $p_simple = $p_simple / 3;
-		while(modulo($q_simple,3) == 0) $q_simple = $q_simple / 3;
-		if($p_simple == 1 AND $q_simple == 1) {
-			$series[$i] = "p";
-			}
-		else {
-			while(modulo($p_simple,5) == 0) $p_simple = $p_simple / 5;
-			while(modulo($q_simple,5) == 0) $q_simple = $q_simple / 5;
-			if($p_simple == 1 AND $q_simple == 1) {
-				$series[$i] = "h";
-				}
-			}
-		}
-	store2($h_image,"series",$i,$series[$i]);
-	}
 	
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 echo "<input type=\"hidden\" name=\"dir_scales\" value=\"".$dir_scales."\">";
@@ -667,12 +646,15 @@ for($i = 0; $i <= $numgrades_fullscale; $i++) {
 	else $show = round($ratio[$i],3);
 	echo "<td style=\"text-align:center; padding-top:4px; padding-bottom:4px; padding-left:0px; padding-right:0px; margin-left:0px; margin-right:0px; background-color:gold;\" colspan=\"2\">";
 	echo "<input type=\"text\" style=\"border:none; text-align:center;\" name=\"ratio_".$i."\" size=\"6\" value=\"".$show."\"><br /><small>";
+	if(!isset($series[$i])) $series[$i] = '';
+	$series[$i] = update_series($p[$i],$q[$i],$series[$i]);
 	if(($p[$i] * $p[$i]) == 0) echo "<input type=\"text\" style=\"border:none; text-align:center;\" name=\"series_".$i."\" size=\"1\" value=\"".$series[$i]."\">";
 	else {
 		echo $series[$i];
 		echo "<input type=\"hidden\" name=\"series_".$i."\" value=\"".$series[$i]."\">";
 		}
 	echo "</small></td>";
+	store2($h_image,"series",$i,$series[$i]);
 	}
 echo "</tr>";
 echo "<tr><th style=\"background-color:azure; padding:4px; position: absolute;\">name</th>";
@@ -1458,8 +1440,8 @@ echo "</td>";
 
 // Analyze scale
 $harmonic_third = $pythagorean_third - $syntonic_comma;
-$harmonic_sixth = 1200 - $harmonic_third;
-$pythagorean_sixth = 1200 - $pythagorean_third;
+$harmonic_minor_sixth = 1200 - $harmonic_third;
+$pythagorean_minor_sixth = 1200 - $pythagorean_third;
 $wolf_fifth = $perfect_fifth - $syntonic_comma;
 store($h_image,"harmonic_third",$harmonic_third);
 store($h_image,"pythagorean_third",$pythagorean_third);
@@ -1525,7 +1507,7 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 			if($class == 7 AND (abs($perfect_fifth - $x[$j][$k])) < 4) $color = "blue";
 		//	if($class == 5 AND (abs($perfect_fourth - $x[$j][$k])) < 4) $color = "blue";
 			if($class == 4 AND (abs($harmonic_third - $x[$j][$k])) < 4) $color = "green";
-		//	if($class == 8 AND (abs($harmonic_sixth - $x[$j][$k])) < 4) $color = "green";
+		//	if($class == 8 AND (abs($harmonic_minor_sixth - $x[$j][$k])) < 4) $color = "green";
 			if(($class == 7) AND (abs($wolf_fifth - $x[$j][$k])) < 4) {
 				// Wolf fifth
 				$list_sensitive_notes .= $k." ";
@@ -1534,7 +1516,7 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 				}
 		//	if(($class == 5) AND (abs((1200 - $wolf_fifth) - $x[$j][$k])) < 4) $color = "red";
 			if(($class == 4) AND (abs($pythagorean_third - $x[$j][$k])) < 4) $color = "brown";
-		//	if(($class == 8) AND (abs($pythagorean_sixth - $x[$j][$k])) < 4) $color = "brown";
+		//	if(($class == 8) AND (abs($pythagorean_minor_sixth - $x[$j][$k])) < 4) $color = "brown";
 			$show = "<font color=\"".$color."\">".round($x[$j][$k])."</font>";
 			if($class == 7 OR $class == 5 OR $class == 4 OR $class == 8) $show = "<b>".$show."</b>";
 			if(round($x[$j][$k]) == 0) $show = '';
@@ -1683,29 +1665,30 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 		}
 		
 	echo "<h3>Tuning scheme:</h3>";	
-	$levelmax = 3; // Number of allowed successive jumps. We'll increase it until all notes appear on the scheme
-	while(TRUE) {
-		$table = array();
-		for($i = 0; $i < $numgrades_fullscale; $i++) $done_note[$i] = FALSE;
-		for($i = 0; $i < 2 * $numgrades_fullscale; $i++) {
-			for($j = 0; $j < 2 * $numgrades_fullscale; $j++) {
-				$table[$i][$j] = -1;
-				}
+	$levelmax = ceil($numgrades_with_labels /  2); // Number of allowed successive jumps. We'll increase it until all notes appear on the scheme
+	$levelmax = 6;
+	$table = array();
+	for($i = 0; $i < $numgrades_fullscale; $i++) $done_note[$i] = FALSE;
+	for($i = 0; $i < 2 * $numgrades_fullscale; $i++) {
+		for($j = 0; $j < 2 * $numgrades_fullscale; $j++) {
+			$table[$i][$j] = -1;
 			}
+		}
+	while(TRUE) {
 		$i = $j = $numgrades_fullscale;
 	//	$startnote = $cycle[$j_max_length][0];
-		$startnote = 0;
 		$level = 0;
-		$table = find_neighbours($table,0,$ratio,$name,$i,$j,$numgrades_fullscale,$level,$levelmax);
+		$startnote = 0;
+		find_neighbours($syntonic_comma,$startnote,$ratio,$name,$i,$j,$numgrades_fullscale,$level,$levelmax);
 		for($i = $number_done = 0; $i < $numgrades_fullscale; $i++) {
 			if($done_note[$i]) $number_done++;
 			}
 		if($number_done >= $numgrades_with_labels) break;
 		$levelmax++;
-		if($levelmax > $numgrades_fullscale) {
-			echo "<p><font color=\"red\">For an unknown reason, only ".$number_done." notes out of ".$numgrades_with_labels." appear on the scheme.</font></p>";
-			break;
-			}
+		if($levelmax > $numgrades_fullscale) break;
+		}
+	if($number_done < $numgrades_with_labels) {
+		echo "<p><font color=\"red\"><i>Only ".$number_done." notes out of ".$numgrades_with_labels." appear on this scheme:</i></font></p>";
 		}
 	$lines = count($table);
 	$imin = $jmin = 2 * $numgrades_fullscale;
@@ -1734,7 +1717,7 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 		echo "</tr>";
 		}
 	echo "</table>";
-	echo "➡ <i>ignoring syntonic comma in major thirds and fifths</i><br /><br />";
+	echo "➡ <i>ignoring syntonic comma in major thirds</i><br /><br />";
 	echo "</td>";
 	}
 echo "</tr>";
@@ -1757,46 +1740,59 @@ echo "</html>";
 
 /* ===========  FUNCTIONS ============== */
 
-function find_neighbours($table,$note,$ratio,$name,$i,$j,$numgrades_fullscale,$level,$levelmax) {
-	global $done_note,$perfect_fifth,$perfect_fourth,$harmonic_third,$harmonic_sixth;
-	$nmax = (2 * $numgrades_fullscale) - 2;
+function find_neighbours($syntonic_comma,$note,$ratio,$name,$i,$j,$numgrades_fullscale,$level,$levelmax) {
+	global $table,$done_note,$perfect_fifth,$perfect_fourth,$harmonic_third,$harmonic_minor_sixth,$pythagorean_third,$pythagorean_minor_sixth;
+	$trace = FALSE;
+	$dist_max = $syntonic_comma - 1; // cents
+	if($ratio[$note] == 0) return;
+//	if($table[$i][$j] == -1) $table[$i][$j] = $note;
 	$table[$i][$j] = $note;
-	if($ratio[$note] == 0) return $table;
+	if($trace) echo "<br />• ".$name[$note]." (".$level."/".$levelmax.") ".$i." ".$j.": ";
 	for($k = 0; $k < $numgrades_fullscale; $k++) {
 		if($note == $k OR $name[$k] == '') continue;
 		$pos = cents($ratio[$k] / $ratio[$note]);
 		if($pos < 0) $pos += 1200;
+		if($trace) echo $name[$k]." ";
 		$dist = abs($pos - $perfect_fifth);
-		if($level < $levelmax AND $dist < 10 AND $i < $nmax) {
+		if($level < $levelmax AND $dist < $dist_max) {
 			if($table[$i+1][$j] == -1 AND !$done_note[$k]) {
-				$table = find_neighbours($table,$k,$ratio,$name,$i+1,$j,$numgrades_fullscale,$level+1,$levelmax);
+				find_neighbours($syntonic_comma,$k,$ratio,$name,$i+1,$j,$numgrades_fullscale,$level+1,$levelmax);
 				}
-			continue;
 			}
 		$dist = abs($pos - $perfect_fourth);
-		if($level < $levelmax AND $dist < 10 AND $i > 0) {
+		if($level < $levelmax AND $dist < $dist_max AND $i > 0) {
 			if($table[$i-1][$j] == -1 AND !$done_note[$k]) {
-				$table = find_neighbours($table,$k,$ratio,$name,$i-1,$j,$numgrades_fullscale,$level+1,$levelmax);
+				find_neighbours($syntonic_comma,$k,$ratio,$name,$i-1,$j,$numgrades_fullscale,$level+1,$levelmax);
 				}
-			continue;
 			}
 		$dist = abs($pos - $harmonic_third);
-		if($level < $levelmax AND $dist < 10) {
+		if($level < $levelmax AND $dist < $dist_max AND $levelmax >= ($numgrades_fullscale - 1)) {
 			if($table[$i][$j+1] == -1 AND !$done_note[$k]) {
-				$table = find_neighbours($table,$k,$ratio,$name,$i,$j+1,$numgrades_fullscale,$level+1,$levelmax);
+				find_neighbours($syntonic_comma,$k,$ratio,$name,$i,$j+1,$numgrades_fullscale,$level+1,$levelmax);
 				}
-			continue;
 			}
-		$dist = abs($pos - $harmonic_sixth);
-		if($level < $levelmax AND $dist < 10) {
+		$dist = abs($pos - $harmonic_minor_sixth);
+		if($level < $levelmax AND $dist < $dist_max AND $j > 0 AND $levelmax >= ($numgrades_fullscale - 1)) {
 			if($table[$i][$j-1] == -1 AND !$done_note[$k]) {
-				$table = find_neighbours($table,$k,$ratio,$name,$i,$j-1,$numgrades_fullscale,$level+1,$levelmax);
+				find_neighbours($syntonic_comma,$k,$ratio,$name,$i,$j-1,$numgrades_fullscale,$level+1,$levelmax);
 				}
-			continue;
 			}
-		$done_note[$note] = TRUE;
+		$dist = abs($pos - $pythagorean_third);
+		if($level < $levelmax AND $dist < $dist_max AND $levelmax == $numgrades_fullscale) {
+			if($table[$i][$j+1] == -1 AND !$done_note[$k]) {
+				find_neighbours($syntonic_comma,$k,$ratio,$name,$i,$j+1,$numgrades_fullscale,$level+1,$levelmax);
+				}
+			}
+		$dist = abs($pos - $pythagorean_minor_sixth);
+		if($level < $levelmax AND $dist < $dist_max AND $j > 0 AND $levelmax == $numgrades_fullscale) {
+			if($table[$i][$j-1] == -1 AND !$done_note[$k]) {
+				find_neighbours($syntonic_comma,$k,$ratio,$name,$i,$j-1,$numgrades_fullscale,$level+1,$levelmax);
+				}
+			}
 		}
-	return $table;
+	$done_note[$note] = TRUE;
+	if($trace) echo "<br />";
+	return;
 	}
 
 function cycle_of_intervals($interval,$cycle,$j) {

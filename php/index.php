@@ -167,8 +167,8 @@ if(isset($_POST['create_csound'])) {
 	$type = $_POST['type'];
 	$name_mode = $_POST['name_mode'];
 	$filename = trim($_POST['filename']);
-	$filename = good_name($type,$filename,$name_mode);
 	if($filename <> '') {
+		$filename = good_name($type,$filename,$name_mode);
 		$new_file = $filename;
 		if(file_exists($dir.SLASH.$filename)) {
 			echo "<p><font color=\"red\">This file already exists:</font> <font color=\"red\">".$filename."</font></p>";
