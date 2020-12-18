@@ -147,10 +147,11 @@ for($j = 0; $j <= $numgrades_fullscale; $j++) {
 		$y_text = $y2 - $y_center + $coord['y'] - $height_text / 2;
 		if(($p[$j] * $q[$j]) > 0) {
 			$fraction = $p[$j]."/".$q[$j];
-			$text = $fraction;
+			$text_ratio[$j] = $fraction;
 			}
-		else $text = round($ratio[$j],3);
-		$length_text = imagefontwidth(10) * strlen($text);
+		else $text_ratio[$j] = round($ratio[$j],3);
+		if($j > 0 AND $text_ratio[$j] == $text_ratio[$j-1]) continue;
+		$length_text = imagefontwidth(10) * strlen($text_ratio[$j]);
 		$coord = set_point(50 + $length_text,$ratio[$j]);
 		$x_text = $x2 - $x_center + $coord['x'] - $length_text / 2;
 		
@@ -166,7 +167,7 @@ for($j = 0; $j <= $numgrades_fullscale; $j++) {
 		$old_x = $x_text;
 		$old_y = $y_text;
 		imagefilledrectangle($im,$x_text - 5,$y_text,$end_x,$end_y,$azure);
-		imagestring($im,10,$x_text,$y_text,$text,$black);
+		imagestring($im,10,$x_text,$y_text,$text_ratio[$j],$black);
 		}
 	}
 	

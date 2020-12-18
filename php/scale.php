@@ -489,9 +489,11 @@ else if(isset($_POST['syntonic_comma'])) $syntonic_comma = $_POST['syntonic_comm
 store($h_image,"syntonic_comma",$syntonic_comma);
 store($h_image,"p_comma",$p_comma);
 store($h_image,"q_comma",$q_comma);
-
-// $list_wolffifth_notes = $_POST['list_wolffifth_notes'];
-// echo $list_wolffifth_notes."@@@<br />";
+	
+for($i = 0; $i <= $numgrades_fullscale; $i++) {
+	if(!isset($series[$i])) $series[$i] = '';
+	$series[$i] = update_series($p[$i],$q[$i],$series[$i]);
+	}
 
 echo "<div id=\"topcomma\"></div>";
 if(isset($_POST['change_comma']) AND isset($_POST['list_sensitive_notes']) AND $_POST['list_sensitive_notes'] <> '') {
@@ -508,6 +510,7 @@ if(isset($_POST['change_comma']) AND isset($_POST['list_sensitive_notes']) AND $
 		$new_p_comma = $new_q_comma = 0;
 		}
 	else $new_comma = $syntonic_comma;
+	
 	$list_sensitive_notes = $_POST['list_sensitive_notes'];
 	$list_wolffifth_notes = $_POST['list_wolffifth_notes'];
 	if($list_sensitive_notes <> '') {
@@ -1805,7 +1808,7 @@ function cycle_of_intervals($interval,$cycle,$j) {
 
 function change_ratio_in_harmonic_cycle_of_fifths($this_note,$change_ratio,$numgrades_fullscale) {
 	global $name,$p,$q,$ratio,$changed_ratio,$perfect_fifth,$series;
-//	echo "this_note = ".$this_note."<br />";
+	// if($this_note == '' OR $this_note == 0 OR $this_note == $numgrades_fullscale) return;
 	if($this_note == '') return;
 	// if(($p[$this_note] * $q[$this_note]) == 0) return;
 	if(isset($changed_ratio[$this_note])) return;
@@ -1829,6 +1832,7 @@ function change_ratio_in_harmonic_cycle_of_fifths($this_note,$change_ratio,$numg
 		}
 	$p[$this_note] = $q[$this_note] = 0;
 	$ratio[$this_note] = $ratio[$this_note] * $change_ratio;
+//	echo "this_note = ".$this_note." = ".$name[$this_note]." ".$change_ratio."<br />";
 	return;
 	}
 ?>
