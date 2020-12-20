@@ -2063,7 +2063,7 @@ function get_fraction($number,$serie) {
 	for($i = 0; $i < $imax; $i++) {
 		if($serie <> '' AND $serie_fract[$i] <> $serie) continue;
 		$dif = abs($number - $ratio_fract[$i]) / $number;
-		if($dif < 0.0015) {
+		if($dif < 0.001) {
 			$fraction['p'] = $p_fract[$i];
 			$fraction['q'] = $q_fract[$i];
 			$fraction['found'] = TRUE;
