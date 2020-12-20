@@ -59,9 +59,9 @@ $serie = "p";
 $the_fraction = get_fraction($number,$serie);
 echo $the_fraction['p']."/".$the_fraction['q']."<br />"; */
 
+if(!isset($_SESSION['scroll'])) $_SESSION['scroll'] = 0;
 if(isset($_POST['scroll'])) {
-	if(!isset($_SESSION['scroll']) OR $_SESSION['scroll'] == 0) $_SESSION['scroll'] = 1;
-	else $_SESSION['scroll'] = 0;
+	$_SESSION['scroll'] = 1 - $_SESSION['scroll'];
 	}
 
 if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST['create_meantone']) OR isset($_POST['modifynames'])) {
@@ -212,6 +212,9 @@ if(isset($_POST['savethisfile']) OR isset($_POST['interpolate']) OR isset($_POST
 		if(($p_comma * $q_comma) > 0) $syntonic_comma = cents($p_comma/$q_comma);
 		}
 	else $p_comma = $q_comma = 0;
+	if(round($syntonic_comma,3) == 21.506 AND ($p_comma * $q_comma) == 0) {
+		$p_comma = 81; $q_comma = 80;
+		}
 	$table = explode(chr(10),$scale_comment);
 	$imax = count($table); $empty = TRUE;
 	$scale_comment = "<html>";
@@ -372,6 +375,9 @@ if($comma_line <> '') {
 		}
 	else $p_comma = $q_comma = 0;
 	}
+if(round($syntonic_comma,3) == 21.506 AND ($p_comma * $q_comma) == 0) {
+	$p_comma = 81; $q_comma = 80;
+	}
 	
 if($scale_series <> '') {
 	$table = explode(' ',$scale_series);
@@ -485,6 +491,9 @@ if(isset($_POST['p_comma']) AND isset($_POST['q_comma'])) {
 	if(($p_comma * $q_comma) > 0) $syntonic_comma = cents($p_comma/$q_comma);
 	}
 else if(isset($_POST['syntonic_comma'])) $syntonic_comma = $_POST['syntonic_comma'];
+if(round($syntonic_comma,3) == 21.506 AND ($p_comma * $q_comma) == 0) {
+	$p_comma = 81; $q_comma = 80;
+	}
 
 store($h_image,"syntonic_comma",$syntonic_comma);
 store($h_image,"p_comma",$p_comma);
@@ -1052,9 +1061,7 @@ if($done AND $numgrades_with_labels > 2) {
 	echo "<input type=\"radio\" name=\"major_minor\" value=\"minor\">lower to relative minor</td>";
 	echo "<td style=\"text-align:center; vertical-align:middle; padding:4px;\"><b>Sensitive note (1 comma)</b><br /><br />➡ adjust note by ";
 	if(($p_comma * $q_comma) > 0) echo $p_comma."/".$q_comma." (or reverse)";
-	else {
-		$syntonic_comma." cents";
-		}
+	else echo round($syntonic_comma,1)." cents";
 	echo ": <input type=\"text\" name=\"name_sensitive_note\" size=\"6\" value=\"\"></td>";
 	echo "</tr></table><br />";
 	if(isset($_POST['transpose'])) {
