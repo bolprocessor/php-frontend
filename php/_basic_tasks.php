@@ -2060,6 +2060,7 @@ function get_fraction($number,$serie) {
 	$imax = count($ratio_fract);
 	$fraction['found'] = FALSE;
 	$fraction['p'] = $fraction['q'] = 0;
+	if($number == 0) return $fraction;
 	for($i = 0; $i < $imax; $i++) {
 		if($serie <> '' AND $serie_fract[$i] <> $serie) continue;
 		$dif = abs($number - $ratio_fract[$i]) / $number;
@@ -2074,6 +2075,7 @@ function get_fraction($number,$serie) {
 	}
 
 function cents($ratio) {
+	if($ratio < 0) return '';
 	$cents = 1200 * log($ratio) / log(2);
 	return $cents;
 	}

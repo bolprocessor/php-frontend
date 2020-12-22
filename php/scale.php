@@ -117,7 +117,6 @@ if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST
 		}
 	$name[$numgrades_fullscale] = $name[0];
 	
-	
 	if(isset($_POST['raisenote'])) {
 		$p_raised_note = abs(intval($_POST['p_raised_note']));
 		$q_raised_note = abs(intval($_POST['q_raised_note']));
@@ -132,7 +131,7 @@ if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST
 			for($j = 0; $j < $numgrades_fullscale; $j++) {
 				if($name[$j] == $raised_note) {
 					$j_raise = $j;
-					if(($p_raised_note * $q_raised_note * $p[$j] * $q[$j]) > 0) {
+					if(($p_raised_note * $q_raised_note * $p[$j] * $q[$j]) <> 0) {
 						$p[$j] = $p[$j] * $p_raised_note;
 						$q[$j] = $q[$j] * $q_raised_note;
 						$fraction = simplify_fraction_eliminate_schisma($p[$j],$q[$j]);
@@ -654,6 +653,8 @@ if(isset($_POST['use_convention'])) {
 store($h_image,"numgrades_fullscale",$numgrades_fullscale);
 echo "<tr><th style=\"background-color:azure; padding:4px; position: absolute;\">fraction</th>";
 for($i = 0; $i <= $numgrades_fullscale; $i++) {
+	$p[$i] = abs($p[$i]);
+	$q[$i] = abs($q[$i]);
 	if(($p[$i] * $q[$i]) == 0 AND $series[$i] <> '') {
 		// Try to guess closest fraction
 		$the_fraction = get_fraction($ratio[$i],$series[$i]);
@@ -674,18 +675,19 @@ for($i = 0; $i <= $numgrades_fullscale; $i++) {
 			}
 		$p_txt = $p[$i];
 		$q_txt = $q[$i];
-		echo "<input type=\"text\" style=\"border:none; text-align:right;\" name=\"p_".$i."\" size=\"5\" value=\"".$p_txt."\"><b>/</b><input type=\"text\" style=\"border:none;\" name=\"q_".$i."\" size=\"5\" value=\"".$q_txt."\">";
-		echo "</td>";
 		}
+	echo "<input type=\"text\" style=\"border:none; text-align:right;\" name=\"p_".$i."\" size=\"5\" value=\"".$p_txt."\"><b>/</b><input type=\"text\" style=\"border:none;\" name=\"q_".$i."\" size=\"5\" value=\"".$q_txt."\">";
+	echo "</td>";
 	store2($h_image,"p",$i,$p[$i]);
 	store2($h_image,"q",$i,$q[$i]);
 	}
 echo "</tr>";
 echo "<tr><th style=\"background-color:azure; padding:4px; position: absolute;\">ratio<br /><small>pyth/harm</small></th>";
 for($i = 0; $i <= $numgrades_fullscale; $i++) {
-	store2($h_image,"ratio",$i,$ratio[$i]);
+	if(($p[$i] * $p[$i]) <> 0) $ratio[$i] = $p[$i] / $q[$i];
 	if($ratio[$i] == 0) $show = '';
 	else $show = round($ratio[$i],3);
+	store2($h_image,"ratio",$i,$show);
 	echo "<td style=\"text-align:center; padding-top:4px; padding-bottom:4px; padding-left:0px; padding-right:0px; margin-left:0px; margin-right:0px; background-color:gold;\" colspan=\"2\">";
 	echo "<input type=\"text\" style=\"border:none; text-align:center;\" name=\"ratio_".$i."\" size=\"6\" value=\"".$show."\"><br /><small>";
 	if(!isset($series[$i])) $series[$i] = '';
@@ -710,7 +712,10 @@ echo "</tr>";
 echo "<tr><th style=\"background-color:azure; padding:4px; position: absolute;\">cents</th>";
 for($i = 0; $i <= $numgrades_fullscale; $i++) {
 	if($ratio[$i] == 0) $cents = '';
-	else $cents = round(cents($ratio[$i]));
+	else {
+		$cents = cents($ratio[$i]);
+		if($cents <> '') $cents = round($cents);
+		}
 	store2($h_image,"cents",$i,$cents);
 	echo "<td style=\"text-align:center; padding-top:4px; padding-bottom:4px; padding-left:0px; padding-right:0px; margin-left:0px; margin-right:0px; background-color:azure;\" colspan=\"2\">";
 	echo "<b>".$cents."</b>";
@@ -720,7 +725,11 @@ echo "</tr>";
 echo "<tr><th style=\"background-color:azure; padding:4px; position: absolute;\">interval</th><td style=\"padding:0px;\"></td>";
 for($i = 0; $i < $numgrades_fullscale; $i++) {
 	if(($ratio[$i] * $ratio[$i + 1]) == 0) $cents = '';
-	else $cents = "«—&nbsp;".round(cents($ratio[$i + 1] / $ratio[$i]))."c&nbsp;—»";
+	else {
+		$cents = cents($ratio[$i + 1] / $ratio[$i]);
+		if($cents <> '') $cents = round($cents);
+		$cents = "«—&nbsp;".$cents."c&nbsp;—»";
+		}
 	echo "<td style=\"white-space:nowrap; text-align:center; padding-top:4px; padding-bottom:4px; padding-left:0px; padding-right:0px; margin-left:0px; margin-right:0px;\" colspan=\"2\">";
 	echo "<font color=\"blue\">".$cents."</font>";
 	echo "</td>";
