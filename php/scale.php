@@ -57,7 +57,7 @@ if(isset($_POST['scroll'])) {
 	}
 
 $error_raise_note ='';
-if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST['raisenote']) OR isset($_POST['create_meantone']) OR isset($_POST['modifynames'])) {
+if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST['modifynote']) OR isset($_POST['alignscale']) OR isset($_POST['create_meantone']) OR isset($_POST['modifynames'])) {
 	if(isset($_POST['scale_name'])) $new_scale_name = trim($_POST['scale_name']);
 	else $new_scale_name = '';
 	if($new_scale_name == '') $new_scale_name = $filename;
@@ -117,7 +117,7 @@ if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST
 		}
 	$name[$numgrades_fullscale] = $name[0];
 	
-	if(isset($_POST['raisenote'])) {
+	if(isset($_POST['modifynote'])) {
 		$p_raised_note = abs(intval($_POST['p_raised_note']));
 		$q_raised_note = abs(intval($_POST['q_raised_note']));
 		$cents_raised_note = trim($_POST['cents_raised_note']);
@@ -160,6 +160,35 @@ if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST
 		$p[0] = $pmax;
 		$q[0] = $qmax;
 		}
+	
+	if(isset($_POST['alignscale']) AND ($ratio[0] <> 0 OR (($p[0] * $q[0]) <> 0))) {
+		if(($p[0] * $q[0]) <> 0) {
+			$p_align = $q[0];
+			$q_align = $p[0];
+			$ratio_align = $p_align / $q_align;
+			}
+		else {
+			$p_align = $q_align = 0;
+			$ratio_align = 1 / $ratio[0];
+			}
+		for($j = 0; $j <= $numgrades_fullscale; $j++) {
+			if(($p_align * $q_align * $p[$j] * $q[$j]) <> 0) {
+				$p[$j] = $p[$j] * $p_align;
+				$q[$j] = $q[$j] * $q_align;
+				$fraction = simplify_fraction_eliminate_schisma($p[$j],$q[$j]);
+				if($fraction['p'] <> $p[$j]) {
+					$p[$j] = $fraction['p'];
+					$q[$j] = $fraction['q'];
+					}
+				$ratio[$j] = $p[$j] / $q[$j];
+				}
+			else {
+				$ratio[$j] = $ratio[$j] * $ratio_align;
+				$p[$j] = $q[$j] = 0;
+				}
+			}
+		}
+	
 	$key_start = intval($_POST['key_start']);
 	$key_step = intval($_POST['key_step']);
 	$p_step = intval($_POST['p_step']);
@@ -230,7 +259,7 @@ if(isset($_POST['interpolate'])) {
 	}
 
 $message = '';
-if(isset($_POST['savethisfile']) OR isset($_POST['interpolate'])  OR isset($_POST['raisenote']) OR isset($_POST['create_meantone']) OR isset($_POST['modifynames'])) {
+if(isset($_POST['savethisfile']) OR isset($_POST['interpolate'])  OR isset($_POST['modifynote']) OR isset($_POST['alignscale']) OR isset($_POST['create_meantone']) OR isset($_POST['modifynames'])) {
 	$message = "&nbsp;<span id=\"timespan\"><font color=\"red\">... Saving this scale ...</font></span>";
 	$scale_comment = $_POST['scale_comment'];
 	if(isset($_POST['syntonic_comma'])) $syntonic_comma = $_POST['syntonic_comma'];
@@ -1472,8 +1501,15 @@ if($done AND $numgrades_with_labels > 2) {
 	
 	echo "<table><tr><td style=\"vertical-align:middle; padding:4px;\">";
 	
-	echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#toptranspose\" name=\"raisenote\" value=\"RAISE NOTE\">&nbsp;";
+	echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#toptranspose\" name=\"modifynote\" value=\"MODIFY NOTE\">&nbsp;";
 	echo "<input type=\"text\" name=\"raised_note\" size=\"5\" value=\"".$raised_note."\"> by (integer) ratio <input type=\"text\" name=\"p_raised_note\" size=\"4\" value=\"".$p_raised_note."\"><b> / </b><input type=\"text\" name=\"q_raised_note\" size=\"3\" value=\"".$q_raised_note."\"> or <input type=\"text\" name=\"cents_raised_note\" size=\"6\" value=\"".$cents_raised_note."\"> cents";
+	if($ratio[0] <> 1.0) {
+		echo "</td></tr><tr><td style=\"vertical-align:middle; padding:4px;\">";
+		echo "<font color=\"red\">➡</font>&nbsp;<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#toptranspose\" name=\"alignscale\" value=\"ALIGN SCALE\">&nbsp;to the position of “".$name[0]."”, which means&nbsp;";
+		if($ratio[0] > 1) echo "lowering&nbsp;";
+		else echo "raising&nbsp;";
+		echo "all notes by <font color=\"red\">".abs(round(cents($ratio[0]),0))." cents</font>";
+		}
 	if($error_raise_note <> '') echo "<br />".$error_raise_note;
 	echo "</td>";
 	echo "</tr></table>";

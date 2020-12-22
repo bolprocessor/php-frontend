@@ -949,6 +949,104 @@ if($max_scales > 0) {
 			}
 		}
 	
+	if(isset($_POST['align_scales'])) {
+		$file_lock = $dir.$filename."_lock";
+		$handle_lock = fopen($file_lock,"w");
+		fwrite($handle_lock,"lock\n");
+		fclose($handle_lock);
+		$need_to_save = TRUE;
+		$dircontent = scandir($dir_scales);
+		foreach($dircontent as $some_scale) {
+			if($some_scale == '.' OR $some_scale == ".." OR $some_scale == ".DS_Store") continue;
+			$table = explode(".",$some_scale);
+			$extension = end($table);
+			if($extension == "txt") {
+				$file_link = $dir_scales.$some_scale;
+				$content = file_get_contents($dir_scales.$some_scale,TRUE);
+				$table2 = explode("\n",$content);
+				$im = count($table2);
+				$ratio_align = 0;
+				$p_align = $q_align = 0;
+				for($i = 0; $i < $im; $i++) {
+					$line = trim($table2[$i]);
+					if($line == '') continue;
+					if($line[0] == 'f') {
+						$line = preg_replace("/\s+/u",' ',$line);
+						$table3 = explode(' ',$line);
+						$ratio_tonic = $table3[8];
+						if(abs($ratio_tonic - 1) > 0.01)
+							$ratio_align = 1 / $ratio_tonic;
+						}
+					if($line[0] == '[') {
+						$line = trim(str_replace('[','',$line));
+						$line = preg_replace("/\s+/u",' ',$line);
+						$table3 = explode(' ',$line);
+						$p_tonic = intval($table3[0]);
+						$q_tonic = intval($table3[1]);
+						if(($p_tonic * $q_tonic) <> 0 AND ($p_tonic / $q_tonic) <> 1) {
+							$p_align = $q_tonic;
+							$q_align = $p_tonic;
+							$ratio_align = $p_align / $q_align;
+							}
+						}
+					}
+				if($ratio_align == 0) continue;
+				echo "Aligning <font color=\"blue\">".str_replace(".txt",'',$some_scale)."</font> ratio = ".$ratio_align." = ".$p_align."/".$q_align."<br />";
+				$handle = fopen($dir_scales.$some_scale,"w");
+				for($i = 0; $i < $im; $i++) {
+					$line = trim($table2[$i]);
+					if($line == '') continue;
+					$ratio = array();
+					if($line[0] == '[') {
+						$new_line = '';
+						$line = trim(str_replace('[','',$line));
+						$line = trim(str_replace(']','',$line));
+						$line = preg_replace("/\s+/u",' ',$line);
+						$table3 = explode(' ',$line);
+						for($j = 0; $j < count($table3); $j += 2) {
+							$p = $table3[$j];
+							$q = $table3[$j + 1];
+							if($p_align <> 0) {
+								$p = $p * $p_align;
+								$q = $q * $q_align;
+								$fraction = simplify_fraction_eliminate_schisma($p,$q);
+								if($fraction['p'] <> $p) {
+									$p = $fraction['p'];
+									$q = $fraction['q'];
+									}
+								$ratio[$j / 2] = $p / $q;
+								}
+							else {
+								$p = $q = 0;
+								}
+							$new_line .= $p." ".$q." ";
+							}
+						$line = "[".trim($new_line)."]";
+						}
+					else if($line[0] == 'f') {
+						$new_line = '';
+						$line = preg_replace("/\s+/u",' ',$line);
+						$table3 = explode(' ',$line);
+						for($j = 0; $j < count($table3); $j++) {
+							$k = $table3[$j];
+							if($j < 8) $new_line .= $k." ";
+							else {
+								if(isset($ratio[$j - 8])) $k = $k * $ratio[$j - 8];
+								else $k = $k * $ratio_align;
+								$new_line .= round($k,3)." ";
+								}
+							}
+						$line = trim($new_line);
+						}
+					fwrite($handle,$line."\n");
+					}
+				fclose($handle);
+				}
+			}
+		echo "<p><font color=\"red\">➡ Now click the SAVE ‘".$filename."’ button to refresh the display</font> </p>";
+		}
+		
+		
 	if(isset($_POST['reassign_keys'])) {
 		$done = FALSE;
 		echo "<p><font color=\"red\">➡</font> <input style=\"background-color:cornsilk;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\">";
@@ -1047,7 +1145,10 @@ if($max_scales > 0) {
 		echo "</tr>";
 		echo "</table>";
 		}
-	if($done) echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"export_scales\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#export\" value=\"EXPORT TONAL SCALES\">&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"delete_scales\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#export\" value=\"DELETE SEVERAL SCALES\">&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"reassign_keys\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#topscales\" value=\"REASSIGN KEYS\"></p>";
+	if($done) echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"export_scales\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#export\" value=\"EXPORT TONAL SCALES\">&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"delete_scales\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#export\" value=\"DELETE SEVERAL SCALES\">";
+	echo "&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"reassign_keys\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#topscales\" value=\"REASSIGN KEYS\">";
+	echo "&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"align_scales\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#topscales\" value=\"ALIGN SCALES ON TONIC\">";
+	echo "</p>";
 	echo "<ol>";
 	$table_names = $p_interval = $q_interval = $cent_position = $ratio_interval = array();
 	for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
