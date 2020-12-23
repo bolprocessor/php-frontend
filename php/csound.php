@@ -951,10 +951,17 @@ if($max_scales > 0) {
 	
 	if(isset($_POST['align_scales'])) {
 		$file_lock = $dir.$filename."_lock";
+		$time_start = time();
+		$time_end = $time_start + 3;
+		while(TRUE) {
+			if(!file_exists($file_lock)) break;
+			if(time() > $time_end) unlink($file_lock);
+			sleep(1);
+			}
 		$handle_lock = fopen($file_lock,"w");
 		fwrite($handle_lock,"lock\n");
 		fclose($handle_lock);
-		$need_to_save = TRUE;
+		$need_to_save = FALSE;
 		$dircontent = scandir($dir_scales);
 		foreach($dircontent as $some_scale) {
 			if($some_scale == '.' OR $some_scale == ".." OR $some_scale == ".DS_Store") continue;
@@ -992,6 +999,7 @@ if($max_scales > 0) {
 					}
 				if($ratio_align == 0) continue;
 				echo "Aligning <font color=\"blue\">".str_replace(".txt",'',$some_scale)."</font> ratio = ".$ratio_align." = ".$p_align."/".$q_align."<br />";
+				$need_to_save = TRUE;
 				$handle = fopen($dir_scales.$some_scale,"w");
 				for($i = 0; $i < $im; $i++) {
 					$line = trim($table2[$i]);
@@ -1043,9 +1051,9 @@ if($max_scales > 0) {
 				fclose($handle);
 				}
 			}
-		echo "<p><font color=\"red\">➡ Now click the SAVE ‘".$filename."’ button to refresh the display</font> </p>";
-		}
-		
+		unlink($file_lock);
+		if($need_to_save) echo "<p><font color=\"red\">➡ Now click the SAVE ‘".$filename."’ button to refresh the display</font> </p>";
+		}	
 		
 	if(isset($_POST['reassign_keys'])) {
 		$done = FALSE;
@@ -1147,7 +1155,7 @@ if($max_scales > 0) {
 		}
 	if($done) echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"export_scales\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#export\" value=\"EXPORT TONAL SCALES\">&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"delete_scales\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#export\" value=\"DELETE SEVERAL SCALES\">";
 	echo "&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"reassign_keys\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#topscales\" value=\"REASSIGN KEYS\">";
-	echo "&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"align_scales\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#topscales\" value=\"ALIGN SCALES ON TONIC\">";
+	echo "&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"align_scales\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."\" value=\"ALIGN SCALES ON THEIR BASE NOTES\">";
 	echo "</p>";
 	echo "<ol>";
 	$table_names = $p_interval = $q_interval = $cent_position = $ratio_interval = array();

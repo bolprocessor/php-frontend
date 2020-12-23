@@ -1503,14 +1503,14 @@ if($done AND $numgrades_with_labels > 2) {
 	
 	echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#toptranspose\" name=\"modifynote\" value=\"MODIFY NOTE\">&nbsp;";
 	echo "<input type=\"text\" name=\"raised_note\" size=\"5\" value=\"".$raised_note."\"> by (integer) ratio <input type=\"text\" name=\"p_raised_note\" size=\"4\" value=\"".$p_raised_note."\"><b> / </b><input type=\"text\" name=\"q_raised_note\" size=\"3\" value=\"".$q_raised_note."\"> or <input type=\"text\" name=\"cents_raised_note\" size=\"6\" value=\"".$cents_raised_note."\"> cents";
+	if($error_raise_note <> '') echo "<br />".$error_raise_note;
 	if($ratio[0] <> 1.0) {
 		echo "</td></tr><tr><td style=\"vertical-align:middle; padding:4px;\">";
-		echo "<font color=\"red\">➡</font>&nbsp;<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#toptranspose\" name=\"alignscale\" value=\"ALIGN SCALE\">&nbsp;to the position of “".$name[0]."”, which means&nbsp;";
+		echo "<font color=\"red\">➡</font>&nbsp;<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#toptranspose\" name=\"alignscale\" value=\"ALIGN SCALE\">&nbsp;to the position of “".$name[0]."” by&nbsp;";
 		if($ratio[0] > 1) echo "lowering&nbsp;";
 		else echo "raising&nbsp;";
 		echo "all notes by <font color=\"red\">".abs(round(cents($ratio[0]),0))." cents</font>";
 		}
-	if($error_raise_note <> '') echo "<br />".$error_raise_note;
 	echo "</td>";
 	echo "</tr></table>";
 	}
@@ -1748,7 +1748,7 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 	for($j = 0; $j < $numgrades_fullscale; $j++) {
 		$cycle[$j] = array();
 		$cycle[$j][] = $j;
-		$cycle[$j] = cycle_of_intervals($fifth,$cycle[$j],$j);
+		$cycle[$j] = cycle_of_intervals($fifth,$cycle[$j],$j,0);
 		if(count($cycle[$j]) > $max_length) {
 			$max_length = count($cycle[$j]);
 			$j_max_length = $j;
@@ -1886,10 +1886,11 @@ function find_neighbours($syntonic_comma,$note,$ratio,$name,$i,$j,$numgrades_ful
 	return;
 	}
 
-function cycle_of_intervals($interval,$cycle,$j) {
+function cycle_of_intervals($interval,$cycle,$j,$level) {
+	if($level > 100) return $cycle;
 	if(isset($interval[$j])) {
 		$cycle[] = $interval[$j];
-		$cycle = cycle_of_intervals($interval,$cycle,$interval[$j]);
+		$cycle = cycle_of_intervals($interval,$cycle,$interval[$j],$level + 1);
 		}
 	return $cycle;
 	}
