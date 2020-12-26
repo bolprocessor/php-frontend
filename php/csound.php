@@ -169,7 +169,7 @@ if(isset($_POST['copy_this_scale'])) {
 					if($line == "_end tables") {
 						if($can_copy) {
 							$folder_scales = $temp_dir.$temp_folder.SLASH."scales";
-						//	echo $folder_scales."<br />";
+							echo $folder_scales."<br />";
 							$dir_scale = scandir($folder_scales);
 							foreach($dir_scale as $this_scale) {
 						//		echo "this_scale = ".$this_scale."<br />";
@@ -183,6 +183,7 @@ if(isset($_POST['copy_this_scale'])) {
 									$table3 = explode(chr(10),$content_scale);
 									for($j = 0; $j < count($table3); $j++) {
 										$line3 = trim($table3[$j]);
+									//	echo $line3."<br />";
 										if($line3 <> '') fwrite($handle,$line3."\n");
 										}
 									}
@@ -190,7 +191,7 @@ if(isset($_POST['copy_this_scale'])) {
 							}
 						}
 					fwrite($handle,$line."\n");
-				//	echo $line."<br />";
+			//		echo $line."<br />";
 					}
 				fclose($handle);
 			//	unlink($file_lock2);
@@ -204,8 +205,9 @@ if(isset($_POST['copy_this_scale'])) {
 	}
 for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
 	if(isset($_POST['copy_scale_'.$i_scale])) {
+		echo "<p><font color=\"red\">➡ The destination file should be closed to make sure that the export takes place</font></p>";
 		echo "<form method=\"post\" action=\"".$url_this_page."&scalefilename=".urlencode($scalefilename)."\" enctype=\"multipart/form-data\">";
-		echo "<input type=\"submit\" style=\"background-color:aquamarine; font-size:large;\" name=\"\" onclick=\"this.form.target='_self';return true;\" value=\"Click to copy scale ‘".$scalefilename."’ to:\"><br />";
+		echo "<input style=\"background-color:cornsilk;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\">&nbsp;<input type=\"submit\" style=\"background-color:aquamarine; font-size:large;\" name=\"\" onclick=\"this.form.target='_self';return true;\" value=\"Click to copy scale ‘".$scalefilename."’ to:\"><br />";
 		echo "<blockquote>";
 		echo "<input type=\"hidden\" name=\"copy_this_scale\" value=\"1\">";
 		$dircontent = scandir($dir);
