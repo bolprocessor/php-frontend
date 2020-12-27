@@ -66,22 +66,24 @@ if(isset($p_comma) AND isset($q_comma) AND ($p_comma * $q_comma) > 0)
 	$comma_ratio = $p_comma / $q_comma;
 else 
 	if(isset($syntonic_comma)) $comma_ratio = exp($syntonic_comma/1200. * log(2));
-	
-$mark_ratio = 1;
-for($i = 0; $i < 7; $i++) {
-	mark($im,$mark_ratio,$blue);
-	if($i > 0 AND isset($comma_ratio)) mark($im,$mark_ratio / $comma_ratio,$green);
-	$mark_ratio = $mark_ratio * 3;
-	}
-$mark_ratio = 1;
-for($i = 0; $i < 7; $i++) {
-	mark($im,$mark_ratio,$blue);
-	if($i > 0 AND isset($comma_ratio)) mark($im,$mark_ratio * $comma_ratio,$green);
-	$mark_ratio = $mark_ratio / 3;
+
+if($interval_cents == 1200) {
+	$mark_ratio = 1;
+	for($i = 0; $i < 7; $i++) {
+		mark($im,$mark_ratio,$blue);
+		if($i > 0 AND isset($comma_ratio)) mark($im,$mark_ratio / $comma_ratio,$green);
+		$mark_ratio = $mark_ratio * 3;
+		}
+	$mark_ratio = 1;
+	for($i = 0; $i < 7; $i++) {
+		mark($im,$mark_ratio,$blue);
+		if($i > 0 AND isset($comma_ratio)) mark($im,$mark_ratio * $comma_ratio,$green);
+		$mark_ratio = $mark_ratio / 3;
+		}
 	}
 
 for($j = 0; $j <= $numgrades_fullscale; $j++) {
-	$angle = 2 * M_PI * cents($ratio[$j]) / 1200 + (M_PI / 2);
+	$angle = 2 * M_PI * cents($ratio[$j]) / $interval_cents + (M_PI / 2);
 	$coord = set_point($radius + 2,$ratio[$j]);
 	$x_note = $coord['x'];
 	$y_note = $coord['y'];
@@ -132,7 +134,7 @@ for($j = 0; $j <= $numgrades_fullscale; $j++) {
 
 $end_x = $end_y = $old_x = $old_y = 0;
 for($j = 0; $j <= $numgrades_fullscale; $j++) {
-	$angle = 2 * M_PI * cents($ratio[$j]) / 1200 + (M_PI / 2);
+	$angle = 2 * M_PI * cents($ratio[$j]) / $interval_cents + (M_PI / 2);
 	$coord = set_point($radius + 2,$ratio[$j]);
 	$x_note = $coord['x'];
 	$y_note = $coord['y'];
@@ -226,9 +228,9 @@ imagedestroy($im);
 // ======================= FUNCTIONS =======================
 
 function set_point($radius,$ratio) {
-	global $x_center,$y_center;
+	global $x_center,$y_center,$interval_cents;
 	$cents = cents($ratio);
-	$angle = 2 * M_PI * $cents / 1200 + (M_PI / 2);
+	$angle = 2 * M_PI * $cents / $interval_cents + (M_PI / 2);
 	$coord['x'] = $radius * cos($angle) + $x_center;
 	$coord['y'] = $radius * sin($angle) + $y_center;
 	return $coord;

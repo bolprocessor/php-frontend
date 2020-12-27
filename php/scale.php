@@ -532,6 +532,7 @@ echo "</tr><tr>";
 echo "<td style=\"white-space:nowrap; padding:6px; vertical-align:middle;\"><font color=\"blue\">interval</font> = <input type=\"text\" name=\"interval\" size=\"5\" value=\"".$interval."\">";
 $cents = round(cents($interval));
 echo " or <input type=\"text\" name=\"interval_cents\" size=\"5\" value=\"".$cents."\"> cents (typically 1200)";
+store($h_image,"interval_cents",$cents);
 echo "</td>";
 echo "</tr><tr>";
 echo "<td style=\"white-space:nowrap; padding:6px; vertical-align:middle;\"><font color=\"blue\">basekey</font> = <input type=\"text\" name=\"basekey\" size=\"5\" value=\"".$basekey."\">";
@@ -1350,16 +1351,8 @@ if($done AND $numgrades_with_labels > 2) {
 				//	if($name[$j] == '') continue;
 					$new_ratio = $this_ratio * $ratio[$j];
 					if(($p[$j] * $q[$j]) <> 0) {
-					/*	if($j == $numgrades_fullscale) {
-							$p_new = $p_new_this_grade[0] * $interval;
-							$q_new  = $q_new_this_grade[0];
-							$new_ratio = $ratio_this_grade[0] * $interval;
-							}
-						else { */
-							$p_new = $p[$j] * $p_raise;
-							$q_new  = $q[$j] * $q_raise;
-						//	$new_ratio = $this_ratio * $ratio[$j];
-						//	}
+						$p_new = $p[$j] * $p_raise;
+						$q_new  = $q[$j] * $q_raise;
 						if(($p_new * $q_new) > 0) {
 							$gcd = gcd($p_new,$q_new);
 							$p_new = $p_new / $gcd;
@@ -1372,14 +1365,14 @@ if($done AND $numgrades_with_labels > 2) {
 							$q_new = $fraction['q'];
 							}
 						$new_ratio = $p_new / $q_new;
-						if($new_ratio > $interval AND $j <> $numgrades_fullscale) {
+						while($new_ratio >= $interval AND !($j == $numgrades_fullscale AND $new_ratio == $interval)) {
 							$q_new = $q_new * $interval;
 							$gcd = gcd($p_new,$q_new);
 							$p_new = $p_new / $gcd;
 							$q_new = $q_new / $gcd;
 							$new_ratio = $new_ratio / $interval;
 							}
-						if($new_ratio < (1. / $interval)) {
+						while($new_ratio < (1. / $interval) AND !($j == 0 AND $new_ratio == 1/$interval)) {
 							$p_new = $p_new * $interval;
 							$gcd = gcd($p_new,$q_new);
 							$p_new = $p_new / $gcd;
@@ -1388,56 +1381,18 @@ if($done AND $numgrades_with_labels > 2) {
 							}
 						$p[$j] = $p_new;
 						$q[$j] = $q_new;
-						$ratio[$j] = $new_ratio;
 						}
-					/*	$p_new_this_grade[$jj] = $p_new;
-						$q_new_this_grade[$jj] = $q_new;
-						$name_this_grade[$jj] = $name[$j];
-						$ratio_this_grade[$jj] = $new_ratio;
-						$cents_new_this_grade[$jj] = cents($new_ratio);
-						}*/
+					else {
+						while($new_ratio >= $interval AND !($j == $numgrades_fullscale AND $new_ratio == $interval))
+							$new_ratio = $new_ratio / $interval;
+						while($new_ratio < (1. / $interval) AND !($j == 0 AND $new_ratio == 1/$interval))
+							$new_ratio = $new_ratio * $interval;
+						}
+					$ratio[$j] = $new_ratio;
 					echo "<font color=\"blue\">‘".$name[$j]."’</font> new ratio = ".round($new_ratio,3);
 					if(($p[$j] * $q[$j]) <> 0) echo " = ".$p_new."/".$q_new;
 					echo "<br />";
-					$jj++;
 					}
-				// Check notes against grama locations
-	/*			for($j = 0; $j <= $numgrades_fullscale; $j++) {
-					$new_name[$j] = '';
-					}
-				$jold = -1;
-				for($jj = 0; $jj <= $numgrades_with_labels; $jj++) {
-					$minimum_dist = 1200;
-					$closest_j = -1;
-					$search_cents = round($cents_new_this_grade[$jj]);
-					for($j = 0; $j <= $numgrades_fullscale; $j++) {
-						if($j == $jold) continue;
-						$cents = cents($ratio[$j]);
-						$dist = abs($cents - $search_cents);
-						if($dist < $minimum_dist) {
-							$minimum_dist = $dist;
-							$closest_j = $j;
-							}
-						}
-					if($closest_j >= 0) {
-						$new_name[$closest_j] = $name_this_grade[$jj];
-						$p[$closest_j] = $p_new_this_grade[$jj];
-						$q[$closest_j] = $q_new_this_grade[$jj];
-						$old_ratio = round($ratio[$closest_j],3);
-						$ratio[$closest_j] = $ratio_this_grade[$jj];
-						if($new_name[$closest_j] <> $name[$closest_j]) {
-							echo "➡ Assigned location of <font color=\"blue\">‘".$name_this_grade[$jj]."’</font> to ".$closest_j."th position";
-							if(round($ratio[$closest_j],3) <> $old_ratio)
-								echo " with ratio ".$p[$closest_j]."/".$q[$closest_j]." = ".round($ratio[$closest_j],3);
-							echo "<br />";
-							}
-						$jold = $closest_j;
-						}
-					}
-				for($j = 0; $j <= $numgrades_fullscale; $j++)
-					$name[$j] = $new_name[$j];
-				if($name[0] == '') $name[0] = $name[$numgrades_fullscale];
-				if($name[$numgrades_fullscale] == '') $name[$numgrades_fullscale] = $name[0]; */
 				}
 			
 			// Now save to file	

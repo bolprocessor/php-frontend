@@ -86,6 +86,16 @@ if(isset($_POST['undelete_scales'])) {
 			}
 		}
 	}
+	
+if(isset($_POST['empty_trash'])) {
+	$dircontent = scandir($dir_scales);
+	foreach($dircontent as $some_scale) {
+		if($some_scale == '.' OR $some_scale == ".." OR $some_scale == ".DS_Store") continue;
+		$table = explode(".",$some_scale);
+		$extension = end($table);
+		if($extension == "old") unlink($dir_scales.$some_scale);
+		}
+	}
 
 for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
 	if(isset($_POST['delete_scale_'.$i_scale])) {
@@ -800,7 +810,7 @@ foreach($dircontent as $some_scale) {
 		}
 	}
 if($deleted_scales > 0) {
-	echo "</b></font>&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"undelete_scales\" onclick=\"this.form.target='_self';return true;\" value=\"UNDELETE all scales\">";
+	echo "</b></font>&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"undelete_scales\" onclick=\"this.form.target='_self';return true;\" value=\"UNDELETE all scales\">&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"empty_trash\" onclick=\"this.form.target='_self';return true;\" value=\"TRASH these scales\">";
 	echo "</p>";
 	}
 echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"create_scale\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#topscales\" value=\"CREATE A NEW TONAL SCALE\">&nbsp;with name <input type=\"text\" name=\"scale_name\" size=\"20\" value=\"\"></p>";
