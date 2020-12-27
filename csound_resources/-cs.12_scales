@@ -1,5 +1,5 @@
 // Bol Processor BP3 compatible with version BP2.9.8
-// Csound resource file saved as "-cs.12_scales". Date: 2020-12-26 04:09:38
+// Csound resource file saved as "-cs.12_scales". Date: 2020-12-27 09:56:22
 16
 -1
 -1
@@ -21,15 +21,6 @@ default.orc
 0
 _begin tables
 f1 0 256 1 "vina-wave-table.aiff" 0 4 0
-"Gmaj_minus"
-/do do# re re# mi fa fa# sol sol# la la# si do/
-c21.5062895967 81 80c
-k0 1 2 3 4 5 6 7 8 9 10 11 12k
-[80 81 20480 19683 10 9 2560 2187 100 81 320 243 25 18 40 27 10240 6561 5 3 1280 729 50 27 160 81]
-sh h h h h h h h h h h h hs
-|4|
-f2 0 128 -51 12 2 261.63 60 0.988 1.04 1.111 1.171 1.235 1.317 1.389 1.481 1.561 1.667 1.756 1.852 1.975
-<html>This is a reduction to 12 grades of scale "Sa12" (23 grades) in ‘-cs.12_scales’<br />Created 2020-12-26 04:42:49<br /></html>
 "Ma01"
 /C Db • D • Eb • E • F • F# • • G Ab • A • Bb • B • C/
 c21.5062895967 81 80c

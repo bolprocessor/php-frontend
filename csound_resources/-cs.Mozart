@@ -1,5 +1,5 @@
 // Bol Processor BP3 compatible with version BP2.9.8
-// Csound resource file saved as "-cs.Mozart". Date: 2020-12-26 04:24:37
+// Csound resource file saved as "-cs.Mozart". Date: 2020-12-27 09:56:25
 16
 -1
 -1
@@ -73,6 +73,15 @@ sp h p h p p p p h p h p ps
 |4|
 f2 0 128 -51 12 2 261.63 60 1 1.067 1.125 1.2 1.266 1.333 1.424 1.5 1.6 1.688 1.8 1.898 2
 <html>This is a reduction of scale "Ma04" (23 grades)<br />Created 2020-11-29 05:02:51<br /></html>
+"Cmin_minus"
+/do do# re re# mi fa fa# sol sol# la la# si do/
+c21.5062895967 81 80c
+k0 1 2 3 4 5 6 7 8 9 10 11 12k
+[80 81 256 243 10 9 32 27 5 4 320 243 45 32 40 27 128 81 5 3 16 9 15 8 160 81]
+sh p h p h h h h p h p h hs
+|4|
+f2 0 128 -51 12 2 261.63 60 0.988 1.053 1.111 1.185 1.25 1.317 1.406 1.481 1.58 1.667 1.778 1.875 1.975
+<html>This is a reduction to 12 grades of scale "Ma04" (23 grades) in ‘-cs.12_scales’<br />Created 2020-12-27 09:35:22<br />Also Cmin lowered by a comma (non-aligned)<br /></html>
 "Dbmaj"
 /do do# re re# mi fa fa# sol sol# la la# si do/
 [1 1 16 15 9 8 6 5 81 64 4 3 729 512 3 2 8 5 27 16 16 9 243 128 2 1]
@@ -147,10 +156,13 @@ f2 0 128 -51 12 2 261.63 60 1 1.066 1.124 1.199 1.265 1.333 1.423 1.499 1.599 1.
 <html>This is a reduction of scale "Ma05" (23 grades)<br />Created 2020-11-29 18:21:05</html>
 "Gmaj"
 /do do# re re# mi fa fa# sol sol# la la# si do/
+c21.5062895967 81 80c
+k0 1 2 3 4 5 6 7 8 9 10 11 12k
 [1 1 256 243 9 8 32 27 5 4 4 3 45 32 3 2 128 81 27 16 16 9 15 8 2 1]
+sp p p p h p h p p p p h ps
 |4|
-f2 0 128 -51 12 2 261.63 60 1 1.053 1.124 1.185 1.25 1.333 1.406 1.499 1.58 1.687 1.777 1.874 1.999
-<html>This is a reduction of scale "Sa12" (23 grades)<br />Created 2020-11-29 18:40:00</html>
+f2 0 128 -51 12 2 261.63 60 1 1.053 1.124 1.185 1.25 1.333 1.406 1.5 1.58 1.688 1.778 1.875 2
+<html>This is a reduction of scale "Sa12" (23 grades)<br />Created 2020-11-29 18:40:00<br /></html>
 "Gmaj_minus"
 /do do# re re# mi fa fa# sol sol# la la# si do/
 c21.5062895967 81 80c
@@ -159,7 +171,7 @@ k0 1 2 3 4 5 6 7 8 9 10 11 12k
 sh h h h h h h h h h h h hs
 |4|
 f2 0 128 -51 12 2 261.63 60 0.988 1.04 1.111 1.171 1.235 1.317 1.389 1.481 1.561 1.667 1.756 1.852 1.975
-<html>This is a reduction to 12 grades of scale "Sa12" (23 grades) in ‘-cs.12_scales’<br />Created 2020-12-26 04:42:49<br /></html>
+<html>This is a reduction to 12 grades of scale "Sa12" (23 grades) in ‘-cs.12_scales’<br />Created 2020-12-26 04:42:49<br />Also Gmaj lowered by a comma (non-aligned)<br /></html>
 "Gmin"
 /do do# re re# mi fa fa# sol sol# la la# si do/
 [1 1 16 15 9 8 6 5 81 64 27 20 729 512 3 2 8 5 27 16 9 5 243 128 2 1]

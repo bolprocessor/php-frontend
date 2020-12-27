@@ -189,12 +189,12 @@ if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST
 			}
 		}
 	
-	$key_start = intval($_POST['key_start']);
-	$key_step = intval($_POST['key_step']);
-	$p_step = intval($_POST['p_step']);
-	$q_step = intval($_POST['q_step']);
-	$p_cents = intval($_POST['p_cents']);
-	$q_cents = intval($_POST['q_cents']);
+	if(isset($_POST['key_start'])) $key_start = intval($_POST['key_start']);
+	if(isset($_POST['key_step'])) $key_step = intval($_POST['key_step']);
+	if(isset($_POST['p_step'])) $p_step = intval($_POST['p_step']);
+	if(isset($_POST['q_step'])) $q_step = intval($_POST['q_step']);
+	if(isset($_POST['p_cents'])) $p_cents = intval($_POST['p_cents']);
+	if(isset($_POST['q_cents'])) $q_cents = intval($_POST['q_cents']);
 	}
 
 if(isset($_POST['create_meantone'])) {
@@ -805,7 +805,7 @@ echo "</tr>";
 echo "</table>";
 if(!isset($_SESSION['scroll']) OR $_SESSION['scroll'] == 1) echo "</div>";
 
-echo "<table style=\"background-color:white;\">";
+echo "<table style=\"background-color:white;\" id=\"topconvention\">";
 echo "<tr>";
 echo "<td>";
 
@@ -869,10 +869,11 @@ if(isset($_POST['change_convention']) AND isset($_POST['new_convention'])) {
 	echo "&nbsp;<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"use_convention\" value=\"USE THIS CONVENTION\">";
 	echo "<hr>";
 	}
+$link_edit = "scale.php";
 if($done) {
 	echo "<table style=\"background-color:white;\">";
 	echo "<tr>";
-	echo "<td style=\"vertical-align:middle; white-space:nowrap;\"><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"change_convention\" value=\"CHANGE NOTE CONVENTION\"> ➡</td>";
+	echo "<td style=\"vertical-align:middle; white-space:nowrap;\"><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"change_convention\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#topconvention\" value=\"CHANGE NOTE CONVENTION\"> ➡</td>";
 	echo "<td style=\"vertical-align:middle; white-space:nowrap;\">";
 	echo "<input type=\"radio\" name=\"new_convention\" value=\"0\">English<br />";
 	echo "<input type=\"radio\" name=\"new_convention\" value=\"1\">Italian/Spanish/French<br />";
@@ -1141,18 +1142,18 @@ if($done AND $numgrades_with_labels > 2) {
 		else
 			$error_transpose .= "<font color=\"red\"> ➡ ERROR: Transposition mode has not been selected</font><br />";
 		$new_scale_name = trim($_POST['transpose_scale_name']);
-			if($new_scale_name == '')
-				$error_transpose .= "<font color=\"red\"> ➡ ERROR: Name of new scale has not been entered</font><br />";
-			$new_scale_name = preg_replace("/\s+/u",' ',$new_scale_name);
-			$new_scale_file = $new_scale_name.".txt";
-			$old_scale_file = $new_scale_name.".old";
-			$result1 = check_duplicate_name($dir_scales,$new_scale_file);
-			$result2 = check_duplicate_name($dir_scales,$old_scale_file);
-			if($result1 OR $result2) {
-				$error_transpose .= "<font color=\"red\"> ➡ ERROR: This name</font> <font color=\"blue\">‘".$new_scale_name."’</font> <font color=\"red\">already exists</font><br />";
-				}
-			$p_raise = abs(intval($_POST['p_raise']));
-			$q_raise = abs(intval($_POST['q_raise']));
+		if($new_scale_name == '')
+			$error_transpose .= "<font color=\"red\"> ➡ ERROR: Name of new scale has not been entered</font><br />";
+		$new_scale_name = preg_replace("/\s+/u",' ',$new_scale_name);
+		$new_scale_file = $new_scale_name.".txt";
+		$old_scale_file = $new_scale_name.".old";
+		$result1 = check_duplicate_name($dir_scales,$new_scale_file);
+		$result2 = check_duplicate_name($dir_scales,$old_scale_file);
+		if($result1 OR $result2) {
+			$error_transpose .= "<font color=\"red\"> ➡ ERROR: This name</font> <font color=\"blue\">‘".$new_scale_name."’</font> <font color=\"red\">already exists</font><br />";
+			}
+		$p_raise = abs(intval($_POST['p_raise']));
+		$q_raise = abs(intval($_POST['q_raise']));
 		if($transposition_mode == "ratio" AND ($p_raise * $q_raise) == 0)
 			$error_transpose .= "<font color=\"red\"> ➡ ERROR: Ratio for raising notes has not been entered</font><br />";
 		if($error_transpose == '') {
@@ -1346,54 +1347,62 @@ if($done AND $numgrades_with_labels > 2) {
 				$this_ratio = $p_raise / $q_raise;
 				echo "<p><font color=\"green\">Transposition</font> by raising all notes, ratio = ".$p_raise."/".$q_raise." = ".round($this_ratio,3)."</p>";
 				for($j = $jj = 0; $j <= $numgrades_fullscale; $j++) {
-					if($name[$j] == '') continue;
-					if($j == $numgrades_fullscale) {
-						$p_new = $p_new_this_grade[0] * $interval;
-						$q_new  = $q_new_this_grade[0];
-						$new_ratio = $ratio_this_grade[0] * $interval;
-						}
-					else {
-						$p_new = $p[$j] * $p_raise;
-						$q_new  = $q[$j] * $q_raise;
-						$new_ratio = $this_ratio * $ratio[$j];
-						}
-					if(($p_new * $q_new) > 0) {
-						$gcd = gcd($p_new,$q_new);
-						$p_new = $p_new / $gcd;
-						$q_new = $q_new / $gcd;
+				//	if($name[$j] == '') continue;
+					$new_ratio = $this_ratio * $ratio[$j];
+					if(($p[$j] * $q[$j]) <> 0) {
+					/*	if($j == $numgrades_fullscale) {
+							$p_new = $p_new_this_grade[0] * $interval;
+							$q_new  = $q_new_this_grade[0];
+							$new_ratio = $ratio_this_grade[0] * $interval;
+							}
+						else { */
+							$p_new = $p[$j] * $p_raise;
+							$q_new  = $q[$j] * $q_raise;
+						//	$new_ratio = $this_ratio * $ratio[$j];
+						//	}
+						if(($p_new * $q_new) > 0) {
+							$gcd = gcd($p_new,$q_new);
+							$p_new = $p_new / $gcd;
+							$q_new = $q_new / $gcd;
+							}
+						$fraction = simplify_fraction_eliminate_schisma($p_new,$q_new);
+						if($fraction['p'] <> $p_new) {
+							echo "=> ".$p_new."/".$q_new." simplified to ".$fraction['p']."/".$fraction['q']."<br />";
+							$p_new = $fraction['p'];
+							$q_new = $fraction['q'];
+							}
 						$new_ratio = $p_new / $q_new;
+						if($new_ratio > $interval AND $j <> $numgrades_fullscale) {
+							$q_new = $q_new * $interval;
+							$gcd = gcd($p_new,$q_new);
+							$p_new = $p_new / $gcd;
+							$q_new = $q_new / $gcd;
+							$new_ratio = $new_ratio / $interval;
+							}
+						if($new_ratio < (1. / $interval)) {
+							$p_new = $p_new * $interval;
+							$gcd = gcd($p_new,$q_new);
+							$p_new = $p_new / $gcd;
+							$q_new = $q_new / $gcd;
+							$new_ratio = $new_ratio * $interval;
+							}
+						$p[$j] = $p_new;
+						$q[$j] = $q_new;
+						$ratio[$j] = $new_ratio;
 						}
-					$fraction = simplify_fraction_eliminate_schisma($p_new,$q_new);
-					if($fraction['p'] <> $p_new) {
-						echo "=> ".$p_new."/".$q_new." simplified to ".$fraction['p']."/".$fraction['q']."<br />";
-						$p_new = $fraction['p'];
-						$q_new = $fraction['q'];
-						$new_ratio = $p_new / $q_new;
-						}
-					if($new_ratio > $interval AND $j <> $numgrades_fullscale) {
-						$q_new = $q_new * $interval;
-						$gcd = gcd($p_new,$q_new);
-						$p_new = $p_new / $gcd;
-						$q_new = $q_new / $gcd;
-						$new_ratio = $new_ratio / $interval;
-						}
-					if($new_ratio < 1) {
-						$p_new = $p_new * $interval;
-						$gcd = gcd($p_new,$q_new);
-						$p_new = $p_new / $gcd;
-						$q_new = $q_new / $gcd;
-						$new_ratio = $new_ratio * $interval;
-						}
-					$p_new_this_grade[$jj] = $p_new;
-					$q_new_this_grade[$jj] = $q_new;
-					$name_this_grade[$jj] = $name[$j];
-					$ratio_this_grade[$jj] = $new_ratio;
-					$cents_new_this_grade[$jj] = cents($new_ratio);
-					echo "<font color=\"blue\">‘".$name[$j]."’</font> new ratio = ".$p_new."/".$q_new." = ".round($new_ratio,3)."<br />";
+					/*	$p_new_this_grade[$jj] = $p_new;
+						$q_new_this_grade[$jj] = $q_new;
+						$name_this_grade[$jj] = $name[$j];
+						$ratio_this_grade[$jj] = $new_ratio;
+						$cents_new_this_grade[$jj] = cents($new_ratio);
+						}*/
+					echo "<font color=\"blue\">‘".$name[$j]."’</font> new ratio = ".round($new_ratio,3);
+					if(($p[$j] * $q[$j]) <> 0) echo " = ".$p_new."/".$q_new;
+					echo "<br />";
 					$jj++;
 					}
 				// Check notes against grama locations
-				for($j = 0; $j <= $numgrades_fullscale; $j++) {
+	/*			for($j = 0; $j <= $numgrades_fullscale; $j++) {
 					$new_name[$j] = '';
 					}
 				$jold = -1;
@@ -1428,57 +1437,57 @@ if($done AND $numgrades_with_labels > 2) {
 				for($j = 0; $j <= $numgrades_fullscale; $j++)
 					$name[$j] = $new_name[$j];
 				if($name[0] == '') $name[0] = $name[$numgrades_fullscale];
-				if($name[$numgrades_fullscale] == '') $name[$numgrades_fullscale] = $name[0];
+				if($name[$numgrades_fullscale] == '') $name[$numgrades_fullscale] = $name[0]; */
 				}
 			
 			// Now save to file	
-				echo "<br />";
-				$link_edit = "scale.php";
-				echo "<font color=\"green\">Saved to new scale</font> <font color=\"blue\">‘".$new_scale_name."’</font>&nbsp;<input style=\"background-color:Aquamarine;\" type=\"submit\" name=\"edit_new_scale\" formaction=\"".$link_edit."?scalefilename=".urlencode($new_scale_name)."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$new_scale_name."’\"></p>";
-				$transpose_scale_name = $new_scale_name;
-				$handle = fopen($dir_scales.$new_scale_file,"w");
-				fwrite($handle,"\"".$new_scale_name."\"\n");
-				$comma_line = $syntonic_comma;
-				if(($p_comma * $q_comma) > 0) $comma_line .= " ".$p_comma." ".$q_comma;
-				fwrite($handle,"c".$comma_line."c\n");
-				$the_notes = $the_fractions = $the_ratios = '';
-				// $the_numbers = '';
-				for($j = 0; $j <= $numgrades_fullscale; $j++) {
-					if($name[$j] <> '') {
-						$the_notes .= $name[$j]." ";
-					//	$the_numbers .= $key[$j]." ";
-						}
-					else {
-						$the_notes .= "• ";
-					//	$the_numbers .= "0 ";
-						}
-					$the_fractions .= $p[$j]." ".$q[$j]." ";
+			echo "<br />";
+			$link_edit = "scale.php";
+			echo "<font color=\"green\">Saved to new scale</font> <font color=\"blue\">‘".$new_scale_name."’</font>&nbsp;<input style=\"background-color:Aquamarine;\" type=\"submit\" name=\"edit_new_scale\" formaction=\"".$link_edit."?scalefilename=".urlencode($new_scale_name)."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$new_scale_name."’\"></p>";
+			$transpose_scale_name = $new_scale_name;
+			$handle = fopen($dir_scales.$new_scale_file,"w");
+			fwrite($handle,"\"".$new_scale_name."\"\n");
+			$comma_line = $syntonic_comma;
+			if(($p_comma * $q_comma) > 0) $comma_line .= " ".$p_comma." ".$q_comma;
+			fwrite($handle,"c".$comma_line."c\n");
+			$the_notes = $the_fractions = $the_ratios = '';
+			// $the_numbers = '';
+			for($j = 0; $j <= $numgrades_fullscale; $j++) {
+				if($name[$j] <> '') {
+					$the_notes .= $name[$j]." ";
+				//	$the_numbers .= $key[$j]." ";
 					}
-				$the_notes = "/".trim($the_notes)."/";
-				$the_fractions = "[".trim($the_fractions)."]";
-			//	$the_numbers = "k".trim($the_numbers)."k";
-				fwrite($handle,$the_notes."\n");
-			//	fwrite($handle,$the_numbers."\n");
-				fwrite($handle,$the_fractions."\n");
-				fwrite($handle,"|".$baseoctave."|\n");
-				$the_scale = "f2 0 128 -51 ";
-				$the_scale .= $numgrades_fullscale." ".$interval." ".$basefreq." ".$basekey." ";
-				for($j = 0; $j <= $numgrades_fullscale; $j++) {
-					if(($p[$j] * $q[$j]) > 0)
-						$the_scale .= round($p[$j]/$q[$j],3)." ";
-					else
-						$the_scale .= $ratio[$j]." ";
+				else {
+					$the_notes .= "• ";
+				//	$the_numbers .= "0 ";
 					}
-				fwrite($handle,$the_scale."\n");
-				$some_comment = "<html>This is a transposition of scale \"".$filename."\" (".$numgrades_fullscale." grades).<br />";
-				if($transposition_mode == "murcchana")
-					$some_comment .= "From ‘".$transpose_from_note."’ to ‘".$transpose_to_note."’.<br />";
-				else // ratio
-					$some_comment .= "All notes raised by ratio ".$p_raise."/".$q_raise.".<br />";
-				$some_comment .= "Created ".date('Y-m-d H:i:s')."</html>";
-				fwrite($handle,$some_comment."\n");
-				fclose($handle);
-				$transpose_from_note = $transpose_to_note  = '';
+				$the_fractions .= $p[$j]." ".$q[$j]." ";
+				}
+			$the_notes = "/".trim($the_notes)."/";
+			$the_fractions = "[".trim($the_fractions)."]";
+		//	$the_numbers = "k".trim($the_numbers)."k";
+			fwrite($handle,$the_notes."\n");
+		//	fwrite($handle,$the_numbers."\n");
+			fwrite($handle,$the_fractions."\n");
+			fwrite($handle,"|".$baseoctave."|\n");
+			$the_scale = "f2 0 128 -51 ";
+			$the_scale .= $numgrades_fullscale." ".$interval." ".$basefreq." ".$basekey." ";
+			for($j = 0; $j <= $numgrades_fullscale; $j++) {
+				if(($p[$j] * $q[$j]) > 0)
+					$the_scale .= round($p[$j]/$q[$j],3)." ";
+				else
+					$the_scale .= $ratio[$j]." ";
+				}
+			fwrite($handle,$the_scale."\n");
+			$some_comment = "<html>This is a transposition of scale \"".$filename."\" (".$numgrades_fullscale." grades).<br />";
+			if($transposition_mode == "murcchana")
+				$some_comment .= "From ‘".$transpose_from_note."’ to ‘".$transpose_to_note."’.<br />";
+			else // ratio
+				$some_comment .= "All positions raised by ratio ".$p_raise."/".$q_raise.".<br />";
+			$some_comment .= "Created ".date('Y-m-d H:i:s')."</html>";
+			fwrite($handle,$some_comment."\n");
+			fclose($handle);
+			$transpose_from_note = $transpose_to_note  = '';
 			}
 		}
 	echo "<table><tr>";
@@ -1494,7 +1503,7 @@ if($done AND $numgrades_with_labels > 2) {
 	echo "<input type=\"radio\" name=\"transposition_mode\" value=\"ratio\"";
 	if($transposition_mode == "ratio") echo " checked";
 	if($p_raise == 0) $p_raise = $q_raise = '';
-	echo "><b>&nbsp;Raise all notes</b> by (integer) ratio <input type=\"text\" name=\"p_raise\" size=\"3\" value=\"".$p_raise."\"><b> / </b><input type=\"text\" name=\"q_raise\" size=\"3\" value=\"".$q_raise."\"> (needs revision)";
+	echo "><b>&nbsp;Raise all positions</b> by (integer) ratio <input type=\"text\" name=\"p_raise\" size=\"3\" value=\"".$p_raise."\"><b> / </b><input type=\"text\" name=\"q_raise\" size=\"3\" value=\"".$q_raise."\">";
 	if($error_transpose <> '') echo "<br /><br />".$error_transpose;
 	echo "</td>";
 	echo "</tr></table><br />";
