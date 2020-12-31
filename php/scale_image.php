@@ -8,6 +8,11 @@ $margin_left = 15;
 $width = 900;
 $height = 130;
 
+if(isset($_GET['no_marks'])) $no_marks = $_GET['no_marks'];
+else $no_marks = 0;
+if(isset($_GET['no_intervals'])) $no_intervals = $_GET['no_intervals'];
+else $no_intervals = 0;
+
 $image_width = $width + 100;
 if($image_width < 1000) $image_width = 1000;
 $im = @imagecreatetruecolor($image_width,800)
@@ -49,17 +54,19 @@ circle($im,$x_center,$y_center,$radius + $crown_thickness,$black);
 
 imagefilltoborder($im,$x_center + $radius + 4,$y_center,$black,$papayawhip);
 
-if(isset($wolffifth)) foreach($wolffifth as $j => $k) {
-	connect($im,$j,$k,$radius - 1,$red,2);
-	}
-if(isset($pyththird)) foreach($pyththird as $j => $k) {
-	connect($im,$j,$k,$radius - 1,$brown,1);
-	}
-if(isset($harmthird)) foreach($harmthird as $j => $k) {
-	connect($im,$j,$k,$radius - 1,$green,3);
-	}
-if(isset($fifth)) foreach($fifth as $j => $k) {
-	connect($im,$j,$k,$radius - 1,$blue,3);
+if(!$no_intervals) {
+	if(isset($wolffifth)) foreach($wolffifth as $j => $k) {
+		connect($im,$j,$k,$radius - 1,$red,2);
+		}
+	if(isset($pyththird)) foreach($pyththird as $j => $k) {
+		connect($im,$j,$k,$radius - 1,$brown,1);
+		}
+	if(isset($harmthird)) foreach($harmthird as $j => $k) {
+		connect($im,$j,$k,$radius - 1,$green,3);
+		}
+	if(isset($fifth)) foreach($fifth as $j => $k) {
+		connect($im,$j,$k,$radius - 1,$blue,3);
+		}
 	}
 
 if(isset($p_comma) AND isset($q_comma) AND ($p_comma * $q_comma) > 0)
@@ -67,7 +74,8 @@ if(isset($p_comma) AND isset($q_comma) AND ($p_comma * $q_comma) > 0)
 else 
 	if(isset($syntonic_comma)) $comma_ratio = exp($syntonic_comma/1200. * log(2));
 
-if($interval_cents == 1200) {
+if($interval_cents <> 1200 AND $no_marks == 0) $no_marks = 1;
+if($no_marks < 1) {
 	$mark_ratio = 1;
 	for($i = 0; $i < 7; $i++) {
 		mark($im,$mark_ratio,$blue);
@@ -125,7 +133,7 @@ for($j = 0; $j <= $numgrades_fullscale; $j++) {
 		$length_text_cents = imagefontwidth(10) * strlen($text2);
 		if($numgrades_fullscale > 8 AND ($ratio[$j] < 1.126 OR ($ratio[$j] > 1.281 AND $ratio[$j] < 1.414))) $x_text -= $length_text_cents;
 		if($numgrades_fullscale > 8 AND ($ratio[$j] > 1.77 OR ($ratio[$j] >= 1.414 AND $ratio[$j] < 1.57))) $x_text += $length_text_cents;
-		if(isset($cents[$j]) AND $cents[$j] > 0) {
+		if(isset($cents[$j]) AND $cents[$j] > 0 AND $name[$j] <> '') {
 			imagefilledrectangle($im,$x_text - 5,$y_text2,$x_text + $length_text_cents + 5,$y_text2 + imagefontheight(10),$white);
 			imagestring($im,10,$x_text,$y_text2,$text2,$black);
 			}
@@ -168,8 +176,10 @@ for($j = 0; $j <= $numgrades_fullscale; $j++) {
 		$end_y = $y_text + imagefontheight(10);
 		$old_x = $x_text;
 		$old_y = $y_text;
-		imagefilledrectangle($im,$x_text - 5,$y_text,$end_x,$end_y,$azure);
-		imagestring($im,10,$x_text,$y_text,$text_ratio[$j],$black);
+		if($name[$j] <> '') {
+			imagefilledrectangle($im,$x_text - 5,$y_text,$end_x,$end_y,$azure);
+			imagestring($im,10,$x_text,$y_text,$text_ratio[$j],$black);
+			}
 		}
 	}
 	
@@ -179,48 +189,50 @@ $x_text = $x2 + 15;
 $y1 = 2 * $radius + 260;
 $y_text = $y1 - imagefontheight(10) / 2;
 
-imagestring($im,10,$x1,$y_text,"For this value of the comma:",$black);
-
-$y1 += 2 * imagefontheight(10);
-$y_text = $y1 - imagefontheight(10) / 2;
-imagelinethick($im,$x1,$y1,$x2,$y1,$blue,4);
-$text = "Perfect fifth (".round($perfect_fifth)." cents)";
-imagestring($im,10,$x_text,$y_text,$text,$black);
-
-$y1 += 1 * imagefontheight(10);
-$y_text = $y1 - imagefontheight(10) / 2;
-imagelinethick($im,$x1,$y1,$x2,$y1,$red,2);
-$text = "Wolf fifth (".round($wolf_fifth)." cents)";
-imagestring($im,10,$x_text,$y_text,$text,$red);
-
-$y1 += 1 * imagefontheight(10);
-$y_text = $y1 - imagefontheight(10) / 2;
-imagelinethick($im,$x1,$y1,$x2,$y1,$green,4);
-$text = "Harmonic major third (".round($harmonic_third)." cents)";
-imagestring($im,10,$x_text,$y_text,$text,$green);
-
-$y1 += 1 * imagefontheight(10);
-$y_text = $y1 - imagefontheight(10) / 2;
-imagelinethick($im,$x1,$y1,$x2,$y1,$brown,2);
-$text = "Pythagorean major third (".round($pythagorean_third)." cents)";
-imagestring($im,10,$x_text,$y_text,$text,$brown);
-
-$x1 = $image_width - 230;
-$y1 = 2 * $radius + 260;
-$x_text = $x1 + 10;
-$x2 = $x1;
-$y2 = $y1 + 25;
-$y_text = $y1 + 5;
-imagelinethick($im,$x1,$y1,$x2,$y2,$blue,3);
-$text = "Pythagorean position";
-imagestring($im,10,$x_text,$y_text,$text,$blue);
-
-$y1 = $y2 + 25;
-$y2 = $y1 + 25;
-$y_text = $y1 + 5;
-imagelinethick($im,$x1,$y1,$x2,$y2,$green,3);
-$text = "Harmonic position";
-imagestring($im,10,$x_text,$y_text,$text,$green);
+if(!$no_intervals) {
+	imagestring($im,10,$x1,$y_text,"For this value of the comma:",$black);
+	
+	$y1 += 2 * imagefontheight(10);
+	$y_text = $y1 - imagefontheight(10) / 2;
+	imagelinethick($im,$x1,$y1,$x2,$y1,$blue,4);
+	$text = "Perfect fifth (".round($perfect_fifth)." cents)";
+	imagestring($im,10,$x_text,$y_text,$text,$black);
+	
+	$y1 += 1 * imagefontheight(10);
+	$y_text = $y1 - imagefontheight(10) / 2;
+	imagelinethick($im,$x1,$y1,$x2,$y1,$red,2);
+	$text = "Wolf fifth (".round($wolf_fifth)." cents)";
+	imagestring($im,10,$x_text,$y_text,$text,$red);
+	
+	$y1 += 1 * imagefontheight(10);
+	$y_text = $y1 - imagefontheight(10) / 2;
+	imagelinethick($im,$x1,$y1,$x2,$y1,$green,4);
+	$text = "Harmonic major third (".round($harmonic_third)." cents)";
+	imagestring($im,10,$x_text,$y_text,$text,$green);
+	
+	$y1 += 1 * imagefontheight(10);
+	$y_text = $y1 - imagefontheight(10) / 2;
+	imagelinethick($im,$x1,$y1,$x2,$y1,$brown,2);
+	$text = "Pythagorean major third (".round($pythagorean_third)." cents)";
+	imagestring($im,10,$x_text,$y_text,$text,$brown);
+	
+	$x1 = $image_width - 230;
+	$y1 = 2 * $radius + 260;
+	$x_text = $x1 + 10;
+	$x2 = $x1;
+	$y2 = $y1 + 25;
+	$y_text = $y1 + 5;
+	imagelinethick($im,$x1,$y1,$x2,$y2,$blue,3);
+	$text = "Pythagorean position";
+	imagestring($im,10,$x_text,$y_text,$text,$blue);
+	
+	$y1 = $y2 + 25;
+	$y2 = $y1 + 25;
+	$y_text = $y1 + 5;
+	imagelinethick($im,$x1,$y1,$x2,$y2,$green,3);
+	$text = "Harmonic position";
+	imagestring($im,10,$x_text,$y_text,$text,$green);
+	}
 		
 imagepng($im);
 imagedestroy($im);

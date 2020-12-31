@@ -373,7 +373,10 @@ for($i = 0; $i < $imax; $i++) {
 echo "Csound function table: <font color=\"blue\">".$scale_table."</font>";
 if($message <> '') echo $message;
 echo "<div style=\"float:right; margin-top:1em; background-color:white; padding:1em; border-radius:5%;\"><h1>Scale “".$filename."”</h1><h3>This version is stored in <font color=\"blue\">‘".$csound_source."’</font></h3>";
+
 $link = "scale_image.php?save_codes_dir=".urlencode($save_codes_dir);
+$link_no_marks = $link."&no_marks=1";
+$link_no_intervals = $link_no_marks."&no_intervals=1";
 
 if(isset($_POST['new_p_comma']) AND isset($_POST['new_q_comma']) AND $_POST['new_p_comma'] > 0  AND $_POST['new_q_comma'] > 0) {
 	// We need these values immediately to update the image if the syntonic comma has been modified
@@ -399,7 +402,7 @@ else {
 	
 $image_name = clean_folder_name($filename)."_".round(10 * $new_comma).$more."_image";
 // echo $image_name."<br />";
-echo "<div class=\"shadow\" style=\"border:2px solid gray; background-color:azure; width:13em;  padding:8px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$link."','".$image_name."','width=1000,height=800,left=100'); return false;\" href=\"".$link."\">IMAGE</a></div>";
+echo "<div class=\"shadow\" style=\"border:2px solid gray; background-color:azure; width:13em;  padding:8px; text-align:center; border-radius: 6px;\">IMAGE:<br /><a onclick=\"window.open('".$link."','".$image_name."','width=1000,height=800,left=100'); return false;\" href=\"".$link."\">full</a> - <a onclick=\"window.open('".$link_no_marks."','".$image_name."','width=1000,height=800,left=100'); return false;\" href=\"".$link_no_marks."\">no marks</a> - <a onclick=\"window.open('".$link_no_intervals."','".$image_name."','width=1000,height=800,left=100'); return false;\" href=\"".$link_no_intervals."\">no intervals</a></div>";
 
 echo "</div>";
 echo "<p>➡ <a target=\"_blank\" href=\"https://www.csounds.com/manual/html/GEN51.html\">Read the documentation</a></p>";
@@ -505,9 +508,8 @@ echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/fo
 echo "<input type=\"hidden\" name=\"dir_scales\" value=\"".$dir_scales."\">";
 echo "<input type=\"hidden\" name=\"csound_source\" value=\"".$csound_source."\">";
 
-// echo "<p style=\"font-size:large;\">Name of this tonal scale: ";
 echo "<h3>Name of this tonal scale: ";
-echo "<input type=\"text\" style=\"font-size:large;\" name=\"scale_name\" size=\"20\" value=\"".$scale_name."\">";
+echo "<input type=\"text\" style=\"font-size:large;\" name=\"scale_name\" size=\"".(strlen($scale_name) + 10)."\" value=\"".$scale_name."\">";
 if(is_integer(strpos($scale_name,' '))) echo " <font color=\"red\">➡</font> avoiding spaces is prefered";
 echo "</h3>";
 echo "<table style=\"background-color:cornsilk;\">";
@@ -676,8 +678,9 @@ if(isset($_POST['use_convention'])) {
 		}
 	if(!$found) {
 		for($i = 0; $i < $numgrades_fullscale; $i++) $name[$i] = $_POST['new_note_'.$i];
-		$name[$numgrades_fullscale] = $_POST['new_note_0'];
+	//	$name[$numgrades_fullscale] = $_POST['new_note_0'];
 		}
+	$name[$numgrades_fullscale] = $name[0];
 	}
 
 store($h_image,"numgrades_fullscale",$numgrades_fullscale);
@@ -744,7 +747,7 @@ for($i = 0; $i <= $numgrades_fullscale; $i++) {
 	if($ratio[$i] == 0) $cents = '';
 	else {
 		$cents = cents($ratio[$i]);
-		if($cents <> '') $cents = round($cents);
+		if($cents <> '') $cents = round($cents,1);
 		}
 	store2($h_image,"cents",$i,$cents);
 	echo "<td style=\"text-align:center; padding-top:4px; padding-bottom:4px; padding-left:0px; padding-right:0px; margin-left:0px; margin-right:0px; background-color:azure;\" colspan=\"2\">";
@@ -757,7 +760,7 @@ for($i = 0; $i < $numgrades_fullscale; $i++) {
 	if(($ratio[$i] * $ratio[$i + 1]) == 0) $cents = '';
 	else {
 		$cents = cents($ratio[$i + 1] / $ratio[$i]);
-		if($cents <> '') $cents = round($cents);
+		if($cents <> '') $cents = round($cents,1);
 		$cents = "«—&nbsp;".$cents."c&nbsp;—»";
 		}
 	echo "<td style=\"white-space:nowrap; text-align:center; padding-top:4px; padding-bottom:4px; padding-left:0px; padding-right:0px; margin-left:0px; margin-right:0px;\" colspan=\"2\">";
@@ -1395,7 +1398,7 @@ if($done AND $numgrades_with_labels > 2) {
 					}
 				}
 			
-			// Now save to file	
+			// Now save to exported file	
 			echo "<br />";
 			$link_edit = "scale.php";
 			echo "<font color=\"green\">Saved to new scale</font> <font color=\"blue\">‘".$new_scale_name."’</font>&nbsp;<input style=\"background-color:Aquamarine;\" type=\"submit\" name=\"edit_new_scale\" formaction=\"".$link_edit."?scalefilename=".urlencode($new_scale_name)."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$new_scale_name."’\"></p>";
@@ -1406,23 +1409,18 @@ if($done AND $numgrades_with_labels > 2) {
 			if(($p_comma * $q_comma) > 0) $comma_line .= " ".$p_comma." ".$q_comma;
 			fwrite($handle,"c".$comma_line."c\n");
 			$the_notes = $the_fractions = $the_ratios = '';
-			// $the_numbers = '';
 			for($j = 0; $j <= $numgrades_fullscale; $j++) {
 				if($name[$j] <> '') {
 					$the_notes .= $name[$j]." ";
-				//	$the_numbers .= $key[$j]." ";
 					}
 				else {
 					$the_notes .= "• ";
-				//	$the_numbers .= "0 ";
 					}
 				$the_fractions .= $p[$j]." ".$q[$j]." ";
 				}
 			$the_notes = "/".trim($the_notes)."/";
 			$the_fractions = "[".trim($the_fractions)."]";
-		//	$the_numbers = "k".trim($the_numbers)."k";
 			fwrite($handle,$the_notes."\n");
-		//	fwrite($handle,$the_numbers."\n");
 			fwrite($handle,$the_fractions."\n");
 			fwrite($handle,"|".$baseoctave."|\n");
 			$the_scale = "f2 0 128 -51 ";
