@@ -127,7 +127,7 @@ for($j = 0; $j <= $numgrades_fullscale; $j++) {
 		$x_text = $x2 - $x_center + $coord['x'] - $length_text / 2;
 		
 		// Print cents
-		$text2 = $cents[$j];
+		$text2 = round($cents[$j]);
 		if($text2 <> '') $text2 .= 'c';
 		$y_text2 = $y_text + imagefontheight(10) + 2;
 		$length_text_cents = imagefontwidth(10) * strlen($text2);

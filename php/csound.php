@@ -179,7 +179,7 @@ if(isset($_POST['copy_this_scale'])) {
 					if($line == "_end tables") {
 						if($can_copy) {
 							$folder_scales = $temp_dir.$temp_folder.SLASH."scales";
-							echo $folder_scales."<br />";
+						//	echo $folder_scales."<br />";
 							$dir_scale = scandir($folder_scales);
 							foreach($dir_scale as $this_scale) {
 						//		echo "this_scale = ".$this_scale."<br />";

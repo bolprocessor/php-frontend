@@ -3,9 +3,7 @@
 -se.<settings file>
 -ho.<alphabet file>
 -mi.<sound-object prototypes file>
--cs.<Csound instruments file>
-
-_mm(60) _striated
+-cs.<Csound resource file>
 
 RND
 

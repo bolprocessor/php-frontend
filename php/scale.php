@@ -39,7 +39,7 @@ $error_meantone = '';
 $basekey = 60;
 $baseoctave = 4;
 $transposition_mode = '';
-$p_raise = $q_raise = $p_raised_note = $q_raised_note = $cents_raised_note = $raised_note = '';
+$p_raise = $q_raise = $p_raised_note = $q_raised_note = $cents_raised_note = $raised_note = $name_sensitive_note = '';
 $scale_choice = $selected_grades = '';
 $selected_grade_name = array();
 $p_comma = 81; $q_comma = 80;
@@ -941,14 +941,17 @@ if($done AND $numgrades_with_labels > 2) {
 		if($error_create == '') {
 			$link_edit = "scale.php";
 			if(isset($_POST['major_minor'])) {
-				echo "<p><font color=\"red\">Exported to</font> <font color=\"blue\">‘".$new_scale_name."’</font> <input style=\"background-color:Aquamarine;\" type=\"submit\" name=\"edit_new_scale\" formaction=\"".$link_edit."?scalefilename=".urlencode($new_scale_name)."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$new_scale_name."’\"></p>";
 				$new_scale_mode = $_POST['major_minor'];
+				$name_sensitive_note = trim($_POST['name_sensitive_note']);
+				if($name_sensitive_note <> '' AND $new_scale_mode == "none") {
+					$error_create = "<br /><font color=\"red\"> ➡ Select option for raising/lowering sensitive note</font> <font color=\"blue\">‘".$name_sensitive_note."’</font>";
+					}
 				if($new_scale_mode <> "none") {
-					$name_sensitive_note = trim($_POST['name_sensitive_note']);
 					if($name_sensitive_note == '') {
 						$error_create = "<br /><font color=\"red\"> ➡ A sensitive note should be specified for the major/minor adjustment</font>";
 						}
 					else {
+						echo "<p><font color=\"red\">Exported to</font> <font color=\"blue\">‘".$new_scale_name."’</font> <input style=\"background-color:Aquamarine;\" type=\"submit\" name=\"edit_new_scale\" formaction=\"".$link_edit."?scalefilename=".urlencode($new_scale_name)."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$new_scale_name."’\"></p>";
 						$p_adjust = $p_comma;
 						$q_adjust = $q_comma;
 						if(($p_comma * $q_comma) == 0) {
@@ -1135,7 +1138,7 @@ if($done AND $numgrades_with_labels > 2) {
 	echo "<td style=\"text-align:center; vertical-align:middle; padding:4px;\"><b>Sensitive note (1 comma)</b><br /><br />➡ adjust note by ";
 	if(($p_comma * $q_comma) > 0) echo $p_comma."/".$q_comma." (or reverse)";
 	else echo round($syntonic_comma,1)." cents";
-	echo ": <input type=\"text\" name=\"name_sensitive_note\" size=\"6\" value=\"\"></td>";
+	echo ": <input type=\"text\" name=\"name_sensitive_note\" size=\"6\" value=\"".$name_sensitive_note."\"></td>";
 	echo "</tr></table><br />";
 	if(isset($_POST['transpose'])) {
 		$transpose_from_note = trim($_POST['transpose_from_note']);

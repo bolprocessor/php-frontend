@@ -1,5 +1,5 @@
 // Bol Processor BP3 compatible with version BP2.9.8
-// Csound resource file saved as "-cs.12_scales". Date: 2020-12-27 09:56:22
+// Csound resource file saved as "-cs.12_scales". Date: 2021-01-04 08:53:15
 16
 -1
 -1
@@ -43,7 +43,10 @@ f2 0 128 -51 23 2 261.63 60 0.988 1.053 1.067 1.111 1.125 1.185 1.2 1.25 1.266 1
 <html>This is a transposition of scale "Ma2" (23 grades)<br />From ‘C’ to ‘F’<br />Created 2020-11-27 18:26:51<br /></html>
 "Ma04"
 /C Db • D • Eb • E • F • F# • G • Ab • A • Bb • B • C/
+c21.5062895967 81 80c
+k0 1 0 2 0 3 0 4 0 5 0 6 0 7 0 8 0 9 0 10 0 11 0 12k
 [80 81 256 243 16 15 10 9 9 8 32 27 6 5 5 4 81 64 320 243 27 20 45 32 64 45 40 27 3 2 128 81 8 5 5 3 27 16 16 9 9 5 15 8 243 128 160 81]
+sh p h h p p h h p h h h h h p p h h p p h h p hs
 |4|
 f2 0 128 -51 23 2 261.63 60 0.988 1.053 1.067 1.111 1.125 1.185 1.2 1.25 1.266 1.317 1.35 1.406 1.422 1.481 1.5 1.58 1.6 1.667 1.688 1.778 1.8 1.875 1.898 1.975
 <html>This is a transposition of scale "Ma3" (23 grades)<br />From ‘E’ to ‘A’<br />Created 2020-11-27 19:34:18<br /></html>
@@ -67,7 +70,10 @@ f2 0 128 -51 23 2 261.63 60 0.988 1.053 1.067 1.111 1.125 1.171 1.2 1.25 1.266 1
 <html>This is a transposition of scale "Ma6" (23 grades)<br />From ‘D’ to ‘G’<br />Created 2020-11-28 08:01:21<br /></html>
 "Ma08"
 /C Db • D • Eb • E • F • F# • G • Ab • A • Bb • B • C/
+c21.5062895967 81 80c
+k0 1 0 2 0 3 0 4 0 5 0 6 0 7 0 8 0 9 0 10 0 11 0 12k
 [80 81 20480 19683 16 15 10 9 9 8 2560 2187 6 5 5 4 81 64 320 243 27 20 45 32 64 45 40 27 3 2 10240 6561 8 5 5 3 27 16 1280 729 9 5 15 8 243 128 160 81]
+sh h h h p h h h p h h h h h p h h h p h h h p hs
 |4|
 f2 0 128 -51 23 2 261.63 60 0.988 1.04 1.067 1.111 1.125 1.171 1.2 1.25 1.266 1.317 1.35 1.406 1.422 1.481 1.5 1.561 1.6 1.667 1.688 1.756 1.8 1.875 1.898 1.975
 <html>This is a transposition of scale "Ma7" (23 grades)<br />From ‘C’ to ‘F’<br />Created 2020-11-28 08:11:34<br /></html>
