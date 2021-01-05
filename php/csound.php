@@ -1167,7 +1167,7 @@ if($max_scales > 0) {
 		}
 	if($done) echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"export_scales\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#export\" value=\"EXPORT TONAL SCALES\">&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"delete_scales\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#export\" value=\"DELETE SEVERAL SCALES\">";
 	echo "&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"reassign_keys\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#topscales\" value=\"REASSIGN KEYS\">";
-	echo "&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"align_scales\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."\" value=\"ALIGN SCALES ON THEIR BASE NOTES\">";
+//	echo "&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"align_scales\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."\" value=\"ALIGN SCALES ON THEIR BASE NOTES\">";
 	echo "</p>";
 	echo "<ol>";
 	$table_names = $p_interval = $q_interval = $cent_position = $ratio_interval = array();
@@ -1196,7 +1196,7 @@ if($max_scales > 0) {
 			$oldratio = 1;
 			$note_name[$i_scale][0] = $table_names[$i_scale][0];
 			for($i_fraction = $k = 0; $i_fraction < (count($table_fraction) - 1); $i_fraction += 2) {
-				if($table_names[$i_scale][$i_fraction / 2] == "•") continue;
+				if(!isset($table_names[$i_scale][$i_fraction / 2]) OR $table_names[$i_scale][$i_fraction / 2] == "•") continue;
 				$note_name[$i_scale][$k + 1] = $table_names[$i_scale][$i_fraction / 2];
 				$ratio[$i_scale][$k] = $table_csound_line[($i_fraction / 2) + 8];
 				$ratio_interval[$i_scale][$k] = 1;

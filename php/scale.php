@@ -119,7 +119,6 @@ if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST
 		$key[0] = $basekey;
 		}
 	$name[$numgrades_fullscale] = $name[0];
-	
 	if(isset($_POST['modifynote'])) {
 		$p_raised_note = abs(intval($_POST['p_raised_note']));
 		$q_raised_note = abs(intval($_POST['q_raised_note']));
@@ -202,16 +201,22 @@ if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST
 		else {
 			$ratio_adjust = exp($cents_adjust / 1200 * log(2));
 			}
-		$p_last = $q_last = $ratio_last = 1;
+		$p_new = $q_new = $ratio_new = 1;
 		for($j = 0; $j <= $numgrades_fullscale; $j++) {
 			if($name[$j] == '' OR $name[$j] == '•') {
-				if(($p_last == $p[$j] AND $q_last == $q[$j]) OR $ratio_last == round($ratio[$j],3)) {
-					$p[$j] = $p[$j] * $p_comma;
-					$q[$j] = $q[$j] * $q_comma;
-					$ratio[$j] = $ratio[$j] * exp($syntonic_comma / 1200 * log(2));
-					}
+				if(($p_new <> $p[$j] OR $q_new <> $q[$j]) AND $ratio_new <> round($ratio[$j],3))
+					continue;
+				// Don't create 2 positions with identical ratios
+				$name[$j] = $name[$j-1];
+				$name[$j-1] = '';
+				$p[$j-1] = $p_last;
+				$q[$j-1] = $q_last;
+				$ratio[$j-1] = $ratio_last;
 				continue;
 				}
+			$p_last = $p[$j];
+			$q_last = $q[$j];
+			$ratio_last = round($ratio[$j],3);
 			if(($p_adjust * $q_adjust * $p[$j] * $q[$j]) <> 0) {
 				$p[$j] = $p[$j] * $p_adjust;
 				$q[$j] = $q[$j] * $q_adjust;
@@ -226,9 +231,9 @@ if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST
 				$ratio[$j] = $ratio[$j] * $ratio_adjust;
 				$p[$j] = $q[$j] = 0;
 				}
-			$p_last = $p[$j];
-			$q_last = $q[$j];
-			$ratio_last = round($ratio[$j],3);
+			$p_new = $p[$j];
+			$q_new = $q[$j];
+			$ratio_new = round($ratio[$j],3);
 			}
 		}
 	
@@ -1156,7 +1161,7 @@ if($done AND $numgrades_with_labels > 2) {
 									if($found) continue;
 									if((round($ratio[$j],3) >= $ratio_transpose) OR ($ratio[$j] < 1 AND $ratio_transpose == 1.0)) {
 										if($j > 0 AND $name[$j] <> '' AND $name[$j] <> '•') $j--;
-										if($name[$j] <> '' AND $name[$j] <> '•') {
+										if($name[$j] <> '') {
 											$p[$j] = $p_transpose * $p_align;
 											$q[$j] = $q_transpose * $q_align;
 											$ratio[$j] = $ratio_transpose * $ratio_align;
@@ -1303,10 +1308,10 @@ if($done AND $numgrades_with_labels > 2) {
 	echo "<td style=\"vertical-align:middle; padding:6px; white-space:nowrap;\"><input type=\"radio\" name=\"major_minor\" value=\"none\" checked>don’t change ratios<br />";
 	echo "<input type=\"radio\" name=\"major_minor\" value=\"major\">raise to relative major<br />";
 	echo "<input type=\"radio\" name=\"major_minor\" value=\"minor\">lower to relative minor</td>";
-	echo "<td style=\"text-align:center; vertical-align:middle; padding:4px;\"><b>Sensitive note (1 comma)</b><br /><br />➡ adjust this note by <font color=\"red\">";
+	echo "<td style=\"text-align:center; vertical-align:middle; padding:4px;\"><b>Sensitive note (1 comma)</b><br /><br />➡ adjust by <font color=\"red\">";
 	if(($p_comma * $q_comma) > 0) echo $p_comma."/".$q_comma."</font> (or reverse)";
 	else echo round($syntonic_comma,1)."</font> cents";
-	echo ": <input type=\"text\" name=\"name_sensitive_note\" size=\"6\" value=\"".$name_sensitive_note."\"></td>";
+	echo " this note: <input type=\"text\" name=\"name_sensitive_note\" size=\"6\" value=\"".$name_sensitive_note."\"></td>";
 	echo "</tr></table><br />";
 	if(isset($_POST['transpose'])) {
 		$transpose_from_note = trim($_POST['transpose_from_note']);
@@ -1353,7 +1358,6 @@ if($done AND $numgrades_with_labels > 2) {
 					$error_transpose .= "<font color=\"red\"> ➡ ERROR: Transpose from note <font color=\"blue\">‘".$transpose_from_note."’</font> <font color=\"red\">was not found in this scale</font><br />";
 				if($j_transpose_to < 0 AND $transposition_mode == "murcchana")
 					$error_transpose .= "<font color=\"red\"> ➡ ERROR: Transpose to note <font color=\"blue\">‘".$transpose_to_note."’</font> <font color=\"red\">was not found in this scale</font><br />";
-					
 				if($error_transpose == '') {
 					$p_transpose_from = $p[$j_transpose_from];
 					$q_transpose_from = $q[$j_transpose_from];
@@ -1363,7 +1367,6 @@ if($done AND $numgrades_with_labels > 2) {
 						$q_transpose_from = $q_transpose_from / $gcd;
 						}
 					$ratio_transpose_from = $ratio[$j_transpose_from];
-					
 					echo "<p><font color=\"green\">Transposition from</font> <font color=\"blue\">‘".$transpose_from_note."’</font> ratio ".$p_transpose_from."/".$q_transpose_from." (".$grade_transpose_from."th position) ";
 					$p_transpose_to = $p[$j_transpose_to];
 					$q_transpose_to = $q[$j_transpose_to];
@@ -1389,7 +1392,6 @@ if($done AND $numgrades_with_labels > 2) {
 						}
 					$ratio_tranpose = $ratio_transpose_to / $ratio_transpose_from;
 					$grade_transpose = $grade_transpose_from - $grade_transpose_to;
-					
 					for($jj = 0; $jj <= $numgrades_with_labels; $jj++) {
 						$new_j = modulo($jj + $grade_transpose,$numgrades_with_labels);
 						$p_new_j = $p_this_grade[$new_j];

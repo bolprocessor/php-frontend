@@ -1989,14 +1989,14 @@ function simplify_fraction_eliminate_schisma($p,$q) {
 			$p = 25; // 1.388 = P1 - 1 syntonic comma
 			$q = 18;
 			}
-		 if($p == 1024 AND $q == 729) { // 1.404 
+	/*	 if($p == 1024 AND $q == 729) { // 1.404 
 			$p = 45; // 1.406 = P1
 			$q = 32;
-			}
-		if($p == 729 AND $q == 512) { // 1.4238
+			} */
+	/*	if($p == 729 AND $q == 512) { // 1.4238
 			$p = 64; // 1.422 = M4
 			$q = 45;
-			}
+			} */
 		if($p == 59049 AND $q == 40960) { // 1.441
 			$p = 36; // 1.440 = M4 + 1 syntonic comma
 			$q = 25;
