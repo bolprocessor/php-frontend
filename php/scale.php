@@ -44,12 +44,15 @@ $scale_choice = $selected_grades = '';
 $selected_grade_name = array();
 $p_comma = 81; $q_comma = 80;
 $syntonic_comma = cents($p_comma/$q_comma);
+$p_major_whole_tone = 9;
+$q_major_whole_tone = 8;
 $list_sensitive_notes = $list_wolffifth_notes = '';
 $pythagorean_third = cents(81/64);
 $pythagorean_minor_sixth = 1200 - $pythagorean_third;
 $perfect_fifth = cents(3/2);
 $perfect_fourth = cents(4/3);
 $series = array();
+$link_edit = "scale.php";
 
 if(!isset($_SESSION['scroll'])) $_SESSION['scroll'] = 0;
 if(isset($_POST['scroll'])) {
@@ -57,7 +60,7 @@ if(isset($_POST['scroll'])) {
 	}
 
 $error_raise_note ='';
-if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST['modifynote']) OR isset($_POST['alignscale']) OR isset($_POST['create_meantone']) OR isset($_POST['modifynames'])) {
+if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST['modifynote']) OR isset($_POST['alignscale']) OR isset($_POST['adjustscale']) OR isset($_POST['create_meantone']) OR isset($_POST['modifynames'])) {
 	if(isset($_POST['scale_name'])) $new_scale_name = trim($_POST['scale_name']);
 	else $new_scale_name = '';
 	if($new_scale_name == '') $new_scale_name = $filename;
@@ -189,6 +192,46 @@ if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST
 			}
 		}
 	
+	if(isset($_POST['adjustscale'])) {
+		$p_adjust = $_POST['p_adjust'];
+		$q_adjust = $_POST['q_adjust'];
+		$cents_adjust = $_POST['cents_adjust'];
+		if(($p_adjust * $q_adjust) <> 0) {
+			$ratio_adjust = $p_adjust / $q_adjust;
+			}
+		else {
+			$ratio_adjust = exp($cents_adjust / 1200 * log(2));
+			}
+		$p_last = $q_last = $ratio_last = 1;
+		for($j = 0; $j <= $numgrades_fullscale; $j++) {
+			if($name[$j] == '' OR $name[$j] == '•') {
+				if(($p_last == $p[$j] AND $q_last == $q[$j]) OR $ratio_last == round($ratio[$j],3)) {
+					$p[$j] = $p[$j] * $p_comma;
+					$q[$j] = $q[$j] * $q_comma;
+					$ratio[$j] = $ratio[$j] * exp($syntonic_comma / 1200 * log(2));
+					}
+				continue;
+				}
+			if(($p_adjust * $q_adjust * $p[$j] * $q[$j]) <> 0) {
+				$p[$j] = $p[$j] * $p_adjust;
+				$q[$j] = $q[$j] * $q_adjust;
+				$fraction = simplify_fraction_eliminate_schisma($p[$j],$q[$j]);
+				if($fraction['p'] <> $p[$j]) {
+					$p[$j] = $fraction['p'];
+					$q[$j] = $fraction['q'];
+					}
+				$ratio[$j] = $p[$j] / $q[$j];
+				}
+			else {
+				$ratio[$j] = $ratio[$j] * $ratio_adjust;
+				$p[$j] = $q[$j] = 0;
+				}
+			$p_last = $p[$j];
+			$q_last = $q[$j];
+			$ratio_last = round($ratio[$j],3);
+			}
+		}
+	
 	if(isset($_POST['key_start'])) $key_start = intval($_POST['key_start']);
 	if(isset($_POST['key_step'])) $key_step = intval($_POST['key_step']);
 	if(isset($_POST['p_step'])) $p_step = intval($_POST['p_step']);
@@ -259,7 +302,7 @@ if(isset($_POST['interpolate'])) {
 	}
 
 $message = '';
-if(isset($_POST['savethisfile']) OR isset($_POST['interpolate'])  OR isset($_POST['modifynote']) OR isset($_POST['alignscale']) OR isset($_POST['create_meantone']) OR isset($_POST['modifynames'])) {
+if(isset($_POST['savethisfile']) OR isset($_POST['interpolate'])  OR isset($_POST['modifynote']) OR isset($_POST['alignscale'])  OR isset($_POST['adjustscale']) OR isset($_POST['create_meantone']) OR isset($_POST['modifynames'])) {
 	$message = "&nbsp;<span id=\"timespan\"><font color=\"red\">... Saving this scale ...</font></span>";
 	$scale_comment = $_POST['scale_comment'];
 	if(isset($_POST['syntonic_comma'])) $syntonic_comma = $_POST['syntonic_comma'];
@@ -289,7 +332,7 @@ if(isset($_POST['savethisfile']) OR isset($_POST['interpolate'])  OR isset($_POS
 	$scale_note_names = $scale_fractions = $scale_keys = $scale_series = '';
 	for($i = 0; $i <= $numgrades_fullscale; $i++) {
 	//	echo $ratio[$i]." = ".$p[$i]."/".$q[$i]."<br />";
-		$line_table .= " ".$ratio[$i];
+		$line_table .= " ".round($ratio[$i],3);
 		$scale_note_names .= $name[$i]." ";
 		if($series[$i] <> '')
 			$scale_series .= $series[$i]." ";
@@ -815,7 +858,69 @@ echo "<td>";
 
 $new_scale_name = $transpose_scale_name = $error_create = $error_transpose = $transpose_from_note = $transpose_to_note = '';
 $done = TRUE;
-	
+
+$list_of_limits = list_of_good_positions($interval,$p_comma,$q_comma,$syntonic_comma);
+sort($list_of_limits);
+// for($i = 0; $i < count($list_of_limits); $i++) echo round($list_of_limits[$i])."<br />";
+
+$cents_interval = cents($interval);
+$high_once = $low_once = FALSE;
+echo "<p>";
+for($j = 0; $j < $numgrades_fullscale; $j++) {
+	$position = round(cents($ratio[$j]));
+	while($position < 0) $position += $cents_interval;
+	while($position > $cents_interval) $position -= $cents_interval;
+	for($i = 0; $i < count($list_of_limits); $i++) {
+		if($list_of_limits[$i] > $position) {
+			$range_interval = $list_of_limits[$i] - $list_of_limits[$i-1];
+			$high_interval = abs($list_of_limits[$i] - $position);
+			$low_interval = abs($position - $list_of_limits[$i-1]);
+			$gap = 0;
+			if($range_interval > ($syntonic_comma + 4) AND $low_interval > 4 AND $high_interval > 4) {
+				if($low_interval > $high_interval) {
+					$high = FALSE; $low_once = TRUE; $gap = $high_interval;
+					}
+				else {
+					$high = $high_once = TRUE; $gap = $low_interval;
+					}
+				echo "<font color=\"red\">➡</font>&nbsp;Position ";
+				if($name[$j] <> '') echo "<font color=\"blue\">‘".$name[$j]."’</font> ";
+				if(($p[$j] * $q[$j]) <> 0) echo $p[$j]."/".$q[$j];
+				else echo round($ratio[$j],3);
+				echo " outside Pyth/harm cycles of fifths (too ";
+				if($high) echo "high";
+				else echo "low";
+				echo " by ".round($gap,1)." cents)<br />";
+				}
+			break;
+			}
+		}
+	}
+echo "</p>";
+if($low_once AND $high_once)
+	echo "<p><font color=\"red\">➡</font> This scale cannot be aligned to Pythagorean/harmonic cycles of fifths because it contains both too high and too low positions</p>";
+else {
+	if($low_once OR $high_once) {
+		echo "<p><font color=\"red\">➡</font>&nbsp;<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#toptable\" name=\"adjustscale\" value=\"ADJUST SCALE\"> to Pyth/harm series ";
+		if($high_once) {
+			echo "lowering";
+			$p_adjust = $q_comma;
+			$q_adjust = $p_comma;
+			$cents_adjust = - $syntonic_comma;
+			}
+		else {
+			echo "raising";
+			$p_adjust = $p_comma;
+			$q_adjust = $q_comma;
+			$cents_adjust = $syntonic_comma;
+			}
+		echo " labeled positions by ".round($syntonic_comma,1)." cents</p>";
+		echo "<input type=\"hidden\" name=\"p_adjust\" value=\"".$p_adjust."\">";
+		echo "<input type=\"hidden\" name=\"q_adjust\" value=\"".$q_adjust."\">";
+		echo "<input type=\"hidden\" name=\"cents_adjust\" value=\"".$cents_adjust."\">";
+		}
+	} 
+
 if(isset($_POST['change_convention']) AND isset($_POST['new_convention'])) {
 	$new_convention = $_POST['new_convention'];
 	$done = FALSE;
@@ -873,7 +978,6 @@ if(isset($_POST['change_convention']) AND isset($_POST['new_convention'])) {
 	echo "&nbsp;<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"use_convention\" value=\"USE THIS CONVENTION\">";
 	echo "<hr>";
 	}
-$link_edit = "scale.php";
 if($done) {
 	echo "<table style=\"background-color:white;\">";
 	echo "<tr>";
@@ -939,7 +1043,6 @@ if($done AND $numgrades_with_labels > 2) {
 			$error_create = "<br /><font color=\"red\"> ➡ ERROR: This name</font> <font color=\"blue\">‘".$new_scale_name."’</font> <font color=\"red\">already exists</font>";
 			}
 		if($error_create == '') {
-			$link_edit = "scale.php";
 			if(isset($_POST['major_minor'])) {
 				$new_scale_mode = $_POST['major_minor'];
 				$name_sensitive_note = trim($_POST['name_sensitive_note']);
@@ -951,62 +1054,73 @@ if($done AND $numgrades_with_labels > 2) {
 						$error_create = "<br /><font color=\"red\"> ➡ A sensitive note should be specified for the major/minor adjustment</font>";
 						}
 					else {
-						echo "<p><font color=\"red\">Exported to</font> <font color=\"blue\">‘".$new_scale_name."’</font> <input style=\"background-color:Aquamarine;\" type=\"submit\" name=\"edit_new_scale\" formaction=\"".$link_edit."?scalefilename=".urlencode($new_scale_name)."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$new_scale_name."’\"></p>";
-						$p_adjust = $p_comma;
-						$q_adjust = $q_comma;
-						if(($p_comma * $q_comma) == 0) {
-							$p_adjust = 1000 * exp($syntonic_comma / 1200 * log(2));
-							$q_adjust = 1000;
-							}
-						for($j = 0; $j < $numgrades_fullscale; $j++) {
-							if($name[$j] == $name_sensitive_note) {
-								if($new_scale_mode == "major") {
-									$p_transpose = $p[$j] * $p_adjust;
-									$q_transpose = $q[$j] * $q_adjust;
-									$ratio_transpose = round($ratio[$j] * $p_adjust / $q_adjust,3);
-									}
-								else {
-									$p_transpose = $p[$j] * $q_adjust;
-									$q_transpose = $q[$j] * $p_adjust;
-									$ratio_transpose = round($ratio[$j] * $q_adjust / $p_adjust,3);
-									}
-								break;
-								}
-							}
-						if($j >= $numgrades_fullscale)
-							$error_create = "<br /><font color=\"red\"> ➡ ERROR: Sensitive note <font color=\"blue\">‘".$name_sensitive_note."’</font> <font color=\"red\">was not found in this scale</font>";
+						$j_sensitive = -1;
+						for($j = 0; $j < $numgrades_fullscale; $j++)
+							if($name[$j] == $name_sensitive_note) $j_sensitive = $j;
+						if($j_sensitive < 0)
+							$error_create = "<br /><font color=\"red\"> ➡ Name of sensitive note is unknown</font>";
 						else {
-							if(($p_transpose * $q_transpose) <> 0) {
-								$gcd = gcd($p_transpose,$q_transpose);
-								$p_transpose = $p_transpose / $gcd;
-								$q_transpose = $q_transpose / $gcd;
+							$p_align = $q_align = $ratio_align = 1;
+							// The tonic is a minor wholetone lower than the sensitive note
+							$ratio_tonic = $ratio[$j_sensitive] * $q_major_whole_tone / $p_major_whole_tone * exp($syntonic_comma / 1200 * log(2));
+							if($ratio_tonic < 1) $ratio_tonic = $ratio_tonic * $interval;
+							$cents_tonic = cents($ratio_tonic);
+					//		echo "ratio_tonic = ".$ratio_tonic."<br />";
+					//		echo "cents_tonic = ".$cents_tonic."<br />";
+							$j_tonic = -1;
+							for($j = 0; $j < $numgrades_fullscale; $j++) {
+								if($name[$j] == '' OR $name[$j] == '•') continue;
+								if(abs($cents_tonic - cents($ratio[$j])) < 10) $j_tonic = $j;
 								}
-							$fraction = simplify_fraction_eliminate_schisma($p_transpose,$q_transpose);
-							if($fraction['p'] <> $p_transpose) {
-								echo "=> ".$p_transpose."/".$q_transpose." simplified to ".$fraction['p']."/".$fraction['q']."<br />";
-								$p_transpose = $fraction['p'];
-								$q_transpose = $fraction['q'];
-								$ratio_transpose = round($p_transpose/$q_transpose,3);
-								}
-							$found = FALSE;
-							$j_transpose = -1;
-						//	echo $p_transpose."/".$q_transpose." = ".$ratio_transpose."<br />";
-							for($j = 0; $j <= $numgrades_fullscale; $j++) {  // $$$$$   REVISE!
-								if($name[$j] == $name_sensitive_note) $name[$j] = '';
-								if($found) continue;
-								if((round($ratio[$j],3) >= $ratio_transpose) OR ($ratio[$j] < 1 AND $ratio_transpose == 1.0)) {
-									if($j > 0 AND $name[$j] <> '') $j--;
-									$p[$j] = $p_transpose;
-									$q[$j] = $q_transpose;
-									$ratio[$j] = $ratio_transpose;
-									$name[$j] = $name_sensitive_note;
-									$j_transpose = $j;
-									$found = TRUE;
+					//		echo "j_tonic = ".$j_tonic."<br />";
+							if(!$full_scale AND $j_tonic >= 0 AND $new_scale_mode == "major") {
+								if($series[$j_tonic] == 'h') {
+									echo "<p><font color=\"red\">➡</font>&nbsp;Labeled positions have been raised by 1 comma to put the tonic <font color=\"blue\">‘".$name[$j_tonic]."’</font> into Pythagorean series of fiths</p>";
+									$p_align = $p_comma;
+									$q_align = $q_comma;
+									if(($p_comma * $q_comma) == 0) {
+										$p_align = 1000 * exp($syntonic_comma / 1200 * log(2));
+										$q_align = 1000;
+										}
+									$ratio_align = $p_align / $q_align;
 									}
 								}
-							if($j_transpose == 0) {
-							//	echo "@@@ ".$p[0]." ".$p_transpose."<br />";
-								$p_transpose = $interval * $p_transpose;
+							if(!$full_scale AND $j_tonic >= 0 AND $new_scale_mode == "minor") {
+								if($series[$j_tonic] == 'p') {
+									echo "<p><font color=\"red\">➡</font>&nbsp;Labeled positions have been lowered by 1 comma to put the tonic <font color=\"blue\">‘".$name[$j_tonic]."’</font> into harmonic series of fiths</p>";
+									$p_align = $q_comma;
+									$q_align = $p_comma;
+									if(($p_comma * $q_comma) == 0) {
+										$p_align = 1000 * exp((-$syntonic_comma) / 1200 * log(2));
+										$q_align = 1000;
+										}
+									$ratio_align = $p_align / $q_align;
+									}
+								}
+							$p_adjust = $p_comma;
+							$q_adjust = $q_comma;
+							if(($p_comma * $q_comma) == 0) {
+								$p_adjust = 1000 * exp($syntonic_comma / 1200 * log(2));
+								$q_adjust = 1000;
+								}
+							for($j = 0; $j < $numgrades_fullscale; $j++) {
+								if($j == $j_sensitive) {
+									if($new_scale_mode == "major") {
+										$p_transpose = $p[$j] * $p_adjust;
+										$q_transpose = $q[$j] * $q_adjust;
+										$ratio_transpose = round($ratio[$j] * $p_adjust / $q_adjust,3);
+										}
+									else {
+										$p_transpose = $p[$j] * $q_adjust;
+										$q_transpose = $q[$j] * $p_adjust;
+										$ratio_transpose = round($ratio[$j] * $q_adjust / $p_adjust,3);
+										}
+									break;
+									}
+								}
+							if($j >= $numgrades_fullscale)
+								$error_create = "<br /><font color=\"red\"> ➡ ERROR: Sensitive note <font color=\"blue\">‘".$name_sensitive_note."’</font> <font color=\"red\">was not found in this scale</font>";
+							else {
 								if(($p_transpose * $q_transpose) <> 0) {
 									$gcd = gcd($p_transpose,$q_transpose);
 									$p_transpose = $p_transpose / $gcd;
@@ -1017,16 +1131,71 @@ if($done AND $numgrades_with_labels > 2) {
 									echo "=> ".$p_transpose."/".$q_transpose." simplified to ".$fraction['p']."/".$fraction['q']."<br />";
 									$p_transpose = $fraction['p'];
 									$q_transpose = $fraction['q'];
+									$ratio_transpose = round($p_transpose/$q_transpose,3);
 									}
-								$p[$numgrades_fullscale] = $p_transpose;
-								$q[$numgrades_fullscale] = $q_transpose;
-								$ratio[$numgrades_fullscale] = $interval * $ratio_transpose;
-								$name[$numgrades_fullscale] = $name_sensitive_note;
+								$found = FALSE;
+								$j_transpose = -1;
+								for($j = 0; $j <= $numgrades_fullscale; $j++) {  // $$$$$   REVISE???
+									if($name[$j] <> '' AND $name[$j] <> '•') {
+										$p[$j] = $p[$j] * $p_align;
+										$q[$j] = $q[$j] * $q_align;
+										$ratio[$j] = $ratio[$j] * $ratio_align;
+										if(($p[$j] * $q[$j]) <> 0) {
+											$gcd = gcd($p[$j],$q[$j]);
+											$p[$j] = $p[$j] / $gcd;
+											$q[$j] = $q[$j] / $gcd;
+											}
+										$fraction = simplify_fraction_eliminate_schisma($p[$j],$q[$j]);
+										if($fraction['p'] <> $p[$j]) {
+											echo "=> ".$p[$j]."/".$q[$j]." simplified to ".$fraction['p']."/".$fraction['q']."<br />";
+											$p[$j] = $fraction['p'];
+											$q[$j] = $fraction['q'];
+											}
+										}
+									if($name[$j] == $name_sensitive_note) $name[$j] = '•';
+									if($found) continue;
+									if((round($ratio[$j],3) >= $ratio_transpose) OR ($ratio[$j] < 1 AND $ratio_transpose == 1.0)) {
+										if($j > 0 AND $name[$j] <> '' AND $name[$j] <> '•') $j--;
+										if($name[$j] <> '' AND $name[$j] <> '•') {
+											$p[$j] = $p_transpose * $p_align;
+											$q[$j] = $q_transpose * $q_align;
+											$ratio[$j] = $ratio_transpose * $ratio_align;
+											}
+										else {
+											$p[$j] = $p_transpose;
+											$q[$j] = $q_transpose;
+											$ratio[$j] = $ratio_transpose;
+											}
+										$name[$j] = $name_sensitive_note;
+										$j_transpose = $j;
+										$found = TRUE;
+										}
+									}
+								if($j_transpose == 0) {
+								//	echo "@@@ ".$p[0]." ".$p_transpose."<br />";
+									$p_transpose = $interval * $p_transpose;
+									if(($p_transpose * $q_transpose) <> 0) {
+										$gcd = gcd($p_transpose,$q_transpose);
+										$p_transpose = $p_transpose / $gcd;
+										$q_transpose = $q_transpose / $gcd;
+										}
+									$fraction = simplify_fraction_eliminate_schisma($p_transpose,$q_transpose);
+									if($fraction['p'] <> $p_transpose) {
+										echo "=> ".$p_transpose."/".$q_transpose." simplified to ".$fraction['p']."/".$fraction['q']."<br />";
+										$p_transpose = $fraction['p'];
+										$q_transpose = $fraction['q'];
+										}
+									$p[$numgrades_fullscale] = $p_transpose * $p_align;
+									$q[$numgrades_fullscale] = $q_transpose * $q_align;
+									$ratio[$numgrades_fullscale] = $interval * $ratio_transpose * $ratio_align;
+									$name[$numgrades_fullscale] = $name_sensitive_note;
+									}
 								}
 							}
 						}
 					}
 				if($error_create == '') {
+					echo "<p><font color=\"red\">Exported to</font> <font color=\"blue\">‘".$new_scale_name."’</font> <input style=\"background-color:Aquamarine;\" type=\"submit\" name=\"edit_new_scale\" formaction=\"".$link_edit."?scalefilename=".urlencode($new_scale_name)."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$new_scale_name."’\"></p>";
 					$handle = fopen($dir_scales.$new_scale_file,"w");
 					fwrite($handle,"\"".$new_scale_name."\"\n");
 					$comma_line = $syntonic_comma;
@@ -1109,7 +1278,6 @@ if($done AND $numgrades_with_labels > 2) {
 		}
 
 	echo "<table><tr id=\"toptranspose\">";
-	$link_edit = "scale.php";
 	echo "<td colspan=\"2\" style=\"vertical-align:middle; padding:4px; white-space:nowrap;\"><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#toptable\" name=\"reduce\" value=\"REDUCE or ADJUST\"> to create a  scale named <input type=\"text\" name=\"reduce_scale_name\" size=\"20\" value=\"".$new_scale_name."\">";
 	
 	echo "</td></tr><tr><td colspan=\"2\" style=\"vertical-align:middle; padding:6px; white-space:nowrap;\">";
@@ -1135,9 +1303,9 @@ if($done AND $numgrades_with_labels > 2) {
 	echo "<td style=\"vertical-align:middle; padding:6px; white-space:nowrap;\"><input type=\"radio\" name=\"major_minor\" value=\"none\" checked>don’t change ratios<br />";
 	echo "<input type=\"radio\" name=\"major_minor\" value=\"major\">raise to relative major<br />";
 	echo "<input type=\"radio\" name=\"major_minor\" value=\"minor\">lower to relative minor</td>";
-	echo "<td style=\"text-align:center; vertical-align:middle; padding:4px;\"><b>Sensitive note (1 comma)</b><br /><br />➡ adjust note by ";
-	if(($p_comma * $q_comma) > 0) echo $p_comma."/".$q_comma." (or reverse)";
-	else echo round($syntonic_comma,1)." cents";
+	echo "<td style=\"text-align:center; vertical-align:middle; padding:4px;\"><b>Sensitive note (1 comma)</b><br /><br />➡ adjust this note by <font color=\"red\">";
+	if(($p_comma * $q_comma) > 0) echo $p_comma."/".$q_comma."</font> (or reverse)";
+	else echo round($syntonic_comma,1)."</font> cents";
 	echo ": <input type=\"text\" name=\"name_sensitive_note\" size=\"6\" value=\"".$name_sensitive_note."\"></td>";
 	echo "</tr></table><br />";
 	if(isset($_POST['transpose'])) {
@@ -1403,7 +1571,6 @@ if($done AND $numgrades_with_labels > 2) {
 			
 			// Now save to exported file	
 			echo "<br />";
-			$link_edit = "scale.php";
 			echo "<font color=\"green\">Saved to new scale</font> <font color=\"blue\">‘".$new_scale_name."’</font>&nbsp;<input style=\"background-color:Aquamarine;\" type=\"submit\" name=\"edit_new_scale\" formaction=\"".$link_edit."?scalefilename=".urlencode($new_scale_name)."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$new_scale_name."’\"></p>";
 			$transpose_scale_name = $new_scale_name;
 			$handle = fopen($dir_scales.$new_scale_file,"w");
@@ -1447,7 +1614,6 @@ if($done AND $numgrades_with_labels > 2) {
 			}
 		}
 	echo "<table><tr>";
-	$link_edit = "scale.php";
 	echo "<td style=\"vertical-align:middle; padding:4px;\">";
 	echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#toptranspose\" name=\"transpose\" value=\"TRANSPOSITION\"> to create a  scale named <input type=\"text\" name=\"transpose_scale_name\" size=\"20\" value=\"\"><br />";
 	echo "</td></tr><tr><td style=\"vertical-align:middle; padding:4px;\">";
@@ -1471,10 +1637,10 @@ if($done AND $numgrades_with_labels > 2) {
 	if($error_raise_note <> '') echo "<br />".$error_raise_note;
 	if($ratio[0] <> 1.0) {
 		echo "</td></tr><tr><td style=\"vertical-align:middle; padding:4px;\">";
-		echo "<font color=\"red\">➡</font>&nbsp;<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#toptranspose\" name=\"alignscale\" value=\"ALIGN SCALE\">&nbsp;to the position of “".$name[0]."” by&nbsp;";
+		echo "<font color=\"red\">➡</font>&nbsp;<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#toptranspose\" name=\"alignscale\" value=\"ALIGN SCALE\">&nbsp;to the position of “".$name[0]."” &nbsp;";
 		if($ratio[0] > 1) echo "lowering&nbsp;";
 		else echo "raising&nbsp;";
-		echo "all notes by <font color=\"red\">".abs(round(cents($ratio[0]),0))." cents</font>";
+		echo "all notes by <font color=\"red\">".abs(round(cents($ratio[0]),1))." cents</font>";
 		}
 	echo "</td>";
 	echo "</tr></table>";

@@ -2109,4 +2109,87 @@ function assign_default_keys($name,$basekey,$numgrades_fullscale) {
 		}
 	return $key;
 	}
+	
+function list_of_good_positions($interval,$p_comma,$q_comma,$syntonic_comma) {
+	$list = array();
+	$cents_interval = cents($interval);
+	if(($p_comma * $q_comma) <> 0) $comma = cents($p_comma/$q_comma);
+	else $comma = $syntonic_comma;
+	if($comma < 1) {
+		echo "<p style=\"color:red;\">ERROR: comma < 1 </p>";
+		return $list ;
+		}
+	// echo $cents_interval." ".$comma;
+	$i = 0;
+	$list[$i++] = 0;
+	$fraction = 1; $i0 = $i;
+	while(TRUE) {
+		$fraction = $fraction * 3 / 2;
+		$position = cents($fraction);
+		while($position < 0) $position += $cents_interval;
+		while($position > $cents_interval) $position -= $cents_interval;
+		$list[$i++] = $position;
+	//	echo $i.") ".round($position)."<br >";
+		$dif1 = abs($position - $comma);
+		if($dif1 < ($comma / 2) OR ($i - $i0) >= 6) break;
+		$dif2 = abs($position - $cents_interval + $comma);
+		if($dif2 < ($comma / 2)) break;
+		}
+	echo "<br />";
+	$fraction = 1; $i0 = $i;
+	while(TRUE) {
+		$fraction = $fraction * 2 / 3;
+		$position = cents($fraction);
+		while($position < 0) $position += $cents_interval;
+		while($position > $cents_interval) $position -= $cents_interval;
+		$list[$i++] = $position;
+	//	echo $i.") ".round($position)."<br >";
+		$dif1 = abs($position - $comma);
+		if($dif1 < ($comma / 2) OR ($i - $i0) >= 6) break;
+		$dif2 = abs($position - $cents_interval + $comma);
+		if($dif2 < ($comma / 2)) break;
+		}
+	echo "<br />";
+	$list[$i++] = $cents_interval;
+	
+	$i0 = $i;
+	for($j = 0; $j < $i0; $j++) {
+		$more = $list[$j] + $comma;
+		if($more < $cents_interval) $list[$i++] = $more;
+		$less = $list[$j] - $comma;
+		if($less > 0) $list[$i++] = $less;
+		}
+	
+	
+/*	$fraction = 81/80; 
+	while(TRUE) {
+		$fraction = $fraction * 3 / 2;
+		$position = cents($fraction);
+		while($position < 0) $position += $cents_interval;
+		while($position > $cents_interval) $position -= $cents_interval;
+		$list[$i++] = round($position);
+		echo $i.") ".round($position)."<br >";
+		$dif1 = abs($position - $comma);
+		if($dif1 < ($comma / 2) OR $i > 100) break;
+		$dif2 = abs($position - $cents_interval + $comma);
+		if($dif2 < ($comma / 2)) break;
+		}
+	$fraction = 81/80;
+	echo "<br />";
+	while(TRUE) {
+		$fraction = $fraction * 2 / 3;
+		$position = cents($fraction);
+		while($position < 0) $position += $cents_interval;
+		while($position > $cents_interval) $position -= $cents_interval;
+		$list[$i++] = round($position);
+		echo $i.") ".round($position)."<br >";
+		$dif1 = abs($position - $comma);
+		if($dif1 < ($comma / 2) OR $i > 100) break;
+		$dif2 = abs($position - $cents_interval + $comma);
+		if($dif2 < ($comma / 2)) break;
+		}
+	echo "<br />"; */
+	
+	return $list;
+	}
 ?>

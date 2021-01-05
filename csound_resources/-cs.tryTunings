@@ -1,5 +1,5 @@
 // Bol Processor BP3 compatible with version BP2.9.8
-// Csound resource file saved as "-cs.tryTunings". Date: 2021-01-04 08:53:27
+// Csound resource file saved as "-cs.tryTunings". Date: 2021-01-05 14:54:42
 16
 -1
 -1
@@ -64,11 +64,11 @@ f2 0 128 -51 12 2 261.63 60 1 1.066 1.124 1.185 1.265 1.333 1.423 1.499 1.599 1.
 /C C# D D# E F F# G G# A A# B C/
 c21.5062895967 81 80c
 k0 1 2 3 4 5 6 7 8 9 10 11 12k
-[1 1 16 15 9 8 32 27 81 64 4 3 64 45 3 2 128 81 27 16 16 9 243 128 2 1]
-sp h p p p p h p p p p p ps
+[1 1 256 243 9 8 32 27 81 64 4 3 64 45 3 2 128 81 27 16 16 9 243 128 2 1]
+sp p p p p p h p p p p p ps
 |4|
-f2 0 128 -51 12 2 261.63 60 1 1.067 1.125 1.185 1.266 1.333 1.422 1.5 1.58 1.688 1.778 1.898 2
-<html>This is a reduction to 12 grades of scale "Ma08" (23 grades) in ‘-cs.12_scales’ in major tonality.<br />Sensitive note = 'Db'<br />Created 2021-01-04 07:28:43<br /></html>
+f2 0 128 -51 12 2 261.63 60 1 1.053 1.125 1.185 1.266 1.333 1.422 1.5 1.58 1.688 1.778 1.898 2
+<html>This is a reduction to 12 grades of scale "Ma08" (23 grades) in ‘-cs.12_scales’ in major tonality.<br />Sensitive note = 'Db'<br />Created 2021-01-05 12:26:59<br /></html>
 "Bmin"
 /C C# D D# E F F# G G# A A# B C/
 c21.5062895967 81 80c
@@ -94,6 +94,15 @@ sp h p h p p h p h p h p ps
 |4|
 f2 0 128 -51 12 2 261.63 60 1 1.067 1.125 1.2 1.266 1.333 1.422 1.5 1.6 1.688 1.8 1.898 2
 <html>This is a reduction of scale "Ma04" (23 grades)<br />Created 2020-11-29 05:02:51<br /></html>
+"Cmin_minus"
+/C C# D D# E F F# G G# A A# B C/
+c21.5062895967 81 80c
+k0 1 2 3 4 5 6 7 8 9 10 11 12k
+[80 81 256 243 10 9 32 27 5 4 320 243 45 32 40 27 128 81 5 3 16 9 15 8 160 81]
+sh p h p h h h h p h p h hs
+|4|
+f2 0 128 -51 12 2 261.63 60 0.988 1.053 1.111 1.185 1.25 1.317 1.406 1.481 1.58 1.667 1.778 1.875 1.975
+<html>This is a reduction to 12 grades of scale "Ma04" (23 grades) in ‘-cs.12_scales’<br />Created 2020-12-27 09:35:22<br />Also Cmin lowered by a comma (non-aligned)<br /></html>
 "Dbmaj"
 /C C# D D# E F F# G G# A A# B C/
 [1 1 16 15 9 8 6 5 81 64 4 3 729 512 3 2 8 5 27 16 16 9 243 128 2 1]
@@ -132,22 +141,27 @@ f2 0 128 -51 12 2 261.63 60 1 1.066 1.124 1.185 1.265 1.333 1.423 1.499 1.58 1.6
 <html>This is a reduction of scale "Ma07" (23 grades)<br />Created 2020-11-29 18:23:04</html>
 "Emaj"
 /C C# D D# E F F# G G# A A# B C/
-[1 1 256 243 9 8 32 27 81 64 4 3 729 512 3 2 128 81 27 16 16 9 243 128 2 1]
+c21.5062895967 81 80c
+[6480 6480 1658880 1574640 810 720 207360 174960 405 320 25920 19440 45 32 3240 2160 829440 524880 405 240 103680 58320 1215 640 12960 6480]
 |4|
-f2 0 128 -51 12 2 261.63 60 1 1.053 1.124 1.185 1.265 1.333 1.423 1.499 1.58 1.687 1.777 1.898 1.999
-<html>This is a reduction of scale "Sa09" (23 grades)<br />Created 2020-11-29 18:39:24</html>
+f2 0 128 -51 12 2 261.63 60 1 1.053 1.125 1.185 1.266 1.333 1.406 1.5 1.58 1.688 1.778 1.898 2
+<html>This is a reduction to 12 grades of scale "Ma09" (23 grades) in ‘-cs.12_scales’ in major tonality.<br />Sensitive note = 'F#'<br />Created 2021-01-05 12:25:27</html>
 "Emin"
 /C C# D D# E F F# G G# A A# B C/
+c21.5062895967 81 80c
+k0 1 2 3 4 5 6 7 8 9 10 11 12k
 [1 1 256 243 9 8 32 27 5 4 4 3 45 32 3 2 128 81 5 3 16 9 15 8 2 1]
+sp p p p h p h p p h p h ps
 |4|
-f2 0 128 -51 12 2 261.63 60 1 1.053 1.124 1.185 1.25 1.333 1.406 1.499 1.58 1.666 1.777 1.874 1.999
-<html>This is a reduction of scale "Ma12" (23 grades)<br />Created 2020-11-29 18:24:24</html>
+f2 0 128 -51 12 2 261.63 60 1 1.053 1.125 1.185 1.25 1.333 1.406 1.5 1.58 1.667 1.778 1.875 2
+<html>This is a reduction of scale "Ma12" (23 grades)<br />Created 2020-11-29 18:24:24<br /></html>
 "F#maj"
 /C C# D D# E F F# G G# A A# B C/
-[1 1 16 15 9 8 32 27 81 64 4 3 729 512 3 2 8 5 27 16 16 9 243 128 2 1]
+c21.5062895967 81 80c
+[6480 6480 20736 19440 810 720 207360 174960 405 320 25920 19440 3645 2560 3240 2160 128 81 405 240 103680 58320 1215 640 12960 6480]
 |4|
-f2 0 128 -51 12 2 261.63 60 1 1.066 1.124 1.185 1.265 1.333 1.423 1.499 1.599 1.687 1.777 1.898 1.999
-<html>This is a reduction of scale "Sa07" (23 grades)<br />Created 2020-11-29 18:38:37</html>
+f2 0 128 -51 12 2 261.63 60 1 1.067 1.125 1.185 1.266 1.333 1.424 1.5 1.58 1.688 1.778 1.898 2
+<html>This is a reduction to 12 grades of scale "Ma07" (23 grades) in ‘-cs.12_scales’ in major tonality.<br />Sensitive note = 'Ab'<br />Created 2021-01-05 12:28:41</html>
 "F#min"
 /C C# D D# E F F# G G# A A# B C/
 [1 1 256 243 9 8 32 27 81 64 4 3 45 32 3 2 128 81 27 16 16 9 15 8 2 1]
@@ -175,6 +189,15 @@ sp p p p h p h p p p p h ps
 |4|
 f2 0 128 -51 12 2 261.63 60 1 1.053 1.124 1.185 1.25 1.333 1.406 1.5 1.58 1.688 1.778 1.875 2
 <html>This is a reduction of scale "Sa12" (23 grades)<br />Created 2020-11-29 18:40:00<br /></html>
+"Gmaj_minus"
+/C C# D D# E F F# G G# A A# B C/
+c21.5062895967 81 80c
+k0 1 2 3 4 5 6 7 8 9 10 11 12k
+[80 81 20480 19683 10 9 2560 2187 100 81 320 243 25 18 40 27 10240 6561 5 3 1280 729 50 27 160 81]
+sh h h h h h h h h h h h hs
+|4|
+f2 0 128 -51 12 2 261.63 60 0.988 1.04 1.111 1.171 1.235 1.317 1.389 1.481 1.561 1.667 1.756 1.852 1.975
+<html>This is a reduction to 12 grades of scale "Sa12" (23 grades) in ‘-cs.12_scales’<br />Created 2020-12-26 04:42:49<br />Also Gmaj lowered by a comma (non-aligned)<br /></html>
 "Gmin"
 /C C# D D# E F F# G G# A A# B C/
 [1 1 16 15 9 8 6 5 81 64 27 20 729 512 3 2 8 5 27 16 9 5 243 128 2 1]
