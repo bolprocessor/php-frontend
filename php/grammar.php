@@ -245,7 +245,7 @@ if($test) echo "url_this_page = ".$url_this_page."<br />";
 
 $csound_is_responsive = FALSE;
 if($file_format == "csound") {
-	echo "<div>";
+	echo "<div style=\"float:right; background-color:white; padding:6px;\">";
 	$csound_is_responsive = check_csound();
 	echo "</div>";
 	}

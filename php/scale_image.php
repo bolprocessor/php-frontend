@@ -91,6 +91,8 @@ if($no_marks < 1) {
 	}
 
 for($j = 0; $j <= $numgrades_fullscale; $j++) {
+	if(!isset($ratio[$j]) OR $ratio[$j] == '') $ratio[$j] = 0;
+	if($ratio[$j] == 0) continue;
 	$angle = 2 * M_PI * cents($ratio[$j]) / $interval_cents + (M_PI / 2);
 	$coord = set_point($radius + 2,$ratio[$j]);
 	$x_note = $coord['x'];
@@ -142,6 +144,7 @@ for($j = 0; $j <= $numgrades_fullscale; $j++) {
 
 $end_x = $end_y = $old_x = $old_y = 0;
 for($j = 0; $j <= $numgrades_fullscale; $j++) {
+	if($ratio[$j] == 0) continue;
 	$angle = 2 * M_PI * cents($ratio[$j]) / $interval_cents + (M_PI / 2);
 	$coord = set_point($radius + 2,$ratio[$j]);
 	$x_note = $coord['x'];

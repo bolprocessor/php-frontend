@@ -793,10 +793,10 @@ for($i = $i + 1; $i < $imax_file; $i++) {
 echo "</textarea><br />";
 echo "<input type=\"hidden\" name=\"the_tables\" value='".$cstables."'>";  // For autosave
 echo "<input type=\"hidden\" name=\"dir_scales\" value=\"".$dir_scales."\">";
-$max_scales = $i_scale; // Beware that we count scales from 1 because 0 is equal-tempered
+$max_scales = $i_scale; // Beware that we count scales from 1 because 0 is the default equal-tempered scale
 
 echo "<div id=\"topscales\"></div>";
-/* if($max_scales > 0) */ echo "<h2>Tonal scales</h2>";
+echo "<h2>Tonal scales</h2>";
 $dircontent = scandir($dir_scales);
 $deleted_scales = 0;
 foreach($dircontent as $some_scale) {
@@ -810,7 +810,7 @@ foreach($dircontent as $some_scale) {
 		}
 	}
 if($deleted_scales > 0) {
-	echo "</b></font>&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"undelete_scales\" onclick=\"this.form.target='_self';return true;\" value=\"UNDELETE all scales\">&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"empty_trash\" onclick=\"this.form.target='_self';return true;\" value=\"TRASH these scales\">";
+	echo "</b></font>&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"undelete_scales\" onclick=\"this.form.target='_self';return true;\" value=\"UNDELETE all scales\">&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"empty_trash\" onclick=\"this.form.target='_self';return true;\" value=\"TRASH deleted scales\">";
 	echo "</p>";
 	}
 echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"create_scale\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#topscales\" value=\"CREATE A NEW TONAL SCALE\">&nbsp;with name <input type=\"text\" name=\"scale_name\" size=\"20\" value=\"\"></p>";
