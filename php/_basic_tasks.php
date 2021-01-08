@@ -1941,10 +1941,14 @@ function simplify_fraction_eliminate_schisma($p,$q) {
 		$gcd = gcd($p,$q);
 		$p = $p / $gcd;
 		$q = $q / $gcd;
-		if($p == 2048 AND $q == 2025) { // 1.0113 syntonic comma - schisma
+		if($p == 2048 AND $q == 2025) { // 1.0113
 			$p = 81; // 1.0125
 			$q = 80;
-			} 
+			}
+		if($p == 20480 AND $q == 19683) { // 1.0405
+			$p = 50; // 1.04166 = REb-1
+			$q = 48;
+			}
 		if($p == 135 AND $q == 128) { // 1.05468
 			$p = 256; // 1.0535 = R1
 			$q = 243;
@@ -1960,6 +1964,14 @@ function simplify_fraction_eliminate_schisma($p,$q) {
 		if($p == 4096 AND $q == 3645) { // 1.1237
 			$p = 9; // 1.125 = R4
 			$q = 8;
+			}
+		if($p == 729 AND $q == 640) { // 1.139
+			$p = 256; // 1.138 RE+1
+			$q = 225;
+			}
+		if($p == 2560 AND $q == 2187) { // 1.170
+			$p = 75; // 1.172 = MIb-1
+			$q = 64;
 			} 
 		if($p == 1215 AND $q == 1024) { // 1.1865
 			$p = 32; // 1.1851 = G1
@@ -1977,6 +1989,10 @@ function simplify_fraction_eliminate_schisma($p,$q) {
 			$p = 81; // 1.126 = G4
 			$q = 64;
 			}
+		if($p == 6561 AND $q == 5120) { // 1.281
+			$p = 32; // 1.28 = MI+1
+			$q = 25;
+			}
 		if($p == 177147 AND $q == 131072) { // 1.351
 			$p = 27; // 1.35 = M2
 			$q = 20;
@@ -1989,14 +2005,14 @@ function simplify_fraction_eliminate_schisma($p,$q) {
 			$p = 25; // 1.388 = P1 - 1 syntonic comma
 			$q = 18;
 			}
-	/*	 if($p == 1024 AND $q == 729) { // 1.404 
+		 if($p == 1024 AND $q == 729) { // 1.404 
 			$p = 45; // 1.406 = P1
 			$q = 32;
-			} */
-	/*	if($p == 729 AND $q == 512) { // 1.4238
+			}
+		if($p == 729 AND $q == 512) { // 1.4238
 			$p = 64; // 1.422 = M4
 			$q = 45;
-			} */
+			}
 		if($p == 59049 AND $q == 40960) { // 1.441
 			$p = 36; // 1.440 = M4 + 1 syntonic comma
 			$q = 25;
@@ -2004,6 +2020,14 @@ function simplify_fraction_eliminate_schisma($p,$q) {
 		if($p == 262144 AND $q == 177147) { // 1.4798
 			$p = 40; // 1.481 = P3
 			$q = 27;
+			}
+		if($p == 16384 AND $q == 10935) { // 1.498
+			$p = 3; // 1.5 = P4
+			$q = 2;
+			}
+		if($p == 10240 AND $q == 6561) { // 1.56073
+			$p = 25; // 1.5625 = LAb-1
+			$q = 16;
 			}
 		if($p == 6561 AND $q == 4096) { // 1.6018
 			$p = 8; // 1.6 = D2
@@ -2013,9 +2037,17 @@ function simplify_fraction_eliminate_schisma($p,$q) {
 			$p = 5; // 1.666 = D3
 			$q = 3;
 			}
+		if($p == 2187 AND $q == 1280) { // 1.708
+			$p = 128; // 1.706 = LA+1
+			$q = 75;
+			}
 		if($p == 2048 AND $q == 1215) { // 1.7679
 			$p = 27; // 1.6875 = D4
 			$q = 16;
+			}
+		if($p == 1280 AND $q == 729) { // 1.756
+			$p = 225; // 1.758 = SIb-1
+			$q = 128;
 			}
 		if($p == 59049 AND $q == 32768) { // 1.802
 			$p = 9; // 1.8 = N2
@@ -2028,6 +2060,10 @@ function simplify_fraction_eliminate_schisma($p,$q) {
 		if($p == 256 AND $q == 135) { // 1.8962
 			$p = 243; // 1.8984 = N4
 			$q = 128;
+			}
+		if($p == 19683 AND $q == 10240) { // 1.922
+			$p = 48; // 1.92 = SI+1
+			$q = 25;
 			}
 		}
 	$result['p'] = $p;

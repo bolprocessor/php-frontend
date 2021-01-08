@@ -6,16 +6,19 @@ header('Content-Type: image/png; charset=utf-8');
 header('Title: "'.$filename.'"');
 $margin_left = 15;
 $width = 900;
-$height = 130;
+$height = 160;
 
 if(isset($_GET['no_marks'])) $no_marks = $_GET['no_marks'];
 else $no_marks = 0;
+if(isset($_GET['no_cents'])) $no_cents = $_GET['no_cents'];
+else $no_cents = 0;
 if(isset($_GET['no_intervals'])) $no_intervals = $_GET['no_intervals'];
 else $no_intervals = 0;
 
 $image_width = $width + 100;
+$image_height = 820;
 if($image_width < 1000) $image_width = 1000;
-$im = @imagecreatetruecolor($image_width,800)
+$im = @imagecreatetruecolor($image_width,$image_height)
       or die('Cannot Initialize new GD image stream');
 $white = imagecolorallocate($im,255,255,255);
 $black = imagecolorallocate($im,0,0,0);
@@ -32,7 +35,7 @@ $lemonchiffon = imagecolorallocate($im,255,250,205);
 $lightcyan = imagecolorallocate($im,224,255,255);
 $papayawhip = imagecolorallocate($im,255,239,213);
 
-imagefilledrectangle($im,0,0,$image_width,800,$white);
+imagefilledrectangle($im,0,0,$image_width,$image_height,$white);
 
 $text = "Scale \"".$filename."\"";
 imagestring($im,10,$margin_left,10,$text,$black);
@@ -90,6 +93,7 @@ if($no_marks < 1) {
 		}
 	}
 
+$shift_name = 0;
 for($j = 0; $j <= $numgrades_fullscale; $j++) {
 	if(!isset($ratio[$j]) OR $ratio[$j] == '') $ratio[$j] = 0;
 	if($ratio[$j] == 0) continue;
@@ -108,14 +112,32 @@ for($j = 0; $j <= $numgrades_fullscale; $j++) {
 	imagesmoothline($im,$x1,$y1,$x2,$y2,$color);
 	
 	// Print names
-	$text = $name[$j];
-	$length_text = imagefontwidth(10) * strlen($text);
-	$height_text = imagefontheight(10);
-	$x_text = $x2 + 20 * cos($angle) - $length_text /  2;
-	$y_text = $y2 + 20 * sin($angle) - $height_text / 2;
-	imagestring($im,10,$x_text,$y_text,$text,$red);
-	
 	if($j < $numgrades_fullscale) {
+		$text = $name[$j];
+		$length_text = imagefontwidth(10) * strlen($text);
+		$height_text = imagefontheight(10);
+		$x_text = $x2 + 20 * cos($angle) - $length_text /  2;
+		$y_text = $y2 + 20 * sin($angle) - $height_text / 2;
+		if(($cents[$j] > 550 AND $cents[$j] < 650) OR $cents[$j] > 1100 OR $cents[$j] < 100) {
+			$shiftarea = TRUE;
+			$y_text += $shift_name;
+			}
+		else $shiftarea = FALSE;
+		if($shiftarea AND ($cents[$j] > 550 AND $cents[$j] < 650)) {
+			if($shift_name < 0) $shift_name = 0;
+			else if($shift_name == 0) $shift_name = imagefontheight(10) + 2;
+			else $shift_name = - imagefontheight(10) - 2;
+			}
+		else if($shiftarea AND ($cents[$j] > 1100 OR $cents[$j] < 100)) {
+			if($shift_name > 0) $shift_name = 0;
+			else if($shift_name == 0) $shift_name = - imagefontheight(10) - 2;
+			else $shift_name = + imagefontheight(10) + 2;
+			}
+		else $shift_name = 0;
+		$length_text_name = imagefontwidth(10) * strlen($text);
+		imagefilledrectangle($im,$x_text - 5,$y_text,$x_text + $length_text_name + 5,$y_text + imagefontheight(10),$white);	
+		imagestring($im,10,$x_text,$y_text,$text,$red);
+	
 		$height_text = imagefontheight(10);
 		$coord = set_point(50 + $height_text / 2,$ratio[$j]);
 		$y_text = $y2 - $y_center + $coord['y'] - $height_text / 2;
@@ -129,6 +151,7 @@ for($j = 0; $j <= $numgrades_fullscale; $j++) {
 		$x_text = $x2 - $x_center + $coord['x'] - $length_text / 2;
 		
 		// Print cents
+		if($no_cents) continue;
 		$text2 = round($cents[$j]);
 		if($text2 <> '') $text2 .= 'c';
 		$y_text2 = $y_text + imagefontheight(10) + 2;
@@ -151,13 +174,15 @@ for($j = 0; $j <= $numgrades_fullscale; $j++) {
 	$y_note = $coord['y'];
 	$x1 = $x_note;
 	$y1 = $y_note;
-	$coord = set_point($radius + $crown_thickness + 12,$ratio[$j]);
+	$coord = set_point($radius + $crown_thickness + 10,$ratio[$j]);
 	$x2 = $coord['x'];
 	$y2 = $coord['y'];
 	if($j < $numgrades_fullscale) {
 		$height_text = imagefontheight(10);
 		$coord = set_point(50 + $height_text / 2,$ratio[$j]);
 		$y_text = $y2 - $y_center + $coord['y'] - $height_text / 2;
+		if($cents[$j] > 550 AND $cents[$j] < 650)
+			$y_text -= imagefontheight(10);
 		if(($p[$j] * $q[$j]) > 0) {
 			$fraction = $p[$j]."/".$q[$j];
 			$text_ratio[$j] = $fraction;
@@ -169,14 +194,15 @@ for($j = 0; $j <= $numgrades_fullscale; $j++) {
 		$x_text = $x2 - $x_center + $coord['x'] - $length_text / 2;
 		
 		// Print fractions or ratios
-		if($y_text <= $end_y AND $y_text >= ($end_y - 2 * imagefontheight(10)) AND $x_text <= $end_x) {
+		if($y_text <= $end_y AND $y_text >= ($end_y - 2 * imagefontheight(10)) AND $x_text <= $end_x)
 			$y_text += imagefontheight(10) + 2;
-			}
 		$end_x = $x_text + $length_text + 5;
-		if($y_text <= $old_y AND $y_text >= ($old_y + imagefontheight(10)) AND $end_x >= $old_x) {
+		if($y_text <= $old_y AND $y_text >= ($old_y + imagefontheight(10)) AND $end_x >= $old_x)
 			$y_text += imagefontheight(10) + 2;
-			}
+		if($y_text > $old_y AND $y_text <= ($old_y + imagefontheight(10)) AND $end_x >= $old_x AND $x_text < $old_x) 
+			$y_text += imagefontheight(10) + 2;
 		$end_y = $y_text + imagefontheight(10);
+		
 		$old_x = $x_text;
 		$old_y = $y_text;
 		if($name[$j] <> '') {
@@ -189,7 +215,7 @@ for($j = 0; $j <= $numgrades_fullscale; $j++) {
 $x1 = $margin_left;
 $x2 = 60;
 $x_text = $x2 + 15;
-$y1 = 2 * $radius + 260;
+$y1 = 2 * $radius + 280;
 $y_text = $y1 - imagefontheight(10) / 2;
 
 if(!$no_intervals) {

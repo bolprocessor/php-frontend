@@ -1,5 +1,5 @@
 // Bol Processor BP3 compatible with version BP2.9.8
-// Csound resource file saved as "-cs.raga". Date: 2020-12-22 06:36:48
+// Csound resource file saved as "-cs.raga". Date: 2021-01-08 17:19:55
 16
 1
 -1
@@ -144,10 +144,12 @@ f2 0 128 -51 12 2 261.63 60 1 1.053 1.111 1.185 1.25 1.333 1.406 1.5 1.58 1.667 
 "Ma3_murcchana"
 /sa rek re gak ga ma ma# pa dhak dha nik ni sa/
 c21.5062895967 81 80c
-[1 1 256 243 9 8 32 27 81 64 4 3 64 45 16384 10935 128 81 27 16 16 9 243 128 2 1]
+k0 1 2 3 4 5 6 7 8 9 10 11 12k
+[1 1 256 243 9 8 32 27 81 64 4 3 64 45 3 2 128 81 27 16 16 9 243 128 2 1]
+sp p p p p p h p p p p p ps
 |4|
-f2 0 128 -51 12 2 261.63 60 1 1.053 1.125 1.185 1.266 1.333 1.422 1.498 1.58 1.688 1.778 1.898 2
-<html>This is a transposition of scale "Sa_murcchana" (12 grades).<br />From ‘ma#’ to ‘sa’.<br />Created 2020-12-17 19:45:32</html>
+f2 0 128 -51 12 2 261.63 60 1 1.053 1.125 1.185 1.266 1.333 1.422 1.5 1.58 1.688 1.778 1.898 2
+<html>This is a transposition of scale "Sa_murcchana" (12 grades).<br />From ‘ma#’ to ‘sa’.<br />Created 2020-12-17 19:45:32<br /></html>
 "Ma_grama_full"
 /sa rek • re • gak • ga • ma • ma# • pa • dhak • dha • nik • ni • sa/
 c21.5062895967 81 80c
@@ -199,11 +201,12 @@ f2 0 128 -51 12 2 261.63 60 1 1.067 1.125 1.2 1.266 1.333 1.422 1.5 1.6 1.688 1.
 "Sa_murcchana"
 /sa rek re gak ga ma ma# pa dhak dha nik ni sa/
 c21.5062895967 81 80c
-k0 1 2 3 4 5 6 -60 8 9 10 11 12k
+k0 1 2 3 4 5 6 0 8 9 10 11 12k
 [1 1 256 243 10 9 32 27 5 4 4 3 45 32 40 27 128 81 5 3 16 9 15 8 2 1]
+sp p h p h p h h p h p h ps
 |4|
 f2 0 128 -51 12 2 261.63 60 1 1.053 1.111 1.185 1.25 1.333 1.406 1.481 1.58 1.667 1.778 1.875 2
-<html>This is a reduction to 12 grades of scale "Ma_grama_full" (23 grades) in ‘-cs.raga2’<br />Created 2020-12-17 15:44:19</html>
+<html>This is a reduction to 12 grades of scale "Ma_grama_full" (23 grades) in ‘-cs.raga2’<br />Created 2020-12-17 15:44:19<br /></html>
 "asavari1"
 /sa re gak ma pa dhak nik sa/
 c21.5062895967 81 80c
@@ -235,10 +238,12 @@ f2 0 128 -51 7 2 261.63 60 1 1.111 1.185 1.333 1.481 1.667 1.875 2
 "bhairao1"
 /sa rek ga ma pa dhak ni sa/
 c21.5062895967 81 80c
-[1 1 256 243 81 64 4 3 16384 10935 128 81 243 128 2 1]
+k0 1 4 5 7 8 11 12k
+[1 1 256 243 81 64 4 3 3 2 128 81 243 128 2 1]
+sp p p p p p p ps
 |4|
-f2 0 128 -51 7 2 261.63 60 1 1.053 1.266 1.333 1.498 1.58 1.898 2
-<html>This is a reduction to 7 grades of scale "Ma3_murcchana" (12 grades) in ‘-cs.raga’<br />Created 2020-12-17 19:50:06</html>
+f2 0 128 -51 7 2 261.63 60 1 1.053 1.266 1.333 1.5 1.58 1.898 2
+<html>This is a reduction to 7 grades of scale "Ma3_murcchana" (12 grades) in ‘-cs.raga’<br />Created 2020-12-17 19:50:06<br /></html>
 "bhairao2"
 /sa rek ga ma pa dhak ni sa/
 c21.5062895967 81 80c
@@ -367,10 +372,12 @@ f2 0 128 -51 7 2 261.63 60 1 1.125 1.266 1.35 1.5 1.688 1.8 2
 "lalit1"
 /sa rek ga ma ma# pa dhak ni sa/
 c21.5062895967 81 80c
-[1 1 256 243 81 64 4 3 64 45 16384 10935 128 81 243 128 2 1]
+k0 1 4 5 6 7 8 11 12k
+[1 1 256 243 81 64 4 3 64 45 3 2 128 81 243 128 2 1]
+sp p p p h p p p ps
 |4|
-f2 0 128 -51 8 2 261.63 60 1 1.053 1.266 1.333 1.422 1.498 1.58 1.898 2
-<html>This is a reduction to 8 grades of scale "Ma3_murcchana" (12 grades) in ‘-cs.raga’<br />Created 2020-12-19 14:23:28</html>
+f2 0 128 -51 8 2 261.63 60 1 1.053 1.266 1.333 1.422 1.5 1.58 1.898 2
+<html>This is a reduction to 8 grades of scale "Ma3_murcchana" (12 grades) in ‘-cs.raga’<br />Created 2020-12-19 14:23:28<br /></html>
 "lalit2"
 /sa rek ga ma ma# pa dhak ni sa/
 c21.5062895967 81 80c
@@ -437,10 +444,12 @@ f2 0 128 -51 7 2 261.63 60 1 1.053 1.185 1.406 1.5 1.58 1.898 2
 "todi3"
 /sa rek gak ma# pa dhak ni sa/
 c21.5062895967 81 80c
-[1 1 256 243 32 27 64 45 16384 10935 128 81 243 128 2 1]
+k0 1 3 6 7 8 11 12k
+[1 1 256 243 32 27 64 45 3 2 128 81 243 128 2 1]
+sp p p h p p p ps
 |4|
-f2 0 128 -51 7 2 261.63 60 1 1.053 1.185 1.422 1.498 1.58 1.898 2
-<html>This is a reduction to 7 grades of scale "Ma3_murcchana" (12 grades) in ‘-cs.raga’<br />Created 2020-12-17 19:47:44</html>
+f2 0 128 -51 7 2 261.63 60 1 1.053 1.185 1.422 1.5 1.58 1.898 2
+<html>This is a reduction to 7 grades of scale "Ma3_murcchana" (12 grades) in ‘-cs.raga’<br />Created 2020-12-17 19:47:44<br /></html>
 "todi4"
 /sa rek gak ma# pa dhak ni sa/
 c21.5062895967 81 80c

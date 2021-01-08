@@ -1,5 +1,5 @@
 // Bol Processor BP3 compatible with version BP2.9.8
-// Csound resource file saved as "-cs.Mozart". Date: 2021-01-05 19:00:23
+// Csound resource file saved as "-cs.Mozart". Date: 2021-01-08 16:57:27
 16
 -1
 -1
@@ -31,10 +31,12 @@ f2 0 128 -51 12 2 261.63 60 0.988 1.053 1.111 1.185 1.25 1.317 1.406 1.481 1.58 
 "Abmin"
 /do do# re re# mi fa fa# sol sol# la la# si do/
 c21.5062895967 81 80c
-[80 81 20480 19683 10 9 2560 2187 5 4 320 243 45 32 40 27 10240 6561 5 3 1280 729 15 8 160 81]
+k0 1 2 3 4 5 6 7 8 9 10 11 12k
+[80 81 25 24 10 9 75 64 5 4 320 243 45 32 40 27 25 16 5 3 225 128 15 8 160 81]
+sh h h h h h h h h h h h hs
 |4|
-f2 0 128 -51 12 2 261.63 60 0.988 1.04 1.111 1.171 1.25 1.317 1.406 1.481 1.561 1.667 1.756 1.875 1.975
-<html>This is a reduction to 12 grades of scale "Ma08" (23 grades) in ‘-cs.12_scales’<br />Created 2021-01-05 18:09:51</html>
+f2 0 128 -51 12 2 261.63 60 0.988 1.042 1.111 1.172 1.25 1.317 1.406 1.481 1.563 1.667 1.758 1.875 1.975
+<html>This is a reduction to 12 grades of scale "Ma08" (23 grades) in ‘-cs.12_scales’<br />Created 2021-01-05 18:09:51<br /></html>
 "Amaj"
 /do do# re re# mi fa fa# sol sol# la la# si do/
 c21.5062895967 81 80c
@@ -61,10 +63,12 @@ f2 0 128 -51 12 2 261.63 60 1 1.053 1.111 1.185 1.25 1.333 1.406 1.481 1.58 1.66
 "Bbmin"
 /do do# re re# mi fa fa# sol sol# la la# si do/
 c21.5062895967 81 80c
-[80 81 256 243 10 9 2560 2187 5 4 320 243 45 32 40 27 128 81 5 3 1280 729 15 8 160 81]
+k0 1 2 3 4 5 6 7 8 9 10 11 12k
+[80 81 256 243 10 9 75 64 5 4 320 243 45 32 40 27 128 81 5 3 225 128 15 8 160 81]
+sh p h h h h h h p h h h hs
 |4|
-f2 0 128 -51 12 2 261.63 60 0.988 1.053 1.111 1.171 1.25 1.317 1.406 1.481 1.58 1.667 1.756 1.875 1.975
-<html>This is a reduction to 12 grades of scale "Ma06" (23 grades) in ‘-cs.12_scales’<br />Created 2021-01-05 18:08:40</html>
+f2 0 128 -51 12 2 261.63 60 0.988 1.053 1.111 1.172 1.25 1.317 1.406 1.481 1.58 1.667 1.758 1.875 1.975
+<html>This is a reduction to 12 grades of scale "Ma06" (23 grades) in ‘-cs.12_scales’<br />Created 2021-01-05 18:08:40<br /></html>
 "Bmaj"
 /do do# re re# mi fa fa# sol sol# la la# si do/
 c21.5062895967 81 80c
@@ -105,10 +109,12 @@ f2 0 128 -51 12 2 261.63 60 0.988 1.053 1.111 1.185 1.25 1.317 1.406 1.481 1.58 
 "Dbmin"
 /do do# re re# mi fa fa# sol sol# la la# si do/
 c21.5062895967 81 80c
-[80 81 20480 19683 10 9 2560 2187 5 4 320 243 25 18 40 27 10240 6561 5 3 1280 729 15 8 160 81]
+k0 1 2 3 4 5 6 7 8 9 10 11 12k
+[80 81 50 48 10 9 75 64 5 4 320 243 25 18 40 27 25 16 5 3 225 128 15 8 160 81]
+sh h h h h h h h h h h h hs
 |4|
-f2 0 128 -51 12 2 261.63 60 0.988 1.04 1.111 1.171 1.25 1.317 1.389 1.481 1.561 1.667 1.756 1.875 1.975
-<html>This is a reduction to 12 grades of scale "Ma09" (23 grades) in ‘-cs.12_scales’<br />Created 2021-01-05 18:10:26</html>
+f2 0 128 -51 12 2 261.63 60 0.988 1.042 1.111 1.172 1.25 1.317 1.389 1.481 1.563 1.667 1.758 1.875 1.975
+<html>This is a reduction to 12 grades of scale "Ma09" (23 grades) in ‘-cs.12_scales’<br />Created 2021-01-05 18:10:26<br /></html>
 "Dmaj"
 /do do# re re# mi fa fa# sol sol# la la# si do/
 c21.5062895967 81 80c
@@ -133,10 +139,12 @@ f2 0 128 -51 12 2 261.63 60 0.988 1.053 1.111 1.185 1.25 1.333 1.406 1.481 1.58 
 "Ebmin"
 /do do# re re# mi fa fa# sol sol# la la# si do/
 c21.5062895967 81 80c
-[80 81 256 243 10 9 2560 2187 5 4 320 243 45 32 40 27 10240 6561 5 3 1280 729 15 8 160 81]
+k0 1 2 3 4 5 6 7 8 9 10 11 12k
+[80 81 256 243 10 9 75 64 5 4 320 243 45 32 40 27 25 16 5 3 225 128 15 8 160 81]
+sh p h h h h h h h h h h hs
 |4|
-f2 0 128 -51 12 2 261.63 60 0.988 1.053 1.111 1.171 1.25 1.317 1.406 1.481 1.561 1.667 1.756 1.875 1.975
-<html>This is a reduction to 12 grades of scale "Ma07" (23 grades) in ‘-cs.12_scales’<br />Created 2021-01-05 18:09:20</html>
+f2 0 128 -51 12 2 261.63 60 0.988 1.053 1.111 1.172 1.25 1.317 1.406 1.481 1.563 1.667 1.758 1.875 1.975
+<html>This is a reduction to 12 grades of scale "Ma07" (23 grades) in ‘-cs.12_scales’<br />Created 2021-01-05 18:09:20<br /></html>
 "Emaj"
 /do do# re re# mi fa fa# sol sol# la la# si do/
 c21.5062895967 81 80c
@@ -179,10 +187,12 @@ f2 0 128 -51 12 2 261.63 60 1 1.053 1.111 1.185 1.25 1.333 1.406 1.5 1.58 1.667 
 "Fmin"
 /do do# re re# mi fa fa# sol sol# la la# si do/
 c21.5062895967 81 80c
-[80 81 256 243 10 9 32 27 5 4 320 243 45 32 40 27 128 81 5 3 1280 729 15 8 160 81]
+k0 1 2 3 4 5 6 7 8 9 10 11 12k
+[80 81 256 243 10 9 32 27 5 4 320 243 45 32 40 27 128 81 5 3 225 128 15 8 160 81]
+sh p h p h h h h p h h h hs
 |4|
-f2 0 128 -51 12 2 261.63 60 0.988 1.053 1.111 1.185 1.25 1.317 1.406 1.481 1.58 1.667 1.756 1.875 1.975
-<html>This is a reduction to 12 grades of scale "Ma05" (23 grades) in ‘-cs.12_scales’<br />Created 2021-01-05 18:07:58</html>
+f2 0 128 -51 12 2 261.63 60 0.988 1.053 1.111 1.185 1.25 1.317 1.406 1.481 1.58 1.667 1.758 1.875 1.975
+<html>This is a reduction to 12 grades of scale "Ma05" (23 grades) in ‘-cs.12_scales’<br />Created 2021-01-05 18:07:58<br /></html>
 "Gmaj"
 /do do# re re# mi fa fa# sol sol# la la# si do/
 c21.5062895967 81 80c

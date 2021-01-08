@@ -61,7 +61,7 @@ if(isset($_POST['scroll'])) {
 	}
 
 $error_raise_note ='';
-if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST['modifynote']) OR isset($_POST['alignscale']) OR isset($_POST['adjustscale']) OR isset($_POST['create_meantone']) OR isset($_POST['add_fifths']) OR isset($_POST['modifynames'])) {
+if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST['modifynote']) OR isset($_POST['alignscale']) OR isset($_POST['adjustscale']) OR isset($_POST['create_meantone']) OR isset($_POST['add_fifths_up']) OR isset($_POST['add_fifths_down']) OR isset($_POST['modifynames'])) {
 	if(isset($_POST['scale_name'])) $new_scale_name = trim($_POST['scale_name']);
 	else $new_scale_name = '';
 	if($new_scale_name == '') $new_scale_name = $filename;
@@ -247,13 +247,15 @@ if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST
 	}
 
 $number_fifths = $p_start_fifths = $q_start_fifths = $error_fifths = '';
-if(isset($_POST['add_fifths'])) {
-//	$number_fifths = intval($_POST['number_fifths']);
+if(isset($_POST['add_fifths_up']) OR isset($_POST['add_fifths_down'])) {
+	$going_up = isset($_POST['add_fifths_up']);
 	$p_start_fifths = intval($_POST['p_start_fifths']);
 	$q_start_fifths = intval($_POST['q_start_fifths']);
 	$names_fifths = trim($_POST['names_fifths']);
 	$names_fifths = str_replace(' ','',$names_fifths);
 	$names_fifths = str_replace(';',',',$names_fifths);
+	$names_fifths = str_replace('/','=',$names_fifths);
+	$names_fifths = str_replace('•','=',$names_fifths);
 	$table_names = array();
 	if($names_fifths <> '') $table_names = explode(",",$names_fifths);
 	$number_fifths = count($table_names) - 1;
@@ -262,13 +264,14 @@ if(isset($_POST['add_fifths'])) {
 	if(($p_start_fifths * $q_start_fifths) == 0)
 		$error_fifths .= "<br />Incorrect fraction ".$p_start_fifths."/".$q_start_fifths." to start creating fifths";
 	if($error_fifths == '') {
-		echo "<p><font color=\"red\">➡</font> Creating ".$number_fifths." perfect fifths starting from fraction ".$p_start_fifths."/".$q_start_fifths."</p>";
-		// $done = FALSE;
-		$ignore_undefined = isset($_POST['ignore_undefined']);
-		if($ignore_undefined) echo "<p>Positions with undefined fractions have been deleted</p>";
+		echo "<p><font color=\"red\">➡</font> Creating ".$number_fifths." perfect fifths ";
+		if($going_up) echo "UP";
+		else echo "DOWN";
+		echo " starting from fraction ".$p_start_fifths."/".$q_start_fifths."</p>";
+		$ignore_unlabeled = isset($_POST['ignore_unlabeled']);
 		for($j = $jj = 0; $j <= $numgrades_fullscale; $j++) {
-			if($ratio[$j] == '' OR $ratio[$j] == 0) continue;
-			if($ignore_undefined AND $p[$j] == 0) continue;
+			if($ratio[$j] == '' OR $ratio[$j] == 0 OR $p[$j] == 0) continue;
+			if($ignore_unlabeled AND ($name[$j] == '' OR $name[$j] == '•') AND round($ratio[$j],3) <> 1  AND round($ratio[$j],3) <> 2) continue;
 			$new_p[$jj] = $p[$j];
 			$new_q[$jj] = $q[$j];
 			$new_ratio[$jj] = $ratio[$j];
@@ -278,8 +281,8 @@ if(isset($_POST['add_fifths'])) {
 		$p_current = $p_start_fifths;
 		$q_current = $q_start_fifths;
 		for($k = 0; $k <= $number_fifths; $k++) {
-			while(($p_current / $q_current) > $interval) $q_current = $q_current * 2;
-			while(($p_current / $q_current) < 1) $p_current = $p_current * 2;
+			while(($p_current / $q_current) > $interval) $q_current = $q_current * $interval;
+			while(($p_current / $q_current) < 1) $p_current = $p_current * $interval;
 			$fraction = simplify_fraction_eliminate_schisma($p_current,$q_current);
 			if($fraction['p'] <> $p_current) {
 				$p_current = $fraction['p'];
@@ -290,15 +293,18 @@ if(isset($_POST['add_fifths'])) {
 			$new_ratio[$jj] = $p_current / $q_current;
 			$new_name[$jj] = '•';
 			if(isset($table_names[$k]) AND $table_names[$k] <> '') $new_name[$jj] = $table_names[$k];
-			$p_current = $p_current * 3;
+			echo "‘".$new_name[$jj]."’ (".$p_current."/".$q_current.") ";
+			if($going_up) $p_current = $p_current * 3;
+			else $q_current = $q_current * 3;
 			$jj++;
 			}
+		if($ignore_unlabeled) echo "<p>Unlabeled positions have been deleted</p>";
 			
 		$new_numgrades = count($new_p) - 1;
 		asort($new_ratio);
 	/*	echo "<br />";
 		foreach($new_ratio as $j => $val) {
-			echo "‘".$new_name[$j]."’ ratio ".round($new_ratio[$j],3)." = ".$new_p[$j]."/".$new_q[$j]."<br />";
+			echo round($new_ratio[$j],3)." ‘".$new_name[$j]."’ ratio = ".$new_p[$j]."/".$new_q[$j]."<br />";
 			}
 		echo "<br />"; */
 		$p_current = $q_current = $ratio_current = 0;
@@ -307,7 +313,12 @@ if(isset($_POST['add_fifths'])) {
 		$p = $q = $ratio = $name = $series = $key = array();
 		foreach($new_ratio as $j => $val) {
 			if(($new_p[$j] == $p_current AND $new_q[$j] == $q_current) OR round($new_ratio[$j],3) == round($ratio_current,3)) {
-				if($jj > 0 AND $new_name[$j] <> '•') $name[$jj-1] = $new_name[$j];
+				if($jj > 0 AND $new_name[$j] <> '•') {
+					if($name[$jj-1] <> '•' AND $name[$jj-1] <> '' AND $name[$jj-1] <> $new_name[$j])
+						$name[$jj-1] .= "=".$new_name[$j];
+					else $name[$jj-1] = $new_name[$j];
+					}
+			//	echo $j.") jj = ".$jj." name = ".$new_name[$j]."<br />";
 				continue;
 				}
 			$p_current = $p[$jj] = $new_p[$j];
@@ -318,12 +329,9 @@ if(isset($_POST['add_fifths'])) {
 			$key[$jj] = $basekey + $jj;
 			$jj++;
 			}
-	/*	$p[$jj] = $p[0];
-		$p[$jj] = $q[0];
-		$ratio[$jj] = $ratio[0];
-		$name[$jj] = $name[0]; */
 		$numgrades_fullscale = $jj - 1;
-		$name[$numgrades_fullscale] = $name[0];
+		if($name[0] <> '•') $name[$numgrades_fullscale] = $name[0];
+		else $name[0] = $name[$numgrades_fullscale];
 		}
 	}
 
@@ -389,7 +397,7 @@ if(isset($_POST['interpolate'])) {
 	}
 
 $message = '';
-if(isset($_POST['savethisfile']) OR isset($_POST['interpolate'])  OR isset($_POST['modifynote']) OR isset($_POST['alignscale'])  OR isset($_POST['adjustscale']) OR isset($_POST['create_meantone']) OR isset($_POST['add_fifths']) OR isset($_POST['modifynames'])) {
+if(isset($_POST['savethisfile']) OR isset($_POST['interpolate'])  OR isset($_POST['modifynote']) OR isset($_POST['alignscale'])  OR isset($_POST['adjustscale']) OR isset($_POST['create_meantone']) OR isset($_POST['add_fifths_up']) OR isset($_POST['add_fifths_down']) OR isset($_POST['modifynames'])) {
 	$message = "&nbsp;<span id=\"timespan\"><font color=\"red\">... Saving this scale ...</font></span>";
 	$scale_comment = $_POST['scale_comment'];
 	if(isset($_POST['syntonic_comma'])) $syntonic_comma = $_POST['syntonic_comma'];
@@ -509,6 +517,7 @@ echo "<div style=\"float:right; margin-top:1em; background-color:white; padding:
 
 $link = "scale_image.php?save_codes_dir=".urlencode($save_codes_dir);
 $link_no_marks = $link."&no_marks=1";
+$link_no_cents = $link."&no_cents=1";
 $link_no_intervals = $link_no_marks."&no_intervals=1";
 
 if(isset($_POST['new_p_comma']) AND isset($_POST['new_q_comma']) AND $_POST['new_p_comma'] > 0  AND $_POST['new_q_comma'] > 0) {
@@ -535,7 +544,8 @@ else {
 	
 $image_name = clean_folder_name($filename)."_".round(10 * $new_comma).$more."_image";
 // echo $image_name."<br />";
-echo "<div class=\"shadow\" style=\"border:2px solid gray; background-color:azure; width:13em;  padding:8px; text-align:center; border-radius: 6px;\">IMAGE:<br /><a onclick=\"window.open('".$link."','".$image_name."','width=1000,height=800,left=100'); return false;\" href=\"".$link."\">full</a> - <a onclick=\"window.open('".$link_no_marks."','".$image_name."','width=1000,height=800,left=100'); return false;\" href=\"".$link_no_marks."\">no marks</a> - <a onclick=\"window.open('".$link_no_intervals."','".$image_name."','width=1000,height=800,left=100'); return false;\" href=\"".$link_no_intervals."\">no intervals</a></div>";
+$image_height = 820;
+echo "<div class=\"shadow\" style=\"border:2px solid gray; background-color:azure; width:20em;  padding:8px; text-align:center; border-radius: 6px;\">IMAGE:<br /><a onclick=\"window.open('".$link."','".$image_name."','width=1000,height=".$image_height.",left=100'); return false;\" href=\"".$link."\">full</a> - <a onclick=\"window.open('".$link_no_marks."','".$image_name."','width=1000,height=".$image_height.",left=100'); return false;\" href=\"".$link_no_marks."\">no marks</a> - <a onclick=\"window.open('".$link_no_cents."','".$image_name."','width=1000,height=".$image_height.",left=100'); return false;\" href=\"".$link_no_cents."\">no cents</a> - <a onclick=\"window.open('".$link_no_intervals."','".$image_name."','width=1000,height=".$image_height.",left=100'); return false;\" href=\"".$link_no_intervals."\">no intervals</a></div>";
 
 echo "</div>";
 echo "<p>➡ <a target=\"_blank\" href=\"https://www.csounds.com/manual/html/GEN51.html\">Read the documentation</a></p>";
@@ -1749,11 +1759,9 @@ if($done) {
 	echo "</ul>";
 	
 	echo "<hr>";
-	echo "<p><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"add_fifths\" value=\"ADD CYCLE OF FIFTHS\"> starting from fraction <input type=\"text\" name=\"p_start_fifths\" size=\"6\" value=\"".$p_start_fifths."\">/<input type=\"text\" name=\"q_start_fifths\" size=\"6\" value=\"".$q_start_fifths."\"><br />";
-	echo "List of names separated by commas, including the starting note, e.g. “FA, DO, SOL”:<br /><input type=\"text\" name=\"names_fifths\" size=\"60\" value=\"\"><br />";
-	echo "<input type=\"checkbox\" name=\"ignore_undefined\" checked>Reset positions with undefined fractions</p>";
-	
-	
+	echo "<p>• <input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"add_fifths_up\" value=\"ADD CYCLE\"> OF <b>ASCENDING</b> FIFTHS<br />• <input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"add_fifths_down\" value=\"ADD CYCLE\"> OF <b>DESCENDING</b> FIFTHS<br />starting from fraction <input type=\"text\" style=\"text-align:right;\" name=\"p_start_fifths\" size=\"6\" value=\"".$p_start_fifths."\">/<input type=\"text\" name=\"q_start_fifths\" size=\"6\" value=\"".$q_start_fifths."\"><br />";
+	echo "List of names separated by commas, including the starting note, e.g. “FA, DO, SOL”:<br /><input type=\"text\" name=\"names_fifths\" size=\"80\" value=\"\"><br />";
+	echo "<input type=\"checkbox\" name=\"ignore_unlabeled\" checked>Reset unlabeled positions</p>";
 	if($error_fifths <> '') echo "<font color=\"red\">".$error_fifths."</font>";
 	echo "<hr>";
 	}
