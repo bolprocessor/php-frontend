@@ -93,7 +93,7 @@ if($no_marks < 1) {
 		}
 	}
 
-$shift_name = 0;
+$shift_name = $oldcents = 0;
 for($j = 0; $j <= $numgrades_fullscale; $j++) {
 	if(!isset($ratio[$j]) OR $ratio[$j] == '') $ratio[$j] = 0;
 	if($ratio[$j] == 0) continue;
@@ -118,11 +118,30 @@ for($j = 0; $j <= $numgrades_fullscale; $j++) {
 		$height_text = imagefontheight(10);
 		$x_text = $x2 + 20 * cos($angle) - $length_text /  2;
 		$y_text = $y2 + 20 * sin($angle) - $height_text / 2;
+		if(abs($cents[$j] - $oldcents) > 50) $shift_name = 0;
 		if(($cents[$j] > 550 AND $cents[$j] < 650) OR $cents[$j] > 1100 OR $cents[$j] < 100) {
 			$shiftarea = TRUE;
 			$y_text += $shift_name;
 			}
 		else $shiftarea = FALSE;
+		$length_text_name = imagefontwidth(10) * strlen($text);
+		imagefilledrectangle($im,$x_text - 5,$y_text,$x_text + $length_text_name + 5,$y_text + imagefontheight(10),$white);	
+		imagestring($im,10,$x_text,$y_text,$text,$red);
+		$oldcents = $cents[$j];
+		$height_text = imagefontheight(10);
+		$coord = set_point(50 + $height_text / 2,$ratio[$j]);
+		$y_text = $y2 - $y_center + $coord['y'] - $height_text / 2;
+		if($shiftarea) $y_text += $shift_name;
+		
+		if(($p[$j] * $q[$j]) > 0) {
+			$fraction = $p[$j]."/".$q[$j];
+			$text = $fraction;
+			}
+		else $text = round($ratio[$j],3);
+		$length_text = imagefontwidth(10) * strlen($text);
+		$coord = set_point(50 + $length_text,$ratio[$j]);
+		$x_text = $x2 - $x_center + $coord['x'] - $length_text / 2;
+		
 		if($shiftarea AND ($cents[$j] > 550 AND $cents[$j] < 650)) {
 			if($shift_name < 0) $shift_name = 0;
 			else if($shift_name == 0) $shift_name = imagefontheight(10) + 2;
@@ -134,21 +153,6 @@ for($j = 0; $j <= $numgrades_fullscale; $j++) {
 			else $shift_name = + imagefontheight(10) + 2;
 			}
 		else $shift_name = 0;
-		$length_text_name = imagefontwidth(10) * strlen($text);
-		imagefilledrectangle($im,$x_text - 5,$y_text,$x_text + $length_text_name + 5,$y_text + imagefontheight(10),$white);	
-		imagestring($im,10,$x_text,$y_text,$text,$red);
-	
-		$height_text = imagefontheight(10);
-		$coord = set_point(50 + $height_text / 2,$ratio[$j]);
-		$y_text = $y2 - $y_center + $coord['y'] - $height_text / 2;
-		if(($p[$j] * $q[$j]) > 0) {
-			$fraction = $p[$j]."/".$q[$j];
-			$text = $fraction;
-			}
-		else $text = round($ratio[$j],3);
-		$length_text = imagefontwidth(10) * strlen($text);
-		$coord = set_point(50 + $length_text,$ratio[$j]);
-		$x_text = $x2 - $x_center + $coord['x'] - $length_text / 2;
 		
 		// Print cents
 		if($no_cents) continue;
@@ -158,7 +162,7 @@ for($j = 0; $j <= $numgrades_fullscale; $j++) {
 		$length_text_cents = imagefontwidth(10) * strlen($text2);
 		if($numgrades_fullscale > 8 AND ($ratio[$j] < 1.126 OR ($ratio[$j] > 1.281 AND $ratio[$j] < 1.414))) $x_text -= $length_text_cents;
 		if($numgrades_fullscale > 8 AND ($ratio[$j] > 1.77 OR ($ratio[$j] >= 1.414 AND $ratio[$j] < 1.57))) $x_text += $length_text_cents;
-		if(isset($cents[$j]) AND $cents[$j] > 0 AND $name[$j] <> '') {
+		if(isset($cents[$j]) AND $cents[$j] <> 0 AND $name[$j] <> '') {
 			imagefilledrectangle($im,$x_text - 5,$y_text2,$x_text + $length_text_cents + 5,$y_text2 + imagefontheight(10),$white);
 			imagestring($im,10,$x_text,$y_text2,$text2,$black);
 			}
@@ -245,22 +249,24 @@ if(!$no_intervals) {
 	$text = "Pythagorean major third (".round($pythagorean_third)." cents)";
 	imagestring($im,10,$x_text,$y_text,$text,$brown);
 	
-	$x1 = $image_width - 230;
-	$y1 = 2 * $radius + 260;
-	$x_text = $x1 + 10;
-	$x2 = $x1;
-	$y2 = $y1 + 25;
-	$y_text = $y1 + 5;
-	imagelinethick($im,$x1,$y1,$x2,$y2,$blue,3);
-	$text = "Pythagorean position";
-	imagestring($im,10,$x_text,$y_text,$text,$blue);
-	
-	$y1 = $y2 + 25;
-	$y2 = $y1 + 25;
-	$y_text = $y1 + 5;
-	imagelinethick($im,$x1,$y1,$x2,$y2,$green,3);
-	$text = "Harmonic position";
-	imagestring($im,10,$x_text,$y_text,$text,$green);
+	if(!$no_marks) {
+		$x1 = $image_width - 230;
+		$y1 = 2 * $radius + 260;
+		$x_text = $x1 + 10;
+		$x2 = $x1;
+		$y2 = $y1 + 25;
+		$y_text = $y1 + 5;
+		imagelinethick($im,$x1,$y1,$x2,$y2,$blue,3);
+		$text = "Pythagorean position";
+		imagestring($im,10,$x_text,$y_text,$text,$blue);
+		
+		$y1 = $y2 + 25;
+		$y2 = $y1 + 25;
+		$y_text = $y1 + 5;
+		imagelinethick($im,$x1,$y1,$x2,$y2,$green,3);
+		$text = "Harmonic position";
+		imagestring($im,10,$x_text,$y_text,$text,$green);
+		}
 	}
 		
 imagepng($im);
