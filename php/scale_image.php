@@ -112,7 +112,7 @@ for($j = 0; $j <= $numgrades_fullscale; $j++) {
 	imagesmoothline($im,$x1,$y1,$x2,$y2,$color);
 	
 	// Print names
-	if($j < $numgrades_fullscale) {
+	
 		$text = $name[$j];
 		$length_text = imagefontwidth(10) * strlen($text);
 		$height_text = imagefontheight(10);
@@ -125,8 +125,10 @@ for($j = 0; $j <= $numgrades_fullscale; $j++) {
 			}
 		else $shiftarea = FALSE;
 		$length_text_name = imagefontwidth(10) * strlen($text);
-		imagefilledrectangle($im,$x_text - 5,$y_text,$x_text + $length_text_name + 5,$y_text + imagefontheight(10),$white);	
-		imagestring($im,10,$x_text,$y_text,$text,$red);
+		if($j < $numgrades_fullscale) {
+			imagefilledrectangle($im,$x_text - 5,$y_text,$x_text + $length_text_name + 5,$y_text + imagefontheight(10),$white);	
+			imagestring($im,10,$x_text,$y_text,$text,$red);
+			}
 		$oldcents = $cents[$j];
 		$height_text = imagefontheight(10);
 		$coord = set_point(50 + $height_text / 2,$ratio[$j]);
@@ -166,7 +168,6 @@ for($j = 0; $j <= $numgrades_fullscale; $j++) {
 			imagefilledrectangle($im,$x_text - 5,$y_text2,$x_text + $length_text_cents + 5,$y_text2 + imagefontheight(10),$white);
 			imagestring($im,10,$x_text,$y_text2,$text2,$black);
 			}
-		}
 	}
 
 $end_x = $end_y = $old_x = $old_y = 0;
@@ -181,7 +182,7 @@ for($j = 0; $j <= $numgrades_fullscale; $j++) {
 	$coord = set_point($radius + $crown_thickness + 10,$ratio[$j]);
 	$x2 = $coord['x'];
 	$y2 = $coord['y'];
-	if($j < $numgrades_fullscale) {
+	if($j < $numgrades_fullscale OR round($ratio[$j],3) <> (2 * round($ratio[0],3))) {
 		$height_text = imagefontheight(10);
 		$coord = set_point(50 + $height_text / 2,$ratio[$j]);
 		$y_text = $y2 - $y_center + $coord['y'] - $height_text / 2;

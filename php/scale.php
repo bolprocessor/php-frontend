@@ -34,13 +34,14 @@ $h_image = fopen($image_file,"w");
 fwrite($h_image,"<?php\n");
 store($h_image,"filename",$filename);
 
-$key_start = $key_step = $p_step = $q_step = $p_cents = $q_cents = '';
+$note_start_meantone = '';
+$p_step_meantone = $q_step_meantone = $p_fraction_comma = $q_fraction_comma = 0;
 $error_meantone = '';
 $basekey = 60;
 $baseoctave = 4;
 $transposition_mode = '';
 $p_raise = $q_raise = $p_raised_note = $q_raised_note = $cents_raised_note = $raised_note = $name_sensitive_note = '';
-$scale_choice = $selected_grades = '';
+$scale_choice = $selected_grades = $names_notes_fifths = $names_notes_meantone = '';
 $selected_grade_name = array();
 $p_comma = 81; $q_comma = 80;
 $syntonic_comma = cents($p_comma/$q_comma);
@@ -54,6 +55,9 @@ $perfect_fourth = cents(4/3);
 $series = array();
 $link_edit = "scale.php";
 $done = TRUE;
+
+if(isset($_POST['scale_comment'])) $scale_comment = $_POST['scale_comment'];
+else $scale_comment = '';
 
 if(!isset($_SESSION['scroll'])) $_SESSION['scroll'] = 0;
 if(isset($_POST['scroll'])) {
@@ -79,11 +83,12 @@ if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST
 	$numgrades_fullscale = $_POST['numgrades'];
 	$interval = trim($_POST['interval']);
 	if($interval == '') $interval = 2;
-	$cents = round(cents($interval));
+	$cents = round(cents($interval),1);
 	if(isset($_POST['interval_cents'])) {
-		$new_cents = round($_POST['interval_cents']);
+		$new_cents = round($_POST['interval_cents'],1);
 		if($new_cents > 1 AND $new_cents <> $cents)
-			$interval = round(exp($new_cents / 1200 * log(2)),4);
+	//		$interval = round(exp($new_cents / 1200 * log(2)),4);
+			$interval = exp($new_cents / 1200 * log(2));
 		}
 	$basefreq = $_POST['basefreq'];
 	$basekey = intval($_POST['basekey']);
@@ -152,16 +157,26 @@ if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST
 				}
 			if($j_raise == -1)
 				$error_raise_note .= "<font color=\"red\"> ➡ ERROR: Note ‘".$raised_note."’ asked for raising does not belong to scale</font><br />";
+			else $scale_comment .= "Note ‘".$raised_note."’ modified by ".$cents_raised_note." cents (".date('Y-m-d H:i:s').")";
 			}
 		}
 	if($p[0] == 0 OR $q[0] == 0) {
-		$pmax = intval($ratio[0] * 1000);
-		$qmax = 1000;
+		$pmax = intval($ratio[0] * 10000);
+		$qmax = 10000;
 		$gcd = gcd($pmax,$qmax);
 		$pmax = $pmax / $gcd;
 		$qmax = $qmax / $gcd;
 		$p[0] = $pmax;
 		$q[0] = $qmax;
+		}
+	if($p[$numgrades_fullscale] == 0 OR $q[$numgrades_fullscale] == 0) {
+		$pmax = intval($interval * 10000);
+		$qmax = 10000;
+		$gcd = gcd($pmax,$qmax);
+		$pmax = $pmax / $gcd;
+		$qmax = $qmax / $gcd;
+		$p[$numgrades_fullscale] = $pmax;
+		$q[$numgrades_fullscale] = $qmax;
 		}
 	
 	if(isset($_POST['alignscale']) AND ($ratio[0] <> 0 OR (($p[0] * $q[0]) <> 0))) {
@@ -190,6 +205,7 @@ if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST
 				$p[$j] = $q[$j] = 0;
 				}
 			}
+		$scale_comment .= "Scale aligned ratio ".$ratio_align." (".date('Y-m-d H:i:s').")";
 		}
 	
 	if(isset($_POST['adjustscale'])) {
@@ -236,42 +252,45 @@ if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST
 			$q_new = $q[$j];
 			$ratio_new = round($ratio[$j],3);
 			}
+		$scale_comment .= "Scale adjusted ratio ".$ratio_adjust." (".date('Y-m-d H:i:s').")";
 		}
 	
-	if(isset($_POST['key_start'])) $key_start = intval($_POST['key_start']);
-	if(isset($_POST['key_step'])) $key_step = intval($_POST['key_step']);
-	if(isset($_POST['p_step'])) $p_step = intval($_POST['p_step']);
-	if(isset($_POST['q_step'])) $q_step = intval($_POST['q_step']);
-	if(isset($_POST['p_cents'])) $p_cents = intval($_POST['p_cents']);
-	if(isset($_POST['q_cents'])) $q_cents = intval($_POST['q_cents']);
+	if(isset($_POST['note_start_meantone'])) $note_start_meantone = trim($_POST['note_start_meantone']);
+	if(isset($_POST['p_step_meantone'])) $p_step_meantone = intval($_POST['p_step_meantone']);
+	if(isset($_POST['q_step_meantone'])) $q_step_meantone = intval($_POST['q_step_meantone']);
+	if(isset($_POST['p_fraction_comma'])) $p_fraction_comma = intval($_POST['p_fraction_comma']);
+	if(isset($_POST['q_fraction_comma'])) $q_fraction_comma = intval($_POST['q_fraction_comma']);
 	}
 
-$number_fifths = $p_start_fifths = $q_start_fifths = $error_fifths = '';
+$number_steps = $p_start_fifths = $q_start_fifths = $error_fifths = '';
 if(isset($_POST['add_fifths_up']) OR isset($_POST['add_fifths_down'])) {
 	$going_up = isset($_POST['add_fifths_up']);
 	$p_start_fifths = intval($_POST['p_start_fifths']);
 	$q_start_fifths = intval($_POST['q_start_fifths']);
-	$names_fifths = trim($_POST['names_fifths']);
-	$names_fifths = str_replace(' ','',$names_fifths);
-	$names_fifths = str_replace(';',',',$names_fifths);
-	$names_fifths = str_replace('/','=',$names_fifths);
-	$names_fifths = str_replace('•','=',$names_fifths);
+	$names_notes_fifths = trim($_POST['names_notes_fifths']);
+	$names_notes_fifths = str_replace(' ','',$names_notes_fifths);
+	$names_notes_fifths = str_replace(';',',',$names_notes_fifths);
+	$names_notes_fifths = str_replace('/','=',$names_notes_fifths);
+	$names_notes_fifths = str_replace('•','=',$names_notes_fifths);
 	$table_names = array();
-	if($names_fifths <> '') $table_names = explode(",",$names_fifths);
-	$number_fifths = count($table_names) - 1;
-	if($number_fifths == 0)
+	if($names_notes_fifths <> '') $table_names = explode(",",$names_notes_fifths);
+	$number_steps = count($table_names) - 1;
+	if($number_steps == 0)
 		$error_fifths .= "<br />Enter the names of new positions!";
 	if(($p_start_fifths * $q_start_fifths) == 0)
 		$error_fifths .= "<br />Incorrect fraction ".$p_start_fifths."/".$q_start_fifths." to start creating fifths";
 	if($error_fifths == '') {
-		echo "<p><font color=\"red\">➡</font> Creating ".$number_fifths." perfect fifths ";
-		if($going_up) echo "UP";
-		else echo "DOWN";
-		echo " starting from fraction ".$p_start_fifths."/".$q_start_fifths."</p>";
+		if($going_up) $thedirection = "up";
+		else $thedirection = "down";
+		echo "<p><font color=\"red\">➡</font> Creating ".$number_steps." perfect fifths ".$thedirection." starting from fraction ".$p_start_fifths."/".$q_start_fifths."</p>";
+		$scale_comment .= "Added fifths ".$thedirection.": “".$names_notes_fifths."” starting ratio ".$p_start_fifths."/".$q_start_fifths." (".date('Y-m-d H:i:s').")";
 		$ignore_unlabeled = isset($_POST['ignore_unlabeled']);
+		$new_p = $new_q = $new_ratio = $new_name = array();
 		for($j = $jj = 0; $j <= $numgrades_fullscale; $j++) {
-			if($ratio[$j] == '' OR $ratio[$j] == 0 OR $p[$j] == 0) continue;
-			if($ignore_unlabeled AND ($name[$j] == '' OR $name[$j] == '•') AND round($ratio[$j],3) <> 1  AND round($ratio[$j],3) <> 2) continue;
+			if($ratio[$j] == '' OR $ratio[$j] == 0) continue;
+			if(($name[$j] == '' OR $name[$j] == '•') AND round($ratio[$j],3) <> 1  AND round($ratio[$j],3) <> 2) {
+				if($ignore_unlabeled) continue;
+				}
 			$new_p[$jj] = $p[$j];
 			$new_q[$jj] = $q[$j];
 			$new_ratio[$jj] = $ratio[$j];
@@ -280,7 +299,7 @@ if(isset($_POST['add_fifths_up']) OR isset($_POST['add_fifths_down'])) {
 			}
 		$p_current = $p_start_fifths;
 		$q_current = $q_start_fifths;
-		for($k = 0; $k <= $number_fifths; $k++) {
+		for($k = 0; $k <= $number_steps; $k++) {
 			while(($p_current / $q_current) > $interval) $q_current = $q_current * $interval;
 			while(($p_current / $q_current) < 1) $p_current = $p_current * $interval;
 			$fraction = simplify_fraction_eliminate_schisma($p_current,$q_current);
@@ -299,12 +318,10 @@ if(isset($_POST['add_fifths_up']) OR isset($_POST['add_fifths_down'])) {
 			$jj++;
 			}
 		if($ignore_unlabeled) echo "<p>Unlabeled positions have been deleted</p>";
-			
-		$new_numgrades = count($new_p) - 1;
 		asort($new_ratio);
-	/*	echo "<br />";
-		foreach($new_ratio as $j => $val) {
-			echo round($new_ratio[$j],3)." ‘".$new_name[$j]."’ ratio = ".$new_p[$j]."/".$new_q[$j]."<br />";
+		echo "<br />";
+	/*	foreach($new_ratio as $j => $val) {
+			echo round($new_ratio[$j],3)." ‘".$new_name[$j]."’ fraction = ".$new_p[$j]."/".$new_q[$j]."<br />";
 			}
 		echo "<br />"; */
 		$p_current = $q_current = $ratio_current = 0;
@@ -312,13 +329,15 @@ if(isset($_POST['add_fifths_up']) OR isset($_POST['add_fifths_down'])) {
 		$jj = 0;
 		$p = $q = $ratio = $name = $series = $key = array();
 		foreach($new_ratio as $j => $val) {
-			if(($new_p[$j] == $p_current AND $new_q[$j] == $q_current) OR round($new_ratio[$j],3) == round($ratio_current,3)) {
+			if(($p_current <> 0 AND $new_p[$j] == $p_current AND $new_q[$j] == $q_current) OR round($new_ratio[$j],3) == round($ratio_current,3)) {
 				if($jj > 0 AND $new_name[$j] <> '•') {
-					if($name[$jj-1] <> '•' AND $name[$jj-1] <> '' AND $name[$jj-1] <> $new_name[$j])
-						$name[$jj-1] .= "=".$new_name[$j];
-					else $name[$jj-1] = $new_name[$j];
+					$table_name = explode("=",$new_name[$j]);
+					if(!in_array($name[$jj-1],$table_name)) $table_name[] = $name[$jj-1];
+					if(count($table_name) > 1) $the_new_name = implode("=",$table_name);
+					else $the_new_name = $new_name[$j];
+					$name[$jj-1] = $the_new_name;
 					}
-			//	echo $j.") jj = ".$jj." name = ".$new_name[$j]."<br />";
+		//		echo "  (".$j.") jj = ".$jj." name = ".$new_name[$j]."<br />";
 				continue;
 				}
 			$p_current = $p[$jj] = $new_p[$j];
@@ -336,37 +355,103 @@ if(isset($_POST['add_fifths_up']) OR isset($_POST['add_fifths_down'])) {
 	}
 
 if(isset($_POST['create_meantone'])) {
-	if($key_start < 0 OR $key_start > 127)
-		$error_meantone .= "<br />Incorrect key value ‘".$key_start."’ to start (should be in range 0…127)";
-	if($key_step < 1 OR $key_step > 127)
-		$error_meantone .= "<br />Incorrect key step value ‘".$key_step."’ (should be in range 1…127)";
-	if($p_step < 1 OR $q_step < 1)
-		$error_meantone .= "<br />Incorrect integer ratio ‘".$p_step."/".$q_step."’";
-	if(abs($q_cents) < 1)
-		$error_meantone .= "<br />Incorrect cent value ‘".$p_cents."/".$q_cents."’";
+	$jstart = -1;
+	for($j = 0; $j <= $numgrades_fullscale; $j++)
+		if($note_start_meantone <> '' AND $note_start_meantone == $name[$j]) $jstart = $j;
+	if($jstart < 0)
+		$error_meantone .= "<br />Missing or incorrect note ‘".$note_start_meantone."’ to start meantone";
+	if($p_step_meantone < 1 OR $q_step_meantone < 1)
+		$error_meantone .= "<br />Incorrect integer ratio ‘".$p_step_meantone."/".$q_step_meantone."’";
+	if(abs($q_fraction_comma) < 1)
+		$error_meantone .= "<br />Incorrect fraction of comma ‘".$p_fraction_comma."/".$q_fraction_comma."’";
+	if(!isset($_POST['meantone_direction']))
+		$error_meantone .= "<br />Missing selection ‘up’ or ‘down’";
+	else $meantone_direction = $_POST['meantone_direction'];
 	if($error_meantone == '') {
-		$cent_ratio = exp($p_cents/$q_cents/1200. * log(2));
-		$key_start_meantone = $key_start % $numgrades_fullscale;
-		$key_meantone = $key_start_meantone;
-		$ratio_meantone = $ratio[$key_start_meantone];
-		while(TRUE) {
-			$key_meantone += $key_step;
-			$this_key = $key_meantone;
-			$k = $ratio_meantone = $ratio_meantone * $p_step / $q_step * $cent_ratio;
-			$key_meantone = $key_meantone % $numgrades_fullscale;
-			$oldinterval = $interval;
-			while($k > $oldinterval) $k = $k / $oldinterval;
-		//	echo $this_key." = ".$key_meantone." => ".$k."<br />";
-			if($this_key == $numgrades_fullscale) {
-				$interval = $ratio_meantone;
-				while(($interval / $oldinterval) > $oldinterval) $interval = $interval / $oldinterval;
-				// $cents = round(1200 * log($interval) / log(2));
-				$cents = round(cents($interval));
-				$interval = round($interval,4);
-				}
-			$ratio[$key_meantone] = round($k,4);
-			if($key_meantone == $key_start_meantone) break;
+		$thedirection = $_POST['meantone_direction'];
+		$names_notes_meantone = trim($_POST['names_notes_meantone']);
+		$msg = "Created meantone ".$meantone_direction."wards notes “".$names_notes_meantone."” ratio ".$p_step_meantone."/".$q_step_meantone." ".$p_fraction_comma."/".$q_fraction_comma." comma (".date('Y-m-d H:i:s').")";
+		echo "<p><font color=\"red\">➡</font> ".$msg."</p>";
+		$scale_comment .= $msg;
+		$ignore_unlabeled = isset($_POST['ignore_unlabeled']);
+		$names_notes_meantone = str_replace(' ','',$names_notes_meantone);
+		$names_notes_meantone = str_replace(';',',',$names_notes_meantone);
+		$names_notes_meantone = str_replace('/','=',$names_notes_meantone);
+		$names_notes_meantone = str_replace('•','=',$names_notes_meantone);
+		$table_names = array();
+		if($names_notes_meantone <> '') $table_names = explode(",",$names_notes_meantone);
+		$number_steps = count($table_names) - 1;
+		if($meantone_direction == "up") {
+			$step_cents = cents($p_step_meantone/$q_step_meantone);
+			$step_cents += $syntonic_comma * $p_fraction_comma/$q_fraction_comma;
 			}
+		else {
+			$step_cents = - cents($p_step_meantone/$q_step_meantone);
+			$step_cents -= $syntonic_comma * $p_fraction_comma/$q_fraction_comma;
+			}
+		$ratio_multiply = exp($step_cents / 1200 * log(2));
+		$new_p = $new_q = $new_ratio = $new_name = array();
+		for($j = $jj = 0; $j <= $numgrades_fullscale; $j++) {
+			if($ratio[$j] == '' OR $ratio[$j] == 0) continue;
+			if(($name[$j] == '' OR $name[$j] == '•') AND round($ratio[$j],3) <> 1  AND round($ratio[$j],3) <> 2) {
+				if($ignore_unlabeled) continue;
+				}
+			$new_p[$jj] = $p[$j];
+			$new_q[$jj] = $q[$j];
+			$new_ratio[$jj] = $ratio[$j];
+			$new_name[$jj] = $name[$j];
+			$jj++;
+			}
+		$ratio_current = $ratio[$jstart];
+		for($k = 0; $k <= $number_steps; $k++) {
+			while($ratio_current > $interval) $ratio_current = $ratio_current / $interval;
+			while($ratio_current < 1) $ratio_current = $ratio_current * $interval;
+			$new_ratio[$jj] = $ratio_current;
+			$new_name[$jj] = '•';
+			if(isset($table_names[$k]) AND $table_names[$k] <> '') $new_name[$jj] = $table_names[$k];
+			echo "‘".$new_name[$jj]."’ (".round($ratio_current,3).") ";
+			$ratio_current = $ratio_current * $ratio_multiply;
+			$jj++;
+			}
+		echo "<br />";
+		if($ignore_unlabeled) echo "<p>Unlabeled positions have been deleted</p>";
+		asort($new_ratio);
+	/*	echo "<br />";
+		foreach($new_ratio as $j => $val) {
+			echo round($new_ratio[$j],3)." ‘".$new_name[$j]."’<br />";
+			}
+		echo "<br />"; */
+		$ratio_current = 0;
+		$name_current = '';
+		$jj = 0;
+		$p = $q = $ratio = $name = $series = $key = array();
+		foreach($new_ratio as $j => $val) {
+			if(($ratio_current <> 0 AND $new_ratio[$j] == $ratio_current) OR round($new_ratio[$j],3) == round($ratio_current,3)) {
+				if($jj > 0 AND $new_name[$j] <> '•') {
+					$table_name = explode("=",$new_name[$j]);
+					if(!in_array($name[$jj-1],$table_name)) $table_name[] = $name[$jj-1];
+					if(count($table_name) > 1) $the_new_name = implode("=",$table_name);
+					else $the_new_name = $new_name[$j];
+					$name[$jj-1] = $the_new_name;
+					}
+				continue;
+				}
+			$p[$jj] = 0;
+			$q[$jj] = 0;
+			$ratio_current = $ratio[$jj] = $new_ratio[$j];
+			if(round($ratio[$jj],3) == 1) $p[$jj] = $q[$jj] = 1;
+			if(round($ratio[$jj],3) == 2) {
+				$p[$jj] = 2;
+				$q[$jj] = 1;
+				}
+			$name_current = $name[$jj] = $new_name[$j];
+			$series[$jj] = '';
+			$key[$jj] = $basekey + $jj;
+			$jj++;
+			}
+		$numgrades_fullscale = $jj - 1;
+		if($name[0] <> '•') $name[$numgrades_fullscale] = $name[0];
+		else $name[0] = $name[$numgrades_fullscale];
 		}
 	}
 
@@ -392,6 +477,7 @@ if(isset($_POST['interpolate'])) {
 				$ratio[$i] = round($new_ratio,3);
 				}
 			}
+		$scale_comment .= "Interpolated equal intervals between grade ".$i1." and grade ".$i2." (".date('Y-m-d H:i:s').")";
 		$i1 = $i2;
 		}
 	}
@@ -399,7 +485,6 @@ if(isset($_POST['interpolate'])) {
 $message = '';
 if(isset($_POST['savethisfile']) OR isset($_POST['interpolate'])  OR isset($_POST['modifynote']) OR isset($_POST['alignscale'])  OR isset($_POST['adjustscale']) OR isset($_POST['create_meantone']) OR isset($_POST['add_fifths_up']) OR isset($_POST['add_fifths_down']) OR isset($_POST['modifynames'])) {
 	$message = "&nbsp;<span id=\"timespan\"><font color=\"red\">... Saving this scale ...</font></span>";
-	$scale_comment = $_POST['scale_comment'];
 	if(isset($_POST['syntonic_comma'])) $syntonic_comma = $_POST['syntonic_comma'];
 	if(isset($_POST['p_comma']) AND isset($_POST['q_comma'])) {
 		$p_comma = $_POST['p_comma'];
@@ -607,8 +692,8 @@ if($scale_fraction <> '') {
 		}
 	}
 
-$pmax = intval($interval * 1000);
-$qmax = 1000;
+$pmax = intval($interval * 10000);
+$qmax = 10000;
 $gcd = gcd($pmax,$qmax);
 $pmax = $pmax / $gcd;
 $qmax = $qmax / $gcd;
@@ -664,8 +749,13 @@ echo "<tr>";
 echo "<td colspan=\"".$numgrades_with_labels."\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"modifynames\" onclick=\"this.form.target='_self';return true;\" formaction=\"scale.php?scalefilename=".urlencode($filename)."\" value=\"SAVE NEW NAMES\">&nbsp;Modify the names of these notes:</td>";
 echo "</tr>";
 echo "<tr>";
-for($j = 0; $j < $numgrades_fullscale; $j++) {
+for($j = $j_col = 0; $j < $numgrades_fullscale; $j++) {
 	if($name[$j] == '') continue;
+	if($j_col >= 12) {
+		$j_col = 0;
+		echo "</tr><tr>";
+		}
+	$j_col++;
 	echo "<td>";
 	echo "<input style=\"text-align:center;\" type=\"text\" name=\"new_name_".$j."\" size=\"5\" value=\"".$name[$j]."\">";
 	echo "</td>";
@@ -674,9 +764,9 @@ echo "</tr>";
 echo "</table>";
 echo "</td>";
 echo "</tr><tr>";
-echo "<td style=\"white-space:nowrap; padding:6px; vertical-align:middle;\"><font color=\"blue\">interval</font> = <input type=\"text\" name=\"interval\" size=\"5\" value=\"".$interval."\">";
-$cents = round(cents($interval));
-echo " or <input type=\"text\" name=\"interval_cents\" size=\"5\" value=\"".$cents."\"> cents (typically 1200)";
+echo "<td style=\"white-space:nowrap; padding:6px; vertical-align:middle;\"><font color=\"blue\">interval</font> = <input type=\"text\" name=\"interval\" size=\"6\" value=\"".$interval."\">";
+$cents = round(cents($interval),1);
+echo " or <input type=\"text\" name=\"interval_cents\" size=\"6\" value=\"".$cents."\"> cents (typically 1200)";
 store($h_image,"interval_cents",$cents);
 echo "</td>";
 echo "</tr><tr>";
@@ -1397,7 +1487,9 @@ if($done AND $numgrades_with_labels > 2) {
 	$size = 5 + strlen($selected_grades);
 	echo "<input type=\"radio\" name=\"scale_choice\" value=\"small_scale\"";
 	if($scale_choice == "small_scale") echo " checked";
-	echo ">with grades:&nbsp;<input type=\"text\" name=\"selected_grades\" size=\"".$size."\" value=\"".$selected_grades."\">";
+	echo ">with grades:<br /><textarea rows=\"3\" cols=\"60\" name=\"selected_grades\">";
+	echo $selected_grades;
+	echo "</textarea>";
 	echo "<br />➡ Unnamed grades can be inserted as hyphens between spaces ‘ - ’<br />";
 	echo "<input type=\"checkbox\" name=\"preserve_numbers\">Preserve key numbers";
 	echo "</td>";
@@ -1748,21 +1840,29 @@ if($done AND $numgrades_with_labels > 2) {
 
 if($done) {
 	echo "<hr>";
-	echo "<p><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"create_meantone\" value=\"CREATE\"> a meantone temperament scale (<a target=\"_blank\" href=\"https://en.wikipedia.org/wiki/Meantone_temperament\">follow this link</a>) with the following data:";
+	echo "<p><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"create_meantone\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#toptable\" value=\"CREATE MEANTONE\"> temperament scale (<a target=\"_blank\" href=\"https://en.wikipedia.org/wiki/Meantone_temperament\">follow this link</a>) with the following data:";
 	if($error_meantone <> '') echo "<font color=\"red\">".$error_meantone."</font>";
 	echo "</p>";
 	echo "<ul>";
-	echo "<li>Start from key: <input type=\"text\" name=\"key_start\" size=\"4\" value=\"".$key_start."\"> (typically 60)</li>";
-	echo "<li>Step by <input type=\"text\" name=\"key_step\" size=\"4\" value=\"".$key_step."\"> keys (typically 7 for cycles of fifths)</li>";
-	echo "<li>Integer ratio of each step <input type=\"text\" name=\"p_step\" size=\"3\" value=\"".$p_step."\">&nbsp;/&nbsp;<input type=\"text\" name=\"q_step\" size=\"3\" value=\"".$q_step."\"> (typically 3/2)</li>";
-	echo "<li>Add <input type=\"text\" name=\"p_cents\" size=\"3\" value=\"".$p_cents."\">&nbsp;/&nbsp;<input type=\"text\" name=\"q_cents\" size=\"3\" value=\"".$q_cents."\"> cent to each step (can be negative, typically -1/3)</li>";
+	echo "<li>Start from note with name: <input type=\"text\" name=\"note_start_meantone\" size=\"6\" value=\"".$note_start_meantone."\">";
+	if($name[0] <> '' AND $name[0] <> '•') echo " (typically ‘".$name[0]."’)";
+	echo "</li>";
+	echo "<li>List of note names separated by commas, including the starting note, e.g. “C, G, E” etc.:<br /><input type=\"text\" name=\"names_notes_meantone\" size=\"80\" value=\"".$names_notes_meantone."\"></li>";
+	echo "<li><input type=\"checkbox\" name=\"ignore_unlabeled\">Hide unlabeled positions</li>";
+	echo "<li>Integer ratio of each step <input type=\"text\" name=\"p_step_meantone\" size=\"3\" value=\"".$p_step_meantone."\">&nbsp;/&nbsp;<input type=\"text\" name=\"q_step_meantone\" size=\"3\" value=\"".$q_step_meantone."\"> (typically 3/2 for fifths or 5/4 for thirds)</li>";
+	echo "<li>Add <input type=\"text\" name=\"p_fraction_comma\" size=\"3\" value=\"".$p_fraction_comma."\">&nbsp;/&nbsp;<input type=\"text\" name=\"q_fraction_comma\" size=\"3\" value=\"".$q_fraction_comma."\"> comma to each step (can be negative, typically -1/7)</li>";
+	echo "<li><input type=\"radio\" name=\"meantone_direction\" value=\"up\">Up (ascending steps)<br />";
+	echo "<input type=\"radio\" name=\"meantone_direction\" value=\"down\">Down (descending steps)</li>";
 	echo "</ul>";
-	
 	echo "<hr>";
-	echo "<p>• <input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"add_fifths_up\" value=\"ADD CYCLE\"> OF <b>ASCENDING</b> FIFTHS<br />• <input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"add_fifths_down\" value=\"ADD CYCLE\"> OF <b>DESCENDING</b> FIFTHS<br />starting from fraction <input type=\"text\" style=\"text-align:right;\" name=\"p_start_fifths\" size=\"6\" value=\"".$p_start_fifths."\">/<input type=\"text\" name=\"q_start_fifths\" size=\"6\" value=\"".$q_start_fifths."\"><br />";
-	echo "List of names separated by commas, including the starting note, e.g. “FA, DO, SOL”:<br /><input type=\"text\" name=\"names_fifths\" size=\"80\" value=\"\"><br />";
-	echo "<input type=\"checkbox\" name=\"ignore_unlabeled\" checked>Reset unlabeled positions</p>";
+	
+	echo "<p><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"add_fifths_up\" value=\"ADD SERIES\"> of <b>ASCENDING</b> fifths<br /><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"add_fifths_down\" value=\"ADD SERIES\"> of <b>DESCENDING</b> fifths";
 	if($error_fifths <> '') echo "<font color=\"red\">".$error_fifths."</font>";
+	echo "</p><ul>";
+	echo "<li>Start from fraction <input type=\"text\" style=\"text-align:right;\" name=\"p_start_fifths\" size=\"6\" value=\"".$p_start_fifths."\">/<input type=\"text\" name=\"q_start_fifths\" size=\"6\" value=\"".$q_start_fifths."\"></li>";
+	echo "<li>List of note names separated by commas, including the starting note, e.g. “C, G, E” etc.:<br /><input type=\"text\" name=\"names_notes_fifths\" size=\"80\" value=\"\"></li>";
+	echo "<li><input type=\"checkbox\" name=\"ignore_unlabeled\">Hide unlabeled positions</li>";
+	echo "</ul>";
 	echo "<hr>";
 	}
 
@@ -2058,7 +2158,7 @@ echo "<input type=\"hidden\" name=\"q_comma\" value=\"".$q_comma."\">";
 		
 $text = html_to_text($scale_comment,"textarea");
 echo "<h3>Comment:</h3>";
-echo "<textarea name=\"scale_comment\" rows=\"5\" style=\"width:700px;\">".$text."</textarea>";
+echo "<textarea name=\"scale_comment\" rows=\"10\" style=\"width:700px;\">".$text."</textarea>";
 echo "<p><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" formaction=\"scale.php?scalefilename=".urlencode($filename)."#toptable\" onclick=\"this.form.target='_self';return true;\" name=\"savethisfile\" value=\"SAVE “".$filename."”\"></p>";
 echo "</form>";
 $line = "§>\n";
