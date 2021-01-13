@@ -1850,7 +1850,7 @@ if($done) {
 	echo "<li>List of note names separated by commas, including the starting note, e.g. “C, G, E” etc.:<br /><input type=\"text\" name=\"names_notes_meantone\" size=\"80\" value=\"".$names_notes_meantone."\"></li>";
 	echo "<li><input type=\"checkbox\" name=\"ignore_unlabeled\">Hide unlabeled positions</li>";
 	echo "<li>Integer ratio of each step <input type=\"text\" name=\"p_step_meantone\" size=\"3\" value=\"".$p_step_meantone."\">&nbsp;/&nbsp;<input type=\"text\" name=\"q_step_meantone\" size=\"3\" value=\"".$q_step_meantone."\"> (typically 3/2 for fifths or 5/4 for thirds)</li>";
-	echo "<li>Add <input type=\"text\" name=\"p_fraction_comma\" size=\"3\" value=\"".$p_fraction_comma."\">&nbsp;/&nbsp;<input type=\"text\" name=\"q_fraction_comma\" size=\"3\" value=\"".$q_fraction_comma."\"> comma to each step (can be negative, typically -1/7)</li>";
+	echo "<li>Add <input type=\"text\" name=\"p_fraction_comma\" size=\"3\" value=\"".$p_fraction_comma."\">&nbsp;/&nbsp;<input type=\"text\" name=\"q_fraction_comma\" size=\"3\" value=\"".$q_fraction_comma."\"> comma to each step (can be negative, typically -2/7)</li>";
 	echo "<li><input type=\"radio\" name=\"meantone_direction\" value=\"up\">Up (ascending steps)<br />";
 	echo "<input type=\"radio\" name=\"meantone_direction\" value=\"down\">Down (descending steps)</li>";
 	echo "</ul>";

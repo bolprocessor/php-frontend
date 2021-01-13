@@ -1,5 +1,5 @@
 // Bol Processor BP3 compatible with version BP2.9.8
-// Csound resource file saved as "-cs.tryTunings". Date: 2021-01-11 16:32:22
+// Csound resource file saved as "-cs.tryTunings". Date: 2021-01-13 08:23:16
 16
 -1
 -1
@@ -231,8 +231,17 @@ k0 1 2 3 4 5 6 7 8 9 10 11 12k
 [1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1]
 sp • • • • • • • • • • • ps
 |4|
-f2 0 128 -51 12 2 261.63 60 1 1.055 1.121 1.192 1.257 1.336 1.409 1.497 1.58 1.679 1.784 1.882 2
-<html>This is an equal-tempered scale for BP3 + Csound.<br />Created 2021-01-11 16:57:09Created meantone upwards notes “do,sol,re,la,mi,si,fa#,do#” ratio 3/2 -1/7 comma (2021-01-11 16:58:25)<br />Created meantone downwards notes “do,fa,sib,mib” ratio 3/2 -1/7 comma (2021-01-11 17:00:47)<br />Created meantone downwards notes “do,fa,sib,mib” ratio 3/2 -1/7 comma (2021-01-11 17:04:47)<br />Created meantone upwards notes “do#, sol#” ratio 3/2 -1/7 comma (2021-01-11 17:17:48)<br /></html>
+f2 0 128 -51 12 2 261.63 60 1 1.042 1.117 1.198 1.248 1.338 1.394 1.495 1.557 1.67 1.79 1.865 2
+<html>Created meantone upwards notes “do, sol, re, la, mi, si, fa#, do#, sol#” ratio 3/2 -2/7 comma (2021-01-11 18:00:22)<br />Created meantone downwards notes “do, fa, sib, mib” ratio 3/2 -2/7 comma (2021-01-11 18:05:45)<br />Created meantone upwards notes “do, sol” ratio 3/2 -2/7 comma (2021-01-11 18:06:40)<br /></html>
+"Zarlino_temp2"
+/do do# re mib mib mi mi fa fa# sol sol2# la sib si do/
+c21.5062895967 81 80c
+k0 1 2 3 4 5 6 7 8 9 10 11 12 13 14k
+[1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1]
+s• • • • • • • • • • • • • • •s
+|4|
+f2 0 128 -51 14 2 261.63 60 1 1.042 1.117 1.196 1.198 1.248 1.25 1.338 1.394 1.495 1.563 1.67 1.79 1.866 2
+<html>This is an equal-tempered scale for BP3 + Csound.<br />Created 2021-01-12 19:07:30<br />Created meantone upwards notes “do, mi, sol#” ratio 5/4 0/1 comma (2021-01-12 19:09:19)<br />Created meantone downwards notes “sol2#, do#” ratio 2/3 0/1 comma (2021-01-12 19:19:12)<br />Created meantone downwards notes “sol2#, do#” ratio 3/2 0/1 comma (2021-01-12 19:21:30)<br />Created meantone downwards notes “do#, fa#, si, mi, la, re, sol, do” ratio 3/2 -2/7 comma (2021-01-12 19:27:04)<br />Created meantone downwards notes “sol, mib” ratio 5/4 0/1 comma (2021-01-12 19:36:22)<br />Created meantone downwards notes “sol,mib” ratio 5/4 0/1 comma (2021-01-12 19:38:08)<br />Created meantone downwards notes “do, fa, sib, mib” ratio 3/2 -2/7 comma (2021-01-12 19:42:02)<br /></html>
 "piano"
 /C C# D D# E F F# G G# A A# B C/
 [1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 501 250]

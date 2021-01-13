@@ -1,5 +1,5 @@
 // Bol Processor BP3 compatible with version BP2.9.8
-// Csound resource file saved as "-cs.Mozart". Date: 2021-01-08 16:57:27
+// Csound resource file saved as "-cs.Mozart". Date: 2021-01-11 22:39:46
 16
 -1
 -1
@@ -207,6 +207,15 @@ c21.5062895967 81 80c
 |4|
 f2 0 128 -51 12 2 261.63 60 0.988 1.053 1.111 1.185 1.25 1.333 1.406 1.481 1.58 1.667 1.778 1.875 1.975
 <html>This is a reduction to 12 grades of scale "Ma03" (23 grades) in ‘-cs.12_scales’<br />Created 2021-01-05 18:15:32</html>
+"Zarlino_temp"
+c21.5062895967 81 80c
+/do do# re mib mi fa fa# sol sol# la sib si do/
+k0 1 2 3 4 5 6 7 8 9 10 11 12k
+sp • • • • • • • • • • • ps
+[1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1]
+|4|
+f2 0 128 -51 12 2 261.63 60 1 1.042 1.117 1.198 1.248 1.338 1.394 1.495 1.557 1.67 1.79 1.865 2
+<html>Cf. Asselin (2000 p. 85)<br /></html>
 "piano"
 /do do# re re# mi fa fa# sol sol# la la# si do/
 [1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 501 250]
