@@ -40,7 +40,7 @@ $error_meantone = '';
 $basekey = 60;
 $baseoctave = 4;
 $transposition_mode = '';
-$p_raise = $q_raise = $p_raised_note = $q_raised_note = $cents_raised_note = $raised_note = $name_sensitive_note = '';
+$p_raise = $q_raise = $p_raised_note = $q_raised_note = $cents_raised_note = $raised_note = $resetbase_note = $name_sensitive_note = '';
 $scale_choice = $selected_grades = $names_notes_fifths = $names_notes_meantone = '';
 $selected_grade_name = array();
 $p_comma = 81; $q_comma = 80;
@@ -65,7 +65,7 @@ if(isset($_POST['scroll'])) {
 	}
 
 $error_raise_note ='';
-if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST['modifynote']) OR isset($_POST['alignscale']) OR isset($_POST['adjustscale']) OR isset($_POST['create_meantone']) OR isset($_POST['equalize']) OR isset($_POST['add_fifths_up']) OR isset($_POST['add_fifths_down']) OR isset($_POST['modifynames'])) {
+if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST['modifynote']) OR isset($_POST['alignscale']) OR isset($_POST['adjustscale']) OR isset($_POST['create_meantone']) OR isset($_POST['equalize']) OR isset($_POST['add_fifths_up']) OR isset($_POST['add_fifths_down']) OR isset($_POST['modifynames']) OR isset($_POST['use_convention']) OR isset($_POST['resetbase'])) {
 	if(isset($_POST['scale_name'])) $new_scale_name = trim($_POST['scale_name']);
 	else $new_scale_name = '';
 	if($new_scale_name == '') $new_scale_name = $filename;
@@ -349,6 +349,88 @@ if(isset($_POST['add_fifths_up']) OR isset($_POST['add_fifths_down'])) {
 		}
 	}
 
+$error_resetbase = '';
+if(isset($_POST['resetbase'])) {
+	$resetbase_note = trim($_POST['resetbase_note']);
+	if($resetbase_note == '')
+		$error_resetbase .= "<br />New base note has not been entered";
+	if($error_resetbase == '') {
+		$j_reset = -1;
+		for($j = 0; $j < $numgrades_fullscale; $j++)
+			if($name[$j] == $resetbase_note) $j_reset = $j;
+		if($j_reset < 0) $error_resetbase .= "<br />Note ‘".$resetbase_note."’ does not belong to this scale";
+		else {
+			$new_p = $new_q = $new_ratio = $new_name = $new_series = array();
+			$p_change = $p[$j_reset] * $q[0];
+			$q_change = $q[$j_reset] * $p[0];
+			$ratio_change = $ratio[$j_reset] / $ratio[0];
+			echo $p_change."/".$q_change." ".$ratio_change."<br />";
+			for($j = 0; $j < $numgrades_fullscale; $j++) {
+				$new_j = $j - $j_reset;
+				$new_j = modulo($new_j,$numgrades_fullscale);
+				$new_p[$new_j] = $p[$j] * $q_change;
+				$new_q[$new_j] = $q[$j] * $p_change;
+				if(($new_p[$new_j] * $new_q[$new_j]) <> 0) {
+					while($new_p[$new_j]/$new_q[$new_j] < $ratio[0]) $new_p[$new_j] = $new_p[$new_j] * $interval;
+					while($new_p[$new_j]/$new_q[$new_j] > ($interval * $ratio[0])) $new_q[$new_j] = $new_q[$new_j] * $interval;
+					$gcd = gcd($new_p[$new_j],$new_q[$new_j]);
+					$new_p[$new_j] = $new_p[$new_j] / $gcd;
+					$new_q[$new_j] = $new_q[$new_j] / $gcd;
+					$new_ratio[$new_j] = $new_p[$new_j]/$new_q[$new_j];
+					}
+				else $new_ratio[$new_j] = $ratio[$j] / $ratio_change;
+				while($new_ratio[$new_j] < $ratio[0]) $new_ratio[$new_j] = $new_ratio[$new_j] * $interval;
+				while($new_ratio[$new_j] > ($interval * $ratio[0])) $new_ratio[$new_j] = $new_ratio[$new_j] / $interval;
+				if($new_j == 0) {
+					$new_ratio[$new_j] = $ratio[0];
+					$new_p[$new_j] = $p[0];
+					$new_q[$new_j] = $q[0];
+					}
+				$new_name[$new_j] = $name[$j];
+				$new_series[$new_j] = $series[$j];
+				echo "(".$new_j.") ".$new_name[$new_j]." ".$new_ratio[$new_j]." ".$new_p[$new_j]."/".$new_q[$new_j]." ".$new_series[$new_j]."<br />";
+				}
+			for($j = 0; $j < $numgrades_fullscale; $j++) {
+				$name[$j] = $new_name[$j];
+				$series[$j] = $new_series[$j];
+				$p[$j] = $new_p[$j];
+				$q[$j] = $new_q[$j];
+				$ratio[$j] = $new_ratio[$j];
+				}
+			$name[$numgrades_fullscale] = $name[0];
+			$p[$numgrades_fullscale] = $p[0] * $interval;
+			$q[$numgrades_fullscale] = $q[0];
+			$ratio[$numgrades_fullscale] = $ratio[0] * $interval;
+			$series[$numgrades_fullscale] = $series[0];
+			}
+		}
+	}
+	
+if(isset($_POST['use_convention'])) {
+	$found = FALSE;
+	for($i = $j = 0; $i <= $numgrades_fullscale; $i++) {
+		if($name[$i] == '') continue;
+		$found = TRUE;
+		$this_note = $name[$i];
+		if(($kfound = array_search($this_note,$Indiannote)) !== FALSE) $k = $kfound;
+		else if(($kfound = array_search($this_note,$AltIndiannote)) !== FALSE) $k = $kfound;
+		else if(($kfound = array_search($this_note,$Englishnote)) !== FALSE) $k = $kfound;
+		else if(($kfound = array_search($this_note,$AltEnglishnote)) !== FALSE) $k = $kfound;
+		else if(($kfound = array_search($this_note,$Frenchnote)) !== FALSE) $k = $kfound;
+		else if(($kfound = array_search($this_note,$AltFrenchnote)) !== FALSE) $k = $kfound;
+		else $k = $j;
+		if(!isset($_POST['new_note_'.$k]))
+			$name[$i] = $_POST['new_note_0'];
+		else $name[$i] = $_POST['new_note_'.$k];
+		$j++;
+		}
+	if(!$found) {
+		for($i = 0; $i < $numgrades_fullscale; $i++) $name[$i] = $_POST['new_note_'.$i];
+	//	$name[$numgrades_fullscale] = $_POST['new_note_0'];
+		}
+	$name[$numgrades_fullscale] = $name[0];
+	}
+
 if(isset($_POST['create_meantone'])) {
 	$jstart = -1;
 	for($j = 0; $j <= $numgrades_fullscale; $j++)
@@ -417,10 +499,10 @@ if(isset($_POST['create_meantone'])) {
 		if($ignore_unlabeled) echo "<p>Unlabeled positions have been deleted</p>";
 		asort($new_ratio);
 		echo "<br />";
-		foreach($new_ratio as $j => $val) {
+	/*	foreach($new_ratio as $j => $val) {
 			echo round($new_ratio[$j],3)." ‘".$new_name[$j]."’<br />";
 			}
-		echo "<br />"; 
+		echo "<br />"; */
 		$ratio_current = 0;		$jj = 0;
 		$p = $q = $ratio = $name = $series = $key = array();
 		foreach($new_ratio as $j => $val) {
@@ -595,7 +677,7 @@ if(isset($_POST['interpolate'])) {
 	}
 
 $message = '';
-if(isset($_POST['savethisfile']) OR isset($_POST['interpolate'])  OR isset($_POST['modifynote']) OR isset($_POST['alignscale'])  OR isset($_POST['adjustscale']) OR isset($_POST['create_meantone']) OR isset($_POST['equalize']) OR isset($_POST['add_fifths_up']) OR isset($_POST['add_fifths_down']) OR isset($_POST['modifynames'])) {
+if(isset($_POST['savethisfile']) OR isset($_POST['interpolate'])  OR isset($_POST['modifynote']) OR isset($_POST['alignscale'])  OR isset($_POST['adjustscale']) OR isset($_POST['create_meantone']) OR isset($_POST['equalize']) OR isset($_POST['add_fifths_up']) OR isset($_POST['add_fifths_down']) OR isset($_POST['modifynames']) OR isset($_POST['use_convention']) OR isset($_POST['resetbase'])) {
 	$message = "&nbsp;<span id=\"timespan\"><font color=\"red\">... Saving this scale ...</font></span>";
 	if(isset($_POST['syntonic_comma'])) $syntonic_comma = $_POST['syntonic_comma'];
 	if(isset($_POST['p_comma']) AND isset($_POST['q_comma'])) {
@@ -1002,31 +1084,6 @@ else $scroll_value = "SCROLL THIS TABLE";
 echo "<input type=\"submit\" style=\"background-color:yellow; \" name=\"scroll\" onclick=\"this.form.target='_self';return true;\" formaction=\"scale.php?scalefilename=".urlencode($filename)."#toptable\" value=\"".$scroll_value."\">";
 echo "</td></tr>";
 
-
-if(isset($_POST['use_convention'])) {
-	$found = FALSE;
-	for($i = $j = 0; $i <= $numgrades_fullscale; $i++) {
-		if($name[$i] == '') continue;
-		$found = TRUE;
-		$this_note = $name[$i];
-		if(($kfound = array_search($this_note,$Indiannote)) !== FALSE) $k = $kfound;
-		else if(($kfound = array_search($this_note,$AltIndiannote)) !== FALSE) $k = $kfound;
-		else if(($kfound = array_search($this_note,$Englishnote)) !== FALSE) $k = $kfound;
-		else if(($kfound = array_search($this_note,$AltEnglishnote)) !== FALSE) $k = $kfound;
-		else if(($kfound = array_search($this_note,$Frenchnote)) !== FALSE) $k = $kfound;
-		else if(($kfound = array_search($this_note,$AltFrenchnote)) !== FALSE) $k = $kfound;
-		else $k = $j;
-		if(!isset($_POST['new_note_'.$k]))
-			$name[$i] = $_POST['new_note_0'];
-		else $name[$i] = $_POST['new_note_'.$k];
-		$j++;
-		}
-	if(!$found) {
-		for($i = 0; $i < $numgrades_fullscale; $i++) $name[$i] = $_POST['new_note_'.$i];
-	//	$name[$numgrades_fullscale] = $_POST['new_note_0'];
-		}
-	$name[$numgrades_fullscale] = $name[0];
-	}
 
 store($h_image,"numgrades_fullscale",$numgrades_fullscale);
 echo "<tr><th style=\"background-color:azure; padding:4px; position: absolute;\">fraction</th>";
@@ -1936,7 +1993,7 @@ if($done AND $numgrades_with_labels > 2) {
 	echo "<input type=\"radio\" name=\"transposition_mode\" value=\"ratio\"";
 	if($transposition_mode == "ratio") echo " checked";
 	if($p_raise == 0) $p_raise = $q_raise = '';
-	echo "><b>&nbsp;Raise all positions</b> by fraction <input type=\"text\" name=\"p_raise\" size=\"3\" value=\"".$p_raise."\"><b> / </b><input type=\"text\" name=\"q_raise\" size=\"3\" value=\"".$q_raise."\">";
+	echo "><b>&nbsp;Raise all positions</b> by fraction <input type=\"text\" name=\"p_raise\" size=\"6\" value=\"".$p_raise."\"><b> / </b><input type=\"text\" name=\"q_raise\" size=\"6\" value=\"".$q_raise."\">";
 	if($error_transpose <> '') echo "<br /><br />".$error_transpose;
 	echo "</td>";
 	echo "</tr></table><br />";
@@ -1946,6 +2003,11 @@ if($done AND $numgrades_with_labels > 2) {
 	echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#toptranspose\" name=\"modifynote\" value=\"MODIFY NOTE\">&nbsp;";
 	echo "<input type=\"text\" name=\"raised_note\" size=\"5\" value=\"".$raised_note."\"> by fraction <input type=\"text\" name=\"p_raised_note\" size=\"4\" value=\"".$p_raised_note."\"><b> / </b><input type=\"text\" name=\"q_raised_note\" size=\"3\" value=\"".$q_raised_note."\"> or <input type=\"text\" name=\"cents_raised_note\" size=\"6\" value=\"".$cents_raised_note."\"> cents";
 	if($error_raise_note <> '') echo "<br />".$error_raise_note;
+	
+	echo "</td></tr><tr><td style=\"vertical-align:middle; padding:4px;\">";
+	echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#toptranspose\" name=\"resetbase\" value=\"RESET BASE OF SCALE\"> to note <input type=\"text\" name=\"resetbase_note\" size=\"6\" value=\"".$q_raise."\">";
+	if($error_resetbase <> '') echo "<font color=\"red\">".$error_resetbase."</font>";
+	
 	if($ratio[0] <> 1.0) {
 		echo "</td></tr><tr><td style=\"vertical-align:middle; padding:4px;\">";
 		echo "<font color=\"red\">➡</font>&nbsp;<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#toptranspose\" name=\"alignscale\" value=\"ALIGN SCALE\">&nbsp;to the position of “".$name[0]."” &nbsp;";

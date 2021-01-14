@@ -1,5 +1,5 @@
 // Bol Processor BP3 compatible with version BP2.9.8
-// Csound resource file saved as "-cs.tryTunings". Date: 2021-01-14 09:09:44
+// Csound resource file saved as "-cs.tryTunings". Date: 2021-01-14 21:27:54
 16
 -1
 -1
@@ -234,14 +234,23 @@ sp • • • • • • • • • • • ps
 f2 0 128 -51 12 2 261.63 60 1 1.042 1.117 1.198 1.248 1.338 1.394 1.495 1.557 1.67 1.79 1.865 2
 <html>Created meantone upwards notes “do, sol, re, la, mi, si, fa#, do#, sol#” ratio 3/2 -2/7 comma (2021-01-11 18:00:22)<br />Created meantone downwards notes “do, fa, sib, mib” ratio 3/2 -2/7 comma (2021-01-11 18:05:45)<br />Created meantone upwards notes “do, sol” ratio 3/2 -2/7 comma (2021-01-11 18:06:40)<br /></html>
 "Zarlino_temp2"
-c21.5062895967 81 80c
 /do do# re mib mi mi fa fa# sol sol2# la sib si do/
+c21.5062895967 81 80c
 k0 1 2 3 4 5 6 7 8 9 10 11 12 13k
-sp • • • • • • • • • • • • ps
 [1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1]
+sp • • • • • • • • • • • • ps
 |4|
 f2 0 128 -51 13 2 261.63 60 1 1.042 1.117 1.196 1.248 1.25 1.337 1.394 1.495 1.563 1.67 1.789 1.865 2
 <html>Created 2021-01-14 09:31:50<br />Created meantone upward notes “do,mi,sol2#” fraction 5/4 (2021-01-14 09:32:46)<br />Created meantone downward notes “sol2#,do#” fraction 3/2 (2021-01-14 09:33:55)<br />Equalized intervals over series “do,sol,re,la,mi,si,fa#,do#” approx fraction 3/2 adjusted -6.1 cents to ratio = 1.495 (2021-01-14 09:34:42)<br />Created meantone downward notes “sol,mib” fraction 5/4 (2021-01-14 09:37:02)<br />Equalized intervals over series “mib,sib,fa,do” approx fraction 3/2 adjusted -5.2 cents to ratio = 1.495 (2021-01-14 09:38:54)<br /></html>
+"meantone_classic"
+/C C# D D# E F F# G G# A A# B C/
+c21.5062895967 81 80c
+k0 1 2 3 4 5 6 7 8 9 10 11 12k
+[1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1]
+sp • • • • • • • • • • • ps
+|4|
+f2 0 128 -51 12 2 261.63 60 1 1.045 1.118 1.196 1.25 1.337 1.398 1.495 1.563 1.672 1.789 1.869 2
+<html>This is an equal-tempered scale for BP3 + Csound.<br />Created 2021-01-14 15:38:08<br />Created meantone upward notes “do,sol,re,la,mi,si,fa#,do#,sol#” fraction 3/2 adjusted -1/4 comma (2021-01-14 15:40:20)<br />Created meantone downward notes “do,fa,sib,mib” fraction 3/2 adjusted -1/4 comma (2021-01-14 15:40:57)<br />Created meantone downward notes “do,fa,sib,mib” fraction 3/2 adjusted -1/4 comma (2021-01-14 15:43:44)<br /></html>
 "piano"
 /C C# D D# E F F# G G# A A# B C/
 [1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 501 250]
