@@ -2195,37 +2195,18 @@ function list_of_good_positions($interval,$p_comma,$q_comma,$syntonic_comma) {
 		$less = $list[$j] - $comma;
 		if($less > 0) $list[$i++] = $less;
 		}
-	
-	
-/*	$fraction = 81/80; 
-	while(TRUE) {
-		$fraction = $fraction * 3 / 2;
-		$position = cents($fraction);
-		while($position < 0) $position += $cents_interval;
-		while($position > $cents_interval) $position -= $cents_interval;
-		$list[$i++] = round($position);
-		echo $i.") ".round($position)."<br >";
-		$dif1 = abs($position - $comma);
-		if($dif1 < ($comma / 2) OR $i > 100) break;
-		$dif2 = abs($position - $cents_interval + $comma);
-		if($dif2 < ($comma / 2)) break;
-		}
-	$fraction = 81/80;
-	echo "<br />";
-	while(TRUE) {
-		$fraction = $fraction * 2 / 3;
-		$position = cents($fraction);
-		while($position < 0) $position += $cents_interval;
-		while($position > $cents_interval) $position -= $cents_interval;
-		$list[$i++] = round($position);
-		echo $i.") ".round($position)."<br >";
-		$dif1 = abs($position - $comma);
-		if($dif1 < ($comma / 2) OR $i > 100) break;
-		$dif2 = abs($position - $cents_interval + $comma);
-		if($dif2 < ($comma / 2)) break;
-		}
-	echo "<br />"; */
-	
 	return $list;
+	}
+	
+function merge_names($name1,$name2) {
+	$table1 = explode("=",$name1);
+	$table2 = explode("=",$name2);
+	$table_merge = array();
+	for($i = 0; $i < count($table1); $i++)
+		if(!in_array($table1[$i],$table_merge)) $table_merge[] = $table1[$i];
+	for($i = 0; $i < count($table2); $i++)
+		if(!in_array($table2[$i],$table_merge)) $table_merge[] = $table2[$i];
+	$result = implode("=",$table_merge);
+	return $result;
 	}
 ?>

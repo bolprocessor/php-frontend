@@ -325,25 +325,20 @@ if(isset($_POST['add_fifths_up']) OR isset($_POST['add_fifths_down'])) {
 			}
 		echo "<br />"; */
 		$p_current = $q_current = $ratio_current = 0;
-	//	$name_current = '';
 		$jj = 0;
 		$p = $q = $ratio = $name = $series = $key = array();
 		foreach($new_ratio as $j => $val) {
 			if(($p_current <> 0 AND $new_p[$j] == $p_current AND $new_q[$j] == $q_current) OR round($new_ratio[$j],3) == round($ratio_current,3)) {
 				if($jj > 0 AND $new_name[$j] <> '•') {
-					$table_name = explode("=",$new_name[$j]);
-					if(!in_array($name[$jj-1],$table_name)) $table_name[] = $name[$jj-1];
-					if(count($table_name) > 1) $the_new_name = implode("=",$table_name);
-					else $the_new_name = $new_name[$j];
-					$name[$jj-1] = $the_new_name;
+					$name[$jj-1] = merge_names($new_name[$j],$name[$jj-1]);
 					}
-		//		echo "  (".$j.") jj = ".$jj." name = ".$new_name[$j]."<br />";
+		//		echo "  (".$j.") jj = ".$jj." name = ".$new_name[$j]." the_new_name = ".$the_new_name."<br />";
 				continue;
 				}
 			$p_current = $p[$jj] = $new_p[$j];
 			$q_current = $q[$jj] = $new_q[$j];
 			$ratio_current = $ratio[$jj] = $new_ratio[$j];
-	/*		$name_current = */ $name[$jj] = $new_name[$j];
+			$name[$jj] = $new_name[$j];
 			$series[$jj] = '';
 			$key[$jj] = $basekey + $jj;
 			$jj++;
@@ -421,23 +416,18 @@ if(isset($_POST['create_meantone'])) {
 		echo "<br />";
 		if($ignore_unlabeled) echo "<p>Unlabeled positions have been deleted</p>";
 		asort($new_ratio);
-	/*	echo "<br />";
+		echo "<br />";
 		foreach($new_ratio as $j => $val) {
 			echo round($new_ratio[$j],3)." ‘".$new_name[$j]."’<br />";
 			}
-		echo "<br />"; */
-		$ratio_current = 0;
-	//	$name_current = '';
-		$jj = 0;
+		echo "<br />"; 
+		$ratio_current = 0;		$jj = 0;
 		$p = $q = $ratio = $name = $series = $key = array();
 		foreach($new_ratio as $j => $val) {
 			if(($ratio_current <> 0 AND $new_ratio[$j] == $ratio_current) OR round($new_ratio[$j],3) == round($ratio_current,3)) {
 				if($jj > 0 AND $new_name[$j] <> '•') {
-					$table_name = explode("=",$new_name[$j]);
-					if(!in_array($name[$jj-1],$table_name)) $table_name[] = $name[$jj-1];
-					if(count($table_name) > 1) $the_new_name = implode("=",$table_name);
-					else $the_new_name = $new_name[$j];
-					$name[$jj-1] = $the_new_name;
+					$name[$jj-1] = merge_names($new_name[$j],$name[$jj-1]);
+	//				echo "  (".$j.") jj = ".$jj." name = ".$new_name[$j]." the_new_name = ".$the_new_name."<br />";
 					}
 				continue;
 				}
@@ -449,7 +439,7 @@ if(isset($_POST['create_meantone'])) {
 				$p[$jj] = 2;
 				$q[$jj] = 1;
 				}
-		/*	$name_current = */ $name[$jj] = $new_name[$j];
+			$name[$jj] = $new_name[$j];
 			$series[$jj] = '';
 			$key[$jj] = $basekey + $jj;
 			$jj++;
@@ -530,8 +520,6 @@ if(isset($_POST['equalize'])) {
 				if(($name[$j] == '' OR $name[$j] == '•') AND round($ratio[$j],3) <> 1  AND round($ratio[$j],3) <> 2) {
 					if($ignore_unlabeled) continue;
 					}
-			/*	$new_p[$jj] = $p[$j];
-				$new_q[$jj] = $q[$j]; */
 				$new_ratio[$jj] = $ratio[$j];
 				$new_name[$jj] = $name[$j];
 				$jj++;
@@ -555,23 +543,18 @@ if(isset($_POST['equalize'])) {
 				}
 			echo "<br />"; */
 			$ratio_current = 0;
-		//	$name_current = '';
 			$jj = 0;
 			$p = $q = $ratio = $name = $series = $key = array();
 			foreach($new_ratio as $j => $val) {
 				if(round($new_ratio[$j],3) == round($ratio_current,3)) {
 					if($jj > 0 AND $new_name[$j] <> '•') {
-						$table_name = explode("=",$new_name[$j]);
-						if(!in_array($name[$jj-1],$table_name)) $table_name[] = $name[$jj-1];
-						if(count($table_name) > 1) $the_new_name = implode("=",$table_name);
-						else $the_new_name = $new_name[$j];
-						$name[$jj-1] = $the_new_name;
+						$name[$jj-1] = merge_names($new_name[$j],$name[$jj-1]);
 						}
-				//	echo "  (".$j.") jj = ".$jj." name = ".$new_name[$j]."<br />";
+			//		echo "  (".$j.") jj = ".$jj." name = ".$new_name[$j]." the_new_name = ".$the_new_name."<br />";
 					continue;
 					}
 				$ratio_current = $ratio[$jj] = $new_ratio[$j];
-		/*		$name_current = */ $name[$jj] = $new_name[$j];
+				$name[$jj] = $new_name[$j];
 				$p[$jj] = $q[$jj] = 0;
 				$series[$jj] = '';
 				$key[$jj] = $basekey + $jj;
