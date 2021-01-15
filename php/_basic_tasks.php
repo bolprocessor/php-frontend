@@ -2203,10 +2203,11 @@ function merge_names($name1,$name2) {
 	$table2 = explode("=",$name2);
 	$table_merge = array();
 	for($i = 0; $i < count($table1); $i++)
-		if(!in_array($table1[$i],$table_merge)) $table_merge[] = $table1[$i];
+		if($table1[$i] <> '' AND $table1[$i] <> '•' AND !in_array($table1[$i],$table_merge)) $table_merge[] = $table1[$i];
 	for($i = 0; $i < count($table2); $i++)
-		if(!in_array($table2[$i],$table_merge)) $table_merge[] = $table2[$i];
+		if($table2[$i] <> '' AND $table2[$i] <> '•' AND !in_array($table2[$i],$table_merge)) $table_merge[] = $table2[$i];
 	$result = implode("=",$table_merge);
+	if($result == '') $result = '•';
 	return $result;
 	}
 ?>
