@@ -125,7 +125,7 @@ for($j = 0; $j <= $numgrades_fullscale; $j++) {
 			}
 		else $shiftarea = FALSE;
 		$length_text_name = imagefontwidth(10) * strlen($text);
-		if($j < $numgrades_fullscale) {
+		if($text <> '' AND $j < $numgrades_fullscale) {
 			imagefilledrectangle($im,$x_text - 5,$y_text,$x_text + $length_text_name + 5,$y_text + imagefontheight(10),$white);	
 			imagestring($im,10,$x_text,$y_text,$text,$red);
 			}

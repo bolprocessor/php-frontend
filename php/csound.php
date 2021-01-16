@@ -63,7 +63,7 @@ if(isset($_POST['create_scale'])) {
 			fwrite($handle,$any_fractions."\n");
 			$any_scale = "f2 0 128 -51 12 2 261.63 60 1 1.059 1.122 1.189 1.26 1.335 1.414 1.498 1.587 1.682 1.782 1.888 2";
 			fwrite($handle,$any_scale."\n");
-			$any_comment = "<html>This is an equal-tempered scale for BP3 + Csound.<br />Created ".date('Y-m-d H:i:s')."</html>";
+			$any_comment = "<html>This is an equal-tempered scale for BP3 + Csound.<br />Created ".date('Y-m-d H:i:s')."<br /></html>";
 			fwrite($handle,$any_comment."\n");
 			fclose($handle);
 			$need_to_save = TRUE;
@@ -813,7 +813,7 @@ if($deleted_scales > 0) {
 	echo "</b></font>&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"undelete_scales\" onclick=\"this.form.target='_self';return true;\" value=\"UNDELETE all scales\">&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"empty_trash\" onclick=\"this.form.target='_self';return true;\" value=\"TRASH deleted scales\">";
 	echo "</p>";
 	}
-echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"create_scale\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#topscales\" value=\"CREATE A NEW TONAL SCALE\">&nbsp;with name <input type=\"text\" name=\"scale_name\" size=\"20\" value=\"\"></p>";
+echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"create_scale\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#topscales\" value=\"CREATE A NEW TONAL SCALE\">&nbsp;with name <input type=\"text\" name=\"scale_name\" size=\"30\" value=\"\"></p>";
 if($error_create <> '') echo $error_create;
 	
 if($max_scales > 0) {
@@ -1236,7 +1236,11 @@ if($max_scales > 0) {
 				}
 			}
 		if(isset($scale_note_names[$i_scale])) echo "<br />&nbsp;&nbsp;&nbsp;<font color=\"red\">".str_replace('/','',$scale_note_names[$i_scale])."</font>";
-		if(isset($scale_comment[$i_scale])) echo "<br /><i>".str_replace("<br />",' ',html_to_text($scale_comment[$i_scale],'txt'))."</i>";
+		if(isset($scale_comment[$i_scale])) {
+			$this_comment = html_to_text($scale_comment[$i_scale],'txt');
+			$this_comment = substr($this_comment, 0, strpos($this_comment, "<br />"));
+			echo "<br /><i>".$this_comment."</i>";
+			}
 		echo "</li>";
 		}
 	echo "</ol>";

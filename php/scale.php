@@ -34,9 +34,6 @@ $h_image = fopen($image_file,"w");
 fwrite($h_image,"<?php\n");
 store($h_image,"filename",$filename);
 
-$note_start_meantone = '';
-$p_step_meantone = $q_step_meantone = $p_fraction_comma = $q_fraction_comma = 0;
-$error_meantone = '';
 $basekey = 60;
 $baseoctave = 4;
 $transposition_mode = '';
@@ -65,7 +62,7 @@ if(isset($_POST['scroll'])) {
 	}
 
 $error_raise_note ='';
-if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST['modifynote']) OR isset($_POST['alignscale']) OR isset($_POST['adjustscale']) OR isset($_POST['create_meantone']) OR isset($_POST['equalize']) OR isset($_POST['add_fifths_up']) OR isset($_POST['add_fifths_down']) OR isset($_POST['modifynames']) OR isset($_POST['use_convention']) OR isset($_POST['resetbase'])) {
+if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST['fixkeynumbers']) OR isset($_POST['modifynote']) OR isset($_POST['alignscale']) OR isset($_POST['adjustscale']) OR isset($_POST['create_meantone']) OR isset($_POST['equalize']) OR isset($_POST['add_fifths_up']) OR isset($_POST['add_fifths_down']) OR isset($_POST['modifynames']) OR isset($_POST['use_convention']) OR isset($_POST['resetbase'])) {
 	if(isset($_POST['scale_name'])) $new_scale_name = trim($_POST['scale_name']);
 	else $new_scale_name = '';
 	if($new_scale_name == '') $new_scale_name = $filename;
@@ -120,7 +117,7 @@ if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST
 		}
 	$new_basekey = abs(intval($_POST['basekey']));
 	if($new_basekey > 0) $basekey = $new_basekey;
-	if($key[0] <> $basekey OR $key[0] == 0 OR $key[$numgrades_fullscale] == 0) {
+	if($key[0] <> $basekey OR $key[0] == 0 OR $key[$numgrades_fullscale] == 0 OR isset($_POST['fixkeynumbers'])) {
 		$this_key = $basekey;
 		echo "<p><font color=\"red\">➡</font> Keys have been renumbered following ‘basekey’</p>";
 		for($i = 0; $i <= $numgrades_fullscale; $i++) {
@@ -263,12 +260,6 @@ if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST
 			}
 		$scale_comment .= "Scale adjusted ratio ".$ratio_adjust." (".date('Y-m-d H:i:s').")";
 		}
-	
-	if(isset($_POST['note_start_meantone'])) $note_start_meantone = trim($_POST['note_start_meantone']);
-	if(isset($_POST['p_step_meantone'])) $p_step_meantone = intval($_POST['p_step_meantone']);
-	if(isset($_POST['q_step_meantone'])) $q_step_meantone = intval($_POST['q_step_meantone']);
-	if(isset($_POST['p_fraction_comma'])) $p_fraction_comma = intval($_POST['p_fraction_comma']);
-	if(isset($_POST['q_fraction_comma'])) $q_fraction_comma = intval($_POST['q_fraction_comma']);
 	}
 
 $number_steps = $p_start_fifths = $q_start_fifths = $error_fifths = '';
@@ -446,6 +437,15 @@ if(isset($_POST['use_convention'])) {
 	$name[$numgrades_fullscale] = $name[0];
 	}
 
+
+$note_start_meantone = '';
+$p_step_meantone = $q_step_meantone = $p_fraction_comma = $q_fraction_comma = 0;
+$error_meantone = '';
+if(isset($_POST['note_start_meantone'])) $note_start_meantone = trim($_POST['note_start_meantone']);
+if(isset($_POST['p_step_meantone'])) $p_step_meantone = intval($_POST['p_step_meantone']);
+if(isset($_POST['q_step_meantone'])) $q_step_meantone = intval($_POST['q_step_meantone']);
+if(isset($_POST['p_fraction_comma'])) $p_fraction_comma = intval($_POST['p_fraction_comma']);
+if(isset($_POST['q_fraction_comma'])) $q_fraction_comma = intval($_POST['q_fraction_comma']);
 if(isset($_POST['create_meantone'])) {
 	$jstart = -1;
 	for($j = 0; $j <= $numgrades_fullscale; $j++)
@@ -505,7 +505,8 @@ if(isset($_POST['create_meantone'])) {
 			while($ratio_current < 1) $ratio_current = $ratio_current * $interval;
 			$new_ratio[$jj] = $ratio_current;
 			$new_name[$jj] = '•';
-			if(isset($table_names[$k]) AND $table_names[$k] <> '') $new_name[$jj] = $table_names[$k];
+			if(isset($table_names[$k]) AND $table_names[$k] <> '' AND $table_names[$k] <> '•')
+				$new_name[$jj] = $table_names[$k];
 			echo "‘".$new_name[$jj]."’ (".round($ratio_current,3).") ";
 			$ratio_current = $ratio_current * $ratio_multiply;
 			$jj++;
@@ -696,7 +697,7 @@ if(isset($_POST['interpolate'])) {
 	}
 
 $message = '';
-if(isset($_POST['savethisfile']) OR isset($_POST['interpolate'])  OR isset($_POST['modifynote']) OR isset($_POST['alignscale'])  OR isset($_POST['adjustscale']) OR isset($_POST['create_meantone']) OR isset($_POST['equalize']) OR isset($_POST['add_fifths_up']) OR isset($_POST['add_fifths_down']) OR isset($_POST['modifynames']) OR isset($_POST['use_convention']) OR isset($_POST['resetbase'])) {
+if(isset($_POST['savethisfile']) OR isset($_POST['fixkeynumbers']) OR isset($_POST['interpolate']) OR isset($_POST['modifynote']) OR isset($_POST['alignscale'])  OR isset($_POST['adjustscale']) OR isset($_POST['create_meantone']) OR isset($_POST['equalize']) OR isset($_POST['add_fifths_up']) OR isset($_POST['add_fifths_down']) OR isset($_POST['modifynames']) OR isset($_POST['use_convention']) OR isset($_POST['resetbase'])) {
 	$message = "&nbsp;<span id=\"timespan\"><font color=\"red\">... Saving this scale ...</font></span>";
 	if(isset($_POST['syntonic_comma'])) $syntonic_comma = $_POST['syntonic_comma'];
 	if(isset($_POST['p_comma']) AND isset($_POST['q_comma'])) {
@@ -975,7 +976,8 @@ for($j = $j_col = 0; $j < $numgrades_fullscale; $j++) {
 		echo "</tr><tr>";
 		}
 	$j_col++;
-	echo "<td>";
+	echo "<td style=\"text-align:center;\">";
+	if($key[$j] > 0) echo "<font color=\"green\"><b>".$key[$j]."</b></font><br />";
 	$the_width = strlen($name[$j]);
 	if($the_width < 5) $the_width = 5;
 	echo "<input style=\"text-align:center;\" type=\"text\" name=\"new_name_".$j."\" size=\"".$the_width."\" value=\"".$name[$j]."\">";
@@ -993,7 +995,7 @@ echo "</td>";
 echo "</tr><tr>";
 echo "<td style=\"white-space:nowrap; padding:6px; vertical-align:middle;\"><font color=\"blue\">basekey</font> = <input type=\"text\" name=\"basekey\" size=\"5\" value=\"".$basekey."\">";
 echo "&nbsp;&nbsp;<font color=\"blue\">baseoctave</font> = <input type=\"text\" name=\"baseoctave\" size=\"5\" value=\"".$baseoctave."\"></td>";
-echo "<td style=\"padding:6px; vertical-align:middle;\"><font color=\"blue\">basefreq</font> = <input type=\"text\" name=\"basefreq\" size=\"5\" value=\"".$basefreq."\"> Hz.<br />This is the frequency for fraction 1/1, assuming a 440 Hz diapason.";
+echo "<td style=\"padding:6px; vertical-align:middle;\"><font color=\"blue\">basefreq</font> = <input type=\"text\" name=\"basefreq\" size=\"7\" value=\"".$basefreq."\"> Hz.<br />This is the frequency for fraction 1/1, assuming a 440 Hz diapason.";
 if($ratio[0] <> 1 AND $name[0] <> '') echo "<br />Here, the frequency of <font color=\"blue\">‘".$name[0]."’</font> would be <font color=\"red\">".round(($basefreq * $ratio[0]),2)."</font> Hz if it is the <i>block key</i>.";
 echo "</td>";
 echo "</tr></table>";
@@ -1227,7 +1229,7 @@ if(!$warned_ratios) {
 	}
 
 echo "</tr>";
-echo "<tr><th style=\"background-color:azure; padding:4px; position: absolute;\">key&nbsp;<input title=\"Reset key numbers starting with basekey\" style=\"background-color:yellow;\" type=\"submit\" name=\"savethisfile\" onclick=\"this.form.target='_self';return true;\" formaction=\"scale.php?scalefilename=".urlencode($filename)."\" value=\"fix\"></th>".$somespace;
+echo "<tr><th style=\"background-color:azure; padding:4px; position: absolute;\">key&nbsp;<input title=\"Reset key numbers of labeled notes starting with basekey\" style=\"background-color:yellow;\" type=\"submit\" name=\"fixkeynumbers\" onclick=\"this.form.target='_self';return true;\" formaction=\"scale.php?scalefilename=".urlencode($filename)."\" value=\"fix\"></th>".$somespace;
 $this_key = $basekey;
 for($i = 0; $i <= $numgrades_fullscale; $i++) {
 	echo "<td style=\"text-align:center; padding-top:4px; padding-bottom:4px; padding-left:0px; padding-right:0px; margin-left:0px; margin-right:0px; background-color:cornsilk;\" colspan=\"2\">";
@@ -1665,7 +1667,7 @@ if($done AND $numgrades_with_labels > 2 AND !$warned_ratios) {
 					else
 						$some_comment = "<html>This is a reduction to ".$numgrades." grades of scale \"".$filename."\" (".$numgrades_fullscale." grades) in ‘".$csound_source."’";
 					if($new_scale_mode == "major")
-						$some_comment .= " in major tonality.";
+						$some_comment .= " in major tonality";
 					else if($new_scale_mode == "minor")
 						$some_comment .= " in relative minor tonality";
 					if($name_sensitive_note <> '') $some_comment .= "<br />Sensitive note = '".$name_sensitive_note."'";
@@ -2063,7 +2065,7 @@ if($done AND !$warned_ratios) {
 	echo "<li>List of note names separated by commas, including the starting note, e.g. “C, G, E” etc.:<br /><input type=\"text\" name=\"names_notes_meantone\" size=\"80\" value=\"".$names_notes_meantone."\"></li>";
 	echo "<li><input type=\"checkbox\" name=\"ignore_unlabeled\">Hide unlabeled positions</li>";
 	echo "<li>Fraction of each step <input type=\"text\" name=\"p_step_meantone\" size=\"3\" value=\"".$p_step_meantone."\">&nbsp;/&nbsp;<input type=\"text\" name=\"q_step_meantone\" size=\"3\" value=\"".$q_step_meantone."\"> (typically 3/2 for fifths or 5/4 for thirds)</li>";
-	echo "<li>Add <input type=\"text\" name=\"p_fraction_comma\" size=\"3\" value=\"".$p_fraction_comma."\">&nbsp;/&nbsp;<input type=\"text\" name=\"q_fraction_comma\" size=\"3\" value=\"".$q_fraction_comma."\"> comma to each step (can be negative, typically -2/7)</li>";
+	echo "<li>Add <input type=\"text\" name=\"p_fraction_comma\" size=\"3\" value=\"".$p_fraction_comma."\">&nbsp;/&nbsp;<input type=\"text\" name=\"q_fraction_comma\" size=\"3\" value=\"".$q_fraction_comma."\"> comma to each step (can be negative, for instance -2/7)</li>";
 	echo "<li><input type=\"radio\" name=\"meantone_direction\" value=\"up\">Up (ascending steps)<br />";
 	echo "<input type=\"radio\" name=\"meantone_direction\" value=\"down\">Down (descending steps)</li>";
 	echo "</ul>";
