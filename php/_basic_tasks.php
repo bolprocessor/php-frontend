@@ -532,8 +532,8 @@ function add_help_links($line) {
 	return $line;
 	}
 
-function gcd ($a, $b) {
-    return $b ? gcd($b, $a % $b) : $a;
+function gcd($a,$b) {
+    return $b ? gcd($b,$a % $b) : $a;
 	}
 
 function gcd_array($array,$a = 0) {
@@ -1425,6 +1425,7 @@ function octave($convention,$key) {
 			$octave = intdiv($key,12) - 1;
 			break;
 		case "Italian/Spanish/French":
+		case "French":
 		case "Indian":
 			$octave = intdiv($key,12) - 2;
 			break;
@@ -1435,6 +1436,7 @@ function octave($convention,$key) {
 function key_to_note($convention,$key) {
 	$name["English"] = array("C","Db","D","Eb","E","F","F#","G","Ab","A","Bb","B");
 	$name["Italian/Spanish/French"] = array("do","reb","re","mib","mi","fa","fa#","sol","lab","la","sib","si");
+	$name["French"] = array("do","reb","re","mib","mi","fa","fa#","sol","lab","la","sib","si");
 	$name["Indian"] = array("sa","rek","re","gak","ga","ma","ma#","pa","dhak","dha","nik","ni");
 	$octave = octave($convention,$key);
 	$class = $key - (12 * intdiv($key,12));

@@ -97,8 +97,10 @@ if(isset($_POST['create_data'])) {
 			unset($_POST['create_data']);
 			}
 		else {
-//			echo "<p style=\"color:red;\" id=\"timespan\">Creating ‘".$filename."’…</p>";
 			$handle = fopen($dir.SLASH.$filename,"w");
+			$template = "data_template";
+			$template_content = @file_get_contents($template,TRUE);
+			fwrite($handle,$template_content."\n");
 			fclose($handle);
 			}
 		}
