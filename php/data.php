@@ -14,7 +14,14 @@ require_once("_header.php");
 echo "<p>Current directory = ".$dir."</p>";
 echo link_to_help();
 
+$test_musicxml =  FALSE;
+
 echo "<h3>Data file “".$filename."”</h3>";
+
+$temp_folder = str_replace(' ','_',$filename)."_".session_id()."_temp";
+if(!file_exists($temp_dir.$temp_folder)) {
+	mkdir($temp_dir.$temp_folder);
+	}
 
 if(isset($_POST['playitem']) OR isset($_POST['expanditem'])) {
 	$i = $_POST['i'];
@@ -88,31 +95,43 @@ if(isset($_POST['playitem']) OR isset($_POST['expanditem'])) {
 		}
 	}
 
-if(isset($_FILES['music_xml_import']) AND $_FILES['music_xml_import']['tmp_name'] <> '') {
-	$upload_filename = $_FILES['music_xml_import']['name'];
-	if($_FILES["music_xml_import"]["size"] > MAXFILESIZE) {
+
+$music_xml_file = $temp_dir.$temp_folder.SLASH."musicXML.musicxml";
+
+if(isset($_POST['select_parts'])) {
+	$upload_filename = $_POST['upload_filename'];
+//	$_FILES['music_xml_import']['tmp_name'] = $_POST['tmpFile'];
+	$reload_musicxml = TRUE;
+	}
+else $reload_musicxml = FALSE;
+
+if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xml_import']['tmp_name'] <> '')) {
+	if(!$reload_musicxml) $upload_filename = $_FILES['music_xml_import']['name'];
+	if(!$reload_musicxml AND $_FILES["music_xml_import"]["size"] > MAXFILESIZE) {
 		echo "<h3><font color=\"red\">Uploading failed:</font> <font color=\"blue\">".$upload_filename."</font> <font color=\"red\">is larger than ".MAXFILESIZE." bytes</font></h3>";
 		}
 	else {
-		$tmpFile = $_FILES['music_xml_import']['tmp_name'];
-/*		move_uploaded_file($tmpFile,$music_xml_file) or die('Problem uploading this MusicXML file');
-		@chmod($music_xml_file,0666); */
-		$table = explode('.',$upload_filename);
-		$extension = end($table);
-		if($extension <> "musicxml" and $extension <> "xml") {
+		if(!$reload_musicxml) {
+			$tmpFile = $_FILES['music_xml_import']['tmp_name'];
+			move_uploaded_file($tmpFile,$music_xml_file) or die('Problem uploading this MusicXML file');
+			@chmod($music_xml_file,0666);
+			$table = explode('.',$upload_filename);
+			$extension = end($table);
+			}
+		if(!$reload_musicxml AND $extension <> "musicxml" AND $extension <> "xml") {
 			echo "<h4><font color=\"red\">Uploading failed:</font> <font color=\"blue\">".$upload_filename."</font> <font color=\"red\">does not have the extension of a MusicXML file!</font></h4>";
 			}
 		else {
+			echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 			$message = '';
-		//	$xml = @file_get_contents($tmpFile,TRUE);
 			$data = '';
 			$partwise = $timewise = $note_on = $pitch = $backup = $attributes = $attributes_key = $changed_attributes = $forward = $time_modification = FALSE;
 			$actual_notes = $normal_notes = $alter = $duration_measure = 0;
 			$part = $measure = $step = -1;
 			$s = array();
-			$file = fopen($tmpFile,"r");
+			$file = fopen($music_xml_file,"r");
 			$score_part = '';
-			$instrument_name = $midi_channel = $divisions = $fifths = $mode = $duration_part = array();
+			$instrument_name = $midi_channel = $divisions = $fifths = $mode = $duration_part = $select_part = array();
 			while(!feof($file)) {
 				$line = fgets($file);
 				if(is_integer($pos=strpos($line,"<score-partwise")) AND $pos == 0) $partwise = TRUE;
@@ -121,7 +140,14 @@ if(isset($_FILES['music_xml_import']) AND $_FILES['music_xml_import']['tmp_name'
 					$score_part = trim(preg_replace("/.*id=\"([^\"]+)\".*/u","$1",$line));
 					}
 				if(is_integer($pos=strpos($line,"</score-part>"))) {
-					$message .= "Score part ‘".$score_part."’ instrument = <i>".$instrument_name[$score_part]."</i>";
+					$part_selection = "select_part_".$score_part;
+					$select_part[$score_part] = isset($_POST[$part_selection]);
+					$message .= "<input type=\"checkbox\" name=\"".$part_selection."\"";
+					if($select_part[$score_part]) {
+						$message .= " checked";
+						echo "Score part ‘".$score_part."’ has been selected.<br />";
+						}
+					$message .= "> Score part ‘".$score_part."’ instrument = <i>".$instrument_name[$score_part]."</i>";
 					if(isset($midi_channel[$score_part]) AND $midi_channel[$score_part] <> '')
 						$message .= " — MIDI channel ".$midi_channel[$score_part];
 					$message .= "<br />";
@@ -177,12 +203,12 @@ if(isset($_FILES['music_xml_import']) AND $_FILES['music_xml_import']['tmp_name'
 				if(is_integer($pos=strpos($line,"<measure "))) {
 					$step = -1; $level = 0; $duration_measure = 0;
 					$measure = trim(preg_replace("/.*number=\"([0-9]+)\".*/u","$1",$line));
-			//		echo "measure = ".$measure."<br />";
+					if($test_musicxml) echo "measure #".$measure."<br />";
 					}
 				if(is_integer($pos=strpos($line,"</measure>"))) {
 					$duration_part[$part] = $duration_measure;
+					if($test_musicxml) echo "duration_measure = ".$duration_measure." level = ".$level."<br /><br />";
 					$duration_measure = 0;
-			//		echo "duration_measure = ".$duration_measure."<br /><br />";
 					}
 				if(is_integer($pos=strpos($line,"<backup>"))) {
 					$backup = TRUE;
@@ -221,7 +247,7 @@ if(isset($_FILES['music_xml_import']) AND $_FILES['music_xml_import']['tmp_name'
 					$s[$measure][$part][$step]['alter'] = 0;
 					$s[$measure][$part][$step]['octave'] = 0;
 					}
-				if(is_integer($pos=strpos($line,"<note "))) {
+				if(is_integer($pos=strpos($line,"<note ")) OR is_integer($pos=strpos($line,"<note>"))) {
 					if(!$partwise) {
 						$message .= "<font color=\"red\">➡ </font> Could not convert this file because it is not in ‘partwise’ format<br />";
 						break;
@@ -234,9 +260,11 @@ if(isset($_FILES['music_xml_import']) AND $_FILES['music_xml_import']['tmp_name'
 					$level++;
 					$is_chord = TRUE;
 					}
-				if($note_on AND is_integer($pos=strpos($line,"<rest/>"))) {
+				if($note_on AND (is_integer($pos=strpos($line,"<rest ")) OR is_integer($pos=strpos($line,"<rest/>")))) {
 					$rest = TRUE;
 					$is_chord = FALSE;
+					$this_octave = 0;
+					if($test_musicxml) echo "rest<br />";
 					}
 				if($note_on AND is_integer($pos=strpos($line,"<grace/>"))) {
 					$note_duration = 0;
@@ -278,6 +306,7 @@ if(isset($_FILES['music_xml_import']) AND $_FILES['music_xml_import']['tmp_name'
 					else $s[$measure][$part][$step]['note'] = $this_note;
 					$s[$measure][$part][$step]['octave'] = $this_octave;
 					$s[$measure][$part][$step]['duration'] = $note_duration;
+				//	if($test_musicxml) echo " ".$step." ".$this_note.$this_octave." (".$note_duration.")<br />";
 					if($level == 0) $duration_measure += $note_duration;
 					$s[$measure][$part][$step]['level'] = $level;
 					$s[$measure][$part][$step]['actual-notes'] = $actual_notes;
@@ -291,10 +320,17 @@ if(isset($_FILES['music_xml_import']) AND $_FILES['music_xml_import']['tmp_name'
 			print_r($s);
 			echo "</pre>"; */
 			fclose($file);
+			ksort($s);
+			$max_measure = 0;
 			foreach($s as $i_measure => $the_measure) {
+				if($test_musicxml) echo "Measure ".$i_measure."<br />";
+				if($i_measure > $max_measure) $max_measure = $i_measure;
 				$data .= "{";
 				$newpart = TRUE;
+				ksort($the_measure);
 				foreach($the_measure as $score_part => $the_part) {
+					$score_part_root = str_replace("_@",'',$score_part);
+					if($reload_musicxml AND !$select_part[$score_part_root]) continue;
 					if(!$newpart) $data .= ",";
 					if(isset($midi_channel[$score_part]) AND $midi_channel[$score_part] > 0)
 					$data .= "_chan(".$midi_channel[$score_part].")";
@@ -308,7 +344,7 @@ if(isset($_FILES['music_xml_import']) AND $_FILES['music_xml_import']['tmp_name'
 						$num = $num / $gcd;
 						$den = $den / $gcd;
 						}
-					if($num == 1 AND $den == 1) $fraction = "-";
+					if($num == 1 AND $den == 1) $fraction = "1";
 					else $fraction = $num."/".$den;
 					if(is_integer($pos=strpos($score_part,"_@"))) {
 						$num = $num_this_part - $duration_part[$score_part];
@@ -324,6 +360,7 @@ if(isset($_FILES['music_xml_import']) AND $_FILES['music_xml_import']['tmp_name'
 					$data .= "{".$fraction.",";
 					$old_level = 0;
 					$stream = ''; $chord = FALSE;
+					ksort($the_part);
 					foreach($the_part as $i_event => $the_event) {
 						$level = $the_event['level'];
 						$num  = $the_event['duration'];
@@ -333,8 +370,8 @@ if(isset($_FILES['music_xml_import']) AND $_FILES['music_xml_import']['tmp_name'
 							$num = $num / $gcd;
 							$den = $den / $gcd;
 							}
-						else $num = 1; // Grace note
-						if($num == 1 AND $den == 1) $fraction = "-";
+						else $num = 1; // Grace note. We allow it the minimum duration and manage to squeeze all notes in the current measure
+						if($num == 1 AND $den == 1) $fraction = "1";
 						else $fraction = $num."/".$den;
 						$alter = $the_event['alter'];
 						$the_note = $the_event['note'];
@@ -344,6 +381,9 @@ if(isset($_FILES['music_xml_import']) AND $_FILES['music_xml_import']['tmp_name'
 							if($alter == -1) $the_note .= "b";
 							}
 						if($the_event['note'] == "rest") {
+							if($fraction == "1") $fraction = "-";
+							if($fraction == "2") $fraction = "--";
+							if($fraction == "3") $fraction = "---";
 							if($old_level > 0) for($i = 0; $i < $old_level; $i++) $stream .= "}";
 							$stream .= " ".$fraction." ";
 							if($old_level > 0) for($i = 0; $i < $old_level; $i++) $stream .= "{";
@@ -355,14 +395,9 @@ if(isset($_FILES['music_xml_import']) AND $_FILES['music_xml_import']['tmp_name'
 							else {
 								if($old_level > 0) $stream .= "}{";
 								}
-					//		$stream .= $i_level."_".$the_event." ";
-					//		$stream .= $score_part."_".$the_event." ";
-					//		$stream .= $i_measure."_".$the_event." ";
 							if($the_event['actual-notes'] > 0) $stream .= "_tempo(".$the_event['actual-notes'];
 							if($the_event['normal-notes'] > 0) $stream .= "/".$the_event['normal-notes'].")";
 							$stream .= "{".$fraction.",".$the_note.$octave."}";
-					//		$stream .= $the_event['note']."(".$the_event['duration'].")";
-					//		$stream .= " ";
 							}
 						$old_level = $level;
 						}
@@ -373,17 +408,22 @@ if(isset($_FILES['music_xml_import']) AND $_FILES['music_xml_import']['tmp_name'
 					}
 				$data .= "}";
 				}
+			$message .= $max_measure." measures processed…<br />";
 			$data = preg_replace("/\s+/u"," ",$data);
 			$data = str_replace(" }","}",$data);
 			$data = str_replace("} ","}",$data);
 			$data = str_replace(" {","{",$data);
 			$data = str_replace("{ ","{",$data);
+			$data = str_replace(", ",",",$data);
 			do $data = str_replace("{}",'',$data,$count);
 			while($count > 0);
 			$data = str_replace(" ,",",",$data);
 			$data = "// MusicXML file ‘".$upload_filename."’ converted\n\n".$data;
-			echo "<h3 id=\"timespan2\"><font color=\"red\">Converted MusicXML file:</font> <font color=\"blue\">".$upload_filename."</font></h3>";
+			echo "<h3><font color=\"red\">Converted MusicXML file:</font> <font color=\"blue\">".$upload_filename."</font></h3>";
 			if($message <> '') echo $message;
+			echo "<input type=\"hidden\" name=\"upload_filename\" value=\"".$upload_filename."\">";
+			echo "Select part(s) and <input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"select_parts\" value=\"reload the same file\">";
+			echo "</form>";
 			$_POST['savethisfile'] = TRUE;
 			$_POST['thistext'] = $data;
 			}
