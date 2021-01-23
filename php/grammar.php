@@ -336,7 +336,6 @@ if($show_production > 0)
 	$link_produce .= "&show_production=1";
 if($trace_production > 0)
 	$link_produce .= "&trace_production=1";
-// $link_produce .= "&random_seed=".$random_seed;
 $link_produce .= "&here=".urlencode($here);
 $window_name = window_name($filename);
 echo "<b>then…</b>";

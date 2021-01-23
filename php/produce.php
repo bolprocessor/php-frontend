@@ -5,6 +5,7 @@ $url_this_page = "produce.php";
 $this_title = "BP console";
 require_once("_header.php");
 
+
 $application_path = $bp_application_path;
 
 if(isset($_GET['startup'])) $startup = $_GET['startup'];
@@ -24,14 +25,15 @@ else $csound_file = '';
 $max_sleep_time_after_bp_command = 15;
 $check_command_line = FALSE;
 $sound_file_link = $result_file = '';
-
 if($instruction == "help") {
 	$command = $application_path."bp --help";
 	}
 else {
 	if(isset($_GET['grammar'])) $grammar_path = urldecode($_GET['grammar']);
 	else $grammar_path = '';
-	if($grammar_path == '') die();
+	if(isset($_GET['data'])) $data_path = urldecode($_GET['data']);
+	else $data_path = '';
+	if($grammar_path == '' AND $data_path == '') die();
 	if(isset($_GET['settings_file'])) $settings_file = $_GET['settings_file'];
 	else $settings_file = '';
 	if(isset($_GET['objects_file'])) $objects_file = $_GET['objects_file'];
@@ -48,6 +50,7 @@ else {
 	else $show_production = FALSE;
 	if(isset($_GET['trace_production'])) $trace_production = TRUE;
 	else $trace_production = FALSE;
+	
 	$new_random_seed =  FALSE;
 	if(isset($_GET['random_seed'])) {
 		$random_seed = $_GET['random_seed'];
@@ -55,9 +58,19 @@ else {
 		}
 	if(isset($_GET['test'])) $check_command_line = TRUE;
 	
-	$table = explode('/',$grammar_path);
-	$grammar_name = $table[count($table) - 1];
-	$dir = str_replace($grammar_name,'',$grammar_path);
+	$grammar_name = '';
+//	$data_name = '';
+	if($grammar_path <> '') {
+		$table = explode(SLASH,$grammar_path);
+		$grammar_name = $table[count($table) - 1];
+		$dir = str_replace($grammar_name,'',$grammar_path);
+		}
+	else {
+		$table = explode(SLASH,$here);
+		$data_name = $table[count($table) - 1];	
+		$dir = str_replace($data_name,'',$here);
+		}
+	
 	if(isset($_GET['csound_orchestra'])) {
 		$csound_orchestra = $_GET['csound_orchestra'];
 		if($csound_orchestra <> '' AND file_exists($dir.$csound_orchestra)) {
@@ -68,7 +81,8 @@ else {
 	else $csound_orchestra = '';
 	
 	$grammar_name = str_replace(" ","_",$grammar_name);
-//	echo "grammar_name = ".$grammar_name."<br />";
+//	$data_name = str_replace(" ","_",$data_name);
+	
 	$project_name = preg_replace("/\.[a-z]+$/u",'',$output);
 	$result_file = $project_name."-result.html";
 //	echo "result_file = ".$result_file."<br />";
@@ -83,11 +97,19 @@ else {
 		if(time() > $time_end) break;
 		sleep(1);
 		}
-
-	$thisgrammar = $grammar_path;
-	if(is_integer(strpos($thisgrammar,' ')))
-		$thisgrammar = '"'.$thisgrammar.'"';
-	$command = $application_path."bp ".$instruction." -gr ".$thisgrammar;
+	
+	if($grammar_path <> '') {
+		$thisgrammar = $grammar_path;
+		if(is_integer(strpos($thisgrammar,' ')))
+			$thisgrammar = '"'.$thisgrammar.'"';
+		$command = $application_path."bp ".$instruction." -gr ".$thisgrammar;
+		}
+	else {
+		$thisdata = $data_path;
+		if(is_integer(strpos($thisdata,' ')))
+			$thisdata = '"'.$thisdata.'"';
+		$command = $application_path."bp ".$instruction." -da ".$thisdata;
+		}
 	
 	if(is_integer(strpos($output,' ')))
 		$output = '"'.$output.'"';
@@ -345,7 +367,7 @@ if($instruction <> "help") {
 			$sound_file_link = str_replace(".sco",'',$csound_file_link);
 			// We change the name of the sound file every time to force the browser to refresh the audio tag
 			$sound_file_link .= "@".rand(10000,99999).".wav";
-			$table = explode('/',$csound_file_link);
+			$table = explode(SLASH,$csound_file_link);
 			$csound_file_name = end($table);
 			$project_name = str_replace(".sco",'',$csound_file_name);
 			$dir = str_replace($csound_file_name,'',$csound_file_link);

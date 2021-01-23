@@ -1,5 +1,6 @@
 <?php
 require_once("_basic_tasks.php");
+require_once("_settings.php");
 
 if(isset($_GET['file'])) $file = urldecode($_GET['file']);
 else $file = '';
@@ -16,6 +17,9 @@ echo link_to_help();
 
 $test_musicxml =  FALSE;
 
+echo "<div style=\"float:right; background-color:white; padding-right:6px; padding-left:6px;\">";
+$csound_is_responsive = check_csound();
+echo "</div>";
 echo "<h3>Data file “".$filename."”</h3>";
 
 $temp_folder = str_replace(' ','_',$filename)."_".session_id()."_temp";
@@ -23,7 +27,7 @@ if(!file_exists($temp_dir.$temp_folder)) {
 	mkdir($temp_dir.$temp_folder);
 	}
 
-if(isset($_POST['playitem']) OR isset($_POST['expanditem'])) {
+/* if(isset($_POST['playitem']) OR isset($_POST['expanditem'])) {
 	$i = $_POST['i'];
 	$line = $_POST['line'];
 	$line = str_replace('•'," . ",$line);
@@ -50,9 +54,7 @@ if(isset($_POST['playitem']) OR isset($_POST['expanditem'])) {
 	if(isset($_POST['playitem']) AND $objects <> '') $command .= " -mi \"".$objects."\"";
 	if(isset($_POST['playitem']) AND $csound <> '') $command .= " -cs \"".$csound."\"";
 	if($settings <> '') $command .= " -se \"".$settings."\"";
-//	if(isset($_POST['playitem'])) $command .= " -d --rtmidi ";
 	if(isset($_POST['playitem'])) $command .= " -d --csoundout \"".$result_textfile."\"";
-//	if(isset($_POST['playitem'])) $command .= " -d --midiout ".$temp_dir."temp_".session_id()."check_play.mid";
 	if(isset($_POST['expanditem'])) $command .= " -d -o ".$result_textfile;
 	$command .= " --traceout ".$tracefile;
 	
@@ -93,17 +95,26 @@ if(isset($_POST['playitem']) OR isset($_POST['expanditem'])) {
 		if(!$found) echo "&nbsp;&nbsp;&nbsp;No result…";
 		echo "</p>";
 		}
-	}
+	} */
+
+$music_xml_file = $temp_dir.$temp_folder.SLASH."temp.musicxml";
+$more_data = '';
+
+$objects_file = $csound_file = $alphabet_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = '';
 
 
-$music_xml_file = $temp_dir.$temp_folder.SLASH."musicXML.musicxml";
+if(isset($_POST['alphabet_file'])) $alphabet_file = $_POST['alphabet_file'];
+if(isset($_POST['settings_file'])) $settings_file = $_POST['settings_file'];
+if(isset($_POST['csound_file'])) $csound_file = $_POST['csound_file'];
+if(isset($_POST['objects_file'])) $objects_file = $_POST['objects_file'];
 
 if(isset($_POST['select_parts'])) {
 	$upload_filename = $_POST['upload_filename'];
-//	$_FILES['music_xml_import']['tmp_name'] = $_POST['tmpFile'];
 	$reload_musicxml = TRUE;
 	}
 else $reload_musicxml = FALSE;
+
+echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 
 if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xml_import']['tmp_name'] <> '')) {
 	if(!$reload_musicxml) $upload_filename = $_FILES['music_xml_import']['name'];
@@ -122,7 +133,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			echo "<h4><font color=\"red\">Uploading failed:</font> <font color=\"blue\">".$upload_filename."</font> <font color=\"red\">does not have the extension of a MusicXML file!</font></h4>";
 			}
 		else {
-			echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+		//	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 			$message = '';
 			$data = '';
 			$partwise = $timewise = $note_on = $pitch = $backup = $attributes = $attributes_key = $changed_attributes = $forward = $time_modification = FALSE;
@@ -130,7 +141,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$part = $measure = $step = -1;
 			$s = array();
 			$file = fopen($music_xml_file,"r");
-			$score_part = '';
+			$score_part = $subtitle_part = '';
 			$instrument_name = $midi_channel = $divisions = $fifths = $mode = $duration_part = $select_part = array();
 			while(!feof($file)) {
 				$line = fgets($file);
@@ -146,6 +157,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 					if($select_part[$score_part]) {
 						$message .= " checked";
 						echo "Score part ‘".$score_part."’ has been selected.<br />";
+						$subtitle_part .= "// Score part ‘".$score_part."’: instrument = ".$instrument_name[$score_part]."\n";
 						}
 					$message .= "> Score part ‘".$score_part."’ instrument = <i>".$instrument_name[$score_part]."</i>";
 					if(isset($midi_channel[$score_part]) AND $midi_channel[$score_part] <> '')
@@ -219,13 +231,9 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 						$div = $divisions[$part];
 					else $div = 0;
 					$duration_part[$part] = $duration_measure;
-			/*		if(isset($duration_part[$part]) AND $duration_part[$part] > 0)
-						$dp = $duration_part[$part];
-					else $dp = 0; */
 					$part .= "_@";
 					$midi_channel[$part] = $chan;
 					$divisions[$part] = $div;
-				//	$duration_part[$part] = $dp;
 					$duration_measure = 0;
 					}
 				if($backup AND is_integer($pos=strpos($line,"<duration>"))) {
@@ -345,10 +353,10 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 						$den = $den / $gcd;
 						}
 					if($num == 1 AND $den == 1) $fraction = "1";
+					else if($den == 1) $fraction = $num;
 					else $fraction = $num."/".$den;
 					if(is_integer($pos=strpos($score_part,"_@"))) {
 						$num = $num_this_part - $duration_part[$score_part];
-					//	$data .= " gap(".$num_this_part."-".$duration_part[$score_part]."=".$num.") ";
 						if($num > 0) {
 							$gcd = gcd($num,$den);
 							$num = $num / $gcd;
@@ -370,8 +378,10 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 							$num = $num / $gcd;
 							$den = $den / $gcd;
 							}
-						else $num = 1; // Grace note. We allow it the minimum duration and manage to squeeze all notes in the current measure
+						else $num = 1;
+						// Grace note. We allow it the minimum duration and manage to squeeze all notes in the current measure
 						if($num == 1 AND $den == 1) $fraction = "1";
+						else if($den == 1) $fraction = $num;
 						else $fraction = $num."/".$den;
 						$alter = $the_event['alter'];
 						$the_note = $the_event['note'];
@@ -415,26 +425,37 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$data = str_replace(" {","{",$data);
 			$data = str_replace("{ ","{",$data);
 			$data = str_replace(", ",",",$data);
+			$data = str_replace("- -","--",$data);
 			do $data = str_replace("{}",'',$data,$count);
 			while($count > 0);
 			$data = str_replace(" ,",",",$data);
-			$data = "// MusicXML file ‘".$upload_filename."’ converted\n\n".$data;
+			$more_data = "// MusicXML file ‘".$upload_filename."’ converted\n";
+			if($subtitle_part <> '') $more_data .= $subtitle_part."\n";
+			
+			if(isset($_POST['delete_current'])) {
+				$_POST['thistext'] = '';
+				if($settings_file <> '') $more_data .= $settings_file."\n";
+				if($csound_file <> '') $more_data .= $csound_file."\n";
+				if($alphabet_file <> '') $more_data .= $alphabet_file."\n";
+				if($objects_file <> '') $more_data .= $objects_file."\n";
+				}
+			$more_data .= "\n".$data;
 			echo "<h3><font color=\"red\">Converted MusicXML file:</font> <font color=\"blue\">".$upload_filename."</font></h3>";
 			if($message <> '') echo $message;
+			echo "<input type=\"checkbox\" name=\"delete_current\">&nbsp;delete current data<br />";
 			echo "<input type=\"hidden\" name=\"upload_filename\" value=\"".$upload_filename."\">";
-			echo "Select part(s) and <input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"select_parts\" value=\"reload the same file\">";
-			echo "</form>";
+			echo "<font color=\"red\">➡</font> You can select part(s) and <input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"select_parts\" value=\"reload the same file\">";
 			$_POST['savethisfile'] = TRUE;
-			$_POST['thistext'] = $data;
+		//	$more_data = $data;
 			}
 		}
 	}
 unset($_FILES['music_xml_import']);
 
-
 if(isset($_POST['savethisfile'])) {
 	echo "<p id=\"timespan\" style=\"color:red;\">Saved file…</p>";
 	$content = $_POST['thistext'];
+	if($more_data <> '') $content = $more_data."\n\n".$content;
 	$handle = fopen($this_file,"w");
 	$file_header = $top_header."\n// Data saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
 	do $content = str_replace("  ",' ',$content,$count);
@@ -447,7 +468,7 @@ if(isset($_POST['savethisfile'])) {
 try_create_new_file($this_file,$filename);
 $content = @file_get_contents($this_file,TRUE);
 if($content === FALSE) ask_create_new_file($url_this_page,$filename);
-$objects_file = $csound_file = $alphabet_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = '';
+// $objects_file = $csound_file = $alphabet_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = '';
 $extract_data = extract_data(TRUE,$content);
 echo "<p style=\"color:blue;\">".$extract_data['headers']."</p>";
 $content = $extract_data['content'];
@@ -461,19 +482,95 @@ $timebase_file = $extract_data['timebase'];
 $keyboard_file = $extract_data['keyboard'];
 $glossary_file = $extract_data['glossary'];
 
-echo "<table style=\"background-color:white;\"><tr>";
-echo "<td id=\"topedit\">";
-echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+echo "<input type=\"hidden\" name=\"settings_file\" value=\"".$settings_file."\">";
+echo "<input type=\"hidden\" name=\"csound_file\" value=\"".$csound_file."\">";
+echo "<input type=\"hidden\" name=\"alphabet_file\" value=\"".$alphabet_file."\">";
+echo "<input type=\"hidden\" name=\"objects_file\" value=\"".$objects_file."\">";
 
-echo "<div style=\"float:right;\">Import MusicXML file: <input type=\"file\" name=\"music_xml_import\">&nbsp;<input type=\"submit\" value=\" send \"></div>";
+if(!isset($output_folder) OR $output_folder == '') $output_folder = "my_output";
+$default_output_name = str_replace("-da.",'',$filename);
+$default_output_name = str_replace(".bpda",'',$default_output_name);
+$file_format = $default_output_format;
+if(isset($data_file_format[$filename])) $file_format = $data_file_format[$filename];
+if(isset($_POST['file_format'])) $file_format = $_POST['file_format'];
+save_settings2("data_file_format",$filename,$file_format); // To _settings.php
+$output_file = $default_output_name;
+if(isset($_POST['output_file'])) $output_file = $_POST['output_file'];
+$output_file = str_replace(".mid",'',$output_file);
+$output_file = str_replace(".sco",'',$output_file);
+switch($file_format) {
+	case "midi": $output_file = $output_file.".mid"; break;
+	case "csound": $output_file = $output_file.".sco"; break;
+	default: $output_file = ''; break;
+	}
+$project_name = preg_replace("/\.[a-z]+$/u",'',$output_file);
+$result_file = $bp_application_path.$output_folder.SLASH.$project_name."-result.html";
 
-echo "<p style=\"text-align:left;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></p>";
+echo "<table id=\"topedit\" cellpadding=\"8px;\"><tr style=\"background-color:white;\">";
+echo "<td><p>Name of output file (with proper extension):<br /><input type=\"text\" name=\"output_file\" size=\"25\" value=\"".$output_file."\">&nbsp;";
+echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"savethisfile\" value=\"SAVE\"></p>";
+echo "</td>";
+echo "<td><p style=\"text-align:left;\">";
+echo "<input type=\"radio\" name=\"file_format\" value=\"\"";
+if($file_format == "") echo " checked";
+echo ">No file (real-time MIDI)";
+echo "<br /><input type=\"radio\" name=\"file_format\" value=\"midi\"";
+if($file_format == "midi") echo " checked";
+echo ">MIDI file";
+echo "<br /><input type=\"radio\" name=\"file_format\" value=\"csound\"";
+if($file_format == "csound") echo " checked";
+echo ">CSOUND file";
+echo "</p></td></tr></table>";
 
-echo "<textarea name=\"thistext\" rows=\"40\" style=\"width:700px;\">".$content."</textarea>";
+// echo $output_file."<br />";
+// echo $result_file."<br />";
+
+$error_mssg = $link_options = '';
+if($alphabet_file <> '') {
+	if(!file_exists($dir.$alphabet_file)) {
+		$error_mssg .= "<font color=\"red\">WARNING: ".$dir.$alphabet_file." not found.</font><br />";
+		$error = TRUE;
+		}
+	else $link_options .= "&alphabet=".urlencode($alphabet_file);
+	}
+if($settings_file <> '') {
+	if(!file_exists($dir.$settings_file)) {
+		$error_mssg .= "<font color=\"red\">WARNING: ".$dir.$settings_file." not found.</font><br />";
+		$error = TRUE;
+		}
+	else $link_options .= "&settings_file=".urlencode($settings_file);
+	}
+if($objects_file <> '') {
+	if(!file_exists($dir.$objects_file)) {
+		$error_mssg .= "<font color=\"red\">WARNING: ".$dir.$objects_file." not found.</font><br />";
+		$error = TRUE;
+		}
+	else $link_options .= "&objects_file=".urlencode($objects_file);
+	}
+if($csound_file <> '') {
+	if(!file_exists($dir_csound_resources.$csound_file)) {
+		$error_mssg .= "<font color=\"red\">WARNING: ".$dir_csound_resources.$csound_file." not found.</font><br />";
+		$error = TRUE;
+		}
+	else $link_options .= "&csound_file=".urlencode($csound_file);
+	}
+$link_options .= "&output=".urlencode($bp_application_path.$output_folder.SLASH.$output_file)."&format=".$file_format;
+$link_options .= "&here=".urlencode($dir.$filename);
+
+if($error_mssg <> '') echo "<p>".$error_mssg."</p>";
+
+echo "<table style=\"background-color:GhostWhite;\" border=\"0\"><tr>";
+echo "<td style=\"background-color:cornsilk;\">";
+
+echo "<div style=\"float:right; vertical-align:middle;\">Import MusicXML file: <input type=\"file\" name=\"music_xml_import\">&nbsp;<input type=\"submit\" style=\"background-color:AquaMarine;\" value=\" send \"></div>";
+
+echo "<div style=\"text-align:left;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></div>";
+
+echo "<br /><textarea name=\"thistext\" rows=\"40\" style=\"width:700px;\">".$content."</textarea>";
 echo "</form>";
 
 display_more_buttons($content,$url_this_page,$dir,$objects_file,$csound_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
-echo "</td><td>";
+echo "</td><td style=\"background-color:cornsilk;\">";
 echo "<table style=\"background-color:Gold;\">";
 $table = explode(chr(10),$content);
 $imax = count($table);
@@ -486,23 +583,28 @@ for($i = $j = 0; $i < $imax; $i++) {
 	$line = preg_replace("/^s\s*$/u",'',$line); // Csound "s" statement
 	$line = preg_replace("/^e\s*$/u",'',$line); // Csound "e" statement
 	if($line == '') continue;
+	if(is_integer($pos=strpos($line,"<?xml")) AND $pos == 0) break;
 	if(is_integer($pos=strpos($line,"//")) AND $pos == 0) continue;
 	if(is_integer($pos=strpos($line,"-")) AND $pos == 0) continue;
-	if(is_integer($pos=strpos($line,"<?xml")) AND $pos == 0) break;
 	$line_recoded = recode_tags($line);
 	$j++;
-	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-	echo "<input type=\"hidden\" name=\"alphabet_file\" value=\"".$alphabet_file."\">";
-	echo "<input type=\"hidden\" name=\"settings_file\" value=\"".$settings_file."\">";
-	echo "<input type=\"hidden\" name=\"objects_file\" value=\"".$objects_file."\">";
-	echo "<input type=\"hidden\" name=\"csound_file\" value=\"".$csound_file."\">";
-	echo "<tr id=\"".$i."\"><td>".$j."</td><td>";
-	echo "<input type=\"hidden\" name=\"i\" value=\"".$i."\">";
-	echo "<input type=\"hidden\" name=\"line\" value=\"".$line."\">";
-	echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" name=\"playitem\" value=\"PLAY\"title=\"Play this polymetric expression\">&nbsp;";
-	echo "<input style=\"background-color:azure;\" type=\"submit\" name=\"expanditem\" value=\"EXP\" title=\"Expand this polymetric expression\">&nbsp;";
-	echo "<input type=\"hidden\" name=\"imax\" value=\"".$imax."\">";
-	echo "</form><small>";
+	$data = $temp_dir.$temp_folder.SLASH.$j.".bpda";
+	$handle = fopen($data,"w");
+	$file_header = $top_header."\n// Data saved as \"".$j.".bpda\". Date: ".gmdate('Y-m-d H:i:s');
+	fwrite($handle,$file_header."\n");
+	fwrite($handle,$line."\n");
+	fclose($handle);
+	echo "<tr><td>".$j."</td><td>";
+	$link_produce = "produce.php?data=".urlencode($data);
+	$link_produce .= $link_options;
+	$link_play = $link_produce."&instruction=play";
+	$link_expand = $link_produce."&instruction=expand-item";
+	$window_name = window_name($filename);
+//	echo "<small>".urldecode($link_play)."</small><br />";
+	echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_play."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Play this polymetric expression\" value=\"PLAY\">&nbsp;";
+	echo "&nbsp;<input style=\"background-color:azure;\" onclick=\"window.open('".$link_expand."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Expand this polymetric expression\" value=\"EXP\">&nbsp;";
+	echo "<small>";
+	if($error_mssg <> '') echo "<p>".$error_mssg."</p>";
 	echo $line_recoded;
 	echo "</small></td></tr>";
 	}

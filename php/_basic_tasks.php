@@ -38,9 +38,9 @@ $dir_trash_folder = $bp_application_path.$trash_folder.SLASH;
 if(isset($_POST['csound_path'])) {
 	$new_csound_path = trim($_POST['csound_path']);
 	if($new_csound_path <> '') {
-		if($new_csound_path[0] <> '/')
+		if($new_csound_path[0] <> SLASH)
 			$new_csound_path = "/".$new_csound_path;
-		if($new_csound_path[strlen($new_csound_path) - 1] <> '/')
+		if($new_csound_path[strlen($new_csound_path) - 1] <> SLASH)
 			$new_csound_path .= "/";
 		save_settings("csound_path",$new_csound_path);
 		$csound_path = $new_csound_path;
@@ -684,7 +684,7 @@ function my_rmdir($src) {
     $dir = opendir($src);
     while(FALSE !== ($file = readdir($dir))) {
         if(($file <> '.' ) && ($file <> '..')) {
-            $full = $src.'/'.$file;
+            $full = $src.SLASH.$file;
             if(is_dir($full)) my_rmdir($full);
             else unlink($full);
             }
@@ -1272,7 +1272,7 @@ function good_name($type,$filename,$name_mode) {
 function fix_new_name($name) {
 	$name = str_replace('+','_',$name);
 	$name = str_replace(' ','_',$name);
-	$name = str_replace('/','_',$name);
+	$name = str_replace(SLASH,'_',$name);
 	$name = str_replace('"',"'",$name);
 	return $name;
 	}
