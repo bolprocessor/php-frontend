@@ -26,81 +26,10 @@ $temp_folder = str_replace(' ','_',$filename)."_".session_id()."_temp";
 if(!file_exists($temp_dir.$temp_folder)) {
 	mkdir($temp_dir.$temp_folder);
 	}
-
-/* if(isset($_POST['playitem']) OR isset($_POST['expanditem'])) {
-	$i = $_POST['i'];
-	$line = $_POST['line'];
-	$line = str_replace('•'," . ",$line);
-	$line_recoded = recode_tags($line);
-	echo "<p>Playing item: <font color=\"blue\">".$line_recoded."</font></p>";
-	$data = $temp_dir."temp_".session_id()."outdata.bpda";
-	$result_textfile = $temp_dir."temp_".session_id()."result.txt";
-	if(file_exists($result_textfile)) unlink($result_textfile);
-	$handle = fopen($data,"w");
-	$file_header = $top_header."\n// Data saved as \"outdata.bpda\". Date: ".gmdate('Y-m-d H:i:s');
-	fwrite($handle,$file_header."\n");
-	fwrite($handle,$line."\n");
-	fclose($handle);
-	$alphabet = $settings = $objects = $csound = '';
-	if($_POST['alphabet_file'] <> '') $alphabet = $dir.$_POST['alphabet_file'];
-	if($_POST['settings_file'] <> '') $settings = $dir.$_POST['settings_file'];
-	if($_POST['objects_file'] <> '') $objects = $dir.$_POST['objects_file'];
-	if($_POST['csound_file'] <> '') $csound = $dir.$_POST['csound_file'];
-	$application_path = $bp_application_path;
-	if(isset($_POST['playitem'])) $command = $application_path."bp play";
-	if(isset($_POST['expanditem'])) $command = $application_path."bp expand-item";
-	$command .= " -da ".$data;
-	if($alphabet <> '') $command .= " -ho \"".$alphabet."\"";
-	if(isset($_POST['playitem']) AND $objects <> '') $command .= " -mi \"".$objects."\"";
-	if(isset($_POST['playitem']) AND $csound <> '') $command .= " -cs \"".$csound."\"";
-	if($settings <> '') $command .= " -se \"".$settings."\"";
-	if(isset($_POST['playitem'])) $command .= " -d --csoundout \"".$result_textfile."\"";
-	if(isset($_POST['expanditem'])) $command .= " -d -o ".$result_textfile;
-	$command .= " --traceout ".$tracefile;
-	
-	echo "<p style=\"color:red;\">".$command."</p>";
-	$no_error = FALSE;
-	$o = send_to_console($command);
-	$n_messages = count($o);
-	if($n_messages > 0) {
-		for($i=0; $i < $n_messages; $i++) {
-			$mssg[$i] = $o[$i];
-			$mssg[$i] = clean_up_encoding(TRUE,TRUE,$mssg[$i]);
-			if(is_integer($pos=strpos($mssg[$i],"Errors: 0")) AND $pos == 0) $no_error = TRUE;
-			}
-		}
-	$message = '';
-	if(!$no_error) {
-		$message .= "<p><font color=\"red\">➡ </font>This process:<br /><small>";
-		for($i=0; $i < $n_messages; $i++) {
-			$message .= "&nbsp;&nbsp;&nbsp;".$mssg[$i]."<br />";
-			}
-		$message .= "</small></p>";
-		}
-	echo $message;
-	
-	if(file_exists($result_textfile))  {
-		echo "<p><font color=\"red\">➡ </font>Result:<br />";
-		$content = @file_get_contents($result_textfile,TRUE);
-		$table = explode(chr(10),$content);
-		$imax = count($table);
-		$found = FALSE;
-		for($i = 0; $i < $imax; $i++) {
-			$line = trim($table[$i]);
-			if($line == '') continue;
-			$found = TRUE;
-			$line = recode_tags($line);
-			echo "&nbsp;&nbsp;&nbsp;".$line."<br />";
-			}
-		if(!$found) echo "&nbsp;&nbsp;&nbsp;No result…";
-		echo "</p>";
-		}
-	} */
-
 $music_xml_file = $temp_dir.$temp_folder.SLASH."temp.musicxml";
 $more_data = '';
 
-$objects_file = $csound_file = $alphabet_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = '';
+$objects_file = $csound_file = $alphabet_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = $csound_default_orchestra = '';
 
 
 if(isset($_POST['alphabet_file'])) $alphabet_file = $_POST['alphabet_file'];
@@ -378,8 +307,14 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 							$num = $num / $gcd;
 							$den = $den / $gcd;
 							}
-						else $num = 1;
-						// Grace note. We allow it the minimum duration and manage to squeeze all notes in the current measure
+						else {
+							// Grace note. We allow it the minimum duration and manage to squeeze all notes in the current measure
+							$num = $duration_part[$score_part];
+							$den = $divisions[$score_part] * 32;
+							$gcd = gcd($num,$den);
+							$num = $num / $gcd;
+							$den = $den / $gcd;
+							}
 						if($num == 1 AND $den == 1) $fraction = "1";
 						else if($den == 1) $fraction = $num;
 						else $fraction = $num."/".$den;
@@ -468,7 +403,6 @@ if(isset($_POST['savethisfile'])) {
 try_create_new_file($this_file,$filename);
 $content = @file_get_contents($this_file,TRUE);
 if($content === FALSE) ask_create_new_file($url_this_page,$filename);
-// $objects_file = $csound_file = $alphabet_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = '';
 $extract_data = extract_data(TRUE,$content);
 echo "<p style=\"color:blue;\">".$extract_data['headers']."</p>";
 $content = $extract_data['content'];
@@ -505,6 +439,35 @@ switch($file_format) {
 	}
 $project_name = preg_replace("/\.[a-z]+$/u",'',$output_file);
 $result_file = $bp_application_path.$output_folder.SLASH.$project_name."-result.html";
+
+if($file_format == "csound") {
+	$found_orchestra_in_instruments = FALSE;
+	if($csound_file <> '') {
+		if(file_exists($dir.$csound_file))
+			rename($dir.$csound_file,$dir_csound_resources.$csound_file);
+		$csound_orchestra = get_orchestra_filename($dir_csound_resources.$csound_file);
+		if($csound_orchestra <> '') $found_orchestra_in_instruments = TRUE;
+		}
+	else $csound_orchestra = $csound_default_orchestra;
+	if($csound_orchestra <> '' AND file_exists($dir.$csound_orchestra)) {
+		rename($dir.$csound_orchestra,$dir_csound_resources.$csound_orchestra);
+		sleep(1);
+		}
+	check_function_tables($dir,$csound_file);
+	echo "<small>";
+	$list_of_tonal_scales = list_of_tonal_scales($dir_csound_resources.$csound_file);
+	if(($max_scales = count($list_of_tonal_scales)) > 0) {
+		if($max_scales > 1) echo "<p style=\"margin-bottom:0px;\">The Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains definitions of tonal scales:";
+		else echo "<p style=\"margin-bottom:0px;\">The Csound orchestra file contains the definition of tonal scale:";
+		echo "<ul style=\"margin-top:0px; margin-bottom:0px\">";
+		for($i_scale = 1; $i_scale <= $max_scales; $i_scale++)
+			echo "<li>".$list_of_tonal_scales[$i_scale - 1]."</li>";
+		if($max_scales > 1) echo "</ul>These scales may be called in “_scale()” instructions";
+		else echo "</ul>This scale may be called in a “_scale()” instruction, but it will also be used by default in replacement of the equal-tempered scale<br />➡ Use “_scale(0,0)” to force equal-tempered";
+		echo "</p>";
+		}
+	echo "</small>";
+	}
 
 echo "<table id=\"topedit\" cellpadding=\"8px;\"><tr style=\"background-color:white;\">";
 echo "<td><p>Name of output file (with proper extension):<br /><input type=\"text\" name=\"output_file\" size=\"25\" value=\"".$output_file."\">&nbsp;";
@@ -547,12 +510,15 @@ if($objects_file <> '') {
 		}
 	else $link_options .= "&objects_file=".urlencode($objects_file);
 	}
-if($csound_file <> '') {
+if($file_format == "csound" AND $csound_file <> '') {
 	if(!file_exists($dir_csound_resources.$csound_file)) {
 		$error_mssg .= "<font color=\"red\">WARNING: ".$dir_csound_resources.$csound_file." not found.</font><br />";
 		$error = TRUE;
 		}
-	else $link_options .= "&csound_file=".urlencode($csound_file);
+	else {
+		$link_options .= "&csound_file=".urlencode($csound_file);
+		if(file_exists($dir_csound_resources.$csound_orchestra)) $link_options .= "&csound_orchestra=".urlencode($csound_orchestra);
+		}
 	}
 $link_options .= "&output=".urlencode($bp_application_path.$output_folder.SLASH.$output_file)."&format=".$file_format;
 $link_options .= "&here=".urlencode($dir.$filename);
@@ -590,21 +556,24 @@ for($i = $j = 0; $i < $imax; $i++) {
 	$j++;
 	$data = $temp_dir.$temp_folder.SLASH.$j.".bpda";
 	$handle = fopen($data,"w");
-	$file_header = $top_header."\n// Data saved as \"".$j.".bpda\". Date: ".gmdate('Y-m-d H:i:s');
-	fwrite($handle,$file_header."\n");
 	fwrite($handle,$line."\n");
 	fclose($handle);
 	echo "<tr><td>".$j."</td><td>";
 	$link_produce = "produce.php?data=".urlencode($data);
 	$link_produce .= $link_options;
-	$link_play = $link_produce."&instruction=play";
+	$link_play = $link_produce."&instruction=play-item";
 	$link_expand = $link_produce."&instruction=expand-item";
 	$window_name = window_name($filename);
 //	echo "<small>".urldecode($link_play)."</small><br />";
 	echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_play."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Play this polymetric expression\" value=\"PLAY\">&nbsp;";
 	echo "&nbsp;<input style=\"background-color:azure;\" onclick=\"window.open('".$link_expand."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Expand this polymetric expression\" value=\"EXP\">&nbsp;";
-	echo "<small>";
+	
+	$n1 = substr_count($line_recoded,'{');
+	$n2 = substr_count($line_recoded,'}');
+	if($n1 > $n2) $error_mssg .= "<font color=\"red\">This score contains ".($n1-$n2)." extra ‘{'</font><br />";
+	if($n2 > $n1) $error_mssg .= "<font color=\"red\">This score contains ".($n2-$n1)." extra ‘}'</font><br />";
 	if($error_mssg <> '') echo "<p>".$error_mssg."</p>";
+	echo "<small>";
 	echo $line_recoded;
 	echo "</small></td></tr>";
 	}

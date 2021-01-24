@@ -127,7 +127,7 @@ else {
 	if($objects_file <> '') $command .= " -mi ".$dir.$objects_file;
 	
 	if($startup <> '') $command .= " --start ".$startup;
-	if($instruction == "produce" OR $instruction == "produce-all") {
+	if($instruction == "produce" OR $instruction == "produce-all" OR $instruction == "play-item") {
 		switch($file_format) {
 			case "data":
 				$command .= " -d -o ".$output;
@@ -170,7 +170,7 @@ if($instruction <> "help") {
 		// Delete this image to be replaced with the current one
 		if($this_name == $grammar_name) {
 			$rep = @unlink($temp_dir.$thisfile);
-			// Make sure deletion is complete before launcjhing the command
+			// Make sure deletion is complete before launching the command
 			$time_start = time();
 			$time_end = $time_start + 5;
 			if($rep) while(TRUE) {
@@ -284,7 +284,7 @@ if($instruction <> "help") {
 			$midi_file_link = $output;
 			if(file_exists($midi_file_link)) {
 		//		echo "midi_file_link = ".$midi_file_link."<br />";
-				echo "<p class=\"shadow\" style=\"width:50%;\"><a href=\"#midi\" onClick=\"MIDIjs.play('".$midi_file_link."');\"><img src=\"pict/loudspeaker.png\" width=\"70px;\" style=\"vertical-align:middle;\" />Play MIDI file</a>";
+				echo "<p class=\"shadow\" style=\"width:25em;\"><a href=\"#midi\" onClick=\"MIDIjs.play('".$midi_file_link."');\"><img src=\"pict/loudspeaker.png\" width=\"70px;\" style=\"vertical-align:middle;\" />Play MIDI file</a>";
 				echo " (<a href=\"#midi\" onClick=\"MIDIjs.stop();\">Stop playing</a>)";
 				echo "&nbsp;or <a href=\"".$midi_file_link."\" download>download it</a></p>";
 				}
@@ -448,7 +448,7 @@ else {
 			}
 		if(file_exists($project_name.".mid")) {
 		//	echo "mid = ".$project_name.".mid<br />";
-			$audio_tag = "<p><b>MIDI file:</b></p><p class=\"shadow\" style=\"width:50%;\"><a href=\"#midi\" onClick=\"MIDIjs.play('".$project_name.".mid');\"><img src=\"".$bp_application_path."php/pict/loudspeaker.png\" width=\"70px;\" style=\"vertical-align:middle;\" />Play MIDI file</a>";
+			$audio_tag = "<p><b>MIDI file:</b></p><p class=\"shadow\" style=\"width:25em;\"><a href=\"#midi\" onClick=\"MIDIjs.play('".$project_name.".mid');\"><img src=\"".$bp_application_path."php/pict/loudspeaker.png\" width=\"70px;\" style=\"vertical-align:middle;\" />Play MIDI file</a>";
 			$audio_tag .= " (<a href=\"#midi\" onClick=\"MIDIjs.stop();\">Stop playing</a>)";
 			$audio_tag .= "&nbsp;or <a href=\"".$project_name.".mid\" download>download it</a></p>";
 			fwrite($handle,$audio_tag."\n");

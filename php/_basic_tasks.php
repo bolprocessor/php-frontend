@@ -218,29 +218,29 @@ function extract_data($compact,$content) {
 			if($time_structure == "striated" OR $time_structure == "smooth")
 				$extract_data['time_structure'] = $time_structure;
 			}
-		if(is_integer($pos=strpos($line,"-ho")) AND $pos == 0)
+		if(is_integer($pos=strpos($line,"-ho")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
 			$extract_data['alphabet'] = fix_file_name($line,"ho");
-		else if(is_integer($pos=strpos($line,"-mi")) AND $pos == 0)
+		else if(is_integer($pos=strpos($line,"-mi")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
 			$extract_data['objects'] = fix_file_name($line,"mi");
-		else if(is_integer($pos=strpos($line,"-cs")) AND $pos == 0)
+		else if(is_integer($pos=strpos($line,"-cs")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
 			$extract_data['csound'] = fix_file_name($line,"cs");
-		else if(is_integer($pos=strpos($line,"-se")) AND $pos == 0)
+		else if(is_integer($pos=strpos($line,"-se")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
 			$extract_data['settings'] = fix_file_name($line,"se");
-		else if(is_integer($pos=strpos($line,"-da")) AND $pos == 0)
+		else if(is_integer($pos=strpos($line,"-da")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
 			$extract_data['data'] = fix_file_name($line,"da");
-		else if(is_integer($pos=strpos($line,"-or")) AND $pos == 0)
+		else if(is_integer($pos=strpos($line,"-or")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
 			$extract_data['orchestra'] = fix_file_name($line,"or");
-		else if(is_integer($pos=strpos($line,"-tb")) AND $pos == 0)
+		else if(is_integer($pos=strpos($line,"-tb")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
 			$extract_data['timebase'] = fix_file_name($line,"tb");
-		else if(is_integer($pos=strpos($line,"-in")) AND $pos == 0)
+		else if(is_integer($pos=strpos($line,"-in")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
 			$extract_data['interaction'] = fix_file_name($line,"in");
-		else if(is_integer($pos=strpos($line,"-md")) AND $pos == 0)
+		else if(is_integer($pos=strpos($line,"-md")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
 			$extract_data['midisetup'] = fix_file_name($line,"md");
-		else if(is_integer($pos=strpos($line,"-tb")) AND $pos == 0)
+		else if(is_integer($pos=strpos($line,"-tb")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
 			$extract_data['timebase'] = fix_file_name($line,"tb");
-		else if(is_integer($pos=strpos($line,"-kb")) AND $pos == 0)
+		else if(is_integer($pos=strpos($line,"-kb")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
 			$extract_data['keyboard'] = fix_file_name($line,"kb");
-		else if(is_integer($pos=strpos($line,"-gl")) AND $pos == 0)
+		else if(is_integer($pos=strpos($line,"-gl")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
 			$extract_data['glossary'] = fix_file_name($line,"gl");
 		else if($line <> '') $start = FALSE;
 		}
