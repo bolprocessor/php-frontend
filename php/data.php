@@ -381,11 +381,53 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			echo "<input type=\"hidden\" name=\"upload_filename\" value=\"".$upload_filename."\">";
 			echo "<font color=\"red\">➡</font> You can select part(s) and <input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"select_parts\" value=\"reload the same file\">";
 			$_POST['savethisfile'] = TRUE;
-		//	$more_data = $data;
 			}
 		}
 	}
 unset($_FILES['music_xml_import']);
+
+if(isset($_POST['explode'])) {
+	$content = $_POST['thistext'];
+	$table = explode(chr(10),$content);
+	$newtable = array();
+	$imax = count($table);
+	for($i = 0; $i < $imax; $i++) {
+		$line = trim($table[$i]);
+		$newline = $line;
+		if(substr_count($line,'{') > 0) {
+			$newline = '';
+			$level = 0;
+			for($j = 0; $j < strlen($line); $j++) {
+				$c = $line[$j];
+				$newline .= $c;
+				if($c == '{') $level++;
+				if($c == '}') {
+					$level--;
+					if($level == 0) $newline .= "\n\n";
+					}
+				}
+			}
+		$newtable[] = $newline;
+		}
+	$newcontent = implode("\n",$newtable);
+	$_POST['thistext'] = $newcontent;
+	$_POST['savethisfile'] = TRUE;
+	}
+
+if(isset($_POST['implode'])) {
+	$content = $_POST['thistext'];
+	$content = str_replace("\r\n","\n",$content);
+//	$content = preg_replace("/[\n\r]/u","\n",$content);
+	do $content = str_replace("} ","}",$content,$count);
+	while($count > 0);
+	do $content = str_replace(" {","{",$content,$count);
+	while($count > 0);
+	do $content = str_replace("}\n\n","}\n",$content,$count);
+	while($count > 0);
+	$content = str_replace("}\n{","} {",$content);
+	$_POST['thistext'] = $content;
+	$_POST['savethisfile'] = TRUE;
+	}
 
 if(isset($_POST['savethisfile'])) {
 	echo "<p id=\"timespan\" style=\"color:red;\">Saved file…</p>";
@@ -535,11 +577,28 @@ echo "<div style=\"text-align:left;\"><input style=\"background-color:yellow; fo
 echo "<br /><textarea name=\"thistext\" rows=\"40\" style=\"width:700px;\">".$content."</textarea>";
 echo "</form>";
 
+echo "<div style=\"text-align:right;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></div>";
+
 display_more_buttons($content,$url_this_page,$dir,$objects_file,$csound_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
 echo "</td><td style=\"background-color:cornsilk;\">";
 echo "<table style=\"background-color:Gold;\">";
 $table = explode(chr(10),$content);
 $imax = count($table);
+if($imax > 0 AND substr_count($content,'{') > 0) {
+	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+	echo "<input type=\"hidden\" name=\"thistext\" value=\"".$content."\">";
+	echo "<input type=\"hidden\" name=\"file_format\" value=\"".$file_format."\">";
+	echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
+	echo "<tr><td colspan=\"2\" style=\"vertical-align:middle; padding:6px;\">";
+	echo "<input type=\"submit\" style=\"background-color:AquaMarine;\" formaction=\"".$url_this_page."#topedit\" name=\"explode\" value=\"EXPLODE\">&nbsp;<font color=\"red\">➡ </font><i>break {} expressions</i>";
+	echo "</td></tr>";
+	if($imax > 4) {
+		echo "<tr><td colspan=\"2\" style=\"vertical-align:middle; padding:6px;\">";
+		echo "<input type=\"submit\" style=\"background-color:AquaMarine;\" formaction=\"".$url_this_page."#topedit\" name=\"implode\" value=\"IMPLODE\">&nbsp;<font color=\"red\">➡ </font><i>merge {} expressions</i>";
+		echo "</td></tr>";
+		}
+	echo "</form>";
+	}
 for($i = $j = 0; $i < $imax; $i++) {
 	$line = trim($table[$i]);
 	$line = preg_replace("/\[.*\]/u",'',$line);
@@ -552,11 +611,11 @@ for($i = $j = 0; $i < $imax; $i++) {
 	if(is_integer($pos=strpos($line,"<?xml")) AND $pos == 0) break;
 	if(is_integer($pos=strpos($line,"//")) AND $pos == 0) continue;
 	if(is_integer($pos=strpos($line,"-")) AND $pos == 0) continue;
-	$line_recoded = recode_tags($line);
+	$line_recoded = recode_entities($line);
 	$j++;
 	$data = $temp_dir.$temp_folder.SLASH.$j.".bpda";
 	$handle = fopen($data,"w");
-	fwrite($handle,$line."\n");
+	fwrite($handle,$line_recoded."\n");
 	fclose($handle);
 	echo "<tr><td>".$j."</td><td>";
 	$link_produce = "produce.php?data=".urlencode($data);
@@ -567,14 +626,17 @@ for($i = $j = 0; $i < $imax; $i++) {
 //	echo "<small>".urldecode($link_play)."</small><br />";
 	echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_play."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Play this polymetric expression\" value=\"PLAY\">&nbsp;";
 	echo "&nbsp;<input style=\"background-color:azure;\" onclick=\"window.open('".$link_expand."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Expand this polymetric expression\" value=\"EXP\">&nbsp;";
-	
 	$n1 = substr_count($line_recoded,'{');
 	$n2 = substr_count($line_recoded,'}');
 	if($n1 > $n2) $error_mssg .= "<font color=\"red\">This score contains ".($n1-$n2)." extra ‘{'</font><br />";
 	if($n2 > $n1) $error_mssg .= "<font color=\"red\">This score contains ".($n2-$n1)." extra ‘}'</font><br />";
 	if($error_mssg <> '') echo "<p>".$error_mssg."</p>";
+	$line_show = $line_recoded;
+	$length = strlen($line_recoded);
+	if($length > 400)
+		$line_show = "<br />".substr($line_recoded,0,100)."<br />&nbsp;... ... ...<br />".substr($line_recoded,-100,100);
 	echo "<small>";
-	echo $line_recoded;
+	echo $line_show;
 	echo "</small></td></tr>";
 	}
 echo "</table>";

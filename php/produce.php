@@ -227,6 +227,21 @@ for($i = 0; $i < $n_messages; $i++) {
 	}
 echo "<hr>";
 
+if($data_path <> '') {
+	$content = @file_get_contents($data_path,TRUE);
+	if($content <> FALSE) {
+		$table = explode(chr(10),$content);
+		for($i = 0; $i < count($table); $i++) {
+			$line_show = $line = trim($table[$i]);
+			if($line == '') continue;
+			$length = strlen($line);
+			if($length > 400)
+			$line_show = substr($line,0,100)."<br />&nbsp;&nbsp;... ... ...<br />".substr($line,-100,100);
+			echo $line_show."<br />";
+			}
+		}
+	}
+
 if($instruction == "help") {
 	for($i=0; $i < $n_messages; $i++) {
 		$mssg = $o[$i];
