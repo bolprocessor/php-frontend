@@ -33,15 +33,18 @@ else {
 	else $grammar_path = '';
 	if(isset($_GET['data'])) $data_path = urldecode($_GET['data']);
 	else $data_path = '';
-	if($grammar_path == '' AND $data_path == '') die();
-	if(isset($_GET['settings_file'])) $settings_file = $_GET['settings_file'];
-	else $settings_file = '';
-	if(isset($_GET['objects_file'])) $objects_file = $_GET['objects_file'];
-	else $objects_file = '';
+	if($grammar_path == '' AND $data_path == '') {
+		echo "Link to data and/or grammar is missing";
+		die();
+		}
+	if(isset($_GET['settings'])) $settings_path = urldecode($_GET['settings']);
+	else $settings_path = '';
+	if(isset($_GET['objects'])) $objects_path = $_GET['objects'];
+	else $objects_path = '';
 	if(isset($_GET['note_convention'])) $note_convention = $_GET['note_convention'];
 	else $note_convention = '';
-	if(isset($_GET['alphabet'])) $alphabet_file = urldecode($_GET['alphabet']);
-	else $alphabet_file = '';
+	if(isset($_GET['alphabet'])) $alphabet_path = urldecode($_GET['alphabet']);
+	else $alphabet_path = '';
 	if(isset($_GET['format'])) $file_format = $_GET['format'];
 	else $file_format = '';
 	if($file_format <> '' AND isset($_GET['output'])) $output = urldecode($_GET['output']);
@@ -59,14 +62,15 @@ else {
 	if(isset($_GET['test'])) $check_command_line = TRUE;
 	
 	$grammar_name = '';
-//	$data_name = '';
+	$data_name = '';
 	if($grammar_path <> '') {
 		$table = explode(SLASH,$grammar_path);
 		$grammar_name = $table[count($table) - 1];
 		$dir = str_replace($grammar_name,'',$grammar_path);
 		}
-	else {
-		$table = explode(SLASH,$here);
+		
+	if($data_path <> '') {
+		$table = explode(SLASH,$data_path);
 		$data_name = $table[count($table) - 1];	
 		$dir = str_replace($data_name,'',$here);
 		}
@@ -81,7 +85,7 @@ else {
 	else $csound_orchestra = '';
 	
 	$grammar_name = str_replace(" ","_",$grammar_name);
-//	$data_name = str_replace(" ","_",$data_name);
+	$data_name = str_replace(" ","_",$data_name);
 	
 	$project_name = preg_replace("/\.[a-z]+$/u",'',$output);
 	$result_file = $project_name."-result.html";
@@ -98,33 +102,45 @@ else {
 		sleep(1);
 		}
 	
+	$command = $application_path."bp ".$instruction;
+	
 	if($grammar_path <> '') {
 		$thisgrammar = $grammar_path;
 		if(is_integer(strpos($thisgrammar,' ')))
 			$thisgrammar = '"'.$thisgrammar.'"';
-		$command = $application_path."bp ".$instruction." -gr ".$thisgrammar;
 		}
-	else {
+	
+	if($data_path <> '') {
 		$thisdata = $data_path;
 		if(is_integer(strpos($thisdata,' ')))
 			$thisdata = '"'.$thisdata.'"';
-		$command = $application_path."bp ".$instruction." -da ".$thisdata;
 		}
+	
+	if($settings_path <> '') {
+		$thissettings = $settings_path;
+		if(is_integer(strpos($thissettings,' ')))
+			$thissettings = '"'.$thissettings.'"';
+		}
+
+	$thisalphabet = $alphabet_path;
+	if(is_integer(strpos($thisalphabet,' ')))
+		$thisalphabet = '"'.$thisalphabet.'"';
+		
+	$thisobject = $objects_path;
+	if(is_integer(strpos($thisobject,' ')))
+		$thisobject = '"'.$thisobject.'"';
 	
 	if(is_integer(strpos($output,' ')))
 		$output = '"'.$output.'"';
-
-	$thisalphabet = $alphabet_file;
-	if(is_integer(strpos($thisalphabet,' ')))
-		$thisalphabet = '"'.$thisalphabet.'"';
-	$thisalphabet = $dir.$thisalphabet;
-
-	if($alphabet_file <> '') $command .= " -ho ".$thisalphabet;
+		
+	if($settings_path <> '') $command .= " -se ".$thissettings;
+	if($data_path <> '') $command .= " -da ".$thisdata;
+	if($grammar_path <> '') $command .= " -gr ".$thisgrammar;
+	if($alphabet_path <> '') $command .= " -ho ".$thisalphabet;
+	if($objects_path <> '') $command .= " -mi ".$thisobject;
 
 	if($note_convention <> '') $command .= " --".$note_convention;
-	if($settings_file <> '') $command .= " -se ".$dir.$settings_file;
 	if($csound_file <> '') $command .= " -cs ".$dir_csound_resources.$csound_file;
-	if($objects_file <> '') $command .= " -mi ".$dir.$objects_file;
 	
 	if($startup <> '') $command .= " --start ".$startup;
 	if($instruction == "produce" OR $instruction == "produce-all" OR $instruction == "play-item") {
@@ -168,7 +184,7 @@ if($instruction <> "help") {
 				}
 			}
 		// Delete this image to be replaced with the current one
-		if($this_name == $grammar_name) {
+		if($this_name == $grammar_name OR $this_name == $data_name) {
 			$rep = @unlink($temp_dir.$thisfile);
 			// Make sure deletion is complete before launching the command
 			$time_start = time();
@@ -203,15 +219,15 @@ if($instruction <> "help") {
 				}
 			}
 		}
-	if($objects_file <> '') {
-		$lock_file = $dir.$objects_file."_lock";
+	if($objects_path <> '') {
+		$lock_file = $objects_path."_lock";
 	//	echo "Sound-object prototypes lock_file = ".$lock_file."<br />";
 		$time_start = time();
 		$time_end = $time_start + 5;
 		while(TRUE) {
 			if(!file_exists($lock_file)) break;
 			if(time() > $time_end) {
-				echo "<p><font color=\"red\">Maximum time (5 seconds) spent waiting for the sound-object prototypes file to be unlocked:</font> <font color=\"blue\">".$dir.$objects_file."</font></p>";
+				echo "<p><font color=\"red\">Maximum time (5 seconds) spent waiting for the sound-object prototypes file to be unlocked:</font> <font color=\"blue\">".$objects_path."</font></p>";
 				break;
 				}
 			}
@@ -230,6 +246,7 @@ echo "<hr>";
 if($data_path <> '') {
 	$content = @file_get_contents($data_path,TRUE);
 	if($content <> FALSE) {
+		echo "<b>";
 		$table = explode(chr(10),$content);
 		for($i = 0; $i < count($table); $i++) {
 			$line_show = $line = trim($table[$i]);
@@ -239,6 +256,7 @@ if($data_path <> '') {
 			$line_show = substr($line,0,100)."<br />&nbsp;&nbsp;... ... ...<br />".substr($line,-100,100);
 			echo $line_show."<br />";
 			}
+		echo "</b>";
 		}
 	}
 
@@ -323,8 +341,8 @@ if($instruction <> "help") {
 					else $this_name .= "_".$table[$i];
 					}
 				}
-		//	echo "this_name = ".$this_name."<br />";
-			if(!$found OR $this_name <> $grammar_name OR isset($table[$i + 2])) continue;
+		//	echo "this_name = ".$this_name.", data_name = ".$data_name.", grammar_name = ".$grammar_name."<br />";
+			if(!$found OR ($this_name <> $grammar_name AND $this_name <> $data_name) OR isset($table[$i + 2])) continue;
 			echo "<td style=\"background-color:white; border-radius: 6px; border: 4px solid Gold; vertical-align:middle; text-align: center; padding:8px; margin:0px;\>";
 			$number = intval(str_replace(".html",'',$table[$i + 1]));
 			$content = @file_get_contents($temp_dir.$thisfile,TRUE);
@@ -487,8 +505,9 @@ if($n_messages > 0) {
 		if(is_integer($pos=strpos($mssg,"../"))) {
 			$mssg = preg_replace("/(\.\.\/.+)$/u","<font color=blue><small>$1</small></font>",$mssg);
 			}
+		if($mssg == "(null)") continue;
 		if($handle) fwrite($handle,$mssg."<br />\n");
-		if($i == 7) echo "…<br />";
+		if($i == 7) echo "… … …<br />";
 		if($i < 7 OR $i > ($n_messages - 4)) echo $mssg."<br />";
 		}
 	if($n_messages == 0) echo "No message produced…";

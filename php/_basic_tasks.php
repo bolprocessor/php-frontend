@@ -19,6 +19,9 @@ save_settings("trash_folder",$trash_folder);
 $max_sleep_time_after_bp_command = 15; // seconds. Maximum time allowed to the console
 $default_output_format = "midi";
 
+$number_fields_csound_instrument = 67;
+$number_midi_parameterss_csound_instrument = 6;
+
 $temp_dir = $bp_application_path."temp_bolprocessor";
 if(!file_exists($temp_dir)) {
 	mkdir($temp_dir);
@@ -190,7 +193,7 @@ function extract_data($compact,$content) {
 	$table = explode(chr(10),$content);
 	$table_out = $extract_data = array();
 	$start = TRUE;
-	$extract_data['metronome'] = $extract_data['time_structure'] = $extract_data['headers'] = $extract_data['alphabet'] = $extract_data['objects'] = $extract_data['csound'] = $extract_data['settings'] = $extract_data['data'] = $extract_data['orchestra'] = $extract_data['timebase'] = $extract_data['interaction'] = $extract_data['midisetup'] = $extract_data['timebase'] = $extract_data['keyboard'] = $extract_data['glossary'] = $extract_data['cstables'] = '';
+	$extract_data['grammar'] = $extract_data['metronome'] = $extract_data['time_structure'] = $extract_data['headers'] = $extract_data['alphabet'] = $extract_data['objects'] = $extract_data['csound'] = $extract_data['settings'] = $extract_data['data'] = $extract_data['orchestra'] = $extract_data['timebase'] = $extract_data['interaction'] = $extract_data['midisetup'] = $extract_data['timebase'] = $extract_data['keyboard'] = $extract_data['glossary'] = $extract_data['cstables'] = '';
 	$extract_data['templates'] = FALSE;
 	for($i = 0; $i < count($table); $i++) {
 		$line = trim($table[$i]);
@@ -218,7 +221,9 @@ function extract_data($compact,$content) {
 			if($time_structure == "striated" OR $time_structure == "smooth")
 				$extract_data['time_structure'] = $time_structure;
 			}
-		if(is_integer($pos=strpos($line,"-ho")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
+		if(is_integer($pos=strpos($line,"-gr")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
+			$extract_data['grammar'] = fix_file_name($line,"ho");
+		else if(is_integer($pos=strpos($line,"-ho")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
 			$extract_data['alphabet'] = fix_file_name($line,"ho");
 		else if(is_integer($pos=strpos($line,"-mi")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
 			$extract_data['objects'] = fix_file_name($line,"mi");
@@ -272,7 +277,7 @@ function window_name($text) {
 	return $text;
 	}
 	
-function display_more_buttons($content,$url_this_page,$dir,$objects_file,$csound_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file) {
+function display_more_buttons($content,$url_this_page,$dir,$grammar_file,$objects_file,$csound_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file) {
 	global $bp_application_path, $csound_resources, $output_file, $file_format, $test;
 	$page_type = str_replace(".php",'',$url_this_page);
 	$page_type = preg_replace("/\.php.*/u",'',$url_this_page);
@@ -297,11 +302,16 @@ function display_more_buttons($content,$url_this_page,$dir,$objects_file,$csound
 	echo "<table style=\"padding:0px; background-color:white; border-spacing: 2px;\" cellpadding=\"0px;\"><tr>";
 	if($alphabet_file <> '') {
 		$url_this_page = "alphabet.php?file=".urlencode($dir.$alphabet_file);
-		
 		if($test) echo "url_this_page = ".$url_this_page."<br />";
-		
 		echo "<td><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"openobjects\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$alphabet_file."’\">&nbsp;";
+		echo "</td></form>";
+		}
+	if($grammar_file <> '') {
+		$url_this_page = "grammar.php?file=".urlencode($dir.$grammar_file);
+		if($test) echo "url_this_page = ".$url_this_page."<br />";
+		echo "<td><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+		echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"openobjects\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$grammar_file."’\">&nbsp;";
 		echo "</td></form>";
 		}
 	if($objects_file <> '') {
@@ -1912,6 +1922,40 @@ function list_of_tonal_scales($csound_orchestra_file) {
 			}
 		}
 	return $list;
+	}
+
+function list_of_instruments($csound_orchestra_file) {
+	global $number_fields_csound_instrument, $number_midi_parameterss_csound_instrument;
+	$list_of_instruments['list'] = array();
+	if(!file_exists($csound_orchestra_file)) return $list;
+	$content = @file_get_contents($csound_orchestra_file,TRUE);
+	$extract_data = extract_data(FALSE,$content);
+	$content = $extract_data['content'];
+	$content_no_br = str_replace("<br>",chr(10),$content);
+	$table = explode(chr(10),$content_no_br);
+	$imax_file = count($table);
+	$number_channels = $table[0];
+	$i = $number_channels;
+	$CsoundOrchestraName = preg_replace("/<\/?html>/u",'',$table[++$i]);
+	$number_instruments = $table[++$i];
+	for($j = 0; $j < $number_instruments; $j++) {
+		$CsoundInstrumentName[$j] = preg_replace("/<\/?html>/u",'',$table[++$i]);
+		$list_of_instruments['list'][$j] = str_replace(' ','_',$CsoundInstrumentName[$j]);
+	//	echo "<br />CsoundInstrumentName = ".$CsoundInstrumentName[$j]."<br />";
+		$InstrumentComment[$j] = preg_replace("/<\/?html>/u",'',$table[++$i]);
+		$argmax[$j] = $table[++$i];
+		$i += $number_fields_csound_instrument;
+		$list_of_instruments['param'][$j] = array();
+		$Instrument_ipmax = $table[++$i];
+	//	echo $i." Instrument_ipmax = ".$Instrument_ipmax."<br />";
+		for($ip = 0; $ip < $Instrument_ipmax; $ip++) {
+			$Instrument_paramlist_name = preg_replace("/<\/?html>/u",'',$table[++$i]);
+		//	echo $i." Instrument_paramlist_name = ".$Instrument_paramlist_name."<br />";
+			$list_of_instruments['param'][$j][] = $Instrument_paramlist_name;
+			$i += ($number_midi_parameterss_csound_instrument + 1);
+			}
+		}
+	return $list_of_instruments;
 	}
 
 function check_duplicate_name($dir,$file) {

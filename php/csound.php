@@ -610,7 +610,7 @@ for($j = 0; $j < $number_instruments; $j++) {
 	$InstrumentPanoramicGEN[$j] = $table[++$i];
 	if($verbose) echo "Instrument panoramicGEN = ".$InstrumentPanoramicGEN[$j]."<br />";
 	fwrite($handle_instrument,$InstrumentPanoramicGEN[$j]."\n");
-	for($ii = 0; $ii < 6; $ii++) {
+	for($ii = 0; $ii < $number_midi_parameterss_csound_instrument; $ii++) {
 		$InstrumentPitchbend[$j][$ii] = $table[++$i];
 		if($verbose) echo "Instrument Pitchbend[".$ii."] = ".$InstrumentPitchbend[$j][$ii]."<br />";
 		fwrite($handle_instrument,$InstrumentPitchbend[$j][$ii]."\n");

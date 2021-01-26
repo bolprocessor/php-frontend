@@ -8,7 +8,6 @@ else $file = '';
 $url_this_page = "grammar.php?file=".urlencode($file);
 $table = explode(SLASH,$file);
 $here = $filename = end($table);
-// $grammar_file = "..".SLASH.$file;
 $grammar_file = $bp_application_path.$file;
 $dir = str_replace($filename,'',$grammar_file);
 $textarea_rows = 20;
@@ -16,6 +15,12 @@ $textarea_rows = 20;
 if($test) echo "grammar_file = ".$grammar_file."<br />";
 
 if(!isset($output_folder) OR $output_folder == '') $output_folder = "my_output";
+
+$temp_folder = str_replace(' ','_',$filename)."_".session_id()."_temp";
+if(!file_exists($temp_dir.$temp_folder)) {
+	mkdir($temp_dir.$temp_folder);
+	}
+	
 $default_output_name = str_replace("-gr.",'',$filename);
 $default_output_name = str_replace(".bpgr",'',$default_output_name);
 $file_format = $default_output_format;
@@ -89,7 +94,6 @@ if(isset($_POST['change_output_folder'])) {
 	$output = $bp_application_path.SLASH.$output_folder;
 	do $output = str_replace(SLASH.SLASH,SLASH,$output,$count);
 	while($count > 0);
-//	echo $output."<br />";
 	if(!file_exists($output)) {
 		echo "<p><font color=\"red\">Created folder:</font><font color=\"blue\"> ".$output."</font><br />";
 		mkdir($output);
@@ -121,7 +125,6 @@ if(isset($_POST['compilegrammar'])) {
 	else $settings_file = '';
 	if(isset($_POST['csound_file'])) $csound_file = $_POST['csound_file'];
 	else $csound_file = '';
-//	echo "<p id=\"timespan\">Compiling ‘".$filename."’</p>";
 	$application_path = $bp_application_path;
 	$command = $application_path."bp compile";
 	$thisgrammar = $dir.$filename;
@@ -281,7 +284,6 @@ if($templates) {
 	$link_produce = "produce.php?instruction=".$action."&grammar=".urlencode($grammar_file);
 //	$link_produce .= "&trace_production=1";
 	$link_produce .= "&here=".urlencode($here);
-//	echo "link = ".$link_produce."<br />";
 	$window_name = window_name($filename);
 	echo "<input style=\"color:DarkBlue; background-color:azure;\" onclick=\"window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"CHECK TEMPLATES\"><br /><br />";
 	}
@@ -295,21 +297,21 @@ if($alphabet_file <> '') {
 		$error_mssg .= "<font color=\"red\"><small>WARNING: ".$dir.$alphabet_file." not found.</small></font><br />";
 		$error = TRUE;
 		}
-	else $link_produce .= "&alphabet=".urlencode($alphabet_file);
+	else $link_produce .= "&alphabet=".urlencode($dir.$alphabet_file);
 	}
 if($settings_file <> '') {
 	if(!file_exists($dir.$settings_file)) {
 		$error_mssg .= "<font color=\"red\"><small>WARNING: ".$dir.$settings_file." not found.</small></font><br />";
 		$error = TRUE;
 		}
-	else $link_produce .= "&settings_file=".urlencode($settings_file);
+	else $link_produce .= "&settings=".urlencode($dir.$settings_file);
 	}
 if($objects_file <> '') {
 	if(!file_exists($dir.$objects_file)) {
 		$error_mssg .= "<font color=\"red\"><small>WARNING: ".$dir.$objects_file." not found.</small></font><br />";
 		$error = TRUE;
 		}
-	else $link_produce .= "&objects_file=".urlencode($objects_file);
+	else $link_produce .= "objects=".urlencode($dir.$objects_file);
 	}
 if($csound_file <> '') {
 	if(!file_exists($dir_csound_resources.$csound_file)) {
@@ -451,13 +453,33 @@ echo "</p>";
 if($file_format == "csound") {
 	$list_of_tonal_scales = list_of_tonal_scales($dir_csound_resources.$csound_file);
 	if(($max_scales = count($list_of_tonal_scales)) > 0) {
-		if($max_scales > 1) echo "<p style=\"margin-bottom:0px;\">The Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains definitions of tonal scales:";
-		else echo "<p style=\"margin-bottom:0px;\">The Csound orchestra file contains the definition of tonal scale:";
+		if($max_scales > 1) echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains definitions of tonal scales:";
+		else echo "<p style=\"margin-bottom:0px;\">The Csound orchestra file <font color=\"blue\">‘".$csound_file."’</font> contains the definition of tonal scale:";
 		echo "<ul style=\"margin-top:0px; margin-bottom:0px\">";
 		for($i_scale = 1; $i_scale <= $max_scales; $i_scale++)
 			echo "<li>".$list_of_tonal_scales[$i_scale - 1]."</li>";
-		if($max_scales > 1) echo "</ul>These scales may be called in “_scale()” instructions";
-		else echo "</ul>This scale may be called in a “_scale()” instruction, but it will also be used by default in replacement of the equal-tempered scale<br />➡ Use “_scale(0,0)” to force equal-tempered";
+		if($max_scales > 1) echo "</ul>These scales may be called in “_scale(name of scale, blockkey)” instructions";
+		else echo "</ul>This scale may be called in a “_scale(name of scale, blockkey)” instruction<br />but it will also be used by default in replacement of the equal-tempered scale<br />➡ Use “_scale(0,0)” to force equal-tempered";
+		echo "</p>";
+		}
+	$list_of_instruments = list_of_instruments($dir_csound_resources.$csound_file);
+	$list = $list_of_instruments['list'];
+	if(($max_instr = count($list)) > 0) {
+		if($max_scales > 0) echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> also contains definitions of instrument(s):";
+		else echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains definitions of instrument(s):";
+		echo "<ol style=\"margin-top:0px; margin-bottom:0px\">";
+		for($i_instr = 0; $i_instr < $max_instr; $i_instr++) {
+			echo "<li><b>_ins(</b><font color=\"green\">".$list[$i_instr]."</font><b>)</b>";
+			$param_list = $list_of_instruments['param'][$i_instr];
+			if(count($param_list) > 0) {
+				echo " ➡ parameter(s) ";
+				for($i_param = 0; $i_param < count($param_list); $i_param++) {
+					echo " “<font color=\"green\">".$param_list[$i_param]."</font>”";
+					}
+				}
+			echo "</li>";
+			}
+		echo "</ol>";
 		echo "</p>";
 		}
 	}
@@ -481,7 +503,6 @@ if($error) echo " - disabled because of missing files";
 echo "\" title=\"Don't forget to save!\"";
 if($error) echo " disabled";
 echo ">";
-// echo "<br />".$link_produce;
 echo "</p>";
 
 $table = explode(chr(10),$content);
@@ -503,7 +524,7 @@ echo "</div>";
 echo "<p style=\"width:90%; text-align:right;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" formaction=\"".$url_this_page."#topedit\" name=\"savegrammar\" value=\"SAVE ‘".$filename."’\"></p>";
 echo "</form>";
 
-display_more_buttons($content,$url_this_page,$dir,$objects_file,$csound_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
+display_more_buttons($content,$url_this_page,$dir,'',$objects_file,$csound_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
 
 $variable = array();
 for($i = 0; $i < $imax; $i++) {
@@ -531,101 +552,68 @@ for($i = 0; $i < $imax; $i++) {
 	}
 
 echo "<form method=\"post\" action=\"".$url_this_page."#expression\" enctype=\"multipart/form-data\">";
-$action = "produce";
-$link_produce = "produce.php?instruction=".$action."&grammar=".urlencode($grammar_file);
-if($alphabet_file <> '') $link_produce .= "&alphabet=".urlencode($alphabet_file);
-if($settings_file <> '') $link_produce .= "&settings_file=".urlencode($settings_file);
+$action = "play-item";
+$link_produce = "produce.php?instruction=".$action."&grammar=".urlencode($dir.$grammar_file);
+if($alphabet_file <> '') $link_produce .= "&alphabet=".urlencode($dir.$alphabet_file);
+if($settings_file <> '') $link_produce .= "&settings=".urlencode($dir.$settings_file);
+if($csound_file <> '') $link_produce .= "&csound_file=".urlencode($csound_file);
+if(file_exists($dir_csound_resources.$csound_orchestra)) $link_produce .= "&csound_orchestra=".urlencode($csound_orchestra);
 $link_produce .= "&output=".urlencode($output.SLASH.$output_file)."&format=".$file_format;
 if($show_production > 0)
 	$link_produce .= "&show_production=1";
 if($trace_production > 0)
 	$link_produce .= "&trace_production=1";
-// $link_produce .= "&random_seed=".$random_seed;
 $link_produce .= "&here=".urlencode($here);
 $window_name = window_name($filename);
 if(count($variable) > 0) {
 	echo "<h3>Variables (click to use as startup string):</h3>";
 	ksort($variable);
+	$j = 0;
 	foreach($variable as $var => $val) {
-		$thislink = $link_produce."&startup=".$var;
-		echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$thislink."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"startup_".$var."\" value=\"".$var."\"> ";
+		$data = $temp_dir.$temp_folder.SLASH.$j.".bpda";
+		$j++;
+		$handle = fopen($data,"w");
+		fwrite($handle,$var."\n");
+		fclose($handle);
+		$link_play_variable = $link_produce;
+		$link_play_variable .= "&data=".urlencode($data);
+		echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_play_variable."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" value=\"".$var."\"> ";
 		}
 	}
+	
+$data_expression = $temp_dir.$temp_folder.SLASH."startup.bpda";
+if($expression == '') {
+	$expression = @file_get_contents($data_expression,TRUE);
+	}
 $recoded_expression = recode_tags($expression);
-echo "<p id=\"expression\">Use this (polymetric) expression as startup&nbsp;➡&nbsp;<input type=\"text\" name=\"expression\" size=\"60\" value=\"".$recoded_expression."\">&nbsp;<input style=\"background-color:Aquamarine;\" type=\"submit\" name=\"playexpression\" value=\"PRODUCE ITEM\"></p>";
-if(isset($_POST['playexpression'])) {
+
+$link_play_expression = $link_produce;
+$link_play_expression .= "&data=".urlencode($data_expression);
+$window_name .= "_startup";
+echo "<hr>";
+
+echo "<p id=\"expression\">Use this (polymetric) expression as startup:<br />";
+echo "";
+echo "<textarea name=\"expression\" rows=\"5\" style=\"width:700px;\">".$recoded_expression."</textarea>";
+echo "<br />";
+$error_mssg = '';
+$n1 = substr_count($expression,'{');
+$n2 = substr_count($expression,'}');
+if($n1 > $n2) $error_mssg .= "<font color=\"red\">This expression contains ".($n1-$n2)." extra ‘{'</font>";
+if($n2 > $n1) $error_mssg .= "<font color=\"red\">This expression contains ".($n2-$n1)." extra ‘}'</font>";
+if($error_mssg <> '') echo "<p>".$error_mssg."</p>";
+echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"saveexpression\" value=\"SAVE THIS EXPRESSION\">&nbsp;then&nbsp;<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_play_expression."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" value=\"PRODUCE ITEM\">";
+
+if(isset($_POST['saveexpression'])) {
 	if($expression == '') {
 		echo "<p id=\"timespan\"><font color=\"red\">➡ Cannot play empty expression…</font></p>";
 		}
 	else {
-		echo "<p id=\"timespan\"><font color=\"red\">➡ Playing:</font> <font color=\"blue\"><big>".$recoded_expression."</big></font></p>";
-		$data = $temp_dir."temp_".session_id()."outdata.bpda";
+		echo "<p id=\"timespan\"><font color=\"red\">➡ Saving:</font> <font color=\"blue\"><big>".$recoded_expression."</big></font></p>";
 		$result_file = $output.SLASH.$output_file;
-		$handle = fopen($data,"w");
-		$file_header = $top_header."\n// Data saved as \"expression.bpda\". Date: ".gmdate('Y-m-d H:i:s');
-		fwrite($handle,$file_header."\n");
+		$handle = fopen($data_expression,"w");
 		fwrite($handle,$expression."\n");
 		fclose($handle);
-		if(file_exists($result_file)) unlink($result_file); 
-		$application_path = $bp_application_path;
-		$command = $application_path."bp produce";
-		$command .= " -gr ".$dir.$filename;
-		$command .= " -S ".$data;
-		if($settings_file <> '') $command .= " -se \"".$dir.$settings_file."\"";
-		if($alphabet_file<> '') $command .= " -ho \"".$dir.$alphabet_file."\"";
-		if($objects_file <> '') $command .= " -mi \"".$dir.$objects_file."\"";
-		if($csound_file <> '') $command .= " -cs \"".$dir_csound_resources.$csound_file."\"";
-		switch($file_format) {
-			case "data":
-				$command .= " -d -o ".$result_file;
-				break;
-			case "midi":
-				$command .= " -d --midiout ".$result_file;
-				break;
-			case "csound":
-				$command .= " -d --csoundout ".$result_file;
-				break;
-			default:
-				$command .= " -d --rtmidi";
-				break;
-			}
-		echo "<p style=\"color:red;\"><small>".$command."</small></p>";
-		$no_error = FALSE;
-		$o = send_to_console($command);
-		$n_messages = count($o);
-		if($n_messages > 0) {
-			for($i=0; $i < $n_messages; $i++) {
-				$mssg[$i] = $o[$i];
-				$mssg[$i] = clean_up_encoding(FALSE,TRUE,$mssg[$i]);
-				if(is_integer($pos=strpos($mssg[$i],"Errors: 0")) AND $pos == 0) $no_error = TRUE;
-				}
-			}
-		$message = '';
-		if(!$no_error) {
-			$message .= "<p><font color=\"red\">➡ </font>This process:<br /><small>";
-			for($i=0; $i < $n_messages; $i++) {
-				$message .= "&nbsp;&nbsp;&nbsp;".$mssg[$i]."<br />";
-				}
-			$message .= "</small></p>";
-			}
-		echo $message;
-		
-		if($file_format == "data" OR $file_format == "csound")  {
-			echo "<p><font color=\"red\">➡ </font>Result:<br />";
-			$content = @file_get_contents($result_file,TRUE);
-			$table = explode(chr(10),$content);
-			$imax = count($table);
-			$found = FALSE;
-			for($i = 0; $i < $imax; $i++) {
-				$line = trim($table[$i]);
-				if($line == '') continue;
-				$found = TRUE;
-				$line = recode_tags($line);
-				echo "&nbsp;&nbsp;&nbsp;".$line."<br />";
-				}
-			if(!$found) echo "&nbsp;&nbsp;&nbsp;No result…";
-			echo "</p>";
-			}
 		}
 	}
 echo "</form>";
