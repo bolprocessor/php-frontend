@@ -389,7 +389,7 @@ if($instruction <> "help") {
 	// Process Csound score if possible
 	if($no_error AND $file_format == "csound") {
 		if($csound_orchestra == '') {
-			$csound_orchestra = "default.orc";
+			$csound_orchestra = "0-default.orc";
 			echo "<p><font color=\"red\">➡</font> Csound orchestra file was not specified. I tried the default orchestra: <font color=\"blue\">".$dir_csound_resources.$csound_orchestra."</font>.</p>";
 			}
 		if(!file_exists($dir_csound_resources.$csound_orchestra)) {

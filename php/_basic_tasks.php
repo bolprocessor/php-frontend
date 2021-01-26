@@ -833,7 +833,7 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder) {
 	$CsoundOrchestraName = $_POST['CsoundOrchestraName'];
 	$warn_not_empty = FALSE;
 	if($CsoundOrchestraName == '') {
-		$CsoundOrchestraName = "default.orc";
+		$CsoundOrchestraName = "0-default.orc";
 		$warn_not_empty = TRUE;
 		}
 	fwrite($handle,$CsoundOrchestraName."\n");

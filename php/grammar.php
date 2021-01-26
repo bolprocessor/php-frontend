@@ -311,7 +311,7 @@ if($objects_file <> '') {
 		$error_mssg .= "<font color=\"red\"><small>WARNING: ".$dir.$objects_file." not found.</small></font><br />";
 		$error = TRUE;
 		}
-	else $link_produce .= "objects=".urlencode($dir.$objects_file);
+	else $link_produce .= "&objects=".urlencode($dir.$objects_file);
 	}
 if($csound_file <> '') {
 	if(!file_exists($dir_csound_resources.$csound_file)) {
@@ -430,18 +430,18 @@ if($file_format == "csound") {
 			}
 		else if($csound_default_orchestra <> '' AND file_exists($dir_csound_resources.$csound_default_orchestra)) {
 			$csound_orchestra = $csound_default_orchestra;
-			echo "• <font color=\"red\">Csound scores</font> will be produced and converted to sound files (including scales) using orchestra ‘<font color=\"blue\">".$csound_default_orchestra."</font>’ as specified in <font color=\"blue\">‘".$settings_file."’</font>";
+			echo "• <font color=\"red\">Csound scores</font> will be produced and converted to sound files (including scales) using orchestra ‘<font color=\"blue\">".$csound_default_orchestra."</font>’</font>";
 			}
 		else if($csound_default_orchestra <> '') {
 			echo "<font color=\"red\">➡</font> Csound scores will be produced yet not converted to sound files by orchestra ‘<font color=\"blue\">".$csound_default_orchestra."</font>’ as specified in ‘<font color=\"blue\">".$settings_file."</font>’ because this file was not found in the Csound resources folder";
 			$csound_orchestra = '';
 			}
-		else if(file_exists($dir_csound_resources."default.orc")) {
-			$csound_orchestra = "default.orc";
-			echo "• <font color=\"red\">Csound scores</font> will be produced and converted to sound files using default orchestra file ‘<font color=\"blue\">".$csound_orchestra."</font>’ found in the Csound resources folder";
+		else if(file_exists($dir_csound_resources."0-default.orc")) {
+			$csound_orchestra = "0-default.orc";
+			echo "• <font color=\"red\">Csound scores</font> will be produced and converted to sound files using default orchestra file ‘<font color=\"blue\">".$csound_orchestra."</font>’";
 			}
 		else {
-			echo "<font color=\"red\">➡</font> Csound scores will be produced yet not converted to sound files</font> because default orchestra file ‘<font color=\"blue\">default.orc</font>’ was not found in the Csound resources folder";
+			echo "<font color=\"red\">➡</font> Csound scores will be produced yet not converted to sound files</font> because default orchestra file ‘<font color=\"blue\">0-default.orc</font>’ was not found in the Csound resources folder";
 			$csound_orchestra = '';
 			}
 		if(file_exists($dir_csound_resources.$csound_orchestra)) $link_produce .= "&csound_orchestra=".urlencode($csound_orchestra);
@@ -450,7 +450,7 @@ if($file_format == "csound") {
 	}
 echo "</p>";
 
-if($file_format == "csound") {
+if($file_format == "csound" AND $csound_file <> '') {
 	$list_of_tonal_scales = list_of_tonal_scales($dir_csound_resources.$csound_file);
 	if(($max_scales = count($list_of_tonal_scales)) > 0) {
 		if($max_scales > 1) echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains definitions of tonal scales:";
@@ -510,6 +510,7 @@ $imax = count($table);
 if($imax > $textarea_rows) $textarea_rows = $imax + 5;
 
 echo "<textarea name=\"thisgrammar\" rows=\"".$textarea_rows."\" style=\"width:90%;\">".$content."</textarea>";
+// echo "<br />".$link_produce."<br />";
 
 echo "<div style=\"float:left; padding-top:12px;\"><input style=\"color:DarkBlue; background-color:Aquamarine; font-size:large;\" onclick=\"window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)";
 if($error) echo " - disabled because of missing files";
@@ -553,9 +554,10 @@ for($i = 0; $i < $imax; $i++) {
 
 echo "<form method=\"post\" action=\"".$url_this_page."#expression\" enctype=\"multipart/form-data\">";
 $action = "play-item";
-$link_produce = "produce.php?instruction=".$action."&grammar=".urlencode($dir.$grammar_file);
+$link_produce = "produce.php?instruction=".$action."&grammar=".urlencode($grammar_file);
 if($alphabet_file <> '') $link_produce .= "&alphabet=".urlencode($dir.$alphabet_file);
 if($settings_file <> '') $link_produce .= "&settings=".urlencode($dir.$settings_file);
+if($objects_file <> '') $link_produce .= "&objects=".urlencode($dir.$objects_file);
 if($csound_file <> '') $link_produce .= "&csound_file=".urlencode($csound_file);
 if(file_exists($dir_csound_resources.$csound_orchestra)) $link_produce .= "&csound_orchestra=".urlencode($csound_orchestra);
 $link_produce .= "&output=".urlencode($output.SLASH.$output_file)."&format=".$file_format;
