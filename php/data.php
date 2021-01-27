@@ -590,7 +590,6 @@ if($csound_file <> '') {
 		if($file_format == "csound" AND file_exists($dir_csound_resources.$csound_orchestra)) $link_options .= "&csound_orchestra=".urlencode($csound_orchestra);
 		}
 	}
-$link_options .= "&output=".urlencode($bp_application_path.$output_folder.SLASH.$output_file)."&format=".$file_format;
 $link_options .= "&here=".urlencode($dir.$filename);
 
 if($error_mssg <> '') echo "<p>".$error_mssg."</p>";
@@ -646,14 +645,25 @@ for($i = $j = 0; $i < $imax; $i++) {
 	fwrite($handle,$line_recoded."\n");
 	fclose($handle);
 	echo "<tr><td>".$j."</td><td>";
+	
+	$link_options_play = $link_options."&output=".urlencode($bp_application_path.$output_folder.SLASH.$output_file)."&format=".$file_format;
+	$output_file_expand = str_replace(".sco",'',$output_file);
+	$output_file_expand = str_replace(".mid",'',$output_file_expand);
+	$output_file_expand .= ".bpda";
+	$link_options_expand = $link_options."&output=".urlencode($bp_application_path.$output_folder.SLASH.$output_file_expand)."&format=data";
 	$link_produce = "produce.php?data=".urlencode($data);
-	$link_produce .= $link_options;
+//	$link_produce .= $link_options_play;
 	$link_play = $link_produce."&instruction=play-item";
+	$link_play .= $link_options_play;
 	$link_expand = $link_produce."&instruction=expand-item";
+	$link_expand .= $link_options_expand;
 	$window_name = window_name($filename);
+	$window_name_play = $window_name."_play";
+	$window_name_expland = $window_name."_expland";
 //	echo "<small>".urldecode($link_play)."</small><br />";
-	echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_play."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Play this polymetric expression\" value=\"PLAY\">&nbsp;";
-	echo "&nbsp;<input style=\"background-color:azure;\" onclick=\"window.open('".$link_expand."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Expand this polymetric expression\" value=\"EXP\">&nbsp;";
+//	echo "<small>".urldecode($link_expand)."</small><br />";
+	echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_play."','".$window_name_play."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Play this polymetric expression\" value=\"PLAY\">&nbsp;";
+	echo "&nbsp;<input style=\"background-color:azure;\" onclick=\"window.open('".$link_expand."','".$window_name_expland."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Expand this polymetric expression\" value=\"EXPAND\">&nbsp;";
 	$n1 = substr_count($line_recoded,'{');
 	$n2 = substr_count($line_recoded,'}');
 	if($n1 > $n2) $error_mssg .= "<font color=\"red\">This score contains ".($n1-$n2)." extra ‘{'</font>";

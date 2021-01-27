@@ -450,37 +450,43 @@ if($file_format == "csound") {
 	}
 echo "</p>";
 
-if($file_format == "csound" AND $csound_file <> '') {
-	$list_of_tonal_scales = list_of_tonal_scales($dir_csound_resources.$csound_file);
-	if(($max_scales = count($list_of_tonal_scales)) > 0) {
-		if($max_scales > 1) echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains definitions of tonal scales:";
-		else echo "<p style=\"margin-bottom:0px;\">The Csound orchestra file <font color=\"blue\">‘".$csound_file."’</font> contains the definition of tonal scale:";
-		echo "<ul style=\"margin-top:0px; margin-bottom:0px\">";
-		for($i_scale = 1; $i_scale <= $max_scales; $i_scale++)
-			echo "<li>".$list_of_tonal_scales[$i_scale - 1]."</li>";
-		if($max_scales > 1) echo "</ul>These scales may be called in “_scale(name of scale, blockkey)” instructions";
-		else echo "</ul>This scale may be called in a “_scale(name of scale, blockkey)” instruction<br />but it will also be used by default in replacement of the equal-tempered scale<br />➡ Use “_scale(0,0)” to force equal-tempered";
-		echo "</p>";
-		}
-	$list_of_instruments = list_of_instruments($dir_csound_resources.$csound_file);
-	$list = $list_of_instruments['list'];
-	if(($max_instr = count($list)) > 0) {
-		if($max_scales > 0) echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> also contains definitions of instrument(s):";
-		else echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains definitions of instrument(s):";
-		echo "<ol style=\"margin-top:0px; margin-bottom:0px\">";
-		for($i_instr = 0; $i_instr < $max_instr; $i_instr++) {
-			echo "<li><b>_ins(</b><font color=\"green\">".$list[$i_instr]."</font><b>)</b>";
-			$param_list = $list_of_instruments['param'][$i_instr];
-			if(count($param_list) > 0) {
-				echo " ➡ parameter(s) ";
-				for($i_param = 0; $i_param < count($param_list); $i_param++) {
-					echo " “<font color=\"green\">".$param_list[$i_param]."</font>”";
-					}
-				}
-			echo "</li>";
+if($csound_file <> '') {
+	if($file_format == "csound") {
+		$list_of_tonal_scales = list_of_tonal_scales($dir_csound_resources.$csound_file);
+		if(($max_scales = count($list_of_tonal_scales)) > 0) {
+			if($max_scales > 1) echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains definitions of tonal scales:";
+			else echo "<p style=\"margin-bottom:0px;\">The Csound orchestra file <font color=\"blue\">‘".$csound_file."’</font> contains the definition of tonal scale:";
+			echo "<ul style=\"margin-top:0px; margin-bottom:0px\">";
+			for($i_scale = 1; $i_scale <= $max_scales; $i_scale++)
+				echo "<li>".$list_of_tonal_scales[$i_scale - 1]."</li>";
+			if($max_scales > 1) echo "</ul>These scales may be called in “_scale(name of scale, blockkey)” instructions";
+			else echo "</ul>This scale may be called in a “_scale(name of scale, blockkey)” instruction<br />but it will also be used by default in replacement of the equal-tempered scale<br />➡ Use “_scale(0,0)” to force equal-tempered";
+			echo "</p>";
 			}
-		echo "</ol>";
-		echo "</p>";
+		$list_of_instruments = list_of_instruments($dir_csound_resources.$csound_file);
+		$list = $list_of_instruments['list'];
+		if(($max_instr = count($list)) > 0) {
+			if($max_scales > 0) echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> also contains definitions of instrument(s):";
+			else echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains definitions of instrument(s):";
+			echo "<ol style=\"margin-top:0px; margin-bottom:0px\">";
+			for($i_instr = 0; $i_instr < $max_instr; $i_instr++) {
+				echo "<li><b>_ins(</b><font color=\"green\">".$list[$i_instr]."</font><b>)</b>";
+				$param_list = $list_of_instruments['param'][$i_instr];
+				if(count($param_list) > 0) {
+					echo " ➡ parameter(s) ";
+					for($i_param = 0; $i_param < count($param_list); $i_param++) {
+						echo " “<font color=\"green\">".$param_list[$i_param]."</font>”";
+						}
+					}
+				echo "</li>";
+				}
+			echo "</ol>";
+			echo "</p>";
+			}
+		}
+	else  {
+		echo "<p>Csound resources have been loaded but cannot be used because the output format is not “CSOUND”.<br />";
+		echo "➡ Instructions “_scale()” and “_ins()” will be ignored</p>";
 		}
 	}
 
@@ -492,6 +498,8 @@ echo "<input type=\"hidden\" name=\"time_structure\" value=\"".$time_structure."
 echo "<input type=\"hidden\" name=\"alphabet_file\" value=\"".$alphabet_file."\">";
 
 echo "<div  id=\"topedit\">&nbsp;</div>";
+
+// echo $link_produce."<br />";
 
 echo "<p><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"savegrammar\" formaction=\"".$url_this_page."#topedit\" value=\"SAVE ‘".$filename."’\">";
 

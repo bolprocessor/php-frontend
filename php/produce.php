@@ -143,7 +143,7 @@ else {
 	if($csound_file <> '') $command .= " -cs ".$dir_csound_resources.$csound_file;
 	
 	if($startup <> '') $command .= " --start ".$startup;
-	if($instruction == "produce" OR $instruction == "produce-all" OR $instruction == "play-item") {
+	if($instruction == "produce" OR $instruction == "produce-all" OR $instruction == "play-item" OR $instruction == "expand-item") {
 		switch($file_format) {
 			case "data":
 				$command .= " -d -o ".$output;
@@ -232,8 +232,7 @@ if($instruction <> "help") {
 				}
 			}
 		}
-	}
-		
+	}	
 $o = send_to_console($command);
 $n_messages = count($o);
 $no_error = FALSE;
@@ -246,7 +245,9 @@ echo "<hr>";
 if($data_path <> '') {
 	$content = @file_get_contents($data_path,TRUE);
 	if($content <> FALSE) {
-		echo "<b>";
+		if($instruction == "play-item") echo "Playing:<br /><br />";
+		if($instruction == "expand-item") echo "Expanding:<br /><br />";
+		echo "<b><font color=\"green\">";
 		$table = explode(chr(10),$content);
 		for($i = 0; $i < count($table); $i++) {
 			$line_show = $line = trim($table[$i]);
@@ -256,7 +257,7 @@ if($data_path <> '') {
 			$line_show = substr($line,0,100)."<br />&nbsp;&nbsp;... ... ...<br />".substr($line,-100,100);
 			echo $line_show."<br />";
 			}
-		echo "</b>";
+		echo "</font></b>";
 		}
 	}
 
