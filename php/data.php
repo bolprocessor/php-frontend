@@ -652,10 +652,9 @@ for($i = $j = 0; $i < $imax; $i++) {
 	$output_file_expand .= ".bpda";
 	$link_options_expand = $link_options."&output=".urlencode($bp_application_path.$output_folder.SLASH.$output_file_expand)."&format=data";
 	$link_produce = "produce.php?data=".urlencode($data);
-//	$link_produce .= $link_options_play;
-	$link_play = $link_produce."&instruction=play-item";
+	$link_play = $link_produce."&instruction=play";
 	$link_play .= $link_options_play;
-	$link_expand = $link_produce."&instruction=expand-item";
+	$link_expand = $link_produce."&instruction=expand";
 	$link_expand .= $link_options_expand;
 	$window_name = window_name($filename);
 	$window_name_play = $window_name."_play";

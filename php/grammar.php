@@ -561,7 +561,7 @@ for($i = 0; $i < $imax; $i++) {
 	}
 
 echo "<form method=\"post\" action=\"".$url_this_page."#expression\" enctype=\"multipart/form-data\">";
-$action = "play-item";
+$action = "play";
 $link_produce = "produce.php?instruction=".$action."&grammar=".urlencode($grammar_file);
 if($alphabet_file <> '') $link_produce .= "&alphabet=".urlencode($dir.$alphabet_file);
 if($settings_file <> '') $link_produce .= "&settings=".urlencode($dir.$settings_file);
