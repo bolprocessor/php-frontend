@@ -373,14 +373,17 @@ if($instruction <> "help") {
 				$j++;
 				}
 			$link = $temp_dir.$thisfile;
-			$left = 100 + (400 * ($number - 1));
+			$left = 10 + (50 * ($number_images - 1));
 			$window_height = 600;
 			if($HeightMax < $window_height) $window_height = $HeightMax + 60;
 			$window_width = 1200;
 			if($WidthMax < $window_width) $window_width = $WidthMax +  20;
 			echo "<div style=\"border:2px solid gray; background-color:azure; width:8em;  padding:2px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$link."','".$title1."','width=".$window_width.",height=".$window_height.",left=".$left."'); return false;\" href=\"".$link."\">Image ".$number."</a></div>&nbsp;";
 			echo "</td>";
-			if(++$number_images > 4) echo "</tr><tr>";
+			if(++$number_images > 11) {
+				$number_images = 0;
+				echo "</tr><tr>";
+				}
 			}
 		echo "</tr></table>";
 		echo "<br />";
