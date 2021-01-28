@@ -3,9 +3,8 @@ session_start();
 require('midi.class.php');
 // Source: https://github.com/robbie-cao/midi-class-php
 
-define('MAXFILESIZE',1000000);
+define('MAXFILESIZE',50000000);
 define('SLASH',DIRECTORY_SEPARATOR);
-// define('SLASH',"/");
 
 $test = FALSE;
 // $test = TRUE;
@@ -19,8 +18,8 @@ save_settings("trash_folder",$trash_folder);
 $max_sleep_time_after_bp_command = 15; // seconds. Maximum time allowed to the console
 $default_output_format = "midi";
 
-$number_fields_csound_instrument = 67;
-$number_midi_parameterss_csound_instrument = 6;
+$number_fields_csound_instrument = 67; // Never change this!
+$number_midi_parameterss_csound_instrument = 6; // Never change this!
 
 $temp_dir = $bp_application_path."temp_bolprocessor";
 if(!file_exists($temp_dir)) {

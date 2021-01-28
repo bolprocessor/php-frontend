@@ -21,6 +21,8 @@ if(isset($_GET['here'])) $here = urldecode($_GET['here']);
 else $here = '???';
 if(isset($_GET['csound_file'])) $csound_file = $_GET['csound_file'];
 else $csound_file = '';
+if(isset($_GET['item'])) $item = $_GET['item'];
+else $item = 0;
 
 $max_sleep_time_after_bp_command = 15;
 $check_command_line = FALSE;
@@ -245,8 +247,8 @@ echo "<hr>";
 if($data_path <> '') {
 	$content = @file_get_contents($data_path,TRUE);
 	if($content <> FALSE) {
-		if($instruction == "play") echo "Playing:<br /><br />";
-		if($instruction == "expand") echo "Expanding:<br /><br />";
+		if($instruction == "play") echo "<b>Playing #".$item."</b><br /><br />";
+		if($instruction == "expand") echo "<b>Expanding #".$item."</b><br /><br />";
 		echo "<b><font color=\"green\">";
 		$table = explode(chr(10),$content);
 		for($i = 0; $i < count($table); $i++) {

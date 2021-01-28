@@ -392,6 +392,7 @@ if(isset($_POST['explode'])) {
 	$table = explode(chr(10),$content);
 	$newtable = array();
 	$imax = count($table);
+	$item = 1;
 	for($i = 0; $i < $imax; $i++) {
 		$line = trim($table[$i]);
 		$newline = $line;
@@ -400,17 +401,21 @@ if(isset($_POST['explode'])) {
 			$level = 0;
 			for($j = 0; $j < strlen($line); $j++) {
 				$c = $line[$j];
+				if($c == '{') {
+					if($item == 1 AND $level == 0) $newline .= "[item ".($item++)."] ";
+					$level++;
+					}
 				$newline .= $c;
-				if($c == '{') $level++;
 				if($c == '}') {
 					$level--;
-					if($level == 0) $newline .= "\n\n";
+					if($level == 0) $newline .= "\n\n[item ".($item++)."] ";
 					}
 				}
 			}
 		$newtable[] = $newline;
 		}
 	$newcontent = implode("\n",$newtable);
+	$newcontent = str_replace("[item ".($item-1)."]",'',$newcontent);
 	$_POST['thistext'] = $newcontent;
 	$_POST['savethisfile'] = TRUE;
 	}
@@ -424,7 +429,8 @@ if(isset($_POST['implode'])) {
 	while($count > 0);
 	do $content = str_replace("}\n\n","}\n",$content,$count);
 	while($count > 0);
-	$content = str_replace("}\n{","} {",$content);
+	$content = preg_replace("/\[item\s[0-9]+\]\s*/u",'',$content);
+	$content = preg_replace("/}\s{/u","} {",$content);
 	$_POST['thistext'] = $content;
 	$_POST['savethisfile'] = TRUE;
 	}
@@ -646,6 +652,7 @@ for($i = $j = 0; $i < $imax; $i++) {
 	fclose($handle);
 	echo "<tr><td>".$j."</td><td>";
 	
+	$link_options .= "&item=".$j;
 	$link_options_play = $link_options."&output=".urlencode($bp_application_path.$output_folder.SLASH.$output_file)."&format=".$file_format;
 	$output_file_expand = str_replace(".sco",'',$output_file);
 	$output_file_expand = str_replace(".mid",'',$output_file_expand);
