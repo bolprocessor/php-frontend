@@ -31,7 +31,6 @@ $more_data = '';
 
 $objects_file = $csound_file = $alphabet_file = $grammar_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = $csound_default_orchestra = '';
 
-
 if(isset($_POST['alphabet_file'])) $alphabet_file = $_POST['alphabet_file'];
 if(isset($_POST['grammar_file'])) $grammar_file = $_POST['grammar_file'];
 if(isset($_POST['settings_file'])) $settings_file = $_POST['settings_file'];
@@ -52,6 +51,31 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 		echo "<h3><font color=\"red\">Uploading failed:</font> <font color=\"blue\">".$upload_filename."</font> <font color=\"red\">is larger than ".MAXFILESIZE." bytes</font></h3>";
 		}
 	else {
+		$content = $_POST['thistext'];
+		$content = str_replace(chr(13).chr(10),chr(10),$content);
+		$content = str_replace(chr(13),chr(10),$content);
+		$declarations = '';
+		if($objects_file <> '') {
+			$declarations .= $objects_file."\n";
+			$content = str_replace($objects_file,'',$content);
+			}
+		if($grammar_file <> '') {
+			$declarations .= $grammar_file."\n";
+			$content = str_replace($grammar_file,'',$content);
+			}
+		if($settings_file <> '') {
+			$declarations .= $settings_file."\n";
+			$content = str_replace($settings_file,'',$content);
+			}
+		if($csound_file <> '') {
+			$declarations .= $csound_file."\n";
+			$content = str_replace($csound_file,'',$content);
+			}
+		if($objects_file <> '') {
+			$declarations .= $objects_file."\n";
+			$content = str_replace($objects_file,'',$content);
+			}
+		$_POST['thistext'] = $content;
 		if(!$reload_musicxml) {
 			$tmpFile = $_FILES['music_xml_import']['tmp_name'];
 			move_uploaded_file($tmpFile,$music_xml_file) or die('Problem uploading this MusicXML file');
@@ -69,9 +93,9 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$actual_notes = $normal_notes = $alter = $duration_measure = 0;
 			$part = $measure = $step = -1;
 			$s = array();
-			$file = fopen($music_xml_file,"r");
 			$score_part = $subtitle_part = '';
 			$instrument_name = $midi_channel = $divisions = $fifths = $mode = $duration_part = $select_part = array();
+			$file = fopen($music_xml_file,"r");
 			while(!feof($file)) {
 				$line = fgets($file);
 				if(is_integer($pos=strpos($line,"<score-partwise")) AND $pos == 0) $partwise = TRUE;
@@ -86,12 +110,19 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 					if($select_part[$score_part]) {
 						$message .= " checked";
 						echo "Score part ‘".$score_part."’ has been selected.<br />";
-						$subtitle_part .= "// Score part ‘".$score_part."’: instrument = ".$instrument_name[$score_part]."\n";
 						}
 					$message .= "> Score part ‘".$score_part."’ instrument = <i>".$instrument_name[$score_part]."</i>";
-					if(isset($midi_channel[$score_part]) AND $midi_channel[$score_part] <> '')
+					if(isset($midi_channel[$score_part]) AND $midi_channel[$score_part] <> '') {
 						$message .= " — MIDI channel ".$midi_channel[$score_part];
+						}
 					$message .= "<br />";
+					if($select_part[$score_part] OR !$reload_musicxml) {
+						$subtitle_part .= "// Score part ‘".$score_part."’: instrument = ".$instrument_name[$score_part];
+						if(isset($midi_channel[$score_part]) AND $midi_channel[$score_part] <> '') {
+							$subtitle_part .= " — MIDI channel ".$midi_channel[$score_part];
+							}
+						$subtitle_part .= "\n";
+						}
 					$score_part = '';
 					}
 				if($score_part <> '' AND is_integer($pos=strpos($line,"<instrument-name>"))) {
@@ -366,14 +397,14 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$data = str_replace(" ,",",",$data);
 			$more_data = "// MusicXML file ‘".$upload_filename."’ converted\n";
 			if($subtitle_part <> '') $more_data .= $subtitle_part."\n";
-			
+			$more_data .= $declarations;
 			if(isset($_POST['delete_current'])) {
 				$_POST['thistext'] = '';
-				if($settings_file <> '') $more_data .= $settings_file."\n";
+		/*		if($settings_file <> '') $more_data .= $settings_file."\n";
 				if($csound_file <> '') $more_data .= $csound_file."\n";
 				if($alphabet_file <> '') $more_data .= $alphabet_file."\n";
 				if($grammar_file <> '') $more_data .= $grammar_file."\n";
-				if($objects_file <> '') $more_data .= $objects_file."\n";
+				if($objects_file <> '') $more_data .= $objects_file."\n"; */
 				}
 			$more_data .= "\n".$data;
 			echo "<h3><font color=\"red\">Converted MusicXML file:</font> <font color=\"blue\">".$upload_filename."</font></h3>";
@@ -634,6 +665,10 @@ if($imax > 0 AND substr_count($content,'{') > 0) {
 	}
 for($i = $j = 0; $i < $imax; $i++) {
 	$line = trim($table[$i]);
+	$error_mssg = '';
+	if(is_integer($pos=strpos($line,"[item ")) AND $pos == 0)
+		$title_this = preg_replace("/\[item\s([0-9]+)\].*/u",'$1',$line);
+	else $title_this = '';
 	$line = preg_replace("/\[.*\]/u",'',$line);
 	$line = preg_replace("/^i[0-9].*/u",'',$line); // Csound note statement
 	$line = preg_replace("/^f[0-9].*/u",'',$line); // Csound table statement
@@ -651,7 +686,6 @@ for($i = $j = 0; $i < $imax; $i++) {
 	fwrite($handle,$line_recoded."\n");
 	fclose($handle);
 	echo "<tr><td>".$j."</td><td>";
-	
 	$link_options .= "&item=".$j;
 	$link_options_play = $link_options."&output=".urlencode($bp_application_path.$output_folder.SLASH.$output_file)."&format=".$file_format;
 	$output_file_expand = str_replace(".sco",'',$output_file);
@@ -675,11 +709,12 @@ for($i = $j = 0; $i < $imax; $i++) {
 	if($n1 > $n2) $error_mssg .= "<font color=\"red\">This score contains ".($n1-$n2)." extra ‘{'</font>";
 	if($n2 > $n1) $error_mssg .= "<font color=\"red\">This score contains ".($n2-$n1)." extra ‘}'</font>";
 	if($error_mssg <> '') echo "<p>".$error_mssg."</p>";
-	$line_show = $line_recoded;
 	$length = strlen($line_recoded);
 	if($length > 400)
 		$line_show = "<br />".substr($line_recoded,0,100)."<br />&nbsp;... ... ...<br />".substr($line_recoded,-100,100);
+	else $line_show = $line_recoded;
 	echo "<small>";
+	if($title_this <> '') $line_show = "<b>[item ".$title_this."]</b> ".$line_show;
 	echo $line_show;
 	echo "</small></td></tr>";
 	}

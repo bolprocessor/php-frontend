@@ -5,7 +5,6 @@ $url_this_page = "produce.php";
 $this_title = "BP console";
 require_once("_header.php");
 
-
 $application_path = $bp_application_path;
 
 if(isset($_GET['startup'])) $startup = $_GET['startup'];
@@ -17,6 +16,15 @@ if($instruction == '') {
 	echo "ERROR: No instruction has been sent";
 	die();
 	}
+
+if($instruction == "produce" OR $instruction == "produce-all" OR $instruction == "play" OR $instruction == "expand") {
+	ob_start();
+	echo "<i>Patience! This process might take up to ".$max_sleep_time_after_bp_command." seconds…</i><br />\n";
+	ob_flush();
+	flush();
+	ob_end_flush();
+	}
+
 if(isset($_GET['here'])) $here = urldecode($_GET['here']);
 else $here = '???';
 if(isset($_GET['csound_file'])) $csound_file = $_GET['csound_file'];
@@ -24,7 +32,7 @@ else $csound_file = '';
 if(isset($_GET['item'])) $item = $_GET['item'];
 else $item = 0;
 
-$max_sleep_time_after_bp_command = 15;
+// $max_sleep_time_after_bp_command = 15;
 $check_command_line = FALSE;
 $sound_file_link = $result_file = '';
 if($instruction == "help") {
@@ -234,7 +242,8 @@ if($instruction <> "help") {
 				}
 			}
 		}
-	}	
+	}
+
 $o = send_to_console($command);
 $n_messages = count($o);
 $no_error = FALSE;
@@ -244,7 +253,7 @@ for($i = 0; $i < $n_messages; $i++) {
 	}
 echo "<hr>";
 
-if($data_path <> '') {
+if(isset($data_path) AND $data_path <> '') {
 	$content = @file_get_contents($data_path,TRUE);
 	if($content <> FALSE) {
 		if($instruction == "play") echo "<b>Playing #".$item."</b><br /><br />";

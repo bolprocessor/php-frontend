@@ -5,6 +5,7 @@ require('midi.class.php');
 
 define('MAXFILESIZE',50000000);
 define('SLASH',DIRECTORY_SEPARATOR);
+ini_set("auto_detect_line_endings",true);
 
 $test = FALSE;
 // $test = TRUE;
@@ -15,7 +16,7 @@ if(!isset($csound_resources) OR $csound_resources == '') $csound_resources = "cs
 save_settings("csound_resources",$csound_resources);
 if(!isset($trash_folder) OR $trash_folder == '') $trash_folder = "trash_bolprocessor";
 save_settings("trash_folder",$trash_folder);
-$max_sleep_time_after_bp_command = 15; // seconds. Maximum time allowed to the console
+$max_sleep_time_after_bp_command = 25; // seconds. Maximum time allowed to the console
 $default_output_format = "midi";
 
 $number_fields_csound_instrument = 67; // Never change this!
