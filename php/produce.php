@@ -16,13 +16,9 @@ if($instruction == '') {
 	echo "ERROR: No instruction has been sent";
 	die();
 	}
-
+ob_start();
 if($instruction == "produce" OR $instruction == "produce-all" OR $instruction == "play" OR $instruction == "expand") {
-	ob_start();
-	echo "<i>Patience! This process might take up to ".$max_sleep_time_after_bp_command." seconds…</i><br />\n";
-	ob_flush();
-	flush();
-	ob_end_flush();
+	echo "<i>Process might take more than ".$max_sleep_time_after_bp_command." seconds.<br />To reduce computation time, increase quantization or/and time resolution in the settings</i>.<br />";
 	}
 
 if(isset($_GET['here'])) $here = urldecode($_GET['here']);
@@ -32,7 +28,6 @@ else $csound_file = '';
 if(isset($_GET['item'])) $item = $_GET['item'];
 else $item = 0;
 
-// $max_sleep_time_after_bp_command = 15;
 $check_command_line = FALSE;
 $sound_file_link = $result_file = '';
 if($instruction == "help") {
@@ -213,7 +208,7 @@ if($check_command_line) {
 	echo "<p><font color=\"red\">➡</font> ".$command."</p>";
 	die();
 	}
-echo "<p><small>command = <font color=\"red\">".$command."</font></small></p>";
+echo "<p><small>command = <font color=\"red\">".$command."</font></small></p>\n";
 
 if($instruction <> "help") {
 	if($csound_file <> '') {
@@ -242,6 +237,35 @@ if($instruction <> "help") {
 				}
 			}
 		}
+	echo "<p id=\"timespan2\" style=\"text-align:center;\"><span class=\"blinking\">… … …</span></p>\n";
+	}
+
+ob_flush();
+flush();
+echo "<hr>";
+
+if(isset($data_path) AND $data_path <> '') {
+	$content = @file_get_contents($data_path,TRUE);
+	if($content <> FALSE) {
+		if($instruction == "play") echo "<p><b>Playing";
+		if($instruction == "expand") echo "<p><b>Expanding";
+		if($item > 0) echo " #".$item;
+		else echo ":";
+		echo "</b></p>";
+		echo "<p style=\"color:MediumTurquoise;\"><b>";
+		$table = explode(chr(10),$content);
+		for($i = 0; $i < count($table); $i++) {
+			$line = trim($table[$i]);
+			$line = recode_tags($line);
+			$line_show = $line;
+			if($line == '') continue;
+			$length = strlen($line);
+			if($length > 400)
+				$line_show = substr($line,0,100)."<br />&nbsp;&nbsp;... ... ...<br />".substr($line,-100,100);
+			echo $line_show."<br />";
+			}
+		echo "</b></p>";
+		}
 	}
 
 $o = send_to_console($command);
@@ -250,26 +274,6 @@ $no_error = FALSE;
 for($i = 0; $i < $n_messages; $i++) {
 	$mssg = $o[$i];
 	if(is_integer($pos=strpos($mssg,"Errors: 0")) AND $pos == 0) $no_error = TRUE;
-	}
-echo "<hr>";
-
-if(isset($data_path) AND $data_path <> '') {
-	$content = @file_get_contents($data_path,TRUE);
-	if($content <> FALSE) {
-		if($instruction == "play") echo "<b>Playing #".$item."</b><br /><br />";
-		if($instruction == "expand") echo "<b>Expanding #".$item."</b><br /><br />";
-		echo "<b><font color=\"green\">";
-		$table = explode(chr(10),$content);
-		for($i = 0; $i < count($table); $i++) {
-			$line_show = $line = trim($table[$i]);
-			if($line == '') continue;
-			$length = strlen($line);
-			if($length > 400)
-			$line_show = substr($line,0,100)."<br />&nbsp;&nbsp;... ... ...<br />".substr($line,-100,100);
-			echo $line_show."<br />";
-			}
-		echo "</font></b>";
-		}
 	}
 
 if($instruction == "help") {
@@ -282,23 +286,33 @@ if($instruction == "help") {
 	}
 
 if($instruction <> "help") {
-	$time_start = time();
+	$last_warning = $time_start = time();
 	$time_end = $time_start + $max_sleep_time_after_bp_command;
 	$donefile = $temp_dir."trace_".session_id()."_done.txt";
 //	echo $donefile."<br />";
+	$dots = 0;
 	while(TRUE) {
 		if(file_exists($donefile)) break;
 		if(time() > $time_end) {
 			echo "<p><font color=\"red\">Maximum time (".$max_sleep_time_after_bp_command." seconds) spent waiting for the 'done.txt' file… The process is incomplete!</font></p>";
 			break;
 			}
+		sleep(1);
+		$time_done = time() - $last_warning;
+		if($time_done > 1) {
+			if($dots == 0) echo "<br /><br />Waiting ";
+			else echo ".";
+			$last_warning = time();
+			$dots++;
+			}
 		}
+	if($dots > 0) echo "<br /><br />";
 	@unlink($donefile);
 	$tracefile_html = clean_up_file_to_html($tracefile);
 	$trace_link = $tracefile_html;
 	$output_link = $output;
 //	$test = TRUE;
-	if($test) echo "output = ".$output."<br />";
+	if($test) echo "<br />output = ".$output."<br />";
 	if($test) echo "tracefile_html = ".$tracefile_html."<br />";
 	if($test) echo "dir = ".$dir."<br />";
 	if($test) echo "trace_link = ".$trace_link."<br />";

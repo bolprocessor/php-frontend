@@ -470,12 +470,12 @@ if($csound_file <> '') {
 			else echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains definitions of instrument(s):";
 			echo "<ol style=\"margin-top:0px; margin-bottom:0px\">";
 			for($i_instr = 0; $i_instr < $max_instr; $i_instr++) {
-				echo "<li><b>_ins(</b><font color=\"green\">".$list[$i_instr]."</font><b>)</b>";
+				echo "<li><b>_ins(</b><font color=\"MediumTurquoise\">".$list[$i_instr]."</font><b>)</b>";
 				$param_list = $list_of_instruments['param'][$i_instr];
 				if(count($param_list) > 0) {
 					echo " ➡ parameter(s) ";
 					for($i_param = 0; $i_param < count($param_list); $i_param++) {
-						echo " “<font color=\"green\">".$param_list[$i_param]."</font>”";
+						echo " “<font color=\"MediumTurquoise\">".$param_list[$i_param]."</font>”";
 						}
 					}
 				echo "</li>";
@@ -612,20 +612,24 @@ $n2 = substr_count($expression,'}');
 if($n1 > $n2) $error_mssg .= "<font color=\"red\">This expression contains ".($n1-$n2)." extra ‘{'</font>";
 if($n2 > $n1) $error_mssg .= "<font color=\"red\">This expression contains ".($n2-$n1)." extra ‘}'</font>";
 if($error_mssg <> '') echo "<p>".$error_mssg."</p>";
-echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"saveexpression\" value=\"SAVE THIS EXPRESSION\">&nbsp;then&nbsp;<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_play_expression."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" value=\"PRODUCE ITEM\">";
-
 if(isset($_POST['saveexpression'])) {
 	if($expression == '') {
 		echo "<p id=\"timespan\"><font color=\"red\">➡ Cannot play empty expression…</font></p>";
 		}
 	else {
 		echo "<p id=\"timespan\"><font color=\"red\">➡ Saving:</font> <font color=\"blue\"><big>".$recoded_expression."</big></font></p>";
-		$result_file = $output.SLASH.$output_file;
+	//	$result_file = $output.SLASH.$output_file;
 		$handle = fopen($data_expression,"w");
 		fwrite($handle,$expression."\n");
 		fclose($handle);
 		}
 	}
+echo "<input  type=\"submit\" name=\"saveexpression\" style=\"background-color:azure;\" value=\"SAVE THIS EXPRESSION\">&nbsp;then&nbsp;<input onclick=\"window.open('".$link_play_expression."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" value=\"PRODUCE ITEM\"";
+if(!file_exists($data_expression)) echo " disabled style=\"background-color:azure; box-shadow: none;\"";
+else echo " style=\"color:DarkBlue; background-color:Aquamarine;\"";
+echo ">";
+
+
 echo "</form>";
 echo "</body>";
 echo "</html>";

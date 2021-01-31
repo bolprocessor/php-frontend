@@ -14,7 +14,7 @@ require_once("_header.php");
 echo "<p>Current directory = ".$dir."</p>";
 echo link_to_help();
 	
-echo "<h2>Csound orchestra file <big>“<font color=\"green\">".$filename."</font>”</big></h2>";
+echo "<h2>Csound orchestra file <big>“<font color=\"MediumTurquoise\">".$filename."</font>”</big></h2>";
 
 if(isset($_POST['savethisfile'])) {
 	echo "<p id=\"timespan\" style=\"color:red;\">Saved file…</p>";

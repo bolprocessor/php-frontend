@@ -1,5 +1,5 @@
-// This is the help file for Bol Processor.
-// When editing it, beware that BP2 looks for prefixes. Therefore, if an item is
+// This is the help file for Bol Processor BP2 and BP3.
+// When editing it, beware that BP3 looks for prefixes. Therefore, if an item is
 // the prefix of another one then it should precede it in this file.
 ### Help 
 • To access on-line help, type cmd-? or select "Help" in the "Action" menu.
@@ -787,12 +787,14 @@ When checked, BP2 will use the quantization setting (in milliseconds) to simplif
     compute very complex items.
 ### _script(scriptline) [Performance control]
 The script line will be executed at "performance time". Note that the line may be
-    a call to another script, etc...
+    a call to another script, etc.
 ### _scale(name,blockkey) [Performance control]
 If microtonal scales have been defined in the Csound instruments file, they can be selected as follows:
 • By default, a 12-tone equal-tempered scale is used.
 • "name" is the label of the scale, by default "scale_1", "scale_2" etc. (no space)
-• "blockkey" specifies the key of a note whose frequency should keep matching equal-temperament. For instance, if blockkey = 69 then 'A4' will always match the diapason. The default value of 'blockkey' is stored in the settings.
+• "blockkey" specifies the key of the note whose frequency should always match equal-temperament. For instance, if blockkey = 69 then 'A4' will stick to diapason (A4 frequency). Default value of 'blockkey' is stored in the settings.
+• If blockkey is 0 in a _scale() statement, it is set to its value found in the settings or by default 60.
+• In a _scale() statement, blockkey may be specified as a note, e.g. 'G4', instead of a key number. Beware of using the same note convention as in the grammar...
 • _scale(0,blockkey) will reset the scale to equal-tempered, in which case 'blockkey' is irrelevant.
 • If exactly 1 scale has been loaded from the Csound instruments file, it will be used by default, i.e. even if no _scale(name,blockkey) instruction is used.
 • Values of 'scale' and 'blockkey' are carried through fields of polymetric expressions and not influenced by _chan() nor _ins() instructions.
@@ -1580,16 +1582,14 @@ Sets controller i to 0 on channel c. For instance, if controller 64 is the hold 
 ### _volumestep [Performance control]
 Indicates that volume should change stepwise between two specified values.
 ### _legato(x) [Performance control]
-Indicates that durations will be increased by x% to produce legato effect.
-• Range of x is 0..127
-• The argument may also be Kx.  See "variable arguments".
+Indicates that durations of notes in the following sequence will be increased by x% to produce legato effect.
 ### _staccato(x) [Performance control]
-Indicates that durations will be decreased by x% to produce staccato effect.
+Indicates that durations of notes in the following sequence will be decreased by x% to produce staccato effect.
 ### _articulstep [Performance control]
-Indicates that articulation (legato-staccato) should change stepwise between two
+Indicates that articulation (legato-staccato) of notes in the following sequence should change stepwise between two
 specified values.
 ### _articulcont [Performance control]
-Indicates that articulation (legato-staccato) should change continuously between two
+Indicates that articulation (legato-staccato) of notes in the following sequence should change continuously between two
 specified values.
 ### _velfixed [Performance control]
 Cancels the effect of _velcont or _velstep.

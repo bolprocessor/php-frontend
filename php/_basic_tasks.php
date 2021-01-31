@@ -16,11 +16,13 @@ if(!isset($csound_resources) OR $csound_resources == '') $csound_resources = "cs
 save_settings("csound_resources",$csound_resources);
 if(!isset($trash_folder) OR $trash_folder == '') $trash_folder = "trash_bolprocessor";
 save_settings("trash_folder",$trash_folder);
-$max_sleep_time_after_bp_command = 25; // seconds. Maximum time allowed to the console
+$max_sleep_time_after_bp_command = 30; // seconds. Maximum time allowed waiting for the 'done.txt' file
 $default_output_format = "midi";
 
 $number_fields_csound_instrument = 67; // Never change this!
-$number_midi_parameterss_csound_instrument = 6; // Never change this!
+$number_midi_parameters_csound_instrument = 6; // Never change this!
+
+$max_term_in_fraction = 128; // Used to simplfy fractions when importing scores
 
 $temp_dir = $bp_application_path."temp_bolprocessor";
 if(!file_exists($temp_dir)) {
@@ -1925,7 +1927,7 @@ function list_of_tonal_scales($csound_orchestra_file) {
 	}
 
 function list_of_instruments($csound_orchestra_file) {
-	global $number_fields_csound_instrument, $number_midi_parameterss_csound_instrument;
+	global $number_fields_csound_instrument, $number_midi_parameters_csound_instrument;
 	$list_of_instruments['list'] = array();
 	if(!file_exists($csound_orchestra_file)) return $list;
 	$content = @file_get_contents($csound_orchestra_file,TRUE);
@@ -1952,7 +1954,7 @@ function list_of_instruments($csound_orchestra_file) {
 			$Instrument_paramlist_name = preg_replace("/<\/?html>/u",'',$table[++$i]);
 		//	echo $i." Instrument_paramlist_name = ".$Instrument_paramlist_name."<br />";
 			$list_of_instruments['param'][$j][] = $Instrument_paramlist_name;
-			$i += ($number_midi_parameterss_csound_instrument + 1);
+			$i += ($number_midi_parameters_csound_instrument + 1);
 			}
 		}
 	return $list_of_instruments;
@@ -2255,5 +2257,34 @@ function merge_names($name1,$name2) {
 	$result = implode("=",$table_merge);
 	if($result == '') $result = '•';
 	return $result;
+	}
+
+function simplify($fraction,$max_term) {
+	$fraction = trim($fraction);
+	$simplify['fraction'] = $fraction;
+	$simplify['done'] = FALSE;
+	if($max_term <= 0) return $simplify;
+	if(!is_integer($pos=strpos($fraction,"/")) OR $pos == 0) return $simplify;
+	$table = explode("/",$fraction);
+	if(count($table) <> 2) return $simplify;
+	$num = $table[0];
+	$den = $table[1];
+	$the_max = 0;
+	if($num > $max_term) $the_max = $num;
+	if($den > $num AND $den > $max_term) $the_max = $den;
+	if($the_max == 0) return $simplify;
+	$ratio = $max_term / $the_max;
+	$num = round($num * $ratio);
+	$den = round($den * $ratio);
+	if(($num * $den) ==  0) $fraction = '';
+	else {
+		$gcd = gcd($num,$den);
+		$num = $num / $gcd;
+		$den = $den / $gcd;
+		$fraction = $num."/".$den;
+		}
+	$simplify['fraction'] = $fraction;
+	$simplify['done'] = TRUE;
+	return $simplify;
 	}
 ?>

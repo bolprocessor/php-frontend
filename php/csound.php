@@ -610,7 +610,7 @@ for($j = 0; $j < $number_instruments; $j++) {
 	$InstrumentPanoramicGEN[$j] = $table[++$i];
 	if($verbose) echo "Instrument panoramicGEN = ".$InstrumentPanoramicGEN[$j]."<br />";
 	fwrite($handle_instrument,$InstrumentPanoramicGEN[$j]."\n");
-	for($ii = 0; $ii < $number_midi_parameterss_csound_instrument; $ii++) {
+	for($ii = 0; $ii < $number_midi_parameters_csound_instrument; $ii++) {
 		$InstrumentPitchbend[$j][$ii] = $table[++$i];
 		if($verbose) echo "Instrument Pitchbend[".$ii."] = ".$InstrumentPitchbend[$j][$ii]."<br />";
 		fwrite($handle_instrument,$InstrumentPitchbend[$j][$ii]."\n");
@@ -804,7 +804,7 @@ foreach($dircontent as $some_scale) {
 	$table = explode(".",$some_scale);
 	$extension = end($table);
 	if($extension == "old") {
-		if($deleted_scales == 0) echo "<p>Deleted scale(s): <font color=\"green\"><b>";
+		if($deleted_scales == 0) echo "<p>Deleted scale(s): <font color=\"MediumTurquoise\"><b>";
 		$deleted_scales++;
 		echo str_replace(".old",'',$some_scale)." ";
 		}
@@ -827,7 +827,7 @@ if($max_scales > 0) {
 			else $scale_notes_string .= $_POST['new_note_'.$i]." ";
 			}
 		$scale_notes_string = trim($scale_notes_string)."/";
-		echo "<p>New note names: <font color=\"red\">".$scale_notes_string."</font></p><font color=\"green\"><b>";
+		echo "<p>New note names: <font color=\"red\">".$scale_notes_string."</font></p><font color=\"MediumTurquoise\"><b>";
 		$dircontent = scandir($dir_scales);
 		foreach($dircontent as $this_file) {
 			if($this_file == '.' OR $this_file == ".." OR $this_file == ".DS_Store") continue;
@@ -1173,7 +1173,7 @@ if($max_scales > 0) {
 	$table_names = $p_interval = $q_interval = $cent_position = $ratio_interval = array();
 	for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
 		$link_edit = "scale.php";
-		echo "<li><font color=\"green\"><b>".$scale_name[$i_scale]."</b></font> ";
+		echo "<li><font color=\"MediumTurquoise\"><b>".$scale_name[$i_scale]."</b></font> ";
 		echo "➡ <input type=\"submit\" style=\"background-color:Aquamarine;\" name=\"edit_scale\" formaction=\"".$link_edit."?scalefilename=".urlencode($scale_name[$i_scale])."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT this scale\">";
 		echo "&nbsp;<input type=\"submit\" style=\"background-color:yellow;\" name=\"delete_scale_".$i_scale."\" formaction=\"".$url_this_page."&scalefilename=".urlencode($scale_name[$i_scale])."\" onclick=\"this.form.target='_self';return true;\" value=\"DELETE this scale (can be reversed)\">";
 		
@@ -1256,7 +1256,7 @@ if($max_scales > 0) {
 		for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
 			if(isset($_POST['delete_scale_'.$i_scale])) {
 				$scalefile = $dir_scales.$scale_name[$i_scale].".txt";
-				echo "Deleting <font color=\"green\"><b>‘".$scale_name[$i_scale]."’</b></font><br />";
+				echo "Deleting <font color=\"MediumTurquoise\"><b>‘".$scale_name[$i_scale]."’</b></font><br />";
 				unlink($scalefile);
 				$found_one = TRUE;
 				}
@@ -1307,7 +1307,7 @@ if($max_scales > 0) {
 					for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
 						if(isset($_POST['export_'.$i_scale])) {
 							$scalefilename = $scale_name[$i_scale];
-							echo "<li><font color=\"green\"><b>".$scalefilename."</b></font>";
+							echo "<li><font color=\"MediumTurquoise\"><b>".$scalefilename."</b></font>";
 							if(in_array($scalefilename,$some_scale)) {
 								echo "<br />&nbsp;&nbsp;<font color=\"red\">➡ A scale with the same name</font> <font color=\"blue\">‘".$scalefilename."’</font> <font color=\"red\">already exists in</font> <font color=\"blue\">‘".$destination."’</font><font color=\"red\">. You need to delete it before copying this version</font>";
 								}
@@ -1412,8 +1412,8 @@ if($max_scales > 0) {
 				if($k == $kmaxi) {
 					$cent_drift = round($cent_position[$i_scale]) - round($cent_position[$j_scale]);
 					echo "<br >&nbsp;&nbsp;=> this scale is identical to <font color=\"blue\">".$scale_name[$j_scale]."</font>";
-					if($cent_drift > 0) echo " <font color=\"green\">➡ raised by ".$cent_drift." cents</font>";
-					if($cent_drift < 0) echo " <font color=\"green\">➡ lowered by ".(-$cent_drift)." cents</font>";
+					if($cent_drift > 0) echo " <font color=\"MediumTurquoise\">➡ raised by ".$cent_drift." cents</font>";
+					if($cent_drift < 0) echo " <font color=\"MediumTurquoise\">➡ lowered by ".(-$cent_drift)." cents</font>";
 					}
 				}
 			echo "</li>";

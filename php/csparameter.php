@@ -26,7 +26,7 @@ if($test) echo "parameter_name = ".$parameter_name."<br />";
 
 echo "<p>Folder of this instrument: <font color=\"blue\">".$folder_this_instrument."</font>";
 echo link_to_help();
-echo "<h2>Csound parameter <big>“<font color=\"green\">".$parameter_name."</font>”</big></h2>";
+echo "<h2>Csound parameter <big>“<font color=\"MediumTurquoise\">".$parameter_name."</font>”</big></h2>";
 echo "<p>This parameter belongs to <big>_ins(".$instrument_index.") “<font color=\"blue\">".$instrument_name."</font>”</big> in file “<font color=\"blue\">".$csfilename."</font>”</p>";
 
 if(isset($_POST['saveparameter'])) {

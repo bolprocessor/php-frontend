@@ -46,7 +46,7 @@ if($content) {
 	ksort($script_more);
 	}
 
-echo "<h2>Script <big>“<font color=\"green\">".$filename."</font>”</big></h2>";
+echo "<h2>Script <big>“<font color=\"MediumTurquoise\">".$filename."</font>”</big></h2>";
 
 if(isset($_POST['addinstruction'])) {
 	$index = $_POST['i'];
@@ -107,11 +107,11 @@ if(isset($_POST['checkscript'])) {
 			}
 		switch($status) {
 			case '0': $tag = "<font color=\"red\">(no)</font>"; break;
-			case '1': $tag = "<font color=\"green\">✓</font>"; break;
+			case '1': $tag = "<font color=\"MediumTurquoise\">✓</font>"; break;
 			case '2': $tag = "<font color=\"blue\">(soon)</font>"; break;
 			}
 		$recoded_line = recode_tags($line);
-		echo "&nbsp;&nbsp;&nbsp;".$tag." [<font color=\"green\">".$instruction.$more."</font>] ".$recoded_line.$remark."<br />";
+		echo "&nbsp;&nbsp;&nbsp;".$tag." [<font color=\"MediumTurquoise\">".$instruction.$more."</font>] ".$recoded_line.$remark."<br />";
 		}
 	}
 
@@ -172,7 +172,7 @@ function list_script_instructions($script_status,$script_more) {
 	foreach($script_status as $instruction => $status) {
 		switch($status) {
 			case '0': $tag = "<font color=\"red\">(obsolete)</font>"; break;
-			case '1': $tag = "<font color=\"green\">✓</font>"; break;
+			case '1': $tag = "<font color=\"MediumTurquoise\">✓</font>"; break;
 			case '2': $tag = "<font color=\"blue\">(soon)</font>"; break;
 			}
 		$more = $script_more[$instruction];

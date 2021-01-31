@@ -977,7 +977,7 @@ for($j = $j_col = 0; $j < $numgrades_fullscale; $j++) {
 		}
 	$j_col++;
 	echo "<td style=\"text-align:center;\">";
-	if($key[$j] > 0) echo "<font color=\"green\"><b>".$key[$j]."</b></font><br />";
+	if($key[$j] > 0) echo "<font color=\"MediumTurquoise\"><b>".$key[$j]."</b></font><br />";
 	$the_width = strlen($name[$j]);
 	if($the_width < 5) $the_width = 5;
 	echo "<input style=\"text-align:center;\" type=\"text\" name=\"new_name_".$j."\" size=\"".$the_width."\" value=\"".$name[$j]."\">";
@@ -1767,7 +1767,7 @@ if($done AND $numgrades_with_labels > 2 AND !$warned_ratios) {
 						$q_transpose_from = $q_transpose_from / $gcd;
 						}
 					$ratio_transpose_from = $ratio[$j_transpose_from];
-					echo "<p><font color=\"green\">Transposition from</font> <font color=\"blue\">‘".$transpose_from_note."’</font> fraction ".$p_transpose_from."/".$q_transpose_from." (".$grade_transpose_from."th position) ";
+					echo "<p><font color=\"MediumTurquoise\">Transposition from</font> <font color=\"blue\">‘".$transpose_from_note."’</font> fraction ".$p_transpose_from."/".$q_transpose_from." (".$grade_transpose_from."th position) ";
 					$p_transpose_to = $p[$j_transpose_to];
 					$q_transpose_to = $q[$j_transpose_to];
 					if(($p_transpose_to * $q_transpose_to) <> 0) {
@@ -1776,7 +1776,7 @@ if($done AND $numgrades_with_labels > 2 AND !$warned_ratios) {
 						$q_transpose_to = $q_transpose_to / $gcd;
 						}
 					$ratio_transpose_to = $ratio[$j_transpose_to];
-					echo "<font color=\"green\">to</font> <font color=\"blue\">‘".$transpose_to_note."’</font> fraction ".$p_transpose_to."/".$q_transpose_to." (".$grade_transpose_to."th position)</p>";
+					echo "<font color=\"MediumTurquoise\">to</font> <font color=\"blue\">‘".$transpose_to_note."’</font> fraction ".$p_transpose_to."/".$q_transpose_to." (".$grade_transpose_to."th position)</p>";
 					$p_transpose = $p_transpose_to * $q_transpose_from;
 					$q_transpose = $q_transpose_to * $p_transpose_from;
 					if(($p_transpose * $q_transpose) <> 0) {
@@ -1841,7 +1841,7 @@ if($done AND $numgrades_with_labels > 2 AND !$warned_ratios) {
 							$p_new = $p_this_grade[$jj];
 							$q_new = $q_this_grade[$jj];
 							$this_ratio = $ratio_this_grade[$jj];
-							echo " <font color=\"green\">approximated to</font> ";
+							echo " <font color=\"MediumTurquoise\">approximated to</font> ";
 							if(($p_new * $q_new) > 0) echo $p_new."/".$q_new." = ";
 							echo round($this_ratio,3);
 							}
@@ -1922,7 +1922,7 @@ if($done AND $numgrades_with_labels > 2 AND !$warned_ratios) {
 			else {
 				// Transpose by raising all notes
 				$this_ratio = $p_raise / $q_raise;
-				echo "<p><font color=\"green\">Transposition</font> by raising all notes, fraction = ".$p_raise."/".$q_raise." = ".round($this_ratio,3)."</p>";
+				echo "<p><font color=\"MediumTurquoise\">Transposition</font> by raising all notes, fraction = ".$p_raise."/".$q_raise." = ".round($this_ratio,3)."</p>";
 				for($j = $jj = 0; $j <= $numgrades_fullscale; $j++) {
 				//	if($name[$j] == '') continue;
 					$new_ratio = $this_ratio * $ratio[$j];
@@ -1973,7 +1973,7 @@ if($done AND $numgrades_with_labels > 2 AND !$warned_ratios) {
 			
 			// Now save to exported file	
 			echo "<br />";
-			echo "<font color=\"green\">Saved to new scale</font> <font color=\"blue\">‘".$new_scale_name."’</font>&nbsp;<input style=\"background-color:Aquamarine;\" type=\"submit\" name=\"edit_new_scale\" formaction=\"".$link_edit."?scalefilename=".urlencode($new_scale_name)."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$new_scale_name."’\"></p>";
+			echo "<font color=\"MediumTurquoise\">Saved to new scale</font> <font color=\"blue\">‘".$new_scale_name."’</font>&nbsp;<input style=\"background-color:Aquamarine;\" type=\"submit\" name=\"edit_new_scale\" formaction=\"".$link_edit."?scalefilename=".urlencode($new_scale_name)."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$new_scale_name."’\"></p>";
 			$transpose_scale_name = $new_scale_name;
 			$handle = fopen($dir_scales.$new_scale_file,"w");
 			fwrite($handle,"\"".$new_scale_name."\"\n");
@@ -2181,7 +2181,7 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 			$string_sensitive_notes .= $name[$sensitive_note]." ";
 			}
 		}
-	echo "<p style=\"\"><b>Colors: <font color=\"blue\">Perfect fifth</font> / <font color=\"red\">Wolf fifth</font> — <font color=\"green\">Harmonic major third</font> / <font color=\"brown\">Pythagorean major third</font></b><br />➡ <i>Wolf fifths indicate ‘sensitive notes’";
+	echo "<p style=\"\"><b>Colors: <font color=\"blue\">Perfect fifth</font> / <font color=\"red\">Wolf fifth</font> — <font color=\"MediumTurquoise\">Harmonic major third</font> / <font color=\"brown\">Pythagorean major third</font></b><br />➡ <i>Wolf fifths indicate ‘sensitive notes’";
 	if($list_sensitive_notes <> '') echo ", here: </i><b><font color=\"red\">".trim($string_sensitive_notes)."</font></b><i>";
 	echo "</i></p>";
 	echo "<input type=\"hidden\" name=\"list_sensitive_notes\" value=\"".$list_sensitive_notes."\">";
@@ -2259,7 +2259,7 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 				if($dist < -1) {
 					$deviation = " (-".round(abs($dist)).")";
 					}
-				echo "<font color=\"green\">".$name[$j]." ".$name[$k]."</font><small>".$deviation."</small><br />";
+				echo "<font color=\"MediumTurquoise\">".$name[$j]." ".$name[$k]."</font><small>".$deviation."</small><br />";
 				$harmthird[$j] = $k;
 				store2($h_image,"harmthird",$j,$k);
 				}
