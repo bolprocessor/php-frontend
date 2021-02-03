@@ -52,17 +52,17 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 		}
 	else {
 		// First we save current content of window
-		$content = $_POST['thistext'];
-		if($more_data <> '') $content = $more_data."\n\n".$content;
+		$save_content = $content = $_POST['thistext'];
+		if(/*$reload_musicxml AND */ $more_data <> '') $save_content = $more_data."\n\n".$save_content;
 		$handle = fopen($this_file,"w");
 		$file_header = $top_header."\n// Data saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
-		do $content = str_replace("  ",' ',$content,$count);
+		do $save_content = str_replace("  ",' ',$save_content,$count);
 		while($count > 0);
 		fwrite($handle,$file_header."\n");
-		fwrite($handle,$content);
+		fwrite($handle,$save_content);
 		fclose($handle);
 		
-		$content = $_POST['thistext'];
+	//	$content = $_POST['thistext'];
 		$content = str_replace(chr(13).chr(10),chr(10),$content);
 		$content = str_replace(chr(13),chr(10),$content);
 		$declarations = '';
@@ -99,342 +99,448 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			}
 		else {
 			$message = '';
-			$data = '';
-			$partwise = $timewise = $note_on = $pitch = $backup = $attributes = $attributes_key = $changed_attributes = $forward = $time_modification = $told_fraction1 = $told_fraction2  = $told_fraction3 = FALSE;
-			$actual_notes = $normal_notes = $alter = $duration_measure = $note_duration = 0;
-			$part = $measure = $step = -1;
-			$s = array();
-			$score_part = $subtitle_part = $this_octave = $this_note = '';
-			$instrument_name = $midi_channel = $divisions = $fifths = $mode = $duration_part = $select_part = array();
-			$file = fopen($music_xml_file,"r");
-			while(!feof($file)) {
-				$line = fgets($file);
-				if(is_integer($pos=strpos($line,"<score-partwise")) AND $pos == 0) $partwise = TRUE;
-				if(is_integer($pos=strpos($line,"<score-timewise")) AND $pos == 0) $timewise = TRUE;
-				if(is_integer($pos=strpos($line,"<score-part "))) {
-					$score_part = trim(preg_replace("/.*id=\"([^\"]+)\".*/u","$1",$line));
-					}
-				if(is_integer($pos=strpos($line,"</score-part>"))) {
-					$part_selection = "select_part_".$score_part;
-					$select_part[$score_part] = isset($_POST[$part_selection]);
-					$message .= "<input type=\"checkbox\" name=\"".$part_selection."\"";
-					if($select_part[$score_part]) {
-						$message .= " checked";
-						echo "Score part ‘".$score_part."’ has been selected.<br />";
+			$data = $score_part = $subtitle_part = '';
+			$max_measure = 0;
+			$partwise = $timewise = $attributes = $attributes_key = $changed_attributes = FALSE;
+			$instrument_name = $midi_channel = $select_part = $duration_part = $divisions = array();
+			
+			$new_method = FALSE;
+			$new_method = TRUE;
+			
+			if($new_method) {
+				$this_score = array();
+				$part = $measure = -1;
+				$reading_measure = FALSE;
+				$file = fopen($music_xml_file,"r");
+				while(!feof($file)) {
+					$line = fgets($file);
+					if(is_integer($pos=strpos($line,"<score-partwise")) AND $pos == 0) $partwise = TRUE;
+					if(is_integer($pos=strpos($line,"<score-timewise")) AND $pos == 0) $timewise = TRUE;
+					if(is_integer($pos=strpos($line,"<score-part "))) {
+						$score_part = trim(preg_replace("/.*id=\"([^\"]+)\".*/u","$1",$line));
 						}
-					$message .= "> Score part ‘".$score_part."’ instrument = <i>".$instrument_name[$score_part]."</i>";
-					if(isset($midi_channel[$score_part]) AND $midi_channel[$score_part] <> '') {
-						$message .= " — MIDI channel ".$midi_channel[$score_part];
-						}
-					$message .= "<br />";
-					if($select_part[$score_part] OR !$reload_musicxml) {
-						$subtitle_part .= "// Score part ‘".$score_part."’: instrument = ".$instrument_name[$score_part];
+					if(is_integer($pos=strpos($line,"</score-part>"))) {
+						$part_selection = "select_part_".$score_part;
+						$select_part[$score_part] = isset($_POST[$part_selection]);
+						$message .= "<input type=\"checkbox\" name=\"".$part_selection."\"";
+						if($select_part[$score_part]) {
+							$message .= " checked";
+							echo "Score part ‘".$score_part."’ has been selected.<br />";
+							}
+						$message .= "> Score part ‘".$score_part."’ instrument = <i>".$instrument_name[$score_part]."</i>";
 						if(isset($midi_channel[$score_part]) AND $midi_channel[$score_part] <> '') {
-							$subtitle_part .= " — MIDI channel ".$midi_channel[$score_part];
-							}
-						$subtitle_part .= "\n";
-						}
-					$score_part = '';
-					}
-				if($score_part <> '' AND is_integer($pos=strpos($line,"<instrument-name>"))) {
-					$instrument_name[$score_part] = trim(preg_replace("/<instrument\-name>(.+)<\/instrument\-name>/u","$1",$line));
-					}
-				if($score_part <> '' AND is_integer($pos=strpos($line,"<midi-channel>"))) {
-					$midi_channel[$score_part] = trim(preg_replace("/<midi\-channel>([0-9]+)<\/midi\-channel>/u","$1",$line));
-					}
-				if($partwise AND is_integer($pos=strpos($line,"<part "))) {
-					$measure = -1;
-					$part = trim(preg_replace("/.*id=\"([^\"]+)\".*/u","$1",$line));
-					}
-				if(is_integer($pos=strpos($line,"<attributes>"))) {
-					$attributes = TRUE;
-					$changed_attributes = FALSE;
-					}
-				if($attributes AND is_integer($pos=strpos($line,"<divisions>"))) {
-					$divisions[$part] = trim(preg_replace("/<divisions>([0-9]+)<\/divisions>/u","$1",$line));
-					$changed_attributes = TRUE;
-					}
-				if($attributes AND is_integer($pos=strpos($line,"<key>"))) {
-					$attributes_key =  TRUE;
-					}
-				if($attributes_key AND is_integer($pos=strpos($line,"<fifths>"))) {
-					$fifths[$part] = trim(preg_replace("/<fifths>(.+)<\/fifths>/u","$1",$line));
-					$changed_attributes = TRUE;
-					}
-				if($attributes_key AND is_integer($pos=strpos($line,"<mode>"))) {
-					$mode[$part] = trim(preg_replace("/<mode>(.+)<\/mode>/u","$1",$line));
-					$changed_attributes = TRUE;
-					}
-				if($attributes AND is_integer($pos=strpos($line,"</key>"))) {
-					$attributes_key =  FALSE;
-					}
-				if(is_integer($pos=strpos($line,"</attributes>"))) {
-					$attributes = FALSE;
-					if($changed_attributes AND !is_integer($pos=strpos($part,"_@"))) {
-						if(isset($divisions[$part]) AND $divisions[$part] > 0) {
-							$message .= "Part ‘".$part."’ divisions = ".$divisions[$part];
-							}
-						if(isset($fifths[$part]) AND $fifths[$part] <> 0) {
-							$message .= ", fifths = ".$fifths[$part];
-							}
-						if(isset($mode[$part]) AND $mode[$part] <> '') {
-							$message .= ", mode = ".$mode[$part];
+							$message .= " — MIDI channel ".$midi_channel[$score_part];
 							}
 						$message .= "<br />";
+						if($select_part[$score_part] OR !$reload_musicxml) {
+							$subtitle_part .= "// Score part ‘".$score_part."’: instrument = ".$instrument_name[$score_part];
+							if(isset($midi_channel[$score_part]) AND $midi_channel[$score_part] <> '') {
+								$subtitle_part .= " — MIDI channel ".$midi_channel[$score_part];
+								}
+							$subtitle_part .= "\n";
+							}
+						$score_part = '';
 						}
-					}
-				if(is_integer($pos=strpos($line,"<measure "))) {
-					$step = -1; $level = 0; $duration_measure = 0;
-					$measure = trim(preg_replace("/.*number=\"([0-9]+)\".*/u","$1",$line));
-					if($test_musicxml) echo "measure #".$measure."<br />";
-					}
-				if(is_integer($pos=strpos($line,"</measure>"))) {
-					$duration_part[$part] = $duration_measure;
-					if($test_musicxml) echo "duration_measure = ".$duration_measure." level = ".$level."<br /><br />";
-					$duration_measure = 0;
-					}
-				if(is_integer($pos=strpos($line,"<backup>"))) {
-					$backup = TRUE;
-					if(isset($midi_channel[$part]) AND $midi_channel[$part] > 0)
-						$chan = $midi_channel[$part];
-					else $chan = 0;
-					if(isset($divisions[$part]) AND $divisions[$part] > 0)
-						$div = $divisions[$part];
-					else $div = 0;
-					$duration_part[$part] = $duration_measure;
-					$part .= "_@";
-					$midi_channel[$part] = $chan;
-					$divisions[$part] = $div;
-					$duration_measure = 0;
-					$step = -1;
-					}
-				if($backup AND is_integer($pos=strpos($line,"<duration>"))) {
-					$duration_part[$part] = trim(preg_replace("/<duration>([0-9]+)<\/duration>/u","$1",$line));
-					}
-				if(is_integer($pos=strpos($line,"</backup>"))) {
-					$backup = FALSE;
-					}
-				if(is_integer($pos=strpos($line,"<forward>"))) {
-					$step++;
-					$forward = TRUE;
-					}
-				if(is_integer($pos=strpos($line,"</forward>"))) {
-					$forward = FALSE;
-					$s[$measure][$part][$step]['note'] = "rest";
-					$s[$measure][$part][$step]['duration'] = $note_duration;
-					if($level == 0) $duration_measure += $note_duration;
-					$s[$measure][$part][$step]['level'] = $level;
-					$s[$measure][$part][$step]['alter'] = 0;
-					$s[$measure][$part][$step]['octave'] = 0;
-					}
-				if(is_integer($pos=strpos($line,"<note ")) OR is_integer($pos=strpos($line,"<note>"))) {
-					if(!$partwise) {
-						$message .= "<font color=\"red\">➡ </font> Could not convert this file because it is not in ‘partwise’ format<br />";
-						break;
+					if($score_part <> '' AND is_integer($pos=strpos($line,"<instrument-name>"))) {
+						$instrument_name[$score_part] = trim(preg_replace("/<instrument\-name>(.+)<\/instrument\-name>/u","$1",$line));
 						}
-					$step++;
-					$note_on = TRUE;
-					$is_chord = $rest = FALSE;
-					$note_duration = 0;
-				//	$s[$measure][$part][$step]['note'] = '';
-					}
-				if($note_on AND is_integer($pos=strpos($line,"<chord/>"))) {
-					$level++;
-					$is_chord = TRUE;
-					}
-				if($note_on AND (is_integer($pos=strpos($line,"<rest ")) OR is_integer($pos=strpos($line,"<rest/>")) OR is_integer($pos=strpos($line,"<rest>")))) {
-					$rest = TRUE;
-					$is_chord = FALSE;
-					$this_octave = 0;
-					if($test_musicxml) echo "rest<br />";
-					}
-				if($note_on AND is_integer($pos=strpos($line,"<grace/>"))) {
-					$note_duration = 0;
-					}
-				if(($note_on OR $forward) AND is_integer($pos=strpos($line,"<duration>"))) {
-					$note_duration = trim(preg_replace("/<duration>([0-9]+)<\/duration>/u","$1",$line));
-					}
-				if($note_on AND is_integer($pos=strpos($line,"<time-modification>"))) {
-					$time_modification = TRUE;
-					}
-				if($time_modification AND is_integer($pos=strpos($line,"<actual-notes>"))) {
-					$actual_notes = trim(preg_replace("/<actual\-notes>([0-9]+)<\/actual\-notes>/u","$1",$line));
-					}
-				if($time_modification AND is_integer($pos=strpos($line,"<normal-notes>"))) {
-					$normal_notes = trim(preg_replace("/<normal\-notes>([0-9]+)<\/normal\-notes>/u","$1",$line));
-					}
-				if($note_on AND is_integer($pos=strpos($line,"</time-modification>"))) {
-					$time_modification = FALSE;
-					}
-				if($note_on AND is_integer($pos=strpos($line,"<pitch>"))) {
-					$pitch = TRUE;
-					if(!$is_chord) $level = 0;
-					$alter = 0;
-					}
-				if($note_on AND is_integer($pos=strpos($line,"</pitch>"))) {
-					$pitch = FALSE;
-					}
-				if($pitch AND is_integer($pos=strpos($line,"<step>"))) {
-					$this_note = trim(preg_replace("/<step>(.+)<\/step>/u","$1",$line));
-					}
-				if($pitch AND is_integer($pos=strpos($line,"<octave>"))) {
-					$this_octave = trim(preg_replace("/<octave>(.+)<\/octave>/u","$1",$line));
-					}
-				if($pitch AND is_integer($pos=strpos($line,"<alter>"))) {
-					$alter = trim(preg_replace("/<alter>(.+)<\/alter>/u","$1",$line));
-					}
-				if($note_on AND is_integer($pos=strpos($line,"</note>"))) {
-					if($rest) $s[$measure][$part][$step]['note'] = "rest";
-					else $s[$measure][$part][$step]['note'] = $this_note;
-					$s[$measure][$part][$step]['octave'] = $this_octave;
-					$s[$measure][$part][$step]['duration'] = $note_duration;
-				//	if($test_musicxml) echo " ".$step." ".$this_note.$this_octave." (".$note_duration.")<br />";
-					if($level == 0) $duration_measure += $note_duration;
-					$s[$measure][$part][$step]['level'] = $level;
-					$s[$measure][$part][$step]['actual-notes'] = $actual_notes;
-					$s[$measure][$part][$step]['normal-notes'] = $normal_notes;
-					$s[$measure][$part][$step]['alter'] = $alter;
-					$note_on = $rest = FALSE;
-					$actual_notes = $normal_notes = 0;
-					}
-				}
-		/*	echo "<pre>";
-			print_r($s);
-			echo "</pre>"; */
-			fclose($file);
-			ksort($s);
-			$max_measure = 0;
-			foreach($s as $i_measure => $the_measure) {
-				if($test_musicxml) echo "Measure ".$i_measure."<br />";
-				if($i_measure > $max_measure) $max_measure = $i_measure;
-				$data .= "{";
-				$newpart = TRUE;
-				ksort($the_measure);
-				foreach($the_measure as $score_part => $the_part) {
-					$score_part_root = str_replace("_@",'',$score_part);
-					if($reload_musicxml AND !$select_part[$score_part_root]) continue;
-					if(!$newpart) $data .= ",";
-					if(isset($midi_channel[$score_part]) AND $midi_channel[$score_part] > 0)
-					$data .= "_chan(".$midi_channel[$score_part].")";
-					if(isset($duration_part[$score_part]))
-						$num = $duration_part[$score_part];
-					else $num = 0;
-					$num_this_part = $num;
-					$den = $divisions[$score_part];
-					if($num > 0) {
-						$gcd = gcd($num,$den);
-						$num = $num / $gcd;
-						$den = $den / $gcd;
+					if($score_part <> '' AND is_integer($pos=strpos($line,"<midi-channel>"))) {
+						$midi_channel[$score_part] = trim(preg_replace("/<midi\-channel>([0-9]+)<\/midi\-channel>/u","$1",$line));
 						}
-					if($num == 1 AND $den == 1) $fraction = "1";
-					else if($den == 1) $fraction = $num;
-					else $fraction = $num."/".$den;
-					if(is_integer($pos=strpos($score_part,"_@"))) {
-						$num = $num_this_part - $duration_part[$score_part];
-						if($num > 0) {
-							$gcd = gcd($num,$den);
-							$num = $num / $gcd;
-							$den = $den / $gcd;
-							if($num == 1 AND $den == 1) $fraction = "-";
-							$data .= " @".$fraction." ";
+					if($partwise AND is_integer($pos=strpos($line,"<part "))) {
+						$measure = -1;
+						$part = trim(preg_replace("/.*id=\"([^\"]+)\".*/u","$1",$line));
+						}
+					if(is_integer($pos=strpos($line,"<attributes>"))) {
+						$attributes = TRUE;
+						$changed_attributes = FALSE;
+						}
+					if($attributes AND is_integer($pos=strpos($line,"<divisions>"))) {
+						$divisions[$part] = trim(preg_replace("/<divisions>([0-9]+)<\/divisions>/u","$1",$line));
+						$changed_attributes = TRUE;
+						}
+					if($attributes AND is_integer($pos=strpos($line,"<key>"))) {
+						$attributes_key =  TRUE;
+						}
+					if($attributes_key AND is_integer($pos=strpos($line,"<fifths>"))) {
+						$fifths[$part] = trim(preg_replace("/<fifths>(.+)<\/fifths>/u","$1",$line));
+						$changed_attributes = TRUE;
+						}
+					if($attributes_key AND is_integer($pos=strpos($line,"<mode>"))) {
+						$mode[$part] = trim(preg_replace("/<mode>(.+)<\/mode>/u","$1",$line));
+						$changed_attributes = TRUE;
+						}
+					if($attributes AND is_integer($pos=strpos($line,"</key>"))) {
+						$attributes_key =  FALSE;
+						}
+					if(is_integer($pos=strpos($line,"</attributes>"))) {
+						$attributes = FALSE;
+						if(FALSE AND $changed_attributes) {
+							if(isset($divisions[$part]) AND $divisions[$part] > 0) {
+								$message .= "Part ‘".$part."’ divisions = ".$divisions[$part];
+								}
+							if(isset($fifths[$part]) AND $fifths[$part] <> 0) {
+								$message .= ", fifths = ".$fifths[$part];
+								}
+							if(isset($mode[$part]) AND $mode[$part] <> '') {
+								$message .= ", mode = ".$mode[$part];
+								}
+							$message .= "<br />";
 							}
 						}
-					$data .= "{".$fraction.",";
-					$old_level = 0;
-					$stream = ''; $chord = FALSE;
-					ksort($the_part);
-					foreach($the_part as $i_event => $the_event) {
-				//		echo "note = ".$the_event['note'].$the_event['octave']." duration = ".$the_event['duration']."<br />";
-						$level = $the_event['level'];
-						$num  = $the_event['duration'];
+					if(is_integer($pos=strpos($line,"<measure "))) {
+						$reading_measure = TRUE;
+						$measure = trim(preg_replace("/.*number=\"([0-9]+)\".*/u","$1",$line));
+						$this_score[$measure][$part] = array();
+						if($test_musicxml) echo "Part ".$part." measure #".$measure."<br />";
+						}
+					if($reading_measure AND is_integer($pos=strpos($line,"</measure>"))) {
+						$reading_measure = FALSE;
+						}
+					if($reading_measure) {
+						$this_score[$measure][$part][] = $line;
+						}
+					}
+				fclose($file);
+				$convert_score = convert_musicxml($this_score,$divisions,$midi_channel,$select_part,$reload_musicxml,$test_musicxml);
+				$data .= $convert_score['data'];
+				$message .= $convert_score['error'];
+				}
+			
+			// Old method, may be deleted	
+			else {
+				$note_on = $pitch = $backup = $forward = $time_modification = $told_fraction1 = $told_fraction2  = $told_fraction3 = FALSE;
+				$actual_notes = $normal_notes = $alter = $duration_measure = $note_duration = 0;
+				$part = $measure = $step = -1;
+				$s = array();
+				$this_octave = $this_note = '';
+				$divisions = $fifths = $mode = array();
+				$file = fopen($music_xml_file,"r");
+				while(!feof($file)) {
+					$line = fgets($file);
+					if(is_integer($pos=strpos($line,"<score-partwise")) AND $pos == 0) $partwise = TRUE;
+					if(is_integer($pos=strpos($line,"<score-timewise")) AND $pos == 0) $timewise = TRUE;
+					if(is_integer($pos=strpos($line,"<score-part "))) {
+						$score_part = trim(preg_replace("/.*id=\"([^\"]+)\".*/u","$1",$line));
+						}
+					if(is_integer($pos=strpos($line,"</score-part>"))) {
+						$part_selection = "select_part_".$score_part;
+						$select_part[$score_part] = isset($_POST[$part_selection]);
+						$message .= "<input type=\"checkbox\" name=\"".$part_selection."\"";
+						if($select_part[$score_part]) {
+							$message .= " checked";
+							echo "Score part ‘".$score_part."’ has been selected.<br />";
+							}
+						$message .= "> Score part ‘".$score_part."’ instrument = <i>".$instrument_name[$score_part]."</i>";
+						if(isset($midi_channel[$score_part]) AND $midi_channel[$score_part] <> '') {
+							$message .= " — MIDI channel ".$midi_channel[$score_part];
+							}
+						$message .= "<br />";
+						if($select_part[$score_part] OR !$reload_musicxml) {
+							$subtitle_part .= "// Score part ‘".$score_part."’: instrument = ".$instrument_name[$score_part];
+							if(isset($midi_channel[$score_part]) AND $midi_channel[$score_part] <> '') {
+								$subtitle_part .= " — MIDI channel ".$midi_channel[$score_part];
+								}
+							$subtitle_part .= "\n";
+							}
+						$score_part = '';
+						}
+					if($score_part <> '' AND is_integer($pos=strpos($line,"<instrument-name>"))) {
+						$instrument_name[$score_part] = trim(preg_replace("/<instrument\-name>(.+)<\/instrument\-name>/u","$1",$line));
+						}
+					if($score_part <> '' AND is_integer($pos=strpos($line,"<midi-channel>"))) {
+						$midi_channel[$score_part] = trim(preg_replace("/<midi\-channel>([0-9]+)<\/midi\-channel>/u","$1",$line));
+						}
+					if($partwise AND is_integer($pos=strpos($line,"<part "))) {
+						$measure = -1;
+						$part = trim(preg_replace("/.*id=\"([^\"]+)\".*/u","$1",$line));
+						}
+					if(is_integer($pos=strpos($line,"<attributes>"))) {
+						$attributes = TRUE;
+						$changed_attributes = FALSE;
+						}
+					if($attributes AND is_integer($pos=strpos($line,"<divisions>"))) {
+						$divisions[$part] = trim(preg_replace("/<divisions>([0-9]+)<\/divisions>/u","$1",$line));
+						$changed_attributes = TRUE;
+						}
+					if($attributes AND is_integer($pos=strpos($line,"<key>"))) {
+						$attributes_key =  TRUE;
+						}
+					if($attributes_key AND is_integer($pos=strpos($line,"<fifths>"))) {
+						$fifths[$part] = trim(preg_replace("/<fifths>(.+)<\/fifths>/u","$1",$line));
+						$changed_attributes = TRUE;
+						}
+					if($attributes_key AND is_integer($pos=strpos($line,"<mode>"))) {
+						$mode[$part] = trim(preg_replace("/<mode>(.+)<\/mode>/u","$1",$line));
+						$changed_attributes = TRUE;
+						}
+					if($attributes AND is_integer($pos=strpos($line,"</key>"))) {
+						$attributes_key =  FALSE;
+						}
+					if(is_integer($pos=strpos($line,"</attributes>"))) {
+						$attributes = FALSE;
+						if($changed_attributes AND !is_integer($pos=strpos($part,"_@"))) {
+							if(isset($divisions[$part]) AND $divisions[$part] > 0) {
+								$message .= "Part ‘".$part."’ divisions = ".$divisions[$part];
+								}
+							if(isset($fifths[$part]) AND $fifths[$part] <> 0) {
+								$message .= ", fifths = ".$fifths[$part];
+								}
+							if(isset($mode[$part]) AND $mode[$part] <> '') {
+								$message .= ", mode = ".$mode[$part];
+								}
+							$message .= "<br />";
+							}
+						}
+					if(is_integer($pos=strpos($line,"<measure "))) {
+						$step = -1; $level = 0; $duration_measure = 0;
+						$measure = trim(preg_replace("/.*number=\"([0-9]+)\".*/u","$1",$line));
+						if($test_musicxml) echo "measure #".$measure."<br />";
+						}
+					if(is_integer($pos=strpos($line,"</measure>"))) {
+						$duration_part[$part] = $duration_measure;
+						if($test_musicxml) echo "duration_measure = ".$duration_measure." level = ".$level."<br /><br />";
+						$duration_measure = 0;
+						}
+					if(is_integer($pos=strpos($line,"<backup>"))) {
+						$backup = TRUE;
+						if(isset($midi_channel[$part]) AND $midi_channel[$part] > 0)
+							$chan = $midi_channel[$part];
+						else $chan = 0;
+						if(isset($divisions[$part]) AND $divisions[$part] > 0)
+							$div = $divisions[$part];
+						else $div = 0;
+						$duration_part[$part] = $duration_measure;
+						$part .= "_@";
+						$midi_channel[$part] = $chan;
+						$divisions[$part] = $div;
+						$duration_measure = 0;
+						$step = -1;
+						}
+					if($backup AND is_integer($pos=strpos($line,"<duration>"))) {
+						$duration_part[$part] = trim(preg_replace("/<duration>([0-9]+)<\/duration>/u","$1",$line));
+						}
+					if(is_integer($pos=strpos($line,"</backup>"))) {
+						$backup = FALSE;
+						}
+					if(is_integer($pos=strpos($line,"<forward>"))) {
+						$step++;
+						$forward = TRUE;
+						}
+					if(is_integer($pos=strpos($line,"</forward>"))) {
+						$forward = FALSE;
+						$s[$measure][$part][$step]['note'] = "rest";
+						$s[$measure][$part][$step]['duration'] = $note_duration;
+						if($level == 0) $duration_measure += $note_duration;
+						$s[$measure][$part][$step]['level'] = $level;
+						$s[$measure][$part][$step]['alter'] = 0;
+						$s[$measure][$part][$step]['octave'] = 0;
+						}
+					if(is_integer($pos=strpos($line,"<note ")) OR is_integer($pos=strpos($line,"<note>"))) {
+						if(!$partwise) {
+							$message .= "<font color=\"red\">➡ </font> Could not convert this file because it is not in ‘partwise’ format<br />";
+							break;
+							}
+						$step++;
+						$note_on = TRUE;
+						$is_chord = $rest = FALSE;
+						$note_duration = 0;
+					//	$s[$measure][$part][$step]['note'] = '';
+						}
+					if($note_on AND is_integer($pos=strpos($line,"<chord/>"))) {
+						$level++;
+						$is_chord = TRUE;
+						}
+					if($note_on AND (is_integer($pos=strpos($line,"<rest ")) OR is_integer($pos=strpos($line,"<rest/>")) OR is_integer($pos=strpos($line,"<rest>")))) {
+						$rest = TRUE;
+						$is_chord = FALSE;
+						$this_octave = 0;
+						if($test_musicxml) echo "rest<br />";
+						}
+					if($note_on AND is_integer($pos=strpos($line,"<grace/>"))) {
+						$note_duration = 0;
+						}
+					if(($note_on OR $forward) AND is_integer($pos=strpos($line,"<duration>"))) {
+						$note_duration = trim(preg_replace("/<duration>([0-9]+)<\/duration>/u","$1",$line));
+						}
+					if($note_on AND is_integer($pos=strpos($line,"<time-modification>"))) {
+						$time_modification = TRUE;
+						}
+					if($time_modification AND is_integer($pos=strpos($line,"<actual-notes>"))) {
+						$actual_notes = trim(preg_replace("/<actual\-notes>([0-9]+)<\/actual\-notes>/u","$1",$line));
+						}
+					if($time_modification AND is_integer($pos=strpos($line,"<normal-notes>"))) {
+						$normal_notes = trim(preg_replace("/<normal\-notes>([0-9]+)<\/normal\-notes>/u","$1",$line));
+						}
+					if($note_on AND is_integer($pos=strpos($line,"</time-modification>"))) {
+						$time_modification = FALSE;
+						}
+					if($note_on AND is_integer($pos=strpos($line,"<pitch>"))) {
+						$pitch = TRUE;
+						if(!$is_chord) $level = 0;
+						$alter = 0;
+						}
+					if($note_on AND is_integer($pos=strpos($line,"</pitch>"))) {
+						$pitch = FALSE;
+						}
+					if($pitch AND is_integer($pos=strpos($line,"<step>"))) {
+						$this_note = trim(preg_replace("/<step>(.+)<\/step>/u","$1",$line));
+						}
+					if($pitch AND is_integer($pos=strpos($line,"<octave>"))) {
+						$this_octave = trim(preg_replace("/<octave>(.+)<\/octave>/u","$1",$line));
+						}
+					if($pitch AND is_integer($pos=strpos($line,"<alter>"))) {
+						$alter = trim(preg_replace("/<alter>(.+)<\/alter>/u","$1",$line));
+						}
+					if($note_on AND is_integer($pos=strpos($line,"</note>"))) {
+						if($rest) $s[$measure][$part][$step]['note'] = "rest";
+						else $s[$measure][$part][$step]['note'] = $this_note;
+						$s[$measure][$part][$step]['octave'] = $this_octave;
+						$s[$measure][$part][$step]['duration'] = $note_duration;
+					//	if($test_musicxml) echo " ".$step." ".$this_note.$this_octave." (".$note_duration.")<br />";
+						if($level == 0) $duration_measure += $note_duration;
+						$s[$measure][$part][$step]['level'] = $level;
+						$s[$measure][$part][$step]['actual-notes'] = $actual_notes;
+						$s[$measure][$part][$step]['normal-notes'] = $normal_notes;
+						$s[$measure][$part][$step]['alter'] = $alter;
+						$note_on = $rest = FALSE;
+						$actual_notes = $normal_notes = 0;
+						}
+					}
+				fclose($file);
+				ksort($s);
+				foreach($s as $i_measure => $the_measure) {
+					if($test_musicxml) echo "Measure ".$i_measure."<br />";
+					if($i_measure > $max_measure) $max_measure = $i_measure;
+					$data .= "{";
+					$newpart = TRUE;
+					ksort($the_measure);
+					foreach($the_measure as $score_part => $the_part) {
+						$score_part_root = str_replace("_@",'',$score_part);
+						if($reload_musicxml AND !$select_part[$score_part_root]) continue;
+						if(!$newpart) $data .= ",";
+						if(isset($midi_channel[$score_part]) AND $midi_channel[$score_part] > 0)
+						$data .= "_chan(".$midi_channel[$score_part].")";
+						if(isset($duration_part[$score_part]))
+							$num = $duration_part[$score_part];
+						else $num = 0;
+						$num_this_part = $num;
 						$den = $divisions[$score_part];
 						if($num > 0) {
 							$gcd = gcd($num,$den);
 							$num = $num / $gcd;
 							$den = $den / $gcd;
 							}
-						else {
-							// Grace note. We allow it the minimum duration and manage to squeeze all notes in the current measure
-							$num = $duration_part[$score_part];
-							$den = $divisions[$score_part] * 32;
-							$gcd = gcd($num,$den);
-							$num = $num / $gcd;
-							$den = $den / $gcd;
-							if($den > 32) { // Approximation is required to avoid overflowing Polyexpand()
-								$num = round(($num * 32) / $den);
-								if($num == 0) $num = 1;
-								$den = 32;
-								}
-							}
 						if($num == 1 AND $den == 1) $fraction = "1";
 						else if($den == 1) $fraction = $num;
 						else $fraction = $num."/".$den;
-						$alter = $the_event['alter'];
-						$the_note = $the_event['note'];
-						$octave = $the_event['octave'];
-						if($alter <> 0 AND $the_event['note'] <> "rest") {
-							if($alter == 1) $the_note .= "#";
-							if($alter == -1) $the_note .= "b";
-							}
-						if($the_event['note'] == "rest") {
-							if($fraction == "1") $fraction = "-";
-							if($fraction == "2") $fraction = "--";
-							if($fraction == "3") $fraction = "---";
-							$simplify = simplify($fraction,$max_term_in_fraction);
-							if($simplify['done'] AND !$told_fraction1) {
-								$message .=  "<font color=\"red\">➡</font> Simplified fraction (1) ".$fraction." to ‘".$simplify['fraction']."’ (and maybe more)<br />";
-								$told_fraction1 = TRUE;
-								}
-							$fraction = $simplify['fraction'];
-							if($fraction <> '') {
-								if($old_level > 0) for($i = 0; $i < $old_level; $i++) $stream .= "}";
-								$stream .= " ".$fraction." ";
-								if($old_level > 0) for($i = 0; $i < $old_level; $i++) $stream .= "{";
+						if(is_integer($pos=strpos($score_part,"_@"))) {
+							$num = $num_this_part - $duration_part[$score_part];
+							if($num > 0) {
+								$gcd = gcd($num,$den);
+								$num = $num / $gcd;
+								$den = $den / $gcd;
+								if($num == 1 AND $den == 1) $fraction = "-";
+								$data .= " @".$fraction." ";
 								}
 							}
-						else {
-							if($level > 0) {
-								$stream .= ","; $chord = TRUE;
+						$data .= "{".$fraction.",";
+						$old_level = 0;
+						$stream = ''; $chord = FALSE;
+						ksort($the_part);
+						foreach($the_part as $i_event => $the_event) {
+							$level = $the_event['level'];
+							$num  = $the_event['duration'];
+							$den = $divisions[$score_part];
+							if($num > 0) {
+								$gcd = gcd($num,$den);
+								$num = $num / $gcd;
+								$den = $den / $gcd;
 								}
 							else {
-								if($old_level > 0) $stream .= "}{";
-								}
-							if($the_note == '') $the_note = "-";
-							if($the_note == "-") $octave = '';
-							if($the_event['actual-notes'] > 0) {
-								$stream .= "_tempo(".$the_event['actual-notes'];
-								if($the_event['normal-notes'] > 0) $stream .= "/".$the_event['normal-notes'];
-								$stream .= ")";
-								$simplify = simplify($fraction,$the_event['actual-notes']);
-								if($simplify['fraction'] == '') $simplify['fraction'] = "1/".$the_event['actual-notes'];
-								if($simplify['done'] AND !$told_fraction2) {
-									$message .=  "<font color=\"red\">➡</font> Simplified fraction (2) ".$fraction." to ‘".$simplify['fraction']."’ (and maybe more)<br />";
-									$told_fraction2 = TRUE;
+								// Grace note. We allow it the minimum duration and manage to squeeze all notes in the current measure
+								$num = $duration_part[$score_part];
+								$den = $divisions[$score_part] * 32;
+								$gcd = gcd($num,$den);
+								$num = $num / $gcd;
+								$den = $den / $gcd;
+								if($den > 32) { // Approximation is required to avoid overflowing Polyexpand()
+									$num = round(($num * 32) / $den);
+									if($num == 0) $num = 1;
+									$den = 32;
 									}
 								}
-							else {
+							if($num == 1 AND $den == 1) $fraction = "1";
+							else if($den == 1) $fraction = $num;
+							else $fraction = $num."/".$den;
+							$alter = $the_event['alter'];
+							$the_note = $the_event['note'];
+							$octave = $the_event['octave'];
+							if($alter <> 0 AND $the_event['note'] <> "rest") {
+								if($alter == 1) $the_note .= "#";
+								if($alter == -1) $the_note .= "b";
+								}
+							if($the_event['note'] == "rest") {
+								if($fraction == "1") $fraction = "-";
+								if($fraction == "2") $fraction = "--";
+								if($fraction == "3") $fraction = "---";
 								$simplify = simplify($fraction,$max_term_in_fraction);
-								if($simplify['done'] AND !$told_fraction3) {
-									$message .=  "<font color=\"red\">➡</font> Simplified fraction (3) ".$fraction." to ‘".$simplify['fraction']."’ (and maybe more)<br />";
-									$told_fraction3 = TRUE;
+								if($simplify['done'] AND !$told_fraction1) {
+									$message .=  "<font color=\"red\">➡</font> Simplified fraction (1) ".$fraction." to ‘".$simplify['fraction']."’ (and maybe more)<br />";
+									$told_fraction1 = TRUE;
+									}
+								$fraction = $simplify['fraction'];
+								if($fraction <> '') {
+									if($old_level > 0) for($i = 0; $i < $old_level; $i++) $stream .= "}";
+									$stream .= " ".$fraction." ";
+									if($old_level > 0) for($i = 0; $i < $old_level; $i++) $stream .= "{";
 									}
 								}
-							$fraction = $simplify['fraction'];
-							if($fraction <> '') $stream .= "{".$fraction.",".$the_note.$octave."}";
-							$the_note = $octave = '';
+							else {
+								if($level > 0) {
+									$stream .= ","; $chord = TRUE;
+									}
+								else {
+									if($old_level > 0) $stream .= "}{";
+									}
+								if($the_note == '') $the_note = "-";
+								if($the_note == "-") $octave = '';
+								if($the_event['actual-notes'] > 0) {
+									$stream .= "_tempo(".$the_event['actual-notes'];
+									if($the_event['normal-notes'] > 0) $stream .= "/".$the_event['normal-notes'];
+									$stream .= ")";
+									$simplify = simplify($fraction,$the_event['actual-notes']);
+									if($simplify['fraction'] == '') $simplify['fraction'] = "1/".$the_event['actual-notes'];
+									if($simplify['done'] AND !$told_fraction2) {
+										$message .=  "<font color=\"red\">➡</font> Simplified fraction (2) ".$fraction." to ‘".$simplify['fraction']."’ (and maybe more)<br />";
+										$told_fraction2 = TRUE;
+										}
+									}
+								else {
+									$simplify = simplify($fraction,$max_term_in_fraction);
+									if($simplify['done'] AND !$told_fraction3) {
+										$message .=  "<font color=\"red\">➡</font> Simplified fraction (3) ".$fraction." to ‘".$simplify['fraction']."’ (and maybe more)<br />";
+										$told_fraction3 = TRUE;
+										}
+									}
+								$fraction = $simplify['fraction'];
+								if($fraction <> '') $stream .= "{".$fraction.",".$the_note.$octave."}";
+								$the_note = $octave = '';
+								}
+							$old_level = $level;
 							}
-						$old_level = $level;
+						if($chord) $stream = "{".$stream."}";
+						$data .= $stream;
+						$newpart = FALSE;
+						$data .= "}";
 						}
-					if($chord) $stream = "{".$stream."}";
-					$data .= $stream;
-					$newpart = FALSE;
 					$data .= "}";
 					}
-				$data .= "}";
 				}
-			$message .= $max_measure." measures processed…<br />";
+				
 			$data = preg_replace("/\s+/u"," ",$data);
 			$data = str_replace(" }","}",$data);
+			$data = str_replace(",}","}",$data);
 			$data = str_replace("} ","}",$data);
 			$data = str_replace(" {","{",$data);
 			$data = str_replace("{ ","{",$data);
@@ -443,16 +549,18 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			do $data = str_replace("{}",'',$data,$count);
 			while($count > 0);
 			$data = str_replace(" ,",",",$data);
-			$more_data = "// MusicXML file ‘".$upload_filename."’ converted\n";
-			if($subtitle_part <> '') $more_data .= $subtitle_part."\n";
+			if($reload_musicxml) {
+				$more_data = "// MusicXML file ‘".$upload_filename."’ converted\n";
+				if($subtitle_part <> '') $more_data .= $subtitle_part."\n";
+				}
 			$more_data .= $declarations;
 			if(isset($_POST['delete_current'])) $_POST['thistext'] = '';
 			$more_data .= "\n".$data;
-			echo "<h3><font color=\"red\">Converted MusicXML file:</font> <font color=\"blue\">".$upload_filename."</font></h3>";
+			echo "<h3><font color=\"red\">Converting MusicXML file:</font> <font color=\"blue\">".$upload_filename."</font></h3>";
 			if($message <> '') echo $message;
 			echo "<input type=\"checkbox\" name=\"delete_current\">&nbsp;delete current data<br />";
 			echo "<input type=\"hidden\" name=\"upload_filename\" value=\"".$upload_filename."\">";
-			echo "<font color=\"red\">➡</font> You can select part(s) and <input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"select_parts\" value=\"reload the same file\">";
+			echo "<font color=\"red\">➡</font> You can select parts and <input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"select_parts\" value=\"CONVERT THEM\">&nbsp;<input style=\"background-color:azure;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"cancel\" value=\"QUIT IMPORTING\">";
 			$_POST['savethisfile'] = TRUE;
 			}
 		}
@@ -675,7 +783,7 @@ if($error_mssg <> '') echo "<p>".$error_mssg."</p>";
 echo "<table style=\"background-color:GhostWhite;\" border=\"0\"><tr>";
 echo "<td style=\"background-color:cornsilk;\">";
 
-echo "<div style=\"float:right; vertical-align:middle;\">Import MusicXML file: <input type=\"file\" name=\"music_xml_import\">&nbsp;<input type=\"submit\" style=\"background-color:AquaMarine;\" value=\" import it \"></div>";
+echo "<div style=\"float:right; vertical-align:middle;\">Import MusicXML file: <input type=\"file\" name=\"music_xml_import\">&nbsp;<input type=\"submit\" style=\"background-color:AquaMarine;\" value=\"← IMPORT\"></div>";
 
 echo "<div style=\"text-align:left;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></div>";
 

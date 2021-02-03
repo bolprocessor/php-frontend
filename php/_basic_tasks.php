@@ -547,6 +547,14 @@ function add_help_links($line) {
 function gcd($a,$b) {
     return $b ? gcd($b,$a % $b) : $a;
 	}
+	
+function lcm($a,$b) {
+	if(($a * $b) == 0) return 0;
+	$gcd = gcd($a,$b);
+	$aa = $a / $gcd;
+	$bb = $b / $gcd;
+	return ($aa * $bb * $gcd);
+	}
 
 function gcd_array($array,$a = 0) {
     $b = array_pop($array);
@@ -2262,13 +2270,28 @@ function merge_names($name1,$name2) {
 function simplify($fraction,$max_term) {
 	$fraction = trim($fraction);
 	$simplify['fraction'] = $fraction;
+	$simplify['p'] = $fraction;
+	$simplify['q'] = 1;
 	$simplify['done'] = FALSE;
 	if($max_term <= 0) return $simplify;
-	if(!is_integer($pos=strpos($fraction,"/")) OR $pos == 0) return $simplify;
+	if(!is_integer($pos=strpos($fraction,"/")) OR $pos == 0) {
+		return $simplify;
+		}
 	$table = explode("/",$fraction);
 	if(count($table) <> 2) return $simplify;
 	$num = $table[0];
 	$den = $table[1];
+	$simplify['p'] = $num;
+	$simplify['q'] = $den;
+	if(($num * $den) ==  0) return $simplify;
+	else {
+		$gcd = gcd($num,$den);
+		$num = $num / $gcd;
+		$den = $den / $gcd;
+		if($den <> 1) $simplify['fraction'] = $num."/".$den;
+		else $simplify['fraction'] = $num;
+		$simplify['done'] = TRUE;
+		}
 	$the_max = 0;
 	if($num > $max_term) $the_max = $num;
 	if($den > $num AND $den > $max_term) $the_max = $den;
@@ -2281,10 +2304,342 @@ function simplify($fraction,$max_term) {
 		$gcd = gcd($num,$den);
 		$num = $num / $gcd;
 		$den = $den / $gcd;
-		$fraction = $num."/".$den;
+		if($den <> 1) $simplify['fraction'] = $num."/".$den;
+		else $simplify['fraction'] = $num;
 		}
+	$simplify['p'] = $num;
+	$simplify['q'] = $den;
 	$simplify['fraction'] = $fraction;
 	$simplify['done'] = TRUE;
 	return $simplify;
+	}
+
+function convert_musicxml($the_score,$divisions,$midi_channel,$select_part,$reload_musicxml,$test_musicxml) {
+	global $max_term_in_fraction;
+	$max_term = 32768; $grace_ratio = 2;
+	$data =  $error = '';
+	foreach($the_score as $i_measure => $the_measure) {
+		if($i_measure < 0) continue;
+		if($test_musicxml) echo "<br /><font color = red>• Measure ".$i_measure."</font><br />";
+		ksort($the_measure);
+		$measure_duration = 0;
+		$curr_event = $convert_measure = array();
+		$data .= "{";
+		$number_parts = 0;
+		foreach($the_measure as $score_part => $the_part) {
+			if(!$reload_musicxml OR !$select_part[$score_part]) continue;
+			$number_parts++;
+			if($test_musicxml) echo "• Measure ".$i_measure." part ".$score_part."<br />";
+			ksort($the_part);
+			$this_note = '';
+			$note_on = $is_chord = $rest = $pitch = $time_modification = $forward = $backup = $chord_in_process = FALSE;
+			$alter = $level = 0;
+			$this_octave = -1;
+			$curr_event[$score_part] = $convert_measure = array();
+			$j = 0; $curr_event[$score_part][$j]['type'] = "seq";
+			foreach($the_part as $i_line => $line) {
+				// if($test_musicxml) echo "<small>".recode_tags($line)."</small><br />";
+				if(is_integer($pos=strpos($line,"<note ")) OR is_integer($pos=strpos($line,"<note>"))) {
+					$note_on = TRUE;
+					$rest = FALSE;
+					$is_chord = FALSE;
+					}
+				if($note_on AND is_integer($pos=strpos($line,"</note>"))) {
+					if($j > 0 AND $is_chord) { // $j = 0 is very unlikely but make sure!
+						// This is the first note tagged ‘chord’ which means the preceding one belongs to the same chord
+						$curr_event[$score_part][$j-1]['type'] = "chord";
+						$chord_in_process = TRUE;
+						}
+					if(!$is_chord AND $chord_in_process) {
+						$chord_in_process = FALSE;
+						$p_this_dur = $curr_event[$score_part][$j]['p_dur'];
+						$q_this_dur = $curr_event[$score_part][$j]['q_dur'];
+						$curr_event[$score_part][$j]['type'] = "seq"; // Create null event to  mark end of chord;
+						$curr_event[$score_part][$j]['note'] = '';
+						$curr_event[$score_part][$j]['p_dur'] = 0;
+						$curr_event[$score_part][$j]['q_dur'] = 1;
+						$j++;
+						$curr_event[$score_part][$j]['type'] = "seq";
+						$curr_event[$score_part][$j]['note'] = $this_note;
+						if($alter <> 0) {
+							if($alter == 1) $curr_event[$score_part][$j]['note'] .= "#";
+							if($alter == -1) $curr_event[$score_part][$j]['note'] .= "b";
+							}
+						$curr_event[$score_part][$j]['p_dur'] = $p_this_dur;
+						$curr_event[$score_part][$j]['q_dur'] = $q_this_dur;
+						}
+					if($rest) $curr_event[$score_part][$j]['note'] = "-";
+					else {
+						$curr_event[$score_part][$j]['note'] = $this_note;
+						if($alter <> 0) {
+							if($alter == 1) $curr_event[$score_part][$j]['note'] .= "#";
+							if($alter == -1) $curr_event[$score_part][$j]['note'] .= "b";
+							}
+						if($this_octave >= 0) $curr_event[$score_part][$j]['note'] .= $this_octave;
+						}
+					$note_on = $rest = $is_chord = FALSE;
+					$j++;
+					$curr_event[$score_part][$j]['type'] = "seq";
+					$curr_event[$score_part][$j]['note'] = '';
+					$curr_event[$score_part][$j]['p_dur'] = 0;
+					$curr_event[$score_part][$j]['q_dur'] = 1;
+					}
+				if($note_on AND is_integer($pos=strpos($line,"<pitch>"))) {
+					$pitch = TRUE;
+					$alter = 0;
+					}
+				if($note_on AND is_integer($pos=strpos($line,"</pitch>"))) {
+					$pitch = FALSE;
+					}
+				if($pitch AND is_integer($pos=strpos($line,"<step>"))) {
+					$this_note = trim(preg_replace("/<step>(.+)<\/step>/u","$1",$line));
+					}
+				if($pitch AND is_integer($pos=strpos($line,"<octave>"))) {
+					$this_octave = trim(preg_replace("/<octave>(.+)<\/octave>/u","$1",$line));
+					}
+				if($pitch AND is_integer($pos=strpos($line,"<alter>"))) {
+					$alter = trim(preg_replace("/<alter>(.+)<\/alter>/u","$1",$line));
+					}
+				if($note_on AND (is_integer($pos=strpos($line,"<rest ")) OR is_integer($pos=strpos($line,"<rest/>")) OR is_integer($pos=strpos($line,"<rest>")))) {
+					$rest = TRUE;
+					$is_chord = FALSE;
+					$curr_event[$score_part][$j]['type'] = "seq";
+					$this_octave = -1;
+					}
+				if(($note_on) AND is_integer($pos=strpos($line,"<duration>"))) {
+					$duration = trim(preg_replace("/<duration>([0-9]+)<\/duration>/u","$1",$line));
+					$curr_event[$score_part][$j]['p_dur'] = $duration;
+					$curr_event[$score_part][$j]['q_dur'] = 1;
+					}
+				if($note_on AND is_integer($pos=strpos($line,"<grace/>"))) {
+					$curr_event[$score_part][$j]['p_dur'] = 0;
+					$curr_event[$score_part][$j]['q_dur'] = 1;
+					}
+				if($note_on AND is_integer($pos=strpos($line,"<chord/>"))) {
+					$is_chord = TRUE;
+					$curr_event[$score_part][$j]['type'] = "chord";
+					}
+					
+				if(is_integer($pos=strpos($line,"<backup>"))) {
+					$backup = TRUE;
+					$is_chord = FALSE;
+					}
+				if(($backup) AND is_integer($pos=strpos($line,"<duration>"))) {
+					$duration = trim(preg_replace("/<duration>([0-9]+)<\/duration>/u","$1",$line));
+					$curr_event[$score_part][$j]['type'] = "back";
+					$curr_event[$score_part][$j]['note'] = '';
+					$curr_event[$score_part][$j]['p_dur'] = $duration;
+					$curr_event[$score_part][$j]['q_dur'] = 1;
+					$j++;
+					$curr_event[$score_part][$j]['type'] = "seq";
+					$curr_event[$score_part][$j]['note'] = '';
+					$curr_event[$score_part][$j]['p_dur'] = 0;
+					$curr_event[$score_part][$j]['q_dur'] = 1;
+					}
+				if(is_integer($pos=strpos($line,"</backup>"))) {
+					$backup = FALSE;
+					}
+					
+				if(is_integer($pos=strpos($line,"<forward>"))) {
+					$forward = TRUE;
+					$is_chord = FALSE;
+					}
+				if(($forward) AND is_integer($pos=strpos($line,"<duration>"))) {
+					$duration = trim(preg_replace("/<duration>([0-9]+)<\/duration>/u","$1",$line));
+					$curr_event[$score_part][$j]['note'] = '-';
+					$curr_event[$score_part][$j]['p_dur'] = $duration;
+					$curr_event[$score_part][$j]['q_dur'] = 1;
+					$j++;
+					$curr_event[$score_part][$j]['type'] = "seq";
+					$curr_event[$score_part][$j]['note'] = '';
+					$curr_event[$score_part][$j]['p_dur'] = 0;
+					$curr_event[$score_part][$j]['q_dur'] = 1;
+					}
+				if(is_integer($pos=strpos($line,"</forward>"))) {
+					$forward = FALSE;
+					}
+					
+				if($note_on AND is_integer($pos=strpos($line,"<time-modification>"))) {
+					$time_modification = TRUE;
+					}
+				if($time_modification AND is_integer($pos=strpos($line,"<actual-notes>"))) {
+					$actual_notes = trim(preg_replace("/<actual\-notes>([0-9]+)<\/actual\-notes>/u","$1",$line));
+					}
+				if($time_modification AND is_integer($pos=strpos($line,"<normal-notes>"))) {
+					$normal_notes = trim(preg_replace("/<normal\-notes>([0-9]+)<\/normal\-notes>/u","$1",$line));
+					}
+				if($note_on AND is_integer($pos=strpos($line,"</time-modification>"))) {
+					$time_modification = FALSE;
+			//		$curr_event[$score_part][$j]['p_dur'] = $curr_event[$score_part][$j]['p_dur'] * $normal_notes;
+			//		$curr_event[$score_part][$j]['q_dur'] = $curr_event[$score_part][$j]['q_dur'] * $actual_notes;
+					}
+				}
+				
+			if(count($the_measure) > 1) $convert_measure[$score_part] = "{";
+			else $convert_measure[$score_part] = '';
+			$is_chord = FALSE;
+			$stream = ''; $stream_units = 0;
+			$p_time_measure = 0; $p_old_duration = -1;
+			$q_time_measure = $q_old_duration = 1;
+			foreach($curr_event[$score_part] as $j => $the_event) {
+				if($the_event['type'] == "back") {
+					if($is_chord) {
+						$convert_measure[$score_part] .= "}";
+						$is_chord = FALSE;
+						}
+					if($test_musicxml) echo " time_measure = ".$p_time_measure."/".$q_time_measure." stream_duration = ".$p_stream_duration."/".$q_stream_duration." the_event[dur] = ".$the_event['p_dur']."/".$the_event['q_dur'].", divisions = ".$divisions[$score_part]." stream = “".$stream."”<br />";
+					if($stream <> '') {
+						$add = add($p_time_measure,$q_time_measure,$p_stream_duration,$q_stream_duration);
+						$p_time_measure = $add['p']; $q_time_measure = $add['q'];
+						$fraction = $p_stream_duration."/".($q_stream_duration * $divisions[$score_part]);
+						$simplify = simplify($fraction,$max_term);
+						$fraction = $simplify['fraction'];
+						if($fraction <> "1") {
+							$convert_measure[$score_part] .= "{";
+							$convert_measure[$score_part] .= $fraction.",";
+							}
+						$convert_measure[$score_part] .= $stream;
+						if($fraction <> "1") $convert_measure[$score_part] .= "}";
+						$stream = ''; $stream_units = 0; $p_stream_duration = 0; $q_stream_duration = 1;
+						}
+					$convert_measure[$score_part] .= ",";
+					// Find whether there is time for a rest
+					$p_duration = $the_event['p_dur']; $q_duration = $the_event['q_dur'];
+					$add = add($p_time_measure,$q_time_measure,(-$p_duration),$q_duration);
+					$p_rest = $add['p'];
+					$q_rest = $add['q'];
+					if($test_musicxml) echo "measure - duration = ".$p_time_measure."/".$q_time_measure." - ".$p_duration."/".$q_duration." = ".$p_rest."/".$q_rest.", divisions = ".$divisions[$score_part]."<br />";
+					$p_time_measure = 0; $q_time_measure = 1;
+					$p_old_duration = -1; $q_old_duration = 1;
+					if($p_rest > 0) {
+						// Here we could also use ‘_rest’ and let the algorithm figure out the duration
+						$stream = "-"; $stream_units = 1;
+						$p_old_duration = $p_time_measure = $p_stream_duration = $p_rest;
+						$q_old_duration = $q_time_measure = $q_stream_duration = $q_rest;
+						if($test_musicxml) echo "Inserting rest after backup duration ".$p_rest."/".$q_rest."<br />";
+						}
+					else if($p_rest < 0) $error .= "<font color=\"red\">➡ </font> Error in part ".$score_part." measure ".$i_measure.", ‘backup’ duration: rest = ".$p_rest."/".$q_rest.", divisions = ".$divisions[$score_part]."<br />";
+					}
+				if(!$is_chord AND $the_event['type'] == "chord") {
+					$p_duration = $the_event['p_dur']; $q_duration = $the_event['q_dur'];
+					if($stream <> '') {
+						if($test_musicxml) echo $the_event['note']." time_measure = ".$p_time_measure."/".$q_time_measure." stream_duration = ".$p_stream_duration."/".$q_stream_duration." closing stream = “".$stream."”<br />";
+						$add = add($p_time_measure,$q_time_measure,$p_stream_duration,$q_stream_duration);
+						$p_time_measure = $add['p']; $q_time_measure = $add['q'];
+						if($p_stream_duration == 0) { // Grace notes
+							$fraction = $p_duration."/".($grace_ratio * $q_duration * $divisions[$score_part]);
+							$q_duration = $q_duration * $grace_ratio;
+							}
+						else $fraction = $p_stream_duration."/".($q_stream_duration * $divisions[$score_part]);
+						$simplify = simplify($fraction,$max_term);
+						$fraction = $simplify['fraction'];
+						$convert_measure[$score_part] .= "{".$fraction.",".$stream."}";
+						$stream = ''; $stream_units = 0; $p_stream_duration = 0; $q_stream_duration = 1;
+						}
+					$add = add($p_time_measure,$q_time_measure,$the_event['p_dur'],$the_event['q_dur']);
+					$p_time_measure = $add['p']; $q_time_measure = $add['q'];
+					$fraction = $p_duration."/".($q_duration * $divisions[$score_part]);
+					$simplify = simplify($fraction,$max_term);
+					$fraction = $simplify['fraction'];
+					$convert_measure[$score_part] .= "{";
+					if($fraction <> "1") $convert_measure[$score_part] .= $fraction.",";
+					$is_chord = TRUE;
+					}
+				if($is_chord AND $the_event['type'] == "seq") {
+					$convert_measure[$score_part] .= "} ";
+					$is_chord = FALSE;
+			//		$p_old_duration = -1; $q_old_duration = 1;
+					}
+				if($the_event['note'] == '') {
+					$is_chord = FALSE;
+					continue;
+					}
+				if(!$is_chord) {
+					$p_duration = $the_event['p_dur']; $q_duration = $the_event['q_dur'];
+					$fraction = $the_event['p_dur']."/".($divisions[$score_part] * $the_event['q_dur']);
+					if(($p_duration * $q_old_duration) == ($p_old_duration * $q_duration)) {
+						$stream .= $the_event['note']." "; $stream_units++;
+						$add = add($p_stream_duration,$q_stream_duration,$p_duration,$q_duration);
+						$p_stream_duration = $add['p']; $q_stream_duration = $add['q'];
+						}
+					else {
+						if($stream <> '') {
+							if($p_stream_duration == 0) { // Grace notes
+								$p_grace = $p_duration;
+								$q_grace = $grace_ratio * $q_duration;
+								$fraction = $p_grace."/".($q_grace * $divisions[$score_part]);
+								$add = add($p_time_measure,$q_time_measure,$p_grace,$q_grace);
+								$q_duration = $q_duration * $grace_ratio;
+								}
+							else {
+								$fraction = $p_stream_duration."/".($q_stream_duration * $divisions[$score_part]);
+								$add = add($p_time_measure,$q_time_measure,$p_stream_duration,$q_stream_duration);
+								}
+							$p_time_measure = $add['p']; $q_time_measure = $add['q'];
+							$simplify = simplify($fraction,$max_term);
+							$fraction = $simplify['fraction'];
+							if($simplify['q'] > 0) $n = $simplify['p'] / $simplify['q'];
+							else $n = 0;
+					//		echo $simplify['p']."/".$simplify['q']." = ".$fraction." = ".$n." = ".$stream_units." -> ".$stream."<br />";
+							if($stream_units <> $n) {
+								$convert_measure[$score_part] .= "{";
+								$convert_measure[$score_part] .= $fraction.",";
+								}
+							$convert_measure[$score_part] .= $stream;
+							if($stream_units <> $n) $convert_measure[$score_part] .= "}";
+							}
+						$stream = $the_event['note']." "; $stream_units = 1;
+						$p_old_duration = $p_stream_duration = $p_duration;
+						$q_old_duration = $q_stream_duration = $q_duration;
+						}
+					}
+				else {
+					$convert_measure[$score_part] .= $the_event['note'];
+					$convert_measure[$score_part] .= ",";
+					}
+				}
+			
+			if($stream <> '') {
+				if($test_musicxml) echo "Before last stream of measure ".$i_measure.", time_measure = ".$p_time_measure."/".$q_time_measure." stream_duration = ".$p_stream_duration."/".$q_stream_duration." stream = “".$stream."”<br />";
+				$fraction = $p_stream_duration."/".($q_stream_duration * $divisions[$score_part]);
+				$simplify = simplify($fraction,$max_term);
+				$fraction = $simplify['fraction'];
+				$convert_measure[$score_part] .= "{".$fraction.",".$stream."}";
+				$add = add($p_time_measure,$q_time_measure,$p_stream_duration,$q_stream_duration);
+				$p_time_measure = $add['p']; $q_time_measure = $add['q'];
+				$stream = ''; $stream_units = 0; $p_stream_duration = 0; $q_stream_duration = 1;
+				}
+			if(count($the_measure) > 1) $convert_measure[$score_part] .= "}";
+		//	$convert_measure[$score_part] = str_replace(",}","}",$convert_measure[$score_part]);
+			
+			if($test_musicxml) echo "End measure ".$i_measure." time_measure = ".$p_time_measure."/".$q_time_measure."<br />";
+
+			$fraction = $p_time_measure."/".($q_time_measure * $divisions[$score_part]);
+			$simplify = simplify($fraction,$max_term);
+			$fraction = $simplify['fraction'];
+			if(isset($midi_channel[$score_part])) $data .= " _chan(".$midi_channel[$score_part].")";
+			$data .= "{".$fraction;
+			$data .= ",".$convert_measure[$score_part];
+			$data .= "}";
+			$data .= ",";
+			}
+		$data .= "} ";
+		}
+	$convert_score['data'] = $data;
+	$convert_score['error'] = $error;
+	return $convert_score;
+	}
+
+function add($p1,$q1,$p2,$q2) {
+	$q3 = $q1 * $q2;
+	$p3 = ($p1 * $q2) + ($p2 * $q1);
+	if($p3 <> 0) {
+		$gcd = gcd($p3,$q3);
+		$p3 = $p3 / $gcd;
+		$q3 = $q3 / $gcd;
+		}
+	$add['p'] = $p3;
+	$add['q'] = $q3;
+	return $add;
 	}
 ?>

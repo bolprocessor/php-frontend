@@ -39,6 +39,18 @@ echo "setTimeout(function() {
 	}, 8000);\n";
 echo "</script>\n";
 
+echo "<script>\n";
+echo "$(window).keydown(function(evt) {
+    var key = String.fromCharCode(evt.keyCode);
+    if (key.toLowerCase() === \"s\" && evt.metaKey) {
+    	alert(\"Soon this key will be programmed to save data...\");
+        evt.preventDefault(true);
+        return false;
+    }
+    return true;
+});";
+echo "</script>\n";
+
 echo "</head>";
 echo "<body>\n";
 ?>
