@@ -2332,7 +2332,7 @@ function convert_musicxml($the_score,$divisions,$midi_channel,$select_part,$relo
 			if($test_musicxml) echo "• Measure ".$i_measure." part ".$score_part."<br />";
 			ksort($the_part);
 			$this_note = '';
-			$note_on = $is_chord = $rest = $pitch = $time_modification = $forward = $backup = $chord_in_process = FALSE;
+			$note_on = $is_chord = $rest = $pitch = $unpitched = $time_modification = $forward = $backup = $chord_in_process = FALSE;
 			$alter = $level = 0;
 			$this_octave = -1;
 			$curr_event[$score_part] = $convert_measure = array();
@@ -2384,12 +2384,23 @@ function convert_musicxml($the_score,$divisions,$midi_channel,$select_part,$relo
 					$curr_event[$score_part][$j]['p_dur'] = 0;
 					$curr_event[$score_part][$j]['q_dur'] = 1;
 					}
+				if($note_on AND is_integer($pos=strpos($line,"<unpitched>"))) {
+					$unpitched = TRUE; // Drum stroke
+					$alter = 0;
+					}
+				if($unpitched AND is_integer($pos=strpos($line,"<display-step>"))) {
+					$this_note = trim(preg_replace("/<display-step>(.+)<\/display\-step>/u","$1",$line));
+					}
+				if($unpitched AND is_integer($pos=strpos($line,"<display-octave>"))) {
+					$this_octave = trim(preg_replace("/<display-octave>(.+)<\/display\-octave>/u","$1",$line));
+					}
+				if($note_on AND is_integer($pos=strpos($line,"</unpitched>"))) {
+					$unpitched = FALSE;
+					$alter = 0;
+					}
 				if($note_on AND is_integer($pos=strpos($line,"<pitch>"))) {
 					$pitch = TRUE;
 					$alter = 0;
-					}
-				if($note_on AND is_integer($pos=strpos($line,"</pitch>"))) {
-					$pitch = FALSE;
 					}
 				if($pitch AND is_integer($pos=strpos($line,"<step>"))) {
 					$this_note = trim(preg_replace("/<step>(.+)<\/step>/u","$1",$line));
@@ -2400,13 +2411,16 @@ function convert_musicxml($the_score,$divisions,$midi_channel,$select_part,$relo
 				if($pitch AND is_integer($pos=strpos($line,"<alter>"))) {
 					$alter = trim(preg_replace("/<alter>(.+)<\/alter>/u","$1",$line));
 					}
+				if($note_on AND is_integer($pos=strpos($line,"</pitch>"))) {
+					$pitch = FALSE;
+					}
 				if($note_on AND (is_integer($pos=strpos($line,"<rest ")) OR is_integer($pos=strpos($line,"<rest/>")) OR is_integer($pos=strpos($line,"<rest>")))) {
 					$rest = TRUE;
 					$is_chord = FALSE;
 					$curr_event[$score_part][$j]['type'] = "seq";
 					$this_octave = -1;
 					}
-				if(($note_on) AND is_integer($pos=strpos($line,"<duration>"))) {
+				if($note_on AND is_integer($pos=strpos($line,"<duration>"))) {
 					$duration = trim(preg_replace("/<duration>([0-9]+)<\/duration>/u","$1",$line));
 					$curr_event[$score_part][$j]['p_dur'] = $duration;
 					$curr_event[$score_part][$j]['q_dur'] = 1;

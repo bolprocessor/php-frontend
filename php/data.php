@@ -104,7 +104,6 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$partwise = $timewise = $attributes = $attributes_key = $changed_attributes = FALSE;
 			$instrument_name = $midi_channel = $select_part = $duration_part = $divisions = array();
 			
-			$new_method = FALSE;
 			$new_method = TRUE;
 			
 			if($new_method) {
@@ -121,11 +120,14 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 						}
 					if(is_integer($pos=strpos($line,"</score-part>"))) {
 						$part_selection = "select_part_".$score_part;
-						$select_part[$score_part] = isset($_POST[$part_selection]);
+						if($reload_musicxml)
+							$select_part[$score_part] = isset($_POST[$part_selection]);
+						else
+							$select_part[$score_part] = FALSE;
 						$message .= "<input type=\"checkbox\" name=\"".$part_selection."\"";
 						if($select_part[$score_part]) {
 							$message .= " checked";
-							echo "Score part ‘".$score_part."’ has been selected.<br />";
+					//		echo "Score part ‘".$score_part."’ has been selected.<br />";
 							}
 						$message .= "> Score part ‘".$score_part."’ instrument = <i>".$instrument_name[$score_part]."</i>";
 						if(isset($midi_channel[$score_part]) AND $midi_channel[$score_part] <> '') {
