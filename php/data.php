@@ -740,35 +740,35 @@ echo "</p></td></tr></table>";
 $error_mssg = $link_options = '';
 if($grammar_file <> '') {
 	if(!file_exists($dir.$grammar_file)) {
-		$error_mssg .= "<font color=\"red\">WARNING: ".$dir.$grammar_file." not found.</font><br />";
+		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING: ".$dir.$grammar_file." not found.</font><br />";
 		$error = TRUE;
 		}
 	else $link_options .= "&grammar=".urlencode($dir.$grammar_file);
 	}
 if($alphabet_file <> '') {
 	if(!file_exists($dir.$alphabet_file)) {
-		$error_mssg .= "<font color=\"red\">WARNING: ".$dir.$alphabet_file." not found.</font><br />";
+		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING: ".$dir.$alphabet_file." not found.</font><br />";
 		$error = TRUE;
 		}
 	else $link_options .= "&alphabet=".urlencode($dir.$alphabet_file);
 	}
 if($settings_file <> '') {
 	if(!file_exists($dir.$settings_file)) {
-		$error_mssg .= "<font color=\"red\">WARNING: ".$dir.$settings_file." not found.</font><br />";
+		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING: ".$dir.$settings_file." not found.</font><br />";
 		$error = TRUE;
 		}
 	else $link_options .= "&settings=".urlencode($dir.$settings_file);
 	}
 if($objects_file <> '') {
 	if(!file_exists($dir.$objects_file)) {
-		$error_mssg .= "<font color=\"red\">WARNING: ".$dir.$objects_file." not found.</font><br />";
+		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING: ".$dir.$objects_file." not found.</font><br />";
 		$error = TRUE;
 		}
 	else $link_options .= "&objects=".urlencode($dir.$objects_file);
 	}
 if($csound_file <> '') {
 	if(!file_exists($dir_csound_resources.$csound_file)) {
-		$error_mssg .= "<font color=\"red\">WARNING: ".$dir_csound_resources.$csound_file." not found.</font><br />";
+		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING: ".$dir_csound_resources.$csound_file." not found.</font><br />";
 		$error = TRUE;
 		}
 	else {

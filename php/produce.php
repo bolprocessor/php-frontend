@@ -6,6 +6,7 @@ $this_title = "BP console";
 require_once("_header.php");
 
 $application_path = $bp_application_path;
+$bad_image = FALSE;
 
 if(isset($_GET['startup'])) $startup = $_GET['startup'];
 else $startup = '';
@@ -18,7 +19,7 @@ if($instruction == '') {
 	}
 ob_start();
 if($instruction == "produce" OR $instruction == "produce-all" OR $instruction == "play" OR $instruction == "expand") {
-	echo "<i>Process might take more than ".$max_sleep_time_after_bp_command." seconds.<br />To reduce computation time, increase quantization or/and time resolution in the settings</i>.<br />";
+	echo "<i>Process might take more than ".$max_sleep_time_after_bp_command." seconds.<br />To reduce computation time, increase quantization in the settings</i>.<br />";
 	}
 
 if(isset($_GET['here'])) $here = urldecode($_GET['here']);
@@ -242,6 +243,7 @@ if($instruction <> "help") {
 
 ob_flush();
 flush();
+
 echo "<hr>";
 
 if(isset($data_path) AND $data_path <> '') {
@@ -352,7 +354,7 @@ if($instruction <> "help") {
 		// Prepare images if any
 		$dircontent = scandir($temp_dir);
 		echo "<table style=\"background-color:snow; padding:0px;\"><tr>";
-		$number_images = 0;
+		$position_image = 0;
 		foreach($dircontent as $thisfile) {
 			$table = explode('_',$thisfile);
 			if($table[0] <> "trace") continue;
@@ -378,7 +380,7 @@ if($instruction <> "help") {
 			$title1 = $grammar_name."_Image_".$number;
 			$title2 = $grammar_name." Image ".$number;
 			$WidthMax = $HeightMax = 0;
-			$number_images++;
+			$position_image++;
 			for($i = 0; $i < $imax; $i++) {
 				$line = trim($table2[$i]);
 			//	echo $i." ".recode_tags($line)."<br />";
@@ -399,15 +401,20 @@ if($instruction <> "help") {
 				$j++;
 				}
 			$link = $temp_dir.$thisfile;
-			$left = 10 + (50 * ($number_images - 1));
+			$left = 10 + (50 * ($position_image - 1));
 			$window_height = 600;
 			if($HeightMax < $window_height) $window_height = $HeightMax + 60;
 			$window_width = 1200;
 			if($WidthMax < $window_width) $window_width = $WidthMax +  20;
-			echo "<div style=\"border:2px solid gray; background-color:azure; width:8em;  padding:2px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$link."','".$title1."','width=".$window_width.",height=".$window_height.",left=".$left."'); return false;\" href=\"".$link."\">Image ".$number."</a></div>&nbsp;";
+			echo "<div style=\"border:2px solid gray; background-color:azure; width:8em;  padding:2px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$link."','".$title1."','width=".$window_width.",height=".$window_height.",left=".$left."'); return false;\" href=\"".$link."\">Image ".$number."</a>";
+			if(check_image($link) <> '') {
+				$bad_image = TRUE;
+				echo " <font color=\"red\"><b>*</b></font>";
+				}
+			echo "</div>&nbsp;";
 			echo "</td>";
-			if(++$number_images > 11) {
-				$number_images = 0;
+			if(++$position_image > 11) {
+				$position_image = 0;
 				echo "</tr><tr>";
 				}
 			}
@@ -542,6 +549,7 @@ if($n_messages > 0) {
 	if($n_messages == 0) echo "No message produced…";
 	else if($handle) {
 		$window_name = $grammar_name."_result";
+		if($bad_image) echo "<p>(<font color=\"red\"><b>*</b></font>) Syntax error in image: negative argument</p>";
 		echo "<p style=\"font-size:larger;\"><input style=\"color:DarkBlue; background-color:yellow; font-size:large;\" onclick=\"window.open('".$result_file."','".$window_name."','width=800,height=600,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Show all ".$n_messages." messages\">";
 		if($warnings == 1) echo " <span class=\"blinking\">=> ".$warnings." warning</span>";
 		if($warnings > 1) echo " <span class=\"blinking\">=> ".$warnings." warnings</span>";
@@ -549,5 +557,18 @@ if($n_messages > 0) {
 		}
 	if($handle) fwrite($handle,"</body>\n");
 	if($handle) fclose($handle);
+	}
+
+function check_image($link) {
+	$result = '';
+	$content = @file_get_contents($link,TRUE);
+	if($content) {
+		$content = str_replace(chr(13).chr(10),chr(10),$content);
+		$content = str_replace(chr(13),chr(10),$content);
+		if(is_integer($pos1 = strrpos($content,"-")) AND is_integer($pos2 = strpos($content,"//"))) {
+			if($pos1 > $pos2) $result = "negative argument";
+			}
+		}
+	return $result;
 	}
 ?>

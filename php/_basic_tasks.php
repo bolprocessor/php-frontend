@@ -388,11 +388,11 @@ function ask_create_new_file($url_this_page,$filename) {
 
 function try_create_new_file($file,$filename) {
 	if(isset($_POST['dontcreate'])) {
-		echo "<p style=\"color:red;\">No file created. You can close this tab…</p>";
+		echo "<p style=\"color:red;\" class=\"blinking\">No file created. You can close this tab…</p>";
 		die();
 		}
 	if(isset($_POST['createfile'])) {
-		echo "<p style=\"color:red;\">Creating ‘".$filename."’…</p>";
+		echo "<p style=\"color:red;\" class=\"blinking\">Creating ‘".$filename."’. Don’t forget to SAVE it!</p>";
 		$handle = fopen($file,"w");
 		fclose($handle);
 		}
