@@ -1456,16 +1456,11 @@ _chan(),_vel(),_volume(),_pan(),_mod(),_press(),_pitchbend(),_pancontrol(),_volu
     computer to freeze the correct value.
 • This parameter capture looks at preceding _pitchrange(), _pancontrol() and
     _volumecontrol() in order to check the proper controller and assess its range.
-### Load time pattern...
-When either grammar or data window is active, this allows you to create "time patterns".
-• Play notes in sequence on the MIDI keyboard at the correct tempo.
-• For a sequence of 'n' notes, BP2 will create 'n-1' time objects: t1,t2, etc., which will
-    be assigned duration ratios.
 ### Time patterns
 Sequences of time intervals characterized by precise ratios, to be used in "smooth time".
 • These are processed like (codeless) "sound-objects". They are usually put together in
     the first field of a "polymetric expression".
-• Use "Load time pattern" to create these patterns, or type them in the grammar or alphabet.
+• Type them at the bottom of a grammar or alphabet.
 • Example:
     TIMEPATTERNS:
     t1= 1/1  t2 = 3/2   t3 = 4/3 

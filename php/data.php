@@ -836,16 +836,40 @@ for($i = $j = 0; $i < $imax; $i++) {
 	$handle = fopen($data,"w");
 	fwrite($handle,$line_recoded."\n");
 	fclose($handle);
+	$line_chunked = ''; $chunked = FALSE;
+	for($k = $level = 0; $k < strlen($line_recoded); $k++) {
+		$line_chunked .= $line_recoded[$k];
+		if($line_recoded[$k] == '{') $level++;
+		if($line_recoded[$k] == '}') {
+			$level--;
+			if($level == 0) {
+				$line_chunked .= "\n";
+				if($k < (strlen($line_recoded) - 1)) $chunked = TRUE;
+				}
+			}
+		}
+	$chunked = TRUE;
+	if($chunked) {
+		$data_chunked = $temp_dir.$temp_folder.SLASH.$j."-chunked.bpda";
+		$handle = fopen($data_chunked,"w");
+		fwrite($handle,$line_chunked."\n");
+		fclose($handle);
+		}
+	else $data_chunked = '';
 	echo "<tr><td>".$j."</td><td>";
-	$link_options .= "&item=".$j;
-	$link_options_play = $link_options."&output=".urlencode($bp_application_path.$output_folder.SLASH.$output_file)."&format=".$file_format;
+//	$link_options .= "&item=".$j;
+	$link_options_play = $link_options."&output=".urlencode($bp_application_path.$output_folder.SLASH.$output_file)."&format=".$file_format."&item=".$j;
+	$link_options_chunked = $link_options_play;
 	$output_file_expand = str_replace(".sco",'',$output_file);
 	$output_file_expand = str_replace(".mid",'',$output_file_expand);
 	$output_file_expand .= ".bpda";
 	$link_options_expand = $link_options."&output=".urlencode($bp_application_path.$output_folder.SLASH.$output_file_expand)."&format=data";
 	$link_produce = "produce.php?data=".urlencode($data);
+	$link_produce_chunked = "produce.php?data=".urlencode($data_chunked);
 	$link_play = $link_produce."&instruction=play";
+	$link_play_chunked = $link_produce_chunked."&instruction=play-all";
 	$link_play .= $link_options_play;
+	$link_play_chunked .= $link_options_play;
 	$link_expand = $link_produce."&instruction=expand";
 	$link_expand .= $link_options_expand;
 	$window_name = window_name($filename);
@@ -853,13 +877,19 @@ for($i = $j = 0; $i < $imax; $i++) {
 	$window_name_expland = $window_name."_expland";
 //	echo "<small>".urldecode($link_play)."</small><br />";
 //	echo "<small>".urldecode($link_expand)."</small><br />";
-	echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_play."','".$window_name_play."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Play this polymetric expression\" value=\"PLAY\">&nbsp;";
-	echo "&nbsp;<input style=\"background-color:azure;\" onclick=\"window.open('".$link_expand."','".$window_name_expland."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Expand this polymetric expression\" value=\"EXPAND\">&nbsp;";
+	echo "<small>".urldecode($link_play_chunked)."</small><br />";
 	$n1 = substr_count($line_recoded,'{');
 	$n2 = substr_count($line_recoded,'}');
 	if($n1 > $n2) $error_mssg .= "<font color=\"red\">This score contains ".($n1-$n2)." extra ‘{'</font>";
 	if($n2 > $n1) $error_mssg .= "<font color=\"red\">This score contains ".($n2-$n1)." extra ‘}'</font>";
-	if($error_mssg <> '') echo "<p>".$error_mssg."</p>";
+	if($error_mssg == '') {
+		echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_play."','".$window_name_play."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Play this polymetric expression\" value=\"PLAY\">&nbsp;";
+		
+		if($chunked) echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_play_chunked."','".$window_name_play."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Play polymetric expression in chunks (no graphics)\" value=\"PLAY chunked\">&nbsp;";
+		
+		echo "&nbsp;<input style=\"background-color:azure;\" onclick=\"window.open('".$link_expand."','".$window_name_expland."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Expand this polymetric expression\" value=\"EXPAND\">&nbsp;";
+		}
+	if($error_mssg <> '') echo $error_mssg."<br />";
 	$length = strlen($line_recoded);
 	if($length > 400)
 		$line_show = "<br />".substr($line_recoded,0,100)."<br />&nbsp;... ... ...<br />".substr($line_recoded,-100,100);

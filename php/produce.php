@@ -18,7 +18,7 @@ if($instruction == '') {
 	die();
 	}
 ob_start();
-if($instruction == "produce" OR $instruction == "produce-all" OR $instruction == "play" OR $instruction == "expand") {
+if($instruction == "produce" OR $instruction == "produce-all" OR $instruction == "play" OR $instruction == "play-all" OR $instruction == "expand") {
 	echo "<i>Process might take more than ".$max_sleep_time_after_bp_command." seconds.<br />To reduce computation time, increase quantization in the settings</i>.<br />";
 	}
 
@@ -149,7 +149,7 @@ else {
 	if($csound_file <> '') $command .= " -cs ".$dir_csound_resources.$csound_file;
 	
 	if($startup <> '') $command .= " --start ".$startup;
-	if($instruction == "produce" OR $instruction == "produce-all" OR $instruction == "play" OR $instruction == "expand") {
+	if($instruction == "produce" OR $instruction == "produce-all" OR $instruction == "play" OR $instruction == "play-all" OR $instruction == "expand") {
 		switch($file_format) {
 			case "data":
 				$command .= " -d -o ".$output;
@@ -250,21 +250,27 @@ if(isset($data_path) AND $data_path <> '') {
 	$content = @file_get_contents($data_path,TRUE);
 	if($content <> FALSE) {
 		if($instruction == "play") echo "<p><b>Playing";
+		if($instruction == "play-all") echo "<p><b>Playing chunks";
 		if($instruction == "expand") echo "<p><b>Expanding";
-		if($item > 0) echo " #".$item;
+		if($item <> 0) echo " #".$item;
 		else echo ":";
 		echo "</b></p>";
 		echo "<p style=\"color:MediumTurquoise;\"><b>";
 		$table = explode(chr(10),$content);
-		for($i = 0; $i < count($table); $i++) {
+		for($i = $k = 0; $i < count($table); $i++) {
+			if($k > 800) {
+				echo "… … …<br />";
+				break;
+				}
 			$line = trim($table[$i]);
 			$line = recode_tags($line);
 			$line_show = $line;
 			if($line == '') continue;
 			$length = strlen($line);
-			if($length > 400)
-				$line_show = substr($line,0,100)."<br />&nbsp;&nbsp;... ... ...<br />".substr($line,-100,100);
+			if($length > 200)
+				$line_show = substr($line,0,50)."<br />&nbsp;&nbsp;... ... ...<br />".substr($line,-100,100);
 			echo $line_show."<br />";
+			$k += strlen($line_show);
 			}
 		echo "</b></p>";
 		}
@@ -322,11 +328,11 @@ if($instruction <> "help") {
 	if($test) echo "file_format = ".$file_format."<br />";
 
 	if(!$no_error) {
-		echo "<p><font color=\"red\">Errors found… </font> ";
-		$content_trace = @file_get_contents($trace_link,TRUE);
-		if($content_trace AND strlen($content_trace) > 4)
-			echo "Check the <a onclick=\"window.open('".$trace_link."','errors','width=800,height=500,left=400'); return false;\" href=\"".$trace_link."\">error trace</a> file!";
-		echo "</p>";
+		$content_trace = @file_get_contents($tracefile,TRUE);
+		if($content_trace AND strlen($content_trace) > 4) {
+			echo "<p><font color=\"red\" class=\"blinking\">Errors found… </font> ";
+			echo "Check the <a onclick=\"window.open('".$trace_link."','errors','width=800,height=500,left=400'); return false;\" href=\"".$trace_link."\">error trace</a> file!</p>";
+			}
 		}
 	else {
 		echo "<p>";
@@ -546,8 +552,7 @@ if($n_messages > 0) {
 		if($i == 7) echo "… … …<br />";
 		if($i < 7 OR $i > ($n_messages - 4)) echo $mssg."<br />";
 		}
-	if($n_messages == 0) echo "No message produced…";
-	else if($handle) {
+	if($handle) {
 		$window_name = $grammar_name."_result";
 		if($bad_image) echo "<p>(<font color=\"red\"><b>*</b></font>) Syntax error in image: negative argument</p>";
 		echo "<p style=\"font-size:larger;\"><input style=\"color:DarkBlue; background-color:yellow; font-size:large;\" onclick=\"window.open('".$result_file."','".$window_name."','width=800,height=600,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Show all ".$n_messages." messages\">";
@@ -558,6 +563,7 @@ if($n_messages > 0) {
 	if($handle) fwrite($handle,"</body>\n");
 	if($handle) fclose($handle);
 	}
+else echo "No message produced…";
 
 function check_image($link) {
 	$result = '';
