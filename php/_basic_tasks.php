@@ -2317,23 +2317,25 @@ function simplify($fraction,$max_term) {
 function convert_musicxml($the_score,$divisions,$midi_channel,$select_part,$reload_musicxml,$test_musicxml) {
 	global $max_term_in_fraction;
 	$max_term = 32768; $grace_ratio = 2;
-	$data =  $error = ''; $tempo_this_part = $default_tempo = array();
+	// MakeMusic Finale dynamics https://en.wikipedia.org/wiki/Dynamics_(music)
+	$dynamic_sign_to_volume = array("pppp" => 10, "ppp" => 23, "pp" => 36, "p" => 49, "mp" => 62, "mf" => 75, "f" => 88, "ff" => 101, "fff" => 114, "ffff" => 127);
+	$data =  $error = ''; $tempo_this_part = $volume_this_part = $default_tempo = array();
 	foreach($the_score as $i_measure => $the_measure) {
 		if($i_measure < 0) continue;
-		$tempo_this_part[$i_measure] = array();
+		$tempo_this_part[$i_measure] = $volume_this_part[$i_measure] = array();
 		if($test_musicxml) echo "<br /><font color = red>• Measure ".$i_measure."</font><br />";
 		ksort($the_measure);
-		$measure_duration = 0;
+		$measure_duration = $max_volume = 0;
 		$curr_event = $convert_measure = array();
 		$data .= "{";
-		$number_parts = 0;
+		$number_parts = 0; 
 		foreach($the_measure as $score_part => $the_part) {
 			if(!$reload_musicxml OR !$select_part[$score_part]) continue;
 			$number_parts++;
 			if($test_musicxml) echo "• Measure ".$i_measure." part ".$score_part."<br />";
 			ksort($the_part);
 			$this_note = '';
-			$note_on = $is_chord = $rest = $pitch = $unpitched = $time_modification = $forward = $backup = $chord_in_process = FALSE;
+			$note_on = $is_chord = $rest = $pitch = $unpitched = $time_modification = $forward = $backup = $chord_in_process = $dynamics = FALSE;
 			$alter = $level = 0;
 			$this_octave = -1;
 			$curr_event[$score_part] = $convert_measure = array();
@@ -2445,13 +2447,34 @@ function convert_musicxml($the_score,$divisions,$midi_channel,$select_part,$relo
 					
 				if(is_integer($pos=strpos($line,"<sound tempo"))) {
 					$tempo = trim(preg_replace("/.+tempo=\"([0-9]+)\"\/>/u","$1",$line));
-					echo $score_part." tempo = ".$tempo." bpm at measure ".$i_measure."<br />";
+				//	echo $score_part." tempo = ".$tempo." bpm at measure ".$i_measure."<br />";
 					$fraction = $tempo."/60";
 					$simplify = simplify($fraction,$max_term);
 					$fraction = $simplify['fraction'];
 					$tempo_this_part[$i_measure][$score_part] = $fraction;
 					}
-					
+				
+				if(is_integer($pos=strpos($line,"<sound dynamics"))) {
+					$volume = trim(preg_replace("/.+dynamics=\"([0-9]+)\"\/>/u","$1",$line));
+				//	echo $score_part." volume = ".$volume." at measure ".$i_measure."<br />";
+					if($volume > $max_volume) $max_volume = $volume;
+					$volume_this_part[$i_measure][$score_part] = $volume;
+					}
+				
+				if(is_integer($pos=strpos($line,"<dynamics "))) {
+					$dynamics = TRUE; continue;
+					}
+				if(is_integer($pos=strpos($line,"</dynamics>"))) $dynamics = FALSE;
+				if($dynamics) {
+					$sign = trim(preg_replace("/<([^\/]+)\/>/u","$1",$line));
+					if(isset($dynamic_sign_to_volume[$sign])) {
+						$volume = $dynamic_sign_to_volume[$sign];
+						$volume_this_part[$i_measure][$score_part] = $volume;
+				//		echo $score_part." sign = ".$sign." => ".$volume." (measure ".$i_measure.")<br />";
+						}
+					else $volume = 0;
+					}
+
 				if(is_integer($pos=strpos($line,"<backup>"))) {
 					$backup = TRUE;
 					$is_chord = FALSE;
@@ -2650,6 +2673,13 @@ function convert_musicxml($the_score,$divisions,$midi_channel,$select_part,$relo
 				}
 			else if(isset($default_tempo[$score_part]))
 				$data .= " _tempo(".$default_tempo[$score_part].")";
+				
+			if(isset($volume_this_part[$i_measure][$score_part])) {
+			//	$volume = round($volume_this_part[$i_measure][$score_part] * 127 / $max_volume);
+				$volume = $volume_this_part[$i_measure][$score_part];
+				$data .= " _volume(".$volume.")";
+				}
+				
 			if(isset($midi_channel[$score_part])) $data .= " _chan(".$midi_channel[$score_part].")";
 			$fraction = $p_time_measure."/".($q_time_measure * $divisions[$score_part]);
 			$simplify = simplify($fraction,$max_term);
