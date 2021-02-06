@@ -2314,12 +2314,13 @@ function simplify($fraction,$max_term) {
 	return $simplify;
 	}
 
-function convert_musicxml($the_score,$divisions,$midi_channel,$select_part,$reload_musicxml,$test_musicxml) {
+function convert_musicxml($the_score,$divisions,$midi_channel,$select_part,$ignore_dynamics,$ignore_tempo,$ignore_channels,$reload_musicxml,$test_musicxml) {
 	global $max_term_in_fraction;
 	$max_term = 32768; $grace_ratio = 2;
 	// MakeMusic Finale dynamics https://en.wikipedia.org/wiki/Dynamics_(music)
 	$dynamic_sign_to_volume = array("pppp" => 10, "ppp" => 23, "pp" => 36, "p" => 49, "mp" => 62, "mf" => 75, "f" => 88, "ff" => 101, "fff" => 114, "ffff" => 127);
 	$data =  $error = ''; $tempo_this_part = $volume_this_part = $default_tempo = array();
+	$tie_type_start = $tie_type_stop = FALSE;
 	foreach($the_score as $i_measure => $the_measure) {
 		if($i_measure < 0) continue;
 		$tempo_this_part[$i_measure] = $volume_this_part[$i_measure] = array();
@@ -2383,8 +2384,11 @@ function convert_musicxml($the_score,$divisions,$midi_channel,$select_part,$relo
 							if($alter == -1) $curr_event[$score_part][$j]['note'] .= "b";
 							}
 						if($this_octave >= 0) $curr_event[$score_part][$j]['note'] .= $this_octave;
+						if($tie_type_start) $curr_event[$score_part][$j]['note'] .= "&";
+						if($tie_type_stop) $curr_event[$score_part][$j]['note'] = "&".$curr_event[$score_part][$j]['note'];
 						}
 					$note_on = $rest = $fermata = $is_chord = FALSE;
+					$tie_type_start = $tie_type_stop = FALSE;
 					$j++;
 					$curr_event[$score_part][$j]['type'] = "seq";
 					$curr_event[$score_part][$j]['note'] = '';
@@ -2445,7 +2449,14 @@ function convert_musicxml($the_score,$divisions,$midi_channel,$select_part,$relo
 					$curr_event[$score_part][$j]['type'] = "chord";
 					}
 					
-				if(is_integer($pos=strpos($line,"<sound tempo"))) {
+					
+				if($note_on AND is_integer($pos=strpos($line,"<tie type"))) {
+					$tie_type = trim(preg_replace("/.+type=\"([^\"]+)\"\/>/u","$1",$line));
+					if($tie_type == "start") $tie_type_start = TRUE;
+					if($tie_type == "stop") $tie_type_stop = TRUE;
+					}
+					
+				if(!$ignore_tempo AND is_integer($pos=strpos($line,"<sound tempo"))) {
 					$tempo = trim(preg_replace("/.+tempo=\"([0-9]+)\"\/>/u","$1",$line));
 				//	echo $score_part." tempo = ".$tempo." bpm at measure ".$i_measure."<br />";
 					$fraction = $tempo."/60";
@@ -2454,20 +2465,22 @@ function convert_musicxml($the_score,$divisions,$midi_channel,$select_part,$relo
 					$tempo_this_part[$i_measure][$score_part] = $fraction;
 					}
 				
-				if(is_integer($pos=strpos($line,"<sound dynamics"))) {
+				if(!$ignore_dynamics AND is_integer($pos=strpos($line,"<sound dynamics"))) {
 					$volume = trim(preg_replace("/.+dynamics=\"([0-9]+)\"\/>/u","$1",$line));
 				//	echo $score_part." volume = ".$volume." at measure ".$i_measure."<br />";
 					if($volume > $max_volume) $max_volume = $volume;
 					$volume_this_part[$i_measure][$score_part] = $volume;
+					// This will cancel the value estimated from the graphic sign previously encountered
 					}
 				
-				if(is_integer($pos=strpos($line,"<dynamics "))) {
+				if(!$ignore_dynamics AND is_integer($pos=strpos($line,"<dynamics "))) {
 					$dynamics = TRUE; continue;
 					}
 				if(is_integer($pos=strpos($line,"</dynamics>"))) $dynamics = FALSE;
 				if($dynamics) {
 					$sign = trim(preg_replace("/<([^\/]+)\/>/u","$1",$line));
-					if(isset($dynamic_sign_to_volume[$sign])) {
+					if(isset($dynamic_sign_to_volume[$sign]) AND !isset($volume_this_part[$i_measure][$score_part])) {
+						// This estimation replaces a missing value of volume
 						$volume = $dynamic_sign_to_volume[$sign];
 						$volume_this_part[$i_measure][$score_part] = $volume;
 				//		echo $score_part." sign = ".$sign." => ".$volume." (measure ".$i_measure.")<br />";
@@ -2680,7 +2693,7 @@ function convert_musicxml($the_score,$divisions,$midi_channel,$select_part,$relo
 				$data .= " _volume(".$volume.")";
 				}
 				
-			if(isset($midi_channel[$score_part])) $data .= " _chan(".$midi_channel[$score_part].")";
+			if(!$ignore_channels AND isset($midi_channel[$score_part])) $data .= " _chan(".$midi_channel[$score_part].")";
 			$fraction = $p_time_measure."/".($q_time_measure * $divisions[$score_part]);
 			$simplify = simplify($fraction,$max_term);
 			$fraction = $simplify['fraction'];
