@@ -562,7 +562,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			if($message <> '') echo $message;
 			echo "<input type=\"checkbox\" name=\"delete_current\">&nbsp;delete current data<br />";
 			echo "<input type=\"hidden\" name=\"upload_filename\" value=\"".$upload_filename."\">";
-			echo "<font color=\"red\">➡</font> You can select parts and <input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"select_parts\" value=\"CONVERT THEM\">&nbsp;<input style=\"background-color:azure;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"cancel\" value=\"QUIT IMPORTING\">";
+			echo "<font color=\"red\">➡</font> You can select parts and <input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"select_parts\" value=\"CONVERT THEM\">&nbsp;or&nbsp;<input style=\"background-color:azure;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"cancel\" value=\"QUIT IMPORTING\">";
 			$_POST['savethisfile'] = TRUE;
 			}
 		}
@@ -571,20 +571,29 @@ unset($_FILES['music_xml_import']);
 
 if(isset($_POST['explode'])) {
 	$content = $_POST['thistext'];
+	do $content = str_replace(chr(10).chr(10),chr(10),$content,$count);
+	while($count > 0);
 	$table = explode(chr(10),$content);
 	$newtable = array();
 	$imax = count($table);
 	$item = 1;
+	$initial_controls = '';
 	for($i = 0; $i < $imax; $i++) {
 		$line = trim($table[$i]);
+		if($line == '') continue;
+		if(is_integer($pos=strpos($line,"{"))) {
+			$initial_controls = trim(substr($line,0,$pos));
+			}
 		$newline = $line;
 		if(substr_count($line,'{') > 0) {
 			$newline = '';
-			$level = 0;
+			$level = 0; $first = TRUE;
 			for($j = 0; $j < strlen($line); $j++) {
 				$c = $line[$j];
 				if($c == '{') {
 					if($item == 1 AND $level == 0) $newline .= "[item ".($item++)."] ";
+					if($level == 0 AND !$first) $newline .= $initial_controls." ";
+					$first = FALSE;
 					$level++;
 					}
 				$newline .= $c;
@@ -593,11 +602,13 @@ if(isset($_POST['explode'])) {
 					if($level == 0) $newline .= "\n\n[item ".($item++)."] ";
 					}
 				}
+			$initial_controls = '';
 			}
 		$newtable[] = $newline;
 		}
 	$newcontent = implode("\n",$newtable);
 	$newcontent = str_replace("[item ".($item-1)."]",'',$newcontent);
+	$newcontent = str_replace("] \n","] ",$newcontent);
 	$_POST['thistext'] = $newcontent;
 	$_POST['savethisfile'] = TRUE;
 	}
@@ -613,7 +624,20 @@ if(isset($_POST['implode'])) {
 	while($count > 0);
 	$content = preg_replace("/\[item\s[0-9]+\]\s*/u",'',$content);
 	$content = preg_replace("/}\s{/u","} {",$content);
-	$_POST['thistext'] = $content;
+	$table = explode(chr(10),$content);
+	$newtable = array();
+	$imax = count($table);
+	for($i = 0; $i < $imax; $i++) {
+		$line = trim($table[$i]);
+		$initial_controls = '';
+		if(is_integer($pos=strpos($line,"{"))) {
+			$initial_controls = trim(substr($line,0,$pos));
+			}
+		$line = $initial_controls.str_replace($initial_controls,'',$line);
+		$newtable[] = $line;
+		}
+	$newcontent = implode("\n",$newtable);
+	$_POST['thistext'] = $newcontent;
 	$_POST['savethisfile'] = TRUE;
 	}
 
@@ -807,7 +831,7 @@ if($imax > 0 AND substr_count($content,'{') > 0) {
 	echo "<tr><td colspan=\"2\" style=\"vertical-align:middle; padding:6px;\">";
 	echo "<input type=\"submit\" style=\"background-color:AquaMarine;\" formaction=\"".$url_this_page."#topedit\" name=\"explode\" value=\"EXPLODE\">&nbsp;<font color=\"red\">➡ </font><i>break</i> {…} <i>expressions</i>";
 	echo "</td></tr>";
-	if($imax > 4) {
+	if($imax > 0) {
 		echo "<tr><td colspan=\"2\" style=\"vertical-align:middle; padding:6px;\">";
 		echo "<input type=\"submit\" style=\"background-color:AquaMarine;\" formaction=\"".$url_this_page."#topedit\" name=\"implode\" value=\"IMPLODE\">&nbsp;<font color=\"red\">➡ </font><i>merge</i> {…} <i>expressions</i>";
 		echo "</td></tr>";
@@ -836,10 +860,20 @@ for($i = $j = 0; $i < $imax; $i++) {
 	$handle = fopen($data,"w");
 	fwrite($handle,$line_recoded."\n");
 	fclose($handle);
-	$line_chunked = ''; $chunked = FALSE;
+	$initial_controls = ''; $chunked = FALSE;
+	if(is_integer($pos=strpos($line_recoded,"{"))) {
+		$initial_controls = trim(substr($line_recoded,0,$pos));
+		}
+	$line_chunked = ''; $first = TRUE;
 	for($k = $level = 0; $k < strlen($line_recoded); $k++) {
+		if($line_recoded[$k] == '{') {
+			if($level == 0 AND !$first) $line_chunked .= $initial_controls;
+			$first = FALSE;
+			$line_chunked .= $line_recoded[$k];
+			$level++;
+			continue;
+			}
 		$line_chunked .= $line_recoded[$k];
-		if($line_recoded[$k] == '{') $level++;
 		if($line_recoded[$k] == '}') {
 			$level--;
 			if($level == 0) {
@@ -848,7 +882,7 @@ for($i = $j = 0; $i < $imax; $i++) {
 				}
 			}
 		}
-	$chunked = TRUE;
+//	$chunked = TRUE;
 	if($chunked) {
 		$data_chunked = $temp_dir.$temp_folder.SLASH.$j."-chunked.bpda";
 		$handle = fopen($data_chunked,"w");
@@ -877,7 +911,7 @@ for($i = $j = 0; $i < $imax; $i++) {
 	$window_name_expland = $window_name."_expland";
 //	echo "<small>".urldecode($link_play)."</small><br />";
 //	echo "<small>".urldecode($link_expand)."</small><br />";
-	echo "<small>".urldecode($link_play_chunked)."</small><br />";
+//	echo "<small>".urldecode($link_play_chunked)."</small><br />";
 	$n1 = substr_count($line_recoded,'{');
 	$n2 = substr_count($line_recoded,'}');
 	if($n1 > $n2) $error_mssg .= "<font color=\"red\">This score contains ".($n1-$n2)." extra ‘{'</font>";
@@ -885,7 +919,7 @@ for($i = $j = 0; $i < $imax; $i++) {
 	if($error_mssg == '') {
 		echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_play."','".$window_name_play."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Play this polymetric expression\" value=\"PLAY\">&nbsp;";
 		
-		if($chunked) echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_play_chunked."','".$window_name_play."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Play polymetric expression in chunks (no graphics)\" value=\"PLAY chunked\">&nbsp;";
+		if($chunked) echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_play_chunked."','".$window_name_play."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Play polymetric expression in chunks (no graphics)\" value=\"PLAY safe\">&nbsp;";
 		
 		echo "&nbsp;<input style=\"background-color:azure;\" onclick=\"window.open('".$link_expand."','".$window_name_expland."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Expand this polymetric expression\" value=\"EXPAND\">&nbsp;";
 		}

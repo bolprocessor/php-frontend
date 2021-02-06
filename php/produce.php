@@ -571,8 +571,9 @@ function check_image($link) {
 	if($content) {
 		$content = str_replace(chr(13).chr(10),chr(10),$content);
 		$content = str_replace(chr(13),chr(10),$content);
-		if(is_integer($pos1 = strrpos($content,"-")) AND is_integer($pos2 = strpos($content,"//"))) {
-			if($pos1 > $pos2) $result = "negative argument";
+		$pos1 = $pos2 = 0;
+		if((is_integer($pos1 = strrpos($content,",-")) OR is_integer($pos2 = strrpos($content,"(-"))) AND is_integer($pos3 = strpos($content,"//"))) {
+			if($pos1 > $pos3 OR $pos2 > $pos3) $result = "negative argument";
 			}
 		}
 	return $result;
