@@ -99,23 +99,37 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			}
 		else {
 			$message = '';
-			$data = $score_part = $subtitle_part = '';
+			$score_part = '';
+			$data = $subtitle_part = '';
 			$max_measure = 0;
 			$partwise = $timewise = $attributes = $attributes_key = $changed_attributes = FALSE;
+			$add_section = TRUE;
 			$instrument_name = $midi_channel = $select_part = $duration_part = $divisions = array();
 			$ignore_dynamics = isset($_POST['ignore_dynamics']);
 			$ignore_tempo = isset($_POST['ignore_tempo']);
 			$ignore_channels = isset($_POST['ignore_channels']);
-			$this_score = array();
-			$part = $measure = -1;
+			$section = 0; // This variable is used for repetitions, see forward/backward
+			$repeat_section[$section] = 1; // By default, don't repeat
+		//	$this_score = array();
+		//	$this_score[$section] = array();
+			$part = '';
+			$i_measure = -1;
 			$reading_measure = FALSE;
 			$file = fopen($music_xml_file,"r");
 			while(!feof($file)) {
 				$line = fgets($file);
-				if(is_integer($pos=strpos($line,"<score-partwise")) AND $pos == 0) $partwise = TRUE;
-				if(is_integer($pos=strpos($line,"<score-timewise")) AND $pos == 0) $timewise = TRUE;
+				if(is_integer($pos=strpos($line,"<score-partwise")) AND $pos == 0) {
+					$partwise = TRUE;
+					continue;
+					}
+				if(is_integer($pos=strpos($line,"<score-timewise")) AND $pos == 0) {
+					$timewise = TRUE;
+					continue;
+					}
+					
 				if(is_integer($pos=strpos($line,"<score-part "))) {
 					$score_part = trim(preg_replace("/.*id=\"([^\"]+)\".*/u","$1",$line));
+					continue;
 					}
 				if(is_integer($pos=strpos($line,"</score-part>"))) {
 					$part_selection = "select_part_".$score_part;
@@ -126,7 +140,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 					$message .= "<input type=\"checkbox\" name=\"".$part_selection."\"";
 					if($select_part[$score_part]) {
 						$message .= " checked";
-				//		echo "Score part ‘".$score_part."’ has been selected.<br />";
+						echo "Score part ‘".$score_part."’ has been selected<br />";
 						}
 					$message .= "> Score part ‘".$score_part."’ instrument = <i>".$instrument_name[$score_part]."</i>";
 					if(isset($midi_channel[$score_part]) AND $midi_channel[$score_part] <> '') {
@@ -141,38 +155,48 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 						$subtitle_part .= "\n";
 						}
 					$score_part = '';
+					continue;
 					}
 				if($score_part <> '' AND is_integer($pos=strpos($line,"<instrument-name>"))) {
 					$instrument_name[$score_part] = trim(preg_replace("/<instrument\-name>(.+)<\/instrument\-name>/u","$1",$line));
+					continue;
 					}
 				if($score_part <> '' AND is_integer($pos=strpos($line,"<midi-channel>"))) {
 					$midi_channel[$score_part] = trim(preg_replace("/<midi\-channel>([0-9]+)<\/midi\-channel>/u","$1",$line));
+					continue;
 					}
 				if($partwise AND is_integer($pos=strpos($line,"<part "))) {
-					$measure = -1;
+					$i_measure = -1;
 					$part = trim(preg_replace("/.*id=\"([^\"]+)\".*/u","$1",$line));
+					continue;
 					}
 				if(is_integer($pos=strpos($line,"<attributes>"))) {
 					$attributes = TRUE;
 					$changed_attributes = FALSE;
+					continue;
 					}
 				if($attributes AND is_integer($pos=strpos($line,"<divisions>"))) {
 					$divisions[$part] = trim(preg_replace("/<divisions>([0-9]+)<\/divisions>/u","$1",$line));
 					$changed_attributes = TRUE;
+					continue;
 					}
 				if($attributes AND is_integer($pos=strpos($line,"<key>"))) {
 					$attributes_key =  TRUE;
+					continue;
 					}
 				if($attributes_key AND is_integer($pos=strpos($line,"<fifths>"))) {
 					$fifths[$part] = trim(preg_replace("/<fifths>(.+)<\/fifths>/u","$1",$line));
 					$changed_attributes = TRUE;
+					continue;
 					}
 				if($attributes_key AND is_integer($pos=strpos($line,"<mode>"))) {
 					$mode[$part] = trim(preg_replace("/<mode>(.+)<\/mode>/u","$1",$line));
 					$changed_attributes = TRUE;
+					continue;
 					}
 				if($attributes AND is_integer($pos=strpos($line,"</key>"))) {
 					$attributes_key =  FALSE;
+					continue;
 					}
 				if(is_integer($pos=strpos($line,"</attributes>"))) {
 					$attributes = FALSE;
@@ -188,22 +212,58 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 							}
 						$message .= "<br />";
 						}
+					continue;
 					}
 				if(is_integer($pos=strpos($line,"<measure "))) {
 					$reading_measure = TRUE;
-					$measure = trim(preg_replace("/.*number=\"([0-9]+)\".*/u","$1",$line));
-					$this_score[$measure][$part] = array();
-					if($test_musicxml) echo "Part ".$part." measure #".$measure."<br />";
+					$i_measure = trim(preg_replace("/.*number=\"([0-9]+)\".*/u","$1",$line));
+				//	$this_score[$section][$i_measure] = array();
+				//	$this_score[$section][$i_measure][$part] = array();
+					if($test_musicxml) echo "Part ".$part." measure #".$i_measure."<br />";
+					if($add_section) {
+						$section++;
+						$this_score[$section][$i_measure] = array();
+						$this_score[$section][$i_measure][$part] = array();
+						$repeat_section[$section] = 1;
+						}
+					$add_section = FALSE;
 					}
 				if($reading_measure AND is_integer($pos=strpos($line,"</measure>"))) {
 					$reading_measure = FALSE;
+					
 					}
+				if($reading_measure AND is_integer($pos=strpos($line,"<repeat "))) {
+					$repeat_direction = trim(preg_replace("/.+direction=\"([^\"]+)\"\/>/u","$1",$line));
+				//	echo "repeat direction = “".$repeat_direction."”<br />";
+					if($repeat_direction == "forward") {
+						if($add_section) {
+							$section++;
+							$this_score[$section][$i_measure] = array();
+							$this_score[$section][$i_measure][$part] = array();
+							$repeat_section[$section] = 1;
+							}
+						$add_section = FALSE;
+						}
+					if($repeat_direction == "backward") {
+						$repeat_section[$section] = 2;
+						$add_section = TRUE;
+					//	echo "• Section ".$section." repeat ".$repeat_section[$section]." time(s)<br />";
+						}
+					continue;
+					}
+				if($reading_measure AND is_integer($pos=strpos($line,"<note>"))) {
+					}
+					
 				if($reading_measure) {
-					$this_score[$measure][$part][] = $line;
+					$this_score[$section][$i_measure][$part][] = $line;
 					}
 				}
 			fclose($file);
-			$convert_score = convert_musicxml($this_score,$divisions,$midi_channel,$select_part,$ignore_dynamics,$ignore_tempo,$ignore_channels,$reload_musicxml,$test_musicxml);
+			foreach($this_score as $section => $the_section) {
+				echo "Section ".$section." repeat ".$repeat_section[$section]." time(s)<br />";
+				}
+			unset($the_section);
+			$convert_score = convert_musicxml($this_score,$repeat_section,$divisions,$midi_channel,$select_part,$ignore_dynamics,$ignore_tempo,$ignore_channels,$reload_musicxml,$test_musicxml);
 			$data .= $convert_score['data'];
 			$message .= $convert_score['error'];
 			$data = preg_replace("/\s+/u"," ",$data);
@@ -536,12 +596,14 @@ for($i = $j = 0; $i < $imax; $i++) {
 	fclose($handle);
 	$initial_controls = '';
 	$chunked = FALSE;
-	$tie = 0;
+	$tie = $n = 0;
 	if(is_integer($pos=strpos($line_recoded,"{"))) {
 		$initial_controls = trim(substr($line_recoded,0,$pos));
 		}
-	$line_chunked = ''; $first = TRUE;
+	$line_chunked = ''; $first = TRUE; $chunk_number = 1; $start_chunk = "[chunk 1] ";
 	for($k = $level = 0; $k < strlen($line_recoded); $k++) {
+		$line_chunked .= $start_chunk;
+		$start_chunk = '';
 		$c = $line_recoded[$k];
 		if($k < (strlen($line_recoded) - 1) AND ctype_alnum($c) AND $line_recoded[$k+1] == '&') $tie++;
 		if($k < (strlen($line_recoded) - 1) AND $c == '&' AND ctype_alnum($line_recoded[$k+1])) $tie--;
@@ -554,9 +616,12 @@ for($i = $j = 0; $i < $imax; $i++) {
 			}
 		$line_chunked .= $c;
 		if($c == '}') {
-			$level--;
-			if($level == 0 AND $tie <= 0) {
+			$level--; 
+			if($level == 0) $n++;
+			if($level == 0 AND ($tie <= 0 OR $n > $maxchunk_size)) {
 				$line_chunked .= "\n";
+				$tie = $n = 0;
+				$start_chunk = "[chunk ".(++$chunk_number)."] ";
 				if($k < (strlen($line_recoded) - 1)) $chunked = TRUE;
 				}
 			}

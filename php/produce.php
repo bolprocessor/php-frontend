@@ -494,7 +494,7 @@ if($instruction <> "help") {
 		}
 	}
 $handle = FALSE;
-if($n_messages > 3000) echo "<p><font color=\"red\">➡</font> Too many messages produced! (".$n_messages.")</p>";
+if($n_messages > 6000) echo "<p><font color=\"red\">➡</font> Too many messages produced! (".$n_messages.")</p>";
 else {
 	if($result_file <> '') $handle = fopen($result_file,"w");
 	if($handle) {

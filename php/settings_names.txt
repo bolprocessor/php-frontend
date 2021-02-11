@@ -61,8 +61,8 @@ Csound file format	0 = MacOS<br />1 = Windows<br />2 = Unix	0
 ProgNrFrom		0
 Fade-out time	seconds (end of MIDI files and Csound scores)	1
 C4 (middle C) key number	(0..127) usually 60	1
-A4 frequency (diapason)	Hz (usally 440)	1
-Strike again NoteOn's		1	1
+A4 frequency (diapason)	Hz (usually 440)	1
+Strike again NoteOn's	Keep selected unless you know why!	1	1
 Default volume	(1..127)	1
 Volume controller	(0..127) usually 7	1
 Default velocity	(1..127)	1
