@@ -216,10 +216,10 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 					}
 				if(is_integer($pos=strpos($line,"<measure "))) {
 					$reading_measure = TRUE;
-					$i_measure = trim(preg_replace("/.*number=\"([0-9]+)\".*/u","$1",$line));
+					$i_measure = trim(preg_replace("/.*number=\"([^\"]+)\".*/u","$1",$line));
 				//	$this_score[$section][$i_measure] = array();
 				//	$this_score[$section][$i_measure][$part] = array();
-					if($test_musicxml) echo "Part ".$part." measure #".$i_measure."<br />";
+				/*	if($test_musicxml) */ echo "Part ".$part." measure #".$i_measure."<br />";
 					if($add_section) {
 						$section++;
 						$this_score[$section][$i_measure] = array();

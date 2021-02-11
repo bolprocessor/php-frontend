@@ -2329,7 +2329,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$s
 		$tempo_this_part[$section] = $volume_this_part[$section] = array();
 		for($i_repeat = 1; $i_repeat <= $repeat_section[$section]; $i_repeat++) {
 			$tie_type_start = $tie_type_stop = FALSE;
-			ksort($the_section);
+		//	ksort($the_section);
 			foreach($the_section as $i_measure => $the_measure) {
 				if($i_measure < 0) continue;
 				$tempo_this_part[$section][$i_measure] = $volume_this_part[$section][$i_measure] = array();
@@ -2345,7 +2345,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$s
 						continue;
 						}
 					$number_parts++;
-					if($test_musicxml) echo "• Measure ".$i_measure." part ".$score_part."<br />";
+					/*if($test_musicxml)*/ echo "• Measure ".$i_measure." part ".$score_part."<br />";
 					ksort($the_part);
 					$this_note = '';
 					$note_on = $is_chord = $rest = $pitch = $unpitched = $time_modification = $forward = $backup = $chord_in_process = $dynamics = FALSE;
@@ -2597,7 +2597,13 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$s
 								$q_old_duration = $q_time_measure = $q_stream_duration = $q_rest;
 								if($test_musicxml) echo "Inserting rest after backup duration ".$p_rest."/".$q_rest."<br />";
 								}
-							else if($p_rest < 0) $error .= "<font color=\"red\">➡ </font> Error in part ".$score_part." measure ".$i_measure.", ‘backup’ duration: rest = ".$p_rest."/".$q_rest.", divisions = ".$divisions[$score_part]."<br />";
+							else {
+								if($p_rest < 0) $error .= "<font color=\"red\">➡ </font> Error in part ".$score_part." measure ".$i_measure.", ‘backup’ duration: rest = ".$p_rest."/".($q_rest * $divisions[$score_part])." (fixed)<br />";
+								$p_rest = 0; $q_rest = 1;
+								$stream = ''; $stream_units = 0;
+								$p_old_duration = $p_time_measure = $p_stream_duration = $p_rest;
+								$q_old_duration = $q_time_measure = $q_stream_duration = $q_rest;
+								}
 							}
 						if(!$is_chord AND $the_event['type'] == "chord") {
 							$p_duration = $the_event['p_dur']; $q_duration = $the_event['q_dur'];
