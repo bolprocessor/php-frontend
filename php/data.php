@@ -104,7 +104,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$max_measure = 0;
 			$partwise = $timewise = $attributes = $attributes_key = $changed_attributes = FALSE;
 			$add_section = TRUE;
-			$instrument_name = $midi_channel = $select_part = $duration_part = $divisions = array();
+			$instrument_name = $midi_channel = $select_part = $duration_part = $divisions = $repeat_section = array();
 			$ignore_dynamics = isset($_POST['ignore_dynamics']);
 			$ignore_tempo = isset($_POST['ignore_tempo']);
 			$ignore_channels = isset($_POST['ignore_channels']);
@@ -140,7 +140,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 					$message .= "<input type=\"checkbox\" name=\"".$part_selection."\"";
 					if($select_part[$score_part]) {
 						$message .= " checked";
-						echo "Score part ‘".$score_part."’ has been selected<br />";
+						echo "<p>Score part ‘".$score_part."’ has been selected</p>";
 						}
 					$message .= "> Score part ‘".$score_part."’ instrument = <i>".$instrument_name[$score_part]."</i>";
 					if(isset($midi_channel[$score_part]) AND $midi_channel[$score_part] <> '') {
@@ -217,9 +217,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				if(is_integer($pos=strpos($line,"<measure "))) {
 					$reading_measure = TRUE;
 					$i_measure = trim(preg_replace("/.*number=\"([^\"]+)\".*/u","$1",$line));
-				//	$this_score[$section][$i_measure] = array();
-				//	$this_score[$section][$i_measure][$part] = array();
-				/*	if($test_musicxml) */ echo "Part ".$part." measure #".$i_measure."<br />";
+					if($test_musicxml) echo "Part ".$part." measure #".$i_measure."<br />";
 					if($add_section) {
 						$section++;
 						$this_score[$section][$i_measure] = array();
@@ -234,14 +232,14 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 					}
 				if($reading_measure AND is_integer($pos=strpos($line,"<repeat "))) {
 					$repeat_direction = trim(preg_replace("/.+direction=\"([^\"]+)\"\/>/u","$1",$line));
-				//	echo "repeat direction = “".$repeat_direction."”<br />";
+					if($test_musicxml) echo "repeat direction = “".$repeat_direction."” section ".$section."<br />";
 					if($repeat_direction == "forward") {
-						if($add_section) {
+				//		if($add_section) {
 							$section++;
 							$this_score[$section][$i_measure] = array();
 							$this_score[$section][$i_measure][$part] = array();
 							$repeat_section[$section] = 1;
-							}
+				//			}
 						$add_section = FALSE;
 						}
 					if($repeat_direction == "backward") {
@@ -259,10 +257,12 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 					}
 				}
 			fclose($file);
-			foreach($this_score as $section => $the_section) {
-				echo "Section ".$section." repeat ".$repeat_section[$section]." time(s)<br />";
+			if($test_musicxml) {
+				foreach($this_score as $section => $the_section) {
+					echo "Section ".$section." repeated ".$repeat_section[$section]." time(s)<br />";
+					}
+				unset($the_section);
 				}
-			unset($the_section);
 			$convert_score = convert_musicxml($this_score,$repeat_section,$divisions,$midi_channel,$select_part,$ignore_dynamics,$ignore_tempo,$ignore_channels,$reload_musicxml,$test_musicxml);
 			$data .= $convert_score['data'];
 			$message .= $convert_score['error'];

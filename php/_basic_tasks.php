@@ -2328,11 +2328,16 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$s
 		if($test_musicxml) echo "<br /><font color = red>• Section ".$section."</font><br />";
 		$tempo_this_part[$section] = $volume_this_part[$section] = array();
 		for($i_repeat = 1; $i_repeat <= $repeat_section[$section]; $i_repeat++) {
-			$tie_type_start = $tie_type_stop = FALSE;
-		//	ksort($the_section);
+			$tie_type_start = $tie_type_stop = FALSE; $index_measure = 0;
+				if($test_musicxml)  echo "Repetition ".$i_repeat." section ".$section."<br />";
+		//	ksort($the_section); Never do this because $i_measure may not be an integer
 			foreach($the_section as $i_measure => $the_measure) {
 				if($i_measure < 0) continue;
 				$tempo_this_part[$section][$i_measure] = $volume_this_part[$section][$i_measure] = array();
+				$index_measure++;
+				if(!is_integer($i_measure))
+					echo "<font color=\"red\">➡</font> Measure #".$index_measure." is wrongly labelled “".$i_measure."” <font color=\"MediumTurquoise\">(fixed)</font><br />";
+				else $index_measure = intval($i_measure);
 				if($test_musicxml) echo "<br /><font color = red>• Measure ".$i_measure."</font><br />";
 				ksort($the_measure);
 				$measure_duration = $max_volume = 0;
@@ -2345,7 +2350,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$s
 						continue;
 						}
 					$number_parts++;
-					/*if($test_musicxml)*/ echo "• Measure ".$i_measure." part ".$score_part."<br />";
+					if($test_musicxml) echo "• Measure ".$i_measure." part ".$score_part."<br />";
 					ksort($the_part);
 					$this_note = '';
 					$note_on = $is_chord = $rest = $pitch = $unpitched = $time_modification = $forward = $backup = $chord_in_process = $dynamics = FALSE;
@@ -2447,7 +2452,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$s
 							$fermata = TRUE;
 							}
 						if($note_on AND is_integer($pos=strpos($line,"<duration>"))) {
-							$duration = intval(trim(preg_replace("/<duration>([0-9]+)<\/duration>/u","$1",$line)));
+							$duration = round(trim(preg_replace("/<duration>([^<]+)<\/duration>/u","$1",$line)));
 							$curr_event[$score_part][$j]['p_dur'] = $duration;
 							$curr_event[$score_part][$j]['q_dur'] = 1;
 							}
@@ -2598,7 +2603,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$s
 								if($test_musicxml) echo "Inserting rest after backup duration ".$p_rest."/".$q_rest."<br />";
 								}
 							else {
-								if($p_rest < 0) $error .= "<font color=\"red\">➡ </font> Error in part ".$score_part." measure ".$i_measure.", ‘backup’ duration: rest = ".$p_rest."/".($q_rest * $divisions[$score_part])." (fixed)<br />";
+								if($p_rest < 0) $error .= "<font color=\"red\">➡ </font> Error in part ".$score_part." measure ".$i_measure.", ‘backup’ duration: rest = ".$p_rest."/".($q_rest * $divisions[$score_part])." <font color=\"MediumTurquoise\">(fixed)</font><br />";
 								$p_rest = 0; $q_rest = 1;
 								$stream = ''; $stream_units = 0;
 								$p_old_duration = $p_time_measure = $p_stream_duration = $p_rest;
