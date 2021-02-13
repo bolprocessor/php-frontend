@@ -37,6 +37,11 @@ if(!file_exists($bp_application_path.$csound_resources)) {
 	}
 $dir_csound_resources = $bp_application_path.$csound_resources.SLASH;
 
+if(!file_exists($bp_application_path.$csound_resources.SLASH."scale_images")) {
+	mkdir($bp_application_path.$csound_resources.SLASH."scale_images");
+	}
+$dir_scale_images = $bp_application_path.$csound_resources.SLASH."scale_images".SLASH;
+
 if(!file_exists($bp_application_path.$trash_folder)) {
 	mkdir($bp_application_path.$trash_folder);
 	}
@@ -1913,6 +1918,7 @@ function html_to_text($text,$type) {
 	}
 
 function list_of_tonal_scales($csound_orchestra_file) {
+	global $dir_scale_images;
 	$list = array();
 	if(!file_exists($csound_orchestra_file)) return $list;
 	$content = @file_get_contents($csound_orchestra_file,TRUE);
@@ -1925,12 +1931,17 @@ function list_of_tonal_scales($csound_orchestra_file) {
 		if($line == "_begin tables") $found = TRUE;
 		if($line == "_end tables") break;
 		if($found) {
-			if($line[0] == "\"")
-				$list[++$j] = "<font color=\"red\">".str_replace('"','',$line);
+			if($line[0] == "\"") {
+				$name_of_file = str_replace('"','',$line);
+				$dir_image = $dir_scale_images.$name_of_file.".png";
+				$list[++$j] = "<font color=\"red\">".$name_of_file;
+				}
 			if($line[0] == "/")
 				$list[$j] .= "</font> = <font color=\"darkmagenta\"><b>".str_replace("/",'',$line)."</b></font>";
-			if($line[0] == "|")
+			if($line[0] == "|") {
 				$list[$j] .= " <font color=\"blue\">baseoctave</font> = <font color=\"red\">".str_replace("|",'',$line)."</font>";
+				if(file_exists($dir_image)) $list[$j] .= " ➡ <a target=\"_blank\" href=\"".$dir_image."\">image</a>";
+				}
 			}
 		}
 	return $list;
@@ -2331,6 +2342,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$s
 			$tie_type_start = $tie_type_stop = FALSE; $index_measure = 0;
 				if($test_musicxml)  echo "Repetition ".$i_repeat." section ".$section."<br />";
 		//	ksort($the_section); Never do this because $i_measure may not be an integer
+		// Beware that there are empty sessions
 			foreach($the_section as $i_measure => $the_measure) {
 				if($i_measure < 0) continue;
 				$tempo_this_part[$section][$i_measure] = $volume_this_part[$section][$i_measure] = array();
@@ -2476,7 +2488,11 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$s
 							$fraction = $tempo."/60";
 							$simplify = simplify($fraction,$max_term_in_fraction);
 							$fraction = $simplify['fraction'];
-							$tempo_this_part[$section][$i_measure][$score_part] = $fraction;
+							if(!isset($tempo_this_part[$section][$i_measure][$score_part])) {
+								// Here we have a limitation: tempo cannot be modified inside a measure
+								// Check for instance measure 33 of Bach's Prelude I in C major BWV_846
+								$tempo_this_part[$section][$i_measure][$score_part] = $fraction;
+								}
 							}
 						
 						if(!$ignore_dynamics AND is_integer($pos=strpos($line,"<sound dynamics"))) {
@@ -2724,6 +2740,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$s
 					if(isset($tempo_this_part[$section][$i_measure][$score_part])) {
 						$data .= " _tempo(".$tempo_this_part[$section][$i_measure][$score_part].")";
 						$default_tempo[$score_part] = $tempo_this_part[$section][$i_measure][$score_part];
+					//	echo "New tempo = ".$default_tempo[$score_part]."<br />";
 						}
 					else if(isset($default_tempo[$score_part]))
 						$data .= " _tempo(".$default_tempo[$score_part].")";

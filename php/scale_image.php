@@ -1,5 +1,6 @@
 <?php
 $save_codes_dir = urldecode($_GET['save_codes_dir']);
+$dir_scale_images = urldecode($_GET['dir_scale_images']);
 $image_file = $save_codes_dir."/image.php";
 require_once($image_file);
 header('Content-Type: image/png; charset=utf-8');
@@ -270,7 +271,9 @@ if(!$no_intervals) {
 		}
 	}
 		
+// imagepng($im,$dir_scale_images.$filename.".png");
 imagepng($im);
+imagepng($im,$dir_scale_images.$filename.".png");
 imagedestroy($im);
 
 // ======================= FUNCTIONS =======================

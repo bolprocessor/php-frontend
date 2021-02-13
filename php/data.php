@@ -140,7 +140,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 					$message .= "<input type=\"checkbox\" name=\"".$part_selection."\"";
 					if($select_part[$score_part]) {
 						$message .= " checked";
-						echo "<p>Score part ‘".$score_part."’ has been selected</p>";
+					//	echo "<p>Score part ‘".$score_part."’ has been selected</p>";
 						}
 					$message .= "> Score part ‘".$score_part."’ instrument = <i>".$instrument_name[$score_part]."</i>";
 					if(isset($midi_channel[$score_part]) AND $midi_channel[$score_part] <> '') {
@@ -239,12 +239,14 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 							$this_score[$section][$i_measure] = array();
 							$this_score[$section][$i_measure][$part] = array();
 							$repeat_section[$section] = 1;
+							$repeat_start_measure[$section] = $i_measure;
 				//			}
 						$add_section = FALSE;
 						}
 					if($repeat_direction == "backward") {
 						$repeat_section[$section] = 2;
 						$add_section = TRUE;
+						$repeat_end_measure[$section] = $i_measure;
 					//	echo "• Section ".$section." repeat ".$repeat_section[$section]." time(s)<br />";
 						}
 					continue;
@@ -256,13 +258,14 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 					$this_score[$section][$i_measure][$part][] = $line;
 					}
 				}
-			fclose($file);
-			if($test_musicxml) {
-				foreach($this_score as $section => $the_section) {
-					echo "Section ".$section." repeated ".$repeat_section[$section]." time(s)<br />";
+			fclose($file); $i_section =  0;
+			foreach($this_score as $section => $the_section) {
+				if(count($the_section) > 0) $i_section++;
+				if(isset($repeat_start_measure[$section]) AND isset($repeat_end_measure[$section])) {
+					echo "Section #".$i_section." is repeated from measure ".$repeat_start_measure[$section]." to ".$repeat_end_measure[$section]."<br />";
 					}
-				unset($the_section);
 				}
+			unset($the_section);
 			$convert_score = convert_musicxml($this_score,$repeat_section,$divisions,$midi_channel,$select_part,$ignore_dynamics,$ignore_tempo,$ignore_channels,$reload_musicxml,$test_musicxml);
 			$data .= $convert_score['data'];
 			$message .= $convert_score['error'];
@@ -303,19 +306,22 @@ unset($_FILES['music_xml_import']);
 
 if(isset($_POST['explode'])) {
 	$content = $_POST['thistext'];
-	do $content = str_replace(chr(10).chr(10),chr(10),$content,$count);
+	$content = str_replace("\r",chr(10),$content);
+	do $content = str_replace(chr(10).chr(10).chr(10),chr(10).chr(10),$content,$count);
 	while($count > 0);
 	$table = explode(chr(10),$content);
 	$newtable = array();
 	$imax = count($table);
 	$item = 1;
 	$initial_controls = ''; $tie = 0;
-	for($i = 0; $i < $imax; $i++) {
+	for($i = $start_line = 0; $i < $imax; $i++) {
 		$line = trim($table[$i]);
-		if($line == '') continue;
+		// if($line == '') continue;
 		if(is_integer($pos=strpos($line,"{"))) {
-			$initial_controls = trim(substr($line,0,$pos));
+			if($initial_controls == '') $initial_controls = trim(substr($line,0,$pos));
+			$start_line = $i;
 			}
+		$line = str_replace($initial_controls,'',$line);
 		$newline = $line;
 		if(substr_count($line,'{') > 0) {
 			$newline = '';
@@ -325,23 +331,23 @@ if(isset($_POST['explode'])) {
 				if($j < (strlen($line) - 1) AND ctype_alnum($c) AND $line[$j+1] == '&') $tie++;
 				if($j < (strlen($line) - 1) AND $c == '&' AND ctype_alnum($line[$j+1])) $tie--;
 				if($c == '{') {
-					if($item == 1 AND $level == 0) $newline .= "[item ".($item++)."] ";
-					if($level == 0 AND !$first) $newline .= $initial_controls." ";
+					if($item == 1 AND $level == 0) $newline .= "[item ".($item++)."] ".$initial_controls." ";
+				//	if($level == 0 AND !$first) $newline .= $initial_controls." ";
 					$first = FALSE;
 					$level++;
 					}
 				$newline .= $c;
 				if($c == '}') {
 					$level--;
-					if($level == 0 AND $tie >= 0) $newline .= "\n\n[item ".($item++)."] ";
+					if($level == 0 /* AND $tie >= 0 */) $newline .= "\n\n[item ".($item++)."] ".$initial_controls;
 					}
 				}
-			$initial_controls = '';
 			}
+	//	if($i <> $start_line) $newline = $initial_controls." ".$newline;
 		$newtable[] = $newline;
 		}
 	$newcontent = implode("\n",$newtable);
-	$newcontent = str_replace("[item ".($item-1)."]",'',$newcontent);
+	$newcontent = str_replace("[item ".($item-1)."] ".$initial_controls,'',$newcontent);
 	$newcontent = str_replace("] \n","] ",$newcontent);
 	$_POST['thistext'] = $newcontent;
 	$_POST['savethisfile'] = TRUE;
@@ -349,28 +355,38 @@ if(isset($_POST['explode'])) {
 
 if(isset($_POST['implode'])) {
 	$content = $_POST['thistext'];
-	$content = str_replace("\r\n","\n",$content);
+	$content = str_replace("\r",chr(10),$content);
+	do $content = str_replace(chr(10).chr(10).chr(10),chr(10).chr(10),$content,$count);
+	while($count > 0);
+//	$content = preg_replace("/_scale\([^\)]+\)\s*/u",'',$content);
 	do $content = str_replace("} ","}",$content,$count);
 	while($count > 0);
 	do $content = str_replace(" {","{",$content,$count);
 	while($count > 0);
 	do $content = str_replace("}\n\n","}\n",$content,$count);
 	while($count > 0);
-	$content = preg_replace("/\[item\s[0-9]+\]\s*/u",'',$content);
-	$content = preg_replace("/}\s{/u","} {",$content);
+	$content = preg_replace("/\[item\s[^\]]+\]\s*/u",'',$content);
+	// $content = preg_replace("/}\s{/u","} {",$content);
 	$table = explode(chr(10),$content);
 	$newtable = array();
 	$imax = count($table);
-	for($i = 0; $i < $imax; $i++) {
+	$initial_controls = '';
+	for($i = $start_line = 0; $i < $imax; $i++) {
 		$line = trim($table[$i]);
-		$initial_controls = '';
+		$these_controls = '';
 		if(is_integer($pos=strpos($line,"{"))) {
-			$initial_controls = trim(substr($line,0,$pos));
+			$these_controls = trim(substr($line,0,$pos));
+			if($initial_controls == '' AND $these_controls <> '') {
+				$initial_controls = $these_controls;
+				$start_line = $i;
+				}
 			}
-		$line = $initial_controls.str_replace($initial_controls,'',$line);
+		$line = str_replace($these_controls,'',$line);
 		$newtable[] = $line;
 		}
+	if($initial_controls <> '') $newtable[$start_line] = $initial_controls." ".$newtable[$start_line];
 	$newcontent = implode("\n",$newtable);
+	$newcontent = preg_replace("/}\s{/u","} {",$newcontent);
 	$_POST['thistext'] = $newcontent;
 	$_POST['savethisfile'] = TRUE;
 	}
@@ -594,7 +610,7 @@ for($i = $j = 0; $i < $imax; $i++) {
 	$handle = fopen($data,"w");
 	fwrite($handle,$line_recoded."\n");
 	fclose($handle);
-	$initial_controls = '';
+	$initial_controls = $tie_error = '';
 	$chunked = FALSE;
 	$tie = $n = 0;
 	if(is_integer($pos=strpos($line_recoded,"{"))) {
@@ -619,6 +635,10 @@ for($i = $j = 0; $i < $imax; $i++) {
 			$level--; 
 			if($level == 0) $n++;
 			if($level == 0 AND ($tie <= 0 OR $n > $maxchunk_size)) {
+				if($tie > 0) {
+					$error_mssg =  $tie." unbound ties";
+					$tie_error = TRUE;
+					}
 				$line_chunked .= "\n";
 				$tie = $n = 0;
 				$start_chunk = "[chunk ".(++$chunk_number)."] ";
@@ -660,7 +680,7 @@ for($i = $j = 0; $i < $imax; $i++) {
 	$n2 = substr_count($line_recoded,'}');
 	if($n1 > $n2) $error_mssg .= "<font color=\"red\">This score contains ".($n1-$n2)." extra ‘{'</font>";
 	if($n2 > $n1) $error_mssg .= "<font color=\"red\">This score contains ".($n2-$n1)." extra ‘}'</font>";
-	if($error_mssg == '') {
+	if($error_mssg == '' OR $tie_error <> '') {
 		echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_play."','".$window_name_play."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Play this polymetric expression\" value=\"PLAY\">&nbsp;";
 		
 		if($chunked) echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_play_chunked."','".$window_name_play."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Play polymetric expression in chunks (no graphics)\" value=\"PLAY safe\">&nbsp;";
