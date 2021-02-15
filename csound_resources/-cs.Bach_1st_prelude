@@ -1,5 +1,5 @@
 // Bol Processor BP3 compatible with version BP2.9.8
-// Csound resource file saved as "-cs.tryTunings". Date: 2021-02-15 16:06:00
+// Csound resource file saved as "-cs.Bach_1st_prelude". Date: 2021-02-12 22:05:24
 16
 -1
 -1
@@ -17,294 +17,10 @@
 -1
 -1
 -1
-0-default.orc
-4
-Plucked_string1
-Default instrument created by template
-10
-1
--1
--1
--1
-4
-0
--1.0000
-1
-1
-0
-0
-0
-0
-0
-0
-0
-0
-8
-5
--1
--1
--1
-9
-6
--1
--1
--1
-10
-7
--1
--1
--1
-7
-7
-7
-7
-7
-0
-0
-0
-0
-0
-8191.50
-64
-64
-8192
-64
-16383
-127
-127
-16383
-127
--200
-2147483647
-2147483647
-2147483647
-2147483647
-0
-2147483647
-2147483647
-2147483647
-2147483647
-200
-2147483647
-2147483647
-2147483647
-2147483647
-0
-Plucked_string2
-Default instrument created by template
-10
-2
--1
--1
--1
-4
-0
--1.0000
-1
-1
-0
-0
-0
-0
-0
-0
-0
-0
-8
-5
--1
--1
--1
-9
-6
--1
--1
--1
-10
-7
--1
--1
--1
-7
-7
-7
-7
-7
-0
-0
-0
-0
-0
-8191.50
-64
-64
-8192
-64
-16383
-127
-127
-16383
-127
--200
-2147483647
-2147483647
-2147483647
-2147483647
-0
-2147483647
-2147483647
-2147483647
-2147483647
-200
-2147483647
-2147483647
-2147483647
-2147483647
-0
-Sine_wave
-no comment
-10
-10
--1
--1
--1
-4
-0
-200
-1
-1
-0
-0
-0
-0
-0
-0
-0
-0
-8
-5
--1
--1
--1
-9
-6
--1
--1
--1
-10
-7
--1
--1
--1
-07
-07
-07
-07
-07
-0
-0
-0
-0
-0
-8191.50
-64
-64
-8192
-64
-16383
-127
-127
-16383
-127
--200
-2147483647
-2147483647
-2147483647
-2147483647
-0
-2147483647
-2147483647
-2147483647
-2147483647
-200
-2147483647
-2147483647
-2147483647
-2147483647
-0
-Synth_brass
-Created by Anthony
-10
-3
--1
--1
--1
-4
-0
--1
-1
-1
-0
-0
-0
-0
-0
-0
-0
-0
-8
-5
--1
--1
--1
-9
-6
--1
--1
--1
-10
-7
--1
--1
--1
-07
-07
-07
-07
-07
-0
-0
-0
-0
-0
-8191.50
-64
-64
-8192
-64
-16383
-127
-127
-16383
-127
--200
-2147483647
-2147483647
-2147483647
-2147483647
-0
-2147483647
-2147483647
-2147483647
-2147483647
-200
-2147483647
-2147483647
-2147483647
-2147483647
+new-vina.orc
 0
 _begin tables
-f1 0 256 10 1 ; This table may be changed
+f1 0 256 1 "vina-wave-table.aiff" 0 4 0
 "2_cycles_of_fifths"
 /DO REb-1 REb=DO#-1 DO# RE-1 RE MIb-1 MIb=RE#-1 RE# MI-1 MI FA-1 FA SOLb-1 SOLb=FA#-1 FA# SOL-1 SOL LAb-1 LAb=SOL#-1 SOL# LA-1 LA SIb-1 LA#-1=SIb LA# SI-1 SI DO-1 DO/
 c21.5062895967 81 80c
@@ -509,12 +225,6 @@ c21.5062895967 81 80c
 |4|
 f2 0 128 -51 12 2 261.63 60 0.988 1.053 1.111 1.185 1.25 1.333 1.406 1.481 1.58 1.667 1.778 1.875 1.975
 <html>This is a reduction to 12 grades of scale "Ma03" (23 grades) in ‘-cs.12_scales’<br />Created 2021-01-05 18:15:32</html>
-"Zarlino_natural"
-/C C# D D# E F F# G G# A A# B C/
-[1 1 16 15 9 8 6 5 5 4 4 3 64 45 3 2 8 5 5 3 16 9 15 8 2 1]
-|4|
-f2 0 128 -51 12 2 261.63 60 1 1.067 1.125 1.2 1.25 1.333 1.422 1.5 1.6 1.667 1.8 1.875 2
-<html>A traditional scale constructed with simple integer ratios<br /></html>
 "Zarlino_temp"
 /C Db D Eb E F F# G G# A Bb B C/
 c21.5062895967 81 80c
@@ -533,15 +243,6 @@ sp • • • • • • • • • • • • ps
 |4|
 f2 0 128 -51 13 2 261.63 60 1 1.042 1.117 1.196 1.248 1.25 1.337 1.394 1.495 1.563 1.67 1.789 1.865 2
 <html>Created 2021-01-14 09:31:50<br />Created meantone upward notes “do,mi,sol2#” fraction 5/4 (2021-01-14 09:32:46)<br />Created meantone downward notes “sol2#,do#” fraction 3/2 (2021-01-14 09:33:55)<br />Equalized intervals over series “do,sol,re,la,mi,si,fa#,do#” approx fraction 3/2 adjusted -6.1 cents to ratio = 1.495 (2021-01-14 09:34:42)<br />Created meantone downward notes “sol,mib” fraction 5/4 (2021-01-14 09:37:02)<br />Equalized intervals over series “mib,sib,fa,do” approx fraction 3/2 adjusted -5.2 cents to ratio = 1.495 (2021-01-14 09:38:54)<br /></html>
-"equal_tempered"
-/C C# D D# E F F# G G# A A# B C/
-c21.5062895967 81 80c
-k0 1 2 3 4 5 6 7 8 9 10 11 12k
-[1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1]
-sp • • • • • • • • • • • ps
-|4|
-f2 0 128 -51 12 2 261.63 60 1 1.059 1.122 1.189 1.26 1.335 1.414 1.498 1.587 1.682 1.782 1.888 2
-<html>This is an equal-tempered scale for BP3 + Csound.<br />Created 2021-02-13 19:09:08<br /></html>
 "meantone_BACH"
 /C Db D Eb E F Gb G Ab A Bb B C/
 c21.5062895967 81 80c
@@ -550,7 +251,7 @@ k0 1 2 3 4 5 6 7 8 9 10 11 12k
 sp • • • • • • • • • • • ps
 |4|
 f2 0 128 -51 12 2 261.63 60 1 1.053 1.119 1.185 1.253 1.333 1.406 1.496 1.58 1.675 1.778 1.88 2
-<html>Kellner's BACH meantone temperament (Asselin 2000 p.101)<br />Created meantone upward notes “do,sol,re,la,mi” fraction 3/2 adjusted -1/5 comma (2021-01-15 16:10:04)<br />Added fifths down: “do,fa,sib,mib,lab,reb,solb” starting fraction 1/1 (2021-01-15 16:11:48)<br />Created meantone upward notes “mi,si” fraction 3/2 (2021-01-15 16:13:36)<br /></html>
+<html>Kellner's BACH meantone temperament (Asselin 2000 p.101)<br />Created 2021-01-15 16:02:04Created meantone upward notes “do,sol,re,la,mi” fraction 3/2 adjusted -1/5 comma (2021-01-15 16:10:04)<br />Added fifths down: “do,fa,sib,mib,lab,reb,solb” starting fraction 1/1 (2021-01-15 16:11:48)<br />Created meantone upward notes “mi,si” fraction 3/2 (2021-01-15 16:13:36)<br /></html>
 "meantone_barca"
 /C C# D D# E F F# G G# A Bb B C/
 c21.5062895967 81 80c
@@ -659,7 +360,7 @@ sp • • • • • • • • • • • ps
 |4|
 f2 0 128 -51 12 2 261.63 60 1 1.049 1.119 1.194 1.253 1.337 1.403 1.496 1.57 1.675 1.787 1.875 2
 <html>Sauveur meantone temperament (Asselin 2000 p. 81)<br />Created 2021-01-16 10:37:52<br />Created meantone downward notes “do,fa,sib,mib” fraction 3/2 adjusted -1/5 comma (2021-01-16 10:44:41)<br />Created meantone upward notes “do,sol,re,la,mi,si,fa#,do#,sol#” fraction 3/2 adjusted -1/5 comma (2021-01-16 10:48:56)<br /></html>
-"meantone_schlick(bad)"
+"meantone_schlick"
 /C C# D Eb E F F# G G# Ab A Bb B C/
 c21.5062895967 81 80c
 k0 1 2 3 4 5 6 7 8 9 10 11 12 13k
@@ -667,7 +368,7 @@ k0 1 2 3 4 5 6 7 8 9 10 11 12 13k
 sp • • • • • • • • • p • • ps
 |4|
 f2 0 128 -51 13 2 261.63 60 1 1.045 1.118 1.196 1.25 1.338 1.398 1.496 1.575 1.6 1.672 1.789 1.87 2
-<html>Schlick meantone temperament (Asselin 2000 p.88)<br />Created 2021-01-16 10:56:35 [INCORRECT]<br />Created meantone downward notes “la,re,sol,do,fa” fraction 3/2 adjusted -1/4 comma (2021-01-16 10:58:50)<br />Created meantone upward notes “la,mi,si” fraction 3/2 adjusted -1/4 comma (2021-01-16 10:59:48)<br />Created meantone upward notes “la,do#” fraction 5/4 (2021-01-16 11:04:11)<br />Equalized intervals over series “si,fa#,do#” approx fraction 3/2 adjusted -5.4 cents to ratio = 1.495 (2021-01-16 11:05:59)<br />Created meantone downward notes “sol,mib” fraction 5/4 (2021-01-16 11:07:31)<br />Equalized intervals over series “mib,sib,fa” approx fraction 3/2 adjusted -5.3 cents to ratio = 1.495 (2021-01-16 11:08:47)<br />Created meantone downward notes “do,lab” fraction 5/4 (2021-01-16 11:13:58)<br />Created meantone upward notes “mi,sol#” fraction 5/4 adjusted 2/3 comma (2021-01-16 11:23:39) [estimation]<br />Base note reset to ‘do’ (2021-01-16 11:25:48)<br /></html>
+<html>Schlick meantone temperament (Asselin 2000 p.88)<br />Created 2021-01-16 10:56:35<br />Created meantone downward notes “la,re,sol,do,fa” fraction 3/2 adjusted -1/4 comma (2021-01-16 10:58:50)<br />Created meantone upward notes “la,mi,si” fraction 3/2 adjusted -1/4 comma (2021-01-16 10:59:48)<br />Created meantone upward notes “la,do#” fraction 5/4 (2021-01-16 11:04:11)<br />Equalized intervals over series “si,fa#,do#” approx fraction 3/2 adjusted -5.4 cents to ratio = 1.495 (2021-01-16 11:05:59)<br />Created meantone downward notes “sol,mib” fraction 5/4 (2021-01-16 11:07:31)<br />Equalized intervals over series “mib,sib,fa” approx fraction 3/2 adjusted -5.3 cents to ratio = 1.495 (2021-01-16 11:08:47)<br />Created meantone downward notes “do,lab” fraction 5/4 (2021-01-16 11:13:58)<br />Created meantone upward notes “mi,sol#” fraction 5/4 adjusted 2/3 comma (2021-01-16 11:23:39) [estimation]<br />Base note reset to ‘do’ (2021-01-16 11:25:48)<br /></html>
 "meantone_tartini-vallotti"
 /C Db D Eb E F Gb G Ab A Bb B C/
 c21.5062895967 81 80c

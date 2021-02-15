@@ -472,12 +472,14 @@ if($csound_file <> '') {
 			}
 		$list_of_instruments = list_of_instruments($dir_csound_resources.$csound_file);
 		$list = $list_of_instruments['list'];
+		$list_index = $list_of_instruments['index'];
 		if(($max_instr = count($list)) > 0) {
 			if($max_scales > 0) echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> also contains definitions of instrument(s):";
 			else echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains definitions of instrument(s):";
-			echo "<ol style=\"margin-top:0px; margin-bottom:0px\">";
+			echo "<ul style=\"margin-top:0px; margin-bottom:0px\">";
 			for($i_instr = 0; $i_instr < $max_instr; $i_instr++) {
 				echo "<li><b>_ins(</b><font color=\"MediumTurquoise\">".$list[$i_instr]."</font><b>)</b>";
+				echo " = <b>_ins(".$list_index[$i_instr].")</b>";
 				$param_list = $list_of_instruments['param'][$i_instr];
 				if(count($param_list) > 0) {
 					echo " ➡ parameter(s) ";
@@ -487,7 +489,7 @@ if($csound_file <> '') {
 					}
 				echo "</li>";
 				}
-			echo "</ol>";
+			echo "</ul>";
 			echo "</p>";
 			}
 		}

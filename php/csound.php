@@ -1475,6 +1475,7 @@ if($number_instruments > 0) {
 		echo "<input type=\"hidden\" name=\"instrument_file\" value=\"".$instrument_file[$j]."\">";
 		
 		$this_index = $name_index[$CsoundInstrumentName[$j]];
+	//	echo "this_index = ".$this_index."<br />";
 		if(isset($done_index[$this_index])) {
 			$this_index = $number_instruments;
 			while(isset($done_index[$this_index])) $this_index++;

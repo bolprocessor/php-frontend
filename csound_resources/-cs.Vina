@@ -1,5 +1,5 @@
 // Bol Processor BP3 compatible with version BP2.9.8
-// Csound resource file saved as "-cs.Vina". Date: 2020-12-19 13:08:21
+// Csound resource file saved as "-cs.Vina". Date: 2021-02-15 16:05:43
 16
 1
 -1
@@ -20,7 +20,7 @@
 new-vina.orc
 1
 Vina
-Simulates the pluck of a vina string using the Karplus-Strong algorithm.
+Simulates the pluck of a vina string using the Karplus-Strong algorithm
 13
 1
 -1

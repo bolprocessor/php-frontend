@@ -1,5 +1,5 @@
 // Bol Processor BP3 compatible with version BP2.9.8
-// Csound resource file saved as "-cs.tryScales". Date: 2021-01-15 08:39:55
+// Csound resource file saved as "-cs.tryScales". Date: 2021-02-13 18:48:43
 16
 -1
 -1
@@ -30,6 +30,12 @@ sp • • • • • • • • • • • • • • • • • • • �
 |4|
 f2 0 128 -51 22 2 261.63 60 1 1.032 1.065 1.099 1.134 1.171 1.208 1.247 1.287 1.328 1.37 1.414 1.459 1.506 1.554 1.604 1.656 1.708 1.763 1.82 1.878 1.938 2
 <html>This is an equal-tempered scale for BP3 + Csound.<br />Created 2020-12-31 13:22:40<br /></html>
+"Zarlino_natural"
+/C C# D D# E F F# G G# A A# B C/
+[1 1 16 15 9 8 6 5 5 4 4 3 64 45 3 2 8 5 5 3 16 9 15 8 2 1]
+|4|
+f2 0 128 -51 12 2 261.63 60 1 1.067 1.125 1.2 1.25 1.333 1.422 1.5 1.6 1.667 1.8 1.875 2
+<html>A traditional scale constructed with simple integer ratios<br /></html>
 "grama"
 /sa_ r1_ r2_ r3_ r4_ g1_ g2_ g3_ g4_ m1_ m2_ m3p1_ m4p2_ p3_ p4_ d1_ d2_ d3_ d4_ n1_ n2_ n3_ n4_ sa_/
 c21.5062895967 81 80c
@@ -45,18 +51,6 @@ f2 0 128 -51 23 2 261.63 60 1 1.053 1.067 1.111 1.125 1.185 1.2 1.25 1.266 1.333
 |4|
 f2 0 128 -51 12 2 261.63 60 1 1.067 1.125 1.2 1.25 1.333 1.422 1.5 1.6 1.667 1.8 1.875 2
 <html>A traditional scale constructed with simple integer ratios<br /></html>
-"meantone1"
-/do • re • mi fa • sol • la • si do/
-[1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1011 500]
-|3|
-f2 0 128 -51 12 2.0226 261.63 60 1 1.0664 1.1246 1.1993 1.2647 1.3487 1.4222 1.4997 1.5993 1.6865 1.7986 1.8966 2.022
-<html>This is a new scale for BP3.  Creation 2020-11-17 22:55:31<br /></html>
-"meantone2"
-/do • re • mi fa • sol • la • si do/
-[1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1011 500]
-|3|
-f2 0 128 -51 12 2.0226 261.63 60 1 1.0664 1.1246 1.1991 1.2647 1.3487 1.4222 1.4997 1.5993 1.6865 1.7986 1.8966 2.022
-<html>This is a new scale for BP3.  Creation 2020-11-17 22:55:31<br /></html>
 "piano"
 /dop dop# rep mibp mip fap fap# solp solp# lap sibp sip dop/
 c21.5062895967 81 80c

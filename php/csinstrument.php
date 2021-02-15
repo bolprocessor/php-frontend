@@ -93,11 +93,13 @@ if(isset($_POST['restore'])) {
 if(isset($_POST['saveinstrument'])) {
 	$csfilename = $_POST['csfilename'];
 	echo "<p id=\"timespan\"><font color=\"red\">Saving this instrument…</font>";
+	echo $instrument_file."<br />";
 	$handle = fopen($instrument_file,"w");
-	$file_header = $top_header."\n// Object prototype saved as \"".$instrument_name."\". Date: ".gmdate('Y-m-d H:i:s');
+	$file_header = $top_header."\n// Csound instrument saved as \"".$instrument_name."\". Date: ".gmdate('Y-m-d H:i:s');
 	fwrite($handle,$file_header."\n");
 	fwrite($handle,$csfilename."\n");
-	$comment = recode_tags($_POST['comment']);
+	$comment = trim(recode_tags($_POST['comment']));
+	if($comment == '') $comment = "no comment";
 	fwrite($handle,$comment."\n");
 	$argmax = $_POST['argmax'];
 	$instrument_argmax = max_argument($argmax_file);
@@ -105,7 +107,7 @@ if(isset($_POST['saveinstrument'])) {
 	
 	fwrite($handle,$argmax."\n");
 	$argmax = 0;
-	$instrument_index = $_POST['InstrumentIndex'];
+	$instrument_index = $_POST['instrument_index'];
 	fwrite($handle,$instrument_index."\n");
 	$InstrumentDilationRatioIndex = convert_empty($_POST['InstrumentDilationRatioIndex']);
 	fwrite($handle,$InstrumentDilationRatioIndex."\n");
@@ -118,7 +120,8 @@ if(isset($_POST['saveinstrument'])) {
 	fwrite($handle,$InstrumentPitchIndex."\n");
 	$InstrumentPitchFormat = $_POST['InstrumentPitchFormat'];
 	fwrite($handle,$InstrumentPitchFormat."\n");
-	$InstrumentPitchBendRange = convert_empty($_POST['InstrumentPitchBendRange']);
+	$InstrumentPitchBendRange = trim($_POST['InstrumentPitchBendRange']); 
+	if($InstrumentPitchBendRange == '') $InstrumentPitchBendRange = 200; // Fixed by BB 2021-02-14
 	fwrite($handle,$InstrumentPitchBendRange."\n");
 	
 	if(isset($_POST['IsLogX_0'])) $InstrumentPitchBendIsLogX = 1;
@@ -233,13 +236,11 @@ if(isset($_POST['saveinstrument'])) {
 $content = file_get_contents($instrument_file,TRUE);
 $extract_data = extract_data(TRUE,$content);
 $content = $extract_data['content'];
-echo "<input type=\"hidden\" name=\"instrument_index\" value=\"".$instrument_index."\">";
 
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 echo "<input type=\"hidden\" name=\"instrument_name\" value=\"".$instrument_name."\">";
 echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";
 echo "<input type=\"hidden\" name=\"instrument_file\" value=\"".$instrument_file."\">";
-echo "<input type=\"hidden\" name=\"instrument_index\" value=\"".$instrument_index."\">";
 $table = explode(chr(10),$content);
 $csfilename = $table[0];
 echo "<input type=\"hidden\" name=\"csfilename\" value=\"".$csfilename."\">";
@@ -254,6 +255,7 @@ if($verbose) echo "argmax = ".$argmax."<br />";
 echo "<input type=\"hidden\" name=\"argmax\" value=\"".$argmax."\">";
 $instrument_index = $table[++$i];
 if(isset($_POST['instrument_index'])) $instrument_index = $_POST['instrument_index'];
+// echo "<input type=\"hidden\" name=\"instrument_index\" value=\"".$instrument_index."\">";
 if($verbose) echo "Instrument index = ".$instrument_index."<br />";
 $InstrumentDilationRatioIndex = $table[++$i];
 if($verbose) echo "Instrument dilation ratio argument = ".$InstrumentDilationRatioIndex."<br />";
@@ -346,7 +348,7 @@ echo "<p>Comment: <input type=\"text\" name=\"comment\" size=\"90\" value=\"".$c
 echo "<table style=\"background-color: white;\">";
 echo "<tr>";
 echo "<td>";
-echo "<p style=\"text-align:right;\">Index of this instrument: <input type=\"text\" name=\"InstrumentIndex\" size=\"4\" value=\"".$instrument_index."\"><br/>";
+echo "<p style=\"text-align:right;\">Index of this instrument: <input type=\"text\" name=\"instrument_index\" size=\"4\" value=\"".$instrument_index."\"><br/>";
 // echo "<p style=\"text-align:right;\">Index of this instrument: <input type=\"text\" name=\"InstrumentIndex\" size=\"4\" value=\"".$instrument_index."\"><br/>";
 $x = $InstrumentDilationRatioIndex;
 if($x == -1) $x = '';
@@ -427,6 +429,7 @@ foreach($dir_instrument as $thisparameter) {
 	}
 if($deleted_parameters <> '') echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"restore\" value=\"RESTORE ALL DELETED PARAMETERS\"> = <font color=\"blue\"><big>".$deleted_parameters."</big></font></p>";
 echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"create_parameter\" value=\"CREATE A NEW PARAMETER\"> named <input type=\"text\" name=\"new_parameter\" size=\"20\" value=\"\"></p>";
+
 echo "</form>";
 $n = 0;
 foreach($dir_instrument as $thisparameter) {

@@ -460,17 +460,19 @@ if($csound_file <> '') {
 			for($i_scale = 1; $i_scale <= $max_scales; $i_scale++)
 				echo "<li>".$list_of_tonal_scales[$i_scale - 1]."</li>";
 			if($max_scales > 1) echo "</ul>These scales may be called in “_scale(name of scale, blockkey)” instructions";
-			else echo "</ul>This scale may be called in a “_scale(name of scale, blockkey)” instruction<br />but it will also be used by default in replacement of the equal-tempered scale<br />➡ Use “_scale(0,0)” to force equal-tempered";
+			else echo "</ul>This scale may be called in a “_scale(name of scale, blockkey)” instruction<br />➡ Use “_scale(0,0)” to force equal-tempered";
 			echo "</p>";
 			}
 		$list_of_instruments = list_of_instruments($dir_csound_resources.$csound_file);
 		$list = $list_of_instruments['list'];
+		$list_index = $list_of_instruments['index'];
 		if(($max_instr = count($list)) > 0) {
 			if($max_scales > 0) echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> also contains definitions of instrument(s):";
 			else echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains definitions of instrument(s):";
 			echo "<ol style=\"margin-top:0px; margin-bottom:0px\">";
 			for($i_instr = 0; $i_instr < $max_instr; $i_instr++) {
 				echo "<li><b>_ins(</b><font color=\"MediumTurquoise\">".$list[$i_instr]."</font><b>)</b>";
+				echo " = <b>_ins(".$list_index[$i_instr].")</b>";
 				$param_list = $list_of_instruments['param'][$i_instr];
 				if(count($param_list) > 0) {
 					echo " ➡ parameter(s) ";
@@ -617,6 +619,7 @@ if(isset($_POST['saveexpression'])) {
 		echo "<p id=\"timespan\"><font color=\"red\">➡ Cannot play empty expression…</font></p>";
 		}
 	else {
+		$expression = recode_entities($expression);
 		echo "<p id=\"timespan\"><font color=\"red\">➡ Saving:</font> <font color=\"blue\"><big>".$recoded_expression."</big></font></p>";
 	//	$result_file = $output.SLASH.$output_file;
 		$handle = fopen($data_expression,"w");

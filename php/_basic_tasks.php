@@ -933,7 +933,6 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder) {
 		}
 	fwrite($handle,"_end tables\n");
 	fclose($handle);
-//	sleep(1);
 	unlink($dir.$file_lock);
 	return $warn_not_empty;
 	}
@@ -1967,7 +1966,8 @@ function list_of_instruments($csound_orchestra_file) {
 	//	echo "<br />CsoundInstrumentName = ".$CsoundInstrumentName[$j]."<br />";
 		$InstrumentComment[$j] = preg_replace("/<\/?html>/u",'',$table[++$i]);
 		$argmax[$j] = $table[++$i];
-		$i += $number_fields_csound_instrument;
+		$list_of_instruments['index'][$j] = $table[++$i];
+		$i += ($number_fields_csound_instrument - 1);
 		$list_of_instruments['param'][$j] = array();
 		$Instrument_ipmax = $table[++$i];
 	//	echo $i." Instrument_ipmax = ".$Instrument_ipmax."<br />";
@@ -2358,7 +2358,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$s
 				$number_parts = 0; 
 				foreach($the_measure as $score_part => $the_part) {
 					if(!$reload_musicxml OR !$select_part[$score_part]) {
-						if($reload_musicxml) echo "Score part ".$score_part." not selected in section ".$section."<br />";
+						if($test_musicxml AND $reload_musicxml) echo "Score part ".$score_part." not selected in section ".$section."<br />";
 						continue;
 						}
 					$number_parts++;
