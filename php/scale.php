@@ -814,7 +814,7 @@ echo "Csound function table: <font color=\"blue\">".$scale_table."</font>";
 if($message <> '') echo $message;
 echo "<div style=\"float:right; margin-top:1em; background-color:white; padding:1em; border-radius:5%;\"><h1>Scale “".$filename."”</h1><h3>This version is stored in <font color=\"blue\">‘".$csound_source."’</font></h3>";
 
-$link = "scale_image.php?save_codes_dir=".urlencode($save_codes_dir)."&dir_scale_images=".urlencode($dir_scale_images);
+$link = "scale_image.php?save_codes_dir=".urlencode($save_codes_dir)."&dir_scale_images=".urlencode($dir_scale_images)."&csound_source=".urlencode($csound_source);
 $link_no_marks = $link."&no_marks=1";
 $link_no_cents = $link."&no_cents=1";
 $link_no_intervals = $link_no_marks."&no_intervals=1";
@@ -1376,6 +1376,7 @@ if(isset($_POST['change_convention']) AND isset($_POST['new_convention'])) {
 	echo "&nbsp;<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"use_convention\" value=\"USE THIS CONVENTION\">";
 	echo "<hr>";
 	}
+	
 if($done AND !$warned_ratios) {
 	echo "<hr><table style=\"background-color:white;\">";
 	echo "<tr>";

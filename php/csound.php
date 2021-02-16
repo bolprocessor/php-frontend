@@ -1171,17 +1171,20 @@ if($max_scales > 0) {
 	echo "</p>";
 	echo "<ol>";
 	$table_names = $p_interval = $q_interval = $cent_position = $ratio_interval = array();
-	for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
+	for($i_scale = 1, $k_image = 0; $i_scale <= $max_scales; $i_scale++) {
 		$link_edit = "scale.php";
 		echo "<li><font color=\"MediumTurquoise\"><b>".$scale_name[$i_scale]."</b></font> ";
-		echo "➡ <input type=\"submit\" style=\"background-color:Aquamarine;\" name=\"edit_scale\" formaction=\"".$link_edit."?scalefilename=".urlencode($scale_name[$i_scale])."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT this scale\">";
-		echo "&nbsp;<input type=\"submit\" style=\"background-color:yellow;\" name=\"delete_scale_".$i_scale."\" formaction=\"".$url_this_page."&scalefilename=".urlencode($scale_name[$i_scale])."\" onclick=\"this.form.target='_self';return true;\" value=\"DELETE this scale (can be reversed)\">";
-		
-		echo "&nbsp;<input type=\"submit\" style=\"background-color:yellow;\" name=\"copy_scale_".$i_scale."\" formaction=\"".$url_this_page."&scalefilename=".urlencode($scale_name[$i_scale])."\" onclick=\"this.form.target='_self';return true;\" value=\"COPY or DUPLICATE this scale\">";
-		
+		echo "➡ <input type=\"submit\" style=\"background-color:Aquamarine;\" name=\"edit_scale\" formaction=\"".$link_edit."?scalefilename=".urlencode($scale_name[$i_scale])."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT\">";
+		echo "&nbsp;<input type=\"submit\" style=\"background-color:yellow;\" name=\"delete_scale_".$i_scale."\" formaction=\"".$url_this_page."&scalefilename=".urlencode($scale_name[$i_scale])."\" onclick=\"this.form.target='_self';return true;\" value=\"DELETE scale (can be reversed)\">";
+		echo "&nbsp;<input type=\"submit\" style=\"background-color:yellow;\" name=\"copy_scale_".$i_scale."\" formaction=\"".$url_this_page."&scalefilename=".urlencode($scale_name[$i_scale])."\" onclick=\"this.form.target='_self';return true;\" value=\"COPY/DUPLICATE scale\">";
+		$dir_image = $dir_scale_images.$scale_name[$i_scale].".png";
+		if(file_exists($dir_image)) {
+			$k_image++; if($k_image > 10) $k_image = 0;
+			echo " ➡&nbsp;".popup_link($scale_name[$i_scale],"image",500,410,(100 * $k_image),$dir_image);
+			}
 		echo "<br /><small><font color=\"blue\">".$scale_table[$i_scale]."</font></small>";
 		if(isset($scale_fraction[$i_scale])) {
-			echo "<br />&nbsp;&nbsp;&nbsp;";
+		//	echo "<br />&nbsp;&nbsp;&nbsp;";
 			$fraction_string = str_replace('[','',str_replace(']','',$scale_fraction[$i_scale]));
 			$fraction_string = preg_replace("/\s+/u",' ',$fraction_string);
 			$table_fraction = explode(' ',$fraction_string);
@@ -1204,13 +1207,12 @@ if($max_scales > 0) {
 				$p = intval($table_fraction[$i_fraction]);
 				$q = intval($table_fraction[$i_fraction + 1]);
 				if(($p * $q) > 0) {
-					echo $p."/".$q." ";
+				//	echo $p."/".$q." ";
 					if($i_fraction  == 0)
 						$cent_position[$i_scale] = 1200 * log($p/$q) /log(2);
 					if($i_fraction > 1) {
 						$p_this_interval = $p * $q_old;
 						$q_this_interval = $q * $p_old;
-					//	echo "(".$q_old." ".$p_old." # ".$p_this_interval."/".$q_this_interval.") ";
 						$simple_fraction = simplify_fraction_eliminate_schisma($p_this_interval,$q_this_interval);
 						if($simple_fraction['p'] <> $p_this_interval) {
 							$p_this_interval = $simple_fraction['p'];
@@ -1218,14 +1220,13 @@ if($max_scales > 0) {
 							}
 						$p_interval[$i_scale][$k] = $p_this_interval;
 						$q_interval[$i_scale][$k] = $q_this_interval;
-					//	echo "[".$p_this_interval."/".$q_this_interval."] ";
 						$k++;
 						}
 					$p_old = $p;
 					$q_old = $q;
 					}
 				else {
-					echo " <small>".round($ratio[$i_scale][$k],4)." </small>";
+				//	echo " <small>".round($ratio[$i_scale][$k],4)." </small>";
 					if($i_fraction > 1) {
 						$ratio_interval[$i_scale][$k] = $ratio[$i_scale][$k] / $oldratio;
 						}
@@ -1235,7 +1236,8 @@ if($max_scales > 0) {
 					}
 				}
 			}
-		if(isset($scale_note_names[$i_scale])) echo "<br />&nbsp;&nbsp;&nbsp;<font color=\"red\">".str_replace('/','',$scale_note_names[$i_scale])."</font>";
+	//	echo "<br />";
+		if(isset($scale_note_names[$i_scale])) echo "<br /><font color=\"red\">".str_replace('/','',$scale_note_names[$i_scale])."</font>";
 		if(isset($scale_comment[$i_scale])) {
 			$this_comment = html_to_text($scale_comment[$i_scale],'txt');
 			$this_comment = substr($this_comment, 0, strpos($this_comment, "<br />"));
@@ -1482,7 +1484,7 @@ if($number_instruments > 0) {
 			}
 		$done_index[$this_index] = TRUE;
 		echo "<input type=\"hidden\" name=\"instrument_index\" value=\"".$this_index."\">";
-		echo "<big>#".$this_index."</big> ";
+		echo "<big>_ins(".$this_index.")</big> ";
 		echo "<input style=\"background-color:azure; font-size:larger;\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" name=\"instrument_name\" value=\"".$CsoundInstrumentName[$j]."\">";
 		$folder_this_instrument = $temp_dir.$temp_folder.SLASH.$CsoundInstrumentName[$j];
 		$argmax_file = $folder_this_instrument.SLASH."argmax.php";

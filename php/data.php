@@ -28,6 +28,7 @@ if(!file_exists($temp_dir.$temp_folder)) {
 	}
 $music_xml_file = $temp_dir.$temp_folder.SLASH."temp.musicxml";
 $more_data = '';
+$link_edit = "data.php";
 
 $objects_file = $csound_file = $alphabet_file = $grammar_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = $csound_default_orchestra = '';
 
@@ -339,7 +340,16 @@ if(isset($_POST['explode'])) {
 				$newline .= $c;
 				if($c == '}') {
 					$level--;
-					if($level == 0 /* AND $tie >= 0 */) $newline .= "\n\n[item ".($item++)."] ".$initial_controls;
+					if($level == 0 /* AND $tie >= 0 */) {
+						$outside_expression = ' ';
+						for($k = ($j + 1); $k < strlen($line); $k++) {
+							$d = $line[$k];
+							if($d == '{') break;
+							$outside_expression .= $d;
+							}
+						$j = $k - 1;
+						$newline .= "\n\n[item ".($item++)."] ".$initial_controls.$outside_expression;
+						}
 					}
 				}
 			}
@@ -349,6 +359,7 @@ if(isset($_POST['explode'])) {
 	$newcontent = implode("\n",$newtable);
 	$newcontent = str_replace("[item ".($item-1)."] ".$initial_controls,'',$newcontent);
 	$newcontent = str_replace("] \n","] ",$newcontent);
+	$newcontent = str_replace("\n//","//",$newcontent);
 	$_POST['thistext'] = $newcontent;
 	$_POST['savethisfile'] = TRUE;
 	}
@@ -382,16 +393,38 @@ if(isset($_POST['implode'])) {
 				}
 			}
 		$line = str_replace($these_controls,'',$line);
-		$newtable[] = $line;
+		$these_controls = str_replace($initial_controls,'',$these_controls);
+		$newtable[] = trim($these_controls." ".$line);
 		}
 	if($initial_controls <> '') $newtable[$start_line] = $initial_controls." ".$newtable[$start_line];
 	$newcontent = implode("\n",$newtable);
-	$newcontent = preg_replace("/}\s{/u","} {",$newcontent);
+	$newcontent = preg_replace("/}\s([^{]*){/u","} $1 {",$newcontent);
+	$newcontent = str_replace("\n//","//",$newcontent);
 	$_POST['thistext'] = $newcontent;
 	$_POST['savethisfile'] = TRUE;
 	}
 
-if(isset($_POST['savethisfile'])) {
+if(isset($_POST['use_convention'])) {
+	$new_convention = $_POST['new_convention'];
+	$content = @file_get_contents($this_file,TRUE);
+	$extract_data = extract_data(TRUE,$content);
+	$content = $extract_data['content'];
+	$newcontent = $content;
+	for($i = 0; $i < 12; $i++) {
+		$new_note = $_POST['new_note_'.$i];
+		for($octave = 0; $octave < 15; $octave++) {
+			$newcontent = str_replace($Englishnote[$i].$octave,$new_note.$octave,$newcontent);
+			$newcontent = str_replace($AltEnglishnote[$i].$octave,$new_note.$octave,$newcontent);
+			$newcontent = str_replace($Frenchnote[$i].$octave,$new_note.$octave,$newcontent);
+			$newcontent = str_replace($AltFrenchnote[$i].$octave,$new_note.$octave,$newcontent);
+			$newcontent = str_replace($Indiannote[$i].$octave,$new_note.$octave,$newcontent);
+			$newcontent = str_replace($AltIndiannote[$i].$octave,$new_note.$octave,$newcontent);
+			}
+		}
+	$_POST['thistext'] = $newcontent;
+	}
+
+if(isset($_POST['savethisfile']) OR isset($_POST['use_convention'])) {
 	echo "<p id=\"timespan\" style=\"color:red;\">Saved file…</p>";
 	$content = $_POST['thistext'];
 	if($more_data <> '') $content = $more_data."\n\n".$content;
@@ -592,7 +625,7 @@ if($imax > 0 AND substr_count($content,'{') > 0) {
 	}
 for($i = $j = 0; $i < $imax; $i++) {
 	$line = trim($table[$i]);
-	$error_mssg = '';
+	$error_mssg = $tie_mssg = '';
 	if(is_integer($pos=strpos($line,"[item ")) AND $pos == 0)
 		$title_this = preg_replace("/\[item\s([^\]]+)\].*/u",'$1',$line);
 	else $title_this = '';
@@ -638,7 +671,7 @@ for($i = $j = 0; $i < $imax; $i++) {
 			if($level == 0) $n++;
 			if($level == 0 AND ($tie <= 0 OR $n > $maxchunk_size)) {
 				if($tie > 0) {
-					$error_mssg =  $tie." unbound ties";
+					$tie_mssg =  "• <font color=\"red\">".$tie." unbound ties in chunk #".$chunk_number."</font><br />";
 					$tie_error = TRUE;
 					}
 				$line_chunked .= "\n";
@@ -680,19 +713,19 @@ for($i = $j = 0; $i < $imax; $i++) {
 //	echo "<small>".urldecode($link_play_chunked)."</small><br />";
 	$n1 = substr_count($line_recoded,'{');
 	$n2 = substr_count($line_recoded,'}');
-	if($n1 > $n2) $error_mssg .= "<font color=\"red\">This score contains ".($n1-$n2)." extra ‘{'</font>";
-	if($n2 > $n1) $error_mssg .= "<font color=\"red\">This score contains ".($n2-$n1)." extra ‘}'</font>";
-	if($error_mssg == '' OR $tie_error <> '') {
+	if($n1 > $n2) $error_mssg .= "• <font color=\"red\">This score contains ".($n1-$n2)." extra ‘{'</font><br />";
+	if($n2 > $n1) $error_mssg .= "• <font color=\"red\">This score contains ".($n2-$n1)." extra ‘}'</font><br />";
+	if($error_mssg == '') {
 		echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_play."','".$window_name_play."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Play this polymetric expression\" value=\"PLAY\">&nbsp;";
-		
 		if($chunked) echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_play_chunked."','".$window_name_play."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Play polymetric expression in chunks (no graphics)\" value=\"PLAY safe\">&nbsp;";
-		
 		echo "&nbsp;<input style=\"background-color:azure;\" onclick=\"window.open('".$link_expand."','".$window_name_expland."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Expand this polymetric expression\" value=\"EXPAND\">&nbsp;";
 		}
-	if($error_mssg <> '') echo $error_mssg."<br />";
+	if($tie_mssg <> '' AND $error_mssg == '') echo "<br />";
+	if($tie_mssg <> '') echo $tie_mssg;
+	if($error_mssg <> '') echo $error_mssg;
 	$length = strlen($line_recoded);
 	if($length > 400)
-		$line_show = "<br />".substr($line_recoded,0,100)."<br />&nbsp;... ... ...<br />".substr($line_recoded,-100,100);
+		$line_show = substr($line_recoded,0,100)."<br />&nbsp;... ... ...<br />".substr($line_recoded,-100,100);
 	else $line_show = $line_recoded;
 	echo "<small>";
 	if($title_this <> '') $line_show = "<b>[item ".$title_this."]</b> ".$line_show;
@@ -702,4 +735,64 @@ for($i = $j = 0; $i < $imax; $i++) {
 echo "</table>";
 echo "</td></tr>";
 echo "</table>";
+echo "<hr id=\"topconvention\">";
+if($settings_file <> '') {
+	$note_convention = get_setting("note_convention",$settings_file);
+	echo "<p>Current note convention for this data should be <font color=\"red\">‘".ucfirst(note_convention(intval($note_convention)))."’</font> as per <font color=\"blue\">‘".$settings_file."’</font></p>";
+	}
+
+if(isset($_POST['change_convention']) AND isset($_POST['new_convention'])) {
+	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+	$new_convention = $_POST['new_convention'];
+	echo "<input type=\"hidden\" name=\"new_convention\" value=\"".$new_convention."\">";
+	echo "<hr>";
+	switch($new_convention) {
+		case '0':
+			$standard_note = $Englishnote;
+			$alt_note = $AltEnglishnote;
+			break;
+		case '1':
+			$standard_note = $Frenchnote;
+			$alt_note = $AltFrenchnote;
+			break;
+		case '2':
+			$standard_note = $Indiannote;
+			$alt_note = $AltIndiannote;
+			break;
+		}
+	echo "<table style=\"background-color:white;\">";
+	echo "<tr>";
+	for($i = 0; $i < 12; $i++) {
+		echo "<td>";
+		echo "<input type=\"radio\" name=\"new_note_".$i."\" value=\"".$standard_note[$i]."\" checked><br /><b><font color=\"red\">".$standard_note[$i];
+		echo "</font></b></td>";
+		}
+	echo "</tr>";
+	echo "<tr>";
+	for($i = 0; $i < 12; $i++) {
+		echo "<td>";
+		if($alt_note[$i] <> $standard_note[$i]) {
+			echo "<input type=\"radio\" name=\"new_note_".$i."\" value=\"".$alt_note[$i]."\"><br /><b><font color=\"red\">".$alt_note[$i];
+			echo "</font></b>";
+			}
+		echo "</td>";
+		}
+	echo "</tr>";
+	echo "</table>";
+	echo "&nbsp;<input style=\"background-color:cornsilk;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\">";
+	echo "&nbsp;<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"use_convention\" value=\"USE THIS CONVENTION\">";
+	echo "</form>";
+	}
+else {
+	echo "<table style=\"background-color:white;\">";
+	echo "<tr>";
+	echo "<td style=\"vertical-align:middle; white-space:nowrap;\"><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"change_convention\" formaction=\"".$url_this_page."#topconvention\" value=\"APPLY NOTE CONVENTION to this data\"> ➡</td>";
+	echo "<td style=\"vertical-align:middle; white-space:nowrap;\">";
+	echo "<input type=\"radio\" name=\"new_convention\" value=\"0\">English<br />";
+	echo "<input type=\"radio\" name=\"new_convention\" value=\"1\">Italian/Spanish/French<br />";
+	echo "<input type=\"radio\" name=\"new_convention\" value=\"2\">Indian<br />";
+	echo "</td>";
+	echo "</tr>";
+	echo "</table>";
+	}
 ?>

@@ -1,6 +1,7 @@
 <?php
 $save_codes_dir = urldecode($_GET['save_codes_dir']);
 $dir_scale_images = urldecode($_GET['dir_scale_images']);
+$csound_source = urldecode($_GET['csound_source']);
 $image_file = $save_codes_dir."/image.php";
 require_once($image_file);
 header('Content-Type: image/png; charset=utf-8');
@@ -40,8 +41,16 @@ imagefilledrectangle($im,0,0,$image_width,$image_height,$white);
 
 $text = "Scale \"".$filename."\"";
 imagestring($im,10,$margin_left,10,$text,$black);
-if(isset($syntonic_comma)) $text = "Comma = ".round($syntonic_comma,1)." cents";
-imagestring($im,10,$margin_left,30,$text,$black);
+if(isset($syntonic_comma)) {
+	$text = "Comma = ".round($syntonic_comma,1)." cents";
+	imagestring($im,10,$margin_left,30,$text,$black);
+	}
+if(isset($csound_source)) {
+	$text = "Source: ".$csound_source;
+	imagestring($im,10,$margin_left,50,$text,$black);
+	}
+$text = "Saved: ".gmdate('Y-m-d')."";
+imagestring($im,10,$margin_left,70,$text,$black);
 
 $radius = 220;
 $x_center = $image_width /  2;

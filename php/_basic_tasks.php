@@ -1916,6 +1916,11 @@ function html_to_text($text,$type) {
 	return $text;
 	}
 
+function popup_link($image_name,$text,$image_width,$image_height,$left_margin,$link) {
+	$popup_link = "<a onclick=\"window.open('".$link."','".$image_name."','width=".$image_width.",height=".$image_height.",left=".$left_margin."'); return false;\" href=\"".$link."\">".$text."</a>";
+	return $popup_link;
+	}
+
 function list_of_tonal_scales($csound_orchestra_file) {
 	global $dir_scale_images;
 	$list = array();
@@ -1924,7 +1929,7 @@ function list_of_tonal_scales($csound_orchestra_file) {
 	$table = explode(chr(10),$content);
 	$imax = count($table);
 	$found = FALSE;
-	for($i = 0, $j = -1; $i < $imax; $i++) {
+	for($i = $k = 0, $j = -1; $i < $imax; $i++) {
 		$line = trim($table[$i]);
 		if($line == '') continue;
 		if($line == "_begin tables") $found = TRUE;
@@ -1933,13 +1938,16 @@ function list_of_tonal_scales($csound_orchestra_file) {
 			if($line[0] == "\"") {
 				$name_of_file = str_replace('"','',$line);
 				$dir_image = $dir_scale_images.$name_of_file.".png";
-				$list[++$j] = "<font color=\"red\">".$name_of_file;
+				$list[++$j] = "<font color=\"MediumTurquoise\">".$name_of_file;
 				}
 			if($line[0] == "/")
 				$list[$j] .= "</font> = <font color=\"darkmagenta\"><b>".str_replace("/",'',$line)."</b></font>";
 			if($line[0] == "|") {
-				$list[$j] .= " <font color=\"blue\">baseoctave</font> = <font color=\"red\">".str_replace("|",'',$line)."</font>";
-				if(file_exists($dir_image)) $list[$j] .= " ➡ <a target=\"_blank\" href=\"".$dir_image."\">image</a>";
+				$list[$j] .= " <font color=\"black\">baseoctave = ".str_replace("|",'',$line)."</font>";
+				if(file_exists($dir_image)) {
+					$k++; if($k > 10) $k = 0;
+					$list[$j] .= " <font color=\"red\">➡</font>&nbsp;".popup_link($name_of_file,"image",500,410,(100 * $k),$dir_image);
+					}
 				}
 			}
 		}

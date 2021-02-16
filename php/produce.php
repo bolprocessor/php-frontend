@@ -349,7 +349,7 @@ if($instruction <> "help") {
 		// Show MIDI file
 		if($file_format == "midi") {
 			$midi_file_link = $output;
-			if(file_exists($midi_file_link)) {
+			if(file_exists($midi_file_link) AND filesize($midi_file_link) > 100) {
 		//		echo "midi_file_link = ".$midi_file_link."<br />";
 				echo "<p class=\"shadow\" style=\"width:25em;\"><a href=\"#midi\" onClick=\"MIDIjs.play('".$midi_file_link."');\"><img src=\"pict/loudspeaker.png\" width=\"70px;\" style=\"vertical-align:middle;\" />Play MIDI file</a>";
 				echo " (<a href=\"#midi\" onClick=\"MIDIjs.stop();\">Stop playing</a>)";
@@ -521,7 +521,7 @@ else {
 				}
 			fwrite($handle,"<a target=\"_blank\" href=\"".$project_name.".wav\" download>Download this sound file</a> (<font color=\"blue\">".$project_name.".wav</font>)</p>");
 			}
-		if(file_exists($project_name.".mid")) {
+		if(file_exists($project_name.".mid") AND filesize($project_name.".mid") > 100) {
 		//	echo "mid = ".$project_name.".mid<br />";
 			$audio_tag = "<p><b>MIDI file:</b></p><p class=\"shadow\" style=\"width:25em;\"><a href=\"#midi\" onClick=\"MIDIjs.play('".$project_name.".mid');\"><img src=\"".$bp_application_path."php/pict/loudspeaker.png\" width=\"70px;\" style=\"vertical-align:middle;\" />Play MIDI file</a>";
 			$audio_tag .= " (<a href=\"#midi\" onClick=\"MIDIjs.stop();\">Stop playing</a>)";
