@@ -279,10 +279,11 @@ if(!$no_intervals) {
 		imagestring($im,10,$x_text,$y_text,$text,$green);
 		}
 	}
-		
-// imagepng($im,$dir_scale_images.$filename.".png");
+
 imagepng($im);
-imagepng($im,$dir_scale_images.$filename.".png");
+$clean_name_of_file = str_replace("#","_",$filename);
+$clean_name_of_file = str_replace("/","_",$clean_name_of_file);
+imagepng($im,$dir_scale_images.$clean_name_of_file.".png");
 imagedestroy($im);
 
 // ======================= FUNCTIONS =======================

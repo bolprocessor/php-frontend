@@ -412,7 +412,7 @@ function compile_help($text_help_file,$html_help_file) {
 	$help[0] = '';
 	$no_entry = array("ON","OFF","vel");
 	if(!file_exists($text_help_file)) {
-		echo "<p style=\"color:green;\">Warning: “BP2_help.html” has not been reconstructed.</p>";
+		echo "<p style=\"color:MediumTurquoise;\">Warning: “BP2_help.html” has not been reconstructed.</p>";
 		return '';
 		}
 	$content = @file_get_contents($text_help_file,TRUE);
@@ -437,7 +437,7 @@ function compile_help($text_help_file,$html_help_file) {
 		$content = str_replace("  ","&nbsp;&nbsp;",$content); // Remove tabulations
 		$table = explode("###",$content);
 		$handle = fopen($html_help_file,"w");
-		$file_header .= "<p style=\"color:green;\">".$table[0]."</p>";
+		$file_header .= "<p style=\"color:MediumTurquoise;\">".$table[0]."</p>";
 		$im = count($table);
 		for($i = 1; $i < $im; $i++) {
 			$table2 = explode("<br />",$table[$i]);
@@ -478,7 +478,7 @@ function compile_help($text_help_file,$html_help_file) {
 		fwrite($handle,$table_header."\n");
 		for($i = 1; $i < $im; $i++) {
 			if(!isset($title[$i])) continue;
-			fwrite($handle,"<h4 style=\"color:green;\" id=\"".$i."\"><a href=\"#toc\">⇪</a> ".$title[$i]."</h4>\n");
+			fwrite($handle,"<h4 style=\"color:MediumTurquoise;\" id=\"".$i."\"><a href=\"#toc\">⇪</a> ".$title[$i]."</h4>\n");
 			fwrite($handle,$item[$i]."\n");
 			}
 		fwrite($handle,"</body>");
@@ -1917,7 +1917,8 @@ function html_to_text($text,$type) {
 	}
 
 function popup_link($image_name,$text,$image_width,$image_height,$left_margin,$link) {
-	$popup_link = "<a onclick=\"window.open('".$link."','".$image_name."','width=".$image_width.",height=".$image_height.",left=".$left_margin."'); return false;\" href=\"".$link."\">".$text."</a>";
+	$link = str_replace("#","_",$link);
+	$popup_link = "<a onclick=\"window.open('".$link."','".$image_name."','toolbar=no,scrollbars=yes,resizable=yes,width=".$image_width.",height=".$image_height.",left=".$left_margin."'); return false;\" href=\"".$link."\">".$text."</a>";
 	return $popup_link;
 	}
 
@@ -1937,16 +1938,19 @@ function list_of_tonal_scales($csound_orchestra_file) {
 		if($found) {
 			if($line[0] == "\"") {
 				$name_of_file = str_replace('"','',$line);
-				$dir_image = $dir_scale_images.$name_of_file.".png";
 				$list[++$j] = "<font color=\"MediumTurquoise\">".$name_of_file;
 				}
 			if($line[0] == "/")
 				$list[$j] .= "</font> = <font color=\"darkmagenta\"><b>".str_replace("/",'',$line)."</b></font>";
 			if($line[0] == "|") {
 				$list[$j] .= " <font color=\"black\">baseoctave = ".str_replace("|",'',$line)."</font>";
+				$clean_name_of_file = str_replace("#","_",$name_of_file);
+				$clean_name_of_file = str_replace("/","_",$clean_name_of_file);
+				$dir_image = $dir_scale_images.$clean_name_of_file.".png";
 				if(file_exists($dir_image)) {
 					$k++; if($k > 10) $k = 0;
-					$list[$j] .= " <font color=\"red\">➡</font>&nbsp;".popup_link($name_of_file,"image",500,410,(100 * $k),$dir_image);
+					$clean_name_of_file = str_replace("#","_",$name_of_file);
+					$list[$j] .= " <font color=\"red\">➡</font>&nbsp;".popup_link($clean_name_of_file,"image",500,410,(100 * $k),$dir_image);
 					}
 				}
 			}

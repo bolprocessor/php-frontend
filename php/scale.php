@@ -1240,7 +1240,7 @@ for($i = 0; $i <= $numgrades_fullscale; $i++) {
 		else $thekey = '';
 		$this_key++;
 		}
-	echo "<input type=\"text\" style=\"border:none; text-align:center; color:green; font-weight:bold; font-size:large;\" name=\"key_".$i."\" size=\"6\" value=\"".$thekey ."\">";
+	echo "<input type=\"text\" style=\"border:none; text-align:center; color:MediumTurquoise; font-weight:bold; font-size:large;\" name=\"key_".$i."\" size=\"6\" value=\"".$thekey ."\">";
 	echo "</td>";
 	}
 $key[0] = $basekey;
@@ -2152,8 +2152,8 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 			$color = "black";
 			if($class == 7 AND (abs($perfect_fifth - $x[$j][$k])) < 4) $color = "blue";
 		//	if($class == 5 AND (abs($perfect_fourth - $x[$j][$k])) < 4) $color = "blue";
-			if($class == 4 AND (abs($harmonic_third - $x[$j][$k])) < 4) $color = "green";
-		//	if($class == 8 AND (abs($harmonic_minor_sixth - $x[$j][$k])) < 4) $color = "green";
+			if($class == 4 AND (abs($harmonic_third - $x[$j][$k])) < 4) $color = "MediumTurquoise";
+		//	if($class == 8 AND (abs($harmonic_minor_sixth - $x[$j][$k])) < 4) $color = "MediumTurquoise";
 			if(($class == 7) AND (abs($wolf_fifth - $x[$j][$k])) < 4) {
 				// Wolf fifth
 				$list_sensitive_notes .= $k." ";

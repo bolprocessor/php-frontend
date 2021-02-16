@@ -1177,10 +1177,12 @@ if($max_scales > 0) {
 		echo "➡ <input type=\"submit\" style=\"background-color:Aquamarine;\" name=\"edit_scale\" formaction=\"".$link_edit."?scalefilename=".urlencode($scale_name[$i_scale])."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT\">";
 		echo "&nbsp;<input type=\"submit\" style=\"background-color:yellow;\" name=\"delete_scale_".$i_scale."\" formaction=\"".$url_this_page."&scalefilename=".urlencode($scale_name[$i_scale])."\" onclick=\"this.form.target='_self';return true;\" value=\"DELETE scale (can be reversed)\">";
 		echo "&nbsp;<input type=\"submit\" style=\"background-color:yellow;\" name=\"copy_scale_".$i_scale."\" formaction=\"".$url_this_page."&scalefilename=".urlencode($scale_name[$i_scale])."\" onclick=\"this.form.target='_self';return true;\" value=\"COPY/DUPLICATE scale\">";
-		$dir_image = $dir_scale_images.$scale_name[$i_scale].".png";
+		$clean_name_of_file = str_replace("#","_",$scale_name[$i_scale]);
+		$clean_name_of_file = str_replace("/","_",$clean_name_of_file);
+		$dir_image = $dir_scale_images.$clean_name_of_file.".png";
 		if(file_exists($dir_image)) {
 			$k_image++; if($k_image > 10) $k_image = 0;
-			echo " ➡&nbsp;".popup_link($scale_name[$i_scale],"image",500,410,(100 * $k_image),$dir_image);
+			echo " ➡&nbsp;".popup_link($clean_name_of_file,"image",500,410,(100 * $k_image),$dir_image);
 			}
 		echo "<br /><small><font color=\"blue\">".$scale_table[$i_scale]."</font></small>";
 		if(isset($scale_fraction[$i_scale])) {
