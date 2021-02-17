@@ -99,7 +99,6 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			echo "<h4><font color=\"red\">Uploading failed:</font> <font color=\"blue\">".$upload_filename."</font> <font color=\"red\">does not have the extension of a MusicXML file!</font></h4>";
 			}
 		else {
-			$message = '';
 			$score_part = '';
 			$data = $subtitle_part = '';
 			$max_measure = 0;
@@ -111,11 +110,11 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$ignore_channels = isset($_POST['ignore_channels']);
 			$section = 0; // This variable is used for repetitions, see forward/backward
 			$repeat_section[$section] = 1; // By default, don't repeat
-		//	$this_score = array();
-		//	$this_score[$section] = array();
 			$part = '';
-			$i_measure = -1;
+			$i_measure = -1; $i_part = 0;
 			$reading_measure = FALSE;
+			$message_top = "_________________<br /><input type=\"checkbox\" id=\"parent1\"> Check all<br />";
+			$message = '';
 			$file = fopen($music_xml_file,"r");
 			while(!feof($file)) {
 				$line = fgets($file);
@@ -127,18 +126,18 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 					$timewise = TRUE;
 					continue;
 					}
-					
 				if(is_integer($pos=strpos($line,"<score-part "))) {
 					$score_part = trim(preg_replace("/.*id=\"([^\"]+)\".*/u","$1",$line));
 					continue;
 					}
 				if(is_integer($pos=strpos($line,"</score-part>"))) {
+					$i_part++;
 					$part_selection = "select_part_".$score_part;
 					if($reload_musicxml)
 						$select_part[$score_part] = isset($_POST[$part_selection]);
 					else
 						$select_part[$score_part] = FALSE;
-					$message .= "<input type=\"checkbox\" name=\"".$part_selection."\"";
+					$message .= "<input type=\"checkbox\" class=\"child1\" name=\"".$part_selection."\"";
 					if($select_part[$score_part]) {
 						$message .= " checked";
 					//	echo "<p>Score part ‘".$score_part."’ has been selected</p>";
@@ -201,7 +200,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 					}
 				if(is_integer($pos=strpos($line,"</attributes>"))) {
 					$attributes = FALSE;
-					if(FALSE AND $changed_attributes) {
+				/*	if($changed_attributes) {
 						if(isset($divisions[$part]) AND $divisions[$part] > 0) {
 							$message .= "Part ‘".$part."’ divisions = ".$divisions[$part];
 							}
@@ -212,7 +211,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 							$message .= ", mode = ".$mode[$part];
 							}
 						$message .= "<br />";
-						}
+						} */
 					continue;
 					}
 				if(is_integer($pos=strpos($line,"<measure "))) {
@@ -229,7 +228,6 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 					}
 				if($reading_measure AND is_integer($pos=strpos($line,"</measure>"))) {
 					$reading_measure = FALSE;
-					
 					}
 				if($reading_measure AND is_integer($pos=strpos($line,"<repeat "))) {
 					$repeat_direction = trim(preg_replace("/.+direction=\"([^\"]+)\"\/>/u","$1",$line));
@@ -281,6 +279,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			do $data = str_replace("{}",'',$data,$count);
 			while($count > 0);
 			$data = str_replace(" ,",",",$data);
+			$data = str_replace("{0/2}",'',$data); // Happens with repetitions, needs to be checked
 			if($reload_musicxml) {
 				$more_data = "// MusicXML file ‘".$upload_filename."’ converted\n";
 				if($subtitle_part <> '') $more_data .= $subtitle_part."\n";
@@ -289,16 +288,19 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			if(isset($_POST['delete_current'])) $_POST['thistext'] = '';
 			$more_data .= "\n".$data;
 			echo "<h3><font color=\"red\">Converting MusicXML file:</font> <font color=\"blue\">".$upload_filename."</font></h3>";
-			if($message <> '') echo $message;
-			echo "_______________________________________<br />";
-			echo "<input type=\"checkbox\" name=\"ignore_dynamics\">&nbsp;Ignore dynamics (volume)<br />";
-			echo "<input type=\"checkbox\" name=\"ignore_tempo\">&nbsp;Ignore tempo<br />";
-			echo "<input type=\"checkbox\" name=\"ignore_channels\">&nbsp;Ignore MIDI channels<br />";
-			echo "_________________<br />";
-			echo "<input type=\"checkbox\" name=\"delete_current\">&nbsp;Delete current data<br />";
-			echo "_________________<br />";
-			echo "<input type=\"hidden\" name=\"upload_filename\" value=\"".$upload_filename."\">";
-			echo "<font color=\"red\">➡</font> You can select parts and <input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"select_parts\" value=\"CONVERT THEM\">&nbsp;or&nbsp;<input style=\"background-color:azure;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"cancel\" value=\"QUIT IMPORTING\">";
+			if($i_part > 1) echo $message_top;
+			if($message <> '') {
+				echo $message;
+				echo "_______________________________________<br />";
+				echo "<input type=\"checkbox\" name=\"ignore_dynamics\">&nbsp;Ignore dynamics (volume)<br />";
+				echo "<input type=\"checkbox\" name=\"ignore_tempo\">&nbsp;Ignore tempo<br />";
+				echo "<input type=\"checkbox\" name=\"ignore_channels\">&nbsp;Ignore MIDI channels<br />";
+				echo "_________________<br />";
+				echo "<input type=\"checkbox\" name=\"delete_current\">&nbsp;Delete current data<br />";
+				echo "_________________<br />";
+				echo "<input type=\"hidden\" name=\"upload_filename\" value=\"".$upload_filename."\">";
+				echo "<font color=\"red\">➡</font> You can select parts and <input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"select_parts\" value=\"CONVERT THEM\">&nbsp;or&nbsp;<input style=\"background-color:azure;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"cancel\" value=\"QUIT IMPORTING\">";
+				}
 			$_POST['savethisfile'] = TRUE;
 			}
 		}
@@ -405,20 +407,24 @@ if(isset($_POST['implode'])) {
 	}
 
 if(isset($_POST['use_convention'])) {
+	$old_convention = $_POST['old_convention'];
 	$new_convention = $_POST['new_convention'];
+	$change_octave = 0;
+	if($old_convention == 1 AND $new_convention <> 1) $change_octave = +1;
+	if($old_convention <> 0 AND $old_convention <> 1 AND $new_convention == 1) $change_octave = -1;
 	$content = @file_get_contents($this_file,TRUE);
 	$extract_data = extract_data(TRUE,$content);
-	$content = $extract_data['content'];
-	$newcontent = $content;
+	$newcontent = $extract_data['content'];
 	for($i = 0; $i < 12; $i++) {
 		$new_note = $_POST['new_note_'.$i];
 		for($octave = 0; $octave < 15; $octave++) {
-			$newcontent = str_replace($Englishnote[$i].$octave,$new_note.$octave,$newcontent);
-			$newcontent = str_replace($AltEnglishnote[$i].$octave,$new_note.$octave,$newcontent);
-			$newcontent = str_replace($Frenchnote[$i].$octave,$new_note.$octave,$newcontent);
-			$newcontent = str_replace($AltFrenchnote[$i].$octave,$new_note.$octave,$newcontent);
-			$newcontent = str_replace($Indiannote[$i].$octave,$new_note.$octave,$newcontent);
-			$newcontent = str_replace($AltIndiannote[$i].$octave,$new_note.$octave,$newcontent);
+			$new_octave = $octave + $change_octave;
+			$newcontent = str_replace($Englishnote[$i].$octave,$new_note.$new_octave,$newcontent);
+			$newcontent = str_replace($AltEnglishnote[$i].$octave,$new_note.$new_octave,$newcontent);
+			$newcontent = str_replace($Frenchnote[$i].$octave,$new_note.$new_octave,$newcontent);
+			$newcontent = str_replace($AltFrenchnote[$i].$octave,$new_note.$new_octave,$newcontent);
+			$newcontent = str_replace($Indiannote[$i].$octave,$new_note.$new_octave,$newcontent);
+			$newcontent = str_replace($AltIndiannote[$i].$octave,$new_note.$new_octave,$newcontent);
 			}
 		}
 	$_POST['thistext'] = $newcontent;
@@ -604,6 +610,68 @@ echo "</form>";
 echo "<div style=\"text-align:right;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></div>";
 
 display_more_buttons($content,$url_this_page,$dir,$grammar_file,$objects_file,$csound_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
+
+if($settings_file <> '') {
+	$note_convention = get_setting("note_convention",$settings_file);
+	echo "<p id=\"topconvention\">Current note convention for this data should be <font color=\"red\">‘".ucfirst(note_convention(intval($note_convention)))."’</font> as per <font color=\"blue\">‘".$settings_file."’</font></p>";
+	}
+else $note_convention = '';
+
+echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+if(isset($_POST['change_convention']) AND isset($_POST['new_convention'])) {
+	$new_convention = $_POST['new_convention'];
+	echo "<input type=\"hidden\" name=\"new_convention\" value=\"".$new_convention."\">";
+	echo "<input type=\"hidden\" name=\"old_convention\" value=\"".$note_convention."\">";
+	echo "<hr>";
+	switch($new_convention) {
+		case '0':
+			$standard_note = $Englishnote;
+			$alt_note = $AltEnglishnote;
+			break;
+		case '1':
+			$standard_note = $Frenchnote;
+			$alt_note = $AltFrenchnote;
+			break;
+		case '2':
+			$standard_note = $Indiannote;
+			$alt_note = $AltIndiannote;
+			break;
+		}
+	echo "<table style=\"background-color:white;\">";
+	echo "<tr>";
+	for($i = 0; $i < 12; $i++) {
+		echo "<td>";
+		echo "<input type=\"radio\" name=\"new_note_".$i."\" value=\"".$standard_note[$i]."\" checked><br /><b><font color=\"red\">".$standard_note[$i];
+		echo "</font></b></td>";
+		}
+	echo "</tr>";
+	echo "<tr>";
+	for($i = 0; $i < 12; $i++) {
+		echo "<td>";
+		if($alt_note[$i] <> $standard_note[$i]) {
+			echo "<input type=\"radio\" name=\"new_note_".$i."\" value=\"".$alt_note[$i]."\"><br /><b><font color=\"red\">".$alt_note[$i];
+			echo "</font></b>";
+			}
+		echo "</td>";
+		}
+	echo "</tr>";
+	echo "</table>";
+	echo "&nbsp;<input style=\"background-color:cornsilk;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\">";
+	echo "&nbsp;<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"use_convention\" value=\"USE THIS CONVENTION\">";
+	}
+else {
+	echo "<table style=\"background-color:white;\">";
+	echo "<tr>";
+	echo "<td style=\"vertical-align:middle; white-space:nowrap;\"><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"change_convention\" formaction=\"".$url_this_page."#topconvention\" value=\"APPLY NOTE CONVENTION to this data\"> ➡</td>";
+	echo "<td style=\"vertical-align:middle; white-space:nowrap;\">";
+	echo "<input type=\"radio\" name=\"new_convention\" value=\"0\">English<br />";
+	echo "<input type=\"radio\" name=\"new_convention\" value=\"1\">Italian/Spanish/French<br />";
+	echo "<input type=\"radio\" name=\"new_convention\" value=\"2\">Indian<br />";
+	echo "</td>";
+	echo "</tr>";
+	echo "</table>";
+	}
+echo "</form>";
 echo "</td><td style=\"background-color:cornsilk;\">";
 echo "<table style=\"background-color:Gold;\">";
 $table = explode(chr(10),$content);
@@ -647,7 +715,7 @@ for($i = $j = 0; $i < $imax; $i++) {
 	fclose($handle);
 	$initial_controls = $tie_error = '';
 	$chunked = FALSE;
-	$tie = $n = 0;
+	$tie = $n = $brackets = 0;
 	if(is_integer($pos=strpos($line_recoded,"{"))) {
 		$initial_controls = trim(substr($line_recoded,0,$pos));
 		}
@@ -658,10 +726,12 @@ for($i = $j = 0; $i < $imax; $i++) {
 		$c = $line_recoded[$k];
 		if($k < (strlen($line_recoded) - 1) AND ctype_alnum($c) AND $line_recoded[$k+1] == '&') $tie++;
 		if($k < (strlen($line_recoded) - 1) AND $c == '&' AND ctype_alnum($line_recoded[$k+1])) $tie--;
+		if($c == '.' AND $k > 0 AND $line_recoded[$k-1]) $brackets++;
 		if($c == '{') {
 			if($level == 0 AND !$first) $line_chunked .= $initial_controls;
 			$first = FALSE;
 			$line_chunked .= $c;
+			$brackets++;
 			$level++;
 			continue;
 			}
@@ -718,7 +788,7 @@ for($i = $j = 0; $i < $imax; $i++) {
 	if($error_mssg == '') {
 		echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_play."','".$window_name_play."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Play this polymetric expression\" value=\"PLAY\">&nbsp;";
 		if($chunked) echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_play_chunked."','".$window_name_play."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Play polymetric expression in chunks (no graphics)\" value=\"PLAY safe\">&nbsp;";
-		echo "&nbsp;<input style=\"background-color:azure;\" onclick=\"window.open('".$link_expand."','".$window_name_expland."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Expand this polymetric expression\" value=\"EXPAND\">&nbsp;";
+		if($brackets > 0) echo "&nbsp;<input style=\"background-color:azure;\" onclick=\"window.open('".$link_expand."','".$window_name_expland."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Expand this polymetric expression\" value=\"EXPAND\">&nbsp;";
 		}
 	if($tie_mssg <> '' AND $error_mssg == '') echo "<br />";
 	if($tie_mssg <> '') echo $tie_mssg;
@@ -735,64 +805,5 @@ for($i = $j = 0; $i < $imax; $i++) {
 echo "</table>";
 echo "</td></tr>";
 echo "</table>";
-echo "<hr id=\"topconvention\">";
-if($settings_file <> '') {
-	$note_convention = get_setting("note_convention",$settings_file);
-	echo "<p>Current note convention for this data should be <font color=\"red\">‘".ucfirst(note_convention(intval($note_convention)))."’</font> as per <font color=\"blue\">‘".$settings_file."’</font></p>";
-	}
 
-if(isset($_POST['change_convention']) AND isset($_POST['new_convention'])) {
-	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-	$new_convention = $_POST['new_convention'];
-	echo "<input type=\"hidden\" name=\"new_convention\" value=\"".$new_convention."\">";
-	echo "<hr>";
-	switch($new_convention) {
-		case '0':
-			$standard_note = $Englishnote;
-			$alt_note = $AltEnglishnote;
-			break;
-		case '1':
-			$standard_note = $Frenchnote;
-			$alt_note = $AltFrenchnote;
-			break;
-		case '2':
-			$standard_note = $Indiannote;
-			$alt_note = $AltIndiannote;
-			break;
-		}
-	echo "<table style=\"background-color:white;\">";
-	echo "<tr>";
-	for($i = 0; $i < 12; $i++) {
-		echo "<td>";
-		echo "<input type=\"radio\" name=\"new_note_".$i."\" value=\"".$standard_note[$i]."\" checked><br /><b><font color=\"red\">".$standard_note[$i];
-		echo "</font></b></td>";
-		}
-	echo "</tr>";
-	echo "<tr>";
-	for($i = 0; $i < 12; $i++) {
-		echo "<td>";
-		if($alt_note[$i] <> $standard_note[$i]) {
-			echo "<input type=\"radio\" name=\"new_note_".$i."\" value=\"".$alt_note[$i]."\"><br /><b><font color=\"red\">".$alt_note[$i];
-			echo "</font></b>";
-			}
-		echo "</td>";
-		}
-	echo "</tr>";
-	echo "</table>";
-	echo "&nbsp;<input style=\"background-color:cornsilk;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\">";
-	echo "&nbsp;<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"use_convention\" value=\"USE THIS CONVENTION\">";
-	echo "</form>";
-	}
-else {
-	echo "<table style=\"background-color:white;\">";
-	echo "<tr>";
-	echo "<td style=\"vertical-align:middle; white-space:nowrap;\"><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"change_convention\" formaction=\"".$url_this_page."#topconvention\" value=\"APPLY NOTE CONVENTION to this data\"> ➡</td>";
-	echo "<td style=\"vertical-align:middle; white-space:nowrap;\">";
-	echo "<input type=\"radio\" name=\"new_convention\" value=\"0\">English<br />";
-	echo "<input type=\"radio\" name=\"new_convention\" value=\"1\">Italian/Spanish/French<br />";
-	echo "<input type=\"radio\" name=\"new_convention\" value=\"2\">Indian<br />";
-	echo "</td>";
-	echo "</tr>";
-	echo "</table>";
-	}
 ?>

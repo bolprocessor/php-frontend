@@ -51,6 +51,22 @@ echo "$(window).keydown(function(evt) {
 });";
 echo "</script>\n";
 
+echo "<script>\n";
+echo "$(document).ready(function() {
+  $(\"#parent1\").click(function() {
+    $(\".child1\").prop(\"checked\", this.checked);
+  });
+
+  $('.child1').click(function() {
+    if ($('.child1:checked').length == $('.child1').length) {
+      $('#parent1').prop('checked', true);
+    } else {
+      $('#parent1').prop('checked', false);
+    }
+  });
+});";
+echo "</script>\n";
+
 echo "</head>";
 echo "<body>\n";
 ?>

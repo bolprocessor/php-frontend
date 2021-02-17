@@ -598,7 +598,6 @@ function recode_tags($text) {
 function recode_entities($text) {
 	$text = preg_replace("/\s*•$/u"," .",$text);
 	$text = preg_replace("/\s*•[ ]*/u"," . ",$text);
-	// $text = str_replace("•"," . ",$text);
 	$text = str_replace(" … "," _rest ",$text);
 	return $text;
 	}
@@ -2354,7 +2353,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$s
 			$tie_type_start = $tie_type_stop = FALSE; $index_measure = 0;
 				if($test_musicxml)  echo "Repetition ".$i_repeat." section ".$section."<br />";
 		//	ksort($the_section); Never do this because $i_measure may not be an integer
-		// Beware that there are empty sessions
+		//  Beware that there are empty sessions
 			foreach($the_section as $i_measure => $the_measure) {
 				if($i_measure < 0) continue;
 				$tempo_this_part[$section][$i_measure] = $volume_this_part[$section][$i_measure] = array();
