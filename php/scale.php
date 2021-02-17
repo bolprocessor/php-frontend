@@ -3,15 +3,13 @@ require_once("_basic_tasks.php");
 
 // $test = TRUE;
 
-if(isset($_POST['dir_scales'])) {
+if(isset($_POST['dir_scales']))
 	$dir_scales = $_POST['dir_scales'];
-	}
 else {
 	echo "=> Csound resource file is not known. First open the ‘-cs’ file!"; die();
 	}
-if(isset($_GET['scalefilename'])) {
+if(isset($_GET['scalefilename']))
 	$filename = urldecode($_GET['scalefilename']);
-	}
 else {
 	echo "Scale name is not known. Call it from the ‘-cs’ file!"; die();
 	}
@@ -52,6 +50,13 @@ $perfect_fourth = cents(4/3);
 $series = array();
 $link_edit = "scale.php";
 $done = TRUE;
+
+
+$clean_name_of_file = str_replace("#","_",$filename);
+$clean_name_of_file = str_replace("/","_",$clean_name_of_file);
+$handle = fopen($dir_scale_images.$clean_name_of_file."-source.txt","w");
+fwrite($handle,$csound_source."\n");
+fclose($handle);
 
 if(isset($_POST['scale_comment'])) $scale_comment = $_POST['scale_comment'];
 else $scale_comment = '';

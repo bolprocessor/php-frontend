@@ -49,9 +49,13 @@ if(isset($_POST['create_scale'])) {
 	if($new_scale_name <> '') {
 		$new_scale_file = $new_scale_name.".txt";
 		$old_scale_file = $new_scale_name.".old";
-		$result1 = check_duplicate_name($dir_scales,$new_scale_file);
-		$result2 = check_duplicate_name($dir_scales,$old_scale_file);
-		if($result1 OR $result2) {
+		$clean_name_of_file = str_replace("#","_",$new_scale_name);
+		$clean_name_of_file = str_replace("/","_",$clean_name_of_file);
+		$result1 = check_duplicate_name($dir_scale_images,$clean_name_of_file.".png");
+		$result2 = check_duplicate_name($dir_scale_images,$clean_name_of_file."-source.txt");
+		$result3 = check_duplicate_name($dir_scales,$new_scale_file);
+		$result4 = check_duplicate_name($dir_scales,$old_scale_file);
+		if($result1 OR $result2 OR $result3 OR $result4) {
 			$error_create = "<p><font color=\"red\">ERROR: This name</font> <font color=\"blue\">‘".$new_scale_name."’</font> <font color=\"red\">already exists</font></p>";
 			}
 		else {
@@ -103,6 +107,13 @@ for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
 		$file_link = $dir_scales.$scalefilename.".txt";
 		$new_file_link = $dir_scales.$scalefilename.".old";
 		rename($file_link,$new_file_link);
+		
+		
+		$clean_name_of_file = str_replace("#","_",$scalefilename);
+		$clean_name_of_file = str_replace("/","_",$clean_name_of_file);
+		@unlink($dir_scale_images.$clean_name_of_file.".png");
+		@unlink($dir_scale_images.$clean_name_of_file."-source.txt");
+		
 		$need_to_save = TRUE;
 		}
 	}

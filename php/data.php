@@ -38,6 +38,10 @@ if(isset($_POST['settings_file'])) $settings_file = $_POST['settings_file'];
 if(isset($_POST['csound_file'])) $csound_file = $_POST['csound_file'];
 if(isset($_POST['objects_file'])) $objects_file = $_POST['objects_file'];
 
+if(isset($_POST['new_convention']))
+	$new_convention = $_POST['new_convention'];
+else $new_convention = '';
+
 if(isset($_POST['select_parts'])) {
 	$upload_filename = $_POST['upload_filename'];
 	$reload_musicxml = TRUE;
@@ -408,7 +412,6 @@ if(isset($_POST['implode'])) {
 
 if(isset($_POST['use_convention'])) {
 	$old_convention = $_POST['old_convention'];
-	$new_convention = $_POST['new_convention'];
 	$change_octave = 0;
 	if($old_convention == 1 AND $new_convention <> 1) $change_octave = +1;
 	if($old_convention <> 0 AND $old_convention <> 1 AND $new_convention == 1) $change_octave = -1;
@@ -465,6 +468,11 @@ echo "<input type=\"hidden\" name=\"csound_file\" value=\"".$csound_file."\">";
 echo "<input type=\"hidden\" name=\"alphabet_file\" value=\"".$alphabet_file."\">";
 echo "<input type=\"hidden\" name=\"grammar_file\" value=\"".$grammar_file."\">";
 echo "<input type=\"hidden\" name=\"objects_file\" value=\"".$objects_file."\">";
+echo "<input type=\"hidden\" name=\"new_convention\" value=\"".$new_convention."\">";
+
+if($settings_file <> '')
+	$note_convention = get_setting("note_convention",$settings_file);
+else $note_convention = '';
 
 if(!isset($output_folder) OR $output_folder == '') $output_folder = "my_output";
 $default_output_name = str_replace("-da.",'',$filename);
@@ -597,6 +605,9 @@ $link_options .= "&here=".urlencode($dir.$filename);
 
 if($error_mssg <> '') echo "<p>".$error_mssg."</p>";
 
+if($note_convention <> '' AND $new_convention <> '' AND $note_convention <> $new_convention)
+	echo "<p><font color=\"red\">➡</font> WARNING: Note convention should be set to <font color=\"red\">‘".ucfirst(note_convention(intval($new_convention)))."’</font> in the <font color=\"blue\">‘".$settings_file."’</font> settings file</p>";
+
 echo "<table style=\"background-color:GhostWhite;\" border=\"0\"><tr>";
 echo "<td style=\"background-color:cornsilk;\">";
 
@@ -611,11 +622,8 @@ echo "<div style=\"text-align:right;\"><input style=\"background-color:yellow; f
 
 display_more_buttons($content,$url_this_page,$dir,$grammar_file,$objects_file,$csound_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
 
-if($settings_file <> '') {
-	$note_convention = get_setting("note_convention",$settings_file);
-	echo "<p id=\"topconvention\">Current note convention for this data should be <font color=\"red\">‘".ucfirst(note_convention(intval($note_convention)))."’</font> as per <font color=\"blue\">‘".$settings_file."’</font></p>";
-	}
-else $note_convention = '';
+if($note_convention <> '')
+	echo "<p id=\"topconvention\">Current note convention for this data is <font color=\"red\">‘".ucfirst(note_convention(intval($note_convention)))."’</font> as per <font color=\"blue\">‘".$settings_file."’</font></p>";
 
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 if(isset($_POST['change_convention']) AND isset($_POST['new_convention'])) {
