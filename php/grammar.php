@@ -8,11 +8,11 @@ else $file = '';
 $url_this_page = "grammar.php?file=".urlencode($file);
 $table = explode(SLASH,$file);
 $here = $filename = end($table);
-$grammar_file = $bp_application_path.$file;
-$dir = str_replace($filename,'',$grammar_file);
+$this_file = $bp_application_path.$file;
+$dir = str_replace($filename,'',$this_file);
 $textarea_rows = 20;
 
-if($test) echo "grammar_file = ".$grammar_file."<br />";
+if($test) echo "grammar_file = ".$this_file."<br />";
 
 if(!isset($output_folder) OR $output_folder == '') $output_folder = "my_output";
 
@@ -24,7 +24,7 @@ if(!file_exists($temp_dir.$temp_folder)) {
 $default_output_name = str_replace("-gr.",'',$filename);
 $default_output_name = str_replace(".bpgr",'',$default_output_name);
 $file_format = $default_output_format;
-if(isset($grammar_file_format[$filename])) $file_format = $grammar_file_format[$filename]; // From _settings.php
+if(isset($this_file_format[$filename])) $file_format = $this_file_format[$filename]; // From _settings.php
 if(isset($_POST['file_format'])) $file_format = $_POST['file_format'];
 save_settings2("grammar_file_format",$filename,$file_format); // To _settings.php
 switch($file_format) {
@@ -40,20 +40,150 @@ $result_file = $bp_application_path.$output_folder.SLASH.$project_name."-result.
 
 $expression = '';
 if(isset($_POST['expression'])) $expression = trim($_POST['expression']);
+if(isset($_POST['new_convention']))
+	$new_convention = $_POST['new_convention'];
+else $new_convention = '';
 
 require_once("_header.php");
 
 echo "<p><small>Current directory = ".$dir;
+$hide = $need_to_save = FALSE;
 
-if(isset($_POST['savegrammar']) OR isset($_POST['compilegrammar'])) {
-	if(isset($_POST['savegrammar'])) echo "<span id=\"timespan\" style=\"color:red;\">&nbsp;…&nbsp;Saved “".$filename."” file…</span>";
-	$content = $_POST['thisgrammar'];
+if(isset($_POST['output_file'])) {
 	$output_file = $_POST['output_file'];
 	$output_file = fix_new_name($output_file);
+	}
+if(isset($_POST['file_format']))
 	$file_format = $_POST['file_format'];
+if(isset($_POST['show_production']))
 	$show_production = $_POST['show_production'];
+if(isset($_POST['trace_production']))
 	$trace_production = $_POST['trace_production'];
+if(isset($_POST['produce_all_items']))
 	$produce_all_items = $_POST['produce_all_items'];
+	
+if(isset($_POST['use_convention'])) {
+	$content = @file_get_contents($this_file,TRUE);
+	$extract_data = extract_data(TRUE,$content);
+	$newcontent = $extract_data['content'];
+	$old_convention = $_POST['old_convention'];
+	$change_octave = 0;
+	if($old_convention == 1 AND $new_convention <> 1) $change_octave = +1;
+	if($old_convention <> '' AND $old_convention <> 1 AND $new_convention == 1) $change_octave = -1;
+	$content = @file_get_contents($this_file,TRUE);
+	$extract_data = extract_data(TRUE,$content);
+	$newcontent = $extract_data['content'];
+	for($i = 0; $i < 12; $i++) {
+		$new_note = $_POST['new_note_'.$i];
+		for($octave = 15; $octave >= 0; $octave--) {
+			$new_octave = $octave + $change_octave;
+			if($new_octave < 0) $new_octave = "00";
+			if($new_convention <> 0) $newcontent = str_replace($Englishnote[$i].$octave,$new_note."@".$new_octave,$newcontent);
+			if($new_convention <> 0) $newcontent = str_replace($AltEnglishnote[$i].$octave,$new_note."@".$new_octave,$newcontent);
+			if($new_convention <> 1) $newcontent = str_replace($Frenchnote[$i].$octave,$new_note."@".$new_octave,$newcontent);
+			if($new_convention <> 1) $newcontent = str_replace($AltFrenchnote[$i].$octave,$new_note."@".$new_octave,$newcontent);
+			if($new_convention <> 2) $newcontent = str_replace($Indiannote[$i].$octave,$new_note."@".$new_octave,$newcontent);
+			if($new_convention <> 2) $newcontent = str_replace($AltIndiannote[$i].$octave,$new_note."@".$new_octave,$newcontent);
+			}
+		}
+	$_POST['thistext'] = str_replace("@",'',$newcontent);
+	// This '@' is required to avoid confusion between "re" in Indian and Italian/French conventions
+	$need_to_save = TRUE;
+	}
+
+if(isset($_POST['delete_chan'])) {
+	$content = @file_get_contents($this_file,TRUE);
+	$extract_data = extract_data(TRUE,$content);
+	$newcontent = $extract_data['content'];
+	$newcontent = preg_replace("/_chan\([^\)]+\)/u",'',$newcontent);
+	$_POST['thistext'] = $newcontent;
+	$need_to_save = TRUE;
+	}
+
+if(isset($_POST['delete_ins'])) {
+	$content = @file_get_contents($this_file,TRUE);
+	$extract_data = extract_data(TRUE,$content);
+	$newcontent = $extract_data['content'];
+	$newcontent = preg_replace("/_ins\([^\)]+\)/u",'',$newcontent);
+	$_POST['thistext'] = $newcontent;
+	$need_to_save = TRUE;
+	}
+
+if(isset($_POST['delete_tempo'])) {
+	$content = @file_get_contents($this_file,TRUE);
+	$extract_data = extract_data(TRUE,$content);
+	$newcontent = $extract_data['content'];
+	$newcontent = preg_replace("/_tempo\([^\)]+\)/u",'',$newcontent);
+	$_POST['thistext'] = $newcontent;
+	$need_to_save = TRUE;
+	}
+	
+if(isset($_POST['delete_volume'])) {
+	$content = @file_get_contents($this_file,TRUE);
+	$extract_data = extract_data(TRUE,$content);
+	$newcontent = $extract_data['content'];
+	$newcontent = preg_replace("/_volume\([^\)]+\)/u",'',$newcontent);
+	$_POST['thistext'] = $newcontent;
+	$need_to_save = TRUE;
+	}
+	
+if(isset($_POST['apply_changes_instructions'])) {
+	$content = @file_get_contents($this_file,TRUE);
+	$extract_data = extract_data(TRUE,$content);
+	$newcontent = $extract_data['content'];
+	$imax = $_POST['chan_max'];
+	for($i = 0; $i < $imax; $i++) {
+		$argument = $_POST['argument_chan_'.$i];
+		$option = $_POST['replace_chan_option_'.$i];
+		switch($option) {
+			case "chan":
+				$new_argument = "@".$_POST['replace_chan_as_chan_'.$i];
+				$newcontent = str_replace("_chan(".$argument.")","_chan(".$new_argument.")",$newcontent);
+			break;
+			case "ins":
+				$new_argument = "@".$_POST['replace_chan_as_ins_'.$i];
+				$newcontent = str_replace("_chan(".$argument.")","_ins(".$new_argument.")",$newcontent);
+			break;
+			case "chan_ins":
+				$new_argument_chan = "@".$_POST['replace_chan_as_chan1_'.$i];
+				$new_argument_ins = "@".$_POST['replace_chan_as_ins1_'.$i];
+				$newcontent = str_replace("_chan(".$argument.")","_chan(".$new_argument_chan.") _ins(".$new_argument_ins.")",$newcontent);
+			break;
+			case "delete":
+				$newcontent = str_replace("_chan(".$argument.")",'',$newcontent);
+			break;
+			}
+		}
+	$jmax = $_POST['ins_max'];
+	for($j = 0; $j < $jmax; $j++) {
+		$argument = $_POST['argument_ins_'.$j];
+		$option = $_POST['replace_ins_option_'.$j];
+		switch($option) {
+			case "chan":
+				$new_argument = "@".$_POST['replace_ins_as_chan_'.$j];
+				$newcontent = str_replace("_chan(".$argument.")","_chan(".$new_argument.")",$newcontent);
+			break;
+			case "ins":
+				$new_argument = "@".$_POST['replace_ins_as_ins_'.$j];
+				$newcontent = str_replace("_chan(".$argument.")","_ins(".$new_argument.")",$newcontent);
+			break;
+			case "chan_ins":
+				$new_argument_chan = "@".$_POST['replace_ins_as_chan1_'.$j];
+				$new_argument_ins = "@".$_POST['replace_ins_as_ins1_'.$j];
+				$newcontent = str_replace("_ins(".$argument.")","_chan(".$new_argument_chan.") _ins(".$new_argument_ins.")",$newcontent);
+			break;
+			case "delete":
+				$newcontent = str_replace("_ins(".$argument.")",'',$newcontent);
+			break;
+			}
+		}
+	$_POST['thistext'] = str_replace("@",'',$newcontent);
+	$need_to_save = TRUE;
+	}
+
+if($need_to_save OR isset($_POST['savegrammar']) OR isset($_POST['compilegrammar'])) {
+	if(isset($_POST['savegrammar'])) echo "<span id=\"timespan\" style=\"color:red;\">&nbsp;…&nbsp;Saved “".$filename."” file…</span>";
+	$content = $_POST['thistext'];
 	if(isset($_POST['alphabet_file'])) $alphabet_file = $_POST['alphabet_file'];
 	else $alphabet_file = '';
 	if(isset($_POST['note_convention'])) $note_convention = $_POST['note_convention'];
@@ -75,7 +205,7 @@ if(isset($_POST['savegrammar']) OR isset($_POST['compilegrammar'])) {
 		$output_file .= ".mid";
 		}
 	if($file_format == '') $output_file = '';
-	$handle = fopen($grammar_file,"w");
+	$handle = fopen($this_file,"w");
 	$content = recode_entities($content);
 	$file_header = $top_header."\n// Grammar file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
 	do $content = str_replace("  ",' ',$content,$count);
@@ -127,10 +257,10 @@ if(isset($_POST['compilegrammar'])) {
 	else $csound_file = '';
 	$application_path = $bp_application_path;
 	$command = $application_path."bp compile";
-	$thisgrammar = $dir.$filename;
-	if(is_integer(strpos($thisgrammar,' ')))
-		$thisgrammar = '"'.$thisgrammar.'"';
-	$command .= " -gr ".$thisgrammar;
+	$thistext = $dir.$filename;
+	if(is_integer(strpos($thistext,' ')))
+		$thistext = '"'.$thistext.'"';
+	$command .= " -gr ".$thistext;
 	if($settings_file <> '') {
 		if(!file_exists($dir.$settings_file)) {
 			echo "<p style=\"color:red;\">WARNING: ".$dir.$settings_file." not found.</p>";
@@ -171,7 +301,7 @@ if(isset($_POST['compilegrammar'])) {
 		}
 	else echo "<p><font color=\"red\">➡</font> <font color=\"blue\">No error.</font></p>";
 	// Now reformat the grammar
-	reformat_grammar(FALSE,$grammar_file);
+	reformat_grammar(FALSE,$this_file);
 	}
 else {
 	if(isset($_POST['random_seed'])) $random_seed = $_POST['random_seed'];
@@ -186,9 +316,9 @@ else {
 	echo "</form>";
 	}
 
-if($test) echo "grammar_file = ".$grammar_file."<br />";
+if($test) echo "grammar_file = ".$this_file."<br />";
 
-$content = @file_get_contents($grammar_file,TRUE);
+$content = @file_get_contents($this_file,TRUE);
 if($content === FALSE) ask_create_new_file($url_this_page,$filename);
 $metronome = 0;
 $time_structure = $objects_file = $csound_file = $alphabet_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = '';
@@ -281,7 +411,7 @@ echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"savegramm
 $error = FALSE;
 if($templates) {
 	$action = "templates";
-	$link_produce = "produce.php?instruction=".$action."&grammar=".urlencode($grammar_file);
+	$link_produce = "produce.php?instruction=".$action."&grammar=".urlencode($this_file);
 //	$link_produce .= "&trace_production=1";
 	$link_produce .= "&here=".urlencode($here);
 	$window_name = window_name($filename);
@@ -290,7 +420,7 @@ if($templates) {
 	
 if($produce_all_items > 0) $action = "produce-all";
 else $action = "produce";
-$link_produce = "produce.php?instruction=".$action."&grammar=".urlencode($grammar_file);
+$link_produce = "produce.php?instruction=".$action."&grammar=".urlencode($this_file);
 $error_mssg = '';
 if($alphabet_file <> '') {
 	if(!file_exists($dir.$alphabet_file)) {
@@ -519,7 +649,7 @@ $table = explode(chr(10),$content);
 $imax = count($table);
 if($imax > $textarea_rows) $textarea_rows = $imax + 5;
 
-echo "<textarea name=\"thisgrammar\" rows=\"".$textarea_rows."\" style=\"width:90%;\">".$content."</textarea>";
+echo "<textarea name=\"thistext\" rows=\"".$textarea_rows."\" style=\"width:90%;\">".$content."</textarea>";
 // echo "<br />".$link_produce."<br />";
 
 echo "<div style=\"float:left; padding-top:12px;\"><input style=\"color:DarkBlue; background-color:Aquamarine; font-size:large;\" onclick=\"window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)";
@@ -564,7 +694,7 @@ for($i = 0; $i < $imax; $i++) {
 
 echo "<form method=\"post\" action=\"".$url_this_page."#expression\" enctype=\"multipart/form-data\">";
 $action = "play";
-$link_produce = "produce.php?instruction=".$action."&grammar=".urlencode($grammar_file);
+$link_produce = "produce.php?instruction=".$action."&grammar=".urlencode($this_file);
 if($alphabet_file <> '') $link_produce .= "&alphabet=".urlencode($dir.$alphabet_file);
 if($settings_file <> '') $link_produce .= "&settings=".urlencode($dir.$settings_file);
 if($objects_file <> '') $link_produce .= "&objects=".urlencode($dir.$objects_file);
@@ -631,9 +761,146 @@ echo "<input  type=\"submit\" name=\"saveexpression\" style=\"background-color:a
 if(!file_exists($data_expression)) echo " disabled style=\"background-color:azure; box-shadow: none;\"";
 else echo " style=\"color:DarkBlue; background-color:Aquamarine;\"";
 echo ">";
+echo "<hr id=\"topchanges\">";
 
+if(isset($_POST['change_convention']) AND isset($_POST['new_convention'])) {
+	$new_convention = $_POST['new_convention'];
+	echo "<input type=\"hidden\" name=\"new_convention\" value=\"".$new_convention."\">";
+	echo "<input type=\"hidden\" name=\"old_convention\" value=\"".$note_convention."\">";
+	switch($new_convention) {
+		case '0':
+			$standard_note = $Englishnote;
+			$alt_note = $AltEnglishnote;
+			break;
+		case '1':
+			$standard_note = $Frenchnote;
+			$alt_note = $AltFrenchnote;
+			break;
+		case '2':
+			$standard_note = $Indiannote;
+			$alt_note = $AltIndiannote;
+			break;
+		}
+	echo "<table style=\"background-color:white;\">";
+	echo "<tr>";
+	for($i = 0; $i < 12; $i++) {
+		echo "<td>";
+		echo "<input type=\"radio\" name=\"new_note_".$i."\" value=\"".$standard_note[$i]."\" checked><br /><b><font color=\"red\">".$standard_note[$i];
+		echo "</font></b></td>";
+		}
+	echo "</tr>";
+	echo "<tr>";
+	for($i = 0; $i < 12; $i++) {
+		echo "<td>";
+		if($alt_note[$i] <> $standard_note[$i]) {
+			echo "<input type=\"radio\" name=\"new_note_".$i."\" value=\"".$alt_note[$i]."\"><br /><b><font color=\"red\">".$alt_note[$i];
+			echo "</font></b>";
+			}
+		echo "</td>";
+		}
+	echo "</tr>";
+	echo "</table>";
+	echo "&nbsp;<input style=\"background-color:cornsilk;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\">";
+	echo "&nbsp;<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"use_convention\" value=\"USE THIS CONVENTION\">";
+	$hide = TRUE;
+	}
+	
+if(isset($_POST['manage_instructions'])) {
+	echo "<hr>";
+	$list_of_arguments_chan = list_of_arguments($content,"_chan(");
+	$list_of_arguments_ins = list_of_arguments($content,"_ins(");
+//	for($i = 0; $i < count($list_of_arguments_ins); $i++) echo "“".$list_of_arguments_ins[$i]."”<br />";
+	
+	echo "<table style=\"background-color:cornsilk; border-spacing:6px;\">";
+	echo "<tr><td><b>Instruction</b></td><td style=\"text-align:center;\"><b>Replace with…</b></td><td><b>Instruction</b></td><td style=\"text-align:center;\"><b>Replace with…</b></td></tr>";
+	$imax = count($list_of_arguments_chan);
+	echo "<input type=\"hidden\" name=\"chan_max\" value=\"".$imax."\">";
+	echo "<tr>";
+	for($i = $col = 0; $i < $imax; $i++) {
+		echo "<td style=\"vertical-align:middle;\"><font color=\"MediumTurquoise\"><b>_chan(".$list_of_arguments_chan[$i].")</b></font></td>";
+		echo "<input type=\"hidden\" name=\"argument_chan_".$i."\" value=\"".$list_of_arguments_chan[$i]."\">";
+		echo "<td style=\"vertical-align:middle; padding:2px; background-color:white;\">";
+		echo "<input type=\"radio\" name=\"replace_chan_option_".$i."\" value=\"chan\"";
+		echo " checked";
+		echo "> _chan(";
+		echo "<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_chan_as_chan_".$i."\" size=\"4\" value=\"".$list_of_arguments_chan[$i]."\">";
+		echo ")<br />";
+		echo "<input type=\"radio\" name=\"replace_chan_option_".$i."\" value=\"ins\">";
+		echo "_ins(";
+		echo "<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_chan_as_ins_".$i."\" size=\"6\" value=\"\">";
+		echo ")<br />";
+		echo "<input type=\"radio\" name=\"replace_chan_option_".$i."\" value=\"chan_ins\">";
+		echo "_chan(<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_chan_as_chan1_".$i."\" size=\"6\" value=\"\">)&nbsp;";
+		echo "_ins(<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_chan_as_ins1_".$i."\" size=\"6\" value=\"\">)<br />";
+		echo "<input type=\"radio\" name=\"replace_chan_option_".$i."\" value=\"delete\"> <i>delete _chan(".$list_of_arguments_chan[$i].")</i>";
+		echo "</td>";
+		$col++;
+		if($col == 2) {
+			echo "</tr><tr>";
+			$col = 0;
+			}
+		}
+	echo "</tr>";
+	$jmax = count($list_of_arguments_ins);
+	echo "<input type=\"hidden\" name=\"ins_max\" value=\"".$jmax."\">";
+	echo "<tr>";
+	for($j = $col = 0; $j < $jmax; $j++) {
+		echo "<td style=\"vertical-align:middle;\"><font color=\"MediumTurquoise\"><b>_ins(".$list_of_arguments_ins[$j].")</b></font></td>";
+		echo "<input type=\"hidden\" name=\"argument_ins_".$j."\" value=\"".$list_of_arguments_ins[$j]."\">";
+		echo "<td style=\"vertical-align:middle; padding:2px;; background-color:white;\">";
+		echo "<input type=\"radio\" name=\"replace_ins_option_".$j."\" value=\"chan\"> _chan(";
+		echo "<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_ins_as_chan_".$j."\" size=\"4\" value=\"\">";
+		echo ")<br />";
+		echo "<input type=\"radio\" name=\"replace_ins_option_".$j."\" value=\"ins\" checked>";
+		echo "_ins(";
+		echo "<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_ins_as_ins_".$j."\" size=\"6\" value=\"".$list_of_arguments_ins[$j]."\">";
+		echo ")<br />";
+		echo "<input type=\"radio\" name=\"replace_ins_option_".$j."\" value=\"chan_ins\">";
+		echo "_chan(<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_ins_as_chan1_".$j."\" size=\"6\" value=\"\">)&nbsp;";
+		echo "_ins(<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_ins_as_ins1_".$j."\" size=\"6\" value=\"\">)<br />";
+		echo "<input type=\"radio\" name=\"replace_ins_option_".$j."\" value=\"delete\"> <i>delete ins(".$list_of_arguments_ins[$j].")</i>";
+		echo "</td>";
+		$col++;
+		if($col == 2) {
+			echo "</tr><tr>";
+			$col = 0;
+			}
+		}
+	echo "</tr>";
+	echo "<tr><td></td><td></td><td><input style=\"background-color:cornsilk;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\"></td><td><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"apply_changes_instructions\" formaction=\"".$url_this_page."#topedition\" value=\"APPLY THESE CHANGES\"></td></tr>";
+	echo "</table>";
+	$hide = TRUE;
+	}
+if(!$hide) {
+	if($note_convention <> '')
+		echo "<p>Current note convention for this grammar is <font color=\"red\">‘".ucfirst(note_convention(intval($note_convention)))."’</font> as per <font color=\"blue\">‘".$settings_file."’</font></p>";
+	echo "<table style=\"background-color:white;\">";
+	echo "<tr>";
+	echo "<td style=\"vertical-align:middle; white-space:nowrap;\"><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"change_convention\" formaction=\"".$url_this_page."#topchanges\" value=\"APPLY NOTE CONVENTION to this data\"> ➡</td>";
+	echo "<td style=\"vertical-align:middle; white-space:nowrap;\">";
+	echo "<input type=\"radio\" name=\"new_convention\" value=\"0\">English<br />";
+	echo "<input type=\"radio\" name=\"new_convention\" value=\"1\">Italian/Spanish/French<br />";
+	echo "<input type=\"radio\" name=\"new_convention\" value=\"2\">Indian<br />";
+	echo "</td>";
+	echo "</tr>";
+	echo "</table>";
+	echo "<hr>";
+	$found_chan = substr_count($content,"_chan(");
+	$found_ins = substr_count($content,"_ins(");
+	$found_tempo = substr_count($content,"_tempo(");
+	$found_volume = substr_count($content,"_volume(");
+	if($found_chan > 0) echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"delete_chan\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _chan()\">&nbsp;";
+	if($found_ins > 0) echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"delete_ins\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _ins()\">&nbsp;";
+	if($found_tempo > 0) echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"delete_tempo\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _tempo()\">&nbsp;";
+	if($found_volume > 0) echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"delete_volume\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _volume()\">&nbsp;";
+	if($found_chan > 0  OR $found_ins > 0) echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"manage_instructions\" formaction=\"".$url_this_page."#topchanges\" value=\"MANAGE _chan() AND _ins()\">&nbsp;";
+	}
 
 echo "</form>";
+
+
+
+	
 echo "</body>";
 echo "</html>";
 ?>

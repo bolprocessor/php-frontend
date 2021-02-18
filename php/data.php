@@ -48,6 +48,8 @@ if(isset($_POST['select_parts'])) {
 	}
 else $reload_musicxml = FALSE;
 
+$need_to_save = FALSE;
+
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 
 if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xml_import']['tmp_name'] <> '')) {
@@ -117,8 +119,8 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$part = '';
 			$i_measure = -1; $i_part = 0;
 			$reading_measure = FALSE;
-			$message_top = "_________________<br /><input type=\"checkbox\" id=\"parent1\"> Check all<br />";
-			$message = '';
+			$message_top = "_________________<br /><input type=\"checkbox\" id=\"parent1\" style=\"box-shadow: -2px -2px Gold\"> <b>Check all</b><br />";
+			$message = ''; $first = TRUE;
 			$file = fopen($music_xml_file,"r");
 			while(!feof($file)) {
 				$line = fgets($file);
@@ -142,8 +144,9 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 					else
 						$select_part[$score_part] = FALSE;
 					$message .= "<input type=\"checkbox\" class=\"child1\" name=\"".$part_selection."\"";
-					if($select_part[$score_part]) {
+					if($select_part[$score_part] OR (!$reload_musicxml AND $first)) {
 						$message .= " checked";
+						$first = FALSE;
 					//	echo "<p>Score part ‘".$score_part."’ has been selected</p>";
 						}
 					$message .= "> Score part ‘".$score_part."’ instrument = <i>".$instrument_name[$score_part]."</i>";
@@ -283,7 +286,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			do $data = str_replace("{}",'',$data,$count);
 			while($count > 0);
 			$data = str_replace(" ,",",",$data);
-			$data = str_replace("{0/2}",'',$data); // Happens with repetitions, needs to be checked
+			$data = preg_replace("/{0\/?[0-9]*}/u",'',$data); // Happens with repetitions, need to check why…
 			if($reload_musicxml) {
 				$more_data = "// MusicXML file ‘".$upload_filename."’ converted\n";
 				if($subtitle_part <> '') $more_data .= $subtitle_part."\n";
@@ -305,7 +308,9 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				echo "<input type=\"hidden\" name=\"upload_filename\" value=\"".$upload_filename."\">";
 				echo "<font color=\"red\">➡</font> You can select parts and <input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"select_parts\" value=\"CONVERT THEM\">&nbsp;or&nbsp;<input style=\"background-color:azure;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"cancel\" value=\"QUIT IMPORTING\">";
 				}
-			$_POST['savethisfile'] = TRUE;
+			$new_convention = 0; // English note convention
+	//		$_POST['savethisfile'] = TRUE;
+			$need_to_save = TRUE;
 			}
 		}
 	}
@@ -414,26 +419,119 @@ if(isset($_POST['use_convention'])) {
 	$old_convention = $_POST['old_convention'];
 	$change_octave = 0;
 	if($old_convention == 1 AND $new_convention <> 1) $change_octave = +1;
-	if($old_convention <> 0 AND $old_convention <> 1 AND $new_convention == 1) $change_octave = -1;
+	if($old_convention <> '' AND $old_convention <> 1 AND $new_convention == 1) $change_octave = -1;
 	$content = @file_get_contents($this_file,TRUE);
 	$extract_data = extract_data(TRUE,$content);
 	$newcontent = $extract_data['content'];
 	for($i = 0; $i < 12; $i++) {
 		$new_note = $_POST['new_note_'.$i];
-		for($octave = 0; $octave < 15; $octave++) {
+		for($octave = 15; $octave >= 0; $octave--) {
 			$new_octave = $octave + $change_octave;
-			$newcontent = str_replace($Englishnote[$i].$octave,$new_note.$new_octave,$newcontent);
-			$newcontent = str_replace($AltEnglishnote[$i].$octave,$new_note.$new_octave,$newcontent);
-			$newcontent = str_replace($Frenchnote[$i].$octave,$new_note.$new_octave,$newcontent);
-			$newcontent = str_replace($AltFrenchnote[$i].$octave,$new_note.$new_octave,$newcontent);
-			$newcontent = str_replace($Indiannote[$i].$octave,$new_note.$new_octave,$newcontent);
-			$newcontent = str_replace($AltIndiannote[$i].$octave,$new_note.$new_octave,$newcontent);
+			if($new_octave < 0) $new_octave = "00";
+			if($new_convention <> 0) $newcontent = str_replace($Englishnote[$i].$octave,$new_note."@".$new_octave,$newcontent);
+			if($new_convention <> 0) $newcontent = str_replace($AltEnglishnote[$i].$octave,$new_note."@".$new_octave,$newcontent);
+			if($new_convention <> 1) $newcontent = str_replace($Frenchnote[$i].$octave,$new_note."@".$new_octave,$newcontent);
+			if($new_convention <> 1) $newcontent = str_replace($AltFrenchnote[$i].$octave,$new_note."@".$new_octave,$newcontent);
+			if($new_convention <> 2) $newcontent = str_replace($Indiannote[$i].$octave,$new_note."@".$new_octave,$newcontent);
+			if($new_convention <> 2) $newcontent = str_replace($AltIndiannote[$i].$octave,$new_note."@".$new_octave,$newcontent);
 			}
 		}
-	$_POST['thistext'] = $newcontent;
+	$_POST['thistext'] = str_replace("@",'',$newcontent);
+	// This '@' is required to avoid confusion between "re" in Indian and Italian/French conventions
+	$need_to_save = TRUE;
 	}
 
-if(isset($_POST['savethisfile']) OR isset($_POST['use_convention'])) {
+if(isset($_POST['delete_chan'])) {
+	$content = @file_get_contents($this_file,TRUE);
+	$extract_data = extract_data(TRUE,$content);
+	$newcontent = $extract_data['content'];
+	$newcontent = preg_replace("/_chan\([^\)]+\)/u",'',$newcontent);
+	$_POST['thistext'] = $newcontent;
+	$need_to_save = TRUE;
+	}
+
+if(isset($_POST['delete_ins'])) {
+	$content = @file_get_contents($this_file,TRUE);
+	$extract_data = extract_data(TRUE,$content);
+	$newcontent = $extract_data['content'];
+	$newcontent = preg_replace("/_ins\([^\)]+\)/u",'',$newcontent);
+	$_POST['thistext'] = $newcontent;
+	$need_to_save = TRUE;
+	}
+
+if(isset($_POST['delete_tempo'])) {
+	$content = @file_get_contents($this_file,TRUE);
+	$extract_data = extract_data(TRUE,$content);
+	$newcontent = $extract_data['content'];
+	$newcontent = preg_replace("/_tempo\([^\)]+\)/u",'',$newcontent);
+	$_POST['thistext'] = $newcontent;
+	$need_to_save = TRUE;
+	}
+	
+if(isset($_POST['delete_volume'])) {
+	$content = @file_get_contents($this_file,TRUE);
+	$extract_data = extract_data(TRUE,$content);
+	$newcontent = $extract_data['content'];
+	$newcontent = preg_replace("/_volume\([^\)]+\)/u",'',$newcontent);
+	$_POST['thistext'] = $newcontent;
+	$need_to_save = TRUE;
+	}
+	
+if(isset($_POST['apply_changes_instructions'])) {
+	$content = @file_get_contents($this_file,TRUE);
+	$extract_data = extract_data(TRUE,$content);
+	$newcontent = $extract_data['content'];
+	$imax = $_POST['chan_max'];
+	for($i = 0; $i < $imax; $i++) {
+		$argument = $_POST['argument_chan_'.$i];
+		$option = $_POST['replace_chan_option_'.$i];
+		switch($option) {
+			case "chan":
+				$new_argument = "@".$_POST['replace_chan_as_chan_'.$i];
+				$newcontent = str_replace("_chan(".$argument.")","_chan(".$new_argument.")",$newcontent);
+			break;
+			case "ins":
+				$new_argument = "@".$_POST['replace_chan_as_ins_'.$i];
+				$newcontent = str_replace("_chan(".$argument.")","_ins(".$new_argument.")",$newcontent);
+			break;
+			case "chan_ins":
+				$new_argument_chan = "@".$_POST['replace_chan_as_chan1_'.$i];
+				$new_argument_ins = "@".$_POST['replace_chan_as_ins1_'.$i];
+				$newcontent = str_replace("_chan(".$argument.")","_chan(".$new_argument_chan.") _ins(".$new_argument_ins.")",$newcontent);
+			break;
+			case "delete":
+				$newcontent = str_replace("_chan(".$argument.")",'',$newcontent);
+			break;
+			}
+		}
+	$jmax = $_POST['ins_max'];
+	for($j = 0; $j < $jmax; $j++) {
+		$argument = $_POST['argument_ins_'.$j];
+		$option = $_POST['replace_ins_option_'.$j];
+		switch($option) {
+			case "chan":
+				$new_argument = "@".$_POST['replace_ins_as_chan_'.$j];
+				$newcontent = str_replace("_chan(".$argument.")","_chan(".$new_argument.")",$newcontent);
+			break;
+			case "ins":
+				$new_argument = "@".$_POST['replace_ins_as_ins_'.$j];
+				$newcontent = str_replace("_chan(".$argument.")","_ins(".$new_argument.")",$newcontent);
+			break;
+			case "chan_ins":
+				$new_argument_chan = "@".$_POST['replace_ins_as_chan1_'.$j];
+				$new_argument_ins = "@".$_POST['replace_ins_as_ins1_'.$j];
+				$newcontent = str_replace("_ins(".$argument.")","_chan(".$new_argument_chan.") _ins(".$new_argument_ins.")",$newcontent);
+			break;
+			case "delete":
+				$newcontent = str_replace("_ins(".$argument.")",'',$newcontent);
+			break;
+			}
+		}
+	$_POST['thistext'] = str_replace("@",'',$newcontent);
+	$need_to_save = TRUE;
+	}
+
+if($need_to_save OR isset($_POST['savethisfile'])) {
 	echo "<p id=\"timespan\" style=\"color:red;\">Saved file…</p>";
 	$content = $_POST['thistext'];
 	if($more_data <> '') $content = $more_data."\n\n".$content;
@@ -605,7 +703,7 @@ $link_options .= "&here=".urlencode($dir.$filename);
 
 if($error_mssg <> '') echo "<p>".$error_mssg."</p>";
 
-if($note_convention <> '' AND $new_convention <> '' AND $note_convention <> $new_convention)
+if(intval($note_convention) <> intval($new_convention))
 	echo "<p><font color=\"red\">➡</font> WARNING: Note convention should be set to <font color=\"red\">‘".ucfirst(note_convention(intval($new_convention)))."’</font> in the <font color=\"blue\">‘".$settings_file."’</font> settings file</p>";
 
 echo "<table style=\"background-color:GhostWhite;\" border=\"0\"><tr>";
@@ -622,10 +720,9 @@ echo "<div style=\"text-align:right;\"><input style=\"background-color:yellow; f
 
 display_more_buttons($content,$url_this_page,$dir,$grammar_file,$objects_file,$csound_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
 
-if($note_convention <> '')
-	echo "<p id=\"topconvention\">Current note convention for this data is <font color=\"red\">‘".ucfirst(note_convention(intval($note_convention)))."’</font> as per <font color=\"blue\">‘".$settings_file."’</font></p>";
+$hide = FALSE;
 
-echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+echo "<form  id=\"topchanges\" method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 if(isset($_POST['change_convention']) AND isset($_POST['new_convention'])) {
 	$new_convention = $_POST['new_convention'];
 	echo "<input type=\"hidden\" name=\"new_convention\" value=\"".$new_convention."\">";
@@ -666,11 +763,82 @@ if(isset($_POST['change_convention']) AND isset($_POST['new_convention'])) {
 	echo "</table>";
 	echo "&nbsp;<input style=\"background-color:cornsilk;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\">";
 	echo "&nbsp;<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"use_convention\" value=\"USE THIS CONVENTION\">";
+	$hide = TRUE;
 	}
-else {
+
+if(isset($_POST['manage_instructions'])) {
+	echo "<hr>";
+	$list_of_arguments_chan = list_of_arguments($content,"_chan(");
+	$list_of_arguments_ins = list_of_arguments($content,"_ins(");
+//	for($i = 0; $i < count($list_of_arguments_ins); $i++) echo "“".$list_of_arguments_ins[$i]."”<br />";
+	
+	echo "<table style=\"background-color:cornsilk; border-spacing:6px;\">";
+	echo "<tr><td><b>Instruction</b></td><td style=\"text-align:center;\"><b>Replace with…</b></td><td><b>Instruction</b></td><td style=\"text-align:center;\"><b>Replace with…</b></td></tr>";
+	$imax = count($list_of_arguments_chan);
+	echo "<input type=\"hidden\" name=\"chan_max\" value=\"".$imax."\">";
+	echo "<tr>";
+	for($i = $col = 0; $i < $imax; $i++) {
+		echo "<td style=\"vertical-align:middle;\"><font color=\"MediumTurquoise\"><b>_chan(".$list_of_arguments_chan[$i].")</b></font></td>";
+		echo "<input type=\"hidden\" name=\"argument_chan_".$i."\" value=\"".$list_of_arguments_chan[$i]."\">";
+		echo "<td style=\"vertical-align:middle; padding:2px; background-color:white;\">";
+		echo "<input type=\"radio\" name=\"replace_chan_option_".$i."\" value=\"chan\"";
+		echo " checked";
+		echo "> _chan(";
+		echo "<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_chan_as_chan_".$i."\" size=\"4\" value=\"".$list_of_arguments_chan[$i]."\">";
+		echo ")<br />";
+		echo "<input type=\"radio\" name=\"replace_chan_option_".$i."\" value=\"ins\">";
+		echo "_ins(";
+		echo "<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_chan_as_ins_".$i."\" size=\"6\" value=\"\">";
+		echo ")<br />";
+		echo "<input type=\"radio\" name=\"replace_chan_option_".$i."\" value=\"chan_ins\">";
+		echo "_chan(<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_chan_as_chan1_".$i."\" size=\"6\" value=\"\">)&nbsp;";
+		echo "_ins(<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_chan_as_ins1_".$i."\" size=\"6\" value=\"\">)<br />";
+		echo "<input type=\"radio\" name=\"replace_chan_option_".$i."\" value=\"delete\"> <i>delete _chan(".$list_of_arguments_chan[$i].")</i>";
+		echo "</td>";
+		$col++;
+		if($col == 2) {
+			echo "</tr><tr>";
+			$col = 0;
+			}
+		}
+	echo "</tr>";
+	$jmax = count($list_of_arguments_ins);
+	echo "<input type=\"hidden\" name=\"ins_max\" value=\"".$jmax."\">";
+	echo "<tr>";
+	for($j = $col = 0; $j < $jmax; $j++) {
+		echo "<td style=\"vertical-align:middle;\"><font color=\"MediumTurquoise\"><b>_ins(".$list_of_arguments_ins[$j].")</b></font></td>";
+		echo "<input type=\"hidden\" name=\"argument_ins_".$j."\" value=\"".$list_of_arguments_ins[$j]."\">";
+		echo "<td style=\"vertical-align:middle; padding:2px;; background-color:white;\">";
+		echo "<input type=\"radio\" name=\"replace_ins_option_".$j."\" value=\"chan\"> _chan(";
+		echo "<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_ins_as_chan_".$j."\" size=\"4\" value=\"\">";
+		echo ")<br />";
+		echo "<input type=\"radio\" name=\"replace_ins_option_".$j."\" value=\"ins\" checked>";
+		echo "_ins(";
+		echo "<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_ins_as_ins_".$j."\" size=\"6\" value=\"".$list_of_arguments_ins[$j]."\">";
+		echo ")<br />";
+		echo "<input type=\"radio\" name=\"replace_ins_option_".$j."\" value=\"chan_ins\">";
+		echo "_chan(<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_ins_as_chan1_".$j."\" size=\"6\" value=\"\">)&nbsp;";
+		echo "_ins(<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_ins_as_ins1_".$j."\" size=\"6\" value=\"\">)<br />";
+		echo "<input type=\"radio\" name=\"replace_ins_option_".$j."\" value=\"delete\"> <i>delete ins(".$list_of_arguments_ins[$j].")</i>";
+		echo "</td>";
+		$col++;
+		if($col == 2) {
+			echo "</tr><tr>";
+			$col = 0;
+			}
+		}
+	echo "</tr>";
+	echo "<tr><td></td><td></td><td><input style=\"background-color:cornsilk;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\"></td><td><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"apply_changes_instructions\" formaction=\"".$url_this_page."#topedition\" value=\"APPLY THESE CHANGES\"></td></tr>";
+	echo "</table>";
+	$hide = TRUE;
+	}
+if(!$hide) {
+	echo "<hr>";
+	if($note_convention <> '')
+		echo "<p>Current note convention for this data is <font color=\"red\">‘".ucfirst(note_convention(intval($note_convention)))."’</font> as per <font color=\"blue\">‘".$settings_file."’</font></p>";
 	echo "<table style=\"background-color:white;\">";
 	echo "<tr>";
-	echo "<td style=\"vertical-align:middle; white-space:nowrap;\"><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"change_convention\" formaction=\"".$url_this_page."#topconvention\" value=\"APPLY NOTE CONVENTION to this data\"> ➡</td>";
+	echo "<td style=\"vertical-align:middle; white-space:nowrap;\"><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"change_convention\" formaction=\"".$url_this_page."#topchanges\" value=\"APPLY NOTE CONVENTION to this data\"> ➡</td>";
 	echo "<td style=\"vertical-align:middle; white-space:nowrap;\">";
 	echo "<input type=\"radio\" name=\"new_convention\" value=\"0\">English<br />";
 	echo "<input type=\"radio\" name=\"new_convention\" value=\"1\">Italian/Spanish/French<br />";
@@ -678,6 +846,16 @@ else {
 	echo "</td>";
 	echo "</tr>";
 	echo "</table>";
+	echo "<hr>";
+	$found_chan = substr_count($content,"_chan(");
+	$found_ins = substr_count($content,"_ins(");
+	$found_tempo = substr_count($content,"_tempo(");
+	$found_volume = substr_count($content,"_volume(");
+	if($found_chan > 0) echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"delete_chan\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _chan()\">&nbsp;";
+	if($found_ins > 0) echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"delete_ins\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _ins()\">&nbsp;";
+	if($found_tempo > 0) echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"delete_tempo\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _tempo()\">&nbsp;";
+	if($found_volume > 0) echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"delete_volume\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _volume()\">&nbsp;";
+	if($found_chan > 0  OR $found_ins > 0) echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"manage_instructions\" formaction=\"".$url_this_page."#topchanges\" value=\"MANAGE _chan() AND _ins()\">&nbsp;";
 	}
 echo "</form>";
 echo "</td><td style=\"background-color:cornsilk;\">";

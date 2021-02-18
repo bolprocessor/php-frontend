@@ -936,9 +936,9 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder) {
 	return $warn_not_empty;
 	}
 	
-function reformat_grammar($verbose,$grammar_file) {
-	if(!file_exists($grammar_file)) return;
-	$content = @file_get_contents($grammar_file,TRUE);
+function reformat_grammar($verbose,$this_file) {
+	if(!file_exists($this_file)) return;
+	$content = @file_get_contents($this_file,TRUE);
 	$new_content = $content;
 	$i_gram = $irul = 1;
 	$section_headers = array("RND","ORD","LIN","SUB","SUB1","TEM","POSLONG","LEFT","RIGHT","INIT:","TIMEPATTERNS:","DATA:","COMMENTS:");
@@ -988,8 +988,8 @@ function reformat_grammar($verbose,$grammar_file) {
 		$table[$i_line] = $line;
 		}
 	$new_content = implode(chr(10),$table);
-	// $grammar_file = "-gr._test";
-	$handle = fopen($grammar_file,"w");
+	// $this_file = "-gr._test";
+	$handle = fopen($this_file,"w");
 	fwrite($handle,$new_content);
 	fclose($handle);
 	return;
@@ -2794,5 +2794,21 @@ function add($p1,$q1,$p2,$q2) {
 	$add['p'] = $p3;
 	$add['q'] = $q3;
 	return $add;
+	}
+
+function list_of_arguments($text,$instruction) {
+	$list = array();
+	$pos = 0;
+	while(TRUE) {
+		$newpos = strpos($text,$instruction,$pos);
+		if($newpos === FALSE) break;
+		$pos = $newpos + strlen($instruction);
+		$pos2 = strpos($text,")",$pos);
+		if($pos2 === FALSE) continue;
+		$arg = substr($text,$pos,$pos2 - $pos);
+		if(!in_array($arg,$list)) $list[] = $arg;
+		}
+	sort($list);
+	return $list;
 	}
 ?>
