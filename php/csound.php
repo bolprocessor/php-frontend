@@ -56,7 +56,13 @@ if(isset($_POST['create_scale'])) {
 		$result3 = check_duplicate_name($dir_scales,$new_scale_file);
 		$result4 = check_duplicate_name($dir_scales,$old_scale_file);
 		if($result1 OR $result2 OR $result3 OR $result4) {
-			$error_create = "<p><font color=\"red\">ERROR: This name</font> <font color=\"blue\">‘".$new_scale_name."’</font> <font color=\"red\">already exists</font></p>";
+			$error_create = "<p><font color=\"red\">ERROR: This name</font> <font color=\"blue\">‘".$new_scale_name."’</font> <font color=\"red\">already exists";
+			$source_image = $dir_scale_images.$clean_name_of_file."-source.txt";
+			if(file_exists($source_image)) {
+				$content_source = trim(@file_get_contents($source_image,TRUE));
+				$error_create .= "in </font><font color=\"blue\">‘<a target=\"_blank\" href=\"csound.php?file=".urlencode($csound_resources.SLASH.$content_source)."\">".$content_source."</a>’";
+				}
+			echo "</font></p>";
 			}
 		else {
 			$handle = fopen($dir_scales.$new_scale_file,"w");

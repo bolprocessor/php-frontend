@@ -49,6 +49,7 @@ if(isset($_POST['select_parts'])) {
 else $reload_musicxml = FALSE;
 
 $need_to_save = FALSE;
+$error_mssg = '';
 
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 
@@ -412,7 +413,34 @@ if(isset($_POST['implode'])) {
 	$newcontent = preg_replace("/}\s([^{]*){/u","} $1 {",$newcontent);
 	$newcontent = str_replace("\n//","//",$newcontent);
 	$_POST['thistext'] = $newcontent;
-	$_POST['savethisfile'] = TRUE;
+	$need_to_save = TRUE;
+	}
+
+if(isset($_POST['create_settings_file']) AND isset($_POST['new_settings_file']) AND $_POST['new_settings_file'] <> '') {
+	$new_settings_file = trim($_POST['new_settings_file']);
+	if($new_settings_file <> '') {
+		$settings_file = good_name("se",$new_settings_file,'');
+		$content = @file_get_contents($this_file,TRUE);
+		$extract_data = extract_data(TRUE,$content);
+		$newcontent = $extract_data['content'];
+		$newcontent = preg_replace("/\-se\.[a-zA-Z0-9]+\s/u",'',$newcontent);
+		$newcontent = preg_replace("/\-se\.:\s?[a-zA-Z0-9]+\.bpse\s/u",'',$newcontent);
+		$_POST['thistext'] = $settings_file."\n\n".$newcontent;
+		$need_to_save = TRUE;
+		}
+	}
+	
+if(isset($_GET['newsettings'])) {
+	$settings_file = urldecode($_GET['newsettings']);
+	$content = @file_get_contents($this_file,TRUE);
+	$extract_data = extract_data(TRUE,$content);
+	$newcontent = $extract_data['content'];
+	$newcontent = preg_replace("/\-se\.[a-zA-Z0-9]+\s/u",'',$newcontent);
+	$newcontent = preg_replace("/\-se\.:\s?[a-zA-Z0-9]+\.bpse\s/u",'',$newcontent);
+	$_POST['thistext'] = $settings_file."\n\n".$newcontent;
+	$need_to_save = TRUE;
+	$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING: this is a new tag/window. Close the previous one to avoid mixing versions!</font><br />";
+	$error = TRUE;
 	}
 
 if(isset($_POST['use_convention'])) {
@@ -606,13 +634,20 @@ if($csound_file <> '') {
 	if($file_format == "csound") {
 		$list_of_tonal_scales = list_of_tonal_scales($dir_csound_resources.$csound_file);
 		if(($max_scales = count($list_of_tonal_scales)) > 0) {
-			if($max_scales > 1) echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains definitions of tonal scales:";
-			else echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains the definition of tonal scale(s):";
+			if($max_scales > 1) {
+				echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains definitions of tonal scales&nbsp;<font color=\"red\">➡</font>&nbsp;<button style=\"background-color:aquamarine; border-radius: 6px; font-size:large;\" onclick=\"toggledisplay(); return false;\">Show/hide tonal scales</button>";
+				echo "<div id=\"showhide\"><br />";
+				}
+			else {
+				echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains the definition of tonal scale:";
+				echo "<div>";
+				}
 			echo "<ul style=\"margin-top:0px; margin-bottom:0px\">";
 			for($i_scale = 1; $i_scale <= $max_scales; $i_scale++)
 				echo "<li>".$list_of_tonal_scales[$i_scale - 1]."</li>";
-			if($max_scales > 1) echo "</ul>These scales may be called in “_scale(name of scale, blockkey)” instructions";
-			else echo "</ul>This scale may be called in a “_scale(name of scale, blockkey)” instruction<br />but it will also be used by default in replacement of the equal-tempered scale<br />➡ Use “_scale(0,0)” to force equal-tempered";
+			if($max_scales > 1) echo "</ul><br />These scales may be called in “_scale(name of scale, blockkey)” instructions (with blockey = 0 by default)";
+			else echo "</ul><br />This scale may be called in a “_scale(name of scale, blockkey)” instruction (with blockey = 0 by default)<br />➡ Use “_scale(0,0)” to force equal-tempered";
+			echo "</div>";
 			echo "</p>";
 			}
 		$list_of_instruments = list_of_instruments($dir_csound_resources.$csound_file);
@@ -660,38 +695,38 @@ if($file_format == "csound") echo " checked";
 echo ">CSOUND file";
 echo "</p></td></tr></table>";
 
-$error_mssg = $link_options = '';
+$link_options = '';
 if($grammar_file <> '') {
 	if(!file_exists($dir.$grammar_file)) {
-		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING: ".$dir.$grammar_file." not found.</font><br />";
+		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING: ".$dir.$grammar_file." not yet created.</font><br />";
 		$error = TRUE;
 		}
 	else $link_options .= "&grammar=".urlencode($dir.$grammar_file);
 	}
 if($alphabet_file <> '') {
 	if(!file_exists($dir.$alphabet_file)) {
-		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING: ".$dir.$alphabet_file." not found.</font><br />";
+		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING: ".$dir.$alphabet_file." not yet created.</font><br />";
 		$error = TRUE;
 		}
 	else $link_options .= "&alphabet=".urlencode($dir.$alphabet_file);
 	}
 if($settings_file <> '') {
 	if(!file_exists($dir.$settings_file)) {
-		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING: ".$dir.$settings_file." not found.</font><br />";
+		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING: ".$dir.$settings_file." not yet created.</font><br />";
 		$error = TRUE;
 		}
 	else $link_options .= "&settings=".urlencode($dir.$settings_file);
 	}
 if($objects_file <> '') {
 	if(!file_exists($dir.$objects_file)) {
-		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING: ".$dir.$objects_file." not found.</font><br />";
+		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING: ".$dir.$objects_file." not yet created.</font><br />";
 		$error = TRUE;
 		}
 	else $link_options .= "&objects=".urlencode($dir.$objects_file);
 	}
 if($csound_file <> '') {
 	if(!file_exists($dir_csound_resources.$csound_file)) {
-		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING: ".$dir_csound_resources.$csound_file." not found.</font><br />";
+		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING: ".$dir_csound_resources.$csound_file." not yet created.</font><br />";
 		$error = TRUE;
 		}
 	else {
@@ -770,8 +805,6 @@ if(isset($_POST['manage_instructions'])) {
 	echo "<hr>";
 	$list_of_arguments_chan = list_of_arguments($content,"_chan(");
 	$list_of_arguments_ins = list_of_arguments($content,"_ins(");
-//	for($i = 0; $i < count($list_of_arguments_ins); $i++) echo "“".$list_of_arguments_ins[$i]."”<br />";
-	
 	echo "<table style=\"background-color:cornsilk; border-spacing:6px;\">";
 	echo "<tr><td><b>Instruction</b></td><td style=\"text-align:center;\"><b>Replace with…</b></td><td><b>Instruction</b></td><td style=\"text-align:center;\"><b>Replace with…</b></td></tr>";
 	$imax = count($list_of_arguments_chan);
@@ -833,6 +866,14 @@ if(isset($_POST['manage_instructions'])) {
 	$hide = TRUE;
 	}
 if(!$hide) {
+	if($settings_file == '') {
+		$new_settings_file = str_replace("-da.",'',$filename);
+		$new_settings_file = str_replace(".bpda",'',$new_settings_file);
+		$new_settings_file = "-se.".$new_settings_file;
+		echo "<p><font color=\"red\">➡</font> <input style=\"background-color:yellow; font-size:large;\" onclick=\"window.open('settings_list.php?dir=".urlencode($dir)."&thispage=".urlencode($url_this_page)."','settingsfiles','width=400,height=400,left=100'); return false;\" type=\"submit\" title=\"Display settings files\" value=\"CHOOSE\"> a settings file or <input style=\"background-color:yellow; font-size:large;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"create_settings_file\" formaction=\"".$url_this_page."\" value=\"CREATE\"> a new file named <input type=\"text\" name=\"new_settings_file\" size=\"25\" value=\"".$new_settings_file."\"></p>";
+		}
+	else 
+		echo "<p style=\"background-color:white;\"><input style=\"background-color:yellow;\" onclick=\"window.open('settings_list.php?dir=".urlencode($dir)."&thispage=".urlencode($url_this_page)."','settingsfiles','width=400,height=400,left=100'); return false;\" type=\"submit\" title=\"Display settings files\" value=\"CHOOSE\"> a different settings file</p>";
 	echo "<hr>";
 	if($note_convention <> '')
 		echo "<p>Current note convention for this data is <font color=\"red\">‘".ucfirst(note_convention(intval($note_convention)))."’</font> as per <font color=\"blue\">‘".$settings_file."’</font></p>";

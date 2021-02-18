@@ -1951,6 +1951,11 @@ function list_of_tonal_scales($csound_orchestra_file) {
 					$clean_name_of_file = str_replace("#","_",$name_of_file);
 					$list[$j] .= " <font color=\"red\">➡</font>&nbsp;".popup_link($clean_name_of_file,"image",500,410,(100 * $k),$dir_image);
 					}
+			/*	$source_image = $dir_scale_images.$clean_name_of_file."-source.txt";
+				if(file_exists($source_image)) {
+					$content_source = trim(@file_get_contents($source_image,TRUE));
+					$list[$j] .= " (".$content_source.")";
+					} */
 				}
 			}
 		}
@@ -1959,7 +1964,7 @@ function list_of_tonal_scales($csound_orchestra_file) {
 
 function list_of_instruments($csound_orchestra_file) {
 	global $number_fields_csound_instrument, $number_midi_parameters_csound_instrument;
-	$list_of_instruments['list'] = array();
+	$list_of_instruments['list'] = $list_of_instruments['index'] = $list_of_instruments['param'] = array();
 	if(!file_exists($csound_orchestra_file)) return $list;
 	$content = @file_get_contents($csound_orchestra_file,TRUE);
 	$extract_data = extract_data(FALSE,$content);

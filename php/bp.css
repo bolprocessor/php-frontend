@@ -102,7 +102,6 @@ td {
 textarea {
 	overflow: visible;
 	overflow-x: hidden;
-//	font-size: small;
 	background-color: Snow;
 	}
 .clickrectangle {
@@ -124,8 +123,8 @@ textarea {
 	}
 
 input {
-	font-size:small;
-	background-color:Cornsilk;
+	font-size: small;
+	background-color: Cornsilk;
 	}
 input[type=text]:hover, input[type=number]:hover, input[type=date]:hover, input[type=file]:hover, input[type=mail]:hover, input[type=email]:hover, input[type=password], input[type=submit]:hover, input[type=search]:hover, textarea:hover, select:hover {
 	box-shadow: -2px -2px Aqua;
@@ -195,23 +194,9 @@ div.horizontalgap {
 	visibility: visible;
 	}
 
-snowflakeContainer {
-    position: absolute;
-    left: 0px;
-    top: 0px;
-	}
-.snowflake {
-    padding-left: 15px;
-    font-family: Cambria, Georgia, serif;
-    font-size: 14px;
-    line-height: 24px;
-    position: fixed;
-    color: LightGrey;
-    user-select: none;
-    z-index: 1000;
-	}
-.snowflake:hover {
-    cursor: default;
+#showhide {
+	 background-color: white;
+	 width: 80%;
 	}
 
 @media only screen and (min-device-width : 320px) and (max-device-width : 1024px) {

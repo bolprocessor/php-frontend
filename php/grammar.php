@@ -584,13 +584,20 @@ if($csound_file <> '') {
 	if($file_format == "csound") {
 		$list_of_tonal_scales = list_of_tonal_scales($dir_csound_resources.$csound_file);
 		if(($max_scales = count($list_of_tonal_scales)) > 0) {
-			if($max_scales > 1) echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains definitions of tonal scales:";
-			else echo "<p style=\"margin-bottom:0px;\">The Csound orchestra file <font color=\"blue\">‘".$csound_file."’</font> contains the definition of tonal scale:";
+			if($max_scales > 1)  {
+				echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains definitions of tonal scales&nbsp;<font color=\"red\">➡</font>&nbsp;<button style=\"background-color:aquamarine; border-radius: 6px; font-size:large;\" onclick=\"toggledisplay(); return false;\">Show/hide tonal scales</button>";
+				echo "<div id=\"showhide\"><br />";
+				}
+			else {
+				echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains the definition of tonal scale:";
+				echo "<div>";
+				}
 			echo "<ul style=\"margin-top:0px; margin-bottom:0px\">";
 			for($i_scale = 1; $i_scale <= $max_scales; $i_scale++)
 				echo "<li>".$list_of_tonal_scales[$i_scale - 1]."</li>";
-			if($max_scales > 1) echo "</ul>These scales may be called in “_scale(name of scale, blockkey)” instructions";
-			else echo "</ul>This scale may be called in a “_scale(name of scale, blockkey)” instruction<br />➡ Use “_scale(0,0)” to force equal-tempered";
+			if($max_scales > 1) echo "</ul><br />These scales may be called in “_scale(name of scale, blockkey)” instructions (with blockey = 0 by default)";
+			else echo "</ul>This scale may be called in a “_scale(name of scale, blockkey)” instruction (with blockey = 0 by default)<br />➡ Use “_scale(0,0)” to force equal-tempered";
+			echo "</div>";
 			echo "</p>";
 			}
 		$list_of_instruments = list_of_instruments($dir_csound_resources.$csound_file);

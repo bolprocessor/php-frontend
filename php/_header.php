@@ -67,6 +67,18 @@ echo "$(document).ready(function() {
 });";
 echo "</script>\n";
 
+echo "<script>\n";
+echo "function settoggledisplay() {
+		var x = document.getElementById(\"showhide\");
+	    if(x) {
+	      x.className='hidden'; }}\n";
+echo "function toggledisplay() {
+	    var x = document.getElementById(\"showhide\");
+	    if(x) {
+	      x.className=(x.className=='hidden')?'unhidden':'hidden'; }
+	  }\n";
+echo "</script>\n";
+
 echo "</head>";
-echo "<body>\n";
+echo "<body onload=\"settoggledisplay()\">\n";
 ?>
