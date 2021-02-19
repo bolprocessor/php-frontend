@@ -5,8 +5,6 @@ require_once("_header.php");
 $dir = urldecode($_GET['dir']);
 $url_this_page = urldecode($_GET['thispage']);
 
-echo $url_this_page."<br />";
-
 $dircontent = scandir($dir);
 foreach($dircontent as $file) {
 	$table = explode('.',$file);

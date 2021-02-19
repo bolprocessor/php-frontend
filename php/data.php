@@ -48,7 +48,7 @@ if(isset($_POST['select_parts'])) {
 	}
 else $reload_musicxml = FALSE;
 
-$need_to_save = FALSE;
+$need_to_save = $error = FALSE;
 $error_mssg = '';
 
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
@@ -456,15 +456,15 @@ if(isset($_POST['use_convention'])) {
 		for($octave = 15; $octave >= 0; $octave--) {
 			$new_octave = $octave + $change_octave;
 			if($new_octave < 0) $new_octave = "00";
-			if($new_convention <> 0) $newcontent = str_replace($Englishnote[$i].$octave,$new_note."@".$new_octave,$newcontent);
-			if($new_convention <> 0) $newcontent = str_replace($AltEnglishnote[$i].$octave,$new_note."@".$new_octave,$newcontent);
-			if($new_convention <> 1) $newcontent = str_replace($Frenchnote[$i].$octave,$new_note."@".$new_octave,$newcontent);
-			if($new_convention <> 1) $newcontent = str_replace($AltFrenchnote[$i].$octave,$new_note."@".$new_octave,$newcontent);
-			if($new_convention <> 2) $newcontent = str_replace($Indiannote[$i].$octave,$new_note."@".$new_octave,$newcontent);
-			if($new_convention <> 2) $newcontent = str_replace($AltIndiannote[$i].$octave,$new_note."@".$new_octave,$newcontent);
+			if($new_convention <> 0) $newcontent = str_replace($Englishnote[$i].$octave,$new_note."@&".$new_octave,$newcontent);
+			if($new_convention <> 0) $newcontent = str_replace($AltEnglishnote[$i].$octave,$new_note."@&".$new_octave,$newcontent);
+			if($new_convention <> 1) $newcontent = str_replace($Frenchnote[$i].$octave,$new_note."@&".$new_octave,$newcontent);
+			if($new_convention <> 1) $newcontent = str_replace($AltFrenchnote[$i].$octave,$new_note."@&".$new_octave,$newcontent);
+			if($new_convention <> 2) $newcontent = str_replace($Indiannote[$i].$octave,$new_note."@&".$new_octave,$newcontent);
+			if($new_convention <> 2) $newcontent = str_replace($AltIndiannote[$i].$octave,$new_note."@&".$new_octave,$newcontent);
 			}
 		}
-	$_POST['thistext'] = str_replace("@",'',$newcontent);
+	$_POST['thistext'] = str_replace("@&",'',$newcontent);
 	// This '@' is required to avoid confusion between "re" in Indian and Italian/French conventions
 	$need_to_save = TRUE;
 	}
@@ -515,16 +515,16 @@ if(isset($_POST['apply_changes_instructions'])) {
 		$option = $_POST['replace_chan_option_'.$i];
 		switch($option) {
 			case "chan":
-				$new_argument = "@".$_POST['replace_chan_as_chan_'.$i];
+				$new_argument = "@&".$_POST['replace_chan_as_chan_'.$i];
 				$newcontent = str_replace("_chan(".$argument.")","_chan(".$new_argument.")",$newcontent);
 			break;
 			case "ins":
-				$new_argument = "@".$_POST['replace_chan_as_ins_'.$i];
+				$new_argument = "@&".$_POST['replace_chan_as_ins_'.$i];
 				$newcontent = str_replace("_chan(".$argument.")","_ins(".$new_argument.")",$newcontent);
 			break;
 			case "chan_ins":
-				$new_argument_chan = "@".$_POST['replace_chan_as_chan1_'.$i];
-				$new_argument_ins = "@".$_POST['replace_chan_as_ins1_'.$i];
+				$new_argument_chan = "@&".$_POST['replace_chan_as_chan1_'.$i];
+				$new_argument_ins = "@&".$_POST['replace_chan_as_ins1_'.$i];
 				$newcontent = str_replace("_chan(".$argument.")","_chan(".$new_argument_chan.") _ins(".$new_argument_ins.")",$newcontent);
 			break;
 			case "delete":
@@ -538,16 +538,16 @@ if(isset($_POST['apply_changes_instructions'])) {
 		$option = $_POST['replace_ins_option_'.$j];
 		switch($option) {
 			case "chan":
-				$new_argument = "@".$_POST['replace_ins_as_chan_'.$j];
+				$new_argument = "@&".$_POST['replace_ins_as_chan_'.$j];
 				$newcontent = str_replace("_chan(".$argument.")","_chan(".$new_argument.")",$newcontent);
 			break;
 			case "ins":
-				$new_argument = "@".$_POST['replace_ins_as_ins_'.$j];
+				$new_argument = "@&".$_POST['replace_ins_as_ins_'.$j];
 				$newcontent = str_replace("_chan(".$argument.")","_ins(".$new_argument.")",$newcontent);
 			break;
 			case "chan_ins":
-				$new_argument_chan = "@".$_POST['replace_ins_as_chan1_'.$j];
-				$new_argument_ins = "@".$_POST['replace_ins_as_ins1_'.$j];
+				$new_argument_chan = "@&".$_POST['replace_ins_as_chan1_'.$j];
+				$new_argument_ins = "@&".$_POST['replace_ins_as_ins1_'.$j];
 				$newcontent = str_replace("_ins(".$argument.")","_chan(".$new_argument_chan.") _ins(".$new_argument_ins.")",$newcontent);
 			break;
 			case "delete":
@@ -555,7 +555,7 @@ if(isset($_POST['apply_changes_instructions'])) {
 			break;
 			}
 		}
-	$_POST['thistext'] = str_replace("@",'',$newcontent);
+	$_POST['thistext'] = str_replace("@&",'',$newcontent);
 	$need_to_save = TRUE;
 	}
 
@@ -681,7 +681,7 @@ if($csound_file <> '') {
 
 echo "<table id=\"topedit\" cellpadding=\"8px;\"><tr style=\"background-color:white;\">";
 echo "<td><p>Name of output file (with proper extension):<br /><input type=\"text\" name=\"output_file\" size=\"25\" value=\"".$output_file."\">&nbsp;";
-echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"savethisfile\" value=\"SAVE\"></p>";
+echo "<input style=\"background-color:yellow;\" type=\"submit\" formaction=\"".$url_this_page."\" name=\"savethisfile\" value=\"SAVE\"></p>";
 echo "</td>";
 echo "<td><p style=\"text-align:left;\">";
 echo "<input type=\"radio\" name=\"file_format\" value=\"\"";
@@ -698,35 +698,35 @@ echo "</p></td></tr></table>";
 $link_options = '';
 if($grammar_file <> '') {
 	if(!file_exists($dir.$grammar_file)) {
-		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING: ".$dir.$grammar_file." not yet created.</font><br />";
+		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING:</font> <font color=\"blue\">".$grammar_file."</font> not yet created<br />";
 		$error = TRUE;
 		}
 	else $link_options .= "&grammar=".urlencode($dir.$grammar_file);
 	}
 if($alphabet_file <> '') {
 	if(!file_exists($dir.$alphabet_file)) {
-		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING: ".$dir.$alphabet_file." not yet created.</font><br />";
+		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING:</font> <font color=\"blue\">".$alphabet_file."</font> not yet created<br />";
 		$error = TRUE;
 		}
 	else $link_options .= "&alphabet=".urlencode($dir.$alphabet_file);
 	}
 if($settings_file <> '') {
 	if(!file_exists($dir.$settings_file)) {
-		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING: ".$dir.$settings_file." not yet created.</font><br />";
+		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING:</font> <font color=\"blue\">".$settings_file."</font> not yet created<br />";
 		$error = TRUE;
 		}
 	else $link_options .= "&settings=".urlencode($dir.$settings_file);
 	}
 if($objects_file <> '') {
 	if(!file_exists($dir.$objects_file)) {
-		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING: ".$dir.$objects_file." not yet created.</font><br />";
+		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING:</font> <font color=\"blue\">".$objects_file."</font> not yet created<br />";
 		$error = TRUE;
 		}
 	else $link_options .= "&objects=".urlencode($dir.$objects_file);
 	}
 if($csound_file <> '') {
 	if(!file_exists($dir_csound_resources.$csound_file)) {
-		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING: ".$dir_csound_resources.$csound_file." not yet created.</font><br />";
+		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING:</font> <font color=\"blue\">".$csound_file."</font> not yet created<br />";
 		$error = TRUE;
 		}
 	else {
@@ -736,7 +736,10 @@ if($csound_file <> '') {
 	}
 $link_options .= "&here=".urlencode($dir.$filename);
 
-if($error_mssg <> '') echo "<p>".$error_mssg."</p>";
+if($error_mssg <> '') {
+	echo "<p>".$error_mssg."</p>";
+//	display_more_buttons(FALSE,$content,$url_this_page,$dir,$grammar_file,$objects_file,$csound_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
+	}
 
 if(intval($note_convention) <> intval($new_convention))
 	echo "<p><font color=\"red\">➡</font> WARNING: Note convention should be set to <font color=\"red\">‘".ucfirst(note_convention(intval($new_convention)))."’</font> in the <font color=\"blue\">‘".$settings_file."’</font> settings file</p>";
@@ -753,7 +756,9 @@ echo "</form>";
 
 echo "<div style=\"text-align:right;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></div>";
 
-display_more_buttons($content,$url_this_page,$dir,$grammar_file,$objects_file,$csound_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
+echo "</form>";
+
+display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,$objects_file,$csound_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
 
 $hide = FALSE;
 
@@ -870,10 +875,10 @@ if(!$hide) {
 		$new_settings_file = str_replace("-da.",'',$filename);
 		$new_settings_file = str_replace(".bpda",'',$new_settings_file);
 		$new_settings_file = "-se.".$new_settings_file;
-		echo "<p><font color=\"red\">➡</font> <input style=\"background-color:yellow; font-size:large;\" onclick=\"window.open('settings_list.php?dir=".urlencode($dir)."&thispage=".urlencode($url_this_page)."','settingsfiles','width=400,height=400,left=100'); return false;\" type=\"submit\" title=\"Display settings files\" value=\"CHOOSE\"> a settings file or <input style=\"background-color:yellow; font-size:large;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"create_settings_file\" formaction=\"".$url_this_page."\" value=\"CREATE\"> a new file named <input type=\"text\" name=\"new_settings_file\" size=\"25\" value=\"".$new_settings_file."\"></p>";
+		echo "<p style=\"background-color:white;\"><font color=\"red\">➡</font> <input style=\"background-color:yellow; font-size:large;\" onclick=\"window.open('settings_list.php?dir=".urlencode($dir)."&thispage=".urlencode($url_this_page)."','settingsfiles','width=400,height=400,left=100'); return false;\" type=\"submit\" title=\"Display settings files\" value=\"CHOOSE\"> a settings file or <input style=\"background-color:yellow; font-size:large;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"create_settings_file\" formaction=\"".$url_this_page."\" value=\"CREATE\"> a new file named <input type=\"text\" name=\"new_settings_file\" size=\"25\" value=\"".$new_settings_file."\"></p>";
 		}
 	else 
-		echo "<p style=\"background-color:white;\"><input style=\"background-color:yellow;\" onclick=\"window.open('settings_list.php?dir=".urlencode($dir)."&thispage=".urlencode($url_this_page)."','settingsfiles','width=400,height=400,left=100'); return false;\" type=\"submit\" title=\"Display settings files\" value=\"CHOOSE\"> a different settings file</p>";
+		echo "<p><input style=\"background-color:yellow;\" onclick=\"window.open('settings_list.php?dir=".urlencode($dir)."&thispage=".urlencode($url_this_page)."','settingsfiles','width=400,height=400,left=100'); return false;\" type=\"submit\" title=\"Display settings files\" value=\"CHOOSE\"> a different settings file</p>";
 	echo "<hr>";
 	if($note_convention <> '')
 		echo "<p>Current note convention for this data is <font color=\"red\">‘".ucfirst(note_convention(intval($note_convention)))."’</font> as per <font color=\"blue\">‘".$settings_file."’</font></p>";

@@ -286,7 +286,7 @@ function window_name($text) {
 	return $text;
 	}
 	
-function display_more_buttons($content,$url_this_page,$dir,$grammar_file,$objects_file,$csound_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file) {
+function display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,$objects_file,$csound_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file) {
 	global $bp_application_path, $csound_resources, $output_file, $file_format, $test;
 	$page_type = str_replace(".php",'',$url_this_page);
 	$page_type = preg_replace("/\.php.*/u",'',$url_this_page);
@@ -309,6 +309,9 @@ function display_more_buttons($content,$url_this_page,$dir,$grammar_file,$object
 			}
 		}
 	echo "<table style=\"padding:0px; background-color:white; border-spacing: 2px;\" cellpadding=\"0px;\"><tr>";
+	if($error) {
+		echo "<td style=\"vertical-align:middle;\"><big><font color=\"red\" class=\"blinking\">➡</font></big></td>";
+		}
 	if($alphabet_file <> '') {
 		$url_this_page = "alphabet.php?file=".urlencode($dir.$alphabet_file);
 		if($test) echo "url_this_page = ".$url_this_page."<br />";
@@ -337,11 +340,9 @@ function display_more_buttons($content,$url_this_page,$dir,$grammar_file,$object
 		}
 	if($settings_file <> '') {
 		$url_this_page = "settings.php?file=".urlencode($dir.$settings_file);
-		
 		if($test) echo "url_this_page = ".$url_this_page."<br />";
-		
 		echo "<td><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-		echo "<input style=\"background-color:yellow;\" type=\"submit\"  onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$settings_file."’\">&nbsp;";
+		echo "<input style=\"background-color:yellow;\" type=\"submit\" formaction=\"".$url_this_page."\"  onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$settings_file."’\">&nbsp;";
 		echo "</td></form>";
 		}
 	if($orchestra_file <> '') {
@@ -2610,12 +2611,14 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$s
 								$fraction = $p_stream_duration."/".($q_stream_duration * $divisions[$score_part]);
 								$simplify = simplify($fraction,$max_term_in_fraction);
 								$fraction = $simplify['fraction'];
-								if($fraction <> "1") {
+								if($simplify['q'] > 0) $n = $simplify['p'] / $simplify['q'];
+								else $n = 0;
+								if($stream_units <> $n) { // Fixed by BB 2021-02-19
 									$convert_measure[$score_part] .= "{";
 									$convert_measure[$score_part] .= $fraction.",";
 									}
 								$convert_measure[$score_part] .= $stream;
-								if($fraction <> "1") $convert_measure[$score_part] .= "}";
+								if($stream_units <> $n) $convert_measure[$score_part] .= "}";
 								$stream = ''; $stream_units = 0; $p_stream_duration = 0; $q_stream_duration = 1;
 								}
 							$convert_measure[$score_part] .= ",";
@@ -2722,6 +2725,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$s
 									$fraction = $simplify['fraction'];
 									if($simplify['q'] > 0) $n = $simplify['p'] / $simplify['q'];
 									else $n = 0;
+								//	echo "i_measure = ".$i_measure." n = ".$n." = ".$simplify['p']."/".$simplify['q']." stream_units = ".$stream_units."<br />";
 									if($stream_units <> $n) {
 										$convert_measure[$score_part] .= "{";
 										$convert_measure[$score_part] .= $fraction.",";

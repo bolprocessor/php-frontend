@@ -672,7 +672,7 @@ echo "</div>";
 echo "<p style=\"width:90%; text-align:right;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" formaction=\"".$url_this_page."#topedit\" name=\"savegrammar\" value=\"SAVE ‘".$filename."’\"></p>";
 echo "</form>";
 
-display_more_buttons($content,$url_this_page,$dir,'',$objects_file,$csound_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
+display_more_buttons(FALSE,$content,$url_this_page,$dir,'',$objects_file,$csound_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
 
 $variable = array();
 for($i = 0; $i < $imax; $i++) {
