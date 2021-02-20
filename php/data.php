@@ -224,15 +224,18 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 					}
 				if(is_integer($pos=strpos($line,"<measure "))) {
 					$reading_measure = TRUE;
-					$i_measure = trim(preg_replace("/.*number=\"([^\"]+)\".*/u","$1",$line));
-					if($test_musicxml) echo "Part ".$part." measure #".$i_measure."<br />";
-					if($add_section) {
-						$section++;
-						$this_score[$section][$i_measure] = array();
-						$this_score[$section][$i_measure][$part] = array();
-						$repeat_section[$section] = 1;
-						}
-					$add_section = FALSE;
+				//	if(!is_integer($pos=strpos($line,"implicit=\"yes\""))) { // Not recommended
+						$i_measure = trim(preg_replace("/.*number=\"([^\"]+)\".*/u","$1",$line));
+						if($test_musicxml)
+							echo "Part ".$part." measure #".$i_measure."<br />";
+						if($add_section) {
+							$section++;
+							$this_score[$section][$i_measure] = array();
+							$this_score[$section][$i_measure][$part] = array();
+							$repeat_section[$section] = 1;
+							}
+						$add_section = FALSE;
+				//		}
 					}
 				if($reading_measure AND is_integer($pos=strpos($line,"</measure>"))) {
 					$reading_measure = FALSE;
@@ -241,13 +244,11 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 					$repeat_direction = trim(preg_replace("/.+direction=\"([^\"]+)\"\/>/u","$1",$line));
 					if($test_musicxml) echo "repeat direction = “".$repeat_direction."” section ".$section."<br />";
 					if($repeat_direction == "forward") {
-				//		if($add_section) {
-							$section++;
-							$this_score[$section][$i_measure] = array();
-							$this_score[$section][$i_measure][$part] = array();
-							$repeat_section[$section] = 1;
-							$repeat_start_measure[$section] = $i_measure;
-				//			}
+						$section++;
+						$this_score[$section][$i_measure] = array();
+						$this_score[$section][$i_measure][$part] = array();
+						$repeat_section[$section] = 1;
+						$repeat_start_measure[$section] = $i_measure;
 						$add_section = FALSE;
 						}
 					if($repeat_direction == "backward") {
@@ -287,7 +288,8 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			do $data = str_replace("{}",'',$data,$count);
 			while($count > 0);
 			$data = str_replace(" ,",",",$data);
-			$data = preg_replace("/{0\/?[0-9]*}/u",'',$data); // Happens with repetitions, need to check why…
+			$data = preg_replace("/{0\/?[0-9]*}/u",'',$data); // Empty measure created by repetition, need to check why… Fixed by BB 2021-02-20
+			$data = preg_replace("/{_tempo[^\)]+\)\s?_chan[^\)]+\)\s?}/u",'',$data); // Empty measure created by repetition, need to check why…
 			if($reload_musicxml) {
 				$more_data = "// MusicXML file ‘".$upload_filename."’ converted\n";
 				if($subtitle_part <> '') $more_data .= $subtitle_part."\n";
@@ -307,7 +309,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				echo "<input type=\"checkbox\" name=\"delete_current\">&nbsp;Delete current data<br />";
 				echo "_________________<br />";
 				echo "<input type=\"hidden\" name=\"upload_filename\" value=\"".$upload_filename."\">";
-				echo "<font color=\"red\">➡</font> You can select parts and <input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"select_parts\" value=\"CONVERT THEM\">&nbsp;or&nbsp;<input style=\"background-color:azure;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"cancel\" value=\"QUIT IMPORTING\">";
+				echo "<font color=\"red\">➡</font> You can select parts and <input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"select_parts\" value=\"CONVERT\">&nbsp;or&nbsp;<input style=\"background-color:azure;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"cancel\" value=\"QUIT IMPORTING\">";
 				}
 			$new_convention = 0; // English note convention
 	//		$_POST['savethisfile'] = TRUE;
