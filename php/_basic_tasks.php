@@ -2372,7 +2372,8 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$s
 				$measure_duration = $max_volume = 0;
 				$curr_event = $convert_measure = array();
 				$data .= "{";
-				$number_parts = 0; 
+				$number_parts = 0;
+				$j_field = 0;
 				foreach($the_measure as $score_part => $the_part) {
 					if(!$reload_musicxml OR !$select_part[$score_part]) {
 						if($test_musicxml AND $reload_musicxml) echo "Score part ".$score_part." not selected in section ".$section."<br />";
@@ -2622,7 +2623,11 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$s
 								if($stream_units <> $n) $convert_measure[$score_part] .= "}";
 								$stream = ''; $stream_units = 0; $p_stream_duration = 0; $q_stream_duration = 1;
 								}
-							$convert_measure[$score_part] .= ",";
+					//		$convert_measure[$score_part] .= "§".$j_field." ". $p_time_measure."/".$q_time_measure."§,";
+							$convert_measure[$score_part] .= "§".$j_field."§,";
+							$p_field_duration[$j_field] = $p_time_measure;
+							$q_field_duration[$j_field] = $q_time_measure;
+							$j_field++;
 							// Find whether there is time for a rest
 							$p_duration = $the_event['p_dur']; $q_duration = $the_event['q_dur'];
 							$add = add($p_time_measure,$q_time_measure,(-$p_duration),$q_duration);
@@ -2770,7 +2775,6 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$s
 						$volume = $volume_this_part[$section][$i_measure][$score_part];
 						$data .= " _volume(".$volume.")";
 						}
-						
 					if(!$ignore_channels AND isset($midi_channel[$score_part])) $data .= " _chan(".$midi_channel[$score_part].")";
 					$fraction = $p_time_measure."/".($q_time_measure * $divisions[$score_part]);
 					$simplify = simplify($fraction,$max_term_in_fraction);
@@ -2778,7 +2782,38 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$s
 					$data .= "{".$fraction;
 					$data .= ",".$convert_measure[$score_part];
 					$data .= "}";
-					$data .= ",";
+			//		$data .= "§".$j_field." ". $p_time_measure."/".$q_time_measure."§,";
+					$data .= "§".$j_field."§,";
+					$p_field_duration[$j_field] = $p_time_measure;
+					$q_field_duration[$j_field] = $q_time_measure;
+					$j_field++;
+					
+					$p_duration_this_measure = 0;
+					$q_duration_this_measure = 1;
+					for($j = 0; $j < $j_field; $j++) {
+						// Calculate duration of the structure = max duration of one of its fields
+						$add = add($p_duration_this_measure,$q_duration_this_measure,-$p_field_duration[$j],$q_field_duration[$j]);
+						$p_gap = $add['p'];
+						if($p_gap < 0) {
+							$p_duration_this_measure = $p_field_duration[$j];
+							$q_duration_this_measure = $q_field_duration[$j];
+							}
+						}
+					for($j = 0; $j < $j_field; $j++) {
+						// Add rests to fill up gaps
+						$add = add($p_duration_this_measure,$q_duration_this_measure,-$p_field_duration[$j],$q_field_duration[$j]);
+						$p_gap = $add['p'];
+						$q_gap = $add['q'];
+						if($p_gap > 0) {
+							$fraction = $p_gap."/".($q_gap * $divisions[$score_part]);
+							$simplify = simplify($fraction,$max_term_in_fraction);
+							$fraction = $simplify['fraction'];
+							$data = str_replace("§".$j."§","{".$fraction."}",$data);
+						//	echo "i_measure #".$i_measure." field #".$j." duration = ".$p_duration_this_measure."/".$q_duration_this_measure." gap = ".$p_gap."/".$q_gap." = ".$fraction."<br />";
+							}
+						else $data = str_replace("§".$j."§",'',$data);
+						}
+						
 					}
 				$data .= "} ";
 				unset($the_part);
