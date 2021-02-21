@@ -113,7 +113,9 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$add_section = TRUE;
 			$instrument_name = $midi_channel = $select_part = $duration_part = $divisions = $repeat_section = array();
 			$ignore_dynamics = isset($_POST['ignore_dynamics']);
-			$ignore_tempo = isset($_POST['ignore_tempo']);
+			if(isset($_POST['tempo_option'])) $tempo_option = $_POST['tempo_option'];
+			else $tempo_option = "all";
+			echo "<input type=\"hidden\" name=\"tempo_option\" value=\"".$tempo_option."\">";
 			$ignore_channels = isset($_POST['ignore_channels']);
 			$section = 0; // This variable is used for repetitions, see forward/backward
 			$repeat_section[$section] = 1; // By default, don't repeat
@@ -274,7 +276,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 					}
 				}
 			unset($the_section);
-			$convert_score = convert_musicxml($this_score,$repeat_section,$divisions,$midi_channel,$select_part,$ignore_dynamics,$ignore_tempo,$ignore_channels,$reload_musicxml,$test_musicxml);
+			$convert_score = convert_musicxml($this_score,$repeat_section,$divisions,$midi_channel,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$reload_musicxml,$test_musicxml);
 			$data .= $convert_score['data'];
 			$message .= $convert_score['error'];
 			$data = preg_replace("/\s+/u"," ",$data);
@@ -289,7 +291,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			while($count > 0);
 			$data = str_replace(" ,",",",$data);
 			$data = preg_replace("/{0\/?[0-9]*}/u",'',$data); // Empty measure created by repetition, need to check why… Fixed by BB 2021-02-20
-			$data = preg_replace("/{_tempo[^\)]+\)\s?_chan[^\)]+\)\s?}/u",'',$data); // Empty measure created by repetition, need to check why…
+			$data = preg_replace("/{_tempo[^\)]+\)\s?_volume[^\)]+\)\s?_chan[^\)]+\)\s?}/u",'',$data); // Empty measure created by repetition, need to check why…
 			if($reload_musicxml) {
 				$more_data = "// MusicXML file ‘".$upload_filename."’ converted\n";
 				if($subtitle_part <> '') $more_data .= $subtitle_part."\n";
@@ -302,8 +304,18 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			if($message <> '') {
 				echo $message;
 				echo "_______________________________________<br />";
+				
+				echo "<input type=\"radio\" name=\"tempo_option\" value=\"ignore\"";
+				if($tempo_option == "ignore") echo " checked";
+				echo ">&nbsp;Ignore tempo markers<br />";
+				echo "<input type=\"radio\" name=\"tempo_option\" value=\"score\"";
+				if($tempo_option == "score") echo " checked";
+				echo ">&nbsp;Interpret only tempo markers of printed score<br />";
+				echo "<input type=\"radio\" name=\"tempo_option\" value=\"all\"";
+				if($tempo_option == "all") echo " checked";
+				echo ">&nbsp;Interpret all tempo markers<br />";
+				echo "_______________________________________<br />";
 				echo "<input type=\"checkbox\" name=\"ignore_dynamics\">&nbsp;Ignore dynamics (volume)<br />";
-				echo "<input type=\"checkbox\" name=\"ignore_tempo\">&nbsp;Ignore tempo<br />";
 				echo "<input type=\"checkbox\" name=\"ignore_channels\">&nbsp;Ignore MIDI channels<br />";
 				echo "_________________<br />";
 				echo "<input type=\"checkbox\" name=\"delete_current\">&nbsp;Delete current data<br />";
