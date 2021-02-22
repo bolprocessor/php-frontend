@@ -2518,13 +2518,17 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$s
 							// Check for instance measure 33 of Bach's Prelude I in C major BWV_846
 							$sum_tempo_measure[$section][$i_measure] += $tempo;
 							$number_tempo_measure[$section][$i_measure]++;
+							// Note that tempo values will be used in all subsequent parts
+							// This may create a problem if they don't appear in the first selected part
 							}
 							
-						if($tempo_option <> "ignore" AND is_integer($pos=strpos($line,"<per-minute>"))) {
+						if($tempo_option == "score" AND is_integer($pos=strpos($line,"<per-minute>"))) {
 							$tempo = trim(preg_replace("/<per\-minute>([^<]+)<\/per\-minute>/u","$1",$line));
-					//		echo $score_part." tempo = ".$tempo." bpm at measure ".$i_measure." (on the printed score)<br />";
+						//	echo $score_part." tempo = ".$tempo." bpm at measure ".$i_measure." (on the printed score)<br />";
 							$sum_tempo_measure[$section][$i_measure] += $tempo;
 							$number_tempo_measure[$section][$i_measure]++;
+							// Note that tempo values will be used in all subsequent parts
+							// This may create a problem if they don't appear in the first selected part
 							}
 						
 						if(!$ignore_dynamics AND is_integer($pos=strpos($line,"<sound dynamics"))) {
@@ -2550,7 +2554,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$s
 								}
 							}
 						
-						if($tempo_option <> "ignore" AND is_integer($pos=strpos($line,"<words"))) {
+						if($tempo_option <> "none" AND is_integer($pos=strpos($line,"<words"))) {
 							$some_words = trim(preg_replace("/.*<words[^>]*>([^<]+)\s*<\/.+/u","$1",$line));
 							if(strlen($some_words) > 2) {
 						//		echo "<br />line = “".recode_tags($line)."”<br />";
@@ -2623,6 +2627,8 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$s
 							}
 						}
 					unset($line);
+					
+					// Now let us transfer events of this measure to $data
 					$convert_measure[$score_part] = '';
 					if(count($the_measure) > 1) $convert_measure[$score_part] .= "{";
 					$is_chord = FALSE;
@@ -2648,8 +2654,17 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$s
 								else $n = 0;
 							//	if($fraction <> "1") {
 								if($stream_units <> $n) { // Fixed by BB 2021-02-19
-									$convert_measure[$score_part] .= "{";
-									$convert_measure[$score_part] .= $fraction.",";
+									if((trim($stream) == "-" OR trim($stream) == "{-}") AND is_int($fraction) AND $fraction < 4) {
+										// Short sequence of '-'
+										$stream = '';
+										for($i = 0; $i < $fraction; $i++) $stream .= "-";
+										$stream_units = $n = $fraction;
+										}
+									else {
+						//				$convert_measure[$score_part] .= "{"."[".$simplify['p']."/".$simplify['q']."] ";
+										$convert_measure[$score_part] .= "{";
+										$convert_measure[$score_part] .= $fraction.",";
+										}
 									}
 								$convert_measure[$score_part] .= $stream;
 								if($stream_units <> $n) $convert_measure[$score_part] .= "}";
@@ -2771,8 +2786,16 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$s
 									if($simplify['q'] > 0) $n = $simplify['p'] / $simplify['q'];
 									else $n = 0;
 									if($stream_units <> $n) {
-										$convert_measure[$score_part] .= "{";
-										$convert_measure[$score_part] .= $fraction.",";
+										if((trim($stream) == "-" OR trim($stream) == "{-}") AND is_int($fraction) AND $fraction < 4) {
+											// Short sequence of '-'
+											$stream = '';
+											for($i = 0; $i < $fraction; $i++) $stream .= "-";
+											$stream_units = $n = $fraction;
+											}
+										else {
+											$convert_measure[$score_part] .= "{";
+											$convert_measure[$score_part] .= $fraction.",";
+											}
 										}
 									$convert_measure[$score_part] .= $stream;
 									if($stream_units <> $n) $convert_measure[$score_part] .= "}";
@@ -2793,7 +2816,23 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$s
 						$fraction = $p_stream_duration."/".($q_stream_duration * $divisions[$score_part]);
 						$simplify = simplify($fraction,$max_term_in_fraction);
 						$fraction = $simplify['fraction'];
-						$convert_measure[$score_part] .= "{".$fraction.",".$stream."}";
+						if($simplify['q'] > 0) $n = $simplify['p'] / $simplify['q'];
+						else $n = 0;
+						if($stream_units <> $n) {
+							if((trim($stream) == "-" OR trim($stream) == "{-}") AND is_int($fraction) AND $fraction < 4) {
+								// Short sequence of '-'
+								$stream = '';
+								for($i = 0; $i < $fraction; $i++) $stream .= "-";
+								$stream_units = $n = $fraction;
+								}
+							else {
+								$convert_measure[$score_part] .= "{";
+								$convert_measure[$score_part] .= $fraction.",";
+								}
+							}
+						$convert_measure[$score_part] .= $stream;
+						if($stream_units <> $n) $convert_measure[$score_part] .= "}";
+				//		$convert_measure[$score_part] .= "{".$fraction.",".$stream."}";
 						$add = add($p_time_field,$q_time_field,$p_stream_duration,$q_stream_duration);
 						$p_time_field = $add['p']; $q_time_field = $add['q'];
 						$stream = ''; $stream_units = 0; $p_stream_duration = 0; $q_stream_duration = 1;
@@ -2811,17 +2850,16 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$s
 						$p_time_measure = $p_time_field;
 						$q_time_measure = $q_time_field;
 						}
-					
-					if($test_musicxml)
-						echo "End measure ".$i_measure." time_measure = ".$p_time_field."/".$q_time_field."<br />";
-					
+						
 					if($number_tempo_measure[$section][$i_measure] > 0) {
 						$tempo_this_measure = round($sum_tempo_measure[$section][$i_measure] / $number_tempo_measure[$section][$i_measure]);
 						$fraction = $tempo_this_measure."/60";
 						$simplify = simplify($fraction,$max_term_in_fraction);
 						$fraction = $simplify['fraction'];
 						$data .= " _tempo(".$fraction.")";
-						if(!isset($default_tempo[$section]) AND !$implicit[$section][$i_measure]) $default_tempo[$section] = $fraction;
+					//	if(!isset($default_tempo[$section]) AND !$implicit[$section][$i_measure]) 
+						if(!$implicit[$section][$i_measure]) // Fixed by BB 2021-02-22
+							$default_tempo[$section] = $fraction;
 						if($old_tempo == 0) $old_tempo = $fraction;
 					//	echo "New tempo = ".$fraction."<br />";
 						}
@@ -2844,20 +2882,16 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$s
 							$data .= " _volume(".$default_volume[$section][$score_part].")";
 						else
 							$data .= " _volume(".$old_volume[$score_part].")";
+							
+					if($test_musicxml)
+						echo "End measure ".$i_measure." time_measure = ".$p_time_field."/".$q_time_field." tempo_this_measure = ".$sum_tempo_measure[$section][$i_measure]."/".$number_tempo_measure[$section][$i_measure]." default_tempo[section] = ".$default_tempo[$section]." implicit = ".(1 * $implicit[$section][$i_measure])." old_tempo = ".$old_tempo."<br /><br />";
 												
 					if(!$ignore_channels AND isset($midi_channel[$score_part])) $data .= " _chan(".$midi_channel[$score_part].")";
 					$fraction = $p_time_measure."/".($q_time_measure * $divisions[$score_part]);
 					$simplify = simplify($fraction,$max_term_in_fraction);
 					$fraction = $simplify['fraction'];
-					$data .= "{".$fraction; // $$$$$
+					$data .= "{".$fraction;
 					$data .= ",".$convert_measure[$score_part];
-					
-					
-				/*	$data .= "@§".$j_field."§";
-					$p_field_duration[$j_field] = $p_time_measure;
-					$q_field_duration[$j_field] = $q_time_measure;
-					$j_field++; */
-					
 					$data .= "}";
 					$data .= "§".$j_field."§,";
 					$p_field_duration[$j_field] = $p_time_measure;
