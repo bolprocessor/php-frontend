@@ -4,6 +4,7 @@ require_once("_basic_tasks.php");
 if(isset($_GET['file'])) $file = urldecode($_GET['file']);
 else $file = '';
 $url_this_page = "alphabet.php?file=".urlencode($file);
+save_settings("last_page",$url_this_page);
 $table = explode(SLASH,$file);
 $filename = end($table);
 $this_file = $bp_application_path.$file;

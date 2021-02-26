@@ -6,6 +6,7 @@ if(isset($_GET['file'])) $file = urldecode($_GET['file']);
 else $file = '';
 if($file == '') die();
 $url_this_page = "data.php?file=".urlencode($file);
+save_settings("last_page",$url_this_page);
 $table = explode(SLASH,$file);
 $filename = end($table);
 $this_file = $bp_application_path.$file;
@@ -295,6 +296,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$data = preg_replace("/{0\/?[0-9]*}/u",'',$data); // Empty measure created by repetition, need to check why… Fixed by BB 2021-02-20
 			$data = preg_replace("/{([0-9]+\/?[0-9]*),\-+}/u"," $1 ",$data); // Replace for instance "{33/8,--}" with " 33/8 " Added by BB 2021-02-23
 			$data = preg_replace("/{_tempo[^\)]+\)\s?_volume[^\)]+\)\s?_chan[^\)]+\)\s?}/u",'',$data); // Empty measure at the beginning of a repetition, need to check why…
+			$data = str_replace(" ,",",",$data);
 			if($reload_musicxml) {
 				$more_data = "// MusicXML file ‘".$upload_filename."’ converted\n";
 				if($subtitle_part <> '') $more_data .= $subtitle_part."\n";
@@ -991,16 +993,18 @@ for($i = $j = 0; $i < $imax; $i++) {
 		$line_chunked .= $c;
 		if($c == '}') {
 			$level--; 
-			if($level == 0) $n++;
-			if($level == 0 AND ($tie <= 0 OR $n > $maxchunk_size)) {
-				if($tie > 0) {
-					$tie_mssg =  "• <font color=\"red\">".$tie." unbound ties in chunk #".$chunk_number."</font><br />";
-					$tie_error = TRUE;
+			if($level == 0) {
+				$n++;
+				if(($tie <= 0 AND $n > $minchunk_size) OR $n > $maxchunk_size) {
+					if(abs($tie) > 0) {
+						$tie_mssg =  "• <font color=\"red\">".abs($tie)." unbound ties in chunk #".$chunk_number."</font><br />";
+						$tie_error = TRUE;
+						}
+					$line_chunked .= "\n";
+					$tie = $n = 0;
+					$start_chunk = "[chunk ".(++$chunk_number)."] ";
+					if($k < (strlen($line_recoded) - 1)) $chunked = TRUE;
 					}
-				$line_chunked .= "\n";
-				$tie = $n = 0;
-				$start_chunk = "[chunk ".(++$chunk_number)."] ";
-				if($k < (strlen($line_recoded) - 1)) $chunked = TRUE;
 				}
 			}
 		}

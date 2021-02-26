@@ -9,7 +9,6 @@ $url_this_page = $this_page = "index.php";
 echo "<table style=\"background-color:snow;\"><tr>";
 echo "<td style=\"padding:4px; vertical-align:middle;\"><img src=\"pict/BP3-logo.png\" width=\"120px;\"/></td><td style=\"padding:4px; vertical-align:middle; white-space:nowrap;\">";
 
-
 if($path <> '') {
 	echo "<h2 style=\"text-align:center;\">Bol Processor ‘BP3’</h2>";
 	$url_this_page .= "?path=".urlencode($path);
@@ -57,6 +56,7 @@ else {
 		}
 	}
 
+echo "<div style=\"float:right; background-color:white; padding:1em;\"><big><font color=\"red\">➡</font> <a target=\"_blank\" href=\"".$last_page."\">Last page visited</a></big></div><br />";
 echo link_to_help();
 
 if($test) echo "dir = ".$dir."<br />";
@@ -340,7 +340,8 @@ if($delete_files) {
 $dircontent = scandir($dir);
 $i_file = 0;
 foreach($dircontent as $thisfile) {
-	if($thisfile == '.' OR $thisfile == ".." OR $thisfile == ".DS_Store" OR $thisfile == "php") continue;
+	if($thisfile[0] == '.' OR $thisfile[0] == '_' OR $thisfile == "php") continue;
+	if($thisfile == "DerivedData" OR $thisfile == "resources" OR $thisfile == "scripts" OR $thisfile == "source" OR $thisfile == "temp_bolprocessor" OR $thisfile == "Makefile" OR $thisfile == "my_output") continue;
 	if(is_dir($dir.SLASH.$thisfile)) {
 		$table = explode('_',$thisfile);
 		$extension = end($table);

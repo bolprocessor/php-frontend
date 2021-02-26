@@ -16,10 +16,11 @@ if(!isset($csound_resources) OR $csound_resources == '') $csound_resources = "cs
 save_settings("csound_resources",$csound_resources);
 if(!isset($trash_folder) OR $trash_folder == '') $trash_folder = "trash_bolprocessor";
 save_settings("trash_folder",$trash_folder);
-$max_sleep_time_after_bp_command = 30; // seconds. Maximum time allowed waiting for the 'done.txt' file
+$max_sleep_time_after_bp_command = 120; // seconds. Maximum time allowed waiting for the 'done.txt' file
 $default_output_format = "midi";
 
 $maxchunk_size = 50; // Max number of measures contained in a chunk
+$minchunk_size = 10; // Min number of measures contained in a chunk
 $max_term_in_fraction = 32768; // Used to simplify fractions when importing scores
 
 $number_fields_csound_instrument = 67; // Never change this!
@@ -2375,7 +2376,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$s
 				if(!is_integer($i_measure)) {
 					$implicit[$section][$i_measure] = TRUE;
 					$measure_label[$i_measure] = $old_measure_label."-".$measure_label[$i_measure];
-					if($list_corrections) echo "<font color=\"red\">➡</font> Implicit measure ".$measure_label[$i_measure]." is labelled <font color=\"MediumTurquoise\">“".$i_measure."”</font><br />";
+					if($list_corrections) echo "• Implicit measure ".$measure_label[$i_measure]." is labelled <font color=\"MediumTurquoise\">“".$i_measure."”</font><br />";
 					}
 				else $old_measure_label = $measure_label[$i_measure];
 				if($test_musicxml)
@@ -2921,7 +2922,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$s
 							$data = str_replace("§".$j."§","§".$j."§ ".$fraction,$data);
 							$p_field_duration[$j] = $p_duration_this_measure;
 							$q_field_duration[$j] = $q_duration_this_measure;
-							if($list_corrections) echo "Measure #".$i_measure." field #".($j + 1)." (duration = ".$p_duration_this_measure."/".$q_duration_this_measure.") added rest = ".$fraction." divisions = ".$divisions[$score_part]."<br />";
+							if($list_corrections) echo "<font color=\"red\">➡</font> Measure #".$i_measure." field #".($j + 1)." (duration = ".$p_duration_this_measure."/".$q_duration_this_measure.") added rest = ".$fraction." (divisions = ".$divisions[$score_part].")<br />";
 							}
 						}
 					}

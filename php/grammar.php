@@ -4,8 +4,8 @@ require_once("_settings.php");
 
 if(isset($_GET['file'])) $file = urldecode($_GET['file']);
 else $file = '';
-// $file = str_replace(" ","_",$file);
 $url_this_page = "grammar.php?file=".urlencode($file);
+save_settings("last_page",$url_this_page);
 $table = explode(SLASH,$file);
 $here = $filename = end($table);
 $this_file = $bp_application_path.$file;
