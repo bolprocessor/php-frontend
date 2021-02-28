@@ -11,9 +11,10 @@ $table = explode(SLASH,$file);
 $filename = end($table);
 $this_file = $bp_application_path.$file;
 $dir = str_replace($filename,'',$this_file);
+$current_directory = str_replace(SLASH.$filename,'',$file);
 
 require_once("_header.php");
-echo "<p>Current directory = ".$dir."</p>";
+echo "<p>Current directory = <a href=\"index.php?path=".urlencode($current_directory)."\">".$dir."</a></p>";
 echo link_to_help();
 
 $test_musicxml = FALSE;
@@ -22,6 +23,7 @@ echo "<div style=\"float:right; background-color:white; padding-right:6px; paddi
 $csound_is_responsive = check_csound();
 echo "</div>";
 echo "<h3>Data file “".$filename."”</h3>";
+save_settings("last_name",$filename);
 
 $temp_folder = str_replace(' ','_',$filename)."_".session_id()."_temp";
 if(!file_exists($temp_dir.$temp_folder)) {
@@ -997,7 +999,7 @@ for($i = $j = 0; $i < $imax; $i++) {
 				$n++;
 				if(($tie <= 0 AND $n > $minchunk_size) OR $n > $maxchunk_size) {
 					if(abs($tie) > 0) {
-						$tie_mssg =  "• <font color=\"red\">".abs($tie)." unbound ties in chunk #".$chunk_number."</font><br />";
+						$tie_mssg =  "• <font color=\"red\">".abs($tie)." unbound tie(s) in chunk #".$chunk_number."</font><br />";
 						$tie_error = TRUE;
 						}
 					$line_chunked .= "\n";

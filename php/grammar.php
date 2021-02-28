@@ -10,6 +10,7 @@ $table = explode(SLASH,$file);
 $here = $filename = end($table);
 $this_file = $bp_application_path.$file;
 $dir = str_replace($filename,'',$this_file);
+$current_directory = str_replace(SLASH.$filename,'',$file);
 $textarea_rows = 20;
 
 if($test) echo "grammar_file = ".$this_file."<br />";
@@ -46,7 +47,7 @@ else $new_convention = '';
 
 require_once("_header.php");
 
-echo "<p><small>Current directory = ".$dir;
+echo "<p>Current directory = <a href=\"index.php?path=".urlencode($current_directory)."\">".$dir."</a></p>";
 $hide = $need_to_save = FALSE;
 
 if(isset($_POST['output_file'])) {
@@ -243,6 +244,7 @@ else {
 echo link_to_help();
 
 echo "<h3>Grammar file “".$filename."”</h3>";
+save_settings("last_name",$filename);
 
 $link = "test-image.html";
 echo "<p style=\"border:2px solid gray; background-color:azure; width:40em;  padding:2px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$link."','CANVAS test','width=500,height=500,left=200'); return false;\" href=\"".$link."\">Test this image to verify that your environment supports CANVAS</a></p>";

@@ -9,12 +9,14 @@ $table = explode(SLASH,$file);
 $filename = end($table);
 $this_file = $bp_application_path.$file;
 $dir = str_replace($filename,'',$this_file);
+$current_directory = str_replace(SLASH.$filename,'',$file);
 
 require_once("_header.php");
-echo "<p>Current directory = ".$dir."</p>";
+echo "<p>Current directory = <a href=\"index.php?path=".urlencode($current_directory)."\">".$dir."</a></p>";
 echo link_to_help();
 
 echo "<h3>Alphabet file “".$filename."”</h3>";
+save_settings("last_name",$filename);
 
 if(isset($_POST['savethisfile'])) {
 	echo "<p id=\"timespan\" style=\"color:red;\">Saved file…</p>";

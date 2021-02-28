@@ -360,18 +360,22 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 	fwrite($handle,$OkMap."\n");
 	fwrite($handle,$OkVelocity."\n");
 	
-	$PreRollMode = $_POST['PreRollMode'];
 	$PreRoll = '';
-	if($PreRollMode == -1) $PreRoll = $_POST['PreRoll1'];
-	if($PreRollMode == 0) $PreRoll = $_POST['PreRoll2'];
+	if(isset($_POST['PreRollMode'])) {
+		$PreRollMode = $_POST['PreRollMode'];
+		if($PreRollMode == -1) $PreRoll = $_POST['PreRoll1'];
+		if($PreRollMode == 0) $PreRoll = $_POST['PreRoll2'];
+		}
 	if($PreRoll == '') {
 		$PreRoll = 0;
 		$PreRollMode = -1;
 		}
-	$PostRollMode = $_POST['PostRollMode'];
 	$PostRoll = '';
-	if($PostRollMode == -1) $PostRoll = $_POST['PostRoll1'];
-	if($PostRollMode == 0) $PostRoll = $_POST['PostRoll2'];
+	if(isset($_POST['PostRollMode'])) {
+		$PostRollMode = $_POST['PostRollMode'];
+		if($PostRollMode == -1) $PostRoll = $_POST['PostRoll1'];
+		if($PostRollMode == 0) $PostRoll = $_POST['PostRoll2'];
+		}
 	if($PostRoll == '') {
 		$PostRoll = 0;
 		$PostRollMode = -1;
@@ -381,11 +385,16 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 	fwrite($handle,$PreRollMode."\n");
 	fwrite($handle,$PostRollMode."\n");
 	
-	$PeriodMode = $_POST['PeriodMode'];
 	$BeforePeriod = '';
-	if($PeriodMode == -1) $BeforePeriod = $_POST['BeforePeriod1'];
-	if($PeriodMode == 0) $BeforePeriod = $_POST['BeforePeriod2'];
-	if($BeforePeriod == '') $BeforePeriod = "0.0000";
+	if(isset($_POST['PeriodMode'])) {
+		$PeriodMode = $_POST['PeriodMode'];
+		if($PeriodMode == -1) $BeforePeriod = $_POST['BeforePeriod1'];
+		if($PeriodMode == 0) $BeforePeriod = $_POST['BeforePeriod2'];
+		}
+	if($BeforePeriod == '') {
+		$BeforePeriod = "0.0000";
+		$PeriodMode = 0;
+		}
 	fwrite($handle,$PeriodMode."\n");
 	fwrite($handle,$BeforePeriod."\n");
 	if(isset($_POST['ForceIntegerPeriod'])) $ForceIntegerPeriod = 1;
@@ -394,10 +403,17 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 	else $DiscardNoteOffs = 0;
 	fwrite($handle,$ForceIntegerPeriod."\n");
 	fwrite($handle,$DiscardNoteOffs."\n");
-	$StrikeAgain = $_POST['StrikeAgain'];
+	
+	if(isset($_POST['StrikeAgain']))
+		$StrikeAgain = $_POST['StrikeAgain'];
+	else $StrikeAgain = 1;
 	fwrite($handle,$StrikeAgain."\n");
-	$CsoundAssignedInstr = $_POST['CsoundAssignedInstr'];
-	$CsoundInstr = $_POST['CsoundInstr'];
+	
+	$CsoundInstr = '';
+	if(isset($_POST['CsoundAssignedInstr'])) {
+		$CsoundAssignedInstr = $_POST['CsoundAssignedInstr'];
+		$CsoundInstr = $_POST['CsoundInstr'];
+		}
 	if($CsoundInstr == '') $CsoundInstr = -1;
 	fwrite($handle,$CsoundAssignedInstr."\n");
 	fwrite($handle,$CsoundInstr."\n");
@@ -523,7 +539,7 @@ if(isset($_POST['playexpression'])) {
 		// $tracefile = $temp_folder."/trace.txt";
 		$handle = fopen($data,"w");
 		$file_header = $top_header."\n// Data saved as \"expression.bpda\". Date: ".gmdate('Y-m-d H:i:s');
-		fwrite($handle,$file_header."\n");
+	//	fwrite($handle,$file_header."\n");
 		fwrite($handle,$expression."\n");
 		fclose($handle);
 		$application_path = $bp_application_path;
@@ -767,14 +783,14 @@ if(!is_numeric($tempo)) {
 	$j -= 4;
 	}
 if($tempo == 0) $tempo = 1000000;
+$red = $green = $blue = 65535;
 if($j >= (count($object_param) - 1)) {
 	echo "<p style=\"color:red;\">WARNING: you are trying to edit an obsolete version of the ‘-mi’ file. Load and save it again in BP2.9.8!</p>";
-	$red = $green = $blue = 65535;
 	}
 else {
-	$red = $object_param[$j++];
-	$green = $object_param[$j++];
-	$blue = $object_param[$j++];
+/*	if(isset($object_param[$j++])) $red = $object_param[$j];
+	if(isset($object_param[$j++])) $green = $object_param[$j];
+	if(isset($object_param[$j++])) $blue = $object_param[$j]; */
 	}
 
 $silence_before_warning = '';

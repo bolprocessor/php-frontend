@@ -16,14 +16,16 @@ $this_file = $bp_application_path.$file;
 $dir = str_replace($filename,'',$this_file);
 $warn_not_empty = FALSE;
 $max_scales = 0;
+$current_directory = str_replace(SLASH.$filename,'',$file);
 
 require_once("_header.php");
-echo "<p><small>Current directory = ".$dir;
-echo "   <span id='message2' style=\"margin-bottom:1em;\"></span>";
+echo "<p><small>Current directory = <a href=\"index.php?path=".urlencode($current_directory)."\">".$dir;
+echo "</a>   <span id='message2' style=\"margin-bottom:1em;\"></span>";
 echo "</small></p>";
 echo link_to_help();
 
-echo "<h2>Csound resource file “".$filename."”</h2>";
+echo "<h3>Csound resource file “".$filename."”</h3>";
+save_settings("last_name",$filename);
 
 if($test) echo "dir = ".$dir."<br />";
 

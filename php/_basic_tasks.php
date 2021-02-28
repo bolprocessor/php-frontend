@@ -16,7 +16,7 @@ if(!isset($csound_resources) OR $csound_resources == '') $csound_resources = "cs
 save_settings("csound_resources",$csound_resources);
 if(!isset($trash_folder) OR $trash_folder == '') $trash_folder = "trash_bolprocessor";
 save_settings("trash_folder",$trash_folder);
-$max_sleep_time_after_bp_command = 120; // seconds. Maximum time allowed waiting for the 'done.txt' file
+$max_sleep_time_after_bp_command = 60; // seconds. Maximum time waiting for the 'done.txt' file
 $default_output_format = "midi";
 
 $maxchunk_size = 50; // Max number of measures contained in a chunk

@@ -12,7 +12,7 @@ save_settings("last_page",$url_this_page);
 $table = explode(SLASH,$file);
 $filename = end($table);
 $this_file = $bp_application_path.$file;
-$dir = str_replace($filename,'',$this_file);
+$dir = str_replace($filename,'',$this_file);$current_directory = str_replace(SLASH.$filename,'',$file);
 
 if(isset($_POST['createcsoundinstruments'])) {
 	$CsoundInstruments_filename = $_POST['CsoundInstruments_filename'];
@@ -27,12 +27,13 @@ if(isset($_POST['createcsoundinstruments'])) {
 	}
 
 require_once("_header.php");
-echo "<p>Current directory = ".$dir;
-echo "   <span id='message1' style=\"margin-bottom:1em;\"></span>";
+echo "<p>Current directory = <a href=\"index.php?path=".urlencode($current_directory)."\">".$dir;
+echo "</a>   <span id='message1' style=\"margin-bottom:1em;\"></span>";
 echo "</p>";
 echo link_to_help();
 
-echo "<h2>Object prototypes file “".$filename."”</h2>";
+echo "<h3>Object prototypes file “".$filename."”</h3>";
+save_settings("last_name",$filename);
 
 if($test) echo "dir = ".$dir."<br />";
 
@@ -144,7 +145,7 @@ if(strlen(trim($content)) == 0) {
 	$template = "prototypes_template";
 	$content = @file_get_contents($template,TRUE);
 	}
-$objects_file = $csound_file = $alphabet_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = '';
+$objects_file = $grammar_file = $csound_file = $alphabet_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = '';
 $extract_data = extract_data(TRUE,$content);
 echo "<p style=\"color:blue;\">".$extract_data['headers']."</p>";
 $content = $extract_data['content'];
@@ -213,7 +214,7 @@ for($i = 0; $i < count($table); $i++) {
 		$object_da[$iobj] = $temp_dir.$temp_folder.SLASH.$object_name[$iobj].".bpda";
 		$handle_da = fopen($object_da[$iobj],"w");
 		$file_header = $top_header."\n// Data saved as \"".$object_name[$iobj].".bpda\". Date: ".gmdate('Y-m-d H:i:s');
-		fwrite($handle_da,$file_header."\n");
+	//	fwrite($handle_da,$file_header."\n");
 		fwrite($handle_da,$object_name[$iobj]."\n");
 		fclose($handle_da);
 		$object_file[$iobj] = $temp_dir.$temp_folder.SLASH.$object_name[$iobj].".txt";
@@ -294,56 +295,57 @@ if($deleted_objects <> '') echo "<p><input style=\"background-color:yellow;\" ty
 
 echo "</form>";
 
-echo "<hr>";
-echo "<h3>Click any of these ".($iobj + 1)." object prototypes to edit it:</h3>";
-
-$temp_alphabet_file = $temp_dir.$temp_folder.SLASH."temp.bpho";
-$handle = fopen($temp_alphabet_file,"w");
-$file_header = $top_header."\n// Alphabet saved as \"temp.bpho\". Date: ".gmdate('Y-m-d H:i:s');
-fwrite($handle,$file_header."\n");
-fwrite($handle,$filename."\n");
-fwrite($handle,"*\n");
-echo "<table style=\"background-color:lightgrey;\">";
-for($i = 0; $i <= $iobj; $i++) {
-	echo "<tr><td style=\"padding:4px; vertical-align:middle;\">";
-	echo "<form method=\"post\" action=\"prototype.php\" enctype=\"multipart/form-data\">";
-	echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";
-	echo "<input type=\"hidden\" name=\"object_file\" value=\"".$object_file[$i]."\">";
-	echo "<input type=\"hidden\" name=\"prototypes_file\" value=\"".$dir.$filename."\">";
-	echo "<input type=\"hidden\" name=\"prototypes_name\" value=\"".$filename."\">";
-	echo "<input type=\"hidden\" name=\"CsoundInstruments_file\" value=\"".$CsoundInstruments_file."\">";
-	echo "<input style=\"background-color:azure; font-size:larger;\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" name=\"object_name\" value=\"".$object_name[$i]."\">";
-	fwrite($handle,$object_name[$i]."\n");
-	echo "</form>";
-	echo "</td>";
-	echo "<td style=\"vertical-align:middle;\">";
-	echo $object_comment[$i];
-	echo "</td>";
-	echo "<td style=\"vertical-align:middle;\">";
-	if($has_csound[$i]) echo "Csound";
-	echo "</td>";
-	echo "<td style=\"padding:4px; vertical-align:middle;\">";
-	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-	echo "<input type=\"hidden\" name=\"dir\" value=\"".$dir."\">";
-	echo "<input type=\"hidden\" name=\"filename\" value=\"".$filename."\">";
-	echo "<input type=\"hidden\" name=\"PrototypeTickKey\" value=\"".$PrototypeTickKey."\">";
-	echo "<input type=\"hidden\" name=\"PrototypeTickChannel\" value=\"".$PrototypeTickChannel."\">";
-	echo "<input type=\"hidden\" name=\"PrototypeTickVelocity\" value=\"".$PrototypeTickVelocity."\">";
-	echo "<input type=\"hidden\" name=\"CsoundInstruments_filename\" value=\"".$CsoundInstruments_filename."\">";
-	echo "<input type=\"hidden\" name=\"comment_on_file\" value=\"".$comment_on_file."\">";
-	echo "<input type=\"hidden\" name=\"maxsounds\" value=\"".$maxsounds."\">";
-	echo "<input type=\"hidden\" name=\"object_name\" value=\"".$object_name[$i]."\">";
-	echo "<input style=\"background-color:yellow; \" type=\"submit\" name=\"delete_object\" value=\"DELETE\">";
-	echo "</td>";
-	echo "<td style=\"padding:4px; vertical-align:middle; text-align:right;\">";
-	echo "<input style=\"background-color:azure;\" type=\"submit\" name=\"duplicate_object\" value=\"DUPLICATE AS\">: <input type=\"text\" name=\"copy_object\" size=\"15\" value=\"\">";
-	echo "</td>";
-	echo "</tr>";
-	echo "</form>";
+if($iobj >= 0) {
+	echo "<hr>";
+	echo "<h3>Click any of these ".($iobj + 1)." object prototypes to edit it:</h3>";
+	$temp_alphabet_file = $temp_dir.$temp_folder.SLASH."temp.bpho";
+	$handle = fopen($temp_alphabet_file,"w");
+	$file_header = $top_header."\n// Alphabet saved as \"temp.bpho\". Date: ".gmdate('Y-m-d H:i:s');
+	fwrite($handle,$file_header."\n");
+	fwrite($handle,$filename."\n");
+//	fwrite($handle,"*\n");
+	echo "<table style=\"background-color:lightgrey;\">";
+	for($i = 0; $i <= $iobj; $i++) {
+		echo "<tr><td style=\"padding:4px; vertical-align:middle;\">";
+		echo "<form method=\"post\" action=\"prototype.php\" enctype=\"multipart/form-data\">";
+		echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";
+		echo "<input type=\"hidden\" name=\"object_file\" value=\"".$object_file[$i]."\">";
+		echo "<input type=\"hidden\" name=\"prototypes_file\" value=\"".$dir.$filename."\">";
+		echo "<input type=\"hidden\" name=\"prototypes_name\" value=\"".$filename."\">";
+		echo "<input type=\"hidden\" name=\"CsoundInstruments_file\" value=\"".$CsoundInstruments_file."\">";
+		echo "<input style=\"background-color:azure; font-size:larger;\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" name=\"object_name\" value=\"".$object_name[$i]."\">";
+		fwrite($handle,$object_name[$i]."\n");
+		echo "</form>";
+		echo "</td>";
+		echo "<td style=\"vertical-align:middle;\">";
+		echo $object_comment[$i];
+		echo "</td>";
+		echo "<td style=\"vertical-align:middle;\">";
+		if($has_csound[$i]) echo "Csound";
+		echo "</td>";
+		echo "<td style=\"padding:4px; vertical-align:middle;\">";
+		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+		echo "<input type=\"hidden\" name=\"dir\" value=\"".$dir."\">";
+		echo "<input type=\"hidden\" name=\"filename\" value=\"".$filename."\">";
+		echo "<input type=\"hidden\" name=\"PrototypeTickKey\" value=\"".$PrototypeTickKey."\">";
+		echo "<input type=\"hidden\" name=\"PrototypeTickChannel\" value=\"".$PrototypeTickChannel."\">";
+		echo "<input type=\"hidden\" name=\"PrototypeTickVelocity\" value=\"".$PrototypeTickVelocity."\">";
+		echo "<input type=\"hidden\" name=\"CsoundInstruments_filename\" value=\"".$CsoundInstruments_filename."\">";
+		echo "<input type=\"hidden\" name=\"comment_on_file\" value=\"".$comment_on_file."\">";
+		echo "<input type=\"hidden\" name=\"maxsounds\" value=\"".$maxsounds."\">";
+		echo "<input type=\"hidden\" name=\"object_name\" value=\"".$object_name[$i]."\">";
+		echo "<input style=\"background-color:yellow; \" type=\"submit\" name=\"delete_object\" value=\"DELETE\">";
+		echo "</td>";
+		echo "<td style=\"padding:4px; vertical-align:middle; text-align:right;\">";
+		echo "<input style=\"background-color:azure;\" type=\"submit\" name=\"duplicate_object\" value=\"DUPLICATE AS\">: <input type=\"text\" name=\"copy_object\" size=\"15\" value=\"\">";
+		echo "</td>";
+		echo "</tr>";
+		echo "</form>";
+		}
+	echo "</table>";
+	fclose($handle);
 	}
-echo "</table>";
-fclose($handle);
 
-display_more_buttons($content,$url_this_page,$dir,$objects_file,$csound_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
+display_more_buttons(FALSE,$content,$url_this_page,$dir,$grammar_file,'',$csound_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
 
 ?>
