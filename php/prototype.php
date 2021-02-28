@@ -392,8 +392,8 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 		if($PeriodMode == 0) $BeforePeriod = $_POST['BeforePeriod2'];
 		}
 	if($BeforePeriod == '') {
-		$BeforePeriod = "0.0000";
-		$PeriodMode = 0;
+		$BeforePeriod = "0";
+		$PeriodMode = -2;
 		}
 	fwrite($handle,$PeriodMode."\n");
 	fwrite($handle,$BeforePeriod."\n");
@@ -414,6 +414,7 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 		$CsoundAssignedInstr = $_POST['CsoundAssignedInstr'];
 		$CsoundInstr = $_POST['CsoundInstr'];
 		}
+	else $CsoundAssignedInstr = -1;
 	if($CsoundInstr == '') $CsoundInstr = -1;
 	fwrite($handle,$CsoundAssignedInstr."\n");
 	fwrite($handle,$CsoundInstr."\n");
