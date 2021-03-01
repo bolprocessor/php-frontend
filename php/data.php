@@ -318,6 +318,9 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				echo "<input type=\"radio\" name=\"tempo_option\" value=\"score\"";
 				if($tempo_option == "score") echo " checked";
 				echo ">&nbsp;Interpret only tempo markers of printed score<br />";
+				echo "<input type=\"radio\" name=\"tempo_option\" value=\"allbutmeasures\"";
+				if($tempo_option == "allbutmeasures") echo " checked";
+				echo ">&nbsp;Interpret tempo markers except within measures<br />";
 				echo "<input type=\"radio\" name=\"tempo_option\" value=\"all\"";
 				if($tempo_option == "all") echo " checked";
 				echo ">&nbsp;Interpret all tempo markers<br />";
@@ -972,7 +975,7 @@ for($i = $j = 0; $i < $imax; $i++) {
 	fclose($handle);
 	$initial_controls = $tie_error = '';
 	$chunked = FALSE;
-	$tie = $n = $brackets = 0;
+	$tie = $n = $brackets = $total_ties = 0;
 	if(is_integer($pos=strpos($line_recoded,"{"))) {
 		$initial_controls = trim(substr($line_recoded,0,$pos));
 		}
@@ -981,7 +984,9 @@ for($i = $j = 0; $i < $imax; $i++) {
 		$line_chunked .= $start_chunk;
 		$start_chunk = '';
 		$c = $line_recoded[$k];
-		if($k < (strlen($line_recoded) - 1) AND ctype_alnum($c) AND $line_recoded[$k+1] == '&') $tie++;
+		if($k < (strlen($line_recoded) - 1) AND ctype_alnum($c) AND $line_recoded[$k+1] == '&') {
+			$tie++; $total_ties++;
+			}
 		if($k < (strlen($line_recoded) - 1) AND $c == '&' AND ctype_alnum($line_recoded[$k+1])) $tie--;
 		if($c == '.' AND $k > 0 AND $line_recoded[$k-1]) $brackets++;
 		if($c == '{') {
@@ -999,7 +1004,7 @@ for($i = $j = 0; $i < $imax; $i++) {
 				$n++;
 				if(($tie <= 0 AND $n > $minchunk_size) OR $n > $maxchunk_size) {
 					if(abs($tie) > 0) {
-						$tie_mssg =  "• <font color=\"red\">".abs($tie)." unbound tie(s) in chunk #".$chunk_number."</font><br />";
+						$tie_mssg =  "• <font color=\"red\">".abs($tie)." unbound tie(s) in chunk #".$chunk_number;
 						$tie_error = TRUE;
 						}
 					$line_chunked .= "\n";
@@ -1012,6 +1017,8 @@ for($i = $j = 0; $i < $imax; $i++) {
 		}
 //	$chunked = TRUE;
 	if($chunked) {
+		if($tie_mssg == '' AND $total_ties > 0) $tie_mssg = "<font color=\"blue\">";
+		if($total_ties > 0) $tie_mssg .=  " <i>total ".$total_ties." tied notes</i></font><br />";
 		$data_chunked = $temp_dir.$temp_folder.SLASH.$j."-chunked.bpda";
 		$handle = fopen($data_chunked,"w");
 		fwrite($handle,$line_chunked."\n");
@@ -1046,7 +1053,7 @@ for($i = $j = 0; $i < $imax; $i++) {
 	if($n2 > $n1) $error_mssg .= "• <font color=\"red\">This score contains ".($n2-$n1)." extra ‘}'</font><br />";
 	if($error_mssg == '') {
 		echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_play."','".$window_name_play."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Play this polymetric expression\" value=\"PLAY\">&nbsp;";
-		if($chunked) echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_play_chunked."','".$window_name_play."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Play polymetric expression in chunks (no graphics)\" value=\"PLAY safe\">&nbsp;";
+		if($chunked) echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_play_chunked."','".$window_name_play."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Play polymetric expression in chunks (no graphics)\" value=\"PLAY safe (".$chunk_number." chunks)\">&nbsp;";
 		if($brackets > 0) echo "&nbsp;<input style=\"background-color:azure;\" onclick=\"window.open('".$link_expand."','".$window_name_expland."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Expand this polymetric expression\" value=\"EXPAND\">&nbsp;";
 		}
 	if($tie_mssg <> '' AND $error_mssg == '') echo "<br />";
