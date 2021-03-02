@@ -117,7 +117,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$instrument_name = $midi_channel = $select_part = $duration_part = $divisions = $repeat_section = array();
 			$ignore_dynamics = isset($_POST['ignore_dynamics']);
 			if(isset($_POST['tempo_option'])) $tempo_option = $_POST['tempo_option'];
-			else $tempo_option = "all";
+			else $tempo_option = "allbutmeasures";
 			$list_corrections = isset($_POST['verbose']);
 			echo "<input type=\"hidden\" name=\"tempo_option\" value=\"".$tempo_option."\">";
 			$ignore_channels = isset($_POST['ignore_channels']);
@@ -284,12 +284,13 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$data .= $convert_score['data'];
 			$message .= $convert_score['error'];
 			$data = preg_replace("/\s+/u"," ",$data);
-			$data = str_replace(" }","}",$data);
 			$data = str_replace(",}","}",$data);
+			$data = str_replace(" }","}",$data);
 			$data = str_replace("} ","}",$data);
 			$data = str_replace(" {","{",$data);
 			$data = str_replace("{ ","{",$data);
 			$data = str_replace(", ",",",$data);
+			$data = str_replace(" ,",",",$data);
 			$data = str_replace("- ","-",$data);
 			do $data = str_replace("{}",'',$data,$count);
 			while($count > 0);
