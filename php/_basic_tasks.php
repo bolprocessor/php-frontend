@@ -2345,7 +2345,7 @@ function simplify($fraction,$max_term) {
 	return $simplify;
 	}
 
-function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$reload_musicxml,$test_musicxml,$list_corrections) {
+function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$reload_musicxml,$test_musicxml,$list_corrections) {
 	global $max_term_in_fraction;
 	$grace_ratio = 2;
 	// MakeMusic Finale dynamics https://en.wikipedia.org/wiki/Dynamics_(music)
@@ -2944,16 +2944,20 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$s
 					if($number_volume_part[$section][$score_part] > 0) {
 						$volume = round($sum_volume_part[$section][$score_part] / $number_volume_part[$section][$score_part]);
 						if($volume > 127) $volume = 127;
-						$data .= " _volume(".$volume.")";
+						if($dynamic_control[$score_part] == "volume") $data .= " _volume(".$volume.")";
+						else $data .= " _vel(".$volume.")";
 						if(!isset($default_volume[$section][$score_part]) AND !$implicit[$section][$i_measure]) $default_volume[$section][$score_part] = $volume;
 						if(!isset($old_volume[$score_part])) $old_volume[$score_part] = $volume;
 						}
-					else if(isset($default_volume[$section][$score_part]))
+					else if(isset($default_volume[$section][$score_part])) {
 						// We must repeat volume on each measure to play it separately
-							$data .= " _volume(".$default_volume[$section][$score_part].")";
+							if($dynamic_control[$score_part] == "volume") $data .= " _volume(".$default_volume[$section][$score_part].")";
+							else $data .= " _vel(".$default_volume[$section][$score_part].")";
+							}
 						else {
 							if(!isset($old_volume[$score_part])) $old_volume[$score_part] = 64;
-							$data .= " _volume(".$old_volume[$score_part].")";
+							if($dynamic_control[$score_part] == "volume") $data .= " _volume(".$old_volume[$score_part].")";
+							else $data .= " _vel(".$old_volume[$score_part].")";
 							}
 							
 					if($test_musicxml)

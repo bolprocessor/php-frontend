@@ -117,7 +117,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$instrument_name = $midi_channel = $select_part = $duration_part = $divisions = $repeat_section = array();
 			$ignore_dynamics = isset($_POST['ignore_dynamics']);
 			if(isset($_POST['tempo_option'])) $tempo_option = $_POST['tempo_option'];
-			else $tempo_option = "allbutmeasures";
+			else $tempo_option = "all";
 			$list_corrections = isset($_POST['verbose']);
 			echo "<input type=\"hidden\" name=\"tempo_option\" value=\"".$tempo_option."\">";
 			$ignore_channels = isset($_POST['ignore_channels']);
@@ -154,13 +154,22 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 					if($select_part[$score_part] OR (!$reload_musicxml AND $first)) {
 						$message .= " checked";
 						$first = FALSE;
-					//	echo "<p>Score part ‘".$score_part."’ has been selected</p>";
 						}
 					$message .= "> Score part ‘".$score_part."’ instrument = <i>".$instrument_name[$score_part]."</i>";
 					if(isset($midi_channel[$score_part]) AND $midi_channel[$score_part] <> '') {
 						$message .= " — MIDI channel ".$midi_channel[$score_part];
 						}
 					$message .= "<br />";
+					if(isset($_POST['dynamic_control_'.$score_part]))
+						$dynamic_control[$score_part] = $_POST['dynamic_control_'.$score_part];
+					$message .= "&nbsp;&nbsp;<input type=\"radio\" name=\"dynamic_control_".$score_part."\" value=\"volume\"";
+					if(!isset($dynamic_control[$score_part]) OR $dynamic_control[$score_part] == "volume")
+						$message .= " checked";
+					$message .= ">&nbsp;Interpret dynamics as volume<br />";
+					$message .= "&nbsp;&nbsp;<input type=\"radio\" name=\"dynamic_control_".$score_part."\" value=\"velocity\"";
+					if(isset($dynamic_control[$score_part]) AND $dynamic_control[$score_part] == "velocity")
+						$message .= " checked";
+					$message .= ">&nbsp;Interpret dynamics as velocity<br />";
 					if($select_part[$score_part] OR !$reload_musicxml) {
 						$subtitle_part .= "// Score part ‘".$score_part."’: instrument = ".$instrument_name[$score_part];
 						if(isset($midi_channel[$score_part]) AND $midi_channel[$score_part] <> '') {
@@ -280,7 +289,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 					}
 				}
 			unset($the_section);
-			$convert_score = convert_musicxml($this_score,$repeat_section,$divisions,$midi_channel,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$reload_musicxml,$test_musicxml,$list_corrections);
+			$convert_score = convert_musicxml($this_score,$repeat_section,$divisions,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$reload_musicxml,$test_musicxml,$list_corrections);
 			$data .= $convert_score['data'];
 			$message .= $convert_score['error'];
 			$data = preg_replace("/\s+/u"," ",$data);
@@ -326,7 +335,17 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				if($tempo_option == "all") echo " checked";
 				echo ">&nbsp;Interpret all tempo markers<br />";
 				echo "_______________________________________<br />";
-				echo "<input type=\"checkbox\" name=\"ignore_dynamics\">&nbsp;Ignore dynamics (volume)<br />";
+				echo "<input type=\"checkbox\" name=\"ignore_dynamics\">&nbsp;Ignore dynamics (volume/velocity)<br />";
+				
+				
+		/*		echo "<input type=\"radio\" name=\"dynamic_control\" value=\"volume\"";
+				if($dynamic_control == "volume") echo " checked";
+				echo ">&nbsp;Convert dynamics to volume control<br />";
+				echo "<input type=\"radio\" name=\"dynamic_control\" value=\"velocity\"";
+				if($dynamic_control == "velocity") echo " checked";
+				echo ">&nbsp;Convert dynamics to velocity control<br />"; */
+				
+				
 				echo "<input type=\"checkbox\" name=\"ignore_channels\">&nbsp;Ignore MIDI channels<br />";
 				echo "_________________<br />";
 				echo "<input type=\"checkbox\" name=\"verbose\"";
@@ -530,6 +549,33 @@ if(isset($_POST['delete_volume'])) {
 	$extract_data = extract_data(TRUE,$content);
 	$newcontent = $extract_data['content'];
 	$newcontent = preg_replace("/_volume\([^\)]+\)/u",'',$newcontent);
+	$_POST['thistext'] = $newcontent;
+	$need_to_save = TRUE;
+	}
+	
+if(isset($_POST['volume_velocity'])) {
+	$content = @file_get_contents($this_file,TRUE);
+	$extract_data = extract_data(TRUE,$content);
+	$newcontent = $extract_data['content'];
+	$newcontent = preg_replace("/_volume\(([^\)]+)\)/u","_vel($1)",$newcontent);
+	$_POST['thistext'] = $newcontent;
+	$need_to_save = TRUE;
+	}
+	
+if(isset($_POST['velocity_volume'])) {
+	$content = @file_get_contents($this_file,TRUE);
+	$extract_data = extract_data(TRUE,$content);
+	$newcontent = $extract_data['content'];
+	$newcontent = preg_replace("/_vel\(([^\)]+)\)/u","_volume($1)",$newcontent);
+	$_POST['thistext'] = $newcontent;
+	$need_to_save = TRUE;
+	}
+	
+if(isset($_POST['delete_velocity'])) {
+	$content = @file_get_contents($this_file,TRUE);
+	$extract_data = extract_data(TRUE,$content);
+	$newcontent = $extract_data['content'];
+	$newcontent = preg_replace("/_vel\([^\)]+\)/u",'',$newcontent);
 	$_POST['thistext'] = $newcontent;
 	$need_to_save = TRUE;
 	}
@@ -767,7 +813,6 @@ $link_options .= "&here=".urlencode($dir.$filename);
 
 if($error_mssg <> '') {
 	echo "<p>".$error_mssg."</p>";
-//	display_more_buttons(FALSE,$content,$url_this_page,$dir,$grammar_file,$objects_file,$csound_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
 	}
 
 if(intval($note_convention) <> intval($new_convention))
@@ -926,10 +971,18 @@ if(!$hide) {
 	$found_ins = substr_count($content,"_ins(");
 	$found_tempo = substr_count($content,"_tempo(");
 	$found_volume = substr_count($content,"_volume(");
+	$found_velocity = substr_count($content,"_vel(");
 	if($found_chan > 0) echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"delete_chan\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _chan()\">&nbsp;";
 	if($found_ins > 0) echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"delete_ins\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _ins()\">&nbsp;";
 	if($found_tempo > 0) echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"delete_tempo\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _tempo()\">&nbsp;";
-	if($found_volume > 0) echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"delete_volume\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _volume()\">&nbsp;";
+	if($found_volume > 0) {
+		echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"delete_volume\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _volume()\">&nbsp;";
+		echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"volume_velocity\" formaction=\"".$url_this_page."#topedit\" value=\"volume -> velocity\">&nbsp;";
+		}
+	if($found_velocity > 0) {
+		echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"delete_velocity\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _vel()\">&nbsp;";
+		echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"velocity_volume\" formaction=\"".$url_this_page."#topedit\" value=\"velocity -> volume\">&nbsp;";
+		}
 	if($found_chan > 0  OR $found_ins > 0) echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"manage_instructions\" formaction=\"".$url_this_page."#topchanges\" value=\"MANAGE _chan() AND _ins()\">&nbsp;";
 	}
 echo "</form>";
