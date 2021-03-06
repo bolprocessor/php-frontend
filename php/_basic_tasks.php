@@ -2356,6 +2356,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 	$sum_tempo_measure = $number_tempo_measure = $sum_volume_part = $number_volume_part = $default_tempo = $default_volume = $old_volume = $implicit = array();
 	$p_last_mm = 0; $q_last_mm = 1;
 	$old_tempo = '';
+	$found_tempo_variation = FALSE;
 	$fermata_show = FALSE; // Only for test
 	ksort($the_score);
 	foreach($the_score as $section => $the_section) {
@@ -2388,14 +2389,14 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 				$curr_event = $convert_measure = $fermata_duration[$i_measure] = array();
 				$data .= "{";
 				$number_parts = 0;
-				$j_field = 0;
+			//	$j_field = 0;
 				foreach($the_measure as $score_part => $the_part) {
 					if(!$reload_musicxml OR !$select_part[$score_part]) {
 						if($test_musicxml AND $reload_musicxml) echo "Score part ".$score_part." not selected in section ".$section."<br />";
 						continue;
 						}
 					$number_parts++;
-					$jj_field = $this_field = 0;
+					$j_field = $jj_field = $this_field = 0;
 					$fermata_duration[$i_measure][$score_part] = array();
 					$fermata_duration[$i_measure][$score_part][$jj_field] = 0;
 					$sum_volume_part[$section][$score_part] = $number_volume_part[$section][$score_part] = 0;
@@ -2534,6 +2535,9 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 							$sum_tempo_measure[$section][$i_measure] += $tempo;
 							$number_tempo_measure[$section][$i_measure]++;
 							if($tempo_option <> "allbutmeasures") {
+								if(!$found_tempo_variation)
+									echo "<p><font color=\"red\">➡</font> Including tempo assignments inside measures</p>";
+								$found_tempo_variation = TRUE;
 								$curr_event[$score_part][$j]['type'] = "mm";
 								$curr_event[$score_part][$j]['value'] = $tempo;
 								$curr_event[$score_part][$j]['p_dur'] = 0;
@@ -3025,7 +3029,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 					$p_duration_this_measure = 0;
 					$q_duration_this_measure = 1;
 					for($j = 0; $j < $j_field; $j++) {
-					//	echo "measure #".$i_measure." this_measure = ".$p_duration_this_measure."/".$q_duration_this_measure." field_duration = ".$p_field_duration[$j]."/".$q_field_duration[$j]." j = ".$j."<br />";
+					//	echo "score_part = ".$score_part." measure #".$i_measure." this_measure_duration = ".$p_duration_this_measure."/".$q_duration_this_measure." field_duration = ".$p_field_duration[$j]."/".$q_field_duration[$j]." j = ".$j."<br />";
 						// Calculate duration of the structure = max duration of one of its fields
 						// (It includes fermata duration)
 						if($empty_field[$j]) continue; // Only silence doesn't count

@@ -300,7 +300,6 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$data = str_replace("{ ","{",$data);
 			$data = str_replace(", ",",",$data);
 			$data = str_replace(" ,",",",$data);
-			// $data = str_replace("- ","-",$data);
 			$data = preg_replace("/\-\s+\-/u","--",$data);
 			do $data = str_replace("{}",'',$data,$count);
 			while($count > 0);
@@ -332,22 +331,12 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				echo ">&nbsp;Interpret only tempo markers of printed score<br />";
 				echo "<input type=\"radio\" name=\"tempo_option\" value=\"allbutmeasures\"";
 				if($tempo_option == "allbutmeasures") echo " checked";
-				echo ">&nbsp;Interpret tempo markers except within measures<br />";
+				echo ">&nbsp;Interpret tempo markers except inside measures<br />";
 				echo "<input type=\"radio\" name=\"tempo_option\" value=\"all\"";
 				if($tempo_option == "all") echo " checked";
 				echo ">&nbsp;Interpret all tempo markers<br />";
 				echo "_______________________________________<br />";
 				echo "<input type=\"checkbox\" name=\"ignore_dynamics\">&nbsp;Ignore dynamics (volume/velocity)<br />";
-				
-				
-		/*		echo "<input type=\"radio\" name=\"dynamic_control\" value=\"volume\"";
-				if($dynamic_control == "volume") echo " checked";
-				echo ">&nbsp;Convert dynamics to volume control<br />";
-				echo "<input type=\"radio\" name=\"dynamic_control\" value=\"velocity\"";
-				if($dynamic_control == "velocity") echo " checked";
-				echo ">&nbsp;Convert dynamics to velocity control<br />"; */
-				
-				
 				echo "<input type=\"checkbox\" name=\"ignore_channels\">&nbsp;Ignore MIDI channels<br />";
 				echo "_________________<br />";
 				echo "<input type=\"checkbox\" name=\"verbose\"";
@@ -360,7 +349,6 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				echo "<font color=\"red\">➡</font> You can select parts and <input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"select_parts\" value=\"CONVERT\">&nbsp;or&nbsp;<input style=\"background-color:azure;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"cancel\" value=\"QUIT IMPORTING\">";
 				}
 			$new_convention = 0; // English note convention
-	//		$_POST['savethisfile'] = TRUE;
 			$need_to_save = TRUE;
 			}
 		}
