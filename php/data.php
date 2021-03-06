@@ -30,7 +30,7 @@ if(!file_exists($temp_dir.$temp_folder)) {
 	mkdir($temp_dir.$temp_folder);
 	}
 $music_xml_file = $temp_dir.$temp_folder.SLASH."temp.musicxml";
-$more_data = '';
+$more_data = ''; $dynamic_control = array();
 $link_edit = "data.php";
 
 $objects_file = $csound_file = $alphabet_file = $grammar_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = $csound_default_orchestra = '';
@@ -300,7 +300,8 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$data = str_replace("{ ","{",$data);
 			$data = str_replace(", ",",",$data);
 			$data = str_replace(" ,",",",$data);
-			$data = str_replace("- ","-",$data);
+			// $data = str_replace("- ","-",$data);
+			$data = preg_replace("/\-\s+\-/u","--",$data);
 			do $data = str_replace("{}",'',$data,$count);
 			while($count > 0);
 			$data = preg_replace("/{({[^{^}]*})}/u","$1",$data); // Simplify {{xxxx}} --> {xxxx}
@@ -309,6 +310,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$data = preg_replace("/{([0-9]+\/?[0-9]*),\-+}/u"," $1 ",$data); // Replace for instance "{33/8,--}" with " 33/8 " Added by BB 2021-02-23
 			$data = preg_replace("/{_tempo[^\)]+\)\s?_volume[^\)]+\)\s?_chan[^\)]+\)\s?}/u",'',$data); // Empty measure at the beginning of a repetition, need to check why…
 			$data = str_replace(" ,",",",$data);
+			$data = str_replace(" }","}",$data);
 			if($reload_musicxml) {
 				$more_data = "// MusicXML file ‘".$upload_filename."’ converted\n";
 				if($subtitle_part <> '') $more_data .= $subtitle_part."\n";
