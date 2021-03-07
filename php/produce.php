@@ -19,7 +19,7 @@ if($instruction == '') {
 	}
 ob_start();
 if($instruction == "produce" OR $instruction == "produce-all" OR $instruction == "play" OR $instruction == "play-all" OR $instruction == "expand") {
-	echo "<i>Process might take more than ".$max_sleep_time_after_bp_command." seconds.<br />To reduce computation time, you may try to increase quantization in the settings</i>.<br />";
+	echo "<i>Process might take more than ".$max_sleep_time_after_bp_command." seconds.<br />To reduce computation time, you may try to use “PLAY safe” or increase quantization in the settings</i>.<br />";
 	}
 
 if(isset($_GET['here'])) $here = urldecode($_GET['here']);
