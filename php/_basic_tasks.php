@@ -3132,4 +3132,26 @@ function list_of_arguments($text,$instruction) {
 	sort($list);
 	return $list;
 	}
+
+function search_value($type,$data,$operator) {
+	$pos1 = 0;
+	$l = strlen($operator) + 1;
+	$min = 127; $max = 0; $total = 0; $n = 0;
+	while(is_integer($pos1=strpos($data,$operator."(",$pos1))) {
+		if(!is_integer($pos2=strpos($data,")",$pos1 + $l))) break;
+		$n++;
+		$this_value = substr($data,$pos1 + $l,$pos2 - $pos1 - $l);
+	//	echo $this_value."<br />";
+		if($this_value < $min) $min = $this_value;
+		if($this_value > $max) $max = $this_value;
+		$total += $this_value;
+		$pos1 = $pos2;
+		}
+//	echo $min." ".$max."<br />";
+	if($type == "median") return round(($max + $min) / 2);
+	if($type == "average") return round($total / $n);
+	if($type == "min") return $min;
+	if($type == "max") return $max;
+	return $this_value;
+	}
 ?>

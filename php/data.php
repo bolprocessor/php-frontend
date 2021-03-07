@@ -579,8 +579,10 @@ if(isset($_POST['change_volume_max'])) $change_volume_max = abs(intval($_POST['c
 
 if(isset($_POST['apply_velocity_change'])) {
 	if(isset($_POST['change_velocity_mid']) AND $change_velocity_mid > 0 AND isset($_POST['change_velocity_max']) AND $change_velocity_max > 0 AND $change_velocity_mid < 128 AND $change_velocity_max < 128 AND $change_velocity_mid <= $change_velocity_max) {
-		$a1 = $change_velocity_mid / 64;
-		$a2 = ($change_velocity_max - $change_velocity_mid) / 63;
+		$average_velocity = $_POST['average_velocity'];
+		$max_velocity = $_POST['max_velocity'];
+		$a1 = $change_velocity_mid / $average_velocity;
+		$a2 = ($change_velocity_max - $change_velocity_mid) / ($max_velocity - $average_velocity);
 		$b2 = $change_velocity_mid;
 		$content = @file_get_contents($this_file,TRUE);
 		$extract_data = extract_data(TRUE,$content);
@@ -589,8 +591,8 @@ if(isset($_POST['apply_velocity_change'])) {
 		while(is_integer($pos1=strpos($data,"_vel(",$pos1))) {
 			if(!is_integer($pos2=strpos($data,")",$pos1 + 4))) break;
 			$this_value = substr($data,$pos1 + 5,$pos2 - $pos1 - 5);
-			if($this_value < 64) $new_value = round($a1 * $this_value);
-			else $new_value = round($a2 * ($this_value - 64) + $b2);
+			if($this_value < $average_velocity) $new_value = round($a1 * $this_value);
+			else $new_value = round($a2 * ($this_value - $average_velocity) + $b2);
 			$new_control = "_vel(".$new_value.")";
 		//	echo $this_value." --> ".$new_value."<br />";
 			$d1 = substr($data,0,$pos1);
@@ -606,8 +608,10 @@ if(isset($_POST['apply_velocity_change'])) {
 
 if(isset($_POST['apply_volume_change'])) {
 	if(isset($_POST['change_volume_mid']) AND $change_volume_mid > 0 AND isset($_POST['change_volume_max']) AND $change_volume_max > 0 AND $change_volume_mid < 128 AND $change_volume_max < 128 AND $change_volume_mid <= $change_volume_max) {
-		$a1 = $change_volume_mid / 64;
-		$a2 = ($change_volume_max - $change_volume_mid) / 63;
+		$average_volume = $_POST['average_volume'];
+		$max_volume = $_POST['max_volume'];
+		$a1 = $change_volume_mid / $average_volume;
+		$a2 = ($change_volume_max - $change_volume_mid) / ($max_volume - $average_volume);
 		$b2 = $change_volume_mid;
 		$content = @file_get_contents($this_file,TRUE);
 		$extract_data = extract_data(TRUE,$content);
@@ -616,8 +620,8 @@ if(isset($_POST['apply_volume_change'])) {
 		while(is_integer($pos1=strpos($data,"_volume(",$pos1))) {
 			if(!is_integer($pos2=strpos($data,")",$pos1 + 7))) break;
 			$this_value = substr($data,$pos1 + 8,$pos2 - $pos1 - 8);
-			if($this_value < 64) $new_value = round($a1 * $this_value);
-			else $new_value = round($a2 * ($this_value - 64) + $b2);
+			if($this_value < $average_volume) $new_value = round($a1 * $this_value);
+			else $new_value = round($a2 * ($this_value - $average_volume) + $b2);
 			$new_control = "_volume(".$new_value.")";
 		//	echo $this_value." --> ".$new_value."<br />";
 			$d1 = substr($data,0,$pos1);
@@ -935,17 +939,24 @@ if(isset($_POST['modify_velocity'])) {
 	echo "<hr>";
 	echo "<h3>Modify velocities:</h3>";
 	echo "<i>Values will be interpolated</i><br />";
+	$content = @file_get_contents($this_file,TRUE);
+	$extract_data = extract_data(TRUE,$content);
+	$data = $extract_data['content'];
+	$average_velocity = search_value("average",$data,"_vel");
+	$max_velocity = search_value("max",$data,"_vel");
+	echo "<input type=\"hidden\" name=\"average_velocity\" value=\"".$average_velocity."\">";
+	echo "<input type=\"hidden\" name=\"max_velocity\" value=\"".$max_velocity."\">";
 	echo "<table style=\"background-color:cornsilk; border-spacing:6px;\">";
-	echo "<tr><td style=\"text-align:center;\"><b>Current value</b></td><td style=\"text-align:center;\"><b>Replace with<br />(0 … 127)</b></td></tr>";
-	echo "<tr>";
-	echo "<td style=\"text-align:center;\">64</td>";
+	echo "<tr><td></td><td style=\"text-align:center;\"><b>Current value</b></td><td style=\"text-align:center;\"><b>Replace with<br />(0 … 127)</b></td></tr>";
+	echo "<tr><td>Average</td>";
+	echo "<td style=\"text-align:center;\">".$average_velocity."</td>";
 	echo "<td style=\"text-align:center;\"><input type=\"text\" style=\"border:none; text-align:center;\" name=\"change_velocity_mid\" size=\"6\" value=\"".$change_velocity_mid."\"></td>";
 	echo "</tr>";
-	echo "<tr>";
-	echo "<td style=\"text-align:center;\">127</td>";
+	echo "<tr><td>Max</td>";
+	echo "<td style=\"text-align:center;\">".$max_velocity."</td>";
 	echo "<td style=\"text-align:center;\"><input type=\"text\" style=\"border:none; text-align:center;\" name=\"change_velocity_max\" size=\"6\" value=\"".$change_velocity_max."\"></td>";
 	echo "</tr>";
-	echo "<tr><td style=\"text-align:center;\"><input style=\"background-color:cornsilk;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\"></td><td style=\"text-align:center;\"><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"apply_velocity_change\" value=\"APPLY\"></td></tr>";
+	echo "<tr><td style=\"text-align:center;\"><input style=\"background-color:cornsilk;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\"></td><td></td><td style=\"text-align:center;\"><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"apply_velocity_change\" value=\"APPLY\"></td></tr>";
 	echo "</table>";
 	echo "<hr>";
 	$hide = TRUE;
@@ -955,17 +966,24 @@ if(isset($_POST['modify_volume'])) {
 	echo "<hr>";
 	echo "<h3>Modify volumes:</h3>";
 	echo "<i>Values will be interpolated</i><br />";
+	$content = @file_get_contents($this_file,TRUE);
+	$extract_data = extract_data(TRUE,$content);
+	$data = $extract_data['content'];
+	$average_volume = search_value("average",$data,"_volume");
+	$max_volume = search_value("max",$data,"_volume");
+	echo "<input type=\"hidden\" name=\"average_volume\" value=\"".$average_volume."\">";
+	echo "<input type=\"hidden\" name=\"max_volume\" value=\"".$max_volume."\">";
 	echo "<table style=\"background-color:cornsilk; border-spacing:6px;\">";
-	echo "<tr><td style=\"text-align:center;\"><b>Current value</b></td><td style=\"text-align:center;\"><b>Replace with<br />(0 … 127)</b></td></tr>";
-	echo "<tr>";
-	echo "<td style=\"text-align:center;\">64</td>";
+	echo "<tr><td></td><td style=\"text-align:center;\"><b>Current value</b></td><td style=\"text-align:center;\"><b>Replace with<br />(0 … 127)</b></td></tr>";
+	echo "<tr><td>Average</td>";
+	echo "<td style=\"text-align:center;\">".$average_volume."</td>";
 	echo "<td style=\"text-align:center;\"><input type=\"text\" style=\"border:none; text-align:center;\" name=\"change_volume_mid\" size=\"6\" value=\"".$change_volume_mid."\"></td>";
 	echo "</tr>";
-	echo "<tr>";
-	echo "<td style=\"text-align:center;\">127</td>";
+	echo "<tr><td>Max</td>";
+	echo "<td style=\"text-align:center;\">".$max_volume."</td>";
 	echo "<td style=\"text-align:center;\"><input type=\"text\" style=\"border:none; text-align:center;\" name=\"change_volume_max\" size=\"6\" value=\"".$change_volume_max."\"></td>";
 	echo "</tr>";
-	echo "<tr><td style=\"text-align:center;\"><input style=\"background-color:cornsilk;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\"></td><td style=\"text-align:center;\"><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"apply_volume_change\" value=\"APPLY\"></td></tr>";
+	echo "<tr><td style=\"text-align:center;\"><input style=\"background-color:cornsilk;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\"></td><td></td><td style=\"text-align:center;\"><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"apply_volume_change\" value=\"APPLY\"></td></tr>";
 	echo "</table>";
 	echo "<hr>";
 	$hide = TRUE;
