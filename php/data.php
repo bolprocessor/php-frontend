@@ -126,8 +126,8 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$part = '';
 			$i_measure = -1; $i_part = 0;
 			$reading_measure = FALSE;
-			$message_top = "_________________<br /><input type=\"checkbox\" id=\"parent1\" style=\"box-shadow: -2px -2px Gold\"> <b>Check all</b><br />";
-			$message = ''; $first = TRUE;
+			$message_top = "<input type=\"checkbox\" id=\"parent1\" style=\"box-shadow: -2px -2px Gold\"> <b>Check all</b><br />";
+			$message_options = ''; $first = TRUE;
 			$file = fopen($music_xml_file,"r");
 			while(!feof($file)) {
 				$line = fgets($file);
@@ -150,26 +150,26 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 						$select_part[$score_part] = isset($_POST[$part_selection]);
 					else
 						$select_part[$score_part] = FALSE;
-					$message .= "<input type=\"checkbox\" class=\"child1\" name=\"".$part_selection."\"";
+					$message_options .= "<input type=\"checkbox\" class=\"child1\" name=\"".$part_selection."\"";
 					if($select_part[$score_part] OR (!$reload_musicxml AND $first)) {
-						$message .= " checked";
+						$message_options .= " checked";
 						$first = FALSE;
 						}
-					$message .= "> Score part ‘".$score_part."’ instrument = <i>".$instrument_name[$score_part]."</i>";
+					$message_options .= "> Score part ‘".$score_part."’ instrument = <i>".$instrument_name[$score_part]."</i>";
 					if(isset($midi_channel[$score_part]) AND $midi_channel[$score_part] <> '') {
-						$message .= " — MIDI channel ".$midi_channel[$score_part];
+						$message_options .= " — MIDI channel ".$midi_channel[$score_part];
 						}
-					$message .= "<br />";
+					$message_options .= "<br />";
 					if(isset($_POST['dynamic_control_'.$score_part]))
 						$dynamic_control[$score_part] = $_POST['dynamic_control_'.$score_part];
-					$message .= "&nbsp;&nbsp;<input type=\"radio\" name=\"dynamic_control_".$score_part."\" value=\"volume\"";
+					$message_options .= "&nbsp;&nbsp;<input type=\"radio\" name=\"dynamic_control_".$score_part."\" value=\"volume\"";
 					if(!isset($dynamic_control[$score_part]) OR $dynamic_control[$score_part] == "volume")
-						$message .= " checked";
-					$message .= ">&nbsp;Interpret dynamics as volume<br />";
-					$message .= "&nbsp;&nbsp;<input type=\"radio\" name=\"dynamic_control_".$score_part."\" value=\"velocity\"";
+						$message_options .= " checked";
+					$message_options .= ">&nbsp;Interpret dynamics as volume<br />";
+					$message_options .= "&nbsp;&nbsp;<input type=\"radio\" name=\"dynamic_control_".$score_part."\" value=\"velocity\"";
 					if(isset($dynamic_control[$score_part]) AND $dynamic_control[$score_part] == "velocity")
-						$message .= " checked";
-					$message .= ">&nbsp;Interpret dynamics as velocity<br />";
+						$message_options .= " checked";
+					$message_options .= ">&nbsp;Interpret dynamics as velocity<br />";
 					if($select_part[$score_part] OR !$reload_musicxml) {
 						$subtitle_part .= "// Score part ‘".$score_part."’: instrument = ".$instrument_name[$score_part];
 						if(isset($midi_channel[$score_part]) AND $midi_channel[$score_part] <> '') {
@@ -225,15 +225,15 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 					$attributes = FALSE;
 				/*	if($changed_attributes) {
 						if(isset($divisions[$part]) AND $divisions[$part] > 0) {
-							$message .= "Part ‘".$part."’ divisions = ".$divisions[$part];
+							$message_options .= "Part ‘".$part."’ divisions = ".$divisions[$part];
 							}
 						if(isset($fifths[$part]) AND $fifths[$part] <> 0) {
-							$message .= ", fifths = ".$fifths[$part];
+							$message_options .= ", fifths = ".$fifths[$part];
 							}
 						if(isset($mode[$part]) AND $mode[$part] <> '') {
-							$message .= ", mode = ".$mode[$part];
+							$message_options .= ", mode = ".$mode[$part];
 							}
-						$message .= "<br />";
+						$message_options .= "<br />";
 						} */
 					continue;
 					}
@@ -291,7 +291,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			unset($the_section);
 			$convert_score = convert_musicxml($this_score,$repeat_section,$divisions,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$reload_musicxml,$test_musicxml,$list_corrections);
 			$data .= $convert_score['data'];
-			$message .= $convert_score['error'];
+			$report = $convert_score['report'];
 			$data = preg_replace("/\s+/u"," ",$data);
 			$data = str_replace(",}","}",$data);
 			$data = str_replace(" }","}",$data);
@@ -318,36 +318,37 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			if(isset($_POST['delete_current'])) $_POST['thistext'] = '';
 			$more_data .= "\n".$data;
 			echo "<h3><font color=\"red\">Converting MusicXML file:</font> <font color=\"blue\">".$upload_filename."</font></h3>";
-			if($i_part > 1) echo $message_top;
-			if($message <> '') {
-				echo $message;
+			if($report <> '') {
+				echo $report;
 				echo "_______________________________________<br />";
-				
-				echo "<input type=\"radio\" name=\"tempo_option\" value=\"ignore\"";
-				if($tempo_option == "ignore") echo " checked";
-				echo ">&nbsp;Ignore all tempo markers<br />";
-				echo "<input type=\"radio\" name=\"tempo_option\" value=\"score\"";
-				if($tempo_option == "score") echo " checked";
-				echo ">&nbsp;Interpret only tempo markers of printed score<br />";
-				echo "<input type=\"radio\" name=\"tempo_option\" value=\"allbutmeasures\"";
-				if($tempo_option == "allbutmeasures") echo " checked";
-				echo ">&nbsp;Interpret tempo markers except inside measures<br />";
-				echo "<input type=\"radio\" name=\"tempo_option\" value=\"all\"";
-				if($tempo_option == "all") echo " checked";
-				echo ">&nbsp;Interpret all tempo markers<br />";
-				echo "_______________________________________<br />";
-				echo "<input type=\"checkbox\" name=\"ignore_dynamics\">&nbsp;Ignore dynamics (volume/velocity)<br />";
-				echo "<input type=\"checkbox\" name=\"ignore_channels\">&nbsp;Ignore MIDI channels<br />";
-				echo "_________________<br />";
-				echo "<input type=\"checkbox\" name=\"verbose\"";
-				if($list_corrections) echo " checked";
-				echo ">&nbsp;List automatic corrections of this score<br />";
-				echo "_________________<br />";
-				echo "<input type=\"checkbox\" name=\"delete_current\">&nbsp;Delete current data<br />";
-				echo "_________________<br />";
-				echo "<input type=\"hidden\" name=\"upload_filename\" value=\"".$upload_filename."\">";
-				echo "<font color=\"red\">➡</font> You can select parts and <input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"select_parts\" value=\"CONVERT\">&nbsp;or&nbsp;<input style=\"background-color:azure;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"cancel\" value=\"QUIT IMPORTING\">";
 				}
+			if($i_part > 1) echo $message_top;
+			echo $message_options;
+			echo "_______________________________________<br />";
+			echo "<input type=\"radio\" name=\"tempo_option\" value=\"ignore\"";
+			if($tempo_option == "ignore") echo " checked";
+			echo ">&nbsp;Ignore all tempo markers<br />";
+			echo "<input type=\"radio\" name=\"tempo_option\" value=\"score\"";
+			if($tempo_option == "score") echo " checked";
+			echo ">&nbsp;Interpret only tempo markers of printed score<br />";
+			echo "<input type=\"radio\" name=\"tempo_option\" value=\"allbutmeasures\"";
+			if($tempo_option == "allbutmeasures") echo " checked";
+			echo ">&nbsp;Interpret tempo markers except inside measures<br />";
+			echo "<input type=\"radio\" name=\"tempo_option\" value=\"all\"";
+			if($tempo_option == "all") echo " checked";
+			echo ">&nbsp;Interpret all tempo markers<br />";
+			echo "_______________________________________<br />";
+			echo "<input type=\"checkbox\" name=\"ignore_dynamics\">&nbsp;Ignore dynamics (volume/velocity)<br />";
+			echo "<input type=\"checkbox\" name=\"ignore_channels\">&nbsp;Ignore MIDI channels<br />";
+			echo "_________________<br />";
+			echo "<input type=\"checkbox\" name=\"verbose\"";
+			if($list_corrections) echo " checked";
+			echo ">&nbsp;List automatic corrections of this score<br />";
+			echo "_________________<br />";
+			echo "<input type=\"checkbox\" name=\"delete_current\">&nbsp;Delete current data<br />";
+			echo "_________________<br />";
+			echo "<input type=\"hidden\" name=\"upload_filename\" value=\"".$upload_filename."\">";
+			echo "<font color=\"red\">➡</font> You can select parts and <input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"select_parts\" value=\"CONVERT\">&nbsp;or&nbsp;<input style=\"background-color:azure;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"cancel\" value=\"QUIT IMPORTING\">";
 			$new_convention = 0; // English note convention
 			$need_to_save = TRUE;
 			}
@@ -1105,144 +1106,148 @@ if(!$hide) {
 	echo "<input type=\"hidden\" name=\"change_volume_max\" value=\"".$change_volume_max."\">";
 	}
 echo "</form>";
-echo "</td><td style=\"background-color:cornsilk;\">";
-echo "<table style=\"background-color:Gold;\">";
-$table = explode(chr(10),$content);
-$imax = count($table);
-if($imax > 0 AND substr_count($content,'{') > 0) {
-	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-	echo "<input type=\"hidden\" name=\"thistext\" value=\"".$content."\">";
-	echo "<input type=\"hidden\" name=\"file_format\" value=\"".$file_format."\">";
-	echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
-	echo "<tr><td colspan=\"2\" style=\"vertical-align:middle; padding:6px;\">";
-	echo "<input type=\"submit\" style=\"background-color:AquaMarine;\" formaction=\"".$url_this_page."#topedit\" name=\"explode\" value=\"EXPLODE\">&nbsp;<font color=\"red\">➡ </font><i>break</i> {…} <i>expressions</i>";
-	echo "</td></tr>";
-	if($imax > 0) {
+echo "</td>";
+if(!$hide) {
+	echo "<td style=\"background-color:cornsilk;\">";
+	echo "<table style=\"background-color:Gold;\">";
+	$table = explode(chr(10),$content);
+	$imax = count($table);
+	if($imax > 0 AND substr_count($content,'{') > 0) {
+		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+		echo "<input type=\"hidden\" name=\"thistext\" value=\"".$content."\">";
+		echo "<input type=\"hidden\" name=\"file_format\" value=\"".$file_format."\">";
+		echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
 		echo "<tr><td colspan=\"2\" style=\"vertical-align:middle; padding:6px;\">";
-		echo "<input type=\"submit\" style=\"background-color:AquaMarine;\" formaction=\"".$url_this_page."#topedit\" name=\"implode\" value=\"IMPLODE\">&nbsp;<font color=\"red\">➡ </font><i>merge</i> {…} <i>expressions</i>";
+		echo "<input type=\"submit\" style=\"background-color:AquaMarine;\" formaction=\"".$url_this_page."#topedit\" name=\"explode\" value=\"EXPLODE\">&nbsp;<font color=\"red\">➡ </font><i>break</i> {…} <i>expressions</i>";
 		echo "</td></tr>";
-		}
-	echo "</form>";
-	}
-for($i = $j = 0; $i < $imax; $i++) {
-	$line = trim($table[$i]);
-	$error_mssg = $tie_mssg = '';
-	if(is_integer($pos=strpos($line,"[item ")) AND $pos == 0)
-		$title_this = preg_replace("/\[item\s([^\]]+)\].*/u",'$1',$line);
-	else $title_this = '';
-	$line = preg_replace("/\[.*\]/u",'',$line);
-	$line = preg_replace("/^i[0-9].*/u",'',$line); // Csound note statement
-	$line = preg_replace("/^f[0-9].*/u",'',$line); // Csound table statement
-	$line = preg_replace("/^t[ ].*/u",'',$line); // Csound tempo statement
-	$line = preg_replace("/^s\s*$/u",'',$line); // Csound "s" statement
-	$line = preg_replace("/^e\s*$/u",'',$line); // Csound "e" statement
-	if($line == '') continue;
-	if(is_integer($pos=strpos($line,"<?xml")) AND $pos == 0) break;
-	if(is_integer($pos=strpos($line,"//")) AND $pos == 0) continue;
-	if(is_integer($pos=strpos($line,"-")) AND $pos == 0) continue;
-	$line_recoded = recode_entities($line);
-	$j++;
-	$data = $temp_dir.$temp_folder.SLASH.$j.".bpda";
-	$handle = fopen($data,"w");
-	fwrite($handle,$line_recoded."\n");
-	fclose($handle);
-	$initial_controls = $tie_error = '';
-	$chunked = FALSE;
-	$tie = $n = $brackets = $total_ties = 0;
-	if(is_integer($pos=strpos($line_recoded,"{"))) {
-		$initial_controls = trim(substr($line_recoded,0,$pos));
-		}
-	$line_chunked = ''; $first = TRUE; $chunk_number = 1; $start_chunk = "[chunk 1] ";
-	for($k = $level = 0; $k < strlen($line_recoded); $k++) {
-		$line_chunked .= $start_chunk;
-		$start_chunk = '';
-		$c = $line_recoded[$k];
-		if($k < (strlen($line_recoded) - 1) AND ctype_alnum($c) AND $line_recoded[$k+1] == '&') {
-			$tie++; $total_ties++;
+		if($imax > 0) {
+			echo "<tr><td colspan=\"2\" style=\"vertical-align:middle; padding:6px;\">";
+			echo "<input type=\"submit\" style=\"background-color:AquaMarine;\" formaction=\"".$url_this_page."#topedit\" name=\"implode\" value=\"IMPLODE\">&nbsp;<font color=\"red\">➡ </font><i>merge</i> {…} <i>expressions</i>";
+			echo "</td></tr>";
 			}
-		if($k < (strlen($line_recoded) - 1) AND $c == '&' AND ctype_alnum($line_recoded[$k+1])) $tie--;
-		if($c == '.' AND $k > 0 AND $line_recoded[$k-1]) $brackets++;
-		if($c == '{') {
-			if($level == 0 AND !$first) $line_chunked .= $initial_controls;
-			$first = FALSE;
+		echo "</form>";
+		}
+	for($i = $j = 0; $i < $imax; $i++) {
+		$line = trim($table[$i]);
+		$error_mssg = $tie_mssg = '';
+		if(is_integer($pos=strpos($line,"[item ")) AND $pos == 0)
+			$title_this = preg_replace("/\[item\s([^\]]+)\].*/u",'$1',$line);
+		else $title_this = '';
+		$line = preg_replace("/\[.*\]/u",'',$line);
+		$line = preg_replace("/^i[0-9].*/u",'',$line); // Csound note statement
+		$line = preg_replace("/^f[0-9].*/u",'',$line); // Csound table statement
+		$line = preg_replace("/^t[ ].*/u",'',$line); // Csound tempo statement
+		$line = preg_replace("/^s\s*$/u",'',$line); // Csound "s" statement
+		$line = preg_replace("/^e\s*$/u",'',$line); // Csound "e" statement
+		if($line == '') continue;
+		if(is_integer($pos=strpos($line,"<?xml")) AND $pos == 0) break;
+		if(is_integer($pos=strpos($line,"//")) AND $pos == 0) continue;
+		if(is_integer($pos=strpos($line,"-")) AND $pos == 0) continue;
+		$line_recoded = recode_entities($line);
+		$j++;
+		$data = $temp_dir.$temp_folder.SLASH.$j.".bpda";
+		$handle = fopen($data,"w");
+		fwrite($handle,$line_recoded."\n");
+		fclose($handle);
+		$initial_controls = $tie_error = '';
+		$chunked = FALSE;
+		$tie = $n = $brackets = $total_ties = 0;
+		if(is_integer($pos=strpos($line_recoded,"{"))) {
+			$initial_controls = trim(substr($line_recoded,0,$pos));
+			}
+		$line_chunked = ''; $first = TRUE; $chunk_number = 1; $start_chunk = "[chunk 1] ";
+		for($k = $level = 0; $k < strlen($line_recoded); $k++) {
+			$line_chunked .= $start_chunk;
+			$start_chunk = '';
+			$c = $line_recoded[$k];
+			if($k < (strlen($line_recoded) - 1) AND ctype_alnum($c) AND $line_recoded[$k+1] == '&') {
+				$tie++; $total_ties++;
+				}
+			if($k < (strlen($line_recoded) - 1) AND $c == '&' AND ctype_alnum($line_recoded[$k+1])) $tie--;
+			if($c == '.' AND $k > 0 AND $line_recoded[$k-1]) $brackets++;
+			if($c == '{') {
+				if($level == 0 AND !$first) $line_chunked .= $initial_controls;
+				$first = FALSE;
+				$line_chunked .= $c;
+				$brackets++;
+				$level++;
+				continue;
+				}
 			$line_chunked .= $c;
-			$brackets++;
-			$level++;
-			continue;
-			}
-		$line_chunked .= $c;
-		if($c == '}') {
-			$level--; 
-			if($level == 0) {
-				$n++;
-				if(($tie <= 0 AND $n > $minchunk_size) OR $n > $maxchunk_size) {
-					if(abs($tie) > 0) {
-						$tie_mssg =  "• <font color=\"red\">".abs($tie)." unbound tie(s) in chunk #".$chunk_number;
-						$tie_error = TRUE;
+			if($c == '}') {
+				$level--; 
+				if($level == 0) {
+					$n++;
+					if(($tie <= 0 AND $n > $minchunk_size) OR $n > $maxchunk_size) {
+						if(abs($tie) > 0) {
+							$tie_mssg =  "• <font color=\"red\">".abs($tie)." unbound tie(s) in chunk #".$chunk_number;
+							$tie_error = TRUE;
+							}
+						$line_chunked .= "\n";
+						$tie = $n = 0;
+						$start_chunk = "[chunk ".(++$chunk_number)."] ";
+						if($k < (strlen($line_recoded) - 1)) $chunked = TRUE;
 						}
-					$line_chunked .= "\n";
-					$tie = $n = 0;
-					$start_chunk = "[chunk ".(++$chunk_number)."] ";
-					if($k < (strlen($line_recoded) - 1)) $chunked = TRUE;
 					}
 				}
 			}
+	//	$chunked = TRUE;
+		if($chunked) {
+			if($tie_mssg == '' AND $total_ties > 0) $tie_mssg = "<font color=\"blue\">";
+			if($total_ties > 0) $tie_mssg .=  " <i>total ".$total_ties." tied notes</i></font><br />";
+			$data_chunked = $temp_dir.$temp_folder.SLASH.$j."-chunked.bpda";
+			$handle = fopen($data_chunked,"w");
+			fwrite($handle,$line_chunked."\n");
+			fclose($handle);
+			}
+		else $data_chunked = '';
+		echo "<tr><td>".$j."</td><td>";
+	//	$link_options .= "&item=".$j;
+		$link_options_play = $link_options."&output=".urlencode($bp_application_path.$output_folder.SLASH.$output_file)."&format=".$file_format."&item=".$j;
+		$link_options_chunked = $link_options_play;
+		$output_file_expand = str_replace(".sco",'',$output_file);
+		$output_file_expand = str_replace(".mid",'',$output_file_expand);
+		$output_file_expand .= ".bpda";
+		$link_options_expand = $link_options."&output=".urlencode($bp_application_path.$output_folder.SLASH.$output_file_expand)."&format=data";
+		$link_produce = "produce.php?data=".urlencode($data);
+		$link_produce_chunked = "produce.php?data=".urlencode($data_chunked);
+		$link_play = $link_produce."&instruction=play";
+		$link_play_chunked = $link_produce_chunked."&instruction=play-all";
+		$link_play .= $link_options_play;
+		$link_play_chunked .= $link_options_play;
+		$link_expand = $link_produce."&instruction=expand";
+		$link_expand .= $link_options_expand;
+		$window_name = window_name($filename);
+		$window_name_play = $window_name."_play";
+		$window_name_expland = $window_name."_expland";
+	//	echo "<small>".urldecode($link_play)."</small><br />";
+	//	echo "<small>".urldecode($link_expand)."</small><br />";
+	//	echo "<small>".urldecode($link_play_chunked)."</small><br />";
+		$n1 = substr_count($line_recoded,'{');
+		$n2 = substr_count($line_recoded,'}');
+		if($n1 > $n2) $error_mssg .= "• <font color=\"red\">This score contains ".($n1-$n2)." extra ‘{'</font><br />";
+		if($n2 > $n1) $error_mssg .= "• <font color=\"red\">This score contains ".($n2-$n1)." extra ‘}'</font><br />";
+		if($error_mssg == '') {
+			echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_play."','".$window_name_play."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Play this polymetric expression\" value=\"PLAY\">&nbsp;";
+			if($chunked) echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_play_chunked."','".$window_name_play."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Play polymetric expression in chunks (no graphics)\" value=\"PLAY safe (".$chunk_number." chunks)\">&nbsp;";
+			if($brackets > 0) echo "&nbsp;<input style=\"background-color:azure;\" onclick=\"window.open('".$link_expand."','".$window_name_expland."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Expand this polymetric expression\" value=\"EXPAND\">&nbsp;";
+			}
+		if($tie_mssg <> '' AND $error_mssg == '') echo "<br />";
+		if($tie_mssg <> '') echo $tie_mssg;
+		if($error_mssg <> '') echo $error_mssg;
+		$length = strlen($line_recoded);
+		if($length > 400)
+			$line_show = substr($line_recoded,0,100)."<br />&nbsp;... ... ...<br />".substr($line_recoded,-100,100);
+		else $line_show = $line_recoded;
+		echo "<small>";
+		if($title_this <> '') $line_show = "<b>[item ".$title_this."]</b> ".$line_show;
+		echo $line_show;
+		echo "</small></td></tr>";
 		}
-//	$chunked = TRUE;
-	if($chunked) {
-		if($tie_mssg == '' AND $total_ties > 0) $tie_mssg = "<font color=\"blue\">";
-		if($total_ties > 0) $tie_mssg .=  " <i>total ".$total_ties." tied notes</i></font><br />";
-		$data_chunked = $temp_dir.$temp_folder.SLASH.$j."-chunked.bpda";
-		$handle = fopen($data_chunked,"w");
-		fwrite($handle,$line_chunked."\n");
-		fclose($handle);
-		}
-	else $data_chunked = '';
-	echo "<tr><td>".$j."</td><td>";
-//	$link_options .= "&item=".$j;
-	$link_options_play = $link_options."&output=".urlencode($bp_application_path.$output_folder.SLASH.$output_file)."&format=".$file_format."&item=".$j;
-	$link_options_chunked = $link_options_play;
-	$output_file_expand = str_replace(".sco",'',$output_file);
-	$output_file_expand = str_replace(".mid",'',$output_file_expand);
-	$output_file_expand .= ".bpda";
-	$link_options_expand = $link_options."&output=".urlencode($bp_application_path.$output_folder.SLASH.$output_file_expand)."&format=data";
-	$link_produce = "produce.php?data=".urlencode($data);
-	$link_produce_chunked = "produce.php?data=".urlencode($data_chunked);
-	$link_play = $link_produce."&instruction=play";
-	$link_play_chunked = $link_produce_chunked."&instruction=play-all";
-	$link_play .= $link_options_play;
-	$link_play_chunked .= $link_options_play;
-	$link_expand = $link_produce."&instruction=expand";
-	$link_expand .= $link_options_expand;
-	$window_name = window_name($filename);
-	$window_name_play = $window_name."_play";
-	$window_name_expland = $window_name."_expland";
-//	echo "<small>".urldecode($link_play)."</small><br />";
-//	echo "<small>".urldecode($link_expand)."</small><br />";
-//	echo "<small>".urldecode($link_play_chunked)."</small><br />";
-	$n1 = substr_count($line_recoded,'{');
-	$n2 = substr_count($line_recoded,'}');
-	if($n1 > $n2) $error_mssg .= "• <font color=\"red\">This score contains ".($n1-$n2)." extra ‘{'</font><br />";
-	if($n2 > $n1) $error_mssg .= "• <font color=\"red\">This score contains ".($n2-$n1)." extra ‘}'</font><br />";
-	if($error_mssg == '') {
-		echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_play."','".$window_name_play."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Play this polymetric expression\" value=\"PLAY\">&nbsp;";
-		if($chunked) echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_play_chunked."','".$window_name_play."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Play polymetric expression in chunks (no graphics)\" value=\"PLAY safe (".$chunk_number." chunks)\">&nbsp;";
-		if($brackets > 0) echo "&nbsp;<input style=\"background-color:azure;\" onclick=\"window.open('".$link_expand."','".$window_name_expland."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Expand this polymetric expression\" value=\"EXPAND\">&nbsp;";
-		}
-	if($tie_mssg <> '' AND $error_mssg == '') echo "<br />";
-	if($tie_mssg <> '') echo $tie_mssg;
-	if($error_mssg <> '') echo $error_mssg;
-	$length = strlen($line_recoded);
-	if($length > 400)
-		$line_show = substr($line_recoded,0,100)."<br />&nbsp;... ... ...<br />".substr($line_recoded,-100,100);
-	else $line_show = $line_recoded;
-	echo "<small>";
-	if($title_this <> '') $line_show = "<b>[item ".$title_this."]</b> ".$line_show;
-	echo $line_show;
-	echo "</small></td></tr>";
+	echo "</table>";
+	echo "</td>";
 	}
-echo "</table>";
-echo "</td></tr>";
+echo "</tr>";
 echo "</table>";
 
 ?>
