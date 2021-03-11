@@ -56,7 +56,7 @@ else {
 		}
 	}
 
-if(isset($last_page) AND isset($last_name)) echo "<div style=\"float:right; background-color:white; padding:1em;\"><font color=\"red\">➡</font> Last page visited:<br /><big><a target=\"_blank\" href=\"".$last_page."\">".$last_name."</a></big></div><br /><br />";
+if(isset($last_page) AND isset($last_name)) echo "<div style=\"float:right; background-color:white; padding:1em;\"><big>Last page visited:<br /><font color=\"red\">➡</font> <a target=\"_blank\" href=\"".$last_page."\">".$last_name."</a></big></div><br /><br />";
 
 echo link_to_help();
 
