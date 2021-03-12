@@ -304,6 +304,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			do $data = str_replace("{}",'',$data,$count);
 			while($count > 0);
 			$data = preg_replace("/{({[^{^}]*})}/u","$1",$data); // Simplify {{xxxx}} --> {xxxx}
+			$data = preg_replace("/{(\-+)}/u","$1",$data); // Simplify {---} --> ---
 			$data = str_replace(" ,",",",$data);
 			$data = preg_replace("/{0\/?[0-9]*}/u",'',$data); // Empty measure created by repetition, need to check why… Fixed by BB 2021-02-20
 			$data = preg_replace("/{([0-9]+\/?[0-9]*),\-+}/u"," $1 ",$data); // Replace for instance "{33/8,--}" with " 33/8 " Added by BB 2021-02-23

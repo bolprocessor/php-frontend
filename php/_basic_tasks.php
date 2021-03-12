@@ -2774,7 +2774,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 						if($p_time_field == 0 AND $i_field_of_part == 0 AND $stream_units > 0 AND $p_stream_duration == 0 AND $new_tempo > 0) {
 							// Grace notes starting measure (e.g. measure #1 of Beethoven-fugue-b-flat-major) 
 							$convert_measure[$score_part] .= "||".$new_tempo."||";
-							$report .= "<font color=\"red\">mm</font> Measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)." metronom set to ".$new_tempo." at date ".$fraction_date." beat(s)<br />";
+							$report .= "<font color=\"red\">mm</font> Measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)." metronome set to ".$new_tempo." at date ".$fraction_date." beat(s)<br />";
 							$new_tempo = 0;
 							}
 						if($the_event['type'] == "back" OR ($p_stream_duration > 0 AND $new_tempo > 0)) {
@@ -2784,7 +2784,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 								}
 							if($i_field_of_part > 0 AND $new_tempo > 0) {
 								$convert_measure[$score_part] .= "||".$new_tempo."||";
-								$report .= "<font color=\"red\">mm</font> Measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)." metronom set to ".$new_tempo." at date ".$fraction_date." beat(s)<br />";
+								$report .= "<font color=\"red\">mm</font> Measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)." metronome set to ".$new_tempo." at date ".$fraction_date." beat(s)<br />";
 								$new_tempo = 0;
 								}
 							if($test_musicxml)
@@ -2813,7 +2813,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 								if($stream_units <> $n) $convert_measure[$score_part] .= "}";
 								if($new_tempo > 0) {
 									$convert_measure[$score_part] .= "||".$new_tempo."||";
-									$report .= "<font color=\"red\">mm</font> Measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)." metronom set to ".$new_tempo." at date ".$fraction_date." beat(s)<br />";
+									$report .= "<font color=\"red\">mm</font> Measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)." metronome set to ".$new_tempo." at date ".$fraction_date." beat(s)<br />";
 									$new_tempo = 0;
 									}
 								$stream = ''; $stream_units = 0; $p_stream_duration = 0; $q_stream_duration = 1;
@@ -2821,7 +2821,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 							else {
 								if($new_tempo > 0) {
 									$stream .= "||".$new_tempo."||";
-									$report .= "<font color=\"red\">mm</font> Measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)." metronom set to ".$new_tempo." at date ".$fraction_date." beat(s)<br />";
+									$report .= "<font color=\"red\">mm</font> Measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)." metronome set to ".$new_tempo." at date ".$fraction_date." beat(s)<br />";
 									$new_tempo = 0;
 									}
 								}
@@ -2958,7 +2958,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 						if(!$is_chord AND $the_event['type'] == "chord") {
 							if($new_tempo > 0) {
 								$convert_measure[$score_part] .= "||".$new_tempo."||";
-								if($fraction_date <> "0") $report .= "<font color=\"red\">mm</font> Measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)." metronom set to ".$new_tempo." at date ".$fraction_date." beat(s)<br />";
+								if($fraction_date <> "0") $report .= "<font color=\"red\">mm</font> Measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)." metronome set to ".$new_tempo." at date ".$fraction_date." beat(s)<br />";
 								$new_tempo = 0;
 								}
 							$p_duration = $the_event['p_dur']; $q_duration = $the_event['q_dur'];
@@ -3064,7 +3064,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 									
 									if($new_tempo > 0) {
 										$convert_measure[$score_part] .= "||".$new_tempo."||";
-										$report .= "<font color=\"red\">mm</font> Measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)." metronom set to ".$new_tempo." at date ".$fraction_date." beat(s)<br />";
+										$report .= "<font color=\"red\">mm</font> Measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)." metronome set to ".$new_tempo." at date ".$fraction_date." beat(s)<br />";
 										$new_tempo = 0;
 										}
 									}
@@ -3111,7 +3111,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 													$p_next_date_new_tempo = $q_next_date_new_tempo = $last_i_new_tempo[$i_field_of_part] = -1;
 													}
 												$convert_measure[$score_part] .= " ||".$new_tempo."|| ";
-												$report .= "<font color=\"red\">mm</font> Measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)." metronom set to ".$new_tempo." during rest starting date ".$fraction_date." beat(s)<br />";
+												$report .= "<font color=\"red\">mm</font> Measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)." metronome set to ".$new_tempo." during rest starting date ".$fraction_date." beat(s)<br />";
 												// $report .= "next_date_new_tempo = ".$p_next_date_new_tempo."/".$q_next_date_new_tempo." i_new_tempo = ".$i_new_tempo."<br />";
 												$new_tempo = 0;
 												}
@@ -3186,16 +3186,17 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 						$fraction = $tempo_this_measure."/60";
 						$simplify = simplify($fraction,$max_term_in_fraction);
 						$fraction = $simplify['fraction'];
-						$data .= " _tempo(".$fraction.")";
+						if($fraction <> "1") $data .= " _tempo(".$fraction.")";
 						if($old_tempo == '') $old_tempo = $fraction;
 						$default_tempo[$section] = $fraction;
 						}
-					else if(isset($default_tempo[$section]))
+					else if(isset($default_tempo[$section])) {
 						// We must repeat tempo on each measure to play it separately
-							$data .= " _tempo(".$default_tempo[$section].")";
+							if($default_tempo[$section] <> "1") $data .= " _tempo(".$default_tempo[$section].")";
+							}
 						else {
 							if($old_tempo == '') $old_tempo = 1;
-							$data .= " _tempo(".$old_tempo.")";
+							if($old_tempo <> "1") $data .= " _tempo(".$old_tempo.")";
 							}
 					
 					if($number_volume_part[$section][$score_part] > 0) {
@@ -3298,7 +3299,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 												}
 											else $i_new_tempo = -1;
 											$stream .= " ||".$new_tempo."|| ";
-											$report .= "<font color=\"red\">mm</font> Measure #".$i_measure." part ".$score_part." field #".($j + 1)." metronom set to ".$new_tempo." during additional rest starting date ".$fraction_date." beat(s)<br />";
+											$report .= "<font color=\"red\">mm</font> Measure #".$i_measure." part ".$score_part." field #".($j + 1)." metronome set to ".$new_tempo." during additional rest starting date ".$fraction_date." beat(s)<br />";
 											// $report .= "next_date_new_tempo = ".$p_next_date_new_tempo."/".$q_next_date_new_tempo." i_new_tempo = ".$i_new_tempo."<br />";
 											$new_tempo = 0;
 											}
@@ -3339,7 +3340,8 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 						$fraction = $simplify['fraction'];
 						$d1 = substr($data,0,$pos1);
 						$d2 = substr($data,$pos1,strlen($data) - $pos1);
-						$this_tempo = "_tempo(".$fraction.") ";
+						if($fraction <> "1") $this_tempo = "_tempo(".$fraction.") ";
+						else $this_tempo = '';
 						$data = $d1.$this_tempo.$d2;
 						$start_search = $pos2 + strlen($this_tempo) + 2;
 						}
