@@ -300,17 +300,26 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$data = str_replace("{ ","{",$data);
 			$data = str_replace(", ",",",$data);
 			$data = str_replace(" ,",",",$data);
-			$data = preg_replace("/\-\s+\-/u","--",$data);
 			do $data = str_replace("{}",'',$data,$count);
 			while($count > 0);
 			$data = preg_replace("/{({[^{^}]*})}/u","$1",$data); // Simplify {{xxxx}} --> {xxxx}
-			$data = preg_replace("/{(\-+)}/u","$1",$data); // Simplify {---} --> ---
+			$data = preg_replace("/{([\-\s]+)}/u","$1",$data); // Simplify {---} --> ---
 			$data = str_replace(" ,",",",$data);
-			$data = preg_replace("/{0\/?[0-9]*}/u",'',$data); // Empty measure created by repetition, need to check why… Fixed by BB 2021-02-20
+		//	$data = preg_replace("/{0\/?[0-9]*}/u",'',$data); // Empty measure created by repetition
+			$data = str_replace("- -","--",$data); // Simplify - - --> --
+			$data = preg_replace("/,[\-\s]+,/u",",",$data); // Suppress fields containing only rests
+			$data = preg_replace("/,[\-\s]+}/u","}",$data); // Suppress fields containing only rests
+			$data = preg_replace("/{([\-\s]+)}/u","$1",$data); // Simplify {---} --> ---
+			$data = preg_replace("/{([0-9]+\/?[0-9]*)}/u"," $1 ",$data); // Simplify {2/3} --> 2/3
+			$data = preg_replace("/,\s*([0-9]+\/?[0-9]*)\s*,/u",",",$data); // Suppress fields containing only rests
+			$data = preg_replace("/,\s*([0-9]+\/?[0-9]*)\s*}/u","}",$data); // Suppress fields containing only rests
 			$data = preg_replace("/{([0-9]+\/?[0-9]*),\-+}/u"," $1 ",$data); // Replace for instance "{33/8,--}" with " 33/8 " Added by BB 2021-02-23
-			$data = preg_replace("/{_tempo[^\)]+\)\s?_volume[^\)]+\)\s?_chan[^\)]+\)\s?}/u",'',$data); // Empty measure at the beginning of a repetition, need to check why…
+			$data = preg_replace("/{0\/?[0-9]*[^}]*}/u",'',$data); // Empty measure created by repetition
+			$data = preg_replace("/{_tempo[^\)]+\)\s*_volume[^\)]+\)\s*_chan[^\)]+\)\s*}/u",'',$data); // Empty measure at the beginning of a repetition
+			$data = preg_replace("/{_tempo[^\)]+\)\s*_vel[^\)]+\)\s*_chan[^\)]+\)\s*}/u",'',$data); // Empty measure at the beginning of a repetition
 			$data = str_replace(" ,",",",$data);
 			$data = str_replace(" }","}",$data);
+			$data = str_replace("- -","--",$data); // Simplify - - --> -- (repeated for unknown reason)
 			if($reload_musicxml) {
 				$more_data = "// MusicXML file ‘".$upload_filename."’ converted\n";
 				if($subtitle_part <> '') $more_data .= $subtitle_part."\n";
@@ -1196,12 +1205,16 @@ if(!$hide) {
 		if($chunked) {
 			if($tie_mssg == '' AND $total_ties > 0) $tie_mssg = "<font color=\"blue\">";
 			if($total_ties > 0) $tie_mssg .=  " <i>total ".$total_ties." tied notes</i></font><br />";
+			else $tie_mssg .=  "</font><br />";
 			$data_chunked = $temp_dir.$temp_folder.SLASH.$j."-chunked.bpda";
 			$handle = fopen($data_chunked,"w");
 			fwrite($handle,$line_chunked."\n");
 			fclose($handle);
 			}
-		else $data_chunked = '';
+		else {
+			$data_chunked = '';
+			if($tie_mssg <> '') $tie_mssg .=  "</font><br />";
+			}
 		echo "<tr><td>".$j."</td><td>";
 	//	$link_options .= "&item=".$j;
 		$link_options_play = $link_options."&output=".urlencode($bp_application_path.$output_folder.SLASH.$output_file)."&format=".$file_format."&item=".$j;
