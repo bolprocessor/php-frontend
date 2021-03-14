@@ -128,6 +128,19 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$reading_measure = FALSE;
 			$message_top = "<input type=\"checkbox\" id=\"parent1\" style=\"box-shadow: -2px -2px Gold\"> <b>Check all</b><br />";
 			$message_options = ''; $first = TRUE;
+			$sum_metronome = $number_metronome = $metronome_max = $metronome_min = 0;
+			$change_metronome_average = $change_metronome_min = $change_metronome_max = 0;
+			$error_change_metronome = '';
+			if(isset($_POST['change_metronome_min']))
+				$change_metronome_min = intval($_POST['change_metronome_min']);			if(isset($_POST['change_metronome_max']))
+				$change_metronome_max = intval($_POST['change_metronome_max']);
+			if(isset($_POST['change_metronome_average']))
+				$change_metronome_average = intval($_POST['change_metronome_average']);
+			if($change_metronome_min < 1 AND ($change_metronome_max > 0 OR $change_metronome_average > 0))
+				$error_change_metronome .= "<font color=\"red\">ERROR changing metronome = minimum value should be positive</font><br />";
+			if(($change_metronome_min >= $change_metronome_max OR $change_metronome_average <= $change_metronome_min OR $change_metronome_average >= $change_metronome_max) AND ($change_metronome_max > 0 OR $change_metronome_average > 0))
+				$error_change_metronome .= "<font color=\"red\">ERROR changing metronome: values are not compatible</font><br />";
+			if($error_change_metronome <> '') $reload_musicxml = FALSE;
 			$file = fopen($music_xml_file,"r");
 			while(!feof($file)) {
 				$line = fgets($file);
@@ -221,6 +234,21 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 					$attributes_key =  FALSE;
 					continue;
 					}
+				
+				$metronome = 0;
+				if(is_integer($pos=strpos($line,"<sound tempo"))) {
+					$metronome = round(trim(preg_replace("/.+tempo=\"([^\"]+)\"\/>/u","$1",$line)));
+					}
+				else if(is_integer($pos=strpos($line,"<per-minute>"))) {
+					$metronome = trim(preg_replace("/<per\-minute>([^<]+)<\/per\-minute>/u","$1",$line));
+					}
+				if($metronome > 0) {
+					$sum_metronome += $metronome;
+					$number_metronome++;
+					if($metronome > $metronome_max) $metronome_max = $metronome;
+					if($metronome < $metronome_min OR $metronome_min == 0) $metronome_min = $metronome;
+					}
+					
 				if(is_integer($pos=strpos($line,"</attributes>"))) {
 					$attributes = FALSE;
 				/*	if($changed_attributes) {
@@ -289,7 +317,10 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 					}
 				}
 			unset($the_section);
-			$convert_score = convert_musicxml($this_score,$repeat_section,$divisions,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$reload_musicxml,$test_musicxml,$list_corrections);
+			if($number_metronome > 0)
+				$metronome_average = round($sum_metronome / $number_metronome);
+			else $metronome_average = 0;
+			$convert_score = convert_musicxml($this_score,$repeat_section,$divisions,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$metronome_average,$metronome_min,$metronome_max,$list_corrections);
 			$data .= $convert_score['data'];
 			$report = $convert_score['report'];
 			$data = preg_replace("/\s+/u"," ",$data);
@@ -334,7 +365,32 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				}
 			if($i_part > 1) echo $message_top;
 			echo $message_options;
-			echo "_______________________________________<br />";
+		//	echo "_______________________________________<br />";
+			if($reload_musicxml) {
+				$current_metronome_min = $convert_score['metronome_min'];
+				$current_metronome_max = $convert_score['metronome_max'];
+				$current_metronome_average = $convert_score['metronome_average'];
+				}
+			else {
+				$current_metronome_min = $metronome_min;
+				$current_metronome_max = $metronome_max;
+				$current_metronome_average = $metronome_average;
+				}
+			if($error_change_metronome <> '') echo $error_change_metronome;
+			if($metronome_average > 0 AND $tempo_option <> "ignore") {
+				echo "<br /><table cellpadding=\"8px;\">";
+				echo "<tr style=\"background-color:white;\"><td><b>Metronome</b></td><td>current:</td><td>set it to…</td></tr>";
+				echo "<tr style=\"background-color:white;\"><td><i>Average</i></td><td>".$current_metronome_average." bpm</td><td><input type=\"text\" style=\"border:none; text-align:center;\" name=\"change_metronome_average\" size=\"6\" value=\"";
+				if($change_metronome_average > 0) echo $change_metronome_average;
+				echo "\"> bpm (approx)</td></tr>";
+				echo "<tr style=\"background-color:white;\"><td><i>Minimum</i></td><td>".$current_metronome_min." bpm</td><td><input type=\"text\" style=\"border:none; text-align:center;\" name=\"change_metronome_min\" size=\"6\" value=\"";
+				if($change_metronome_min > 0) echo $change_metronome_min;
+				echo "\"> bpm</td></tr>";
+				echo "<tr style=\"background-color:white;\"><td><i>Maximum</i></td><td>".$current_metronome_max." bpm</td><td><input type=\"text\" style=\"border:none; text-align:center;\" name=\"change_metronome_max\" size=\"6\" value=\"";
+				if($change_metronome_max > 0) echo $change_metronome_max;
+				echo "\"> bpm</td></tr>";
+				echo "</table><br />";
+				}
 			echo "<input type=\"radio\" name=\"tempo_option\" value=\"ignore\"";
 			if($tempo_option == "ignore") echo " checked";
 			echo ">&nbsp;Ignore all tempo markers<br />";

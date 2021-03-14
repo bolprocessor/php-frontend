@@ -2349,7 +2349,7 @@ function simplify($fraction,$max_term) {
 	return $simplify;
 	}
 
-function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$reload_musicxml,$test_musicxml,$list_corrections) {
+function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$metronome_average,$metronome_min,$metronome_max,$list_corrections) {
 	global $max_term_in_fraction;
 	$grace_ratio = 2;
 	// MakeMusic Finale dynamics https://en.wikipedia.org/wiki/Dynamics_(music)
@@ -2357,6 +2357,16 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 	$dynamic_sign_to_tempo = array("Largo" => 50, "Lento" => 60, "Adagio" => 70, "Andante" => 88, "Moderato" => 100, "Allegretto" => 114, "Allegro" => 136, "Vivace" => 140, "Presto" => 170, "Prestissimo" => 190);
 	$data =  $report = $old_measure_label = '';
 	$measure_label = array();
+	$sum_metronome = $number_metronome = $metronome_max = $metronome_min = 0;
+	
+	if(($change_metronome_min * $change_metronome_average * $change_metronome_max) > 0) {
+		$a1 = ($change_metronome_average - $change_metronome_min) / ($metronome_average - $metronome_min);
+		$b1 = $change_metronome_min;
+		$a2 = ($change_metronome_max - $change_metronome_average) / ($metronome_max - $metronome_average);
+		$b2 = $change_metronome_average;
+		}
+	else $a1 = 0;
+		
 	$sum_tempo_measure = $number_tempo_measure = $sum_volume_part = $number_volume_part = $default_tempo = $default_volume = $old_volume = $implicit = array();
 	$p_last_mm = 0; $q_last_mm = 1;
 	$old_tempo = '';
@@ -2572,8 +2582,18 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 						if(($tempo_option == "all" OR $tempo_option == "allbutmeasures") AND is_integer($pos=strpos($line,"<sound tempo"))) {
 							$tempo = round(trim(preg_replace("/.+tempo=\"([^\"]+)\"\/>/u","$1",$line)));
 							// echo $score_part." mm = ".$tempo." at measure #".$i_measure."<br />";
+							
+							if($a1 > 0) {
+								if($tempo < $metronome_average) $tempo = round(($a1 * ($tempo - $metronome_min)) + $b1);
+								else $tempo = round($a2 * ($tempo - $metronome_average) + $b2);
+								}
+							
 							$sum_tempo_measure[$section][$i_measure] += $tempo;
 							$number_tempo_measure[$section][$i_measure]++;
+							$sum_metronome += $tempo;
+							$number_metronome++;
+							if($tempo > $metronome_max) $metronome_max = $tempo;
+							if($tempo < $metronome_min OR $metronome_min == 0) $metronome_min = $tempo;
 							if($tempo_option <> "allbutmeasures") {
 								if(!$found_tempo_variation)
 									echo "<p><font color=\"red\">➡</font> Including tempo assignments inside measures</p>";
@@ -2590,11 +2610,27 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 							// This may create a problem if they don't appear in the first selected part
 							}
 							
-						if($tempo_option == "score" AND is_integer($pos=strpos($line,"<per-minute>"))) {
-							$tempo = trim(preg_replace("/<per\-minute>([^<]+)<\/per\-minute>/u","$1",$line));
+						if(($tempo_option == "all" OR $tempo_option == "score" OR $tempo_option == "allbutmeasures") AND is_integer($pos=strpos($line,"<per-minute>"))) {
+							$tempo = round(trim(preg_replace("/<per\-minute>([^<]+)<\/per\-minute>/u","$1",$line)));
 						//	echo $score_part." tempo = ".$tempo." bpm at measure ".$i_measure." (on the printed score)<br />";
+							if($a1 > 0) {
+								if($tempo < $metronome_average) $tempo = round(($a1 * ($tempo - $metronome_min)) + $b1);
+								else $tempo = round($a2 * ($tempo - $metronome_average) + $b2);
+								}
 							$sum_tempo_measure[$section][$i_measure] += $tempo;
 							$number_tempo_measure[$section][$i_measure]++;
+							$sum_metronome += $tempo;
+							$number_metronome++;
+							if($tempo > $metronome_max) $metronome_max = $tempo;
+							if($tempo < $metronome_min OR $metronome_min == 0) $metronome_min = $tempo;
+							
+							$curr_event[$score_part][$j]['type'] = "mm"; // Added by BB 2021-03-14
+							$curr_event[$score_part][$j]['value'] = $tempo;
+							$curr_event[$score_part][$j]['p_dur'] = 0;
+							$curr_event[$score_part][$j]['q_dur'] = 1;
+							$is_chord = FALSE;
+							$j++;
+							continue;
 							// Note that tempo values will be used in all subsequent parts
 							// This may create a problem if they don't appear in the first selected part
 							}
@@ -2622,26 +2658,30 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 								}
 							}
 						
-						if($tempo_option <> "none" AND is_integer($pos=strpos($line,"<words"))) {
+						if($tempo_option <> "ignore" AND is_integer($pos=strpos($line,"<words"))) {
 							$some_words = trim(preg_replace("/.*<words[^>]*>([^<]+)\s*<\/.+/u","$1",$line));
 							if(strlen($some_words) > 2) {
-						//		echo "<br />line = “".recode_tags($line)."”<br />";
+							//	echo "<br />line = “".recode_tags($line)."”<br />";
 								foreach($dynamic_sign_to_tempo as $dynamic_sign => $tempo) {
 									if(is_integer(stripos($some_words,$dynamic_sign))) {
 							//			echo "Words = “".recode_tags($some_words)."” at measure ".$i_measure." => ".$dynamic_sign." = ".$tempo."<br />";
+										if($a1 > 0) {
+											if($tempo < $metronome_average)
+												$tempo = round(($a1 * ($tempo - $metronome_min)) + $b1);
+											else $tempo = round($a2 * ($tempo - $metronome_average) + $b2);
+											}
 										$sum_tempo_measure[$section][$i_measure] += $tempo;
 										$number_tempo_measure[$section][$i_measure]++;
+										
+										$curr_event[$score_part][$j]['type'] = "mm"; // Added by BB 2021-03-14
+										$curr_event[$score_part][$j]['value'] = round($tempo);
+										$curr_event[$score_part][$j]['p_dur'] = 0;
+										$curr_event[$score_part][$j]['q_dur'] = 1;
+										$is_chord = FALSE;
+										$j++;
 										break;
 										}
 									}
-						/*		if($tempo_option <> "allbutmeasures") { // Fixed by BB 2021-03-02
-									$curr_event[$score_part][$j]['type'] = "mm";
-									$curr_event[$score_part][$j]['value'] = round($tempo);
-									$curr_event[$score_part][$j]['p_dur'] = 0;
-									$curr_event[$score_part][$j]['q_dur'] = 1;
-									$is_chord = FALSE;
-									$j++;
-									} */
 								}
 							$some_words = '';
 							continue;
@@ -3386,7 +3426,8 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 					
 					if($physical_time > 0) $tempobis = round(60 * $p_time_measure / ($q_time_measure * $divisions[$score_part]) / $physical_time);
 					else $tempobis = $tempo_this_measure;
-					if(abs(($tempo_this_measure - $tempobis) / $tempo_this_measure) > 0.4) $warning = TRUE;
+				//	$report .= "Measure ".$i_measure." number_tempo_measure = ".$number_tempo_measure[$section][$i_measure]." sum_tempo_measure = ".$sum_tempo_measure[$section][$i_measure]." tempo_this_measure = ".$tempo_this_measure."<br />";
+					if($tempo_this_measure == 0 OR abs(($tempo_this_measure - $tempobis) / $tempo_this_measure) > 0.4) $warning = TRUE;
 					else $warning = FALSE;
 					if($warning) $report .= "<font color=\"red\">";
 					if($tempobis <> $tempo_this_measure) $report .= "➡ Measure #".$i_measure." part ".$score_part." physical time = ".round($physical_time,3)." s, average tempo = ".$tempo_this_measure." —> final tempo = ".$tempobis."<br />";
@@ -3435,6 +3476,12 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 		}
 	unset($the_section);
 	$convert_score['data'] = $data;
+	$convert_score['metronome_min'] = $metronome_min;
+	$convert_score['metronome_max'] = $metronome_max;
+	if($number_metronome > 0)
+		$metronome_average = round($sum_metronome / $number_metronome);
+	else $metronome_average = 0;
+	$convert_score['metronome_average'] = $metronome_average;
 	if($list_corrections) $convert_score['report'] = $report;
 	else $convert_score['report'] = '';
 	return $convert_score;
