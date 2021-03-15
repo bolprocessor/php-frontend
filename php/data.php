@@ -1,6 +1,7 @@
 <?php
 require_once("_basic_tasks.php");
 require_once("_settings.php");
+require_once("_musicxml.php");
 
 if(isset($_GET['file'])) $file = urldecode($_GET['file']);
 else $file = '';
@@ -365,7 +366,6 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				}
 			if($i_part > 1) echo $message_top;
 			echo $message_options;
-		//	echo "_______________________________________<br />";
 			if($reload_musicxml) {
 				$current_metronome_min = $convert_score['metronome_min'];
 				$current_metronome_max = $convert_score['metronome_max'];
