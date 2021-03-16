@@ -650,20 +650,24 @@ if(isset($_POST['delete_velocity'])) {
 	$need_to_save = TRUE;
 	}
 
-$change_velocity_mid = $change_volume_mid = 64;
+$change_velocity_average = $change_volume_average = 64;
 $change_velocity_max = $change_volume_max = 127;
-if(isset($_POST['change_velocity_mid'])) $change_velocity_mid = abs(intval($_POST['change_velocity_mid']));
+if(isset($_POST['change_velocity_average'])) $change_velocity_average = abs(intval($_POST['change_velocity_average']));
 if(isset($_POST['change_velocity_max'])) $change_velocity_max = abs(intval($_POST['change_velocity_max']));
-if(isset($_POST['change_volume_mid'])) $change_volume_mid = abs(intval($_POST['change_volume_mid']));
+if(isset($_POST['change_volume_average'])) $change_volume_average = abs(intval($_POST['change_volume_average']));
 if(isset($_POST['change_volume_max'])) $change_volume_max = abs(intval($_POST['change_volume_max']));
 
 if(isset($_POST['apply_velocity_change'])) {
-	if(isset($_POST['change_velocity_mid']) AND $change_velocity_mid > 0 AND isset($_POST['change_velocity_max']) AND $change_velocity_max > 0 AND $change_velocity_mid < 128 AND $change_velocity_max < 128 AND $change_velocity_mid <= $change_velocity_max) {
-		$average_velocity = $_POST['average_velocity'];
-		$max_velocity = $_POST['max_velocity'];
-		$a1 = $change_velocity_mid / $average_velocity;
-		$a2 = ($change_velocity_max - $change_velocity_mid) / ($max_velocity - $average_velocity);
-		$b2 = $change_velocity_mid;
+	if(isset($_POST['change_velocity_average']) AND $change_velocity_average > 0 AND isset($_POST['change_velocity_max']) AND $change_velocity_max > 0 AND $change_velocity_average < 128 AND $change_velocity_max < 128 AND $change_velocity_average <= $change_velocity_max) {
+		$velocity_average = $_POST['velocity_average'];
+		$velocity_max = $_POST['max_velocity'];
+		$velocity_min = $change_velocity_min = 0;
+		/* $a1 = $change_velocity_average / $velocity_average;
+		$a2 = ($change_velocity_max - $change_velocity_average) / ($velocity_max - $velocity_average);
+		$b2 = $change_velocity_average; */
+		$a = (($velocity_min - $velocity_max)*($change_velocity_min - $change_velocity_average) - ($velocity_min - $velocity_average)*($change_velocity_min - $change_velocity_max)) / (($velocity_min*$velocity_min - $velocity_average*$velocity_average)*($velocity_min - $velocity_max) - ($velocity_min*$velocity_min - $velocity_max*$velocity_max)*($velocity_min - $velocity_average));
+		$b = (($change_velocity_min - $change_velocity_average) - $a * ($velocity_min*$velocity_min - $velocity_average*$velocity_average))/($velocity_min - $velocity_average);
+		$c = $change_velocity_min - ($a * $velocity_min * $velocity_min) - $b * $velocity_min;
 		$content = @file_get_contents($this_file,TRUE);
 		$extract_data = extract_data(TRUE,$content);
 		$data = $extract_data['content'];
@@ -671,10 +675,12 @@ if(isset($_POST['apply_velocity_change'])) {
 		while(is_integer($pos1=strpos($data,"_vel(",$pos1))) {
 			if(!is_integer($pos2=strpos($data,")",$pos1 + 4))) break;
 			$this_value = substr($data,$pos1 + 5,$pos2 - $pos1 - 5);
-			if($this_value < $average_velocity) $new_value = round($a1 * $this_value);
-			else $new_value = round($a2 * ($this_value - $average_velocity) + $b2);
+		/*	if($this_value < $velocity_average) $new_value = round($a1 * $this_value);
+			else $new_value = round($a2 * ($this_value - $velocity_average) + $b2); */
+			$new_value = round($a * $this_value * $this_value + $b * $this_value + $c);
 			$new_control = "_vel(".$new_value.")";
 		//	echo $this_value." --> ".$new_value."<br />";
+			echo "_vel(".$this_value.") --> _vel(".$new_value.")<br />";
 			$d1 = substr($data,0,$pos1);
 			$d2 = substr($data,$pos2 +  1,strlen($data) - $pos2 - 1);
 			$data = $d1.$new_control.$d2;
@@ -683,16 +689,20 @@ if(isset($_POST['apply_velocity_change'])) {
 		$_POST['thistext'] = $data;
 		$need_to_save = TRUE;
 		}
-	else echo "<p><font color=\"red\">➡ Modified values of velocity “".$_POST['change_velocity_mid']."” and “".$_POST['change_velocity_max']."” are missing or out of range!</font></p>";
+	else echo "<p><font color=\"red\">➡ Modified values of velocity “".$_POST['change_velocity_average']."” and “".$_POST['change_velocity_max']."” are missing or out of range!</font></p>";
 	}
 
 if(isset($_POST['apply_volume_change'])) {
-	if(isset($_POST['change_volume_mid']) AND $change_volume_mid > 0 AND isset($_POST['change_volume_max']) AND $change_volume_max > 0 AND $change_volume_mid < 128 AND $change_volume_max < 128 AND $change_volume_mid <= $change_volume_max) {
-		$average_volume = $_POST['average_volume'];
-		$max_volume = $_POST['max_volume'];
-		$a1 = $change_volume_mid / $average_volume;
-		$a2 = ($change_volume_max - $change_volume_mid) / ($max_volume - $average_volume);
-		$b2 = $change_volume_mid;
+	if(isset($_POST['change_volume_average']) AND $change_volume_average > 0 AND isset($_POST['change_volume_max']) AND $change_volume_max > 0 AND $change_volume_average < 128 AND $change_volume_max < 128 AND $change_volume_average <= $change_volume_max) {
+		$volume_average = $_POST['volume_average'];
+		$volume_max = $_POST['volume_max'];
+		$volume_min = $change_volume_min = 0;
+	/*	$a1 = $change_volume_average / $volume_average;
+		$a2 = ($change_volume_max - $change_volume_average) / ($volume_max - $volume_average);
+		$b2 = $change_volume_average; */
+		$a = (($volume_min - $volume_max)*($change_volume_min - $change_volume_average) - ($volume_min - $volume_average)*($change_volume_min - $change_volume_max)) / (($volume_min*$volume_min - $volume_average*$volume_average)*($volume_min - $volume_max) - ($volume_min*$volume_min - $volume_max*$volume_max)*($volume_min - $volume_average));
+		$b = (($change_volume_min - $change_volume_average) - $a * ($volume_min*$volume_min - $volume_average*$volume_average))/($volume_min - $volume_average);
+		$c = $change_volume_min - ($a * $volume_min * $volume_min) - $b * $volume_min;
 		$content = @file_get_contents($this_file,TRUE);
 		$extract_data = extract_data(TRUE,$content);
 		$data = $extract_data['content'];
@@ -700,10 +710,11 @@ if(isset($_POST['apply_volume_change'])) {
 		while(is_integer($pos1=strpos($data,"_volume(",$pos1))) {
 			if(!is_integer($pos2=strpos($data,")",$pos1 + 7))) break;
 			$this_value = substr($data,$pos1 + 8,$pos2 - $pos1 - 8);
-			if($this_value < $average_volume) $new_value = round($a1 * $this_value);
-			else $new_value = round($a2 * ($this_value - $average_volume) + $b2);
+		/*	if($this_value < $volume_average) $new_value = round($a1 * $this_value);
+			else $new_value = round($a2 * ($this_value - $volume_average) + $b2); */
+			$new_value= round($a * $this_value * $this_value + $b * $this_value + $c);
 			$new_control = "_volume(".$new_value.")";
-		//	echo $this_value." --> ".$new_value."<br />";
+			echo "_volume(".$this_value.") --> _volume(".$new_value.")<br />";
 			$d1 = substr($data,0,$pos1);
 			$d2 = substr($data,$pos2 +  1,strlen($data) - $pos2 - 1);
 			$data = $d1.$new_control.$d2;
@@ -712,7 +723,7 @@ if(isset($_POST['apply_volume_change'])) {
 		$_POST['thistext'] = $data;
 		$need_to_save = TRUE;
 		}
-	else echo "<p><font color=\"red\">➡ Modified values of volume “".$_POST['change_volume_mid']."” and “".$_POST['change_volume_max']."” are missing or out of range!</font></p>";
+	else echo "<p><font color=\"red\">➡ Modified values of volume “".$_POST['change_volume_average']."” and “".$_POST['change_volume_max']."” are missing or out of range!</font></p>";
 	}
 	
 if(isset($_POST['apply_changes_instructions'])) {
@@ -1022,15 +1033,15 @@ if(isset($_POST['modify_velocity'])) {
 	$content = @file_get_contents($this_file,TRUE);
 	$extract_data = extract_data(TRUE,$content);
 	$data = $extract_data['content'];
-	$average_velocity = search_value("average",$data,"_vel");
+	$velocity_average = search_value("average",$data,"_vel");
 	$max_velocity = search_value("max",$data,"_vel");
-	echo "<input type=\"hidden\" name=\"average_velocity\" value=\"".$average_velocity."\">";
+	echo "<input type=\"hidden\" name=\"velocity_average\" value=\"".$velocity_average."\">";
 	echo "<input type=\"hidden\" name=\"max_velocity\" value=\"".$max_velocity."\">";
 	echo "<table style=\"background-color:cornsilk; border-spacing:6px;\">";
 	echo "<tr><td></td><td style=\"text-align:center;\"><b>Current value</b></td><td style=\"text-align:center;\"><b>Replace with<br />(0 … 127)</b></td></tr>";
 	echo "<tr><td>Average</td>";
-	echo "<td style=\"text-align:center;\">".$average_velocity."</td>";
-	echo "<td style=\"text-align:center;\"><input type=\"text\" style=\"border:none; text-align:center;\" name=\"change_velocity_mid\" size=\"6\" value=\"".$change_velocity_mid."\"></td>";
+	echo "<td style=\"text-align:center;\">".$velocity_average."</td>";
+	echo "<td style=\"text-align:center;\"><input type=\"text\" style=\"border:none; text-align:center;\" name=\"change_velocity_average\" size=\"6\" value=\"".$change_velocity_average."\"></td>";
 	echo "</tr>";
 	echo "<tr><td>Max</td>";
 	echo "<td style=\"text-align:center;\">".$max_velocity."</td>";
@@ -1049,18 +1060,18 @@ if(isset($_POST['modify_volume'])) {
 	$content = @file_get_contents($this_file,TRUE);
 	$extract_data = extract_data(TRUE,$content);
 	$data = $extract_data['content'];
-	$average_volume = search_value("average",$data,"_volume");
-	$max_volume = search_value("max",$data,"_volume");
-	echo "<input type=\"hidden\" name=\"average_volume\" value=\"".$average_volume."\">";
-	echo "<input type=\"hidden\" name=\"max_volume\" value=\"".$max_volume."\">";
+	$volume_average = search_value("average",$data,"_volume");
+	$volume_max = search_value("max",$data,"_volume");
+	echo "<input type=\"hidden\" name=\"volume_average\" value=\"".$volume_average."\">";
+	echo "<input type=\"hidden\" name=\"volume_max\" value=\"".$volume_max."\">";
 	echo "<table style=\"background-color:cornsilk; border-spacing:6px;\">";
 	echo "<tr><td></td><td style=\"text-align:center;\"><b>Current value</b></td><td style=\"text-align:center;\"><b>Replace with<br />(0 … 127)</b></td></tr>";
 	echo "<tr><td>Average</td>";
-	echo "<td style=\"text-align:center;\">".$average_volume."</td>";
-	echo "<td style=\"text-align:center;\"><input type=\"text\" style=\"border:none; text-align:center;\" name=\"change_volume_mid\" size=\"6\" value=\"".$change_volume_mid."\"></td>";
+	echo "<td style=\"text-align:center;\">".$volume_average."</td>";
+	echo "<td style=\"text-align:center;\"><input type=\"text\" style=\"border:none; text-align:center;\" name=\"change_volume_average\" size=\"6\" value=\"".$change_volume_average."\"></td>";
 	echo "</tr>";
 	echo "<tr><td>Max</td>";
-	echo "<td style=\"text-align:center;\">".$max_volume."</td>";
+	echo "<td style=\"text-align:center;\">".$volume_max."</td>";
 	echo "<td style=\"text-align:center;\"><input type=\"text\" style=\"border:none; text-align:center;\" name=\"change_volume_max\" size=\"6\" value=\"".$change_volume_max."\"></td>";
 	echo "</tr>";
 	echo "<tr><td style=\"text-align:center;\"><input style=\"background-color:cornsilk;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\"></td><td></td><td style=\"text-align:center;\"><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"apply_volume_change\" value=\"APPLY\"></td></tr>";
@@ -1179,9 +1190,9 @@ if(!$hide) {
 		echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"modify_velocity\" formaction=\"".$url_this_page."#topchanges\" value=\"Modify _vel()\">&nbsp;";
 		}
 	if($found_chan > 0  OR $found_ins > 0) echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"manage_instructions\" formaction=\"".$url_this_page."#topchanges\" value=\"MANAGE _chan() AND _ins()\">&nbsp;";
-	echo "<input type=\"hidden\" name=\"change_velocity_mid\" value=\"".$change_velocity_mid."\">";
+	echo "<input type=\"hidden\" name=\"change_velocity_average\" value=\"".$change_velocity_average."\">";
 	echo "<input type=\"hidden\" name=\"change_velocity_max\" value=\"".$change_velocity_max."\">";
-	echo "<input type=\"hidden\" name=\"change_volume_mid\" value=\"".$change_volume_mid."\">";
+	echo "<input type=\"hidden\" name=\"change_volume_average\" value=\"".$change_volume_average."\">";
 	echo "<input type=\"hidden\" name=\"change_volume_max\" value=\"".$change_volume_max."\">";
 	}
 echo "</form>";
