@@ -1,6 +1,6 @@
 <?php
 
-function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$metronome_average,$metronome_min,$metronome_max,$list_corrections) {
+function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections) {
 	global $max_term_in_fraction;
 	$grace_ratio = 2;
 	// MakeMusic Finale dynamics https://en.wikipedia.org/wiki/Dynamics_(music)
@@ -10,13 +10,18 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 	$measure_label = array();
 	$sum_metronome = $number_metronome = $metronome_max = $metronome_min = 0;
 	
-	if(($change_metronome_min * $change_metronome_average * $change_metronome_max) > 0) {
-		$a1 = ($change_metronome_average - $change_metronome_min) / ($metronome_average - $metronome_min);
+	if(($current_metronome_min * $current_metronome_average * $current_metronome_max * $change_metronome_min * $change_metronome_average * $change_metronome_max) > 0) {
+		$change_metronome = TRUE;
+	/*	$a1 = ($change_metronome_average - $change_metronome_min) / ($current_metronome_average - $current_metronome_min);
 		$b1 = $change_metronome_min;
-		$a2 = ($change_metronome_max - $change_metronome_average) / ($metronome_max - $metronome_average);
-		$b2 = $change_metronome_average;
+		$a2 = ($change_metronome_max - $change_metronome_average) / ($current_metronome_max - $current_metronome_average);
+		$b2 = $change_metronome_average; */
+		// Quadratic mapping:
+		$a = (($current_metronome_min - $current_metronome_max)*($change_metronome_min - $change_metronome_average) - ($current_metronome_min - $current_metronome_average)*($change_metronome_min - $change_metronome_max)) / (($current_metronome_min*$current_metronome_min - $current_metronome_average*$current_metronome_average)*($current_metronome_min - $current_metronome_max) - ($current_metronome_min*$current_metronome_min - $current_metronome_max*$current_metronome_max)*($current_metronome_min - $current_metronome_average));
+		$b = (($change_metronome_min - $change_metronome_average) - $a * ($current_metronome_min*$current_metronome_min - $current_metronome_average*$current_metronome_average))/($current_metronome_min - $current_metronome_average);
+		$c = $change_metronome_min - ($a * $current_metronome_min * $current_metronome_min) - $b * $current_metronome_min;
 		}
-	else $a1 = 0;
+	else $change_metronome = FALSE;
 		
 	$sum_tempo_measure = $number_tempo_measure = $sum_volume_part = $number_volume_part = $default_tempo = $default_volume = $old_volume = $implicit = array();
 	$p_last_mm = 0; $q_last_mm = 1;
@@ -234,9 +239,12 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 							$tempo = round(trim(preg_replace("/.+tempo=\"([^\"]+)\"\/>/u","$1",$line)));
 							// echo $score_part." mm = ".$tempo." at measure #".$i_measure."<br />";
 							
-							if($a1 > 0) {
-								if($tempo < $metronome_average) $tempo = round(($a1 * ($tempo - $metronome_min)) + $b1);
-								else $tempo = round($a2 * ($tempo - $metronome_average) + $b2);
+							if($change_metronome) {
+								$tempo_changed = round($a * $tempo * $tempo + $b * $tempo + $c);
+						/*		if($tempo < $current_metronome_average) $tempo = round(($a1 * ($tempo - $current_metronome_min)) + $b1);
+								else $tempo = round($a2 * ($tempo - $current_metronome_average) + $b2); */
+								$report .= "Metronome changed from ".$tempo." (non-printed) to ".$tempo_changed."<br />";
+								$tempo = $tempo_changed;
 								}
 							
 							$sum_tempo_measure[$section][$i_measure] += $tempo;
@@ -264,9 +272,12 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 						if(($tempo_option == "all" OR $tempo_option == "score" OR $tempo_option == "allbutmeasures") AND is_integer($pos=strpos($line,"<per-minute>"))) {
 							$tempo = round(trim(preg_replace("/<per\-minute>([^<]+)<\/per\-minute>/u","$1",$line)));
 						//	echo $score_part." tempo = ".$tempo." bpm at measure ".$i_measure." (on the printed score)<br />";
-							if($a1 > 0) {
-								if($tempo < $metronome_average) $tempo = round(($a1 * ($tempo - $metronome_min)) + $b1);
-								else $tempo = round($a2 * ($tempo - $metronome_average) + $b2);
+							if($change_metronome) {
+								$tempo_changed = round($a * $tempo * $tempo + $b * $tempo + $c);
+						/*		if($tempo < $current_metronome_average) $tempo = round(($a1 * ($tempo - $current_metronome_min)) + $b1);
+								else $tempo = round($a2 * ($tempo - $current_metronome_average) + $b2); */
+								$report .= "Metronome changed from ".$tempo." (printed score) to ".$tempo_changed."<br />";
+								$tempo = $tempo_changed;
 								}
 							$sum_tempo_measure[$section][$i_measure] += $tempo;
 							$number_tempo_measure[$section][$i_measure]++;
@@ -316,10 +327,13 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 								foreach($dynamic_sign_to_tempo as $dynamic_sign => $tempo) {
 									if(is_integer(stripos($some_words,$dynamic_sign))) {
 							//			echo "Words = “".recode_tags($some_words)."” at measure ".$i_measure." => ".$dynamic_sign." = ".$tempo."<br />";
-										if($a1 > 0) {
-											if($tempo < $metronome_average)
-												$tempo = round(($a1 * ($tempo - $metronome_min)) + $b1);
-											else $tempo = round($a2 * ($tempo - $metronome_average) + $b2);
+										if($change_metronome) {
+											$tempo_changed = round($a * $tempo * $tempo + $b * $tempo + $c);
+									/*		if($tempo < $current_metronome_average)
+												$tempo = round(($a1 * ($tempo - $current_metronome_min)) + $b1);
+											else $tempo = round($a2 * ($tempo - $current_metronome_average) + $b2); */
+											$report .= "Metronome changed from ".$tempo." (".$some_words.") to ".$tempo_changed."<br />";
+											$tempo = $tempo_changed;
 											}
 										$sum_tempo_measure[$section][$i_measure] += $tempo;
 										$number_tempo_measure[$section][$i_measure]++;
