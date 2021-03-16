@@ -662,26 +662,39 @@ if(isset($_POST['apply_velocity_change'])) {
 		$velocity_average = $_POST['velocity_average'];
 		$velocity_max = $_POST['max_velocity'];
 		$velocity_min = $change_velocity_min = 0;
-		/* $a1 = $change_velocity_average / $velocity_average;
-		$a2 = ($change_velocity_max - $change_velocity_average) / ($velocity_max - $velocity_average);
-		$b2 = $change_velocity_average; */
+		$quad = TRUE;
 		$quadratic_mapping = quadratic_mapping($velocity_min,$velocity_average,$velocity_max,$change_velocity_min,$change_velocity_average,$change_velocity_max);
 		$a = $quadratic_mapping['a'];
 		$b = $quadratic_mapping['b'];
 		$c = $quadratic_mapping['c'];
+		$y_prime1 = $quadratic_mapping['y_prime1'];
+		$y_prime3 = $quadratic_mapping['y_prime3'];
+		if($y_prime1 < 0 OR $y_prime3 < 0) { // Quadratic regression is not monotonous
+			$quad = FALSE;
+			$a1 = $change_velocity_average / $velocity_average;
+			$a2 = ($change_velocity_max - $change_velocity_average) / ($velocity_max - $velocity_average);
+			$b2 = $change_velocity_average;
+			}
 		$content = @file_get_contents($this_file,TRUE);
 		$extract_data = extract_data(TRUE,$content);
 		$data = $extract_data['content'];
-		$pos1 = 0;
+		$pos1 = 0; $done = array(); $said = FALSE;
 		while(is_integer($pos1=strpos($data,"_vel(",$pos1))) {
 			if(!is_integer($pos2=strpos($data,")",$pos1 + 4))) break;
 			$this_value = substr($data,$pos1 + 5,$pos2 - $pos1 - 5);
-		/*	if($this_value < $velocity_average) $new_value = round($a1 * $this_value);
-			else $new_value = round($a2 * ($this_value - $velocity_average) + $b2); */
-			$new_value = round($a * $this_value * $this_value + $b * $this_value + $c);
+			if($quad) $new_value = round($a * $this_value * $this_value + $b * $this_value + $c);
+			else {
+				if($this_value < $velocity_average) $new_value = round($a1 * $this_value);
+				else $new_value = round($a2 * ($this_value - $velocity_average) + $b2);
+				}
 			$new_control = "_vel(".$new_value.")";
-		//	echo $this_value." --> ".$new_value."<br />";
-			echo "_vel(".$this_value.") --> _vel(".$new_value.")<br />";
+			if(!$said) {
+				if($quad) echo "<p><b>Velocity changed using quadratic mapping:</b></p>";
+				else echo "<p><b>Velocity changed using linear mapping (because quadratic is not monotonous):</b></p>";
+				}
+			$said = TRUE;
+			if(!isset($done[$new_value])) echo "_vel(".$this_value.") --> _vel(".$new_value.")<br />";
+			$done[$new_value] = TRUE;
 			$d1 = substr($data,0,$pos1);
 			$d2 = substr($data,$pos2 +  1,strlen($data) - $pos2 - 1);
 			$data = $d1.$new_control.$d2;
@@ -698,25 +711,39 @@ if(isset($_POST['apply_volume_change'])) {
 		$volume_average = $_POST['volume_average'];
 		$volume_max = $_POST['volume_max'];
 		$volume_min = $change_volume_min = 0;
-	/*	$a1 = $change_volume_average / $volume_average;
-		$a2 = ($change_volume_max - $change_volume_average) / ($volume_max - $volume_average);
-		$b2 = $change_volume_average; */
+		$quad = TRUE;
 		$quadratic_mapping = quadratic_mapping($volume_min,$volume_average,$volume_max,$change_volume_min,$change_volume_average,$change_volume_max);
 		$a = $quadratic_mapping['a'];
 		$b = $quadratic_mapping['b'];
 		$c = $quadratic_mapping['c'];
+		$y_prime1 = $quadratic_mapping['y_prime1'];
+		$y_prime3 = $quadratic_mapping['y_prime3'];
+		if($y_prime1 < 0 OR $y_prime3 < 0) { // Quadratic regression is not monotonous
+			$quad = FALSE;
+			$a1 = $change_volume_average / $volume_average;
+			$a2 = ($change_volume_max - $change_volume_average) / ($volume_max - $volume_average);
+			$b2 = $change_volume_average;
+			}
 		$content = @file_get_contents($this_file,TRUE);
 		$extract_data = extract_data(TRUE,$content);
 		$data = $extract_data['content'];
-		$pos1 = 0;
+		$pos1 = 0; $done = array(); $said = FALSE;
 		while(is_integer($pos1=strpos($data,"_volume(",$pos1))) {
 			if(!is_integer($pos2=strpos($data,")",$pos1 + 7))) break;
 			$this_value = substr($data,$pos1 + 8,$pos2 - $pos1 - 8);
-		/*	if($this_value < $volume_average) $new_value = round($a1 * $this_value);
-			else $new_value = round($a2 * ($this_value - $volume_average) + $b2); */
-			$new_value= round($a * $this_value * $this_value + $b * $this_value + $c);
+			if($quad) $new_value= round($a * $this_value * $this_value + $b * $this_value + $c);
+			else {
+				if($this_value < $volume_average) $new_value = round($a1 * $this_value);
+				else $new_value = round($a2 * ($this_value - $volume_average) + $b2);
+				}
 			$new_control = "_volume(".$new_value.")";
-			echo "_volume(".$this_value.") --> _volume(".$new_value.")<br />";
+			if(!$said) {
+				if($quad) echo "<p><b>Volume changed using quadratic mapping:</b></p>";
+				else echo "<p><b>Volume changed using linear mapping (because quadratic is not monotonous):</b></p>";
+				}
+			$said = TRUE;
+			if(!isset($done[$new_value])) echo "_volume(".$this_value.") --> _volume(".$new_value.")<br />";
+			$done[$new_value] = TRUE;
 			$d1 = substr($data,0,$pos1);
 			$d2 = substr($data,$pos2 +  1,strlen($data) - $pos2 - 1);
 			$data = $d1.$new_control.$d2;

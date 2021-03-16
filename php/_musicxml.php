@@ -9,17 +9,24 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 	$data =  $report = $old_measure_label = '';
 	$measure_label = array();
 	$sum_metronome = $number_metronome = $metronome_max = $metronome_min = 0;
-	
+	$said_tempo = FALSE;
 	if(($current_metronome_min * $current_metronome_average * $current_metronome_max * $change_metronome_min * $change_metronome_average * $change_metronome_max) > 0) {
-		$change_metronome = TRUE;
-	/*	$a1 = ($change_metronome_average - $change_metronome_min) / ($current_metronome_average - $current_metronome_min);
-		$b1 = $change_metronome_min;
-		$a2 = ($change_metronome_max - $change_metronome_average) / ($current_metronome_max - $current_metronome_average);
-		$b2 = $change_metronome_average; */
+		$change_metronome = $quad = TRUE;
 		// Quadratic mapping:
-		$a = (($current_metronome_min - $current_metronome_max)*($change_metronome_min - $change_metronome_average) - ($current_metronome_min - $current_metronome_average)*($change_metronome_min - $change_metronome_max)) / (($current_metronome_min*$current_metronome_min - $current_metronome_average*$current_metronome_average)*($current_metronome_min - $current_metronome_max) - ($current_metronome_min*$current_metronome_min - $current_metronome_max*$current_metronome_max)*($current_metronome_min - $current_metronome_average));
-		$b = (($change_metronome_min - $change_metronome_average) - $a * ($current_metronome_min*$current_metronome_min - $current_metronome_average*$current_metronome_average))/($current_metronome_min - $current_metronome_average);
-		$c = $change_metronome_min - ($a * $current_metronome_min * $current_metronome_min) - $b * $current_metronome_min;
+		$quad = TRUE;
+		$quadratic_mapping = quadratic_mapping($current_metronome_min,$current_metronome_average,$current_metronome_max,$change_metronome_min,$change_metronome_average,$change_metronome_max);
+		$a = $quadratic_mapping['a'];
+		$b = $quadratic_mapping['b'];
+		$c = $quadratic_mapping['c'];
+		$y_prime1 = $quadratic_mapping['y_prime1'];
+		$y_prime3 = $quadratic_mapping['y_prime3'];
+		if($y_prime1 < 0 OR $y_prime3 < 0) { // Quadratic regression is not monotonous
+			$quad = FALSE;
+			$a1 = ($change_metronome_average - $change_metronome_min) / ($current_metronome_average - $current_metronome_min);
+			$b1 = $change_metronome_min;
+			$a2 = ($change_metronome_max - $change_metronome_average) / ($current_metronome_max - $current_metronome_average);
+			$b2 = $change_metronome_average;
+			}
 		}
 	else $change_metronome = FALSE;
 		
@@ -240,9 +247,16 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 							// echo $score_part." mm = ".$tempo." at measure #".$i_measure."<br />";
 							
 							if($change_metronome) {
-								$tempo_changed = round($a * $tempo * $tempo + $b * $tempo + $c);
-						/*		if($tempo < $current_metronome_average) $tempo = round(($a1 * ($tempo - $current_metronome_min)) + $b1);
-								else $tempo = round($a2 * ($tempo - $current_metronome_average) + $b2); */
+								if(!$said_tempo) {
+									if($quad) $report .= "<p><b>Tempo changed using quadratic mapping</b></p>";
+									else $report .= "<p><b>Tempo changed using linear mapping (because quadratic is not monotonous):</b></p>";
+									$said_tempo = TRUE;
+									}
+								if($quad) $tempo_changed = round($a * $tempo * $tempo + $b * $tempo + $c);
+								else {
+									if($tempo < $current_metronome_average) $tempo_changed = round(($a1 * ($tempo - $current_metronome_min)) + $b1);
+									else $tempo_changed = round($a2 * ($tempo - $current_metronome_average) + $b2);
+									}
 								$report .= "Metronome changed from ".$tempo." (non-printed) to ".$tempo_changed."<br />";
 								$tempo = $tempo_changed;
 								}
@@ -273,9 +287,16 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 							$tempo = round(trim(preg_replace("/<per\-minute>([^<]+)<\/per\-minute>/u","$1",$line)));
 						//	echo $score_part." tempo = ".$tempo." bpm at measure ".$i_measure." (on the printed score)<br />";
 							if($change_metronome) {
-								$tempo_changed = round($a * $tempo * $tempo + $b * $tempo + $c);
-						/*		if($tempo < $current_metronome_average) $tempo = round(($a1 * ($tempo - $current_metronome_min)) + $b1);
-								else $tempo = round($a2 * ($tempo - $current_metronome_average) + $b2); */
+								if(!$said_tempo) {
+									if($quad) $report .= "<p><b>Tempo changed using quadratic mapping</b></p>";
+									else $report .= "<p><b>Tempo changed using linear mapping (because quadratic is not monotonous):</b></p>";
+									$said_tempo = TRUE;
+									}
+								if($quad) $tempo_changed = round($a * $tempo * $tempo + $b * $tempo + $c);
+								else {
+									if($tempo < $current_metronome_average) $tempo_changed = round(($a1 * ($tempo - $current_metronome_min)) + $b1);
+									else $tempo_changed = round($a2 * ($tempo - $current_metronome_average) + $b2);
+									}
 								$report .= "Metronome changed from ".$tempo." (printed score) to ".$tempo_changed."<br />";
 								$tempo = $tempo_changed;
 								}
@@ -316,7 +337,6 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 								$volume = $dynamic_sign_to_volume[$sign];
 								$sum_volume_part[$section][$score_part] += $volume;
 								$number_volume_part[$section][$score_part]++;
-						//		echo $score_part." sign = ".$sign." => ".$volume." (measure ".$i_measure.")<br />";
 								}
 							}
 						
@@ -328,10 +348,16 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 									if(is_integer(stripos($some_words,$dynamic_sign))) {
 							//			echo "Words = “".recode_tags($some_words)."” at measure ".$i_measure." => ".$dynamic_sign." = ".$tempo."<br />";
 										if($change_metronome) {
-											$tempo_changed = round($a * $tempo * $tempo + $b * $tempo + $c);
-									/*		if($tempo < $current_metronome_average)
-												$tempo = round(($a1 * ($tempo - $current_metronome_min)) + $b1);
-											else $tempo = round($a2 * ($tempo - $current_metronome_average) + $b2); */
+											if(!$said_tempo) {
+												if($quad) $report .= "<p><b>Tempo changed using quadratic mapping</b></p>";
+												else $report .= "<p><b>Tempo changed using linear mapping (because quadratic is not monotonous):</b></p>";
+												$said_tempo = TRUE;
+												}
+											if($quad) $tempo_changed = round($a * $tempo * $tempo + $b * $tempo + $c);
+											else {
+												if($tempo < $current_metronome_average) $tempo_changed = round(($a1 * ($tempo - $current_metronome_min)) + $b1);
+												else $tempo_changed = round($a2 * ($tempo - $current_metronome_average) + $b2);
+												}
 											$report .= "Metronome changed from ".$tempo." (".$some_words.") to ".$tempo_changed."<br />";
 											$tempo = $tempo_changed;
 											}
@@ -801,7 +827,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 									$convert_measure[$score_part] .= $stream;
 									if($stream_units <> $n) $convert_measure[$score_part] .= "}";
 									
-									if($new_tempo > 0) {
+									if($new_tempo > 0) { // $$$$$$
 										$convert_measure[$score_part] .= "||".$new_tempo."||";
 										$current_period = 60 / $new_tempo;
 										$report .= "<font color=\"red\">mm</font> Measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)." metronome set to ".$new_tempo." at date ".$fraction_date." beat(s)<br />";
@@ -817,19 +843,23 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 									if($i_field_of_part > 0 AND $new_tempo == 0 AND $p_next_date_new_tempo > 0 AND $the_event['note'] == "-") {
 										$add = add($p_time_field,$q_time_field,$the_event['p_dur'],$the_event['q_dur']);
 										$add = add($add['p'],$add['q'],-$p_next_date_new_tempo,$q_next_date_new_tempo);
+									//	$report .= "time_field = ".$p_time_field."/".$q_time_field." event_dur = ".$the_event['p_dur']."/".$the_event['q_dur']." next_date_new_tempo = ".$p_next_date_new_tempo."/".$q_next_date_new_tempo."<br />";
 										if(($add['p'] * $add['q']) >= 0 AND isset($value_new_tempo[$i_new_tempo]) AND $value_new_tempo[$i_new_tempo] > 0) {
 											
 											$add = add($p_next_date_new_tempo,$q_next_date_new_tempo,-$p_time_field,$q_time_field);
 											$p_initial_part = $add['p'];
 											$q_initial_part = $add['q'];
+										//	$report .= " initial_part = ".$p_initial_part."/".$q_initial_part."<br />";
 										//	if(($p_initial_part / $q_initial_part) > 0.05) {
-											if(($p_initial_part / $q_initial_part / $divisions[$score_part]) >= 0.05) {
+											if(($p_initial_part / $q_initial_part / $divisions[$score_part]) >= 0) {
 												// Create initial part of rest still at the old tempo
 												$fraction = $p_initial_part."/".($q_initial_part * $divisions[$score_part]);
 												$simplify = simplify($fraction,$max_term_in_fraction);
 												$fraction = $simplify['fraction'];
-												$convert_measure[$score_part] .= " ".$fraction." ";
+												if($fraction <> "0")
+													$convert_measure[$score_part] .= " ".$fraction." ";
 												// Reduce duration of rest by the initial part
+											//	$report .= "event_dur = ".$the_event['p_dur']."/".$the_event['q_dur']." initial_part = ".$p_initial_part."/".$q_initial_part."<br />";
 												$add = add($the_event['p_dur'],$the_event['q_dur'],-$p_initial_part,$q_initial_part);
 												$p_duration = $the_event['p_dur'] = $add['p'];
 												$q_duration = $the_event['q_dur'] = $add['q'];
@@ -848,13 +878,14 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 													$last_i_new_tempo[$i_field_of_part] = $i_new_tempo;
 													$p_last_next_date_new_tempo[$i_field_of_part] = $p_next_date_new_tempo;
 													$q_last_next_date_new_tempo[$i_field_of_part] = $q_next_date_new_tempo;
+												//	$report .= "next_date_new_tempo = ".$p_next_date_new_tempo."/".$q_next_date_new_tempo." last_next_date_new_tempo = ".$p_last_next_date_new_tempo[$i_field_of_part]."/".$q_last_next_date_new_tempo[$i_field_of_part]."<br />";
 													}
 												else {
 													$p_next_date_new_tempo = $q_next_date_new_tempo = $last_i_new_tempo[$i_field_of_part] = -1;
 													}
+											//	$report .= "new_tempo = ".$new_tempo." next tempo[".$i_new_tempo."] = ".$value_new_tempo[$i_new_tempo]."<br />";
 												$convert_measure[$score_part] .= " ||".$new_tempo."|| ";
 												$report .= "<font color=\"red\">mm</font> Measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)." metronome set to ".$new_tempo." during rest starting date ".$fraction_date." beat(s)<br />";
-												// $report .= "next_date_new_tempo = ".$p_next_date_new_tempo."/".$q_next_date_new_tempo." i_new_tempo = ".$i_new_tempo."<br />";
 												$new_tempo = 0;
 												}
 											else break;

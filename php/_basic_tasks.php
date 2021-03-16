@@ -2404,9 +2404,15 @@ function quadratic_mapping($x1,$x2,$x3,$y1,$y2,$y3) {
 	$a = (($x1 - $x3) * ($y1 - $y2) - ($x1 - $x2) * ($y1 - $y3)) / (($x1*$x1 - $x2*$x2) * ($x1 - $x3) - ($x1*$x1 - $x3*$x3) * ($x1 - $x2));
 	$b = (($y1 - $y2) - $a * ($x1*$x1 - $x2*$x2)) / ($x1 - $x2);
 	$c = $y1 - ($a * $x1 * $x1) - $b * $x1;
+	$y_prime1 = 2 * $a * $x1 + $b;
+	$y_prime2 = 2 * $a * $x2 + $b;
+	$y_prime3 = 2 * $a * $x3 + $b;
 	$result['a'] = $a;
 	$result['b'] = $b;
 	$result['c'] = $c;
+	$result['y_prime1'] = $y_prime1;
+	$result['y_prime2'] = $y_prime2;
+	$result['y_prime3'] = $y_prime3;
 	return $result;
 	}
 ?>
