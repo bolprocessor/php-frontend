@@ -2399,4 +2399,14 @@ function search_value($type,$data,$operator) {
 	if($type == "max") return $max;
 	return $this_value;
 	}
+
+function quadratic_mapping($x1,$x2,$x3,$y1,$y2,$y3) {
+	$a = (($x1 - $x3) * ($y1 - $y2) - ($x1 - $x2) * ($y1 - $y3)) / (($x1*$x1 - $x2*$x2) * ($x1 - $x3) - ($x1*$x1 - $x3*$x3) * ($x1 - $x2));
+	$b = (($y1 - $y2) - $a * ($x1*$x1 - $x2*$x2)) / ($x1 - $x2);
+	$c = $y1 - ($a * $x1 * $x1) - $b * $x1;
+	$result['a'] = $a;
+	$result['b'] = $b;
+	$result['c'] = $c;
+	return $result;
+	}
 ?>

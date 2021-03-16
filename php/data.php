@@ -665,9 +665,10 @@ if(isset($_POST['apply_velocity_change'])) {
 		/* $a1 = $change_velocity_average / $velocity_average;
 		$a2 = ($change_velocity_max - $change_velocity_average) / ($velocity_max - $velocity_average);
 		$b2 = $change_velocity_average; */
-		$a = (($velocity_min - $velocity_max)*($change_velocity_min - $change_velocity_average) - ($velocity_min - $velocity_average)*($change_velocity_min - $change_velocity_max)) / (($velocity_min*$velocity_min - $velocity_average*$velocity_average)*($velocity_min - $velocity_max) - ($velocity_min*$velocity_min - $velocity_max*$velocity_max)*($velocity_min - $velocity_average));
-		$b = (($change_velocity_min - $change_velocity_average) - $a * ($velocity_min*$velocity_min - $velocity_average*$velocity_average))/($velocity_min - $velocity_average);
-		$c = $change_velocity_min - ($a * $velocity_min * $velocity_min) - $b * $velocity_min;
+		$quadratic_mapping = quadratic_mapping($velocity_min,$velocity_average,$velocity_max,$change_velocity_min,$change_velocity_average,$change_velocity_max);
+		$a = $quadratic_mapping['a'];
+		$b = $quadratic_mapping['b'];
+		$c = $quadratic_mapping['c'];
 		$content = @file_get_contents($this_file,TRUE);
 		$extract_data = extract_data(TRUE,$content);
 		$data = $extract_data['content'];
@@ -700,9 +701,10 @@ if(isset($_POST['apply_volume_change'])) {
 	/*	$a1 = $change_volume_average / $volume_average;
 		$a2 = ($change_volume_max - $change_volume_average) / ($volume_max - $volume_average);
 		$b2 = $change_volume_average; */
-		$a = (($volume_min - $volume_max)*($change_volume_min - $change_volume_average) - ($volume_min - $volume_average)*($change_volume_min - $change_volume_max)) / (($volume_min*$volume_min - $volume_average*$volume_average)*($volume_min - $volume_max) - ($volume_min*$volume_min - $volume_max*$volume_max)*($volume_min - $volume_average));
-		$b = (($change_volume_min - $change_volume_average) - $a * ($volume_min*$volume_min - $volume_average*$volume_average))/($volume_min - $volume_average);
-		$c = $change_volume_min - ($a * $volume_min * $volume_min) - $b * $volume_min;
+		$quadratic_mapping = quadratic_mapping($volume_min,$volume_average,$volume_max,$change_volume_min,$change_volume_average,$change_volume_max);
+		$a = $quadratic_mapping['a'];
+		$b = $quadratic_mapping['b'];
+		$c = $quadratic_mapping['c'];
 		$content = @file_get_contents($this_file,TRUE);
 		$extract_data = extract_data(TRUE,$content);
 		$data = $extract_data['content'];
@@ -1029,7 +1031,7 @@ if(isset($_POST['change_convention']) AND isset($_POST['new_convention'])) {
 if(isset($_POST['modify_velocity'])) {
 	echo "<hr>";
 	echo "<h3>Modify velocities:</h3>";
-	echo "<i>Values will be interpolated</i><br />";
+	echo "<i>Values will be quadratically interpolated</i><br />";
 	$content = @file_get_contents($this_file,TRUE);
 	$extract_data = extract_data(TRUE,$content);
 	$data = $extract_data['content'];
@@ -1056,7 +1058,7 @@ if(isset($_POST['modify_velocity'])) {
 if(isset($_POST['modify_volume'])) {
 	echo "<hr>";
 	echo "<h3>Modify volumes:</h3>";
-	echo "<i>Values will be interpolated</i><br />";
+	echo "<i>Values will be quadratically interpolated</i><br />";
 	$content = @file_get_contents($this_file,TRUE);
 	$extract_data = extract_data(TRUE,$content);
 	$data = $extract_data['content'];

@@ -446,7 +446,6 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 								$q_date_this_tempo = $add['q'];
 								$p_date_new_tempo[$i_new_tempo] = $p_date_this_tempo;
 								$q_date_new_tempo[$i_new_tempo] = $q_date_this_tempo;
-							//	echo "• measure #".$i_measure." : i_new_tempo = ".$i_new_tempo." new_tempo = ".$new_tempo." time_field = ".$p_time_field."/".$q_time_field." stream_duration = ".$p_stream_duration."/".$q_stream_duration." date_this_tempo = ".$p_date_this_tempo."/".$q_date_this_tempo."<br />";
 								}
 							}
 						if($i_field_of_measure > 0) {
@@ -468,7 +467,6 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 										$last_i_new_tempo[$i_field_of_part] = $i_new_tempo;
 										$p_last_next_date_new_tempo[$i_field_of_part] = $p_next_date_new_tempo;
 										$q_last_next_date_new_tempo[$i_field_of_part] = $q_next_date_new_tempo;
-							//			echo "next_date_new_tempo = ".$p_next_date_new_tempo."/".$q_next_date_new_tempo."<br />";
 										}
 									else {
 										$p_next_date_new_tempo = $q_next_date_new_tempo = $last_i_new_tempo[$i_field_of_part] = -1;
@@ -503,7 +501,6 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 							if($stream_units > 0) {
 						//		$report .= "Stream = ".$stream." measure #".$i_measure." field #".($i_field_of_part + 1)."<br />";
 								if($i_field_of_part == 0) $physical_time += $current_period * ($p_stream_duration / $q_stream_duration / $divisions[$score_part]);
-						//		echo " physical time = ".$physical_time." current_period = ".$current_period."<br />";
 								$add = add($p_time_field,$q_time_field,$p_stream_duration,$q_stream_duration);
 								$p_time_field = $add['p']; $q_time_field = $add['q'];
 								$fraction = $p_stream_duration."/".($q_stream_duration * $divisions[$score_part]);
@@ -543,7 +540,6 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 								}
 							if($the_event['type'] == "back") {
 								$convert_measure[$score_part] .= "§".$i_field_of_part."§,";
-						//		$convert_measure[$score_part] .= "@".$p_time_field."/".($q_time_field * $divisions[$score_part])."§".$i_field_of_part."§,";
 								$p_field_duration[$i_field_of_part] = $p_time_field;
 								$q_field_duration[$i_field_of_part] = $q_time_field * $divisions[$score_part];
 								$i_field_of_part++; $i_field_of_measure++;
@@ -623,18 +619,16 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 							if(($add['p'] * $add['q']) >= 0) {
 								$the_event['fermata'] = TRUE;
 								// Fermata applied to note or rest
-								if(TRUE OR !isset($the_event['forward'])) {
-									$add = add($the_event['p_dur'],$the_event['q_dur'],$p_fermata_duration[$i_measure][$score_part][$i_fermata],$q_fermata_duration[$i_measure][$score_part][$i_fermata]);
-									$the_event['p_dur'] = $add['p'];
-									$the_event['q_dur'] = $add['q'];
-									$fraction = $p_fermata_duration[$i_measure][$score_part][$i_fermata]."/".($q_fermata_duration[$i_measure][$score_part][$i_fermata] * $divisions[$score_part]);
-									$simplify = simplify($fraction,$max_term_in_fraction);
-									$fraction = $simplify['fraction'];
-									$fraction_date = $p_time_field."/".($q_time_field * $divisions[$score_part]);
-									$simplify_date = simplify($fraction_date,$max_term_in_fraction);
-									$fraction_date = $simplify_date['fraction'];
-									$report .= "<font color=\"MediumTurquoise\">f+ </font> Measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)." note ‘".$the_event['note']."’ at date ".$fraction_date." increased by ".$fraction." beat(s) to insert fermata #".($i_fermata + 1)."<br />";
-									}
+								$add = add($the_event['p_dur'],$the_event['q_dur'],$p_fermata_duration[$i_measure][$score_part][$i_fermata],$q_fermata_duration[$i_measure][$score_part][$i_fermata]);
+								$the_event['p_dur'] = $add['p'];
+								$the_event['q_dur'] = $add['q'];
+								$fraction = $p_fermata_duration[$i_measure][$score_part][$i_fermata]."/".($q_fermata_duration[$i_measure][$score_part][$i_fermata] * $divisions[$score_part]);
+								$simplify = simplify($fraction,$max_term_in_fraction);
+								$fraction = $simplify['fraction'];
+								$fraction_date = $p_date_next_fermata."/".($q_date_next_fermata * $divisions[$score_part]);
+								$simplify_date = simplify($fraction_date,$max_term_in_fraction);
+								$fraction_date = $simplify_date['fraction'];
+								$report .= "<font color=\"MediumTurquoise\">f+ </font> Measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)." note ‘".$the_event['note']."’ at date ".$fraction_date." increased by ".$fraction." beat(s) to insert fermata #".($i_fermata + 1)."<br />";
 								}
 							else if($the_event['note'] == "-") {
 								$add = add($add['p'],$add['q'],$the_event['p_dur'],$the_event['q_dur']);
@@ -646,9 +640,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 										$fraction = $p_fermata_duration[$i_measure][$score_part][$i_fermata]."/".($q_fermata_duration[$i_measure][$score_part][$i_fermata] * $divisions[$score_part]);
 										$simplify = simplify($fraction,$max_term_in_fraction);
 										$fraction = $simplify['fraction'];
-										
-										$add2 = add($p_time_field,$q_time_field,$p_stream_duration,$q_stream_duration);
-										$fraction_date = $add2['p']."/".($add2['q'] * $divisions[$score_part]);
+										$fraction_date = $p_date_next_fermata."/".($q_date_next_fermata * $divisions[$score_part]);
 										$simplify_date = simplify($fraction_date,$max_term_in_fraction);
 										$fraction_date = $simplify_date['fraction'];
 										$report .= "<font color=\"MediumTurquoise\">f+ </font> Measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)." silence at date ".$fraction_date." increased by ".$fraction." to insert fermata #".($i_fermata + 1)."<br />";
@@ -660,7 +652,6 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 							}
 						if(isset($the_event['fermata']) AND $the_event['fermata']) {
 							$add = add($p_time_field,$q_time_field,$p_stream_duration,$q_stream_duration);
-						//	echo "Measure #".$i_measure." field #".($i_field_of_part + 1)." note ‘".$the_event['note']."’ IS FERMATA #".$i_fermata.", date = ".$add['p']."/".$add['q']."<br />";
 							$i_fermata++;
 							if(isset($p_fermata_date[$i_measure][$score_part][$i_fermata])) {
 								$p_date_next_fermata = $p_fermata_date[$i_measure][$score_part][$i_fermata];
