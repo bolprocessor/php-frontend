@@ -32,17 +32,18 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 		
 	$sum_tempo_measure = $number_tempo_measure = $sum_volume_part = $number_volume_part = $default_tempo = $default_volume = $old_volume = $implicit = array();
 	$p_last_mm = 0; $q_last_mm = 1;
-	$old_tempo = '';
+	$old_tempo = ''; $current_tempo = 1;
 	$found_tempo_variation = FALSE;
 	$fermata_show = FALSE; // Only for test
 	ksort($the_score);
 	foreach($the_score as $section => $the_section) {
-		if($test_musicxml) echo "<br /><font color = red>• Section ".$section."</font><br />";
+		if($reload_musicxml) $report .= "<br /><b>== Section ".$section." ==</b><br />";
 		$sum_tempo_measure[$section] = $number_tempo_measure[$section] = array();
 		$sum_volume_part[$section] = $number_volume_part[$section] = array();
 		$default_volume[$section] = array();
 		$implicit[$section] = array();
-		$default_tempo[$section] = $current_tempo = 1;
+		if(!isset($default_tempo[$section - 1])) $default_tempo[$section] = $current_tempo;
+		else $default_tempo[$section] = $default_tempo[$section - 1];
 		for($i_repeat = 1; $i_repeat <= $repeat_section[$section]; $i_repeat++) {
 			$tie_type_start = $tie_type_stop = FALSE;
 			if($test_musicxml) echo "Repetition ".$i_repeat." section ".$section."<br />";
@@ -51,10 +52,12 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 		//  Beware that there are empty sessions
 			foreach($the_section as $i_measure => $the_measure) {
 				if($i_measure < 0) continue;
-				$simplify = simplify($current_tempo,$max_term_in_fraction);
+			//	$simplify = simplify($current_tempo,$max_term_in_fraction);
+				$simplify = simplify($default_tempo[$section],$max_term_in_fraction);
 				$n = $simplify['p'] / $simplify['q'];
 				$current_period = 1 / $n;
-				$physical_time = 0.;
+				if($reload_musicxml) $report .= "<br />• Measure #".$i_measure." starts with current period = ".round($current_period,2)."s, current tempo = ".$current_tempo.", default tempo = ".$default_tempo[$section]." (metronome = ".(60 * $n).")<br />";
+				$physical_time = $max_physical_time = 0.;
 				$sum_tempo_measure[$section][$i_measure] = 0;
 				$number_tempo_measure[$section][$i_measure] = 0;
 				$measure_label[$i_measure] = $i_measure;
@@ -62,7 +65,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 				if(!is_integer($i_measure)) {
 					$implicit[$section][$i_measure] = TRUE;
 					$measure_label[$i_measure] = $old_measure_label."-".$measure_label[$i_measure];
-					if($list_corrections) echo "• Implicit measure ".$measure_label[$i_measure]." is labelled <font color=\"MediumTurquoise\">“".$i_measure."”</font><br />";
+					$report .= "• Implicit measure #".$i_measure." is labelled <font color=\"MediumTurquoise\">“".$measure_label[$i_measure]."”</font><br />";
 					}
 				else $old_measure_label = $measure_label[$i_measure];
 				if($test_musicxml)
@@ -223,6 +226,9 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 						if(is_integer($pos=strpos($line,"<fermata"))) {
 							$fermata = TRUE;
 							}
+						if($note_on AND is_integer($pos=strpos($line,"<trill-mark"))) {
+							$curr_event[$score_part][$j]['trill'] = TRUE;
+							}
 						if($note_on AND is_integer($pos=strpos($line,"<duration>"))) {
 							$duration = round(trim(preg_replace("/<duration>([^<]+)<\/duration>/u","$1",$line)));
 							$curr_event[$score_part][$j]['p_dur'] = $duration;
@@ -361,13 +367,14 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 											$report .= "Metronome changed from ".$tempo." (".$some_words.") to ".$tempo_changed."<br />";
 											$tempo = $tempo_changed;
 											}
-										$sum_tempo_measure[$section][$i_measure] += $tempo;
-										$number_tempo_measure[$section][$i_measure]++;
+									//	$sum_tempo_measure[$section][$i_measure] += $tempo;
+									//	$number_tempo_measure[$section][$i_measure]++;
 										
 										$curr_event[$score_part][$j]['type'] = "mm"; // Added by BB 2021-03-14
 										$curr_event[$score_part][$j]['value'] = round($tempo);
 										$curr_event[$score_part][$j]['p_dur'] = 0;
 										$curr_event[$score_part][$j]['q_dur'] = 1;
+										$curr_event[$score_part][$j]['word'] = $dynamic_sign;
 										$is_chord = FALSE;
 										$j++;
 										break;
@@ -463,6 +470,14 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 					foreach($curr_event[$score_part] as $j => $the_event) {
 						if($the_event['type'] == "mm") {
 							$new_tempo = $the_event['value'];
+							if(isset($the_event['word'])) {
+								$report .= "<font color=\"red\">mm</font> Measure #".$i_measure." dynamic sign “<font color=\"blue\">".$the_event['word']."</font>” metronome set to ".$new_tempo."<br />";
+								$current_period = 60 / $new_tempo;
+								$fraction = $new_tempo."/60";
+								$simplify = simplify($fraction,$max_term_in_fraction);
+								$fraction = $simplify['fraction'];
+								$old_tempo = $current_tempo = $default_tempo[$section] = $fraction;
+								}
 							if($i_field_of_measure == 0) {
 								// We will store new tempo values appearing in the first field (upper line)
 								$i_new_tempo++;
@@ -526,7 +541,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 								echo " time_field = ".$p_time_field."/".$q_time_field." stream_duration = ".$p_stream_duration."/".$q_stream_duration." the_event[dur] = ".$the_event['p_dur']."/".$the_event['q_dur'].", divisions = ".$divisions[$score_part]." stream = “".$stream."”<br />";
 							if($stream_units > 0) {
 						//		$report .= "Stream = ".$stream." measure #".$i_measure." field #".($i_field_of_part + 1)."<br />";
-								if($i_field_of_part == 0) $physical_time += $current_period * ($p_stream_duration / $q_stream_duration / $divisions[$score_part]);
+								/* if($i_field_of_part == 0) */ $physical_time += $current_period * ($p_stream_duration / $q_stream_duration / $divisions[$score_part]);
 								$add = add($p_time_field,$q_time_field,$p_stream_duration,$q_stream_duration);
 								$p_time_field = $add['p']; $q_time_field = $add['q'];
 								$fraction = $p_stream_duration."/".($q_stream_duration * $divisions[$score_part]);
@@ -568,6 +583,12 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 								$convert_measure[$score_part] .= "§".$i_field_of_part."§,";
 								$p_field_duration[$i_field_of_part] = $p_time_field;
 								$q_field_duration[$i_field_of_part] = $q_time_field * $divisions[$score_part];
+								$report .= "+ measure #".$i_measure." field #".($i_field_of_part + 1)." : physical time = ".round($physical_time,2)."s";
+								if($empty_field[$i_field_of_part]) $report .= " (only silence)";
+								$report .= "<br />";
+								if(!$empty_field[$i_field_of_part] AND $physical_time > $max_physical_time)
+									$max_physical_time = $physical_time;
+								$physical_time = 0.;
 								$i_field_of_part++; $i_field_of_measure++;
 								$empty_field[$i_field_of_part] = TRUE;
 								$new_tempo = 0;
@@ -629,9 +650,10 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 							
 						if(isset($the_event['fermata']) AND $the_event['fermata'] AND $the_event['note'] <> '') {
 							$fraction = $p_fermata_duration[$i_measure][$score_part][$i_fermata]."/".($q_fermata_duration[$i_measure][$score_part][$i_fermata] * $divisions[$score_part]);
-							
 							$simplify = simplify($fraction,$max_term_in_fraction);
 							$fraction = $simplify['fraction'];
+							$physical_time += $current_period * ($p_fermata_duration[$i_measure][$score_part][$i_fermata] / $q_fermata_duration[$i_measure][$score_part][$i_fermata] / $divisions[$score_part]);
+							// $report .= "physical_time1 = ".$physical_time." current_period = ".$current_period." fermata_duration = ".$p_fermata_duration[$i_measure][$score_part][$i_fermata]."/".$q_fermata_duration[$i_measure][$score_part][$i_fermata]."<br />";
 							$add = add($p_time_field,$q_time_field,$p_stream_duration,$q_stream_duration);
 					//		if($i_field_of_part == 0) $physical_time += $current_period * ($p_stream_duration / $q_stream_duration / $divisions[$score_part]);
 							$fraction_date = $add['p']."/".($add['q'] * $divisions[$score_part]);
@@ -645,6 +667,8 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 							if(($add['p'] * $add['q']) >= 0) {
 								$the_event['fermata'] = TRUE;
 								// Fermata applied to note or rest
+								$physical_time += $current_period * ($p_fermata_duration[$i_measure][$score_part][$i_fermata] / $q_fermata_duration[$i_measure][$score_part][$i_fermata] / $divisions[$score_part]);
+								// $report .= "physical_time2 = ".$physical_time." current_period = ".$current_period." fermata_duration = ".$p_fermata_duration[$i_measure][$score_part][$i_fermata]."/".$q_fermata_duration[$i_measure][$score_part][$i_fermata]."<br />";
 								$add = add($the_event['p_dur'],$the_event['q_dur'],$p_fermata_duration[$i_measure][$score_part][$i_fermata],$q_fermata_duration[$i_measure][$score_part][$i_fermata]);
 								$the_event['p_dur'] = $add['p'];
 								$the_event['q_dur'] = $add['q'];
@@ -661,18 +685,18 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 								if(($add['p'] * $add['q']) >= 0) {
 									$the_event['fermata'] = TRUE;
 									// Fermata occuring inside a rest
-									if(TRUE OR !isset($the_event['forward'])) {
-										$add = add($the_event['p_dur'],$the_event['q_dur'],$p_fermata_duration[$i_measure][$score_part][$i_fermata],$q_fermata_duration[$i_measure][$score_part][$i_fermata]);
-										$fraction = $p_fermata_duration[$i_measure][$score_part][$i_fermata]."/".($q_fermata_duration[$i_measure][$score_part][$i_fermata] * $divisions[$score_part]);
-										$simplify = simplify($fraction,$max_term_in_fraction);
-										$fraction = $simplify['fraction'];
-										$fraction_date = $p_date_next_fermata."/".($q_date_next_fermata * $divisions[$score_part]);
-										$simplify_date = simplify($fraction_date,$max_term_in_fraction);
-										$fraction_date = $simplify_date['fraction'];
-										$report .= "<font color=\"MediumTurquoise\">f+ </font> Measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)." silence at date ".$fraction_date." increased by ".$fraction." to insert fermata #".($i_fermata + 1)."<br />";
-										$the_event['p_dur'] = $add['p'];
-										$the_event['q_dur'] = $add['q'];
-										}
+									$physical_time += $current_period * ($p_fermata_duration[$i_measure][$score_part][$i_fermata] / $q_fermata_duration[$i_measure][$score_part][$i_fermata] / $divisions[$score_part]);
+									// $report .= "physical_time3 = ".$physical_time." current_period = ".$current_period." fermata_duration = ".$p_fermata_duration[$i_measure][$score_part][$i_fermata]."/".$q_fermata_duration[$i_measure][$score_part][$i_fermata]."<br />";
+									$add = add($the_event['p_dur'],$the_event['q_dur'],$p_fermata_duration[$i_measure][$score_part][$i_fermata],$q_fermata_duration[$i_measure][$score_part][$i_fermata]);
+									$fraction = $p_fermata_duration[$i_measure][$score_part][$i_fermata]."/".($q_fermata_duration[$i_measure][$score_part][$i_fermata] * $divisions[$score_part]);
+									$simplify = simplify($fraction,$max_term_in_fraction);
+									$fraction = $simplify['fraction'];
+									$fraction_date = $p_date_next_fermata."/".($q_date_next_fermata * $divisions[$score_part]);
+									$simplify_date = simplify($fraction_date,$max_term_in_fraction);
+									$fraction_date = $simplify_date['fraction'];
+									$report .= "<font color=\"MediumTurquoise\">f+ </font> Measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)." silence at date ".$fraction_date." increased by ".$fraction." to insert fermata #".($i_fermata + 1)."<br />";
+									$the_event['p_dur'] = $add['p'];
+									$the_event['q_dur'] = $add['q'];
 									}
 								}
 							}
@@ -713,14 +737,14 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 									$p_duration = $add2['p']; $q_duration = $add2['q'];
 									$add = add($p_time_field,$q_time_field,$p_grace,$q_grace);
 									$p_time_field = $add['p']; $q_time_field = $add['q'];
-									if($i_field_of_part == 0) $physical_time += $current_period * ($p_grace / $q_grace / $divisions[$score_part]);
+									/* if($i_field_of_part == 0) */ $physical_time += $current_period * ($p_grace / $q_grace / $divisions[$score_part]);
 									$fraction = $p_grace."/".($q_grace * $divisions[$score_part]);
 									}
 								else {
 									$fraction = $p_stream_duration."/".($q_stream_duration * $divisions[$score_part]);
 									$add = add($p_time_field,$q_time_field,$p_stream_duration,$q_stream_duration);
 									$p_time_field = $add['p']; $q_time_field = $add['q'];
-									if($i_field_of_part == 0) $physical_time += $current_period * ($p_stream_duration / $q_stream_duration / $divisions[$score_part]);
+									/* if($i_field_of_part == 0) */ $physical_time += $current_period * ($p_stream_duration / $q_stream_duration / $divisions[$score_part]);
 									}
 								
 								$simplify = simplify($fraction,$max_term_in_fraction);
@@ -744,7 +768,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 								$convert_measure[$score_part] .= "arpeggiate";
 								$report .= "<font color=\"blue\">Arpeggio</font> measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)."<br />";
 								}
-							if($i_field_of_part == 0) $physical_time += $current_period * ($p_duration / $q_duration / $divisions[$score_part]);
+							/* if($i_field_of_part == 0) */ $physical_time += $current_period * ($p_duration / $q_duration / $divisions[$score_part]);
 							$add = add($p_time_field,$q_time_field,$p_duration,$q_duration);
 							$p_time_field = $add['p']; $q_time_field = $add['q'];
 							$fraction = $p_duration."/".($q_duration * $divisions[$score_part]);
@@ -753,7 +777,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 							$convert_measure[$score_part] .= "{";
 							if($fraction <> "1") {
 								if($fraction == 0) { // Grace notes in chord
-									$report .= "FRACTION_0<br />";
+								//	$report .= "FRACTION_0<br />";
 									$fraction = "FRACTION_0";
 									}
 								$convert_measure[$score_part] .= $fraction.",";
@@ -778,7 +802,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 							$fraction = $the_event['p_dur']."/".($divisions[$score_part] * $the_event['q_dur']);
 							if(($p_duration * $q_old_duration) == ($p_old_duration * $q_duration)) {
 								$stream .= $the_event['note']." ";
-								if($the_event['note'] <> "-") $empty_field[$i_field_of_part] = FALSE;
+								if($the_event['note'] <> "-" AND $the_event['note'] <> '') $empty_field[$i_field_of_part] = FALSE;
 								$stream_units++;
 								$add = add($p_stream_duration,$q_stream_duration,$p_duration,$q_duration);
 								$p_stream_duration = $add['p']; $q_stream_duration = $add['q'];
@@ -799,13 +823,13 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 										$add2 = add($p_duration,$q_duration,-$p_grace,$q_grace);
 										$p_duration = $add2['p']; $q_duration = $add2['q'];
 										$add = add($p_time_field,$q_time_field,$p_grace,$q_grace);
-										if($i_field_of_part == 0) $physical_time += $current_period * ($p_grace/$q_grace / $divisions[$score_part]);
+										/* if($i_field_of_part == 0) */ $physical_time += $current_period * ($p_grace/$q_grace / $divisions[$score_part]);
 										$fraction = $p_grace."/".($q_grace * $divisions[$score_part]);
 										}
 									else {
 										$fraction = $p_stream_duration."/".($q_stream_duration * $divisions[$score_part]);
 										$add = add($p_time_field,$q_time_field,$p_stream_duration,$q_stream_duration);
-										if($i_field_of_part == 0) $physical_time += $current_period * ($p_stream_duration/$q_stream_duration / $divisions[$score_part]);
+										/* if($i_field_of_part == 0) */ $physical_time += $current_period * ($p_stream_duration/$q_stream_duration / $divisions[$score_part]);
 										}
 									$p_time_field = $add['p']; $q_time_field = $add['q'];
 									$simplify = simplify($fraction,$max_term_in_fraction);
@@ -827,7 +851,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 									$convert_measure[$score_part] .= $stream;
 									if($stream_units <> $n) $convert_measure[$score_part] .= "}";
 									
-									if($new_tempo > 0) { // $$$$$$
+									if($new_tempo > 0) { // maybe useless
 										$convert_measure[$score_part] .= "||".$new_tempo."||";
 										$current_period = 60 / $new_tempo;
 										$report .= "<font color=\"red\">mm</font> Measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)." metronome set to ".$new_tempo." at date ".$fraction_date." beat(s)<br />";
@@ -867,8 +891,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 												$add = add($p_time_field,$q_time_field,$p_initial_part,$q_initial_part);
 												$p_time_field = $add['p'];
 												$q_time_field = $add['q'];
-												if($i_field_of_part == 0) $physical_time += $current_period * ($p_initial_part/$q_initial_part / $divisions[$score_part]);
-												
+												/* if($i_field_of_part == 0) */ $physical_time += $current_period * ($p_initial_part/$q_initial_part / $divisions[$score_part]);
 												// Update new_tempo
 												$new_tempo = $value_new_tempo[$i_new_tempo];
 												$i_new_tempo++;
@@ -884,8 +907,11 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 													$p_next_date_new_tempo = $q_next_date_new_tempo = $last_i_new_tempo[$i_field_of_part] = -1;
 													}
 											//	$report .= "new_tempo = ".$new_tempo." next tempo[".$i_new_tempo."] = ".$value_new_tempo[$i_new_tempo]."<br />";
-												$convert_measure[$score_part] .= " ||".$new_tempo."|| ";
-												$report .= "<font color=\"red\">mm</font> Measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)." metronome set to ".$new_tempo." during rest starting date ".$fraction_date." beat(s)<br />";
+												if($new_tempo <> round(60 / $current_period)) { // Added by BB 2021-03-16
+													$convert_measure[$score_part] .= " ||".$new_tempo."|| ";
+													$current_period = 60 / $new_tempo; // Added by BB 2021-03-16
+													$report .= "<font color=\"red\">mm</font> Measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)." metronome set to ".$new_tempo." during rest starting date ".$fraction_date." beat(s)<br />";
+													}
 												$new_tempo = 0;
 												}
 											else break;
@@ -898,14 +924,14 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 							//	if($p_duration > 0) {
 									$stream_units = 1;
 								//	}
-								if($the_event['note'] <> "-") $empty_field[$i_field_of_part] = FALSE;
+								if($the_event['note'] <> "-" AND $the_event['note'] <> '') $empty_field[$i_field_of_part] = FALSE;
 								$p_old_duration = $p_stream_duration = $p_duration;
 								$q_old_duration = $q_stream_duration = $q_duration;
 								}
 							}
 						else {
 							$convert_measure[$score_part] .= $the_event['note'];
-							if($the_event['note'] <> "-") $empty_field[$i_field_of_part] = FALSE;
+							if($the_event['note'] <> "-" AND $the_event['note'] <> '') $empty_field[$i_field_of_part] = FALSE;
 							$convert_measure[$score_part] .= ",";
 							}
 						}
@@ -941,9 +967,10 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 						if($stream_units <> $n) $convert_measure[$score_part] .= "}";
 						$add = add($p_time_field,$q_time_field,$p_stream_duration,$q_stream_duration);
 						$p_time_field = $add['p']; $q_time_field = $add['q'];
-						if($i_field_of_part == 0) $physical_time += $current_period * ($p_stream_duration/$q_stream_duration / $divisions[$score_part]);
+						/* if($i_field_of_part == 0) */ $physical_time += $current_period * ($p_stream_duration/$q_stream_duration / $divisions[$score_part]);
 						$stream = ''; $stream_units = 0; $p_stream_duration = 0; $q_stream_duration = 1;
 						}
+								
 					$convert_measure[$score_part] .= "§".$i_field_of_part."§,";
 					$p_field_duration[$i_field_of_part] = $p_time_field;
 					$q_field_duration[$i_field_of_part] = $q_time_field * $divisions[$score_part];
@@ -965,23 +992,22 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 						$fraction = $simplify['fraction'];
 						// if($fraction <> "1") $data .= " _tempo(".$fraction.")";
 						if($old_tempo == '') $old_tempo = $fraction;
-						$current_tempo = $default_tempo[$section] = $fraction;
+					//	$current_tempo = $default_tempo[$section] = $fraction;
+						$current_tempo = $fraction;
+					//	$report .= "number_tempo_measure = ".$number_tempo_measure[$section][$i_measure]." tempo_this_measure = ".$tempo_this_measure." current_tempo = ".$current_tempo."<br />";
 						}
 					else if(isset($default_tempo[$section])) {
 						// We must repeat tempo on each measure to play it separately
 							$simplify = simplify($default_tempo[$section],$max_term_in_fraction);
 							$tempo_this_measure = round($simplify['p'] * 60 / $simplify['q']);
 							if($default_tempo[$section] <> "1") {
-								// $data .= " _tempo(".$default_tempo[$section].")";
 								$current_tempo = $default_tempo[$section];
 								}
 							}
 						else {
-						//	$report .= "OLD_TEMPO<br />";
 							if($old_tempo == '') $old_tempo = 1;
 							$simplify = simplify($old_tempo,$max_term_in_fraction);
 							$tempo_this_measure = round($simplify['p'] * 60 / $simplify['q']);
-							// if($old_tempo <> "1") $data .= " _tempo(".$old_tempo.")";
 							$current_tempo = $old_tempo;
 							}
 					$data .= "_tempo(TEMPO_THIS_MEASURE)";
@@ -1076,7 +1102,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 											$add = add($p_time_field,$q_time_field,$p_initial_part,$q_initial_part);
 											$p_time_field = $add['p'];
 											$q_time_field = $add['q'];
-											if($j == 0) $physical_time += $current_period * ($p_initial_part/$q_initial_part / $divisions[$score_part]);
+											/* if($j == 0) */ $physical_time += $current_period * ($p_initial_part/$q_initial_part / $divisions[$score_part]);
 											// Update new_tempo
 											$new_tempo = $value_new_tempo[$i_new_tempo];
 											$i_new_tempo++;
@@ -1096,7 +1122,6 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 									}
 								else break;
 								}
-								
 							$fraction = $p_gap."/".$q_gap;
 							$simplify = simplify($fraction,$max_term_in_fraction);
 							$fraction = $simplify['fraction'];
@@ -1108,21 +1133,28 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 							}
 						}
 					
-					if($physical_time > 0) $tempobis = round(60 * $p_time_measure / ($q_time_measure * $divisions[$score_part]) / $physical_time);
-					else $tempobis = $tempo_this_measure;
+					$report .= "+ measure #".$i_measure." field #".$i_field_of_part." : physical time = ".round($physical_time,2)."s";
+					if($empty_field[$i_field_of_part - 1]) $report .= " (only silence)";
+					$report .= "<br />";
+					if(!$empty_field[$i_field_of_part - 1] AND $physical_time > $max_physical_time)
+						$max_physical_time = $physical_time;
+					
+					if($max_physical_time > 0.) $final_tempo = round(60 * $p_time_measure / ($q_time_measure * $divisions[$score_part]) / $max_physical_time);
+					else $final_tempo = $tempo_this_measure;
 				//	$report .= "Measure ".$i_measure." number_tempo_measure = ".$number_tempo_measure[$section][$i_measure]." sum_tempo_measure = ".$sum_tempo_measure[$section][$i_measure]." tempo_this_measure = ".$tempo_this_measure."<br />";
-					if($tempo_this_measure == 0 OR abs(($tempo_this_measure - $tempobis) / $tempo_this_measure) > 0.4) $warning = TRUE;
+					if($tempo_this_measure == 0 OR abs(($tempo_this_measure - $final_tempo) / $tempo_this_measure) > 0.4) $warning = TRUE;
 					else $warning = FALSE;
 					if($warning) $report .= "<font color=\"red\">";
-					if($tempobis <> $tempo_this_measure) $report .= "➡ Measure #".$i_measure." part ".$score_part." physical time = ".round($physical_time,3)." s, average tempo = ".$tempo_this_measure." —> final tempo = ".$tempobis."<br />";
+				/*	if($final_tempo <> $tempo_this_measure) */ $report .= "➡ Measure #".$i_measure." part ".$score_part." physical time = ".round($max_physical_time,2)."s, average metronome = ".$tempo_this_measure.", final metronome = <font color=\"blue\">".$final_tempo."</font><br />";
 					if($warning) $report .= "</font>";
-					if($tempobis > 0) $tempo_this_measure = $tempobis;
-					$physical_time = 0.;
+					if($final_tempo > 0) $tempo_this_measure = $final_tempo;
+					$physical_time = $max_physical_time = 0.;
 					
 					$fraction = $tempo_this_measure."/60";
 					$simplify = simplify($fraction,$max_term_in_fraction);
 					$fraction = $simplify['fraction'];
-					$current_tempo = $default_tempo[$section] = $fraction; // $$$$
+				//	$current_tempo = $default_tempo[$section] = $fraction; // $$$$
+					$current_tempo = $fraction; // $$$$
 					if($fraction <> "1") $data = str_replace("TEMPO_THIS_MEASURE",$fraction,$data);
 					else $data = str_replace("_tempo(TEMPO_THIS_MEASURE)",'',$data);
 					
