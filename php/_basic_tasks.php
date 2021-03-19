@@ -2410,9 +2410,40 @@ function quadratic_mapping($x1,$x2,$x3,$y1,$y2,$y3) {
 	$result['a'] = $a;
 	$result['b'] = $b;
 	$result['c'] = $c;
-	$result['y_prime1'] = $y_prime1;
+	$result['y_prime1'] = $y_prime1; // First derived is required to check that funnction is monotonous
 	$result['y_prime2'] = $y_prime2;
 	$result['y_prime3'] = $y_prime3;
 	return $result;
+	}
+
+function create_grammar($data_path) {
+	$grammar = '';
+	$content = @file_get_contents($data_path,TRUE);
+	$extract_data = extract_data(TRUE,$content);
+	$content = $extract_data['content'];
+	$table = explode(chr(10),$content );
+	$imax = count($table);
+	$i_variable = 1; $first = TRUE; $all_variables = '';
+	for($i = 0; $i < $imax; $i++) {
+		$line = trim($table[$i]);
+		if(is_integer($pos=strpos($line,"//")) AND $pos == 0) {
+			$grammar .= $line."<br />";
+			continue;
+			}
+		if($line == '') continue;
+		$line = preg_replace("/\[[^\]]*\]/u",'',$line);
+		if(is_integer(strpos($line,"{"))) {
+			if($first) $grammar .= "<br />S --> ALL_VARIABLES<br /><br />";
+			$first = FALSE;
+			$index = sprintf('%03d',$i_variable);
+			$line = "M".$index." --> ".$line;
+			$all_variables .= "M".$index." ";
+			$i_variable++;
+			}
+		else if($first) $grammar .= "<br />";
+		$grammar .= $line."<br />";
+		}
+	$grammar = str_replace("ALL_VARIABLES",$all_variables,$grammar);
+	return $grammar;
 	}
 ?>

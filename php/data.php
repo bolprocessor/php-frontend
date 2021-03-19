@@ -1226,17 +1226,23 @@ if(!$hide) {
 	}
 echo "</form>";
 echo "</td>";
+$window_name = window_name($filename);
 if(!$hide) {
 	echo "<td style=\"background-color:cornsilk;\">";
 	echo "<table style=\"background-color:Gold;\">";
 	$table = explode(chr(10),$content);
 	$imax = count($table);
 	if($imax > 0 AND substr_count($content,'{') > 0) {
+		$window_name_grammar = $window_name."_grammar";
+		$link_grammar = "produce.php?data=".urlencode($this_file);
+		$link_grammar = $link_grammar."&instruction=create_grammar";
+
 		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		echo "<input type=\"hidden\" name=\"thistext\" value=\"".$content."\">";
 		echo "<input type=\"hidden\" name=\"file_format\" value=\"".$file_format."\">";
 		echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
 		echo "<tr><td colspan=\"2\" style=\"vertical-align:middle; padding:6px;\">";
+		echo "<div style=\"float:right;\"><input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_grammar."','".$window_name_grammar."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"create_grammar\" title=\"Create grammar using items on this page\" value=\"CREATE GRAMMAR\"></div>";
 		echo "<input type=\"submit\" style=\"background-color:AquaMarine;\" formaction=\"".$url_this_page."#topedit\" name=\"explode\" value=\"EXPLODE\">&nbsp;<font color=\"red\">➡ </font><i>break</i> {…} <i>expressions</i>";
 		echo "</td></tr>";
 		if($imax > 0) {
@@ -1340,7 +1346,6 @@ if(!$hide) {
 		$link_play_chunked .= $link_options_play;
 		$link_expand = $link_produce."&instruction=expand";
 		$link_expand .= $link_options_expand;
-		$window_name = window_name($filename);
 		$window_name_play = $window_name."_play";
 		$window_name_expland = $window_name."_expland";
 	//	echo "<small>".urldecode($link_play)."</small><br />";

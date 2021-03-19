@@ -43,6 +43,13 @@ else {
 		echo "Link to data and/or grammar is missing";
 		die();
 		}
+	if($instruction == "create_grammar") {
+	//	echo "Creating grammar from ".$data_path;
+		$create_grammar = create_grammar($data_path);
+		echo $create_grammar;
+		echo "<br />----------";
+		die();
+		}
 	if(isset($_GET['settings'])) $settings_path = urldecode($_GET['settings']);
 	else $settings_path = '';
 	if(isset($_GET['objects'])) $objects_path = $_GET['objects'];

@@ -475,12 +475,12 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 					foreach($curr_event[$score_part] as $j => $the_event) {
 						if($the_event['type'] == "mm") {
 							$new_tempo = $the_event['value'];
+							$fraction = $new_tempo."/60";
+							$simplify = simplify($fraction,$max_term_in_fraction);
+							$fraction = $simplify['fraction'];
 							if(isset($the_event['word'])) {
 								$report .= "<font color=\"red\">mm</font> Measure #".$i_measure." dynamic sign “<font color=\"blue\">".$the_event['word']."</font>” metronome set to ".$new_tempo."<br />";
 								$current_period = 60 / $new_tempo;
-								$fraction = $new_tempo."/60";
-								$simplify = simplify($fraction,$max_term_in_fraction);
-								$fraction = $simplify['fraction'];
 								$old_tempo = $current_tempo = $default_tempo[$section] = $fraction;
 								}
 							if($i_field_of_measure == 0) {
@@ -492,6 +492,10 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 								$q_date_this_tempo = $add['q'];
 								$p_date_new_tempo[$i_new_tempo] = $p_date_this_tempo;
 								$q_date_new_tempo[$i_new_tempo] = $q_date_this_tempo;
+								if($p_time_field == 0) {
+									$current_period = 60 / $new_tempo;
+									$old_tempo = $current_tempo = $default_tempo[$section] = $fraction;
+									}
 								}
 							}
 						if($i_field_of_measure > 0) {
