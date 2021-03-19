@@ -122,6 +122,9 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$list_corrections = isset($_POST['verbose']);
 			echo "<input type=\"hidden\" name=\"tempo_option\" value=\"".$tempo_option."\">";
 			$ignore_channels = isset($_POST['ignore_channels']);
+			$ignore_trills = isset($_POST['ignore_trills']);
+			$ignore_fermata = isset($_POST['ignore_fermata']);
+			$ignore_arpeggios = isset($_POST['ignore_arpeggios']);
 			$section = 0; // This variable is used for repetitions, see forward/backward
 			$repeat_section[$section] = 1; // By default, don't repeat
 			$part = '';
@@ -330,7 +333,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			if($number_metronome > 0)
 				$metronome_average = round($sum_metronome / $number_metronome);
 			else $metronome_average = 0;
-			$convert_score = convert_musicxml($this_score,$repeat_section,$divisions,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections);
+			$convert_score = convert_musicxml($this_score,$repeat_section,$divisions,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$ignore_trills,$ignore_fermata,$ignore_arpeggios,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections);
 			$data .= $convert_score['data'];
 			$report = $convert_score['report'];
 			$data = preg_replace("/\s+/u"," ",$data);
@@ -417,8 +420,22 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			if($tempo_option == "all") echo " checked";
 			echo ">&nbsp;Interpret all tempo markers<br />";
 			echo "_______________________________________<br />";
-			echo "<input type=\"checkbox\" name=\"ignore_dynamics\">&nbsp;Ignore dynamics (volume/velocity)<br />";
-			echo "<input type=\"checkbox\" name=\"ignore_channels\">&nbsp;Ignore MIDI channels<br />";
+			echo "<input type=\"checkbox\" name=\"ignore_trills\"";
+			if($ignore_trills) echo " checked";
+			echo ">&nbsp;Ignore trills<br />";
+			echo "<input type=\"checkbox\" name=\"ignore_fermata\"";
+			if($ignore_fermata) echo " checked";
+			echo ">&nbsp;Ignore fermata<br />";
+			echo "<input type=\"checkbox\" name=\"ignore_arpeggios\"";
+			if($ignore_arpeggios) echo " checked";
+			echo ">&nbsp;Ignore arpeggios<br />";
+			echo "_______________________________________<br />";
+			echo "<input type=\"checkbox\" name=\"ignore_dynamics\"";
+			if($ignore_dynamics) echo " checked";
+			echo ">&nbsp;Ignore dynamics (volume/velocity)<br />";
+			echo "<input type=\"checkbox\" name=\"ignore_channels\"";
+			if($ignore_channels) echo " checked";
+			echo ">&nbsp;Ignore MIDI channels<br />";
 			echo "_________________<br />";
 			echo "<input type=\"checkbox\" name=\"verbose\"";
 			if($list_corrections) echo " checked";
@@ -591,7 +608,7 @@ if(isset($_POST['delete_chan'])) {
 	$content = @file_get_contents($this_file,TRUE);
 	$extract_data = extract_data(TRUE,$content);
 	$newcontent = $extract_data['content'];
-	$newcontent = preg_replace("/_chan\([^\)]+\)/u",'',$newcontent);
+	$newcontent = preg_replace("/\s*_chan\([^\)]+\)\s*/u",'',$newcontent);
 	$_POST['thistext'] = $newcontent;
 	$need_to_save = TRUE;
 	}
@@ -600,7 +617,7 @@ if(isset($_POST['delete_ins'])) {
 	$content = @file_get_contents($this_file,TRUE);
 	$extract_data = extract_data(TRUE,$content);
 	$newcontent = $extract_data['content'];
-	$newcontent = preg_replace("/_ins\([^\)]+\)/u",'',$newcontent);
+	$newcontent = preg_replace("/\s*_ins\([^\)]+\)\s*/u",'',$newcontent);
 	$_POST['thistext'] = $newcontent;
 	$need_to_save = TRUE;
 	}
@@ -609,7 +626,7 @@ if(isset($_POST['delete_tempo'])) {
 	$content = @file_get_contents($this_file,TRUE);
 	$extract_data = extract_data(TRUE,$content);
 	$newcontent = $extract_data['content'];
-	$newcontent = preg_replace("/_tempo\([^\)]+\)/u",'',$newcontent);
+	$newcontent = preg_replace("/\s*_tempo\([^\)]+\)\s*/u",'',$newcontent);
 	$_POST['thistext'] = $newcontent;
 	$need_to_save = TRUE;
 	}
@@ -618,7 +635,7 @@ if(isset($_POST['delete_volume'])) {
 	$content = @file_get_contents($this_file,TRUE);
 	$extract_data = extract_data(TRUE,$content);
 	$newcontent = $extract_data['content'];
-	$newcontent = preg_replace("/_volume\([^\)]+\)/u",'',$newcontent);
+	$newcontent = preg_replace("/\s*_volume\([^\)]+\)\s*/u",'',$newcontent);
 	$_POST['thistext'] = $newcontent;
 	$need_to_save = TRUE;
 	}
@@ -645,7 +662,7 @@ if(isset($_POST['delete_velocity'])) {
 	$content = @file_get_contents($this_file,TRUE);
 	$extract_data = extract_data(TRUE,$content);
 	$newcontent = $extract_data['content'];
-	$newcontent = preg_replace("/_vel\([^\)]+\)/u",'',$newcontent);
+	$newcontent = preg_replace("/\s*_vel\([^\)]+\)\s*/u",'',$newcontent);
 	$_POST['thistext'] = $newcontent;
 	$need_to_save = TRUE;
 	}
