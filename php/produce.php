@@ -47,7 +47,7 @@ else {
 	//	echo "Creating grammar from ".$data_path;
 		$create_grammar = create_grammar($data_path);
 		echo $create_grammar;
-		echo "<br />----------";
+	//	echo "<br />----------";
 		die();
 		}
 	if(isset($_GET['settings'])) $settings_path = urldecode($_GET['settings']);

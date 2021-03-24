@@ -591,8 +591,10 @@ function clean_up_encoding($create_bullets,$convert,$text) {
 	}
 
 function recode_tags($text) {
-	$text = str_replace("<","&lt;",$text);
-	$text = str_replace(">","&gt;",$text);
+	do $text = str_replace("<","&lt;",$text,$count);
+	while($count > 0);
+	do $text = str_replace(">","&gt;",$text,$count);
+	while($count > 0);
 	$text = str_replace('"',"&quot;",$text);
 	return $text;
 	}
@@ -2427,7 +2429,7 @@ function create_grammar($data_path) {
 	for($i = 0; $i < $imax; $i++) {
 		$line = trim($table[$i]);
 		if(is_integer($pos=strpos($line,"//")) AND $pos == 0) {
-			$grammar .= $line."<br />";
+		//	$grammar .= $line."<br />";
 			continue;
 			}
 		if($line == '') continue;
@@ -2436,11 +2438,11 @@ function create_grammar($data_path) {
 			if($first) $grammar .= "<br />S --> ALL_VARIABLES<br /><br />";
 			$first = FALSE;
 			$index = sprintf('%03d',$i_variable);
-			$line = "M".$index." --> ".$line;
+			$line = "M".$index." --> ".recode_tags($line);
 			$all_variables .= "M".$index." ";
 			$i_variable++;
 			}
-		else if($first) $grammar .= "<br />";
+		else if(!$first) continue;
 		$grammar .= $line."<br />";
 		}
 	$grammar = str_replace("ALL_VARIABLES",$all_variables,$grammar);

@@ -73,8 +73,6 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 		fwrite($handle,$file_header."\n");
 		fwrite($handle,$save_content);
 		fclose($handle);
-		
-	//	$content = $_POST['thistext'];
 		$content = str_replace(chr(13).chr(10),chr(10),$content);
 		$content = str_replace(chr(13),chr(10),$content);
 		$declarations = '';
@@ -148,7 +146,6 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				$current_metronome_max = intval($_POST['current_metronome_max']);
 			if(isset($_POST['current_metronome_average']))
 				$current_metronome_average = intval($_POST['current_metronome_average']);
-				
 			if($change_metronome_min < 1 AND ($change_metronome_max > 0 OR $change_metronome_average > 0))
 				$error_change_metronome .= "<font color=\"red\">ERROR changing metronome = minimum value should be positive</font><br />";
 			if(($change_metronome_min >= $change_metronome_max OR $change_metronome_average <= $change_metronome_min OR $change_metronome_average >= $change_metronome_max) AND ($change_metronome_max > 0 OR $change_metronome_average > 0))
@@ -333,6 +330,23 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			if($number_metronome > 0)
 				$metronome_average = round($sum_metronome / $number_metronome);
 			else $metronome_average = 0;
+			$list_settings = '';
+			switch($tempo_option) {
+				case "ignore":
+					$list_settings .= "// Ignoring all metronome markers\n"; break;
+				case "score":
+					$list_settings .= "// Only metronome markers of printed score\n"; break;
+				case "allbutmeasures":
+					$list_settings .= "// Metronome markers except inside measures\n"; break;
+				case "all":
+					$list_settings .= "// All metronome markers\n"; break;
+				}
+			if($ignore_channels) $list_settings .= "// Ignoring MIDI channels\n";
+			if($ignore_dynamics) $list_settings .= "// Ignoring dynamics\n";
+			if($ignore_trills) $list_settings .= "// Ignoring trills\n";
+			if($ignore_fermata) $list_settings .= "// Ignoring fermata\n";
+			if($ignore_arpeggios) $list_settings .= "// Ignoring arpeggios\n";
+			if($list_settings <> '') $list_settings .= "\n";
 			$convert_score = convert_musicxml($this_score,$repeat_section,$divisions,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$ignore_trills,$ignore_fermata,$ignore_arpeggios,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections);
 			$data .= $convert_score['data'];
 			$report = $convert_score['report'];
@@ -368,6 +382,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				$more_data = "// MusicXML file ‘".$upload_filename."’ converted\n";
 				if($subtitle_part <> '') $more_data .= $subtitle_part."\n";
 				}
+			if($reload_musicxml) $more_data .= $list_settings;
 			$more_data .= $declarations;
 			if(isset($_POST['delete_current'])) $_POST['thistext'] = '';
 			$more_data .= "\n".$data;
@@ -409,16 +424,16 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				}
 			echo "<input type=\"radio\" name=\"tempo_option\" value=\"ignore\"";
 			if($tempo_option == "ignore") echo " checked";
-			echo ">&nbsp;Ignore all tempo markers<br />";
+			echo ">&nbsp;Ignore all metronome markers<br />";
 			echo "<input type=\"radio\" name=\"tempo_option\" value=\"score\"";
 			if($tempo_option == "score") echo " checked";
-			echo ">&nbsp;Interpret only tempo markers of printed score<br />";
+			echo ">&nbsp;Interpret only metronome markers of printed score<br />";
 			echo "<input type=\"radio\" name=\"tempo_option\" value=\"allbutmeasures\"";
 			if($tempo_option == "allbutmeasures") echo " checked";
-			echo ">&nbsp;Interpret tempo markers except inside measures<br />";
+			echo ">&nbsp;Interpret metronome markers except inside measures<br />";
 			echo "<input type=\"radio\" name=\"tempo_option\" value=\"all\"";
 			if($tempo_option == "all") echo " checked";
-			echo ">&nbsp;Interpret all tempo markers<br />";
+			echo ">&nbsp;Interpret all metronome markers<br />";
 			echo "_______________________________________<br />";
 			echo "<input type=\"checkbox\" name=\"ignore_trills\"";
 			if($ignore_trills) echo " checked";
@@ -1255,7 +1270,7 @@ if(!$hide) {
 		$link_grammar = $link_grammar."&instruction=create_grammar";
 
 		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-		echo "<input type=\"hidden\" name=\"thistext\" value=\"".$content."\">";
+	//	echo "<input type=\"hidden\" name=\"thistext\" value=\"".$content."\">";
 		echo "<input type=\"hidden\" name=\"file_format\" value=\"".$file_format."\">";
 		echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
 		echo "<tr><td colspan=\"2\" style=\"vertical-align:middle; padding:6px;\">";
@@ -1272,6 +1287,9 @@ if(!$hide) {
 	for($i = $j = 0; $i < $imax; $i++) {
 		$line = trim($table[$i]);
 		$error_mssg = $tie_mssg = '';
+		if(is_integer($pos=strpos($line,"<?xml")) AND $pos == 0) break;
+		if(is_integer($pos=strpos($line,"//")) AND $pos == 0) continue;
+		if(is_integer($pos=strpos($line,"-")) AND $pos == 0) continue;
 		if(is_integer($pos=strpos($line,"[item ")) AND $pos == 0)
 			$title_this = preg_replace("/\[item\s([^\]]+)\].*/u",'$1',$line);
 		else $title_this = '';
@@ -1380,9 +1398,10 @@ if(!$hide) {
 		if($tie_mssg <> '' AND $error_mssg == '') echo "<br />";
 		if($tie_mssg <> '') echo $tie_mssg;
 		if($error_mssg <> '') echo $error_mssg;
+		$line_recoded = recode_tags($line_recoded);
 		$length = strlen($line_recoded);
 		if($length > 400)
-			$line_show = substr($line_recoded,0,100)."<br />&nbsp;... ... ...<br />".substr($line_recoded,-100,100);
+			$line_show = substr($line_recoded,0,90)."<br />&nbsp;... ... ...<br />".substr($line_recoded,-90,90);
 		else $line_show = $line_recoded;
 		echo "<small>";
 		if($title_this <> '') $line_show = "<b>[item ".$title_this."]</b> ".$line_show;
