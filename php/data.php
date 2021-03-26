@@ -120,7 +120,8 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$list_corrections = isset($_POST['verbose']);
 			echo "<input type=\"hidden\" name=\"tempo_option\" value=\"".$tempo_option."\">";
 			$ignore_channels = isset($_POST['ignore_channels']);
-			$ignore_trills = isset($_POST['ignore_trills']);
+		//	$ignore_trills = isset($_POST['ignore_trills']);
+			$ignore_trills = TRUE;
 			$ignore_fermata = isset($_POST['ignore_fermata']);
 			$ignore_arpeggios = isset($_POST['ignore_arpeggios']);
 			$section = 0; // This variable is used for repetitions, see forward/backward
@@ -392,6 +393,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				echo "_______________________________________<br />";
 				}
 			if($i_part > 1) echo $message_top;
+			else if(!$reload_musicxml) $ignore_channels = TRUE;
 			echo $message_options;
 			if($reload_musicxml) {
 				$current_metronome_min = $convert_score['metronome_min'];
@@ -435,9 +437,9 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			if($tempo_option == "all") echo " checked";
 			echo ">&nbsp;Interpret all metronome markers<br />";
 			echo "_______________________________________<br />";
-			echo "<input type=\"checkbox\" name=\"ignore_trills\"";
+		/*	echo "<input type=\"checkbox\" name=\"ignore_trills\"";
 			if($ignore_trills) echo " checked";
-			echo ">&nbsp;Ignore trills<br />";
+			echo ">&nbsp;Ignore trills<br />"; */
 			echo "<input type=\"checkbox\" name=\"ignore_fermata\"";
 			if($ignore_fermata) echo " checked";
 			echo ">&nbsp;Ignore fermata<br />";
@@ -468,7 +470,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 unset($_FILES['music_xml_import']);
 
 if(isset($_POST['explode'])) {
-	$content = $_POST['thistext'];
+	$content = decode_tags($_POST['thistext']);
 	$content = str_replace("\r",chr(10),$content);
 	do $content = str_replace(chr(10).chr(10).chr(10),chr(10).chr(10),$content,$count);
 	while($count > 0);
@@ -527,7 +529,7 @@ if(isset($_POST['explode'])) {
 	}
 
 if(isset($_POST['implode'])) {
-	$content = $_POST['thistext'];
+	$content = decode_tags($_POST['thistext']);
 	$content = str_replace("\r",chr(10),$content);
 	do $content = str_replace(chr(10).chr(10).chr(10),chr(10).chr(10),$content,$count);
 	while($count > 0);
@@ -704,7 +706,8 @@ if(isset($_POST['apply_velocity_change'])) {
 		if($y_prime1 < 0 OR $y_prime3 < 0) { // Quadratic regression is not monotonous
 			$quad = FALSE;
 			$a1 = $change_velocity_average / $velocity_average;
-			$a2 = ($change_velocity_max - $change_velocity_average) / ($velocity_max - $velocity_average);
+			if($velocity_max > $velocity_average) $a2 = ($change_velocity_max - $change_velocity_average) / ($velocity_max - $velocity_average);
+			else $a2 = 0;
 			$b2 = $change_velocity_average;
 			}
 		$content = @file_get_contents($this_file,TRUE);
@@ -716,7 +719,7 @@ if(isset($_POST['apply_velocity_change'])) {
 			$this_value = substr($data,$pos1 + 5,$pos2 - $pos1 - 5);
 			if($quad) $new_value = round($a * $this_value * $this_value + $b * $this_value + $c);
 			else {
-				if($this_value < $velocity_average) $new_value = round($a1 * $this_value);
+				if($this_value <= $velocity_average) $new_value = round($a1 * $this_value);
 				else $new_value = round($a2 * ($this_value - $velocity_average) + $b2);
 				}
 			$new_control = "_vel(".$new_value.")";
@@ -753,7 +756,8 @@ if(isset($_POST['apply_volume_change'])) {
 		if($y_prime1 < 0 OR $y_prime3 < 0) { // Quadratic regression is not monotonous
 			$quad = FALSE;
 			$a1 = $change_volume_average / $volume_average;
-			$a2 = ($change_volume_max - $change_volume_average) / ($volume_max - $volume_average);
+			if($volume_max > $volume_average) $a2 = ($change_volume_max - $change_volume_average) / ($volume_max - $volume_average);
+			else $a2 = 0;
 			$b2 = $change_volume_average;
 			}
 		$content = @file_get_contents($this_file,TRUE);
@@ -765,7 +769,7 @@ if(isset($_POST['apply_volume_change'])) {
 			$this_value = substr($data,$pos1 + 8,$pos2 - $pos1 - 8);
 			if($quad) $new_value= round($a * $this_value * $this_value + $b * $this_value + $c);
 			else {
-				if($this_value < $volume_average) $new_value = round($a1 * $this_value);
+				if($this_value <= $volume_average) $new_value = round($a1 * $this_value);
 				else $new_value = round($a2 * ($this_value - $volume_average) + $b2);
 				}
 			$new_control = "_volume(".$new_value.")";
@@ -1270,7 +1274,7 @@ if(!$hide) {
 		$link_grammar = $link_grammar."&instruction=create_grammar";
 
 		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-	//	echo "<input type=\"hidden\" name=\"thistext\" value=\"".$content."\">";
+		echo "<input type=\"hidden\" name=\"thistext\" value=\"".recode_tags($content)."\">";
 		echo "<input type=\"hidden\" name=\"file_format\" value=\"".$file_format."\">";
 		echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
 		echo "<tr><td colspan=\"2\" style=\"vertical-align:middle; padding:6px;\">";
@@ -1290,10 +1294,10 @@ if(!$hide) {
 		if(is_integer($pos=strpos($line,"<?xml")) AND $pos == 0) break;
 		if(is_integer($pos=strpos($line,"//")) AND $pos == 0) continue;
 		if(is_integer($pos=strpos($line,"-")) AND $pos == 0) continue;
-		if(is_integer($pos=strpos($line,"[item ")) AND $pos == 0)
-			$title_this = preg_replace("/\[item\s([^\]]+)\].*/u",'$1',$line);
+		if(is_integer($pos=strpos($line,"[")) AND $pos == 0)
+			$title_this = preg_replace("/\[([^\]]+)\].*/u",'$1',$line);
 		else $title_this = '';
-		$line = preg_replace("/\[.*\]/u",'',$line);
+		$line = preg_replace("/\[[^\]]*\]/u",'',$line);
 		$line = preg_replace("/^i[0-9].*/u",'',$line); // Csound note statement
 		$line = preg_replace("/^f[0-9].*/u",'',$line); // Csound table statement
 		$line = preg_replace("/^t[ ].*/u",'',$line); // Csound tempo statement
@@ -1393,7 +1397,8 @@ if(!$hide) {
 		if($error_mssg == '') {
 			echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_play."','".$window_name_play."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Play this polymetric expression\" value=\"PLAY\">&nbsp;";
 			if($chunked) echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_play_chunked."','".$window_name_play."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Play polymetric expression in chunks (no graphics)\" value=\"PLAY safe (".$chunk_number." chunks)\">&nbsp;";
-			if($brackets > 0) echo "&nbsp;<input style=\"background-color:azure;\" onclick=\"window.open('".$link_expand."','".$window_name_expland."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Expand this polymetric expression\" value=\"EXPAND\">&nbsp;";
+		//	if($brackets > 0)
+			echo "&nbsp;<input style=\"background-color:azure;\" onclick=\"window.open('".$link_expand."','".$window_name_expland."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Expand this polymetric expression\" value=\"EXPAND\">&nbsp;";
 			}
 		if($tie_mssg <> '' AND $error_mssg == '') echo "<br />";
 		if($tie_mssg <> '') echo $tie_mssg;
@@ -1404,7 +1409,7 @@ if(!$hide) {
 			$line_show = substr($line_recoded,0,90)."<br />&nbsp;... ... ...<br />".substr($line_recoded,-90,90);
 		else $line_show = $line_recoded;
 		echo "<small>";
-		if($title_this <> '') $line_show = "<b>[item ".$title_this."]</b> ".$line_show;
+		if($title_this <> '') $line_show = "<b><font color=\"AquaMarine\">[".$title_this."]</font></b> ".$line_show;
 		echo $line_show;
 		echo "</small></td></tr>";
 		}

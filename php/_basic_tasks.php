@@ -591,11 +591,16 @@ function clean_up_encoding($create_bullets,$convert,$text) {
 	}
 
 function recode_tags($text) {
-	do $text = str_replace("<","&lt;",$text,$count);
-	while($count > 0);
-	do $text = str_replace(">","&gt;",$text,$count);
-	while($count > 0);
+	$text = str_replace("<","&lt;",$text);
+	$text = str_replace(">","&gt;",$text);
 	$text = str_replace('"',"&quot;",$text);
+	return $text;
+	}
+
+function decode_tags($text) {
+	$text = str_replace("&lt;","<",$text);
+	$text = str_replace("&gt;",">",$text);
+	$text = str_replace("&quot;",'"',$text);
 	return $text;
 	}
 
@@ -2403,6 +2408,11 @@ function search_value($type,$data,$operator) {
 	}
 
 function quadratic_mapping($x1,$x2,$x3,$y1,$y2,$y3) {
+	if((($x1*$x1 - $x2*$x2) * ($x1 - $x3) - ($x1*$x1 - $x3*$x3) * ($x1 - $x2)) == 0 OR $x1 == $x2) {
+		$result['a'] = $result['b'] = $result['c'] = 0;
+		$result['y_prime1'] = $result['y_prime3'] = -1;
+		return $result;
+		}
 	$a = (($x1 - $x3) * ($y1 - $y2) - ($x1 - $x2) * ($y1 - $y3)) / (($x1*$x1 - $x2*$x2) * ($x1 - $x3) - ($x1*$x1 - $x3*$x3) * ($x1 - $x2));
 	$b = (($y1 - $y2) - $a * ($x1*$x1 - $x2*$x2)) / ($x1 - $x2);
 	$c = $y1 - ($a * $x1 * $x1) - $b * $x1;

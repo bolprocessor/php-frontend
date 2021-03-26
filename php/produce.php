@@ -382,7 +382,7 @@ if($instruction <> "help") {
 					else $this_name .= "_".$table[$i];
 					}
 				}
-		//	echo "this_name = ".$this_name.", data_name = ".$data_name.", grammar_name = ".$grammar_name."<br />";
+			// echo "this_name = ".$this_name.", data_name = ".$data_name.", grammar_name = ".$grammar_name."<br />";
 			if(!$found OR ($this_name <> $grammar_name AND $this_name <> $data_name) OR isset($table[$i + 2])) continue;
 			echo "<td style=\"background-color:white; border-radius: 6px; border: 4px solid Gold; vertical-align:middle; text-align: center; padding:8px; margin:0px;\>";
 			$number = intval(str_replace(".html",'',$table[$i + 1]));
@@ -390,8 +390,7 @@ if($instruction <> "help") {
 			$table2 = explode(chr(10),$content);
 			$imax = count($table2);
 			$table3 = array();
-			$title1 = $grammar_name."_Image_".$number;
-			$title2 = $grammar_name." Image ".$number;
+			$title1 = $this_name."_Image_".$number;
 			$WidthMax = $HeightMax = 0;
 			$position_image++;
 			for($i = 0; $i < $imax; $i++) {
