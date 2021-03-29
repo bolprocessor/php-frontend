@@ -2435,16 +2435,25 @@ function create_grammar($data_path) {
 	$content = $extract_data['content'];
 	$table = explode(chr(10),$content );
 	$imax = count($table);
-	$i_variable = 1; $first = TRUE; $all_variables = '';
+	$i_variable = 1; $first = TRUE;
+	$all_variables = '';
 	for($i = 0; $i < $imax; $i++) {
 		$line = trim($table[$i]);
-		if(is_integer($pos=strpos($line,"//")) AND $pos == 0) {
-		//	$grammar .= $line."<br />";
-			continue;
-			}
-		if($line == '') continue;
+		if(is_integer($pos=strpos($line,"<?xml")) AND $pos == 0) continue;
+		if(is_integer($pos=strpos($line,"//")) AND $pos == 0) continue;
 		$line = preg_replace("/\[[^\]]*\]/u",'',$line);
-		if(is_integer(strpos($line,"{"))) {
+		$line = preg_replace("/^i[0-9].*/u",'',$line); // Csound note statement
+		$line = preg_replace("/^f[0-9].*/u",'',$line); // Csound table statement
+		$line = preg_replace("/^t[ ].*/u",'',$line); // Csound tempo statement
+		$line = preg_replace("/^s\s*$/u",'',$line); // Csound "s" statement
+		$line = preg_replace("/^e\s*$/u",'',$line); // Csound "e" statement
+		if($line == '') continue;
+		if(!is_integer($pos=strpos($line,"-")) OR $pos > 0) {
+			$line = recode_entities($line);
+			$new_item = TRUE;
+			}
+		else $new_item = FALSE;
+		if($new_item) {
 			if($first) $grammar .= "<br />S --> ALL_VARIABLES<br /><br />";
 			$first = FALSE;
 			$index = sprintf('%03d',$i_variable);
