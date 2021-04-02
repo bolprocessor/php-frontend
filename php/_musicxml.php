@@ -132,8 +132,10 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 								$curr_event[$score_part][$j]['type'] = "seq";
 								$curr_event[$score_part][$j]['note'] = $this_note;
 								if($alter <> 0) {
+									if($alter == 2) $curr_event[$score_part][$j]['note'] .= "##";
 									if($alter == 1) $curr_event[$score_part][$j]['note'] .= "#";
 									if($alter == -1) $curr_event[$score_part][$j]['note'] .= "b";
+									if($alter == -2) $curr_event[$score_part][$j]['note'] .= "bb";
 									}
 								$curr_event[$score_part][$j]['p_dur'] = $p_this_dur;
 								$curr_event[$score_part][$j]['q_dur'] = $q_this_dur;
@@ -161,8 +163,10 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 								if(!$is_chord AND !isset($curr_event[$score_part][$j]['type'])) $curr_event[$score_part][$j]['type'] = 'seq'; // Added by BB 2021-03-01
 								$curr_event[$score_part][$j]['note'] = $this_note;
 								if($alter <> 0) {
+									if($alter == 2) $curr_event[$score_part][$j]['note'] .= "##";
 									if($alter == 1) $curr_event[$score_part][$j]['note'] .= "#";
 									if($alter == -1) $curr_event[$score_part][$j]['note'] .= "b";
+									if($alter == -2) $curr_event[$score_part][$j]['note'] .= "bb";
 									}
 								if($this_octave >= 0) $curr_event[$score_part][$j]['note'] .= $this_octave;
 								if($tie_type_start) $curr_event[$score_part][$j]['note'] .= "&";
@@ -1067,6 +1071,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 						echo "End measure ".$i_measure." time_measure = ".$p_time_field."/".$q_time_field." tempo_this_measure = ".$sum_tempo_measure[$section][$i_measure]."/".$number_tempo_measure[$section][$i_measure]." default_tempo[section] = ".$default_tempo[$section]." implicit = ".(1 * $implicit[$section][$i_measure])." old_tempo = ".$old_tempo."<br /><br />";
 												
 					if(!$ignore_channels AND isset($midi_channel[$score_part])) $data .= " _chan(".$midi_channel[$score_part].")";
+					$convert_measure[$score_part] = fix_alterations($convert_measure[$score_part]);
 					$fraction = $p_time_measure."/".($q_time_measure * $divisions[$score_part]);
 					$simplify = simplify($fraction,$max_term_in_fraction);
 					$fraction = $simplify['fraction'];
@@ -1319,5 +1324,15 @@ function process_arpeggiate($data,$score_divisions) {
 		}
 //	$data = str_replace("arpeggiate",'@@@',$data);
 	return $data;
+	}
+	
+function fix_alterations($text) {
+	$search = array("C##","D##","E##","F##","G##","A##","B##");
+	$replace = array("D","E","F#","G","A","B","C#");
+	$text = str_ireplace($search,$replace,$text);
+	$search = array("Cbb","Dbb","Ebb","Fbb","Gbb","Abb","Bbb");
+	$replace = array("Bb","C","D","Eb","F","G","A");
+	$text = str_ireplace($search,$replace,$text);
+	return $text;
 	}
 ?>
