@@ -608,6 +608,8 @@ function recode_entities($text) {
 	$text = preg_replace("/\s*•$/u"," .",$text);
 	$text = preg_replace("/\s*•[ ]*/u"," . ",$text);
 	$text = str_replace(" … "," _rest ",$text);
+	$text = preg_replace("/{\s*…\s*/u","{_rest ",$text);
+	$text = preg_replace("/,\s*…\s*/u",", _rest ",$text);
 	return $text;
 	}
 
