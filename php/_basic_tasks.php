@@ -7,6 +7,12 @@ define('MAXFILESIZE',50000000);
 define('SLASH',DIRECTORY_SEPARATOR);
 ini_set("auto_detect_line_endings",true);
 
+$which_system = '';
+// Compilation options:
+// which_system = 'Linux';
+// which_system = 'Windows 10';
+// which_system = 'Mac OS X';
+
 $test = FALSE;
 // $test = TRUE;
 
@@ -1628,6 +1634,8 @@ function get_instruction($line) {
 	}
 
 function getOS() {
+	global $which_system;
+	if($which_system <> '') return $which_system;
     $user_agent = $_SERVER['HTTP_USER_AGENT'];
     $os_platform  = "Unknown OS Platform";
     $os_array     = array(
@@ -1662,6 +1670,8 @@ function getOS() {
 	}
 
 function windows_system() {
+	global $which_system;
+	if($which_system == "Windows") return TRUE;
 	$os_platform = getOS();
 	if(PHP_OS == "WINNT" OR is_integer(strpos($os_platform,"Windows"))) return TRUE;
 	return FALSE;

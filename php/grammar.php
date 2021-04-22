@@ -25,7 +25,7 @@ if(!file_exists($temp_dir.$temp_folder)) {
 $default_output_name = str_replace("-gr.",'',$filename);
 $default_output_name = str_replace(".bpgr",'',$default_output_name);
 $file_format = $default_output_format;
-if(isset($this_file_format[$filename])) $file_format = $this_file_format[$filename]; // From _settings.php
+if(isset($grammar_file_format[$filename])) $file_format = $grammar_file_format[$filename]; // From _settings.php
 if(isset($_POST['file_format'])) $file_format = $_POST['file_format'];
 save_settings2("grammar_file_format",$filename,$file_format); // To _settings.php
 switch($file_format) {
