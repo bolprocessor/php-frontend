@@ -121,7 +121,6 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			echo "<input type=\"hidden\" name=\"tempo_option\" value=\"".$tempo_option."\">";
 			$ignore_channels = isset($_POST['ignore_channels']);
 		//	$ignore_trills = isset($_POST['ignore_trills']);
-			$ignore_trills = TRUE;
 			$ignore_fermata = isset($_POST['ignore_fermata']);
 			$ignore_arpeggios = isset($_POST['ignore_arpeggios']);
 			$section = 0; // This variable is used for repetitions, see forward/backward
@@ -153,8 +152,19 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				$error_change_metronome .= "<font color=\"red\">ERROR changing metronome: values are not compatible</font><br />";
 			if($error_change_metronome <> '') $reload_musicxml = FALSE;
 			$file = fopen($music_xml_file,"r");
+			$print_info = FALSE;
+			$beat_unit = "quarter";
 			while(!feof($file)) {
 				$line = fgets($file);
+				if(is_integer($pos=strpos($line,"</print"))) { // Added by BB 2022/01/28
+					$print_info = FALSE;
+					continue;
+					}
+				if($print_info) continue;
+				if(is_integer($pos=strpos($line,"<print"))) { // Added by BB 2022/01/28
+					$print_info = TRUE;
+					continue;
+					}
 				if(is_integer($pos=strpos($line,"<score-partwise")) AND $pos == 0) {
 					$partwise = TRUE;
 					continue;
@@ -245,13 +255,18 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 					$attributes_key =  FALSE;
 					continue;
 					}
-				
+		//	echo str_replace('<','@',$line)."<br />";
+				if(is_integer($pos=strpos($line,"<beat-unit>"))) {
+					$beat_unit = trim(preg_replace("/<beat-unit>(.+)<\/beat-unit>/u","$1",$line));
+					}
 				$metronome = 0;
 				if(is_integer($pos=strpos($line,"<sound tempo"))) {
 					$metronome = round(trim(preg_replace("/.+tempo=\"([^\"]+)\"\/>/u","$1",$line)));
 					}
-				else if(is_integer($pos=strpos($line,"<per-minute>"))) {
-					$metronome = trim(preg_replace("/<per\-minute>([^<]+)<\/per\-minute>/u","$1",$line));
+				if(($tempo_option == "all" OR $tempo_option == "score" OR $tempo_option == "allbutmeasures") AND is_integer($pos=strpos($line,"<per-minute>"))) { // Fixed by BB 2022-01-29
+					$per_minute = trim(preg_replace("/<per\-minute>([^<]+)<\/per\-minute>/u","$1",$line));
+					$beat_divide = beat_divide($beat_unit);
+					$metronome = round(($per_minute * $beat_divide['p']) / $beat_divide['q']);
 					}
 				if($metronome > 0) {
 					$sum_metronome += $metronome;
@@ -344,11 +359,11 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				}
 			if($ignore_channels) $list_settings .= "// Ignoring MIDI channels\n";
 			if($ignore_dynamics) $list_settings .= "// Ignoring dynamics\n";
-			if($ignore_trills) $list_settings .= "// Ignoring trills\n";
+		//	if($ignore_trills) $list_settings .= "// Ignoring trills\n";
 			if($ignore_fermata) $list_settings .= "// Ignoring fermata\n";
 			if($ignore_arpeggios) $list_settings .= "// Ignoring arpeggios\n";
 			if($list_settings <> '') $list_settings .= "\n";
-			$convert_score = convert_musicxml($this_score,$repeat_section,$divisions,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$ignore_trills,$ignore_fermata,$ignore_arpeggios,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections);
+			$convert_score = convert_musicxml($this_score,$repeat_section,$divisions,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$ignore_fermata,$ignore_arpeggios,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections);
 			$data .= $convert_score['data'];
 			$report = $convert_score['report'];
 			$data = preg_replace("/\s+/u"," ",$data);
