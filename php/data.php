@@ -116,7 +116,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$instrument_name = $midi_channel = $select_part = $duration_part = $divisions = $repeat_section = array();
 			$ignore_dynamics = isset($_POST['ignore_dynamics']);
 			if(isset($_POST['tempo_option'])) $tempo_option = $_POST['tempo_option'];
-			else $tempo_option = "all";
+			else $tempo_option = "allbutscore";
 			$list_corrections = isset($_POST['verbose']);
 			echo "<input type=\"hidden\" name=\"tempo_option\" value=\"".$tempo_option."\">";
 			$ignore_channels = isset($_POST['ignore_channels']);
@@ -263,7 +263,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				if(is_integer($pos=strpos($line,"<sound tempo"))) {
 					$metronome = round(trim(preg_replace("/.+tempo=\"([^\"]+)\"\/>/u","$1",$line)));
 					}
-				if(($tempo_option == "all" OR $tempo_option == "score" OR $tempo_option == "allbutmeasures") AND is_integer($pos=strpos($line,"<per-minute>"))) { // Fixed by BB 2022-01-29
+				if(($tempo_option == "all" OR $tempo_option == "score" OR $tempo_option == "allbutmeasures") AND is_integer($pos=strpos($line,"<per-minute>"))) {
 					$per_minute = trim(preg_replace("/<per\-minute>([^<]+)<\/per\-minute>/u","$1",$line));
 					$beat_divide = beat_divide($beat_unit);
 					$metronome = round(($per_minute * $beat_divide['p']) / $beat_divide['q']);
@@ -349,9 +349,11 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$list_settings = '';
 			switch($tempo_option) {
 				case "ignore":
-					$list_settings .= "// Ignoring all metronome markers\n"; break;
+					$list_settings .= "// Discard all metronome markers\n"; break;
 				case "score":
 					$list_settings .= "// Only metronome markers of printed score\n"; break;
+				case "allbutscore":
+					$list_settings .= "// Metronome markers except the ones of printed score\n"; break;
 				case "allbutmeasures":
 					$list_settings .= "// Metronome markers except inside measures\n"; break;
 				case "all":
@@ -441,13 +443,16 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				}
 			echo "<input type=\"radio\" name=\"tempo_option\" value=\"ignore\"";
 			if($tempo_option == "ignore") echo " checked";
-			echo ">&nbsp;Ignore all metronome markers<br />";
+			echo ">&nbsp;Discard all metronome markers<br />";
 			echo "<input type=\"radio\" name=\"tempo_option\" value=\"score\"";
 			if($tempo_option == "score") echo " checked";
 			echo ">&nbsp;Interpret only metronome markers of printed score<br />";
 			echo "<input type=\"radio\" name=\"tempo_option\" value=\"allbutmeasures\"";
 			if($tempo_option == "allbutmeasures") echo " checked";
 			echo ">&nbsp;Interpret metronome markers except inside measures<br />";
+			echo "<input type=\"radio\" name=\"tempo_option\" value=\"allbutscore\"";
+			if($tempo_option == "allbutscore") echo " checked";
+			echo ">&nbsp;Interpret metronome markers except the ones of printed score<br />";
 			echo "<input type=\"radio\" name=\"tempo_option\" value=\"all\"";
 			if($tempo_option == "all") echo " checked";
 			echo ">&nbsp;Interpret all metronome markers<br />";

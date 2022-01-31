@@ -248,7 +248,8 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 							if($tie_type == "stop") $tie_type_stop = TRUE;
 							}
 							
-						if(($tempo_option == "all" OR $tempo_option == "allbutmeasures") AND is_integer($pos=strpos($line,"<sound tempo"))) {
+						if(($tempo_option <> "score" AND $tempo_option <> "ignore") AND is_integer($pos=strpos($line,"<sound tempo"))) { // Fixed by BB 2022-01-31
+						/* if(($tempo_option == "all" OR $tempo_option == "allbutmeasures") AND is_integer($pos=strpos($line,"<sound tempo"))) { */
 							$tempo = round(trim(preg_replace("/.+tempo=\"([^\"]+)\"\/>/u","$1",$line)));
 							// echo $score_part." mm = ".$tempo." at measure #".$i_measure."<br />";
 							if($change_metronome) {
@@ -291,7 +292,8 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 						if(is_integer($pos=strpos($line,"<beat-unit>"))) {
 							$beat_unit = trim(preg_replace("/<beat-unit>(.+)<\/beat-unit>/u","$1",$line));
 							continue;
-							}	
+							}
+				/*		if(($tempo_option == "all" OR $tempo_option == "score") AND is_integer($pos=strpos($line,"<per-minute>"))) { */
 						if(($tempo_option == "all" OR $tempo_option == "score" OR $tempo_option == "allbutmeasures") AND is_integer($pos=strpos($line,"<per-minute>"))) {
 							$per_minute = round(trim(preg_replace("/<per\-minute>([^<]+)<\/per\-minute>/u","$1",$line)));
 							$beat_divide = beat_divide($beat_unit);
@@ -314,15 +316,17 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 							$number_tempo_measure[$section][$i_measure]++;
 							$sum_metronome += $tempo;
 							$number_metronome++;
+							$number_metronome_markers++; // Added by BB 2022-01-31
 							if($tempo > $metronome_max) $metronome_max = $tempo;
 							if($tempo < $metronome_min OR $metronome_min == 0) $metronome_min = $tempo;
-							
-							$curr_event[$score_part][$j]['type'] = "mm"; // Added by BB 2021-03-14
-							$curr_event[$score_part][$j]['value'] = $tempo;
-							$curr_event[$score_part][$j]['p_dur'] = 0;
-							$curr_event[$score_part][$j]['q_dur'] = 1;
-							$is_chord = FALSE;
-							$j++;
+							if($tempo_option <> "allbutmeasures") { // Added by BB 2022-01-31
+								$curr_event[$score_part][$j]['type'] = "mm"; // Added by BB 2021-03-14
+								$curr_event[$score_part][$j]['value'] = $tempo;
+								$curr_event[$score_part][$j]['p_dur'] = 0;
+								$curr_event[$score_part][$j]['q_dur'] = 1;
+								$is_chord = FALSE;
+								$j++;
+								}
 							continue;
 							// Note that tempo values will be used in all subsequent parts
 							// This may create a problem if they don't appear in the first selected part
@@ -1185,13 +1189,13 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 					
 					if($max_physical_time > 0.) $final_metronome = round(60 * $p_time_measure / ($q_time_measure * $divisions[$score_part]) / $max_physical_time);
 					else $final_metronome = $metronome_this_measure;
-				//	$report .= "Measure ".$i_measure." number_tempo_measure = ".$number_tempo_measure[$section][$i_measure]." sum_tempo_measure = ".$sum_tempo_measure[$section][$i_measure]." tempo_this_measure = ".$metronome_this_measure."<br />";
+					// $report .= "Measure #".$i_measure." max_physical_time = ".round($max_physical_time,2)."s, time_measure = ".$p_time_measure."/".$q_time_measure.", divisions = ".$divisions[$score_part].", number_tempo_measure = ".$number_tempo_measure[$section][$i_measure].", sum_tempo_measure = ".$sum_tempo_measure[$section][$i_measure].", tempo_this_measure = ".$metronome_this_measure."<br />";
 					if($metronome_this_measure == 0 OR abs(($metronome_this_measure - $final_metronome) / $metronome_this_measure) > 0.4) $warning = TRUE;
 					else $warning = FALSE;
 					if($warning) $report .= "<font color=\"red\">";
-					$report .= "➡ Measure #".$i_measure." part [".$score_part."] physical time = ".round($max_physical_time,2)."s, average metronome = ".$metronome_this_measure.", final metronome = <font color=\"blue\">".$final_metronome."</font><br />";
+					$report .= "➡ Measure #".$i_measure." part [".$score_part."] physical time = ".round($max_physical_time,2)."s, average metronome of this measure = ".$metronome_this_measure.", final metronome = <font color=\"blue\">".$final_metronome."</font><br />";
 					if($warning) $report .= "</font>";
-					if($final_metronome > 0) $metronome_this_measure = $final_metronome;
+					if($warning AND ($final_metronome > 0)) $metronome_this_measure = $final_metronome; // Fixed by BB 2022-01-31
 					$physical_time = $max_physical_time = 0.;
 					$fraction = $metronome_this_measure."/60";
 					$simplify = simplify($fraction,$max_term_in_fraction);
