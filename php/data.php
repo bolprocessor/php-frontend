@@ -395,6 +395,9 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$data = preg_replace("/{_tempo[^\)]+\)\s*_vel[^\)]+\)\s*_chan[^\)]+\)\s*}/u",'',$data); // Empty measure at the beginning of a repetition
 			$data = str_replace(" ,",",",$data);
 			$data = str_replace(" }","}",$data);
+			$data = preg_replace("/}\s*[1-1]\s+/u","} - ",$data); // Added by BB 2022-02-01
+			$data = str_replace("-{","- {",$data);
+				$data = str_replace("}-","} -",$data);
 			$data = str_replace("- -","--",$data); // Simplify - - --> -- (repeated for unknown reason)
 			if($reload_musicxml) {
 				$more_data = "// MusicXML file ‘".$upload_filename."’ converted\n";
