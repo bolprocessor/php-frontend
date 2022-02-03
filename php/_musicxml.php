@@ -1,6 +1,11 @@
 <?php
-function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$ignore_fermata,$ignore_arpeggios,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections) {
+$notes_diesis = array("C","C#","D","D#","E","F","F#","G","G#","A","A#","B");
+$notes_bemol = array("C","Db","D","Eb","E","F","Gb","G","Ab","A","Bb","B");
+$standard_diatonic_scale = array(0,2,4,5,7,9,11); // These are pitch classes
+
+function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$ignore_fermata,$ignore_mordents,$ignore_arpeggios,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections) {
 	global $max_term_in_fraction;
+	global $notes_diesis,$notes_bemol;
 	$grace_ratio = 2;
 	// MakeMusic Finale dynamics https://en.wikipedia.org/wiki/Dynamics_(music)
 	$dynamic_sign_to_volume = array("pppp" => 10, "ppp" => 23, "pp" => 36, "p" => 49, "mp" => 62, "mf" => 75, "f" => 88, "ff" => 101, "fff" => 114, "ffff" => 127);
@@ -66,6 +71,9 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 				if($test_musicxml)
 					echo "<font color = red>• Measure ".$measure_label[$i_measure]."</font><br />";
 			//	ksort($the_measure);
+
+		/*		if(isset($fifths[$score_part])) $current_fifths = $fifths[$score_part];
+				else $current_fifths = 0; */
 				$curr_event = $convert_measure = $p_fermata_total_duration[$i_measure] = $q_fermata_total_duration[$i_measure] = $p_fermata_date[$i_measure] = $q_fermata_date[$i_measure] = $p_fermata_duration[$i_measure] = $q_fermata_duration[$i_measure] = array();
 				$data .= "{";
 				$number_parts = 0;
@@ -81,6 +89,10 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 						continue;
 						}
 					$number_parts++;
+					if(isset($fifths[$score_part])) $current_fifths = $fifths[$score_part];
+					else $current_fifths = 0;
+					$diatonic_scale = diatonic_scale($current_fifths);
+					$altered_diatonic_scale = $diatonic_scale; // We'll store alterations in this measure
 					$i_field_of_part = $i_field_of_part2 = 0;
 					$i_fermata = 0;
 					$p_date[$i_measure][$score_part] = 0; $q_date[$i_measure][$score_part] = 1;
@@ -432,6 +444,24 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 						if($note_on AND is_integer($pos=strpos($line,"<arpeggiate "))) {
 							$curr_event[$score_part][$j]['arpeggiate'] = TRUE;
 							}
+						if(!$ignore_mordents AND $note_on AND is_integer($pos=strpos($line,"<inverted-mordent "))) {
+							$curr_event[$score_part][$j]['type'] = "mordent";
+							$curr_event[$score_part][$j]['version'] = "upper";
+							if(is_integer($pos=strpos($line,"long")))
+								$mordent_long = trim(preg_replace("/.*long\s*=\s*\"(.+)\".*>/u","$1",$line));
+							else $mordent_long = "no";
+							$curr_event[$score_part][$j]['long'] = $mordent_long;
+							continue;
+							}
+						if(!$ignore_mordents AND $note_on AND is_integer($pos=strpos($line,"<mordent"))) {
+							$curr_event[$score_part][$j]['type'] = "mordent";
+							$curr_event[$score_part][$j]['version'] = "lower";
+							if(is_integer($pos=strpos($line,"long")))
+								$mordent_long = trim(preg_replace("/.*long\s*=\s*\"(.+)\".*>/u","$1",$line));
+							else $mordent_long = "no";
+							$curr_event[$score_part][$j]['long'] = $mordent_long;
+							continue;
+							}
 						if($note_on AND is_integer($pos=strpos($line,"<time-modification>"))) {
 							$time_modification = TRUE;
 							}
@@ -453,7 +483,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 					// Now let us transfer events of this measure to $data
 					$convert_measure[$score_part] = '';
 					if(count($the_measure) > 1) $convert_measure[$score_part] .= "{";
-					$is_chord = FALSE;
+					$is_chord = $upper_mordent = $lower_mordent = FALSE;
 					$stream = ''; $stream_units = 0;
 					$p_time_measure = $p_time_field = $p_stream_duration = $new_tempo = $i_fermata = 0;
 					$p_old_duration = -1; $q_old_duration = 1;
@@ -475,6 +505,12 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 						if(!isset($the_event['type'])) { // Added by BB 2022-01-28
 							$report .= "<font color=\"red\">Potential error:</font> the_event['type'] is not set: measure #".$i_measure." j = ".$j."<br />";
 							continue;
+							}
+						if($the_event['type'] == "mordent") {
+							if($the_event['version'] == "lower") $lower_mordent = TRUE;
+							if($the_event['version'] == "upper") $upper_mordent = TRUE;
+							$mordent_long = $the_event['long'];
+							$report .= "<font color=\"blue\">".$the_event['version']." mordent</font> long=\"".$mordent_long."\" measure #".$i_measure." field #".($i_field_of_part + 1)."<br />";
 							}
 						if($the_event['type'] == "mm" AND $i_field_of_measure == 0) { // Fixed by BB 2022-02-01
 							$new_tempo = $the_event['value'];
@@ -838,13 +874,28 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 							$is_chord = FALSE;
 							continue;
 							}
-								
+						
+						$altered_diatonic_scale = adjust_scale($diatonic_scale,$altered_diatonic_scale,$the_event['note']);
+						$diatonic_scale_string = '';
+						if($upper_mordent OR $lower_mordent OR count($altered_diatonic_scale) > 0) {
+							for($i = 0; $i < count($altered_diatonic_scale); $i++) {
+								if($i > 0) $diatonic_scale_string .= ",";
+								$diatonic_scale_string .= $altered_diatonic_scale[$i];
+								}
+							}
 						if(!$is_chord) {
 						//	$report .= "•• measure #".$i_measure." note ".$the_event['note']." field #".($i_field_of_part + 1)." time_field = ".$p_time_field."/".$q_time_field." stream_duration = ".$p_stream_duration."/".$q_stream_duration." stream_units = ".$stream_units." event_dur = ".$the_event['p_dur']."/".$the_event['q_dur']."<br />";
 							$p_duration = $the_event['p_dur']; $q_duration = $the_event['q_dur'];
 							$fraction = $the_event['p_dur']."/".($divisions[$score_part] * $the_event['q_dur']);
 							if(($p_duration * $q_old_duration) == ($p_old_duration * $q_duration)) {
-								$stream .= $the_event['note']." ";
+								if($upper_mordent) $stream .= " mordent(".$diatonic_scale_string." upper,".$mordent_long."|";
+								if($lower_mordent) $stream .= " mordent(".$diatonic_scale_string." lower,".$mordent_long."|";
+								$stream .= $the_event['note'];
+								if($upper_mordent OR $lower_mordent) {
+									$stream .= ") ";
+									$upper_mordent = $lower_mordent = FALSE;
+									}
+								else $stream .= " ";
 								if($the_event['note'] <> "-" AND $the_event['note'] <> '') $empty_field[$i_field_of_part] = FALSE;
 								$stream_units++;
 								$add = add($p_stream_duration,$q_stream_duration,$p_duration,$q_duration);
@@ -973,7 +1024,15 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 										}
 									else break;
 									}
-								$stream = $the_event['note']." ";
+								$stream = '';
+								if($upper_mordent) $stream .= " mordent(".$diatonic_scale_string." upper,".$mordent_long."|";
+								if($lower_mordent) $stream .= " mordent(".$diatonic_scale_string." lower,".$mordent_long."|";
+								$stream .= $the_event['note'];
+								if($upper_mordent OR $lower_mordent) {
+									$stream .= ") ";
+									$upper_mordent = $lower_mordent = FALSE;
+									}
+								else $stream .= " ";
 								$stream_units = 1;
 								if($the_event['note'] <> "-" AND $the_event['note'] <> '') $empty_field[$i_field_of_part] = FALSE;
 								$p_old_duration = $p_stream_duration = $p_duration;
@@ -1249,6 +1308,9 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 		echo "<p><font color=\"red\">➡</font> ".$number_metronome_markers." metronome markers have been found inside measures of this score</p>";
 	else
 		echo "<p><font color=\"red\">➡</font> No metronome marker has been found inside measures of this score</p>";
+	if(isset($fifths[$score_part])) $current_fifths = $fifths[$score_part];
+	else $current_fifths = 0;
+	if(!$ignore_mordents) $data = process_mordent($data,$current_fifths);
 	$convert_score['data'] = $data;
 	$convert_score['metronome_min'] = $metronome_min;
 	$convert_score['metronome_max'] = $metronome_max;
@@ -1260,7 +1322,144 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$midi_channel,$d
 	else $convert_score['report'] = '';
 	return $convert_score;
 	}
-	
+
+function diatonic_scale($fifths) {
+	// Construct diatonic scale with its alterations according to fifths
+	global $notes_diesis,$notes_bemol;
+	$diatonic_scale = array(0,2,4,5,7,9,11);
+	if($fifths <> 0) {
+		if($fifths > 0) $scale_pos = 3; // Start with F
+		else $scale_pos = 6; // Start with B
+		for($i = 0; $i < abs($fifths); $i++) {
+			if($fifths > 0) { // diesis
+				$diatonic_scale[$scale_pos]++;
+				$scale_pos += 4;
+				}
+			else { // bemol
+				$diatonic_scale[$scale_pos]--;
+				$scale_pos += 3;
+				}
+			if($scale_pos > 6) $scale_pos -= 7;
+			}
+	/*	echo "scale = ";
+		for($i = 0; $i < count($diatonic_scale); $i++) echo $notes_bemol[$diatonic_scale[$i]]." ";
+		echo "<br />"; */
+		}
+	else $diatonic_scale = array();
+	return $diatonic_scale;
+	}
+
+function adjust_scale($diatonic_scale,$altered_diatonic_scale,$note) {
+	global $notes_diesis,$notes_bemol,$standard_diatonic_scale;
+	$note_class = preg_replace("/(.+)[0-9]+/u","$1",$note);
+	for($pitch_class = 0; $pitch_class < 12; $pitch_class++) {
+		if($notes_diesis[$pitch_class] == $note_class) {
+			$alteration = "diesis";
+			$unaltered_pitch_class = $pitch_class - 1;
+			break;
+			}
+		if($notes_bemol[$pitch_class] == $note_class) {
+			$alteration = "bemol";
+			$unaltered_pitch_class = $pitch_class + 1;
+			break;
+			}
+		}
+	if($pitch_class < 12) {
+		for($i = 0; $i < count($altered_diatonic_scale); $i++) {
+			if($altered_diatonic_scale[$i] == $pitch_class) return $altered_diatonic_scale;
+			}
+		for($i = 0; $i < count($diatonic_scale); $i++) {
+			if($diatonic_scale[$i] == $pitch_class) {
+				$altered_diatonic_scale[$i] = $diatonic_scale[$i];
+				return $altered_diatonic_scale;
+				}
+			}
+		for($i = 0; $i < count($standard_diatonic_scale); $i++) {
+			if($standard_diatonic_scale[$i] == $pitch_class) {
+				$altered_diatonic_scale[$i] = $standard_diatonic_scale[$i];
+				return $altered_diatonic_scale;
+				}
+			}
+		}
+	return $altered_diatonic_scale;
+	}
+
+function process_mordent($data,$fifths) {
+	global $notes_diesis,$notes_bemol;
+	$start_search = 0;
+	while(is_integer($pos1=strpos($data,"mordent(",$start_search))) {
+		if(!is_integer($pos2=strpos($data,")",$pos1 + 8))) break;
+		$old_expression = substr($data,$pos1 + 8,$pos2 - $pos1 - 8);
+		$altered_diatonic_scale_string = trim(preg_replace("/(.+)\s.+/u","$1",$old_expression));
+		// echo "altered_diatonic_scale_string = ".$altered_diatonic_scale_string."<br />";
+		$diatonic_scale = explode(',',$altered_diatonic_scale_string);
+		// echo $fifths." ".$old_expression." = ";
+		$note = trim(preg_replace("/.+\|(.+)/u","$1",$old_expression));
+		if(is_integer(strpos($old_expression,"&"))) $link = "&";
+		else $link = '';
+		if(is_integer(strpos($old_expression,"upper"))) $direction = "up";
+		else $direction = "down";
+		$long = is_integer(strpos($old_expression,"yes"));
+		$new_expression = mordent($note,$long,$link,$diatonic_scale,$direction,$fifths);
+		//echo $new_expression."<br /><br />";
+		$d1 = substr($data,0,$pos1);
+		$d2 = substr($data,$pos2 + 1,strlen($data) - $pos2 - 1);
+		$data = $d1.$new_expression.$d2;
+		$start_search = $pos1 + strlen($new_expression);
+		}
+	return $data;
+	}
+
+function mordent($note,$long,$link,$diatonic_scale,$direction,$fifths) {
+	global $notes_diesis,$notes_bemol;
+	$note = str_replace('&','',$note);
+	$note_class = preg_replace("/(.+)[0-9]+/u","$1",$note);
+	for($pitch_class = 0; $pitch_class < 12; $pitch_class++) {
+		if($notes_diesis[$pitch_class] == $note_class OR $notes_bemol[$pitch_class] == $note_class) break;
+		}
+	if($pitch_class > 12) {
+		echo "<font color=red>➡</font> Incorrect pitch class for ".$note." in mordent ".$direction."<br />";
+		$note2 = "???";
+		}
+	$octave = preg_replace("/.+([0-9]+)/u","$1",$note);
+//	echo "note = ".$note." pitch_class = ".$pitch_class."<br />";
+	if($direction == "down") {
+		$lower_pitch_class = $pitch_class - 1;
+		if($lower_pitch_class < 0) {
+			$lower_pitch_class = $diatonic_scale[6]; $octave--;
+			}
+	//	echo "lower_pitch_class = ".$lower_pitch_class."<br />";
+		for($i = count($diatonic_scale) - 1; $i >= 0; $i--) {
+			if($diatonic_scale[$i] <= $lower_pitch_class) {
+				if($fifths > 0) $alt_pitch_class = $notes_diesis[$diatonic_scale[$i]];
+				else $alt_pitch_class = $notes_bemol[$diatonic_scale[$i]];
+				
+				break;
+				}
+			}
+		}
+	if($direction == "up") {
+		$higher_pitch_class = $pitch_class + 1;
+		if($higher_pitch_class > 11) {
+			$higher_pitch_class = 0; $octave++;
+			}
+	//	echo "higher_pitch_class = ".$higher_pitch_class."<br />";
+		for($i = 0; $i < count($diatonic_scale); $i++) {
+			if($diatonic_scale[$i] >= $higher_pitch_class) {
+				if($fifths > 0) $alt_pitch_class = $notes_diesis[$diatonic_scale[$i]];
+				else $alt_pitch_class = $notes_bemol[$diatonic_scale[$i]];
+				break;
+				}
+			}
+		}
+	$note2 = $alt_pitch_class.$octave;
+	if($long)
+		$expression = "{1/4,".$note2." ".$note." ".$note2."}{3/4,".$note.$link."}";
+	else
+		$expression = "{1/8,".$note." ".$note2."}{7/8,".$note.$link."}";
+	if($pitch_class == $diatonic_scale[$i]) echo "<font color=red>➡</font> Error pitch class ".$pitch_class." not changed in ".$expression."<br />";
+	return $expression;
+	}
 
 function process_arpeggiate($data,$score_divisions) {
 	global $max_term_in_fraction;

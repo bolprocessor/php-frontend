@@ -122,6 +122,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$ignore_channels = isset($_POST['ignore_channels']);
 		//	$ignore_trills = isset($_POST['ignore_trills']);
 			$ignore_fermata = isset($_POST['ignore_fermata']);
+			$ignore_mordents = isset($_POST['ignore_mordents']);
 			$ignore_arpeggios = isset($_POST['ignore_arpeggios']);
 			$section = 0; // This variable is used for repetitions, see forward/backward
 			$repeat_section[$section] = 1; // By default, don't repeat
@@ -154,6 +155,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$file = fopen($music_xml_file,"r");
 			$print_info = FALSE;
 			$beat_unit = "quarter";
+			$fifths = $mode = array();
 			while(!feof($file)) {
 				$line = fgets($file);
 				if(is_integer($pos=strpos($line,"</print"))) { // Added by BB 2022/01/28
@@ -225,6 +227,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				if($partwise AND is_integer($pos=strpos($line,"<part "))) {
 					$i_measure = -1;
 					$part = trim(preg_replace("/.*id=\"([^\"]+)\".*/u","$1",$line));
+					$fifths[$part] = 0;
 					continue;
 					}
 				if(is_integer($pos=strpos($line,"<attributes>"))) {
@@ -363,9 +366,10 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			if($ignore_dynamics) $list_settings .= "// Ignoring dynamics\n";
 		//	if($ignore_trills) $list_settings .= "// Ignoring trills\n";
 			if($ignore_fermata) $list_settings .= "// Ignoring fermata\n";
+			if($ignore_mordents) $list_settings .= "// Ignoring mordents\n";
 			if($ignore_arpeggios) $list_settings .= "// Ignoring arpeggios\n";
 			if($list_settings <> '') $list_settings .= "\n";
-			$convert_score = convert_musicxml($this_score,$repeat_section,$divisions,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$ignore_fermata,$ignore_arpeggios,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections);
+			$convert_score = convert_musicxml($this_score,$repeat_section,$divisions,$fifths,$mode,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$ignore_fermata,$ignore_mordents,$ignore_arpeggios,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections);
 			$data .= $convert_score['data'];
 			$report = $convert_score['report'];
 			$data = preg_replace("/\s+/u"," ",$data);
@@ -466,6 +470,9 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			echo "<input type=\"checkbox\" name=\"ignore_fermata\"";
 			if($ignore_fermata) echo " checked";
 			echo ">&nbsp;Ignore fermata<br />";
+			echo "<input type=\"checkbox\" name=\"ignore_mordents\"";
+			if($ignore_mordents) echo " checked";
+			echo ">&nbsp;Ignore mordents<br />";
 			echo "<input type=\"checkbox\" name=\"ignore_arpeggios\"";
 			if($ignore_arpeggios) echo " checked";
 			echo ">&nbsp;Ignore arpeggios<br />";
