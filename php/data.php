@@ -158,15 +158,15 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$fifths = $mode = array();
 			while(!feof($file)) {
 				$line = fgets($file);
-				if(is_integer($pos=strpos($line,"</print"))) { // Added by BB 2022/01/28
+			/*	if(is_integer($pos=strpos($line,"</print"))) { 
 					$print_info = FALSE;
 					continue;
 					}
 				if($print_info) continue;
-				if(is_integer($pos=strpos($line,"<print"))) { // Added by BB 2022/01/28
+				if(is_integer($pos=strpos($line,"<print"))) { 
 					$print_info = TRUE;
 					continue;
-					}
+					} */
 				if(is_integer($pos=strpos($line,"<score-partwise")) AND $pos == 0) {
 					$partwise = TRUE;
 					continue;
@@ -299,7 +299,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				//	if(!is_integer($pos=strpos($line,"implicit=\"yes\""))) { // Not recommended
 						$i_measure = trim(preg_replace("/.*number=\"([^\"]+)\".*/u","$1",$line));
 						if($test_musicxml)
-							echo "Part ".$part." measure #".$i_measure."<br />";
+							echo "• Part ".$part." measure #".$i_measure."<br />";
 						if($add_section) {
 							$section++;
 							$this_score[$section][$i_measure] = array();
@@ -327,18 +327,17 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 						$repeat_section[$section] = 2;
 						$add_section = TRUE;
 						$repeat_end_measure[$section] = $i_measure;
-					//	echo "• Section ".$section." repeat ".$repeat_section[$section]." time(s)<br />";
+						if($test_musicxml) echo "• Section ".$section." repeat ".$repeat_section[$section]." time(s)<br />";
 						}
 					continue;
-					}
-				if($reading_measure AND is_integer($pos=strpos($line,"<note>"))) {
 					}
 					
 				if($reading_measure) {
 					$this_score[$section][$i_measure][$part][] = $line;
 					}
 				}
-			fclose($file); $i_section =  0;
+			fclose($file);
+			$i_section =  0;
 			foreach($this_score as $section => $the_section) {
 				if(count($the_section) > 0) $i_section++;
 				if(isset($repeat_start_measure[$section]) AND isset($repeat_end_measure[$section])) {
