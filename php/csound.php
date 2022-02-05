@@ -127,8 +127,9 @@ if(isset($_GET['scalefilename'])) $scalefilename = urldecode($_GET['scalefilenam
 
 $duplicated_scale = FALSE;
 if(isset($_POST['copy_this_scale'])) {
-	if(isset($_POST['file_choice'])) {
-		$destination = $_POST['file_choice'];
+	if(isset($_POST['file_choice']) OR (isset($_POST['duplicate_name']) AND ($new_scale_name = trim($_POST['duplicate_name']) <> ''))) {
+		if(isset($_POST['file_choice'])) $destination = $_POST['file_choice'];
+		else $destination = $filename;
 		echo "<hr>";
 		if($destination == $filename) {
 			$new_scale_name = trim($_POST['duplicate_name']);
@@ -246,7 +247,7 @@ for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
 			if(($prefix <> "-cs" AND $extension <> "bpcs") OR is_integer(strpos($thisfile,"_lock"))) continue;
 			echo "<input type=\"radio\" name=\"file_choice\" value=\"".$thisfile."\">".$thisfile;
 			if($thisfile == $filename) {
-				echo " <font color=\"red\">(self)</font> <input type=\"submit\" style=\"background-color:aquamarine; \" name=\"\" onclick=\"this.form.target='_self';return true;\" value=\"DUPLICATE ‘".$scalefilename."’\"> under name: <input type=\"text\" name=\"duplicate_name\" size=\"20\" value=\"\">";
+				echo " <font color=\"red\">(self)</font> <input type=\"submit\" style=\"background-color:aquamarine; \" name=\"\" onclick=\"this.form.target='_self';return true;\" value=\"DUPLICATE ‘".$scalefilename."’\"> under name: <input type=\"text\" name=\"duplicate_name\" size=\"40\" value=\"\">";
 				}
 			echo "<br />";
 			}

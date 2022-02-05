@@ -111,18 +111,19 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$score_part = '';
 			$data = $subtitle_part = '';
 			$max_measure = 0;
-			$partwise = $timewise = $attributes = $attributes_key = $changed_attributes = FALSE;
+			$partwise = $timewise = $attributes = $attributes_key = $changed_attributes = $found_trill = $found_ornament = FALSE;
 			$add_section = TRUE;
 			$instrument_name = $midi_channel = $select_part = $duration_part = $divisions = $repeat_section = array();
 			$ignore_dynamics = isset($_POST['ignore_dynamics']);
 			if(isset($_POST['tempo_option'])) $tempo_option = $_POST['tempo_option'];
 			else $tempo_option = "allbutscore";
-			$list_corrections = isset($_POST['verbose']);
+			$list_corrections = isset($_POST['list_corrections']);
+			$trace_ornamentations = isset($_POST['trace_ornamentations']);
 			echo "<input type=\"hidden\" name=\"tempo_option\" value=\"".$tempo_option."\">";
 			$ignore_channels = isset($_POST['ignore_channels']);
-		//	$ignore_trills = isset($_POST['ignore_trills']);
+			$ignore_trills = isset($_POST['ignore_trills']);
 			$ignore_fermata = isset($_POST['ignore_fermata']);
-			$ignore_mordents = isset($_POST['ignore_mordents']);
+			$ignore_ornaments = isset($_POST['ignore_ornaments']);
 			$ignore_arpeggios = isset($_POST['ignore_arpeggios']);
 			$section = 0; // This variable is used for repetitions, see forward/backward
 			$repeat_section[$section] = 1; // By default, don't repeat
@@ -294,6 +295,10 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 						} */
 					continue;
 					}
+				if(is_integer($pos=strpos($line,"<trill-mark"))) $found_trill = TRUE;
+				if(is_integer($pos=strpos($line,"<inverted-mordent"))) $found_ornament = TRUE;
+				if(is_integer($pos=strpos($line,"<mordent"))) $found_ornament = TRUE;
+				if(is_integer($pos=strpos($line,"<turn"))) $found_ornament = TRUE;
 				if(is_integer($pos=strpos($line,"<measure "))) {
 					$reading_measure = TRUE;
 				//	if(!is_integer($pos=strpos($line,"implicit=\"yes\""))) { // Not recommended
@@ -363,12 +368,12 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				}
 			if($ignore_channels) $list_settings .= "// Ignoring MIDI channels\n";
 			if($ignore_dynamics) $list_settings .= "// Ignoring dynamics\n";
-		//	if($ignore_trills) $list_settings .= "// Ignoring trills\n";
+			if($ignore_trills) $list_settings .= "// Ignoring trills\n";
 			if($ignore_fermata) $list_settings .= "// Ignoring fermata\n";
-			if($ignore_mordents) $list_settings .= "// Ignoring mordents\n";
+			if($ignore_ornaments) $list_settings .= "// Ignoring mordents and turns\n";
 			if($ignore_arpeggios) $list_settings .= "// Ignoring arpeggios\n";
 			if($list_settings <> '') $list_settings .= "\n";
-			$convert_score = convert_musicxml($this_score,$repeat_section,$divisions,$fifths,$mode,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$ignore_fermata,$ignore_mordents,$ignore_arpeggios,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections);
+			$convert_score = convert_musicxml($this_score,$repeat_section,$divisions,$fifths,$mode,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$ignore_fermata,$ignore_ornaments,$ignore_trills,$ignore_arpeggios,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections,$trace_ornamentations);
 			$data .= $convert_score['data'];
 			$report = $convert_score['report'];
 			$data = preg_replace("/\s+/u"," ",$data);
@@ -463,15 +468,21 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			if($tempo_option == "all") echo " checked";
 			echo ">&nbsp;Interpret all metronome markers<br />";
 			echo "_______________________________________<br />";
-		/*	echo "<input type=\"checkbox\" name=\"ignore_trills\"";
-			if($ignore_trills) echo " checked";
-			echo ">&nbsp;Ignore trills<br />"; */
+			if($found_trill) {
+				echo "<input type=\"checkbox\" name=\"ignore_trills\"";
+				if($ignore_trills) echo " checked";
+				echo ">&nbsp;<font color=\"red\">➡</font> Ignore trills (some have been found in this score)<br />";
+				}
+			else $ignore_trills = FALSE;
+			if($found_ornament) {
+				echo "<input type=\"checkbox\" name=\"ignore_ornaments\"";
+				if($ignore_ornaments) echo " checked";
+				echo ">&nbsp;<font color=\"red\">➡</font> Ignore mordents and turns (some have been found in this score)<br />";
+				}
+			else $ignore_ornaments = FALSE;
 			echo "<input type=\"checkbox\" name=\"ignore_fermata\"";
 			if($ignore_fermata) echo " checked";
 			echo ">&nbsp;Ignore fermata<br />";
-			echo "<input type=\"checkbox\" name=\"ignore_mordents\"";
-			if($ignore_mordents) echo " checked";
-			echo ">&nbsp;Ignore mordents<br />";
 			echo "<input type=\"checkbox\" name=\"ignore_arpeggios\"";
 			if($ignore_arpeggios) echo " checked";
 			echo ">&nbsp;Ignore arpeggios<br />";
@@ -483,9 +494,12 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			if($ignore_channels) echo " checked";
 			echo ">&nbsp;Ignore MIDI channels<br />";
 			echo "_________________<br />";
-			echo "<input type=\"checkbox\" name=\"verbose\"";
+			echo "<input type=\"checkbox\" name=\"list_corrections\"";
 			if($list_corrections) echo " checked";
 			echo ">&nbsp;List automatic corrections of this score<br />";
+			echo "<input type=\"checkbox\" name=\"trace_ornamentations\"";
+			if($list_corrections) echo " checked";
+			echo ">&nbsp;Trace ornamentations<br />";
 			echo "_________________<br />";
 			echo "<input type=\"checkbox\" name=\"delete_current\">&nbsp;Delete current data<br />";
 			echo "_________________<br />";
