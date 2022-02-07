@@ -2,7 +2,8 @@
 require_once("_basic_tasks.php");
 require_once("_settings.php");
 $url_this_page = "produce.php";
-$this_title = "BP console";
+if(isset($_GET['title'])) $this_title = urldecode($_GET['title']);
+else $this_title = '';
 require_once("_header.php");
 
 $application_path = $bp_application_path;
