@@ -348,7 +348,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			foreach($this_score as $section => $the_section) {
 				if(count($the_section) > 0) $i_section++;
 				if(isset($repeat_start_measure[$section]) AND isset($repeat_end_measure[$section])) {
-					echo "Section #".$i_section." is repeated from measure ".$repeat_start_measure[$section]." to ".$repeat_end_measure[$section]."<br />";
+					echo "Section #".$i_section." is repeated from measure ".$repeat_start_measure[$section]." to ".$repeat_end_measure[$section]."<br /><br />";
 					}
 				}
 			unset($the_section);
