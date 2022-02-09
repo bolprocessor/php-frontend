@@ -132,6 +132,9 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$ignore_trills = isset($_POST['ignore_trills']);
 			$ignore_fermata = isset($_POST['ignore_fermata']);
 			$ignore_mordents = isset($_POST['ignore_mordents']);
+			$chromatic_trills = isset($_POST['chromatic_trills']);
+			$chromatic_mordents = isset($_POST['chromatic_mordents']);
+			$chromatic_turns = isset($_POST['chromatic_turns']);
 			$ignore_turns = isset($_POST['ignore_turns']);
 			$ignore_arpeggios = isset($_POST['ignore_arpeggios']);
 			$section = 0; // This variable is used for repetitions, see forward/backward
@@ -372,21 +375,33 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			if($ignore_dynamics) $list_settings .= "// Ignoring dynamics\n";
 			if($found_trill)
 				if($ignore_trills) $list_settings .= "// Ignoring trills\n";
-				else $list_settings .= "// Including trills\n";
+				else {
+					$list_settings .= "// Including trills";
+					if($chromatic_trills) $list_settings .= " (chromatic)";
+					$list_settings .= "\n";
+					}
 			if($found_fermata)
 				if($ignore_fermata) $list_settings .= "// Ignoring fermata\n";
 				else $list_settings .= "// Including fermata\n";
 			if($found_mordent)
 				if($ignore_mordents) $list_settings .= "// Ignoring mordents\n";
-				else $list_settings .= "// Including mordents\n";
+				else {
+					$list_settings .= "// Including mordents";
+					if($chromatic_mordents) $list_settings .= " (chromatic)";
+					$list_settings .= "\n";
+					}
 			if($found_turn)
 				if($ignore_turns) $list_settings .= "// Ignoring turns\n";
-				else $list_settings .= "// Including turns\n";
+				else {
+					$list_settings .= "// Including turns";
+					if($chromatic_turns) $list_settings .= " (chromatic)";
+					$list_settings .= "\n";
+					}
 			if($found_arpeggio)
 				if($ignore_arpeggios) $list_settings .= "// Ignoring arpeggios\n";
 				else $list_settings .= "// Including arpeggios\n";
 			if($list_settings <> '') $list_settings .= "\n";
-			$convert_score = convert_musicxml($this_score,$repeat_section,$divisions,$fifths,$mode,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$ignore_fermata,$ignore_mordents,$ignore_turns,$ignore_trills,$ignore_arpeggios,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections,$trace_ornamentations);
+			$convert_score = convert_musicxml($this_score,$repeat_section,$divisions,$fifths,$mode,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$ignore_fermata,$ignore_mordents,$chromatic_mordents,$ignore_turns,$chromatic_turns,$ignore_trills,$chromatic_trills,$ignore_arpeggios,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections,$trace_ornamentations);
 			$data .= $convert_score['data'];
 			$report = $convert_score['report'];
 			$data = preg_replace("/\s+/u"," ",$data);
@@ -495,7 +510,10 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				echo ">&nbsp;<font color=\"red\">➡</font> Ignore trills (some have been found in this score)";
 				$link_preview .= "&filter=trill";
 				$window_name = $upload_filename."_trill";
-				echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_preview."','".$window_name."','width=800,height=400,left=200'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\"><br />";
+				echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_preview."','".$window_name."','width=800,height=400,left=200'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\">&nbsp;";
+				echo "<input type=\"checkbox\" name=\"chromatic_trills\"";
+				if($chromatic_trills) echo " checked";
+				echo ">&nbsp;➡&nbsp;make them chromatic<br />";
 				}
 			else $ignore_trills = FALSE;
 			if($found_mordent) {
@@ -504,7 +522,10 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				echo ">&nbsp;<font color=\"red\">➡</font> Ignore mordents (some have been found in this score)";
 				$link_preview .= "&filter=mordent";
 				$window_name = $upload_filename."_mordent";
-				echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_preview."','".$window_name."','width=800,height=400,left=150'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\"><br />";
+				echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_preview."','".$window_name."','width=800,height=400,left=150'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\">&nbsp;";
+				echo "<input type=\"checkbox\" name=\"chromatic_mordents\"";
+				if($chromatic_mordents) echo " checked";
+				echo ">&nbsp;➡&nbsp;make them chromatic<br />";
 				}
 			else $ignore_mordents = FALSE;
 			if($found_turn) {
@@ -513,7 +534,10 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				echo ">&nbsp;<font color=\"red\">➡</font> Ignore turns (some have been found in this score)";
 				$link_preview .= "&filter=turn";
 				$window_name = $upload_filename."_turn";
-				echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_preview."','".$window_name."','width=800,height=400,left=100'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\"><br />";
+				echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_preview."','".$window_name."','width=800,height=400,left=100'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\">&nbsp;";
+				echo "<input type=\"checkbox\" name=\"chromatic_turns\"";
+				if($chromatic_turns) echo " checked";
+				echo ">&nbsp;➡&nbsp;make them chromatic<br />";
 				}
 			else $ignore_turns = FALSE;
 			if($found_fermata) {

@@ -3,7 +3,7 @@ $notes_diesis = array("C","C#","D","D#","E","F","F#","G","G#","A","A#","B");
 $notes_bemol = array("C","Db","D","Eb","E","F","Gb","G","Ab","A","Bb","B");
 $standard_diatonic_scale = array(0,2,4,5,7,9,11); // These are pitch classes
 
-function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$ignore_fermata,$ignore_mordents,$ignore_turns,$ignore_trills,$ignore_arpeggios,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections,$trace_ornamentations) {
+function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$ignore_fermata,$ignore_mordents,$chromatic_mordents,$ignore_turns,$chromatic_turns,$ignore_trills,$chromatic_trills,$ignore_arpeggios,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections,$trace_ornamentations) {
 	global $max_term_in_fraction;
 	global $notes_diesis,$notes_bemol,$standard_diatonic_scale;
 	$grace_ratio = 2;
@@ -38,7 +38,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 	$old_tempo = ''; $current_tempo = 1;
 	$beat_unit = "quarter";
 	$found_tempo_variation = FALSE;
-	$found_mordent = $found_turn = $found_trill = $found_turn = FALSE;
+	$found_mordent = $found_turn = $found_trill = $found_turn = $chromatic = FALSE;
 	$fermata_show = FALSE; // Only for test
 	ksort($the_score);
 	foreach($the_score as $section => $the_section) {
@@ -188,6 +188,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 								if($upper_mordent) $curr_event[$score_part][$j]['ornament'] = "upper_mordent";
 								if($lower_mordent) $curr_event[$score_part][$j]['ornament'] = "lower_mordent";
 								if($upper_mordent OR $lower_mordent) $curr_event[$score_part][$j]['long'] = $long_ornamentation;
+								$curr_event[$score_part][$j]['chromatic'] = $chromatic;
 								if($turn) {
 									$curr_event[$score_part][$j]['turn'] = TRUE;
 									$curr_event[$score_part][$j]['turn-beats'] = $turn_beats;
@@ -205,7 +206,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 								$p_date[$i_measure][$score_part] = $add['p'];
 								$q_date[$i_measure][$score_part] = $add['q'];
 								}
-							$note_on = $rest = $fermata = $is_chord = $upper_mordent = $lower_mordent = $trill = $turn = FALSE;
+							$note_on = $rest = $fermata = $is_chord = $upper_mordent = $lower_mordent = $trill = $turn = $chromatic = FALSE;
 							$long_ornamentation = '';
 							$tie_type_start = $tie_type_stop = FALSE;
 							$j++;
@@ -459,12 +460,14 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							}
 						if($note_on AND !$ignore_trills AND is_integer($pos=strpos($line,"<trill-mark"))) {
 							$trill = $found_trill = TRUE;
+							$chromatic = $chromatic_trills;
 							if(is_integer($pos=strpos($line,"trill-beats")))
 								$trill_beats = trim(preg_replace("/.*trill-beats\s*=\s*\"(.+)\".*>/u","$1",$line));
 							else $trill_beats = 3;
 							}
 						if(!$ignore_mordents AND $note_on AND is_integer($pos=strpos($line,"<inverted-mordent"))) {
 							$upper_mordent = $found_mordent = TRUE;
+							$chromatic = $chromatic_mordents;
 							if(is_integer($pos=strpos($line,"long")))
 								$long_ornamentation = trim(preg_replace("/.*long\s*=\s*\"(.+)\".*>/u","$1",$line));
 							else $long_ornamentation = "no";
@@ -472,6 +475,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							}
 						if(!$ignore_mordents AND $note_on AND is_integer($pos=strpos($line,"<mordent"))) {
 							$lower_mordent = $found_mordent = TRUE;
+							$chromatic = $chromatic_mordents;
 							if(is_integer($pos=strpos($line,"long")))
 								$long_ornamentation = trim(preg_replace("/.*long\s*=\s*\"(.+)\".*>/u","$1",$line));
 							else $long_ornamentation = "no";
@@ -479,6 +483,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							}
 						if(!$ignore_turns AND $note_on AND is_integer($pos=strpos($line,"<turn"))) {
 							$turn = $found_turn = TRUE;
+							$chromatic = $chromatic_turns;
 							if(is_integer($pos=strpos($line,"beats")))
 								$turn_beats = trim(preg_replace("/.*beats\s*=\s*\"(.+)\".*>/u","$1",$line));
 							else $turn_beats = 4;
@@ -533,11 +538,15 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							$turn_beats = $the_event['turn-beats'];
 							$long_ornamentation = $the_event['long'];
 							$report .= "beats = ".$turn_beats."</font> ";
+							if(isset($the_event['chromatic']) AND $the_event['chromatic'])
+							$report .= "(chromatic) ";
 							$report .= "long = \"".$long_ornamentation."\" ";
 							$report .= "measure #".$i_measure." field #".($i_field_of_part + 1)."<br />";
 							}
 						if(isset($the_event['ornament'])) {
 							$report .= "<font color=\"blue\">".$the_event['ornament']."</font> ";
+							if(isset($the_event['chromatic']) AND $the_event['chromatic'])
+							$report .= "(chromatic) ";
 							if($the_event['ornament'] == "trill") {
 								$trill_beats = $the_event['trill-beats'];
 								if($trill_beats <> 3) $report .= "trill beats=\"".$trill_beats."\" ";
@@ -919,22 +928,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							$p_duration = $the_event['p_dur']; $q_duration = $the_event['q_dur'];
 							$fraction = $the_event['p_dur']."/".($divisions[$score_part] * $the_event['q_dur']);
 							if(($p_duration * $q_old_duration) == ($p_old_duration * $q_duration)) {
-								if(isset($the_event['ornament']) OR isset($the_event['turn'])) {
-									if(isset($the_event['turn'])) {
-										$turn = "turn"."=".$turn_beats;
-										if(!isset($the_event['ornament'])) $the_event['ornament'] = "upper_mordent";
-										}
-									else $turn = '';
-									if($the_event['ornament'] == "upper_mordent")
-										$stream .= " ornament(".$diatonic_scale_string." upper,".$turn.",".$long_ornamentation."|";
-									if($the_event['ornament'] == "lower_mordent")
-										$stream .= " ornament(".$diatonic_scale_string." lower,".$turn.",".$long_ornamentation."|";
-									if($the_event['ornament'] == "trill")
-										$stream .= " ornament(".$diatonic_scale_string." trill,,".$trill_beats."|";
-									}
-								$stream .= $the_event['note'];
-								if(isset($the_event['ornament'])) $stream .= ") ";
-								else $stream .= " ";
+								$stream = add_note($stream,$i_measure,$the_event,$long_ornamentation,$diatonic_scale_string);
 								if($the_event['note'] <> "-" AND $the_event['note'] <> '') $empty_field[$i_field_of_part] = FALSE;
 								$stream_units++;
 								$add = add($p_stream_duration,$q_stream_duration,$p_duration,$q_duration);
@@ -1064,23 +1058,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 									else break;
 									}
 								$stream = '';
-
-								if(isset($the_event['ornament']) OR isset($the_event['turn'])) {
-									if(isset($the_event['turn'])) {
-										$turn = "turn"."=".$turn_beats;
-										if(!isset($the_event['ornament'])) $the_event['ornament'] = "upper_mordent";
-										}
-									else $turn = '';
-									if($the_event['ornament'] == "upper_mordent")
-										$stream .= " ornament(".$diatonic_scale_string." upper,".$turn.",".$long_ornamentation."|";
-									if($the_event['ornament'] == "lower_mordent")
-										$stream .= " ornament(".$diatonic_scale_string." lower,".$turn.",".$long_ornamentation."|";
-									if($the_event['ornament'] == "trill")
-										$stream .= " ornament(".$diatonic_scale_string." trill,,".$trill_beats."|";
-									}
-								$stream .= $the_event['note'];
-								if(isset($the_event['ornament'])) $stream .= ") ";
-								else $stream .= " ";
+								$stream = add_note($stream,$i_measure,$the_event,$long_ornamentation,$diatonic_scale_string);
 								$stream_units = 1;
 								if($the_event['note'] <> "-" AND $the_event['note'] <> '') $empty_field[$i_field_of_part] = FALSE;
 								$p_old_duration = $p_stream_duration = $p_duration;
@@ -1373,6 +1351,29 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 	return $convert_score;
 	}
 
+function add_note($stream,$i_measure,$the_event,$long_ornamentation,$diatonic_scale_string) {
+	if(isset($the_event['ornament']) OR isset($the_event['turn'])) {
+		if($the_event['chromatic']) $mode = "chromatic";
+		else $mode = '';
+		if(isset($the_event['turn'])) {
+			$turn_beats = $the_event['turn-beats'];
+			$turn = "turn"."=".$turn_beats;
+			if(!isset($the_event['ornament'])) $the_event['ornament'] = "upper_mordent";
+			}
+		else $turn = '';
+		if($the_event['ornament'] == "upper_mordent")
+			$stream .= " ornament(".$diatonic_scale_string."_".$i_measure."_upper,".$mode.",".$turn.",".$long_ornamentation."|";
+		if($the_event['ornament'] == "lower_mordent")
+			$stream .= " ornament(".$diatonic_scale_string."_".$i_measure."_lower,".$mode.",".$turn.",".$long_ornamentation."|";
+		if($the_event['ornament'] == "trill")
+			$stream .= " ornament(".$diatonic_scale_string."_".$i_measure."_trill,".$mode.",,".$the_event['trill-beats']."|";
+		}
+	$stream .= $the_event['note'];
+	if(isset($the_event['ornament'])) $stream .= ") ";
+	else $stream .= " ";
+	return $stream;
+	}
+
 function diatonic_scale($fifths) {
 	// Construct diatonic scale with its alterations according to fifths
 	global $notes_diesis,$notes_bemol,$standard_diatonic_scale;
@@ -1442,16 +1443,20 @@ function process_ornamentation($data,$fifths,$trace_ornamentations) {
 	while(is_integer($pos1=strpos($data,$tag,$start_search))) {
 		if(!is_integer($pos2=strpos($data,")",$pos1 + $tag_length))) break;
 		$old_expression = substr($data,$pos1 + $tag_length,$pos2 - $pos1 - $tag_length);
-		$altered_diatonic_scale_string = trim(preg_replace("/(.+)\s.+/u","$1",$old_expression));
-		if($trace_ornamentations) echo "Altered diatonic scale = (".$altered_diatonic_scale_string.")<br />";
+		$table = explode("_",$old_expression);
+		$altered_diatonic_scale_string = $table[0];
+		$i_measure = $table[1];
+	//	$altered_diatonic_scale_string = trim(preg_replace("/(.+)\s.+/u","$1",$old_expression));
+		if($trace_ornamentations) echo "Altered diatonic scale = (".$altered_diatonic_scale_string.") measure #".$i_measure."<br />";
 		$diatonic_scale = explode(',',$altered_diatonic_scale_string);
-		// if($trace_ornamentations) echo $fifths." expression = “".$old_expression."”<br />";
+	//	if($trace_ornamentations) echo $fifths." fifths, expression = “".$old_expression."”<br />";
 		$note = trim(preg_replace("/.+\|(.+)/u","$1",$old_expression));
 		if(is_integer(strpos($old_expression,"&"))) $link = "&";
 		else $link = '';
 		if(is_integer(strpos($old_expression,"upper"))) $direction = "up";
 		else $direction = "down";
 		$turn = is_integer(strpos($old_expression,"turn"));
+		$chromatic = is_integer(strpos($old_expression,"chromatic"));
 		$name_ornament = "Mordent ".$direction;
 		$turn_beats = 0;
 		if($turn) {
@@ -1468,8 +1473,12 @@ function process_ornamentation($data,$fifths,$trace_ornamentations) {
 		$long = is_integer(strpos($old_expression,"yes"));
 		if($long) $name_ornament .= " long";
 		else $name_ornament .= " short";
-		$new_expression = ornament($note,$long,$link,$diatonic_scale,$direction,$fifths,$trill,$trill_beats,$turn,$turn_beats,$trace_ornamentations);
-		if($trace_ornamentations) echo "<font color=\"blue\">".$name_ornament."</font> = ".$new_expression."<br /><br />";
+		$new_expression = ornament($note,$long,$link,$diatonic_scale,$direction,$fifths,$trill,$trill_beats,$turn,$turn_beats,$chromatic,$trace_ornamentations);
+		if($trace_ornamentations) {
+			echo "<font color=\"blue\">".$name_ornament."</font>";
+			if($chromatic) echo " (chromatic)";
+			echo " = ".$new_expression."<br /><br />";
+			}
 		$d1 = substr($data,0,$pos1);
 		$d2 = substr($data,$pos2 + 1,strlen($data) - $pos2 - 1);
 		$data = $d1.$new_expression.$d2;
@@ -1478,7 +1487,7 @@ function process_ornamentation($data,$fifths,$trace_ornamentations) {
 	return $data;
 	}
 
-function ornament($note,$long,$link,$diatonic_scale,$direction,$fifths,$trill,$trill_beats,$turn,$turn_beats,$trace_ornamentations) {
+function ornament($note,$long,$link,$diatonic_scale,$direction,$fifths,$trill,$trill_beats,$turn,$turn_beats,$chromatic,$trace_ornamentations) {
 	// Read https://bolprocessor.org/importing-musicxml/#ornaments
 	global $notes_diesis,$notes_bemol;
 	$note = str_replace('&','',$note);
@@ -1492,41 +1501,66 @@ function ornament($note,$long,$link,$diatonic_scale,$direction,$fifths,$trill,$t
 		$note2 = "???";
 		}
 	$octave = preg_replace("/.+([0-9]+)/u","$1",$note);
-	if($trace_ornamentations) echo "Note = ".$note." pitch_class = ".$pitch_class."<br />";
-	if($direction == "down" OR $turn) {
+	if($trace_ornamentations) {
+		echo "Note = ".$note;
+		if($link) echo "&";
+		echo " pitch_class = ".$pitch_class."<br />";
+		}
+
+	if($chromatic) {
 		$lower_pitch_class = $pitch_class - 1;
-		if($lower_pitch_class < $diatonic_scale[0]) {
-			$lower_pitch_class = $diatonic_scale[6]; $octave--;
+		if($lower_pitch_class < 0) {
+			$lower_pitch_class += 12; $octave--;
 			}
-		if($trace_ornamentations) echo "lower_pitch_class = ".$lower_pitch_class."<br />";
-		for($i = count($diatonic_scale) - 1; $i >= 0; $i--) {
-			if($diatonic_scale[$i] <= $lower_pitch_class) {
-				if($fifths >= 0) $alt_note = $notes_diesis[$diatonic_scale[$i]];
-				else $alt_note = $notes_bemol[$diatonic_scale[$i]];
-				if($turn) $note_down = $alt_note.$octave;
-				break;
-				}
-			}
-		}
-	if($alt_note <> '' AND $pitch_class == $diatonic_scale[$i]) echo "<font color=red>➡</font> Error pitch class ".$pitch_class." not changed in ".$expression."<br />";
-	$octave = preg_replace("/.+([0-9]+)/u","$1",$note);
-	if($direction == "up" OR $turn) {
+		$alt_note = $notes_bemol[$lower_pitch_class];
+		$note_down = $alt_note.$octave;
+		if($alt_note <> '' AND $pitch_class == $lower_pitch_class) echo "<font color=red>➡</font> Error pitch class ".$pitch_class." not changed in ".$expression."<br />";
+		$octave = preg_replace("/.+([0-9]+)/u","$1",$note);
 		$higher_pitch_class = $pitch_class + 1;
-		if($higher_pitch_class > $diatonic_scale[6]) {
-			$higher_pitch_class = 0; $octave++;
+		if($higher_pitch_class > 11) {
+			$higher_pitch_class -= 12; $octave++;
 			}
-		if($trace_ornamentations) echo "higher_pitch_class = ".$higher_pitch_class."<br />";
-		for($i = 0; $i < count($diatonic_scale); $i++) {
-			if($diatonic_scale[$i] >= $higher_pitch_class) {
-				if($fifths >= 0) $alt_note = $notes_diesis[$diatonic_scale[$i]];
-				else $alt_note = $notes_bemol[$diatonic_scale[$i]];
-				if($turn) $note_up = $alt_note.$octave;
-				break;
+		$alt_note = $notes_diesis[$higher_pitch_class];
+		$note_up = $alt_note.$octave;
+		if($alt_note <> '' AND $pitch_class == $higher_pitch_class) echo "<font color=red>➡</font> Error pitch class ".$pitch_class." not changed in ".$expression."<br />";
+		if($note2 <> "???") $note2 = $alt_note.$octave;
+		}
+	else {
+		if($direction == "down" OR $turn) {
+			$lower_pitch_class = $pitch_class - 1;
+			if($lower_pitch_class < $diatonic_scale[0]) {
+				$lower_pitch_class = $diatonic_scale[6]; $octave--;
+				}
+			if($trace_ornamentations) echo "lower_pitch_class = ".$lower_pitch_class."<br />";
+			for($i = count($diatonic_scale) - 1; $i >= 0; $i--) {
+				if($diatonic_scale[$i] <= $lower_pitch_class) {
+					if($fifths >= 0) $alt_note = $notes_diesis[$diatonic_scale[$i]];
+					else $alt_note = $notes_bemol[$diatonic_scale[$i]];
+					if($turn) $note_down = $alt_note.$octave;
+					break;
+					}
 				}
 			}
+		if($alt_note <> '' AND $pitch_class == $diatonic_scale[$i]) echo "<font color=red>➡</font> Error pitch class ".$pitch_class." not changed in ".$expression."<br />";
+		$octave = preg_replace("/.+([0-9]+)/u","$1",$note);
+		if($direction == "up" OR $turn OR $trill) {
+			$higher_pitch_class = $pitch_class + 1;
+			if($higher_pitch_class > $diatonic_scale[6]) {
+				$higher_pitch_class = 0; $octave++;
+				}
+			if($trace_ornamentations) echo "higher_pitch_class = ".$higher_pitch_class."<br />";
+			for($i = 0; $i < count($diatonic_scale); $i++) {
+				if($diatonic_scale[$i] >= $higher_pitch_class) {
+					if($fifths >= 0) $alt_note = $notes_diesis[$diatonic_scale[$i]];
+					else $alt_note = $notes_bemol[$diatonic_scale[$i]];
+					if($turn) $note_up = $alt_note.$octave;
+					break;
+					}
+				}
+			if($note2 <> "???") $note2 = $alt_note.$octave;
+			}
+		if($alt_note <> '' AND $pitch_class == $diatonic_scale[$i]) echo "<font color=red>➡</font> Error pitch class ".$pitch_class." not changed in ".$expression."<br />";
 		}
-	if($alt_note <> '' AND $pitch_class == $diatonic_scale[$i]) echo "<font color=red>➡</font> Error pitch class ".$pitch_class." not changed in ".$expression."<br />";
-	if($note2 <> "???") $note2 = $alt_note.$octave;
 	if($turn) {
 		// https://en.wikipedia.org/wiki/Ornament_(music)#Turn
 		// https://www.w3.org/2021/06/musicxml40/musicxml-reference/elements/turn/
