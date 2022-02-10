@@ -886,7 +886,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 								$convert_measure[$score_part] = str_replace("FRACTION_0",$fraction2,$convert_measure[$score_part]);
 								}
 							if(isset($the_event['arpeggio'])) {
-								$convert_measure[$score_part] .= "arpeggio";
+								$convert_measure[$score_part] .= "arpeggio(".$i_measure.")";
 								$report .= "<font color=\"blue\">Arpeggio</font> measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)."<br />";
 								}
 							$physical_time += $current_period * ($p_duration / $q_duration / $divisions[$score_part]);
@@ -1613,15 +1613,15 @@ function ornament($note,$long,$link,$diatonic_scale,$direction,$fifths,$trill,$t
 function process_arpeggios($data,$score_divisions,$trace_ornamentations) {
 	global $max_term_in_fraction;
 	$start_search = 0;
-/*	$max_divisions = round($score_divisions / 8);
-	if($max_divisions == 0) $max_divisions = 1; */
 	$min_divisions = round($score_divisions / 20);
 	if($min_divisions == 0) $min_divisions = 1;
 	while(is_integer($pos1=strpos($data,"arpeggio",$start_search))) {
 		if(!is_integer($pos2=strpos($data,"}",$pos1 + 8))) break;
 		$old_expression = substr($data,$pos1 + 8,$pos2 - $pos1 - 7);
 		$old_expression = str_replace(",}","}",$old_expression); // Not necessary but looks nicer when tracing
-		// echo "old_expression = ".$old_expression."<br />";
+		$i_measure = preg_replace("/\(([0-9]+)\).+/u","$1",$old_expression);
+		// echo "old_expression = ".$old_expression." i_measure = ".$i_measure."<br />";
+		$old_expression = str_replace("(".$i_measure.")",'',$old_expression);
 		$old_length = strlen($old_expression);
 		$old_expression = str_replace(' ','',$old_expression);
 		$no_digit = FALSE;
@@ -1638,11 +1638,9 @@ function process_arpeggios($data,$score_divisions,$trace_ornamentations) {
 			else $q_duration = 1;
 			}
 		$divisions = $score_divisions * $p_duration / $q_duration;
-		
 		$divisions1 = $min_divisions * (count($table) - 1);
 		$max_divisions = round($divisions / 2);
 		if($max_divisions == 0) $max_divisions = 1;
-		
 		if($divisions1 > $max_divisions) $divisions1 = $max_divisions;
 		$divisions2 = $divisions - $divisions1;
 	//	echo $p_duration."/".$q_duration." divisions = ".$divisions." divisions1 = ".$divisions1." divisions2 = ".$divisions2." ".$old_expression."<br />";
@@ -1655,9 +1653,11 @@ function process_arpeggios($data,$score_divisions,$trace_ornamentations) {
 		$simplify = simplify($fraction,$max_term_in_fraction);
 		$fraction = $simplify['fraction'];
 		$new_expression2 .= $fraction.',';
-		for($i = 0; $i < (count($table) - 1); $i++) {
+		for($i = 0; $i < count($table); $i++) { // Fixed by BB 2022-02-10
 			if(!$no_digit AND $i == 0) continue;
 			$note = str_replace('{','',$table[$i]);
+			$note = str_replace('}','',$note);
+			// echo $note."<br />"; 
 			$tied = "no";
 			if(is_integer($pos=strpos($note,'&'))) {
 				if($pos == 0) $tied = "before";
@@ -1686,14 +1686,14 @@ function process_arpeggios($data,$score_divisions,$trace_ornamentations) {
 		$new_expression1 .= "}";
 		$new_expression2 .= "}";
 		$new_expression = str_replace(" }","}",$new_expression1.$new_expression2);
-		if($trace_ornamentations) echo "<font color=\"blue\">Arpeggio</font> = ".$new_expression."<br /><br />";
+		$new_expression = str_replace(",}","}",$new_expression);
+		if($trace_ornamentations) echo "<font color=\"blue\">Arpeggio</font> = ".$new_expression." in measure #".$i_measure."<br /><br />";
 		$d1 = substr($data,0,$pos1);
 		$d2 = substr($data,$pos2 + 1,strlen($data) - $pos2 - 1);
 		$data = $d1.$new_expression.$d2;
-		$data = str_replace("arpeggio",'',$data);
+	//	$data = str_replace("arpeggio",'',$data); Fixed by BB 2022-02-10
 		$start_search = $pos1 + strlen($new_expression);
 		}
-//	$data = str_replace("arpeggio",'@@@',$data);
 	return $data;
 	}
 	
