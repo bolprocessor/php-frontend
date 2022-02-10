@@ -3,7 +3,7 @@ $notes_diesis = array("C","C#","D","D#","E","F","F#","G","G#","A","A#","B");
 $notes_bemol = array("C","Db","D","Eb","E","F","Gb","G","Ab","A","Bb","B");
 $standard_diatonic_scale = array(0,2,4,5,7,9,11); // These are pitch classes
 
-function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$ignore_fermata,$ignore_mordents,$chromatic_mordents,$ignore_turns,$chromatic_turns,$ignore_trills,$chromatic_trills,$ignore_arpeggios,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections,$trace_ornamentations) {
+function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$include_measures,$ignore_fermata,$ignore_mordents,$chromatic_mordents,$ignore_turns,$chromatic_turns,$ignore_trills,$chromatic_trills,$ignore_arpeggios,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections,$trace_ornamentations) {
 	global $max_term_in_fraction;
 	global $notes_diesis,$notes_bemol,$standard_diatonic_scale;
 	$grace_ratio = 2;
@@ -53,6 +53,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 			$tie_type_start = $tie_type_stop = FALSE;
 			if($test_musicxml) echo "• Repetition ".$i_repeat."/".$repeat_section[$section]." section ".$section."<br />";
 			$p_fermata_date = $q_fermata_date = $p_fermata_duration = $q_fermata_duration = $p_fermata_total_duration = $q_fermata_total_duration = $p_date = $q_date = array();
+			$first_measure = TRUE;
 		//	ksort($the_section); Never do this because $i_measure may not be an integer
 		//  Beware that there are empty sessions
 			foreach($the_section as $i_measure => $the_measure) {
@@ -71,11 +72,9 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 				else $old_measure_label = $measure_label[$i_measure];
 				if($test_musicxml)
 					echo "<font color = red>• Measure ".$measure_label[$i_measure]."</font><br />";
-			//	ksort($the_measure);
-
-		/*		if(isset($fifths[$score_part])) $current_fifths = $fifths[$score_part];
-				else $current_fifths = 0; */
 				$curr_event = $convert_measure = $p_fermata_total_duration[$i_measure] = $q_fermata_total_duration[$i_measure] = $p_fermata_date[$i_measure] = $q_fermata_date[$i_measure] = $p_fermata_duration[$i_measure] = $q_fermata_duration[$i_measure] = array();
+				if($include_measures AND !$first_measure) $data .= " [—".$i_measure."—] ";
+				$first_measure = FALSE;
 				$data .= "{";
 				$number_parts = 0;
 				$i_field_of_measure = 0; // Index of field irrespective of parts
@@ -317,7 +316,6 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							$beat_unit = trim(preg_replace("/<beat-unit>(.+)<\/beat-unit>/u","$1",$line));
 							continue;
 							}
-				/*		if(($tempo_option == "all" OR $tempo_option == "score") AND is_integer($pos=strpos($line,"<per-minute>"))) { */
 						if(($tempo_option == "all" OR $tempo_option == "score" OR $tempo_option == "allbutmeasures") AND is_integer($pos=strpos($line,"<per-minute>"))) {
 							$per_minute = round(trim(preg_replace("/<per\-minute>([^<]+)<\/per\-minute>/u","$1",$line)));
 							$beat_divide = beat_divide($beat_unit);
@@ -1619,7 +1617,7 @@ function process_arpeggios($data,$score_divisions,$trace_ornamentations) {
 		if(!is_integer($pos2=strpos($data,"}",$pos1 + 8))) break;
 		$old_expression = substr($data,$pos1 + 8,$pos2 - $pos1 - 7);
 		$old_expression = str_replace(",}","}",$old_expression); // Not necessary but looks nicer when tracing
-		$i_measure = preg_replace("/\(([0-9]+)\).+/u","$1",$old_expression);
+		$i_measure = preg_replace("/\(([^\)]+)\).+/u","$1",$old_expression); // Beware that i_measure might not be a number!
 		// echo "old_expression = ".$old_expression." i_measure = ".$i_measure."<br />";
 		$old_expression = str_replace("(".$i_measure.")",'',$old_expression);
 		$old_length = strlen($old_expression);

@@ -129,6 +129,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$trace_ornamentations = isset($_POST['trace_ornamentations']);
 			echo "<input type=\"hidden\" name=\"tempo_option\" value=\"".$tempo_option."\">";
 			$ignore_channels = isset($_POST['ignore_channels']);
+			$include_measures = isset($_POST['include_measures']);
 			$ignore_trills = isset($_POST['ignore_trills']);
 			$ignore_fermata = isset($_POST['ignore_fermata']);
 			$ignore_mordents = isset($_POST['ignore_mordents']);
@@ -401,7 +402,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				if($ignore_arpeggios) $list_settings .= "// Ignoring arpeggios\n";
 				else $list_settings .= "// Including arpeggios\n";
 			if($list_settings <> '') $list_settings .= "\n";
-			$convert_score = convert_musicxml($this_score,$repeat_section,$divisions,$fifths,$mode,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$ignore_fermata,$ignore_mordents,$chromatic_mordents,$ignore_turns,$chromatic_turns,$ignore_trills,$chromatic_trills,$ignore_arpeggios,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections,$trace_ornamentations);
+			$convert_score = convert_musicxml($this_score,$repeat_section,$divisions,$fifths,$mode,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$include_measures,$ignore_fermata,$ignore_mordents,$chromatic_mordents,$ignore_turns,$chromatic_turns,$ignore_trills,$chromatic_trills,$ignore_arpeggios,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections,$trace_ornamentations);
 			$data .= $convert_score['data'];
 			$report = $convert_score['report'];
 			$data = preg_replace("/\s+/u"," ",$data);
@@ -433,7 +434,9 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$data = str_replace(" }","}",$data);
 			$data = preg_replace("/}\s*[1-1]\s+/u","} - ",$data); // Added by BB 2022-02-01
 			$data = str_replace("-{","- {",$data);
-				$data = str_replace("}-","} -",$data);
+			$data = str_replace("}-","} -",$data);
+			$data = str_replace("}[","} [",$data);
+			$data = str_replace("]{","] {",$data);
 			$data = str_replace("- -","--",$data); // Simplify - - --> -- (repeated for unknown reason)
 			if($reload_musicxml) {
 				$more_data = "// MusicXML file ‘".$upload_filename."’ converted\n";
@@ -566,6 +569,9 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			echo "<input type=\"checkbox\" name=\"ignore_channels\"";
 			if($ignore_channels) echo " checked";
 			echo ">&nbsp;Ignore MIDI channels<br />";
+			echo "<input type=\"checkbox\" name=\"include_measures\"";
+			if($include_measures) echo " checked";
+			echo ">&nbsp;Include measure numbers<br />";
 			echo "_________________<br />";
 			echo "<input type=\"checkbox\" name=\"list_corrections\"";
 			if($list_corrections) echo " checked";
@@ -598,7 +604,9 @@ if(isset($_POST['explode'])) {
 	for($i = $start_line = 0; $i < $imax; $i++) {
 		$line = trim($table[$i]);
 		// if($line == '') continue;
-		if(is_integer($pos=strpos($line,"{"))) {
+		if(is_integer($pos1=strpos($line,"{"))) {
+			if(is_integer($pos2=strpos($line,"[")) AND $pos2 < $pos1) $pos = $pos2;
+			else $pos = $pos1;
 			if($initial_controls == '') $initial_controls = trim(substr($line,0,$pos));
 			$start_line = $i;
 			}
