@@ -57,8 +57,24 @@ while(!feof($file)) {
 		$this_measure .= "<font color=\"".$couleur."\">".$line_print."</font><br />";
 		continue;
 		}
+	if(is_integer($pos=strpos($line,"slur"))) {
+		if($filter == "slur") {
+			$print_this = TRUE; $couleur = "green";
+			$this_measure .= $arrow;
+			}
+		$this_measure .= "<font color=\"".$couleur."\">".$line_print."</font><br />";
+		continue;
+		}
 	if(is_integer($pos=strpos($line,"mordent"))) {
 		if($filter == "mordent") {
+			$print_this = TRUE; $couleur = "green";
+			$this_measure .= $arrow;
+			}
+		$this_measure .= "<font color=\"".$couleur."\">".$line_print."</font><br />";
+		continue;
+		}
+	if(is_integer($pos=strpos($line,"breath-mark"))) {
+		if($filter == "breath") {
 			$print_this = TRUE; $couleur = "green";
 			$this_measure .= $arrow;
 			}
@@ -135,5 +151,4 @@ while(!feof($file)) {
 	if($no_filter AND $this_measure == '') echo $line_print."<br />";
 	else $this_measure .= $line_print."<br />";
 	}
-// echo "</code>";
 ?>

@@ -119,17 +119,22 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$score_part = '';
 			$data = $subtitle_part = '';
 			$max_measure = 0;
-			$partwise = $timewise = $attributes = $attributes_key = $changed_attributes = $found_trill = $found_mordent = $found_turn = $found_fermata = $found_arpeggio = FALSE;
-			$add_section = TRUE;
+			$partwise = $timewise = $attributes = $attributes_key = $changed_attributes = $found_trill = $found_mordent = $found_turn = $found_fermata = $found_arpeggio = $found_breath = $found_slur = FALSE;
+			$add_section = $include_breaths = $include_measures = $include_slurs = TRUE;
+			$accept_signs = FALSE;
 			$instrument_name = $midi_channel = $select_part = $duration_part = $divisions = $repeat_section = array();
 			$ignore_dynamics = isset($_POST['ignore_dynamics']);
 			if(isset($_POST['tempo_option'])) $tempo_option = $_POST['tempo_option'];
-			else $tempo_option = "allbutscore";
+			else $tempo_option = "all";
 			$list_corrections = isset($_POST['list_corrections']);
+			$trace_tempo = isset($_POST['trace_tempo']);
 			$trace_ornamentations = isset($_POST['trace_ornamentations']);
 			echo "<input type=\"hidden\" name=\"tempo_option\" value=\"".$tempo_option."\">";
 			$ignore_channels = isset($_POST['ignore_channels']);
-			$include_measures = isset($_POST['include_measures']);
+			if($reload_musicxml) $include_breaths = isset($_POST['include_breaths']);
+			if($reload_musicxml) $include_measures = isset($_POST['include_measures']);
+			if($reload_musicxml) $accept_signs = isset($_POST['accept_signs']);
+			if($reload_musicxml) $include_slurs = isset($_POST['include_slurs']);
 			$ignore_trills = isset($_POST['ignore_trills']);
 			$ignore_fermata = isset($_POST['ignore_fermata']);
 			$ignore_mordents = isset($_POST['ignore_mordents']);
@@ -138,11 +143,30 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$chromatic_turns = isset($_POST['chromatic_turns']);
 			$ignore_turns = isset($_POST['ignore_turns']);
 			$ignore_arpeggios = isset($_POST['ignore_arpeggios']);
+			$p_breath_length = 1; $q_breath_length = 6;
+			$breath_tag = "🌱";
+			$slur_length = 20; // Percentage in _legato()
+			if(isset($_POST['p_breath_length'])) $p_breath_length = round(abs(intval($_POST['p_breath_length'])));
+			if(isset($_POST['q_breath_length'])) $q_breath_length = round(abs(intval($_POST['q_breath_length'])));
+			if(isset($_POST['breath_tag'])) $breath_tag = trim($_POST['breath_tag']);
+			if(isset($_POST['slur_length'])) $slur_length = round(abs(intval($_POST['slur_length'])));
+			if($p_breath_length == 0) $p_breath_length = 1;
+			if($q_breath_length == 0) $q_breath_length = 1;
+			$breath_length['p'] = $p_breath_length;
+			$breath_length['q'] = $q_breath_length;
 			$section = 0; // This variable is used for repetitions, see forward/backward
 			$repeat_section[$section] = 1; // By default, don't repeat
 			$part = '';
 			$i_measure = -1; $i_part = 0;
 			$reading_measure = FALSE;
+			$trace_measures = isset($_POST['trace_measures']);
+			$measures['min'] = $measures['max'] = 0;
+			if($trace_measures) {
+				$measures['min'] = round(abs(intval($_POST['measure_min'])));
+				$measures['max'] = round(abs(intval($_POST['measure_max'])));
+				if($measures['max'] >= $measures['min']) $list_corrections = $trace_tempo = FALSE;
+				else $trace_measures = FALSE;
+				}
 			$message_top = "<input type=\"checkbox\" id=\"parent1\" style=\"box-shadow: -2px -2px Gold\"> <b>Check all</b><br />";
 			$message_options = ''; $first = TRUE;
 			$sum_metronome = $number_metronome = $metronome_max = $metronome_min = 0;
@@ -243,6 +267,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				if($attributes AND is_integer($pos=strpos($line,"<divisions>"))) {
 					$divisions[$part] = trim(preg_replace("/<divisions>([0-9]+)<\/divisions>/u","$1",$line));
 					$changed_attributes = TRUE;
+			//		echo "@ divisions = ".$divisions[$part]."<br />";
 					continue;
 					}
 				if($attributes AND is_integer($pos=strpos($line,"<key>"))) {
@@ -305,20 +330,20 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				if(is_integer($pos=strpos($line,"<turn"))) $found_turn = TRUE;
 				if(is_integer($pos=strpos($line,"<fermata"))) $found_fermata = TRUE;
 				if(is_integer($pos=strpos($line,"<arpeggiate"))) $found_arpeggio = TRUE;
+				if(is_integer($pos=strpos($line,"<breath-mark")))$found_breath = TRUE;
+				if(is_integer($pos=strpos($line,"<slur")))$found_slur = TRUE;
 				if(is_integer($pos=strpos($line,"<measure "))) {
 					$reading_measure = TRUE;
-				//	if(!is_integer($pos=strpos($line,"implicit=\"yes\""))) { // Not recommended
-						$i_measure = trim(preg_replace("/.*number=\"([^\"]+)\".*/u","$1",$line));
-						if($test_musicxml)
-							echo "• Part ".$part." measure #".$i_measure."<br />";
-						if($add_section) {
-							$section++;
-							$this_score[$section][$i_measure] = array();
-							$this_score[$section][$i_measure][$part] = array();
-							$repeat_section[$section] = 1;
-							}
-						$add_section = FALSE;
-				//		}
+					$i_measure = trim(preg_replace("/.*number=\"([^\"]+)\".*/u","$1",$line));
+					if($test_musicxml)
+						echo "• Part ".$part." measure #".$i_measure."<br />";
+					if($add_section) {
+						$section++;
+						$this_score[$section][$i_measure] = array();
+						$this_score[$section][$i_measure][$part] = array();
+						$repeat_section[$section] = 1;
+						}
+					$add_section = FALSE;
 					}
 				if($reading_measure AND is_integer($pos=strpos($line,"</measure>"))) {
 					$reading_measure = FALSE;
@@ -362,18 +387,20 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$list_settings = '';
 			switch($tempo_option) {
 				case "ignore":
-					$list_settings .= "// Discard all metronome markers\n"; break;
+					$list_settings .= "// Discarding all metronome markers\n"; break;
 				case "score":
-					$list_settings .= "// Only metronome markers of printed score\n"; break;
+					$list_settings .= "// Reading only metronome markers of printed score\n"; break;
 				case "allbutscore":
-					$list_settings .= "// Metronome markers except the ones of printed score\n"; break;
+					$list_settings .= "// Reading metronome markers except on the printed score\n"; break;
 				case "allbutmeasures":
-					$list_settings .= "// Metronome markers except inside measures\n"; break;
+					$list_settings .= "// Reading metronome markers except inside measures\n"; break;
 				case "all":
-					$list_settings .= "// All metronome markers\n"; break;
+					$list_settings .= "// Reading all metronome markers\n"; break;
 				}
+			if($accept_signs) $list_settings .= "// Reading tempo signs: “allegro” etc.\n";
 			if($ignore_channels) $list_settings .= "// Ignoring MIDI channels\n";
 			if($ignore_dynamics) $list_settings .= "// Ignoring dynamics\n";
+			if($found_breath AND !$include_breaths) $list_settings .= "// Ignoring breaths\n";
 			if($found_trill)
 				if($ignore_trills) $list_settings .= "// Ignoring trills\n";
 				else {
@@ -398,11 +425,23 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 					if($chromatic_turns) $list_settings .= " (chromatic)";
 					$list_settings .= "\n";
 					}
+			if($found_slur)
+				if($include_slurs) {
+					$list_settings .= "// Including slurs = _legato(".$slur_length.")\n";
+					}
+				else $list_settings .= "// Ignoring slurs\n";
 			if($found_arpeggio)
 				if($ignore_arpeggios) $list_settings .= "// Ignoring arpeggios\n";
 				else $list_settings .= "// Including arpeggios\n";
+			if($found_breath)
+				if($include_breaths) {
+					$list_settings .= "// Including breaths = ".$p_breath_length."/".$q_breath_length." beat";
+					if($breath_tag <> '') $list_settings .= " and tag = [".$breath_tag."]";
+					$list_settings .= "\n";
+					}
+				else $list_settings .= "// Ignoring breaths\n";
 			if($list_settings <> '') $list_settings .= "\n";
-			$convert_score = convert_musicxml($this_score,$repeat_section,$divisions,$fifths,$mode,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$include_measures,$ignore_fermata,$ignore_mordents,$chromatic_mordents,$ignore_turns,$chromatic_turns,$ignore_trills,$chromatic_trills,$ignore_arpeggios,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections,$trace_ornamentations);
+			$convert_score = convert_musicxml($this_score,$repeat_section,$divisions,$fifths,$mode,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$include_breaths,$include_slurs,$slur_length,$include_measures,$ignore_fermata,$ignore_mordents,$chromatic_mordents,$ignore_turns,$chromatic_turns,$ignore_trills,$chromatic_trills,$ignore_arpeggios,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections,$trace_tempo,$trace_ornamentations,$breath_length,$breath_tag,$trace_measures,$measures,$accept_signs);
 			$data .= $convert_score['data'];
 			$report = $convert_score['report'];
 			$data = preg_replace("/\s+/u"," ",$data);
@@ -437,6 +476,8 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$data = str_replace("}-","} -",$data);
 			$data = str_replace("}[","} [",$data);
 			$data = str_replace("]{","] {",$data);
+			$data = str_replace(" 0 "," ",$data); // Added by BB 2022-02-12
+			$data = str_replace(",1 ",", - ",$data); // Added by BB 2022-02-12
 			$data = str_replace("- -","--",$data); // Simplify - - --> -- (repeated for unknown reason)
 			if($reload_musicxml) {
 				$more_data = "// MusicXML file ‘".$upload_filename."’ converted\n";
@@ -452,7 +493,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$window_name = $upload_filename;
 			$link_preview = "preview_musicxml.php";
 			$link_preview .= "?music_xml_file=".urlencode($music_xml_file)."&title=".urlencode($upload_filename);
-			echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_preview."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"preview\" value=\"PREVIEW MusicXML file\" title=\"\"> <b>(simplified)</b><br /><br />";
+			echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_preview."','".$window_name."','width=600,height=800,left=200'); return false;\" type=\"submit\" name=\"preview\" value=\"PREVIEW MusicXML file\" title=\"\"> <b>(simplified)</b><br /><br />";
 
 			if($report <> '') {
 				echo $report;
@@ -461,6 +502,9 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			if($i_part > 1) echo $message_top;
 			else if(!$reload_musicxml) $ignore_channels = TRUE;
 			echo $message_options;
+			echo "<input type=\"checkbox\" name=\"ignore_channels\"";
+			if($ignore_channels) echo " checked";
+			echo ">&nbsp;Ignore MIDI channels<br />";
 			if($reload_musicxml) {
 				$current_metronome_min = $convert_score['metronome_min'];
 				$current_metronome_max = $convert_score['metronome_max'];
@@ -496,16 +540,19 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			echo ">&nbsp;Discard all metronome markers<br />";
 			echo "<input type=\"radio\" name=\"tempo_option\" value=\"score\"";
 			if($tempo_option == "score") echo " checked";
-			echo ">&nbsp;Interpret only metronome markers of printed score<br />";
+			echo ">&nbsp;Interpret only <i>prescriptive</i> metronome markers (printed score)<br />";
 			echo "<input type=\"radio\" name=\"tempo_option\" value=\"allbutmeasures\"";
 			if($tempo_option == "allbutmeasures") echo " checked";
 			echo ">&nbsp;Interpret metronome markers except inside measures<br />";
 			echo "<input type=\"radio\" name=\"tempo_option\" value=\"allbutscore\"";
 			if($tempo_option == "allbutscore") echo " checked";
-			echo ">&nbsp;Interpret metronome markers except the ones of printed score<br />";
+			echo ">&nbsp;Interpret metronome markers except the <i>prescriptive</i> ones of printed score<br />";
 			echo "<input type=\"radio\" name=\"tempo_option\" value=\"all\"";
 			if($tempo_option == "all") echo " checked";
 			echo ">&nbsp;Interpret all metronome markers<br />";
+			echo "<input type=\"checkbox\" name=\"accept_signs\"";
+			if($accept_signs) echo " checked";
+			echo ">&nbsp;Interpret tempo signs such as “allegro”<br />";
 			echo "_______________________________________<br />";
 			if($found_trill) {
 				echo "<input type=\"checkbox\" name=\"ignore_trills\"";
@@ -513,7 +560,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				echo ">&nbsp;<font color=\"red\">➡</font> Ignore trills (some have been found in this score)";
 				$link_preview .= "&filter=trill";
 				$window_name = $upload_filename."_trill";
-				echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_preview."','".$window_name."','width=800,height=400,left=200'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\">&nbsp;";
+				echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_preview."','".$window_name."','width=600,height=400,left=200'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\">&nbsp;";
 				echo "<input type=\"checkbox\" name=\"chromatic_trills\"";
 				if($chromatic_trills) echo " checked";
 				echo ">&nbsp;➡&nbsp;make them chromatic<br />";
@@ -525,7 +572,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				echo ">&nbsp;<font color=\"red\">➡</font> Ignore mordents (some have been found in this score)";
 				$link_preview .= "&filter=mordent";
 				$window_name = $upload_filename."_mordent";
-				echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_preview."','".$window_name."','width=800,height=400,left=150'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\">&nbsp;";
+				echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_preview."','".$window_name."','width=600,height=400,left=150'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\">&nbsp;";
 				echo "<input type=\"checkbox\" name=\"chromatic_mordents\"";
 				if($chromatic_mordents) echo " checked";
 				echo ">&nbsp;➡&nbsp;make them chromatic<br />";
@@ -537,7 +584,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				echo ">&nbsp;<font color=\"red\">➡</font> Ignore turns (some have been found in this score)";
 				$link_preview .= "&filter=turn";
 				$window_name = $upload_filename."_turn";
-				echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_preview."','".$window_name."','width=800,height=400,left=100'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\">&nbsp;";
+				echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_preview."','".$window_name."','width=600,height=400,left=100'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\">&nbsp;";
 				echo "<input type=\"checkbox\" name=\"chromatic_turns\"";
 				if($chromatic_turns) echo " checked";
 				echo ">&nbsp;➡&nbsp;make them chromatic<br />";
@@ -549,7 +596,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				echo ">&nbsp;<font color=\"red\">➡</font> Ignore fermata (some have been found in this score)";
 				$link_preview .= "&filter=fermata";
 				$window_name = $upload_filename."_fermata";
-				echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_preview."','".$window_name."','width=800,height=400,left=50'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\"><br />";
+				echo "&nbsp;<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_preview."','".$window_name."','width=600,height=400,left=50'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\"><br />";
 				}
 			else $ignore_fermata = FALSE;
 			if($found_arpeggio) {
@@ -558,27 +605,57 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				echo ">&nbsp;<font color=\"red\">➡</font> Ignore arpeggios (some have been found in this score)";
 				$link_preview .= "&filter=arpeggio";
 				$window_name = $upload_filename."_arpeggio";
-				echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_preview."','".$window_name."','width=800,height=400,left=0'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\"><br />";
+				echo "&nbsp;<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_preview."','".$window_name."','width=600,height=400,left=0'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\"><br />";
 				}
 			else $ignore_arpeggios = FALSE;
-			if($found_trill OR $found_arpeggio OR $found_mordent OR $found_turn OR $found_fermata) echo "_______________________________________<br />";
+
+			if($found_slur) {
+				echo "<input type=\"checkbox\" name=\"include_slurs\"";
+				if($include_slurs) echo " checked";
+				echo ">&nbsp;Include slurs (some have been found in this score)";
+				$link_preview .= "&filter=slur";
+				$window_name = $upload_filename."_slur";
+				echo "&nbsp;<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_preview."','".$window_name."','width=600,height=400,left=0'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\"><br />";
+				echo "&nbsp;&nbsp;&nbsp;… with extra duration = <input type=\"text\" style=\"border:none; text-align:center;\" name=\"slur_length\" size=\"2\" value=\"".$slur_length."\">&nbsp;%<br />";
+				}
+			else $include_slurs = FALSE;
+
+			if($found_trill OR $found_arpeggio OR $found_mordent OR $found_turn OR $found_fermata OR $found_slur) echo "_______________________________________<br />";
 
 			echo "<input type=\"checkbox\" name=\"ignore_dynamics\"";
 			if($ignore_dynamics) echo " checked";
 			echo ">&nbsp;Ignore dynamics (volume/velocity)<br />";
-			echo "<input type=\"checkbox\" name=\"ignore_channels\"";
-			if($ignore_channels) echo " checked";
-			echo ">&nbsp;Ignore MIDI channels<br />";
+			if($found_breath) {
+				echo "<input type=\"checkbox\" name=\"include_breaths\"";
+				if($include_breaths) echo " checked";
+				echo ">&nbsp;Include breaths (some have been found in this score)";
+				$link_preview .= "&filter=breath";
+				$window_name = $upload_filename."_breath";
+				echo "&nbsp;<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_preview."','".$window_name."','width=600,height=400,left=0'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\"><br />";
+				echo "&nbsp;&nbsp;&nbsp;… with breath length = <input type=\"text\" style=\"border:none; text-align:center;\" name=\"p_breath_length\" size=\"2\" value=\"".$p_breath_length."\">/<input type=\"text\" style=\"border:none; text-align:center;\" name=\"q_breath_length\" size=\"2\" value=\"".$q_breath_length."\"> beat(s)<br />";
+				echo "&nbsp;&nbsp;&nbsp;… and breath tag = <input type=\"text\" style=\"border:none; text-align:center;\" name=\"breath_tag\" size=\"4\" value=\"".$breath_tag."\"><br />";
+				}
+			else $include_breaths = FALSE;
 			echo "<input type=\"checkbox\" name=\"include_measures\"";
 			if($include_measures) echo " checked";
-			echo ">&nbsp;Include measure numbers<br />";
+			echo ">&nbsp;Insert measure numbers [—n—]<br />";
 			echo "_________________<br />";
+			echo "<input type=\"checkbox\" name=\"trace_ornamentations\"";
+			if($trace_ornamentations) echo " checked";
+			echo ">&nbsp;Trace ornamentations and arpeggios<br />";
 			echo "<input type=\"checkbox\" name=\"list_corrections\"";
 			if($list_corrections) echo " checked";
-			echo ">&nbsp;List automatic corrections of this score<br />";
-			echo "<input type=\"checkbox\" name=\"trace_ornamentations\"";
-			if($list_corrections) echo " checked";
-			echo ">&nbsp;Trace ornamentations and arpeggios<br />";
+			echo ">&nbsp;Trace all corrections of this score<br />";
+			echo "<input type=\"checkbox\" name=\"trace_tempo\"";
+			if($trace_tempo) echo " checked";
+			echo ">&nbsp;Trace tempo variations of this score<br />";
+			if($measures['min'] == 0) $min = '';
+			else $min = $measures['min'];
+			if($measures['max'] == 0) $max = '';
+			else $max = $measures['max'];
+			echo "<input type=\"checkbox\" name=\"trace_measures\"";
+			if($trace_measures) echo " checked";
+			echo ">&nbsp;Trace measures <input type=\"text\" style=\"border:none; text-align:center;\" name=\"measure_min\" size=\"4\" value=\"".$min."\"> to <input type=\"text\" style=\"border:none; text-align:center;\" name=\"measure_max\" size=\"4\" value=\"".$max."\"><br />";
 			echo "_________________<br />";
 			echo "<input type=\"checkbox\" name=\"delete_current\">&nbsp;Delete current data<br />";
 			echo "_________________<br />";
