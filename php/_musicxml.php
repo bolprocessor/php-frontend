@@ -7,7 +7,7 @@ $super_trace = FALSE;
 $trace_breath = TRUE;
 $trace_breath = FALSE;
 
-function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$include_breaths,$include_slurs,$slur_length,$include_measures,$ignore_fermata,$ignore_mordents,$chromatic_mordents,$ignore_turns,$chromatic_turns,$ignore_trills,$chromatic_trills,$ignore_arpeggios,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections,$trace_tempo,$trace_ornamentations,$breath_length,$breath_tag,$trace_measures,$measures,$accept_signs) {
+function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$include_breaths,$include_slurs,$include_measures,$ignore_fermata,$ignore_mordents,$chromatic_mordents,$ignore_turns,$chromatic_turns,$ignore_trills,$chromatic_trills,$ignore_arpeggios,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections,$trace_tempo,$trace_ornamentations,$breath_length,$breath_tag,$trace_measures,$measures,$accept_signs) {
 	global $super_trace,$trace_breath;
 	global $max_term_in_fraction;
 	global $notes_diesis,$notes_bemol,$standard_diatonic_scale;
@@ -1100,7 +1100,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 									$i_breath++;
 									$breath_in_stream = TRUE;
 									}
-								$stream = add_note($stream,$i_measure,$the_event,$long_ornamentation,$diatonic_scale_string,$slur_length);
+								$stream = add_note($stream,$i_measure,$the_event,$long_ornamentation,$diatonic_scale_string);
 								if($the_event['note'] <> "-" AND $the_event['note'] <> '') $empty_field[$i_field_of_part] = FALSE;
 								$stream_units++;
 								$add = add($p_stream_duration,$q_stream_duration,$p_duration,$q_duration);
@@ -1251,7 +1251,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 									else break;
 									}
 								$stream = '';
-								$stream = add_note($stream,$i_measure,$the_event,$long_ornamentation,$diatonic_scale_string,$slur_length);
+								$stream = add_note($stream,$i_measure,$the_event,$long_ornamentation,$diatonic_scale_string);
 								$stream_units = 1;
 								if($the_event['note'] <> "-" AND $the_event['note'] <> '') $empty_field[$i_field_of_part] = FALSE;
 								$p_old_duration = $p_stream_duration = $p_duration;
@@ -1580,7 +1580,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 	return $convert_score;
 	}
 
-function add_note($stream,$i_measure,$the_event,$long_ornamentation,$diatonic_scale_string,$slur_length) {
+function add_note($stream,$i_measure,$the_event,$long_ornamentation,$diatonic_scale_string) {
 	if(isset($the_event['ornament']) OR isset($the_event['turn'])) {
 		if($the_event['chromatic']) $mode = "chromatic";
 		else $mode = '';
@@ -1597,10 +1597,12 @@ function add_note($stream,$i_measure,$the_event,$long_ornamentation,$diatonic_sc
 		if($the_event['ornament'] == "trill")
 			$stream .= " ornament(".$diatonic_scale_string."_".$i_measure."_trill,".$mode.",,".$the_event['trill-beats']."|";
 		}
-	else if(isset($the_event['slur']) AND $the_event['slur'] == "start") $stream .= " _legato(".$slur_length.") ";
+	if(isset($the_event['slur'])) {
+		if($the_event['slur'] == "start") $stream .= " _legato_ ";
+		else if($the_event['slur'] == "stop") $stream .= " _nolegato_ ";
+		}
 	$stream .= $the_event['note'];
-	if(isset($the_event['ornament'])) $stream .= ")";
-	if(isset($the_event['slur']) AND $the_event['slur'] == "stop") $stream .= " _legato(0) ";
+	if(isset($the_event['ornament'])) $stream .= ") ";
 	else $stream .= " ";
 	return $stream;
 	}
@@ -1721,6 +1723,15 @@ function process_ornamentation($data,$fifths,$trace_ornamentations) {
 function ornament($note,$long,$link,$diatonic_scale,$direction,$fifths,$trill,$trill_beats,$turn,$turn_beats,$chromatic,$trace_ornamentations) {
 	// Read https://bolprocessor.org/importing-musicxml/#ornaments
 	global $notes_diesis,$notes_bemol;
+	$legato = $nolegato = FALSE;
+	if(is_integer(strpos($note,"_legato_"))) {
+		$legato = TRUE;
+		$note = trim(str_replace("_legato_",'',$note));
+		}
+	if(is_integer(strpos($note,"_nolegato_"))) {
+		$nolegato = TRUE;
+		$note = trim(str_replace("_nolegato_",'',$note));
+		}
 	$note = str_replace('&','',$note);
 	$alt_note = $note2 = '';
 	$note_class = preg_replace("/(.+)[0-9]+/u","$1",$note);
@@ -1737,7 +1748,6 @@ function ornament($note,$long,$link,$diatonic_scale,$direction,$fifths,$trill,$t
 		if($link) echo "&";
 		echo " pitch_class = ".$pitch_class."<br />";
 		}
-
 	if($chromatic) {
 		$lower_pitch_class = $pitch_class - 1;
 		if($lower_pitch_class < 0) {
@@ -1839,6 +1849,8 @@ function ornament($note,$long,$link,$diatonic_scale,$direction,$fifths,$trill,$t
 		else
 			$expression = "{1/8,".$note." ".$note2."}{7/8,".$note.$link."}";
 		}
+	if($legato) $expression = " _legato_ ".$expression;
+	if($nolegato) $expression = " _nolegato_ ".$expression;
 	return $expression;
 	}
 
