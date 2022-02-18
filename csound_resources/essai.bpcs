@@ -1,0 +1,117 @@
+// Bol Processor BP3 compatible with version BP2.9.8
+// Csound resource file saved as "essai.bpcs". Date: 2020-11-20 11:23:50
+16
+-1
+-1
+-1
+-1
+-1
+-1
+-1
+-1
+-1
+-1
+-1
+-1
+-1
+-1
+-1
+-1
+default.orc
+1
+toto
+Default instrument created by template
+10
+1
+-1
+-1
+-1
+4
+0
+-1.0000
+1
+1
+0
+0
+0
+0
+0
+0
+0
+0
+8
+5
+-1
+-1
+-1
+9
+6
+-1
+-1
+-1
+10
+7
+-1
+-1
+-1
+7
+7
+7
+7
+7
+0
+0
+0
+0
+0
+8191.50
+64
+64
+8192
+64
+16383
+127
+127
+16383
+127
+-200
+2147483647
+2147483647
+2147483647
+2147483647
+0
+2147483647
+2147483647
+2147483647
+2147483647
+200
+2147483647
+2147483647
+2147483647
+2147483647
+0
+_begin tables
+f1 0 256 10 1 ; This table may be changed
+"beta"
+/• • • • • • • • • • • •/
+[1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 3 2]
+f2 0 128 -51 11 1.5 261.63 60 1 1.038 1.077 1.117 1.159 1.202 1.248 1.294 1.343 1.393 1.446 1.5
+<html>An equal-tempered version of the Bohlen–Pierce scale designed by Wendy Carlos.<br />Read https://en.wikipedia.org/wiki/Equal_temperament<br /></html>
+"fifteen_scale"
+/one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen one/
+[1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1]
+f2 0 128 -51 15 2 263 60 1 1.066 1.125 1.2 1.25 1.333 1.42 1.5 1.6 1.666 1.777 1.6875 1.9 1.92 1.95 2
+<html>A test scale with 15 intervals and arbitrary ratios<br />For experiments only!<br /></html>
+"grama"
+/sa_ r1_ r2_ r3_ r4_ g1_ g2_ g3_ g4_ m1_ m2_ m3p1_ m4p2_ p3_ p4_ d1_ d2_ d3_ d4_ n1_ n2_ n3_ n4_ sa_/
+[1 1 256 243 16 15 10 9 9 8 32 27 6 5 5 4 81 64 4 3 27 20 45 32 64 45 40 27 3 2 128 81 8 5 5 3 27 16 16 9 9 5 15 8 243 128 2 1]
+f2 0 128 -51 23 2 261.63 60 1 1.053 1.067 1.111 1.125 1.185 1.2 1.25 1.266 1.333 1.35 1.406 1.422 1.481 1.5 1.58 1.6 1.667 1.688 1.778 1.8 1.875 1.898 2
+<html>The Indian grama scale as conceptualized by E. J. Arnold.<br />Publication: ‘L'intonation juste dans la théorie ancienne de l'Inde : les applications aux musiques modale et harmonique’. Revue de Musicologie, vol. 71c n° 1-2, 1985, p. 11-38. Edited and translated by Bernard Bel<br /></html>
+"meantone1"
+/do • re • mi fa • sol • la • si do/
+[1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1011 500]
+f2 0 128 -51 12 2.0226 261.63 60 1 1.0664 1.1246 1.1993 1.2647 1.3487 1.4222 1.4997 1.5993 1.6865 1.7986 1.8966 2.022
+<html>This is a new scale for BP3.  Creation 2020-11-17 22:55:31<br /></html>
+_end tables
+
+
