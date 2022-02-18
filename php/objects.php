@@ -174,22 +174,18 @@ for($i = 0; $i < count($table); $i++) {
 		}
 	if($i == 3) {
 		$CsoundInstruments_filename = trim($line);
+		$CsoundInstruments_filename = str_replace($csound_resources."/",'',$CsoundInstruments_filename);
 		if($CsoundInstruments_filename <> '' AND !is_integer(strpos($CsoundInstruments_filename,"-cs.")) AND !is_integer(strpos($CsoundInstruments_filename,".bpcs")))
 			$CsoundInstruments_filename .= ".bpcs";
 		echo "<input type=\"hidden\" name=\"CsoundInstruments_filename\" value=\"".$CsoundInstruments_filename."\">";
 		echo "CsoundInstruments filename = <input type=\"text\" name=\"CsoundInstruments_filename\" size=\"20\" value=\"".$CsoundInstruments_filename."\">";
 		if($CsoundInstruments_filename <> '') { 
-			echo "&nbsp;➡&nbsp;";
-			$CsoundInstruments_file = $dir.$CsoundInstruments_filename;
-			$path = str_replace($bp_application_path,'',$dir);
-			if($CsoundInstruments_filename <> '' AND file_exists($CsoundInstruments_file)) {
-				echo "<a target=\"_blank\" href=\"csound.php?file=".urlencode($path.$CsoundInstruments_filename)."\">edit this file</a>";
-				}
-			else {
+			$CsoundInstruments_file = $dir_csound_resources.$CsoundInstruments_filename;
+			if(!file_exists($CsoundInstruments_file)) {
+				echo "&nbsp;➡&nbsp;";
 				echo "File not found: <input style=\"background-color:yellow;\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" name=\"createcsoundinstruments\" value=\"CREATE ‘".$CsoundInstruments_filename."’\">";
 				}
 			}
-		else $CsoundInstruments_file = '';
 		echo "<br />";
 		}
 /*	if($i == 4) {
@@ -294,6 +290,17 @@ echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"create
 if($deleted_objects <> '') echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"restore\" value=\"RESTORE ALL DELETED OBJECTS\"> = <font color=\"blue\"><big>".$deleted_objects."</big></font></p>";
 
 echo "</form>";
+
+if($CsoundInstruments_filename <> '') {
+	$CsoundInstruments_file = $dir_csound_resources.$CsoundInstruments_filename;
+	if($CsoundInstruments_filename <> '' AND file_exists($CsoundInstruments_file)) {
+		$url_csound_page = "csound.php?file=".urlencode($csound_resources.SLASH.$csound_file);
+		echo "<td><form method=\"post\" action=\"".$url_csound_page."\" enctype=\"multipart/form-data\">";
+		echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$csound_file."’\">&nbsp;";
+		echo "</td></form>";
+		}
+	}
+else $CsoundInstruments_file = '';
 
 if($iobj >= 0) {
 	echo "<hr>";

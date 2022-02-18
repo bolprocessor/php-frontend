@@ -708,6 +708,7 @@ function get_setting($parameter,$settings_file) {
 	if($parameter == "diapason") $i = 63;
 	if($parameter == "C4key") $i = 62;
 	if($parameter == "csound_default_orchestra") $i = 1;
+	if($parameter == "quantization") $i = 2;
 	if($i <> -1) return $table[$i];
 	else return '';
 	}
@@ -738,7 +739,7 @@ function my_rmdir($src) {
 	}
 
 function SaveObjectPrototypes($verbose,$dir,$filename,$temp_folder) {
-	global $top_header, $test, $temp_dir;
+	global $top_header,$test,$temp_dir,$csound_resources;
 	$file_lock = $filename."_lock";
 	$time_start = time();
 	$time_end = $time_start + 3;
@@ -759,7 +760,9 @@ function SaveObjectPrototypes($verbose,$dir,$filename,$temp_folder) {
 	fwrite($handle,$PrototypeTickChannel."\n");
 	$PrototypeTickVelocity = $_POST['PrototypeTickVelocity'];
 	fwrite($handle,$PrototypeTickVelocity."\n");
-	$CsoundInstruments_filename = $_POST['CsoundInstruments_filename'];
+	$CsoundInstruments_filename = trim($_POST['CsoundInstruments_filename']);
+	if(!is_integer($pos=strpos($CsoundInstruments_filename,$csound_resources)) AND $CsoundInstruments_filename <> '')
+		$CsoundInstruments_filename = $csound_resources."/".$CsoundInstruments_filename;
 	fwrite($handle,$CsoundInstruments_filename."\n");
 	$maxsounds = $_POST['maxsounds'];
 	fwrite($handle,$maxsounds."\n");

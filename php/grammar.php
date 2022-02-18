@@ -354,7 +354,7 @@ if($csound_file <> '') {
 	if($csound_orchestra <> '') $found_orchestra_in_instruments = TRUE;
 	}
 else $csound_orchestra = '';
-$show_production = $trace_production = $note_convention = $non_stop_improvize = $p_clock = $q_clock = $striated_time = $max_time_computing = $produce_all_items = $random_seed = 0;
+$show_production = $trace_production = $note_convention = $non_stop_improvize = $p_clock = $q_clock = $striated_time = $max_time_computing = $produce_all_items = $random_seed = $quantization = 0;
 $csound_default_orchestra = '';
 $diapason = 440; $C4key = 60;
 $found_orchestra_in_settings = FALSE;
@@ -373,6 +373,7 @@ if($settings_file <> '') {
 	$diapason = get_setting("diapason",$settings_file);
 	$C4key = get_setting("C4key",$settings_file);
 	$csound_default_orchestra = get_setting("csound_default_orchestra",$settings_file);
+	$quantization = get_setting("quantization",$settings_file);
 	if($csound_default_orchestra <> '') $found_orchestra_in_settings = TRUE;
 	}
 
@@ -512,9 +513,10 @@ else {
 		}
 	if($metronome > 0) {
 		echo "⏱ Metronome = <font color=\"red\">".$metronome."</font> beats/mn and time structure is <font color=\"red\">".$time_structure."</font> as per <font color=\"blue\">‘".$settings_file."’</font><br />";
-		if($metronome_in_grammar > 0) {
-			echo "• Metronome specification <b>_mm(".$metronome_in_grammar.")</b> in grammar  is ignored because it is set by <font color=\"blue\">‘".$settings_file."’</font><br />";
-			}
+		if($metronome_in_grammar > 0)
+			echo "• Metronome specification <b>_mm(".$metronome_in_grammar.")</b> in grammar is ignored because it is set by <font color=\"blue\">‘".$settings_file."’</font><br />";
+		if($quantization > 0)
+			echo "•&nbsp;Quantization = <font color=\"red\">".$quantization."</font> milliseconds as per <font color=\"blue\">‘".$settings_file."’</font><br />";
 		}
 	else
 		echo "⏱ No metronome value found in <font color=\"blue\">‘".$settings_file."’</font><br />";

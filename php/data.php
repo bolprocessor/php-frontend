@@ -170,6 +170,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$message_top = "<input type=\"checkbox\" id=\"parent1\" style=\"box-shadow: -2px -2px Gold\"> <b>Check all</b><br />";
 			$message_options = ''; $first = TRUE;
 			$sum_metronome = $number_metronome = $metronome_max = $metronome_min = 0;
+			$metronome = 60;
 			$change_metronome_average = $change_metronome_min = $change_metronome_max = 0;
 			$current_metronome_average = $current_metronome_min = $current_metronome_max = 0;
 			$error_change_metronome = '';
@@ -1093,6 +1094,101 @@ echo "<input type=\"hidden\" name=\"new_convention\" value=\"".$new_convention."
 if($settings_file <> '')
 	$note_convention = get_setting("note_convention",$settings_file);
 else $note_convention = '';
+
+// =====
+$metronome = 0;
+$time_structure = $objects_file = $csound_file = $alphabet_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = '';
+$extract_data = extract_data(TRUE,$content);
+echo "<p style=\"color:blue;\">".$extract_data['headers']."</p>";
+$content = $extract_data['content'];
+$alphabet_file = $extract_data['alphabet'];
+$objects_file = $extract_data['objects'];
+$csound_file = $extract_data['csound'];
+$settings_file = $extract_data['settings'];
+$orchestra_file = $extract_data['orchestra'];
+$interaction_file = $extract_data['interaction'];
+$midisetup_file = $extract_data['midisetup'];
+$timebase_file = $extract_data['timebase'];
+$keyboard_file = $extract_data['keyboard'];
+$glossary_file = $extract_data['glossary'];
+$time_structure = $extract_data['time_structure'];
+$templates = $extract_data['templates'];
+$found_elsewhere = FALSE;
+if($alphabet_file <> '' AND $objects_file == '') {
+	$objects_file = get_name_mi_file($dir.$alphabet_file);
+	if($objects_file <> '') $found_elsewhere = TRUE;
+	}
+$found_orchestra_in_instruments = FALSE;
+if($csound_file <> '') {
+	if(file_exists($dir.$csound_file))
+		rename($dir.$csound_file,$dir_csound_resources.$csound_file);
+	$csound_orchestra = get_orchestra_filename($dir_csound_resources.$csound_file);
+	if($csound_orchestra <> '') $found_orchestra_in_instruments = TRUE;
+	}
+else $csound_orchestra = '';
+$show_production = $trace_production = $note_convention = $non_stop_improvize = $p_clock = $q_clock = $striated_time = $max_time_computing = $produce_all_items = $random_seed = $quantization = 0;
+$csound_default_orchestra = '';
+$diapason = 440; $C4key = 60;
+$found_orchestra_in_settings = FALSE;
+if($settings_file <> '') {
+	$show_production = get_setting("show_production",$settings_file);
+	$trace_production = get_setting("trace_production",$settings_file);
+	$note_convention = get_setting("note_convention",$settings_file);
+	$non_stop_improvize = get_setting("non_stop_improvize",$settings_file);
+	$p_clock = get_setting("p_clock",$settings_file);
+	$q_clock = get_setting("q_clock",$settings_file);
+	$striated_time = get_setting("striated_time",$settings_file);
+	if($striated_time > 0) $time_structure = "striated";
+	$max_time_computing = get_setting("max_time_computing",$settings_file);
+	$produce_all_items = get_setting("produce_all_items",$settings_file);
+	$random_seed = get_setting("random_seed",$settings_file);
+	$diapason = get_setting("diapason",$settings_file);
+	$C4key = get_setting("C4key",$settings_file);
+	$csound_default_orchestra = get_setting("csound_default_orchestra",$settings_file);
+	$quantization = get_setting("quantization",$settings_file);
+	if($csound_default_orchestra <> '') $found_orchestra_in_settings = TRUE;
+	}
+// =======
+if($settings_file == '') {
+	if($metronome > 0) {
+		$p_clock = intval($metronome * 10000);
+		$q_clock = 600000;
+		$gcd = gcd($p_clock,$q_clock);
+		$p_clock = $p_clock / $gcd;
+		$q_clock = $q_clock / $gcd;
+		if(intval($metronome) == $metronome)
+			$metronome = intval($metronome);
+		else $metronome = sprintf("%.3f",$metronome);
+		echo "<p>⏱ Time base: <font color=\"red\">".$p_clock."</font> ticks in <font color=\"red\">".$q_clock."</font> seconds (metronome = <font color=\"red\">".$metronome."</font> beats/mn)<br />";
+		if($time_structure == '') $time_structure = "striated";
+		echo "⏱ Time structure: <font color=\"red\">".$time_structure."</font></p>";
+		}
+	else {
+		$metronome =  60;
+		$p_clock = $q_clock = 1;
+		if($time_structure <> '')
+			echo "<p>⏱ Metronome (time base) is not correctly specified. It will be set to <font color=\"red\">60</font> beats per minute. Time structure is <font color=\"red\">".$time_structure."</font> as indicated in this grammar.</p>";
+		else
+			echo "<p>⏱ Metronome (time base) and structure of time are neither specified nor set up by a ‘-se’ file.<br />Therefore they will be set to <font color=\"red\">60</font> beats per minute and <font color=\"red\">striated</font>.</p>";
+		$time_structure = "striated";
+		}
+	}
+else {
+	$metronome = 0;
+	if($p_clock > 0 AND $q_clock > 0) {
+		$metronome = 60 * $q_clock / $p_clock;
+		if($metronome <> intval($metronome)) $metronome = sprintf("%.3f",$metronome);
+		}
+	if($metronome > 0) {
+		echo "⏱ Metronome = <font color=\"red\">".$metronome."</font> beats/mn and time structure is <font color=\"red\">".$time_structure."</font> as per <font color=\"blue\">‘".$settings_file."’</font><br />";
+		if($quantization > 0)
+			echo "•&nbsp;Quantization = <font color=\"red\">".$quantization."</font> milliseconds as per <font color=\"blue\">‘".$settings_file."’</font><br />";
+		}
+	else
+		echo "⏱ No metronome value found in <font color=\"blue\">‘".$settings_file."’</font><br />";
+	}
+if($note_convention <> '') echo "• Note convention is <font color=\"red\">‘".ucfirst(note_convention(intval($note_convention)))."’</font> as per <font color=\"blue\">‘".$settings_file."’</font><br />";
+// =======
 
 if(!isset($output_folder) OR $output_folder == '') $output_folder = "my_output";
 $default_output_name = str_replace("-da.",'',$filename);
