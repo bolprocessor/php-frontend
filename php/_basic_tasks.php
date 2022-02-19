@@ -5,6 +5,8 @@ require('midi.class.php');
 
 define('MAXFILESIZE',50000000);
 define('SLASH',DIRECTORY_SEPARATOR);
+define('STRIATED',1);
+define('SMOOTH',0);
 ini_set("auto_detect_line_endings",true);
 
 $which_system = '';
@@ -231,7 +233,7 @@ function extract_data($compact,$content) {
 			$extract_data['templates'] = TRUE;
 			}
 		if(is_integer($pos=strpos($line,"_mm")) AND $pos == 0) {
-			$metronome = preg_replace("/.+\((.+)\).+/u","$1",$line);
+			$metronome = preg_replace("/.*_mm\(([^\)]+)\).*/u","$1",$line);
 			$extract_data['metronome'] = $metronome;
 			$time_structure = preg_replace("/.+\)\s+_(.+)$/u","$1",$line);
 			if($time_structure == "striated" OR $time_structure == "smooth")
@@ -696,12 +698,12 @@ function get_setting($parameter,$settings_file) {
 	$table = explode(chr(10),$content);
 	$i = -1;
 	if($parameter == "note_convention") $i = 47;
+	if($parameter == "nature_of_time") $i = 6;
 	if($parameter == "show_production") $i = 14;
 	if($parameter == "trace_production") $i = 17;
 	if($parameter == "produce_all_items") $i = 13;
 	if($parameter == "random_seed") $i = 45;
 	if($parameter == "non_stop_improvize") $i = 10;
-	if($parameter == "striated_time") $i = 6;
 	if($parameter == "p_clock") $i = 7;
 	if($parameter == "q_clock") $i = 8;
 	if($parameter == "max_time_computing") $i = 44;
@@ -2481,5 +2483,11 @@ function create_grammar($data_path) {
 		}
 	$grammar = str_replace("ALL_VARIABLES",$all_variables,$grammar);
 	return $grammar;
+	}
+
+function nature_of_time($value) {
+	if($value == SMOOTH) return "SMOOTH";
+	if($value == STRIATED) return "STRIATED";
+	return '';
 	}
 ?>

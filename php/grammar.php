@@ -323,7 +323,7 @@ if($test) echo "grammar_file = ".$this_file."<br />";
 $content = @file_get_contents($this_file,TRUE);
 if($content === FALSE) ask_create_new_file($url_this_page,$filename);
 $metronome = 0;
-$time_structure = $objects_file = $csound_file = $alphabet_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = '';
+$nature_of_time = $objects_file = $csound_file = $alphabet_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = '';
 $extract_data = extract_data(TRUE,$content);
 echo "<p style=\"color:blue;\">".$extract_data['headers']."</p>";
 $content = $extract_data['content'];
@@ -339,7 +339,8 @@ $keyboard_file = $extract_data['keyboard'];
 $glossary_file = $extract_data['glossary'];
 $metronome = $metronome_in_grammar = $extract_data['metronome'];
 $time_structure = $extract_data['time_structure'];
-// echo "metronome = ".$metronome." time structure = ".$time_structure."<br />";
+if($time_structure == "striated") $nature_of_time = STRIATED;
+if($time_structure == "smooth") $nature_of_time = SMOOTH;
 $templates = $extract_data['templates'];
 $found_elsewhere = FALSE;
 if($alphabet_file <> '' AND $objects_file == '') {
@@ -365,8 +366,6 @@ if($settings_file <> '') {
 	$non_stop_improvize = get_setting("non_stop_improvize",$settings_file);
 	$p_clock = get_setting("p_clock",$settings_file);
 	$q_clock = get_setting("q_clock",$settings_file);
-	$striated_time = get_setting("striated_time",$settings_file);
-	if($striated_time > 0) $time_structure = "striated";
 	$max_time_computing = get_setting("max_time_computing",$settings_file);
 	$produce_all_items = get_setting("produce_all_items",$settings_file);
 	$random_seed = get_setting("random_seed",$settings_file);
@@ -374,6 +373,7 @@ if($settings_file <> '') {
 	$C4key = get_setting("C4key",$settings_file);
 	$csound_default_orchestra = get_setting("csound_default_orchestra",$settings_file);
 	$quantization = get_setting("quantization",$settings_file);
+	$nature_of_time_settings = get_setting("nature_of_time",$settings_file);
 	if($csound_default_orchestra <> '') $found_orchestra_in_settings = TRUE;
 	}
 
@@ -488,39 +488,45 @@ if($settings_file == '') {
 		$gcd = gcd($p_clock,$q_clock);
 		$p_clock = $p_clock / $gcd;
 		$q_clock = $q_clock / $gcd;
-		if(intval($metronome) == $metronome)
-			$metronome = intval($metronome);
+		if(intval($metronome) == $metronome) $metronome = intval($metronome);
 		else $metronome = sprintf("%.3f",$metronome);
 		echo "<p>⏱ Time base: <font color=\"red\">".$p_clock."</font> ticks in <font color=\"red\">".$q_clock."</font> seconds (metronome = <font color=\"red\">".$metronome."</font> beats/mn)<br />";
-		if($time_structure == '') $time_structure = "striated";
-		echo "⏱ Time structure: <font color=\"red\">".$time_structure."</font></p>";
+		if(!is_numeric($nature_of_time)) $nature_of_time = STRIATED;
 		}
 	else {
 		$metronome =  60;
 		$p_clock = $q_clock = 1;
 		if($time_structure <> '')
-			echo "<p>⏱ Metronome (time base) is not correctly specified. It will be set to <font color=\"red\">60</font> beats per minute. Time structure is <font color=\"red\">".$time_structure."</font> as indicated in this grammar.</p>";
-		else
-			echo "<p>⏱ Metronome (time base) and structure of time are neither specified nor set up by a ‘-se’ file.<br />Therefore they will be set to <font color=\"red\">60</font> beats per minute and <font color=\"red\">striated</font>.</p>";
-		$time_structure = "striated";
+			echo "<p>⏱ Metronome (time base) is not properly specified. It will be set to <font color=\"red\">60</font> beats per minute. Time structure is <font color=\"red\">".$time_structure."</font> as indicated in data.</p>";
+		else {
+			$nature_of_time = STRIATED;
+			echo "<p>⏱ Metronome (time base) and structure of time are neither specified in grammar nor set up by a ‘-se’ file.<br />Therefore metronome will be set to <font color=\"red\">60</font> beats per minute and time structure to <font color=\"red\">STRIATED</font>.</p>";
+			}
 		}
 	}
 else {
-	$metronome = 0;
 	if($p_clock > 0 AND $q_clock > 0) {
-		$metronome = 60 * $q_clock / $p_clock;
-		if($metronome <> intval($metronome)) $metronome = sprintf("%.3f",$metronome);
+		$metronome_settings = 60 * $q_clock / $p_clock;
 		}
-	if($metronome > 0) {
-		echo "⏱ Metronome = <font color=\"red\">".$metronome."</font> beats/mn and time structure is <font color=\"red\">".$time_structure."</font> as per <font color=\"blue\">‘".$settings_file."’</font><br />";
-		if($metronome_in_grammar > 0)
-			echo "• Metronome specification <b>_mm(".$metronome_in_grammar.")</b> in grammar is ignored because it is set by <font color=\"blue\">‘".$settings_file."’</font><br />";
+	else $metronome_settings = 0;
+	if($metronome > 0 AND $metronome <> $metronome_settings) {
+		echo "➡&nbsp;Conflict: metronome is ".$metronome_settings." beats/mn as per <font color=\"blue\">‘".$settings_file."’</font> and ".$metronome." beats/mn in grammar. We'll use <font color=\"red\">".$metronome."</font> beats/mn<br />";
+		}
+	if(!is_numeric($metronome)) $metronome = $metronome_settings;
+	if($metronome <> intval($metronome)) $metronome = sprintf("%.3f",$metronome);
+	if(($nature_of_time_settings <> $nature_of_time) AND (is_numeric($nature_of_time))) {
+		echo "➡&nbsp;Conflict: time structure is ".nature_of_time($nature_of_time_settings)." as per <font color=\"blue\">‘".$settings_file."’</font> and ".nature_of_time($nature_of_time)." in grammar. We'll use ".nature_of_time($nature_of_time)."<br />";
+		}
+	if(!is_numeric($nature_of_time)) $nature_of_time = $nature_of_time_settings;
+	if($metronome > 0. AND $nature_of_time == STRIATED) {
+		echo "⏱ Metronome = <font color=\"red\">".$metronome."</font> beats/mn<br />";
 		if($quantization > 0)
 			echo "•&nbsp;Quantization = <font color=\"red\">".$quantization."</font> milliseconds as per <font color=\"blue\">‘".$settings_file."’</font><br />";
 		}
-	else
-		echo "⏱ No metronome value found in <font color=\"blue\">‘".$settings_file."’</font><br />";
 	}
+if($nature_of_time == STRIATED) echo "•&nbsp;Time is <font color=\"red\">".nature_of_time($nature_of_time)."</font><br />";
+else echo "•&nbsp;Time is <font color=\"red\">".nature_of_time($nature_of_time)."</font> (no fixed tempo)<br />";
+
 if($non_stop_improvize > 0) echo "• <font color=\"red\">Non-stop improvize</font> as set by <font color=\"blue\">‘".$settings_file."’</font>: <i>only 10 variations will be produced, no picture</i><br />";
 if($diapason <> 440) echo "• <font color=\"red\">Diapason</font> (A4 frequency) = <font color=\"red\">".$diapason."</font> Hz as set by <font color=\"blue\">‘".$settings_file."’</font><br />";
 if($C4key <> 60) {
@@ -530,6 +536,7 @@ if($C4key <> 60) {
 	}
 if($found_elsewhere AND $objects_file <> '') echo "• Sound-object prototype file = <font color=\"blue\">‘".$objects_file."’</font> found in <font color=\"blue\">‘".$alphabet_file."’</font><br />";
 if($note_convention <> '') echo "• Note convention is <font color=\"red\">‘".ucfirst(note_convention(intval($note_convention)))."’</font> as per <font color=\"blue\">‘".$settings_file."’</font><br />";
+else echo "• Note convention is <font color=\"red\">‘English’</font> by default<br />";
 if($produce_all_items == 1) echo "• Produce all items has been set ON by <font color=\"blue\">‘".$settings_file."’</font><br />";
 if($show_production == 1) echo "• Show production has been set ON by <font color=\"blue\">‘".$settings_file."’</font><br />";
 if($trace_production == 1) echo "• Trace production has been set ON by <font color=\"blue\">‘".$settings_file."’</font><br />";
@@ -581,8 +588,8 @@ if($file_format == "csound") {
 		if(file_exists($dir_csound_resources.$csound_orchestra)) $link_produce .= "&csound_orchestra=".urlencode($csound_orchestra);
 		}
 	else echo "<font color=\"red\">➡</font> Csound scores will be produced yet not converted to sound files because Csound is not installed or not responsive";
+	echo "<br />";
 	}
-echo "</p>";
 
 if($csound_file <> '') {
 	if($file_format == "csound") {
@@ -640,7 +647,7 @@ echo "<input type=\"hidden\" name=\"metronome\" value=\"".$metronome."\">";
 echo "<input type=\"hidden\" name=\"time_structure\" value=\"".$time_structure."\">";
 echo "<input type=\"hidden\" name=\"alphabet_file\" value=\"".$alphabet_file."\">";
 
-echo "<div  id=\"topedit\">&nbsp;</div>";
+echo "<span  id=\"topedit\">&nbsp;</span>";
 
 // echo $link_produce."<br />";
 
