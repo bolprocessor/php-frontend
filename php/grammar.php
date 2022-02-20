@@ -215,7 +215,7 @@ if($need_to_save OR isset($_POST['savegrammar']) OR isset($_POST['compilegrammar
 	fwrite($handle,$content);
 	fclose($handle);
 	}
-echo "</small></p>";
+// echo "</small></p>";
 
 if(isset($_POST['change_output_folder'])) {
 	$output_folder = trim($_POST['output_folder']);
@@ -427,32 +427,33 @@ $link_produce = "produce.php?instruction=".$action."&grammar=".urlencode($this_f
 $error_mssg = '';
 if($alphabet_file <> '') {
 	if(!file_exists($dir.$alphabet_file)) {
-		$error_mssg .= "<font color=\"red\"><small>WARNING: ".$dir.$alphabet_file." not found.</small></font><br />";
+		$error_mssg .= "<font color=\"red\">WARNING: ".$dir.$alphabet_file." not found.</font><br />";
 		$error = TRUE;
 		}
 	else $link_produce .= "&alphabet=".urlencode($dir.$alphabet_file);
 	}
 if($settings_file <> '') {
 	if(!file_exists($dir.$settings_file)) {
-		$error_mssg .= "<font color=\"red\"><small>WARNING: ".$dir.$settings_file." not found.</small></font><br />";
+		$error_mssg .= "<font color=\"red\">WARNING: ".$dir.$settings_file." not found.</font><br />";
 		$error = TRUE;
 		}
 	else $link_produce .= "&settings=".urlencode($dir.$settings_file);
 	}
 if($objects_file <> '') {
 	if(!file_exists($dir.$objects_file)) {
-		$error_mssg .= "<font color=\"red\"><small>WARNING: ".$dir.$objects_file." not found.</small></font><br />";
+		$error_mssg .= "<font color=\"red\">WARNING: ".$dir.$objects_file." not found.</font><br />";
 		$error = TRUE;
 		}
 	else $link_produce .= "&objects=".urlencode($dir.$objects_file);
 	}
 if($csound_file <> '') {
 	if(!file_exists($dir_csound_resources.$csound_file)) {
-		$error_mssg .= "<font color=\"red\"><small>WARNING: ".$dir_csound_resources.$csound_file." not found.</small></font><br />";
+		$error_mssg .= "<font color=\"red\">WARNING: ".$dir_csound_resources.$csound_file." not found.</font><br />";
 		$error = TRUE;
 		}
 	else $link_produce .= "&csound_file=".urlencode($csound_file);
 	}
+
 if($csound_orchestra == '') $csound_orchestra = $csound_default_orchestra;
 if($csound_orchestra <> '') {
 	if(file_exists($dir.$csound_orchestra)) {
@@ -663,6 +664,7 @@ if($error) echo " disabled";
 echo ">";
 echo "</p>";
 
+if($error) echo "<p>".$error_mssg."</p>";
 $table = explode(chr(10),$content);
 $imax = count($table);
 if($imax > $textarea_rows) $textarea_rows = $imax + 5;
@@ -678,7 +680,6 @@ echo ">";
 $link_test = $link_produce."&test";
 $display_command_title = "DisplayCommand".$filename;
 echo "&nbsp;<input style=\"color:DarkBlue; background-color:Azure; font-size:large;\" onclick=\"window.open('".$link_test."','".$display_command_title."','width=1000,height=100,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Display command line\">";
-if($error) echo "<br />".$error_mssg;
 echo "</div>";
 echo "<p style=\"width:90%; text-align:right;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" formaction=\"".$url_this_page."#topedit\" name=\"savegrammar\" value=\"SAVE ‘".$filename."’\"></p>";
 echo "</form>";

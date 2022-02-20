@@ -1991,7 +1991,7 @@ function list_of_tonal_scales($csound_orchestra_file) {
 function list_of_instruments($csound_orchestra_file) {
 	global $number_fields_csound_instrument, $number_midi_parameters_csound_instrument;
 	$list_of_instruments['list'] = $list_of_instruments['index'] = $list_of_instruments['param'] = array();
-	if(!file_exists($csound_orchestra_file)) return $list;
+	if(!file_exists($csound_orchestra_file)) return $list_of_instruments;
 	$content = @file_get_contents($csound_orchestra_file,TRUE);
 	$extract_data = extract_data(FALSE,$content);
 	$content = $extract_data['content'];
