@@ -210,22 +210,22 @@ function extract_data($compact,$content) {
 		}
 	$table = explode(chr(10),$content);
 	$table_out = $extract_data = array();
-	$start = TRUE;
+	$start = $header = TRUE;
 	$extract_data['grammar'] = $extract_data['metronome'] = $extract_data['time_structure'] = $extract_data['headers'] = $extract_data['alphabet'] = $extract_data['objects'] = $extract_data['csound'] = $extract_data['settings'] = $extract_data['data'] = $extract_data['orchestra'] = $extract_data['timebase'] = $extract_data['interaction'] = $extract_data['midisetup'] = $extract_data['timebase'] = $extract_data['keyboard'] = $extract_data['glossary'] = $extract_data['cstables'] = '';
 	$extract_data['templates'] = FALSE;
 	for($i = 0; $i < count($table); $i++) {
 		$line = trim($table[$i]);
 		$line = preg_replace("/\s/u",' ',$line);
-	//	echo $i." “".$table[$i]."”<br />";
 		if($i == 0)
-			$line = preg_replace("/.*(\/\/.*)/u","$1",$line);
-		if($start AND is_integer($pos=strpos($line,"//")) AND $pos == 0) {
+			$line = preg_replace("/.*(\/\/.*)/u","$1",$line); // Cleaning up old versions
+		if($header AND is_integer($pos=strpos($line,"//")) AND $pos == 0) {
+	//		echo $i." “".$table[$i]."”<br />";
 			if($i > 1) $table_out[] = $line;
 			else {
-				if($extract_data['headers'] <> '')
-					$extract_data['headers'] .= "<br />";
+				if($extract_data['headers'] <> '') $extract_data['headers'] .= "<br />";
 				$extract_data['headers'] .= $line;
 				}
+			if($i > 1 OR $line == '') $header = FALSE;
 			continue;
 			}
 		$table_out[] = $line;

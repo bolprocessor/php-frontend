@@ -7,7 +7,7 @@ $super_trace = FALSE;
 $trace_breath = TRUE;
 $trace_breath = FALSE;
 
-function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$include_breaths,$include_slurs,$include_measures,$ignore_fermata,$ignore_mordents,$chromatic_mordents,$ignore_turns,$chromatic_turns,$ignore_trills,$chromatic_trills,$ignore_arpeggios,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections,$trace_tempo,$trace_ornamentations,$breath_length,$breath_tag,$trace_measures,$measures,$accept_signs) {
+function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$include_breaths,$include_slurs,$include_measures,$ignore_fermata,$ignore_mordents,$chromatic_mordents,$ignore_turns,$chromatic_turns,$ignore_trills,$chromatic_trills,$ignore_arpeggios,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections,$trace_tempo,$trace_ornamentations,$breath_length,$breath_tag,$trace_measures,$measures,$accept_signs,$include_parts,$number_parts,$apply_rndtime,$rndtime) {
 	global $super_trace,$trace_breath;
 	global $max_term_in_fraction;
 	global $notes_diesis,$notes_bemol,$standard_diatonic_scale;
@@ -15,7 +15,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 	// MakeMusic Finale dynamics https://en.wikipedia.org/wiki/Dynamics_(music)
 	$dynamic_sign_to_volume = array("pppp" => 10, "ppp" => 23, "pp" => 36, "p" => 49, "mp" => 62, "mf" => 75, "sfp" => 80, "f" => 88, "sf" => 90, "ff" => 101, "sff" => 110, "fff" => 114, "sfff" => 120, "ffff" => 127);
 	$dynamic_sign_to_tempo = array("Largo" => 50, "Lento" => 60, "Adagio" => 70, "Andante" => 88, "Moderato" => 100, "Allegretto" => 114, "Allegro" => 136, "Vivace" => 140, "Presto" => 170, "Prestissimo" => 190);
-	$data =  $report = $old_measure_label = '';
+	$data = $report = $old_measure_label = '';
 	$measure_label = array();
 	$sum_metronome = $number_metronome = $metronome_max = $metronome_min = $number_metronome_markers = 0;
 	$said_tempo = FALSE;
@@ -60,6 +60,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 		if($trace_breath) echo "Breath rest = ".$breath_rest."<br />";
 		}
 	ksort($the_score);
+	if($number_parts == 1 AND $apply_rndtime[0]) $data .= "_rndtime(".$rndtime[0].") ";
 	foreach($the_score as $section => $the_section) {
 		if($list_this OR $trace_tempo) $report .= "<br /><b>== Section ".$section." ==</b><br />";
 		$sum_tempo_measure[$section] = $number_tempo_measure[$section] = array();
@@ -100,7 +101,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 				if($include_measures AND !$first_measure AND $reload_musicxml) $data .= " [—".$i_measure."—] ";
 				$first_measure = FALSE;
 				$data .= "{";
-				$number_parts = 0;
+				$i_part = 0;
 				$i_field_of_measure = 0; // Index of field irrespective of parts
 				$i_new_tempo = -1;
 				$p_next_date_new_tempo = $q_next_date_new_tempo = -1;
@@ -112,7 +113,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 						if($test_musicxml AND $reload_musicxml) echo "Score part ".$score_part." not selected in section ".$section."<br />";
 						continue;
 						}
-					$number_parts++;
+					$i_part++;
 					$breath_location = array();
 					$i_breath = $n_breath = 0;
 					if(isset($fifths[$score_part])) $current_fifths = $fifths[$score_part];
@@ -1391,6 +1392,8 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 						echo "End measure ".$i_measure." time_measure = ".$p_time_field."/".$q_time_field." tempo_this_measure = ".$sum_tempo_measure[$section][$i_measure]."/".$number_tempo_measure[$section][$i_measure]." default_tempo[section] = ".$default_tempo[$section]." implicit = ".(1 * $implicit[$section][$i_measure])." old_tempo = ".$old_tempo."<br /><br />";
 												
 					if(!$ignore_channels AND isset($midi_channel[$score_part])) $data .= " _chan(".$midi_channel[$score_part].")";
+					if($include_parts AND $number_parts > 1) $data .= "[".$score_part."]";
+					if($number_parts > 1 AND $apply_rndtime[$i_part - 1]) $data .= " _rndtime(".$rndtime[$i_part - 1].") ";
 					$convert_measure[$score_part] = fix_alterations($convert_measure[$score_part]);
 					if($found_breath) { // Adjust the total duration of this measure
 						$add = add($p_time_measure,$q_time_measure,$breath_length['p'] * $divisions[$score_part],$breath_length['q']);
