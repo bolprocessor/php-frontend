@@ -7,7 +7,7 @@ $super_trace = FALSE;
 $trace_breath = TRUE;
 $trace_breath = FALSE;
 
-function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$include_breaths,$include_slurs,$include_measures,$ignore_fermata,$ignore_mordents,$chromatic_mordents,$ignore_turns,$chromatic_turns,$ignore_trills,$chromatic_trills,$ignore_arpeggios,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections,$trace_tempo,$trace_ornamentations,$breath_length,$breath_tag,$trace_measures,$measures,$accept_signs,$include_parts,$number_parts,$apply_rndtime,$rndtime) {
+function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$include_breaths,$include_slurs,$include_measures,$ignore_fermata,$ignore_mordents,$chromatic_mordents,$ignore_turns,$chromatic_turns,$ignore_trills,$chromatic_trills,$ignore_arpeggios,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections,$trace_tempo,$trace_ornamentations,$breath_length,$breath_tag,$trace_measures,$measures,$accept_signs,$include_parts,$number_parts,$apply_rndtime,$rndtime,$apply_rndvel,$rndvel) {
 	global $super_trace,$trace_breath;
 	global $max_term_in_fraction;
 	global $notes_diesis,$notes_bemol,$standard_diatonic_scale;
@@ -60,7 +60,8 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 		if($trace_breath) echo "Breath rest = ".$breath_rest."<br />";
 		}
 	ksort($the_score);
-	if($number_parts == 1 AND $apply_rndtime[0]) $data .= "_rndtime(".$rndtime[0].") ";
+	if($reload_musicxml AND $number_parts == 1 AND $apply_rndtime[0]) $data .= "_rndtime(".$rndtime[0].") ";
+	if($reload_musicxml AND $number_parts == 1 AND $apply_rndvel[0]) $data .= "_rndvel(".$rndvel[0].") ";
 	foreach($the_score as $section => $the_section) {
 		if($list_this OR $trace_tempo) $report .= "<br /><b>== Section ".$section." ==</b><br />";
 		$sum_tempo_measure[$section] = $number_tempo_measure[$section] = array();
@@ -1260,6 +1261,10 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 								}
 							}
 						else {
+							if(isset($the_event['slur'])) {
+								if($the_event['slur'] == "start") $convert_measure[$score_part] .= " _legato_ ";
+								else if($the_event['slur'] == "stop") $convert_measure[$score_part] .= " _nolegato_ ";
+								}
 							$convert_measure[$score_part] .= $the_event['note'];
 							if($the_event['note'] <> "-" AND $the_event['note'] <> '') {
 								$empty_field[$i_field_of_part] = FALSE;
@@ -1390,10 +1395,12 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							
 					if($test_musicxml)
 						echo "End measure ".$i_measure." time_measure = ".$p_time_field."/".$q_time_field." tempo_this_measure = ".$sum_tempo_measure[$section][$i_measure]."/".$number_tempo_measure[$section][$i_measure]." default_tempo[section] = ".$default_tempo[$section]." implicit = ".(1 * $implicit[$section][$i_measure])." old_tempo = ".$old_tempo."<br /><br />";
-												
 					if(!$ignore_channels AND isset($midi_channel[$score_part])) $data .= " _chan(".$midi_channel[$score_part].")";
-					if($include_parts AND $number_parts > 1) $data .= "[".$score_part."]";
-					if($number_parts > 1 AND $apply_rndtime[$i_part - 1]) $data .= " _rndtime(".$rndtime[$i_part - 1].") ";
+					if($reload_musicxml AND $number_parts > 1 ) {						
+						if($include_parts) $data .= "[".$score_part."]";
+						if($apply_rndtime[$i_part - 1]) $data .= " _rndtime(".$rndtime[$i_part - 1].") ";
+						if($apply_rndvel[$i_part - 1]) $data .= " _rndvel(".$rndvel[$i_part - 1].") ";
+						}
 					$convert_measure[$score_part] = fix_alterations($convert_measure[$score_part]);
 					if($found_breath) { // Adjust the total duration of this measure
 						$add = add($p_time_measure,$q_time_measure,$breath_length['p'] * $divisions[$score_part],$breath_length['q']);
@@ -1859,6 +1866,7 @@ function ornament($note,$long,$link,$diatonic_scale,$direction,$fifths,$trill,$t
 
 function process_arpeggios($data,$score_divisions,$trace_ornamentations) {
 	global $max_term_in_fraction;
+//	return $data;
 	$start_search = 0;
 	$min_divisions = round($score_divisions / 20);
 	if($min_divisions == 0) $min_divisions = 1;
@@ -1911,6 +1919,10 @@ function process_arpeggios($data,$score_divisions,$trace_ornamentations) {
 				else $tied = "after";
 				if(substr_count($note,'&') > 1) $tied = "both";
 				}
+			$legato = is_integer(strpos($note,"_legato_"));
+			$nolegato = is_integer(strpos($note,"_nolegato_"));
+			$note = trim(str_replace("_legato_",'',$note));
+			$note = trim(str_replace("_nolegato_",'',$note));
 			if($tied == "no") {
 				$note1 =  $note."&";
 				$note2 =  "&".$note;
@@ -1927,6 +1939,8 @@ function process_arpeggios($data,$score_divisions,$trace_ornamentations) {
 				$note1 =  $note;
 				$note2 =  $note;
 				}
+			if($legato) $new_expression1 .= "_legato_ ";
+			if($nolegato) $new_expression1 .= "_nolegato_ ";
 			$new_expression1 .= $note1." ";
 			$new_expression2 .= $note2.",";
 			}
@@ -1938,7 +1952,6 @@ function process_arpeggios($data,$score_divisions,$trace_ornamentations) {
 		$d1 = substr($data,0,$pos1);
 		$d2 = substr($data,$pos2 + 1,strlen($data) - $pos2 - 1);
 		$data = $d1.$new_expression.$d2;
-	//	$data = str_replace("arpeggio",'',$data); Fixed by BB 2022-02-10
 		$start_search = $pos1 + strlen($new_expression);
 		}
 	return $data;

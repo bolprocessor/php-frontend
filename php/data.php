@@ -123,7 +123,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$partwise = $timewise = $attributes = $attributes_key = $changed_attributes = $found_trill = $found_mordent = $found_turn = $found_fermata = $found_arpeggio = $found_breath = $found_slur = FALSE;
 			$add_section = $include_breaths = $include_measures = $include_slurs = $include_parts = TRUE;
 			$accept_signs = FALSE;
-			$instrument_name = $midi_channel = $select_part = $duration_part = $divisions = $repeat_section = $rndtime = $part_label = $apply_rndtime = array();
+			$instrument_name = $midi_channel = $select_part = $duration_part = $divisions = $repeat_section = $rndtime = $rndvel = $part_label = $apply_rndtime = $apply_rndvel = array();
 			$ignore_dynamics = isset($_POST['ignore_dynamics']);
 			if(isset($_POST['tempo_option'])) $tempo_option = $_POST['tempo_option'];
 			else $tempo_option = "all";
@@ -144,7 +144,16 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 					$index = "apply_rndtime_".$i;
 					$apply_rndtime[$i] = isset($_POST[$index]);
 					$index = "rndtime_".$i;
-					$rndtime[$i] = $_POST[$index];
+					$rndtime[$i] = round(abs(intval($_POST[$index])));
+					}
+				}
+			if($reload_musicxml) {
+				for($i = 0;  $i < $number_parts; $i++) {
+					$index = "apply_rndvel_".$i;
+					$apply_rndvel[$i] = isset($_POST[$index]);
+					$index = "rndvel_".$i;
+					$rndvel[$i] = round(abs(intval($_POST[$index])));
+					if($rndvel[$i] > 64) $rndvel[$i] = 64;
 					}
 				}
 			$ignore_trills = isset($_POST['ignore_trills']);
@@ -444,7 +453,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 					}
 				else $list_settings .= "// Ignoring breaths\n";
 			if($list_settings <> '') $list_settings .= "\n";
-			$convert_score = convert_musicxml($this_score,$repeat_section,$divisions,$fifths,$mode,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$include_breaths,$include_slurs,$include_measures,$ignore_fermata,$ignore_mordents,$chromatic_mordents,$ignore_turns,$chromatic_turns,$ignore_trills,$chromatic_trills,$ignore_arpeggios,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections,$trace_tempo,$trace_ornamentations,$breath_length,$breath_tag,$trace_measures,$measures,$accept_signs,$include_parts,$number_parts,$apply_rndtime,$rndtime);
+			$convert_score = convert_musicxml($this_score,$repeat_section,$divisions,$fifths,$mode,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$include_breaths,$include_slurs,$include_measures,$ignore_fermata,$ignore_mordents,$chromatic_mordents,$ignore_turns,$chromatic_turns,$ignore_trills,$chromatic_trills,$ignore_arpeggios,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections,$trace_tempo,$trace_ornamentations,$breath_length,$breath_tag,$trace_measures,$measures,$accept_signs,$include_parts,$number_parts,$apply_rndtime,$rndtime,$apply_rndvel,$rndvel);
 			$data .= $convert_score['data'];
 			$report = $convert_score['report'];
 			$data = preg_replace("/\s+/u"," ",$data);
@@ -621,11 +630,11 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			if($found_slur) {
 				echo "<input type=\"checkbox\" name=\"include_slurs\"";
 				if($include_slurs) echo " checked";
-				echo ">&nbsp;Include slurs (some have been found in this score)";
+				echo ">&nbsp;Interpret slurs (some have been found in this score)";
 				$link_preview .= "&filter=slur";
 				$window_name = $upload_filename."_slur";
 				echo "&nbsp;<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_preview."','".$window_name."','width=600,height=400,left=0'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\"><br />";
-				echo "&nbsp;&nbsp;&nbsp;… with extra duration = <input type=\"text\" style=\"border:none; text-align:center;\" name=\"slur_length\" size=\"2\" value=\"".$slur_length."\">&nbsp;%<br />";
+				echo "&nbsp;&nbsp;&nbsp;… as legato, extra duration = <input type=\"text\" style=\"border:none; text-align:center;\" name=\"slur_length\" size=\"2\" value=\"".$slur_length."\">&nbsp;%<br />";
 				}
 			else $include_slurs = FALSE;
 
@@ -643,7 +652,18 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				if($number_parts > 1) echo " in part ‘".$part_label[$i]."’";
 				echo "<br />";
 				}
-
+			echo "Apply velocity randomization:<br />";
+			for($i = 0;  $i < $number_parts; $i++) {
+				$index = "apply_rndvel_".$i;
+				if(!isset($apply_rndvel[$i])) $apply_rndvel[$i] = FALSE;
+				echo "<input type=\"checkbox\" name=\"apply_rndvel_".$i."\"";
+				if($apply_rndvel[$i]) echo " checked";
+				$index = "rndvel_".$i;
+				if(!isset($rndvel[$i])) $rndvel[$i] = 10;
+				echo ">&nbsp;<input type=\"text\" style=\"border:none; text-align:right;\" name=\"rndvel_".$i."\" size=\"3\" value=\"".$rndvel[$i]."\"> = 0 to 64";
+				if($number_parts > 1) echo " in part ‘".$part_label[$i]."’";
+				echo "<br />";
+				}
 			echo "<input type=\"checkbox\" name=\"ignore_dynamics\"";
 			if($ignore_dynamics) echo " checked";
 			echo ">&nbsp;Ignore dynamics (volume/velocity)<br />";
