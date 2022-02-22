@@ -7,7 +7,7 @@ $super_trace = FALSE;
 $trace_breath = TRUE;
 $trace_breath = FALSE;
 
-function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$include_breaths,$include_slurs,$include_measures,$ignore_fermata,$ignore_mordents,$chromatic_mordents,$ignore_turns,$chromatic_turns,$ignore_trills,$chromatic_trills,$ignore_arpeggios,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections,$trace_tempo,$trace_ornamentations,$breath_length,$breath_tag,$trace_measures,$measures,$accept_signs,$include_parts,$number_parts,$apply_rndtime,$rndtime,$apply_rndvel,$rndvel) {
+function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$include_breaths,$include_slurs,$include_measures,$ignore_fermata,$ignore_mordents,$chromatic_mordents,$ignore_turns,$chromatic_turns,$ignore_trills,$chromatic_trills,$ignore_arpeggios,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections,$trace_tempo,$trace_ornamentations,$breath_length,$breath_tag,$trace_measures,$measures,$accept_signs,$include_parts,$number_parts,$apply_rndtime,$rndtime,$apply_rndvel,$rndvel,$extend_last_measure,$number_measures) {
 	global $super_trace,$trace_breath;
 	global $max_term_in_fraction;
 	global $notes_diesis,$notes_bemol,$standard_diatonic_scale;
@@ -100,6 +100,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 					echo "<font color = red>• Measure ".$measure_label[$i_measure]."</font><br />";
 				$curr_event = $convert_measure = $p_fermata_total_duration[$i_measure] = $q_fermata_total_duration[$i_measure] = $p_fermata_date[$i_measure] = $q_fermata_date[$i_measure] = $p_fermata_duration[$i_measure] = $q_fermata_duration[$i_measure] = array();
 				if($include_measures AND !$first_measure AND $reload_musicxml) $data .= " [—".$i_measure."—] ";
+				if(($i_measure == $number_measures) AND ($extend_last_measure > 0)) $data .= " _legato(".$extend_last_measure.") ";
 				$first_measure = FALSE;
 				$data .= "{";
 				$i_part = 0;
