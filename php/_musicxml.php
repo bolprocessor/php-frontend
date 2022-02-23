@@ -7,7 +7,7 @@ $super_trace = FALSE;
 $trace_breath = TRUE;
 $trace_breath = FALSE;
 
-function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$include_breaths,$include_slurs,$include_measures,$ignore_fermata,$ignore_mordents,$chromatic_mordents,$ignore_turns,$chromatic_turns,$ignore_trills,$chromatic_trills,$ignore_arpeggios,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections,$trace_tempo,$trace_ornamentations,$breath_length,$breath_tag,$trace_measures,$measures,$accept_signs,$include_parts,$number_parts,$apply_rndtime,$rndtime,$apply_rndvel,$rndvel,$extend_last_measure,$number_measures) {
+function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$include_breaths,$include_slurs,$include_measures,$ignore_fermata,$ignore_mordents,$chromatic_mordents,$ignore_turns,$chromatic_turns,$ignore_trills,$chromatic_trills,$ignore_arpeggios,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections,$trace_tempo,$trace_ornamentations,$breath_length,$breath_tag,$trace_measures,$measures,$accept_signs,$include_parts,$number_parts,$apply_rndtime,$rndtime,$apply_rndvel,$rndvel,$extend_last_measure,$number_measures,$accept_pedal) {
 	global $super_trace,$trace_breath;
 	global $max_term_in_fraction;
 	global $notes_diesis,$notes_bemol,$standard_diatonic_scale;
@@ -145,7 +145,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 					if($test_musicxml) echo "• Measure ".$i_measure." part ".$score_part."<br />";
 					ksort($the_part);
 					$this_note = $some_words = '';
-					$note_on = $is_chord = $rest = $pitch = $unpitched = $time_modification = $forward = $backup = $chord_in_process = $dynamics = $upper_mordent = $lower_mordent = $trill = $turn = FALSE;
+					$note_on = $is_chord = $rest = $pitch = $unpitched = $time_modification = $forward = $backup = $chord_in_process = $dynamics = $upper_mordent = $lower_mordent = $trill = $turn = $pedalstart = $pedalstop = FALSE;
 					$long_ornamentation = $slur_type = '';
 					$alter = $level = 0;
 					$more_duration = 0;
@@ -208,6 +208,9 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 								//	echo "•• Measure #".$i_measure." part ".$score_part." a note is fermata #".$i_fermata." at date = ".$p_fermata_date[$i_measure][$score_part][$i_fermata]."/".$q_fermata_date[$i_measure][$score_part][$i_fermata]."<br />";
 								$i_fermata++;
 								}
+							if($pedalstop AND $pedalstart) $curr_event[$score_part][$j]['pedal'] = "stopstart";
+							else if($pedalstart) $curr_event[$score_part][$j]['pedal'] = "start";
+							else if($pedalstop) $curr_event[$score_part][$j]['pedal'] = "stop";
 							if($rest) {
 								$curr_event[$score_part][$j]['note'] = "-";
 								if($fermata AND $fermata_show) $curr_event[$score_part][$j]['note'] .= "fermata";
@@ -249,7 +252,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 								$sum_durations += ($curr_event[$score_part][$j]['p_dur'] / $curr_event[$score_part][$j]['q_dur']);
 						//		$time_this_field += $curr_event[$score_part][$j]['p_dur'] / $curr_event[$score_part][$j]['q_dur'];
 								}
-							$note_on = $rest = $fermata = $is_chord = $upper_mordent = $lower_mordent = $trill = $turn = $chromatic = FALSE;
+							$note_on = $rest = $fermata = $is_chord = $upper_mordent = $lower_mordent = $trill = $turn = $chromatic = $pedalstart = $pedalstop = FALSE;
 							$long_ornamentation = $slur_type = '';
 							$tie_type_start = $tie_type_stop = FALSE;
 							$j++;
@@ -573,6 +576,11 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							if(is_integer($pos=strpos($line,"trill-beats")))
 								$trill_beats = trim(preg_replace("/.*trill-beats\s*=\s*\"(.+)\".*>/u","$1",$line));
 							else $trill_beats = 3;
+							}
+						if(is_integer($pos=strpos($line,"<pedal"))) {
+							$pedal_type = trim(preg_replace("/.*type\s*=\s*\"([^\"]+)\".*>/u","$1",$line));
+							if($pedal_type == "start" OR $pedal_type == "resume") $pedalstart = TRUE;
+							if($pedal_type == "stop" OR $pedal_type == "discontinue") $pedalstop = TRUE;
 							}
 						if(!$ignore_mordents AND $note_on AND is_integer($pos=strpos($line,"<inverted-mordent"))) {
 							$upper_mordent = $found_mordent = TRUE;
@@ -1103,7 +1111,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 									$i_breath++;
 									$breath_in_stream = TRUE;
 									}
-								$stream = add_note($stream,$i_measure,$the_event,$long_ornamentation,$diatonic_scale_string);
+								$stream = add_note($stream,$i_measure,$the_event,$long_ornamentation,$diatonic_scale_string,$accept_pedal[$i_part - 1]);
 								if($the_event['note'] <> "-" AND $the_event['note'] <> '') $empty_field[$i_field_of_part] = FALSE;
 								$stream_units++;
 								$add = add($p_stream_duration,$q_stream_duration,$p_duration,$q_duration);
@@ -1254,7 +1262,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 									else break;
 									}
 								$stream = '';
-								$stream = add_note($stream,$i_measure,$the_event,$long_ornamentation,$diatonic_scale_string);
+								$stream = add_note($stream,$i_measure,$the_event,$long_ornamentation,$diatonic_scale_string,$accept_pedal[$i_part - 1]);
 								$stream_units = 1;
 								if($the_event['note'] <> "-" AND $the_event['note'] <> '') $empty_field[$i_field_of_part] = FALSE;
 								$p_old_duration = $p_stream_duration = $p_duration;
@@ -1265,6 +1273,12 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							if(isset($the_event['slur'])) {
 								if($the_event['slur'] == "start") $convert_measure[$score_part] .= " _legato_ ";
 								else if($the_event['slur'] == "stop") $convert_measure[$score_part] .= " _nolegato_ ";
+								}
+							if(isset($the_event['pedal']) AND $accept_pedal[$i_part - 1]) {
+								// This is unlikely to happen: pedal command in upper notes of a chord
+								if($the_event['pedal'] == "start") $convert_measure[$score_part] .= " _pedalstart_ ";
+								else if($the_event['pedal'] == "stop") $convert_measure[$score_part] .= " _pedalstop_ ";
+								else if($the_event['pedal'] == "stopstart") $convert_measure[$score_part] .= " _pedalstopstart_ ";
 								}
 							$convert_measure[$score_part] .= $the_event['note'];
 							if($the_event['note'] <> "-" AND $the_event['note'] <> '') {
@@ -1342,6 +1356,9 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 					$i_new_tempo = 0;
 					$last_i_new_tempo[$i_field_of_part] = -1;
 					if(count($the_measure) > 1) $convert_measure[$score_part] .= "}";
+					$convert_measure[$score_part] = str_replace("_pedalstart_","_switch_on_part(".$i_part.")",$convert_measure[$score_part]);
+					$convert_measure[$score_part] = str_replace("_pedalstop_","_switch_off_part(".$i_part.")",$convert_measure[$score_part]);
+					$convert_measure[$score_part] = str_replace("_pedalstopstart_","_switch_off_part(".$i_part.") _switch_on_part(".$i_part.")",$convert_measure[$score_part]);
 					$add = add($p_time_measure,$q_time_measure,(-$p_time_field),$q_time_field);
 					if(($add['p'] * $add['q']) < 0) {
 						$p_time_measure = $p_time_field;
@@ -1591,7 +1608,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 	return $convert_score;
 	}
 
-function add_note($stream,$i_measure,$the_event,$long_ornamentation,$diatonic_scale_string) {
+function add_note($stream,$i_measure,$the_event,$long_ornamentation,$diatonic_scale_string,$ok_pedal) {
 	if(isset($the_event['ornament']) OR isset($the_event['turn'])) {
 		if($the_event['chromatic']) $mode = "chromatic";
 		else $mode = '';
@@ -1611,6 +1628,11 @@ function add_note($stream,$i_measure,$the_event,$long_ornamentation,$diatonic_sc
 	if(isset($the_event['slur'])) {
 		if($the_event['slur'] == "start") $stream .= " _legato_ ";
 		else if($the_event['slur'] == "stop") $stream .= " _nolegato_ ";
+		}
+	if(isset($the_event['pedal']) AND $ok_pedal) {
+		if($the_event['pedal'] == "start") $stream .= " _pedalstart_ ";
+		else if($the_event['pedal'] == "stop") $stream .= " _pedalstop_ ";
+		else if($the_event['pedal'] == "stopstart") $stream .= " _pedalstopstart_ ";
 		}
 	$stream .= $the_event['note'];
 	if(isset($the_event['ornament'])) $stream .= ") ";
@@ -1734,7 +1756,7 @@ function process_ornamentation($data,$fifths,$trace_ornamentations) {
 function ornament($note,$long,$link,$diatonic_scale,$direction,$fifths,$trill,$trill_beats,$turn,$turn_beats,$chromatic,$trace_ornamentations) {
 	// Read https://bolprocessor.org/importing-musicxml/#ornaments
 	global $notes_diesis,$notes_bemol;
-	$legato = $nolegato = FALSE;
+	$legato = $nolegato = $pedalstart = $pedalstop = $pedalstopstart = FALSE;
 	if(is_integer(strpos($note,"_legato_"))) {
 		$legato = TRUE;
 		$note = trim(str_replace("_legato_",'',$note));
@@ -1742,6 +1764,18 @@ function ornament($note,$long,$link,$diatonic_scale,$direction,$fifths,$trill,$t
 	if(is_integer(strpos($note,"_nolegato_"))) {
 		$nolegato = TRUE;
 		$note = trim(str_replace("_nolegato_",'',$note));
+		}
+	if(is_integer(strpos($note,"_pedalstart_"))) {
+		$pedalstart = TRUE;
+		$note = trim(str_replace("_pedalstart_",'',$note));
+		}
+	if(is_integer(strpos($note,"_pedalstop_"))) {
+		$pedalstop = TRUE;
+		$note = trim(str_replace("_pedalstop_",'',$note));
+		}
+	if(is_integer(strpos($note,"_pedalstopstart_"))) {
+		$pedalstop = TRUE;
+		$note = trim(str_replace("_pedalstopstart_",'',$note));
 		}
 	$note = str_replace('&','',$note);
 	$alt_note = $note2 = '';
@@ -1862,6 +1896,9 @@ function ornament($note,$long,$link,$diatonic_scale,$direction,$fifths,$trill,$t
 		}
 	if($legato) $expression = " _legato_ ".$expression;
 	if($nolegato) $expression = " _nolegato_ ".$expression;
+	if($pedalstart) $expression = " _pedalstart_ ".$expression;
+	if($pedalstop) $expression = " _pedalstop_ ".$expression;
+	if($pedalstopstart) $expression = " _pedalstopstart_ ".$expression;
 	return $expression;
 	}
 
@@ -1922,8 +1959,14 @@ function process_arpeggios($data,$score_divisions,$trace_ornamentations) {
 				}
 			$legato = is_integer(strpos($note,"_legato_"));
 			$nolegato = is_integer(strpos($note,"_nolegato_"));
+			$pedalstart = is_integer(strpos($note,"_pedalstart_"));
+			$pedalstop = is_integer(strpos($note,"_pedalstop_"));
+			$pedalstopstart = is_integer(strpos($note,"_pedalstopstart_"));
 			$note = trim(str_replace("_legato_",'',$note));
 			$note = trim(str_replace("_nolegato_",'',$note));
+			$note = trim(str_replace("_pedalstart_",'',$note));
+			$note = trim(str_replace("_pedalstop_",'',$note));
+			$note = trim(str_replace("_pedalstopstart_",'',$note));
 			if($tied == "no") {
 				$note1 =  $note."&";
 				$note2 =  "&".$note;
@@ -1942,6 +1985,9 @@ function process_arpeggios($data,$score_divisions,$trace_ornamentations) {
 				}
 			if($legato) $new_expression1 .= "_legato_ ";
 			if($nolegato) $new_expression1 .= "_nolegato_ ";
+			if($pedalstart) $new_expression1 .= "_pedalstart_ ";
+			if($pedalstop) $new_expression1 .= "_pedalstop_ ";
+			if($pedalstopstart) $new_expression1 .= "_pedalstopstart_ ";
 			$new_expression1 .= $note1." ";
 			$new_expression2 .= $note2.",";
 			}

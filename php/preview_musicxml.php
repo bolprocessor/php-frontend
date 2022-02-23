@@ -49,6 +49,14 @@ while(!feof($file)) {
 		continue;
 		}
 	$couleur = "black";
+	if(is_integer($pos=strpos($line,"<pedal"))) {
+		if($filter == "pedal") {
+			$print_this = TRUE; $couleur = "green";
+			$this_measure .= $arrow;
+			}
+		$this_measure .= "<font color=\"".$couleur."\">".$line_print."</font><br />";
+		continue;
+		}
 	if(is_integer($pos=strpos($line,"trill-mark"))) {
 		if($filter == "trill") {
 			$print_this = TRUE; $couleur = "green";
