@@ -1234,7 +1234,7 @@ if($settings_file <> '') {
 	$nature_of_time_settings = get_setting("nature_of_time",$settings_file);
 	if($csound_default_orchestra <> '') $found_orchestra_in_settings = TRUE;
 	}
-// =======
+echo "<div style=\"background-color:white; padding:1em; width:690px; border-radius: 15px;\">";
 if($settings_file == '') {
 	$metronome =  60;
 	$p_clock = $q_clock = 1;
@@ -1266,8 +1266,8 @@ echo "•&nbsp;Time structure is <font color=\"red\">".nature_of_time($nature_of
 
 if($note_convention <> '') echo "• Note convention is <font color=\"red\">‘".ucfirst(note_convention(intval($note_convention)))."’</font> as per <font color=\"blue\">‘".$settings_file."’</font><br />";
 else echo "• Note convention is <font color=\"red\">‘English’</font> by default<br />";
-echo "<br />";
-// =======
+// echo "<br />";
+echo "</div>";
 
 if(!isset($output_folder) OR $output_folder == '') $output_folder = "my_output";
 $default_output_name = str_replace("-da.",'',$filename);
@@ -1305,7 +1305,7 @@ if($csound_file <> '') {
 		if(($max_scales = count($list_of_tonal_scales)) > 0) {
 			if($max_scales > 1) {
 				echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains definitions of tonal scales&nbsp;<font color=\"red\">➡</font>&nbsp;<button style=\"background-color:aquamarine; border-radius: 6px; font-size:large;\" onclick=\"toggledisplay(); return false;\">Show/hide tonal scales</button>";
-				echo "<div id=\"showhide\"><br />";
+				echo "<div id=\"showhide\" style=\"border-radius: 15px; padding:6px;\"><br />";
 				}
 			else {
 				echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains the definition of tonal scale:";
@@ -1347,8 +1347,8 @@ if($csound_file <> '') {
 		echo "➡ Instructions “_scale()” and “_ins()” will be ignored</p>";
 		}
 	}
-
-echo "<table id=\"topedit\" cellpadding=\"8px;\"><tr style=\"background-color:white;\">";
+else echo "<br />";
+echo "<table id=\"topedit\" style=\"background-color:white; border-radius: 15px; border: 1px solid black;\" cellpadding=\"8px;\"><tr style=\"\">";
 echo "<td><p>Name of output file (with proper extension):<br /><input type=\"text\" name=\"output_file\" size=\"25\" value=\"".$output_file."\">&nbsp;";
 echo "<input style=\"background-color:yellow;\" type=\"submit\" formaction=\"".$url_this_page."\" name=\"savethisfile\" value=\"SAVE\"></p>";
 echo "</td>";
@@ -1409,7 +1409,7 @@ if($error_mssg <> '') {
 	echo "<p>".$error_mssg."</p>";
 	}
 
-if(intval($note_convention) <> intval($new_convention))
+if(intval($note_convention) <> intval($new_convention) AND $new_convention <> '')
 	echo "<p><font color=\"red\">➡</font> WARNING: Note convention should be set to <font color=\"red\">‘".ucfirst(note_convention(intval($new_convention)))."’</font> in the <font color=\"blue\">‘".$settings_file."’</font> settings file</p>";
 
 echo "<table style=\"background-color:GhostWhite;\" border=\"0\"><tr>";

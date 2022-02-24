@@ -1132,8 +1132,10 @@ Sends hexadecimal data to the MIDI output. Using this low-level command is
     not recommended, except for system-exclusive messages.
 ### MIDI switch ON «64..95» channel «1..16» [Script command]
 Switches ON specified switch on specified channel (e.g. the 'hold' pedal).
+• This is the same as _switchon(«64..95»,«1..16»)
 ### MIDI switch OFF «64..95» channel «1..16» [Script command]
 Switches OFF specified switch on specified channel (e.g. the 'hold' pedal).
+• This is the same as _switchoff(«64..95»,«1..16»)
 ### MIDI set basic channel to «1..16» [Script command]
 Specifies on which channel the following program change messages should be sent.
 ### Return [Script command]

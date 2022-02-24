@@ -386,7 +386,7 @@ if($file_format == "csound") {
 	echo "</div>";
 	}
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-echo "<table cellpadding=\"8px;\"><tr style=\"background-color:white;\">";
+echo "<table cellpadding=\"8px;\" style=\"background-color:white; border-radius: 15px; border: 1px solid black;\"><tr style=\"\">";
 echo "<td><p>Name of output file (with proper extension):<br /><input type=\"text\" name=\"output_file\" size=\"25\" value=\"".$output_file."\">&nbsp;";
 echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"savegrammar\" value=\"SAVE\"></p>";
 echo "</td>";
@@ -481,7 +481,7 @@ echo ">";
 echo "</td></tr>";
 echo "<tr><td colspan=\"2\"><p style=\"text-align:center;\">➡ <i>You can change above settings, then save the grammar…</i></p></td></tr>";
 echo "</table>";
-
+echo "<br /><div style=\"background-color:white; padding:1em; width:690px; border-radius: 15px;\">";
 if($settings_file == '') {
 	if($metronome > 0) {
 		$p_clock = intval($metronome * 10000);
@@ -550,7 +550,6 @@ if($settings_file <> '' AND isset($random_seed)) {
 if($max_time_computing > 0) {
 	echo "• Max computation time has been set to <font color=\"red\">".$max_time_computing."</font> seconds by <font color=\"blue\">‘".$settings_file."’</font><br />";
 	}
-
 if($file_format == "csound") {
 	if($csound_orchestra <> '' AND file_exists($dir.$csound_orchestra)) {
 		rename($dir.$csound_orchestra,$dir_csound_resources.$csound_orchestra);
@@ -591,14 +590,14 @@ if($file_format == "csound") {
 	else echo "<font color=\"red\">➡</font> Csound scores will be produced yet not converted to sound files because Csound is not installed or not responsive";
 	echo "<br />";
 	}
-
+echo "</div>";
 if($csound_file <> '') {
 	if($file_format == "csound") {
 		$list_of_tonal_scales = list_of_tonal_scales($dir_csound_resources.$csound_file);
 		if(($max_scales = count($list_of_tonal_scales)) > 0) {
 			if($max_scales > 1)  {
 				echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains definitions of tonal scales&nbsp;<font color=\"red\">➡</font>&nbsp;<button style=\"background-color:aquamarine; border-radius: 6px; font-size:large;\" onclick=\"toggledisplay(); return false;\">Show/hide tonal scales</button>";
-				echo "<div id=\"showhide\"><br />";
+				echo "<div id=\"showhide\"  style=\"border-radius: 15px; padding:6px;\"><br />";
 				}
 			else {
 				echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains the definition of tonal scale:";
@@ -640,7 +639,7 @@ if($csound_file <> '') {
 		echo "➡ Instructions “_scale()” and “_ins()” will be ignored</p>";
 		}
 	}
-
+	
 echo "<input type=\"hidden\" name=\"produce_all_items\" value=\"".$produce_all_items."\">";
 echo "<input type=\"hidden\" name=\"show_production\" value=\"".$show_production."\">";
 echo "<input type=\"hidden\" name=\"trace_production\" value=\"".$trace_production."\">";
@@ -649,9 +648,6 @@ echo "<input type=\"hidden\" name=\"time_structure\" value=\"".$time_structure."
 echo "<input type=\"hidden\" name=\"alphabet_file\" value=\"".$alphabet_file."\">";
 
 echo "<span  id=\"topedit\">&nbsp;</span>";
-
-// echo $link_produce."<br />";
-
 echo "<p><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"savegrammar\" formaction=\"".$url_this_page."#topedit\" value=\"SAVE ‘".$filename."’\">";
 
 if((file_exists($output.SLASH.$default_output_name.".wav") OR file_exists($output.SLASH.$default_output_name.".mid") OR file_exists($output.SLASH.$default_output_name.".html") OR file_exists($output.SLASH.$default_output_name.".sco")) AND file_exists($result_file)) {
@@ -753,7 +749,7 @@ $link_play_expression .= "&data=".urlencode($data_expression);
 $window_name .= "_startup";
 echo "<hr>";
 
-echo "<p id=\"expression\">Use this (polymetric) expression as startup:<br />";
+echo "<p id=\"expression\">Use the following (polymetric) expression as startup:<br />";
 echo "";
 echo "<textarea name=\"expression\" rows=\"5\" style=\"width:700px;\">".$recoded_expression."</textarea>";
 echo "<br />";
