@@ -415,7 +415,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 						$list_settings .= "// Reading all metronome markers\n"; break;
 					}
 				if($accept_signs) $list_settings .= "// Reading tempo signs: “allegro” etc.\n";
-				if($extend_last_measure > 0) $list_settings .= "// Extended duration of last measure by ".$extend_last_measure."%\n";
+				if($extend_last_measure > 0) $list_settings .= "// Extended duration of last measure by ".$extend_last_measure." %\n";
 				for($i = 0; $i < $number_parts; $i++) {
 					if($apply_rndtime[$i])
 						$list_settings .= "// Time randomisation = ".$rndtime[$i]." ms in part ‘".$part_label[$i]."’\n";
@@ -536,12 +536,9 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			if($number_parts > 1) echo $message_top;
 			else if(!$reload_musicxml) $ignore_channels = TRUE;
 			echo $message_options;
-			if($number_parts > 1) {
-				echo "<input type=\"checkbox\" name=\"ignore_channels\"";
-				if($ignore_channels) echo " checked";
-				echo ">&nbsp;Ignore MIDI channels<br />";
-				}
-			else $ignore_channels = TRUE;
+			echo "<input type=\"checkbox\" name=\"ignore_channels\"";
+			if($ignore_channels) echo " checked";
+			echo ">&nbsp;Ignore MIDI channels<br />";
 			if($reload_musicxml) {
 				$current_metronome_min = $convert_score['metronome_min'];
 				$current_metronome_max = $convert_score['metronome_max'];
@@ -761,7 +758,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			echo "<input type=\"hidden\" name=\"number_parts\" value=\"".$number_parts."\">";
 			echo "<font color=\"red\">➡</font> Now, select parts and <input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"select_parts\" value=\"CONVERT\">&nbsp;or&nbsp;<input style=\"background-color:azure;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"cancel\" value=\"QUIT IMPORTING\">";
 			echo "</div>";
-			if($reload_musicxml) {
+			if($found_pedal_command AND $reload_musicxml) {
 				for($i = 0; $i < $number_parts; $i++) {
 					$more_data = str_replace("_switch_on_part(".($i + 1).")"," _switchon(".$switch_controler[$i].",".$switch_channel[$i].") ",$more_data);
 					$more_data = str_replace("_switch_off_part(".($i + 1).")"," _switchoff(".$switch_controler[$i].",".$switch_channel[$i].") ",$more_data);
@@ -1212,11 +1209,11 @@ echo "<input type=\"hidden\" name=\"alphabet_file\" value=\"".$alphabet_file."\"
 echo "<input type=\"hidden\" name=\"grammar_file\" value=\"".$grammar_file."\">";
 echo "<input type=\"hidden\" name=\"objects_file\" value=\"".$objects_file."\">";
 echo "<input type=\"hidden\" name=\"new_convention\" value=\"".$new_convention."\">";
-$show_production = $trace_production = $non_stop_improvize = $p_clock = $q_clock = $striated_time = $max_time_computing = $produce_all_items = $random_seed = $quantization = 0;
+$show_production = $trace_production = $non_stop_improvize = $p_clock = $q_clock = $striated_time = $max_time_computing = $produce_all_items = $random_seed = $quantization = $time_resolution = 0;
 $note_convention = '';
 $csound_default_orchestra = '';
 $diapason = 440; $C4key = 60;
-$found_orchestra_in_settings = FALSE;
+$found_orchestra_in_settings = $quantize = FALSE;
 if($settings_file <> '') {
 	$show_production = get_setting("show_production",$settings_file);
 	$trace_production = get_setting("trace_production",$settings_file);
@@ -1230,20 +1227,25 @@ if($settings_file <> '') {
 	$diapason = get_setting("diapason",$settings_file);
 	$C4key = get_setting("C4key",$settings_file);
 	$csound_default_orchestra = get_setting("csound_default_orchestra",$settings_file);
+	$time_resolution = get_setting("time_resolution",$settings_file);
 	$quantization = get_setting("quantization",$settings_file);
+	$quantize = get_setting("quantize",$settings_file);
 	$nature_of_time_settings = get_setting("nature_of_time",$settings_file);
 	if($csound_default_orchestra <> '') $found_orchestra_in_settings = TRUE;
 	}
+if($quantization == 0) $quantize = FALSE;
 echo "<div style=\"background-color:white; padding:1em; width:690px; border-radius: 15px;\">";
 if($settings_file == '') {
+	$time_resolution = 10; //  10 milliseconds by default
 	$metronome =  60;
 	$p_clock = $q_clock = 1;
 	$nature_of_time = STRIATED;
 	if($time_structure <> '')
 		echo "⏱ Metronome (time base) is not specified by a ‘-se’ file. It will be set to <font color=\"red\">60</font> beats per minute. Time structure may be changed in data.<br />";
-	else {
+	else
 		echo "⏱ Metronome (time base) is not specified by a ‘-se’ file. It will be set to <font color=\"red\">60</font> beats per minute.<br />";
-		}
+	echo "•&nbsp;Time resolution = <font color=\"red\">".$time_resolution."</font> milliseconds (by default)<br />";
+	echo "•&nbsp;No quantization<br />";
 	}
 else {
 	if($p_clock > 0 AND $q_clock > 0) {
@@ -1258,9 +1260,19 @@ else {
 	$nature_of_time = $nature_of_time_settings;
 	if($metronome > 0. AND $nature_of_time == STRIATED) {
 		echo "⏱ Metronome = <font color=\"red\">".$metronome."</font> beats/mn by default as per <font color=\"blue\">‘".$settings_file."’</font><br />";
-		if($quantization > 0)
-			echo "•&nbsp;Quantization = <font color=\"red\">".$quantization."</font> milliseconds as per <font color=\"blue\">‘".$settings_file."’</font><br />";
 		}
+	echo "•&nbsp;Time resolution = <font color=\"red\">".$time_resolution."</font> milliseconds as per <font color=\"blue\">‘".$settings_file."’</font><br />";
+	if($quantize) {
+		echo "•&nbsp;Quantization = <font color=\"red\">".$quantization."</font> milliseconds as per <font color=\"blue\">‘".$settings_file."’</font>";
+		if($time_resolution > $quantization) {
+			echo "&nbsp;<font color=\"red\">➡</font>&nbsp;may be raised to <font color=\"red\">".$time_resolution."</font>&nbsp;ms…";
+			$dir_base = str_replace($bp_application_path,'',$dir);
+			$url_settings = "settings.php?file=".urlencode($dir_base.$settings_file);
+			echo "&nbsp;<font color=\"red\">➡</font>&nbsp;<a target=\"_blank\" href=\"".$url_settings."\">edit settings</a>";
+			}
+		echo "<br />";
+		}
+	else echo "•&nbsp;No quantization<br />";
 	}
 echo "•&nbsp;Time structure is <font color=\"red\">".nature_of_time($nature_of_time)."</font> by default but it may be changed in data<br />";
 
@@ -1420,7 +1432,6 @@ echo "<div style=\"float:right; vertical-align:middle;\">Import MusicXML file: <
 echo "<div style=\"text-align:left;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></div>";
 
 echo "<br /><textarea name=\"thistext\" rows=\"40\" style=\"width:700px;\">".$content."</textarea>";
-echo "</form>";
 
 echo "<div style=\"text-align:right;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></div>";
 

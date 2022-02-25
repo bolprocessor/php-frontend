@@ -39,7 +39,7 @@ for($i = 0; $i < $imax; $i++) {
 	}
 
 if(isset($_POST['saveparameters'])) {
-	echo "<p id=\"timespan2\" style=\"color:red;\">Saved parameters ➡ don't forget to save again related grammar!</p>";
+	echo "<p id=\"timespan2\" style=\"color:red;\">Saved parameters ➡ don't forget to save again related grammar or data!</p>";
 	$handle = fopen($this_file,"w");
 	$file_header = $top_header."\n// Settings file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
 	fwrite($handle,$file_header."\n");

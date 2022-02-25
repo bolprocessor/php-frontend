@@ -204,6 +204,7 @@ function extract_data($compact,$content) {
 	$content = str_replace(chr(13),chr(10),$content);
 	$content = str_replace(chr(9),' ',$content); // Remove tabulations
 	$content = clean_up_encoding(TRUE,TRUE,$content);
+	$content = decode_entities($content);
 	if($compact) {
 		do $content = str_replace(chr(10).chr(10).chr(10),chr(10).chr(10),$content,$count);
 		while($count > 0);
@@ -302,19 +303,20 @@ function display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,
 	
 	$dir = str_replace($bp_application_path,'',$dir);
 	if($test) echo "dir = ".$dir."<br />";
-	
-	if($page_type == "grammar" OR $page_type == "alphabet" OR $page_type == "glossary" OR $page_type == "interaction") {
-		if(isset($_POST['show_help_entries'])) {
-			$entries = display_help_entries($content);
-			echo $entries."<br />";
-			}
-		else {
-			echo "<div style=\"float:right; margin-top:6px;\">";
-			echo "<form method=\"post\" action=\"".$url_this_page."#help_entries\" enctype=\"multipart/form-data\">";
-			echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
-			echo "<input type=\"hidden\" name=\"file_format\" value=\"".$file_format."\">";
-			echo "<input style=\"background-color:azure;\" type=\"submit\" name=\"show_help_entries\" value=\"SHOW HELP ENTRIES\">";
-			echo "</form></div>";
+	if($content <> '') {
+		if($page_type == "grammar" OR $page_type == "alphabet" OR $page_type == "glossary" OR $page_type == "interaction") {
+			if(isset($_POST['show_help_entries'])) {
+				$entries = display_help_entries($content);
+				echo $entries."<br />";
+				}
+			else {
+				echo "<div style=\"float:right; margin-top:6px;\">";
+				echo "<form method=\"post\" action=\"".$url_this_page."#help_entries\" enctype=\"multipart/form-data\">";
+				echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
+				echo "<input type=\"hidden\" name=\"file_format\" value=\"".$file_format."\">";
+				echo "<input style=\"background-color:azure;\" type=\"submit\" name=\"show_help_entries\" value=\"SHOW HELP ENTRIES\">";
+				echo "</form></div>";
+				}
 			}
 		}
 	echo "<table style=\"padding:0px; background-color:white; border-spacing: 2px;\" cellpadding=\"0px;\"><tr>";
@@ -614,10 +616,18 @@ function decode_tags($text) {
 
 function recode_entities($text) {
 	$text = preg_replace("/\s*•$/u"," .",$text);
-	$text = preg_replace("/\s*•[ ]*/u"," . ",$text);
+//	$text = preg_replace("/\s*•[ ]*/u"," . ",$text);
+	$text = preg_replace("/\s*•\s/u"," . ",$text);
 	$text = str_replace(" … "," _rest ",$text);
+	$text = preg_replace("/\s*…\s*,/u"," _rest,",$text);
 	$text = preg_replace("/{\s*…\s*/u","{_rest ",$text);
+	$text = preg_replace("/\s*…\s*}/u"," _rest}",$text);
 	$text = preg_replace("/,\s*…\s*/u",", _rest ",$text);
+	return $text;
+	}
+
+function decode_entities($text) {
+	$text = str_replace("_rest","…",$text);
 	return $text;
 	}
 
@@ -635,6 +645,7 @@ function clean_up_file_to_html($file) {
 	$text = trim($text);
 	$text = recode_tags($text);
 	$text = clean_up_encoding(FALSE,TRUE,$text);
+	$text = decode_entities($text);
 	$text = str_replace("¬",'',$text);
 	do $text = str_replace(chr(10).chr(10).chr(10),chr(10).chr(10),$text,$count);
 	while($count > 0);
@@ -711,6 +722,8 @@ function get_setting($parameter,$settings_file) {
 	if($parameter == "C4key") $i = 62;
 	if($parameter == "csound_default_orchestra") $i = 1;
 	if($parameter == "quantization") $i = 2;
+	if($parameter == "quantize") $i = 5;
+	if($parameter == "time_resolution") $i = 3;
 	if($i <> -1) return $table[$i];
 	else return '';
 	}
@@ -1005,7 +1018,6 @@ function reformat_grammar($verbose,$this_file) {
 			$line = "gram#".$i_gram."[".$irul."] ".$line;
 			$irul++;
 			}
-	//	$line = str_replace(" . "," • ",$line);
 		if($verbose) echo $line."<br />";
 		$table[$i_line] = $line;
 		}

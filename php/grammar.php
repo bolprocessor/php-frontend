@@ -355,10 +355,10 @@ if($csound_file <> '') {
 	if($csound_orchestra <> '') $found_orchestra_in_instruments = TRUE;
 	}
 else $csound_orchestra = '';
-$show_production = $trace_production = $note_convention = $non_stop_improvize = $p_clock = $q_clock = $striated_time = $max_time_computing = $produce_all_items = $random_seed = $quantization = 0;
+$show_production = $trace_production = $note_convention = $non_stop_improvize = $p_clock = $q_clock = $striated_time = $max_time_computing = $produce_all_items = $random_seed = $quantization = $time_resolution = 0;
 $csound_default_orchestra = '';
 $diapason = 440; $C4key = 60;
-$found_orchestra_in_settings = FALSE;
+$found_orchestra_in_settings = $quantize = FALSE;
 if($settings_file <> '') {
 	$show_production = get_setting("show_production",$settings_file);
 	$trace_production = get_setting("trace_production",$settings_file);
@@ -372,7 +372,9 @@ if($settings_file <> '') {
 	$diapason = get_setting("diapason",$settings_file);
 	$C4key = get_setting("C4key",$settings_file);
 	$csound_default_orchestra = get_setting("csound_default_orchestra",$settings_file);
+	$time_resolution = get_setting("time_resolution",$settings_file);
 	$quantization = get_setting("quantization",$settings_file);
+	$quantize = get_setting("quantize",$settings_file);
 	$nature_of_time_settings = get_setting("nature_of_time",$settings_file);
 	if($csound_default_orchestra <> '') $found_orchestra_in_settings = TRUE;
 	}
@@ -483,6 +485,7 @@ echo "<tr><td colspan=\"2\"><p style=\"text-align:center;\">➡ <i>You can chang
 echo "</table>";
 echo "<br /><div style=\"background-color:white; padding:1em; width:690px; border-radius: 15px;\">";
 if($settings_file == '') {
+	$time_resolution = 10; //  10 milliseconds by default
 	if($metronome > 0) {
 		$p_clock = intval($metronome * 10000);
 		$q_clock = 600000;
@@ -504,6 +507,8 @@ if($settings_file == '') {
 			echo "<p>⏱ Metronome (time base) and structure of time are neither specified in grammar nor set up by a ‘-se’ file.<br />Therefore metronome will be set to <font color=\"red\">60</font> beats per minute and time structure to <font color=\"red\">STRIATED</font>.</p>";
 			}
 		}
+	echo "•&nbsp;Time resolution = <font color=\"red\">".$time_resolution."</font> milliseconds (by default)<br />";
+	echo "•&nbsp;No quantization<br />";
 	}
 else {
 	if($p_clock > 0 AND $q_clock > 0) {
@@ -521,9 +526,19 @@ else {
 	if(!is_numeric($nature_of_time)) $nature_of_time = $nature_of_time_settings;
 	if($metronome > 0. AND $nature_of_time == STRIATED) {
 		echo "⏱ Metronome = <font color=\"red\">".$metronome."</font> beats/mn<br />";
-		if($quantization > 0)
-			echo "•&nbsp;Quantization = <font color=\"red\">".$quantization."</font> milliseconds as per <font color=\"blue\">‘".$settings_file."’</font><br />";
 		}
+	echo "•&nbsp;Time resolution = <font color=\"red\">".$time_resolution."</font> milliseconds as per <font color=\"blue\">‘".$settings_file."’</font><br />";
+	if($quantize) {
+		echo "•&nbsp;Quantization = <font color=\"red\">".$quantization."</font> milliseconds as per <font color=\"blue\">‘".$settings_file."’</font>";
+		if($time_resolution > $quantization) {
+			echo "&nbsp;<font color=\"red\">➡</font>&nbsp;may be raised to <font color=\"red\">".$time_resolution."</font>&nbsp;ms…";
+			$dir_base = str_replace($bp_application_path,'',$dir);
+			$url_settings = "settings.php?file=".urlencode($dir_base.$settings_file);
+			echo "&nbsp;<font color=\"red\">➡</font>&nbsp;<a target=\"_blank\" href=\"".$url_settings."\">edit settings</a>";
+			}
+		echo "<br />";
+		}
+	else echo "•&nbsp;No quantization<br />";
 	}
 if($nature_of_time == STRIATED) echo "•&nbsp;Time is <font color=\"red\">".nature_of_time($nature_of_time)."</font><br />";
 else echo "•&nbsp;Time is <font color=\"red\">".nature_of_time($nature_of_time)."</font> (no fixed tempo)<br />";
@@ -743,7 +758,6 @@ if($expression == '') {
 	$expression = @file_get_contents($data_expression,TRUE);
 	}
 $recoded_expression = recode_tags($expression);
-
 $link_play_expression = $link_produce;
 $link_play_expression .= "&data=".urlencode($data_expression);
 $window_name .= "_startup";
@@ -825,7 +839,6 @@ if(isset($_POST['manage_instructions'])) {
 	$list_of_arguments_chan = list_of_arguments($content,"_chan(");
 	$list_of_arguments_ins = list_of_arguments($content,"_ins(");
 //	for($i = 0; $i < count($list_of_arguments_ins); $i++) echo "“".$list_of_arguments_ins[$i]."”<br />";
-	
 	echo "<table style=\"background-color:cornsilk; border-spacing:6px;\">";
 	echo "<tr><td><b>Instruction</b></td><td style=\"text-align:center;\"><b>Replace with…</b></td><td><b>Instruction</b></td><td style=\"text-align:center;\"><b>Replace with…</b></td></tr>";
 	$imax = count($list_of_arguments_chan);
@@ -910,12 +923,7 @@ if(!$hide) {
 	if($found_volume > 0) echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"delete_volume\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _volume()\">&nbsp;";
 	if($found_chan > 0  OR $found_ins > 0) echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"manage_instructions\" formaction=\"".$url_this_page."#topchanges\" value=\"MANAGE _chan() AND _ins()\">&nbsp;";
 	}
-
 echo "</form>";
-
-
-
-	
 echo "</body>";
 echo "</html>";
 ?>
