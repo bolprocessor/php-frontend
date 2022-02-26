@@ -27,7 +27,7 @@ save_settings("trash_folder",$trash_folder);
 $max_sleep_time_after_bp_command = 240; // seconds. Maximum time waiting for the 'done.txt' file
 $default_output_format = "midi";
 
-$maxchunk_size = 50; // Max number of measures contained in a chunk
+$maxchunk_size = 100; // Max number of measures contained in a chunk
 $minchunk_size = 10; // Min number of measures contained in a chunk
 $max_term_in_fraction = 32768; // Used to simplify fractions when importing scores
 

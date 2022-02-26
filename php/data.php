@@ -150,7 +150,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 					$apply_rndvel[$i] = isset($_POST[$index]);
 					$index = "rndvel_".$i;
 					$rndvel[$i] = round(abs(intval($_POST[$index])));
-					if($rndvel[$i] > 64) $rndvel[$i] = 64;
+					if($rndvel[$i] > 127) $rndvel[$i] = 127;
 					}
 				}
 			$ignore_trills = isset($_POST['ignore_trills']);
@@ -704,7 +704,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				if($apply_rndvel[$i]) echo " checked";
 				$index = "rndvel_".$i;
 				if(!isset($rndvel[$i])) $rndvel[$i] = 10;
-				echo ">&nbsp;<input type=\"text\" style=\"border:none; text-align:center;\" name=\"rndvel_".$i."\" size=\"3\" value=\"".$rndvel[$i]."\"> = 0 to 64";
+				echo ">&nbsp;<input type=\"text\" style=\"border:none; text-align:center;\" name=\"rndvel_".$i."\" size=\"3\" value=\"".$rndvel[$i]."\"> (in range 0 to 127)";
 				if($number_parts > 1) echo " in part ‘".$part_label[$i]."’";
 				echo "<br />";
 				}
@@ -1735,7 +1735,18 @@ if(!$hide) {
 				$level--; 
 				if($level == 0) {
 					$n++;
-					if(($tie <= 0 AND $n > $minchunk_size) OR $n > $maxchunk_size) {
+					$ok_legato = TRUE;
+					$pos1 = $pos2 = $legato_value = 0;
+					while(TRUE) {  // Don't break a chunk containing legato
+						// Added by BB 2022-02-26
+						if(!is_integer($pos1=strpos($line_chunked,"_legato(",$pos1))) break;
+						$pos2 = strpos($line_chunked,")",$pos1);
+						$legato_value = substr($line_chunked,$pos1 + 8,$pos2 - $pos1 - 8);
+						$pos1 = $pos2 + 1;
+						if($legato_value > 0) break;
+						}
+					if($legato_value > 0) $ok_legato = FALSE;
+					if(($ok_legato AND $tie <= 0 AND $n > $minchunk_size) OR $n > $maxchunk_size) {
 						if(abs($tie) > 0) {
 							$tie_mssg =  "• <font color=\"red\">".abs($tie)." unbound tie(s) in chunk #".$chunk_number;
 							$tie_error = TRUE;
@@ -1748,7 +1759,6 @@ if(!$hide) {
 					}
 				}
 			}
-	//	$chunked = TRUE;
 		if($chunked) {
 			if($tie_mssg == '' AND $total_ties > 0) $tie_mssg = "<font color=\"blue\">";
 			if($total_ties > 0) $tie_mssg .=  " <i>total ".$total_ties." tied notes</i></font><br />";
