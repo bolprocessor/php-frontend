@@ -326,9 +326,9 @@ function display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,
 	if($alphabet_file <> '') {
 		$url_this_page = "alphabet.php?file=".urlencode($dir.$alphabet_file);
 		if($test) echo "url_this_page = ".$url_this_page."<br />";
-		echo "<td><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-		echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"openobjects\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$alphabet_file."’\">&nbsp;";
-		echo "</td></form>";
+		echo "<td>";
+		echo "<input style=\"background-color:yellow;float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$alphabet_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$alphabet_file."’\">";
+		echo "</td>";
 		}
 	if($grammar_file <> '') {
 		$url_this_page = "grammar.php?file=".urlencode($dir.$grammar_file);
@@ -352,45 +352,45 @@ function display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,
 	if($settings_file <> '') {
 		$url_this_page = "settings.php?file=".urlencode($dir.$settings_file);
 		if($test) echo "url_this_page = ".$url_this_page."<br />";
-		echo "<td><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-		echo "<input style=\"background-color:yellow;\" type=\"submit\" formaction=\"".$url_this_page."\"  onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$settings_file."’\">&nbsp;";
-		echo "</td></form>";
+		echo "<td>";
+		echo "<input style=\"background-color:yellow;float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$settings_file."','width=1000,height=800,left=100'); return false;\" value=\"EDIT ‘".$settings_file."’\">";
+		echo "</td>";
 		}
 	if($orchestra_file <> '') {
 		$url_this_page = "orchestra.php?file=".urlencode($dir.$orchestra_file);
-		echo "<td><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-		echo "<input style=\"background-color:yellow;\" type=\"submit\"  onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$orchestra_file."’\">&nbsp;";
-		echo "</td></form>";
+		echo "<td>";
+		echo "<input style=\"background-color:yellow;float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$orchestra_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$orchestra_file."’\">";
+		echo "</td>";
 		}
 	if($interaction_file <> '') {
 		$url_this_page = "interaction.php?file=".urlencode($dir.$interaction_file);
-		echo "<td><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-		echo "<input style=\"background-color:yellow;\" type=\"submit\"  onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$interaction_file."’\">&nbsp;";
-		echo "</td></form>";
+		echo "<td>";
+		echo "<input style=\"background-color:yellow;float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$interaction_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$interaction_file."’\">";
+		echo "</td>";
 		}
 	if($midisetup_file <> '') {
 		$url_this_page = "midisetup.php?file=".urlencode($dir.$midisetup_file);
-		echo "<td><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-		echo "<input style=\"background-color:yellow;\" type=\"submit\"  onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$midisetup_file."’\">&nbsp;";
-		echo "</td></form>";
+		echo "<td>";
+		echo "<input style=\"background-color:yellow;float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$midisetup_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$midisetup_file."’\">";
+		echo "</td>";
 		}
 	if($timebase_file <> '') {
 		$url_this_page = "timebase.php?file=".urlencode($dir.$timebase_file);
-		echo "<td><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-		echo "<input style=\"background-color:yellow;\" type=\"submit\"  onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$timebase_file."’\">&nbsp;";
-		echo "</td></form>";
+		echo "<td>";
+		echo "<input style=\"background-color:yellow;float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$timebase_file."','width=1000,height=900,left=50'); return false;\" value=\"EDIT ‘".$timebase_file."’\">";
+		echo "</td>";
 		}
 	if($keyboard_file <> '') {
 		$url_this_page = "keyboard.php?file=".urlencode($dir.$keyboard_file);
-		echo "<td><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-		echo "<input style=\"background-color:yellow;\" type=\"submit\"  onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$keyboard_file."’\">&nbsp;";
-		echo "</td></form>";
+		echo "<td>";
+		echo "<input style=\"background-color:yellow;float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$keyboard_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$keyboard_file."’\">";
+		echo "</td>";
 		}
 	if($glossary_file <> '') {
 		$url_this_page = "glossary.php?file=".urlencode($dir.$glossary_file);
-		echo "<td><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-		echo "<input style=\"background-color:yellow;\" type=\"submit\"  onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$glossary_file."’\">&nbsp;";
-		echo "</td></form>";
+		echo "<td>";
+		echo "<input style=\"background-color:yellow;float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$glossary_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$glossary_file."’\">";
+		echo "</td>";
 		}
 	echo "</tr></table>";
 	return;
@@ -547,7 +547,8 @@ function add_help_links($line) {
 					$l1 = substr($line,0,$pos1);
 					$l2 = substr($line,$pos1,strlen($token));
 					$l3 = substr($line,$pos2,strlen($line) - $pos2);
-					$insert = "<a onclick=\"window.open('".$html_help_file."#".$i."','show_".$i."','width=800,height=300'); return false;\" href=\"".$html_help_file."#".$i."\">";
+				//	$insert = "<a onclick=\"window.open('".$html_help_file."#".$i."','show_".$i."','width=800,height=300'); return false;\" href=\"".$html_help_file."#".$i."\">";
+					$insert = "<a onclick=\"window.open('".$html_help_file."#".$i."','show_help','width=800,height=300'); return false;\" href=\"".$html_help_file."#".$i."\">";
 					$line = $l1.$insert.$l2."</a>".$l3;
 					$posdone = $pos1 + strlen($insert);
 					$done[$posdone] = TRUE;

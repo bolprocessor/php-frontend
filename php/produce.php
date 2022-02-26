@@ -18,10 +18,7 @@ if($instruction == '') {
 	echo "ERROR: No instruction has been sent";
 	die();
 	}
-ob_start();
-if($instruction == "produce" OR $instruction == "produce-all" OR $instruction == "play" OR $instruction == "play-all" OR $instruction == "expand") {
-	echo "<i>Process might take more than ".$max_sleep_time_after_bp_command." seconds.<br />To reduce computation time, you may try to use “PLAY safe” or increase quantization in the settings</i>.<br />";
-	}
+// ob_start(); ob_flush(); flush();
 
 if(isset($_GET['here'])) $here = urldecode($_GET['here']);
 else $here = '???';
@@ -74,6 +71,13 @@ else {
 		$new_random_seed = TRUE;
 		}
 	if(isset($_GET['test'])) $check_command_line = TRUE;
+
+	if($instruction == "produce" OR $instruction == "produce-all" OR $instruction == "play" OR $instruction == "play-all" OR $instruction == "expand") {
+		echo "<script>";
+		echo "var sometext = \"<i>Process might take more than ".$max_sleep_time_after_bp_command." seconds.<br />To reduce computation time, you may try to use “PLAY safe”<br />… or increase the time quantization in</i> <font color=blue>".$settings_path."</font><br />\";";
+		echo "document.body.innerHTML = sometext";
+		echo "</script>";
+		}
 	
 	$grammar_name = '';
 	$data_name = '';
@@ -102,7 +106,9 @@ else {
 	$data_name = str_replace(" ","_",$data_name);
 	
 	$project_name = preg_replace("/\.[a-z]+$/u",'',$output);
-	$result_file = $project_name."-result.html";
+	if($instruction == "play" OR $instruction == "play-all")
+		$result_file = $project_name."_".$instruction."-result.html";
+	else $result_file = $project_name."-result.html";
 //	echo "result_file = ".$result_file."<br />";
 	
 	@unlink($result_file);
@@ -560,7 +566,7 @@ if($n_messages > 0) {
 		if($i < 7 OR $i > ($n_messages - 4)) echo $mssg."<br />";
 		}
 	if($handle) {
-		$window_name = $grammar_name."_result";
+		$window_name = $grammar_name."_".rand(0,99)."_result";
 		if($bad_image) echo "<p>(<font color=\"red\"><b>*</b></font>) Syntax error in image: negative argument</p>";
 		echo "<p style=\"font-size:larger;\"><input style=\"color:DarkBlue; background-color:yellow; font-size:large;\" onclick=\"window.open('".$result_file."','".$window_name."','width=800,height=600,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Show all ".$n_messages." messages\">";
 		if($warnings == 1) echo " <span class=\"blinking\">=> ".$warnings." warning</span>";

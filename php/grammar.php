@@ -183,7 +183,7 @@ if(isset($_POST['apply_changes_instructions'])) {
 	}
 
 if($need_to_save OR isset($_POST['savegrammar']) OR isset($_POST['compilegrammar'])) {
-	if(isset($_POST['savegrammar'])) echo "<span id=\"timespan\" style=\"color:red;\">&nbsp;…&nbsp;Saved “".$filename."” file…</span>";
+	if(isset($_POST['savegrammar'])) echo "<span id=\"timespan\" style=\"color:red; float:right;\">&nbsp;…&nbsp;Saved “".$filename."” file…</span>";
 	$content = $_POST['thistext'];
 	if(isset($_POST['alphabet_file'])) $alphabet_file = $_POST['alphabet_file'];
 	else $alphabet_file = '';
@@ -247,7 +247,7 @@ echo "<h3>Grammar file “".$filename."”</h3>";
 save_settings("last_name",$filename);
 
 $link = "test-image.html";
-echo "<p style=\"border:2px solid gray; background-color:azure; width:40em;  padding:2px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$link."','CANVAS test','width=500,height=500,left=200'); return false;\" href=\"".$link."\">Test this image to verify that your environment supports CANVAS</a></p>";
+echo "<div style=\"float:right;\"><p style=\"border:2px solid gray; background-color:azure; width:17em;  padding:2px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$link."','CANVAS test','width=500,height=500,left=200'); return false;\" href=\"".$link."\">Test image to verify that your<br />environment supports CANVAS</a></p></div>";
 
 	
 if(isset($_POST['compilegrammar'])) {
@@ -465,7 +465,8 @@ if($csound_orchestra <> '') {
 	check_function_tables($dir,$csound_file);
 	if(file_exists($dir_csound_resources.$csound_orchestra)) $link_produce .= "&csound_orchestra=".urlencode($csound_orchestra);
 	}
-
+$dir_base = str_replace($bp_application_path,'',$dir);
+$url_settings = "settings.php?file=".urlencode($dir_base.$settings_file);
 if($error) echo $error_mssg;
 if($test) echo "output = ".$output."<br />";
 if($test) echo "output_file = ".$output_file."<br />";
@@ -484,6 +485,7 @@ echo "</td></tr>";
 echo "<tr><td colspan=\"2\"><p style=\"text-align:center;\">➡ <i>You can change above settings, then save the grammar…</i></p></td></tr>";
 echo "</table>";
 echo "<br /><div style=\"background-color:white; padding:1em; width:690px; border-radius: 15px;\">";
+if($settings_file <> '') echo "<input style=\"background-color:yellow;float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_settings."','".$settings_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$settings_file."’\">";
 if($settings_file == '') {
 	$time_resolution = 10; //  10 milliseconds by default
 	if($metronome > 0) {
@@ -530,12 +532,7 @@ else {
 	echo "•&nbsp;Time resolution = <font color=\"red\">".$time_resolution."</font> milliseconds as per <font color=\"blue\">‘".$settings_file."’</font><br />";
 	if($quantize) {
 		echo "•&nbsp;Quantization = <font color=\"red\">".$quantization."</font> milliseconds as per <font color=\"blue\">‘".$settings_file."’</font>";
-		if($time_resolution > $quantization) {
-			echo "&nbsp;<font color=\"red\">➡</font>&nbsp;may be raised to <font color=\"red\">".$time_resolution."</font>&nbsp;ms…";
-			$dir_base = str_replace($bp_application_path,'',$dir);
-			$url_settings = "settings.php?file=".urlencode($dir_base.$settings_file);
-			echo "&nbsp;<font color=\"red\">➡</font>&nbsp;<a target=\"_blank\" href=\"".$url_settings."\">edit settings</a>";
-			}
+		if($time_resolution > $quantization) echo "&nbsp;<font color=\"red\">➡</font>&nbsp;may be raised to <font color=\"red\">".$time_resolution."</font>&nbsp;ms…";
 		echo "<br />";
 		}
 	else echo "•&nbsp;No quantization<br />";
@@ -563,7 +560,9 @@ if($settings_file <> '' AND isset($random_seed)) {
 		echo "• Random seed is ‘no seed’ as per <font color=\"blue\">‘".$settings_file."’</font><br />";
 	}
 if($max_time_computing > 0) {
-	echo "• Max computation time has been set to <font color=\"red\">".$max_time_computing."</font> seconds by <font color=\"blue\">‘".$settings_file."’</font><br />";
+	echo "• Max computation time has been set to <font color=\"red\">".$max_time_computing."</font> seconds by <font color=\"blue\">‘".$settings_file."’</font>";
+	if($max_time_computing < 30) echo "&nbsp;<font color=\"red\">➡</font>&nbsp;probably too small!";
+	echo "<br />";
 	}
 if($file_format == "csound") {
 	if($csound_orchestra <> '' AND file_exists($dir.$csound_orchestra)) {
@@ -663,7 +662,7 @@ echo "<input type=\"hidden\" name=\"time_structure\" value=\"".$time_structure."
 echo "<input type=\"hidden\" name=\"alphabet_file\" value=\"".$alphabet_file."\">";
 
 echo "<span  id=\"topedit\">&nbsp;</span>";
-echo "<p><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"savegrammar\" formaction=\"".$url_this_page."#topedit\" value=\"SAVE ‘".$filename."’\">";
+echo "<p><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"savegrammar\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".$filename."’\">";
 
 if((file_exists($output.SLASH.$default_output_name.".wav") OR file_exists($output.SLASH.$default_output_name.".mid") OR file_exists($output.SLASH.$default_output_name.".html") OR file_exists($output.SLASH.$default_output_name.".sco")) AND file_exists($result_file)) {
 	echo "&nbsp;&nbsp;&nbsp;<input style=\"color:DarkBlue; background-color:azure; font-size:large;\" onclick=\"window.open('".$result_file."','result','width=800,height=600,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Show latests results\">";
@@ -694,7 +693,6 @@ echo "&nbsp;<input style=\"color:DarkBlue; background-color:Azure; font-size:lar
 echo "</div>";
 echo "<p style=\"width:90%; text-align:right;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" formaction=\"".$url_this_page."#topedit\" name=\"savegrammar\" value=\"SAVE ‘".$filename."’\"></p>";
 echo "</form>";
-
 display_more_buttons(FALSE,$content,$url_this_page,$dir,'',$objects_file,$csound_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
 
 $variable = array();

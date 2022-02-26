@@ -20,9 +20,6 @@ echo link_to_help();
 
 $test_musicxml = FALSE;
 
-echo "<div style=\"float:right; background-color:white; padding-right:6px; padding-left:6px;\">";
-$csound_is_responsive = check_csound();
-echo "</div>";
 echo "<h3>Data file “".$filename."”</h3>";
 save_settings("last_name",$filename); 
 
@@ -1150,9 +1147,7 @@ if(isset($_POST['apply_changes_instructions'])) {
 	}
 
 if($need_to_save OR isset($_POST['savethisfile'])) {
-	echo "<p id=\"timespan\" style=\"color:red;\">Saved file…</p>";
-/*	if(isset($_POST['first_scale'])) $first_scale = $_POST['first_scale'];
-	else $first_scale = ''; */
+	echo "<p id=\"timespan\" style=\"color:red; float:right;\">Saved ‘".$filename."’file…</p>";
 	if(isset($_POST['thistext'])) $content = $_POST['thistext'];
 	else $content = '';
 	if($more_data <> '') $content = $more_data."\n\n".$content;
@@ -1161,7 +1156,6 @@ if($need_to_save OR isset($_POST['savethisfile'])) {
 	do $content = str_replace("  ",' ',$content,$count);
 	while($count > 0);
 	fwrite($handle,$file_header."\n");
-//	if($first_scale <> '') fwrite($handle,$first_scale);
 	fwrite($handle,$content);
 	fclose($handle);
 	}
@@ -1234,6 +1228,8 @@ if($settings_file <> '') {
 	if($csound_default_orchestra <> '') $found_orchestra_in_settings = TRUE;
 	}
 if($quantization == 0) $quantize = FALSE;
+$dir_base = str_replace($bp_application_path,'',$dir);
+$url_settings = "settings.php?file=".urlencode($dir_base.$settings_file);
 echo "<div style=\"background-color:white; padding:1em; width:690px; border-radius: 15px;\">";
 if($settings_file == '') {
 	$time_resolution = 10; //  10 milliseconds by default
@@ -1253,32 +1249,31 @@ else {
 		}
 	else $metronome_settings = 0;
 	if($metronome > 0 AND $metronome <> $metronome_settings) {
-		echo "➡&nbsp;Metronome is ".$metronome_settings." beats/mn as per <font color=\"blue\">‘".$settings_file."’</font> but it may be changed in data.<br />";
+		echo "➡&nbsp;Metronome = <font color=\"red\">".$metronome_settings."</font> beats/mn as per <font color=\"blue\">‘".$settings_file."’</font> but it may be changed in data.<br />";
 		}
 	if($metronome_settings > 0) $metronome = $metronome_settings;
 	if($metronome <> intval($metronome)) $metronome = sprintf("%.3f",$metronome);
 	$nature_of_time = $nature_of_time_settings;
-	if($metronome > 0. AND $nature_of_time == STRIATED) {
+	if($metronome > 0.) {
 		echo "⏱ Metronome = <font color=\"red\">".$metronome."</font> beats/mn by default as per <font color=\"blue\">‘".$settings_file."’</font><br />";
 		}
 	echo "•&nbsp;Time resolution = <font color=\"red\">".$time_resolution."</font> milliseconds as per <font color=\"blue\">‘".$settings_file."’</font><br />";
 	if($quantize) {
 		echo "•&nbsp;Quantization = <font color=\"red\">".$quantization."</font> milliseconds as per <font color=\"blue\">‘".$settings_file."’</font>";
-		if($time_resolution > $quantization) {
-			echo "&nbsp;<font color=\"red\">➡</font>&nbsp;may be raised to <font color=\"red\">".$time_resolution."</font>&nbsp;ms…";
-			$dir_base = str_replace($bp_application_path,'',$dir);
-			$url_settings = "settings.php?file=".urlencode($dir_base.$settings_file);
-			echo "&nbsp;<font color=\"red\">➡</font>&nbsp;<a target=\"_blank\" href=\"".$url_settings."\">edit settings</a>";
-			}
+		if($time_resolution > $quantization) echo "&nbsp;<font color=\"red\">➡</font>&nbsp;may be raised to <font color=\"red\">".$time_resolution."</font>&nbsp;ms…";
 		echo "<br />";
 		}
 	else echo "•&nbsp;No quantization<br />";
 	}
 echo "•&nbsp;Time structure is <font color=\"red\">".nature_of_time($nature_of_time)."</font> by default but it may be changed in data<br />";
-
-if($note_convention <> '') echo "• Note convention is <font color=\"red\">‘".ucfirst(note_convention(intval($note_convention)))."’</font> as per <font color=\"blue\">‘".$settings_file."’</font><br />";
-else echo "• Note convention is <font color=\"red\">‘English’</font> by default<br />";
-// echo "<br />";
+if($max_time_computing > 0) {
+	echo "• Max computation time has been set to <font color=\"red\">".$max_time_computing."</font> seconds by <font color=\"blue\">‘".$settings_file."’</font>";
+	if($max_time_computing < 30) echo "&nbsp;<font color=\"red\">➡</font>&nbsp;probably too small!";
+	echo "<br />";
+	}
+if($note_convention <> '') echo "• Note convention is <font color=\"red\">‘".ucfirst(note_convention(intval($note_convention)))."’</font> as per <font color=\"blue\">‘".$settings_file."’</font>";
+else echo "• Note convention is <font color=\"red\">‘English’</font> by default";
+if($settings_file <> '') echo "<input style=\"background-color:yellow;float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_settings."','".$settings_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$settings_file."’\">";
 echo "</div>";
 
 if(!isset($output_folder) OR $output_folder == '') $output_folder = "my_output";
@@ -1360,6 +1355,10 @@ if($csound_file <> '') {
 		}
 	}
 else echo "<br />";
+
+echo "<div style=\"float:right; background-color:white; padding-right:6px; padding-left:6px;\">";
+$csound_is_responsive = check_csound();
+echo "</div>";
 echo "<table id=\"topedit\" style=\"background-color:white; border-radius: 15px; border: 1px solid black;\" cellpadding=\"8px;\"><tr style=\"\">";
 echo "<td><p>Name of output file (with proper extension):<br /><input type=\"text\" name=\"output_file\" size=\"25\" value=\"".$output_file."\">&nbsp;";
 echo "<input style=\"background-color:yellow;\" type=\"submit\" formaction=\"".$url_this_page."\" name=\"savethisfile\" value=\"SAVE\"></p>";
@@ -1429,7 +1428,7 @@ echo "<td style=\"background-color:cornsilk;\">";
 
 echo "<div style=\"float:right; vertical-align:middle;\">Import MusicXML file: <input style=\"color:red;\" type=\"file\" name=\"music_xml_import\">&nbsp;<input type=\"submit\" style=\"background-color:AquaMarine;\" value=\"← IMPORT\"></div>";
 
-echo "<div style=\"text-align:left;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></div>";
+echo "<div style=\"text-align:left;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" formaction=\"".$url_this_page."\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></div>";
 
 echo "<br /><textarea name=\"thistext\" rows=\"40\" style=\"width:700px;\">".$content."</textarea>";
 
@@ -1780,7 +1779,8 @@ if(!$hide) {
 		$link_expand = $link_produce."&instruction=expand";
 		$link_expand .= $link_options_expand;
 		$window_name_play = $window_name."_play";
-		$window_name_expland = $window_name."_expland";
+		$window_name_expand = $window_name."_expand";
+		$window_name_chunked = $window_name."_chunked";
 	//	echo "<small>".urldecode($link_play)."</small><br />";
 	//	echo "<small>".urldecode($link_expand)."</small><br />";
 	//	echo "<small>".urldecode($link_play_chunked)."</small><br />";
@@ -1790,9 +1790,9 @@ if(!$hide) {
 		if($n2 > $n1) $error_mssg .= "• <font color=\"red\">This score contains ".($n2-$n1)." extra ‘}'</font><br />";
 		if($error_mssg == '') {
 			echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_play."','".$window_name_play."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Play this polymetric expression\" value=\"PLAY\">&nbsp;";
-			if($chunked) echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_play_chunked."','".$window_name_play."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Play polymetric expression in chunks (no graphics)\" value=\"PLAY safe (".$chunk_number." chunks)\">&nbsp;";
+			if($chunked) echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_play_chunked."','".$window_name_chunked."','width=800,height=800,left=150,toolbar=yes'); return false;\" type=\"submit\" name=\"produce\" title=\"Play polymetric expression in chunks (no graphics)\" value=\"PLAY safe (".$chunk_number." chunks)\">&nbsp;";
 		//	if($brackets > 0)
-			echo "&nbsp;<input style=\"background-color:azure;\" onclick=\"window.open('".$link_expand."','".$window_name_expland."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Expand this polymetric expression\" value=\"EXPAND\">&nbsp;";
+			echo "&nbsp;<input style=\"background-color:azure;\" onclick=\"window.open('".$link_expand."','".$window_name_expand."','width=800,height=800,left=100'); return false;\" type=\"submit\" name=\"produce\" title=\"Expand this polymetric expression\" value=\"EXPAND\">&nbsp;";
 			}
 		if($tie_mssg <> '' AND $error_mssg == '') echo "<br />";
 		if($tie_mssg <> '') echo $tie_mssg;
