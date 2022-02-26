@@ -74,7 +74,7 @@ else {
 
 	if($instruction == "produce" OR $instruction == "produce-all" OR $instruction == "play" OR $instruction == "play-all" OR $instruction == "expand") {
 		echo "<script>";
-		echo "var sometext = \"<i>Process might take more than ".$max_sleep_time_after_bp_command." seconds.<br />To reduce computation time, you may try to use “PLAY safe”<br />… or increase the time quantization in</i> <font color=blue>".$settings_path."</font><br />\";";
+		echo "var sometext = \"<span id=warning><i>Process might take more than ".$max_sleep_time_after_bp_command." seconds.<br />To reduce computation time, you may try to use “PLAY safe”<br />… or increase the time quantization in</i> <font color=blue>".$settings_path."</font><br /></span>\";";
 		echo "document.body.innerHTML = sometext";
 		echo "</script>";
 		}
@@ -234,7 +234,7 @@ if($instruction <> "help") {
 		while(TRUE) {
 			if(!file_exists($lock_file)) break;
 			if(time() > $time_end) {
-				echo "<p><font color=\"red\">Maximum time (5 seconds) spent waiting for the Csound resource file to be unlocked:</font> <font color=\"blue\">".$dir_csound_resources.$csound_file."</font></p>";
+				echo "<p id=\"cswait\"><font color=\"red\">Maximum time (5 seconds) spent waiting for the Csound resource file to be unlocked:</font> <font color=\"blue\">".$dir_csound_resources.$csound_file."</font></p>";
 				break;
 				}
 			}
@@ -247,12 +247,12 @@ if($instruction <> "help") {
 		while(TRUE) {
 			if(!file_exists($lock_file)) break;
 			if(time() > $time_end) {
-				echo "<p><font color=\"red\">Maximum time (5 seconds) spent waiting for the sound-object prototypes file to be unlocked:</font> <font color=\"blue\">".$objects_path."</font></p>";
+				echo "<p id=\"miwait\"><font color=\"red\">Maximum time (5 seconds) spent waiting for the sound-object prototypes file to be unlocked:</font> <font color=\"blue\">".$objects_path."</font></p>";
 				break;
 				}
 			}
 		}
-	echo "<p id=\"timespan2\" style=\"text-align:center;\"><span class=\"blinking\">… … …</span></p>\n";
+	echo "<p id=\"wait\" style=\"text-align:center; background-color:yellow;\"><big><b><span class=\"blinking\">… Bol Processor console is working …</span></b></big><br />(Don't close this window!)</p>\n";
 	}
 
 ob_flush();
@@ -340,7 +340,12 @@ if($instruction <> "help") {
 	if($test) echo "trace_link = ".$trace_link."<br />";
 	if($test) echo "output_link = ".$output_link."<br />";
 	if($test) echo "file_format = ".$file_format."<br />";
-
+	echo "<script>";
+	echo "document.getElementById('warning').style.display = \"none\";";
+	echo "document.getElementById('wait').style.display = \"none\";";
+	echo "document.getElementById('miwait').style.display = \"none\";";
+	echo "document.getElementById('cswait').style.display = \"none\";";
+	echo "</script>";
 	if(!$no_error) {
 		$content_trace = @file_get_contents($tracefile,TRUE);
 		if($content_trace AND strlen($content_trace) > 4) {
