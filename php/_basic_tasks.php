@@ -27,7 +27,7 @@ save_settings("trash_folder",$trash_folder);
 $max_sleep_time_after_bp_command = 240; // seconds. Maximum time waiting for the 'done.txt' file
 $default_output_format = "midi";
 
-$maxchunk_size = 100; // Max number of measures contained in a chunk
+$maxchunk_size = 700; // Max number of measures contained in a chunk
 $minchunk_size = 10; // Min number of measures contained in a chunk
 $max_term_in_fraction = 32768; // Used to simplify fractions when importing scores
 
@@ -36,9 +36,7 @@ $number_midi_parameters_csound_instrument = 6; // Never change this!
 
 
 $temp_dir = $bp_application_path."temp_bolprocessor";
-if(!file_exists($temp_dir)) {
-	mkdir($temp_dir);
-	}
+if(!file_exists($temp_dir)) mkdir($temp_dir);
 $temp_dir .= SLASH;
 
 if(!file_exists($bp_application_path.$csound_resources)) {
@@ -2502,5 +2500,15 @@ function nature_of_time($value) {
 	if($value == SMOOTH) return "SMOOTH";
 	if($value == STRIATED) return "STRIATED";
 	return '';
+	}
+
+function get_legato($c,$line,$pos) {
+	if($c <> '_') return -1;
+	if(is_integer($pos1=strpos($line,"_legato(",$pos)) AND $pos1 == $pos) {
+		$pos2 = strpos($line,")",$pos1);
+		$legato_value = substr($line,$pos1 + 8,$pos2 - $pos1 - 8);
+		return $legato_value;
+		}
+	else return -1;
 	}
 ?>

@@ -79,6 +79,12 @@ echo "function toggledisplay() {
 	  }\n";
 echo "</script>\n";
 
+echo "<script>\n";  // Not used: delaying the display of an element
+echo "$(document).ready(function() {\n
+  $('#doucement').hide().delay(3000).fadeIn('slow');
+});\n";
+echo "</script>\n";
+
 echo "</head>";
 echo "<body onload=\"settoggledisplay()\">\n";
 ?>

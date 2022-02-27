@@ -791,21 +791,21 @@ if(isset($_POST['explode'])) {
 		$newline = $line;
 		if(substr_count($line,'{') > 0) {
 			$newline = '';
-			$level = 0; $first = TRUE;
+			$level_bracket = 0; $first = TRUE;
 			for($j = 0; $j < strlen($line); $j++) {
 				$c = $line[$j];
 				if($j < (strlen($line) - 1) AND ctype_alnum($c) AND $line[$j+1] == '&') $tie++;
 				if($j < (strlen($line) - 1) AND $c == '&' AND ctype_alnum($line[$j+1])) $tie--;
 				if($c == '{') {
-					if($item == 1 AND $level == 0) $newline .= "[item ".($item++)."] ".$initial_controls." ";
-				//	if($level == 0 AND !$first) $newline .= $initial_controls." ";
+					if($item == 1 AND $level_bracket == 0) $newline .= "[item ".($item++)."] ".$initial_controls." ";
+				//	if($level_bracket == 0 AND !$first) $newline .= $initial_controls." ";
 					$first = FALSE;
-					$level++;
+					$level_bracket++;
 					}
 				$newline .= $c;
 				if($c == '}') {
-					$level--;
-					if($level == 0 /* AND $tie >= 0 */) {
+					$level_bracket--;
+					if($level_bracket == 0 /* AND $tie >= 0 */) {
 						$outside_expression = ' ';
 						for($k = ($j + 1); $k < strlen($line); $k++) {
 							$d = $line[$k];
@@ -1208,7 +1208,9 @@ $note_convention = '';
 $csound_default_orchestra = '';
 $diapason = 440; $C4key = 60;
 $found_orchestra_in_settings = $quantize = FALSE;
-if($settings_file <> '') {
+$dir_base = str_replace($bp_application_path,'',$dir);
+$url_settings = "settings.php?file=".urlencode($dir_base.$settings_file);
+if($settings_file <> '' AND file_exists($dir.$settings_file)) {
 	$show_production = get_setting("show_production",$settings_file);
 	$trace_production = get_setting("trace_production",$settings_file);
 	$note_convention = get_setting("note_convention",$settings_file);
@@ -1228,10 +1230,8 @@ if($settings_file <> '') {
 	if($csound_default_orchestra <> '') $found_orchestra_in_settings = TRUE;
 	}
 if($quantization == 0) $quantize = FALSE;
-$dir_base = str_replace($bp_application_path,'',$dir);
-$url_settings = "settings.php?file=".urlencode($dir_base.$settings_file);
 echo "<div style=\"background-color:white; padding:1em; width:690px; border-radius: 15px;\">";
-if($settings_file == '') {
+if($settings_file == '' OR !file_exists($dir.$settings_file)) {
 	$time_resolution = 10; //  10 milliseconds by default
 	$metronome =  60;
 	$p_clock = $q_clock = 1;
@@ -1273,7 +1273,7 @@ if($max_time_computing > 0) {
 	}
 if($note_convention <> '') echo "• Note convention is <font color=\"red\">‘".ucfirst(note_convention(intval($note_convention)))."’</font> as per <font color=\"blue\">‘".$settings_file."’</font>";
 else echo "• Note convention is <font color=\"red\">‘English’</font> by default";
-if($settings_file <> '') echo "<input style=\"background-color:yellow;float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_settings."','".$settings_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$settings_file."’\">";
+if($settings_file <> '' AND file_exists($dir.$settings_file)) echo "<input style=\"background-color:yellow;float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_settings."','".$settings_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$settings_file."’\">";
 echo "</div>";
 
 if(!isset($output_folder) OR $output_folder == '') $output_folder = "my_output";
@@ -1311,7 +1311,8 @@ if($csound_file <> '') {
 		$list_of_tonal_scales = list_of_tonal_scales($dir_csound_resources.$csound_file);
 		if(($max_scales = count($list_of_tonal_scales)) > 0) {
 			if($max_scales > 1) {
-				echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains definitions of tonal scales&nbsp;<font color=\"red\">➡</font>&nbsp;<button style=\"background-color:aquamarine; border-radius: 6px; font-size:large;\" onclick=\"toggledisplay(); return false;\">Show/hide tonal scales</button>";
+				echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains definitions of tonal scales";
+				echo "&nbsp;<font color=\"red\">➡</font>&nbsp;<button style=\"background-color:aquamarine; border-radius: 6px; font-size:large;\" onclick=\"toggledisplay(); return false;\">Show/hide tonal scales</button>";
 				echo "<div id=\"showhide\" style=\"border-radius: 15px; padding:6px;\"><br />";
 				}
 			else {
@@ -1672,15 +1673,24 @@ if(!$hide) {
 		echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
 		echo "<tr><td colspan=\"2\" style=\"vertical-align:middle; padding:6px;\">";
 		echo "<div style=\"float:right;\"><input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_grammar."','".$window_name_grammar."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"create_grammar\" title=\"Create grammar using items on this page\" value=\"CREATE GRAMMAR\"></div>";
-		echo "<input type=\"submit\" style=\"background-color:AquaMarine;\" formaction=\"".$url_this_page."#topedit\" name=\"explode\" value=\"EXPLODE\">&nbsp;<font color=\"red\">➡ </font><i>break</i> {…} <i>expressions</i>";
+		echo "<input type=\"submit\" style=\"background-color:AquaMarine;\" formaction=\"".$url_this_page."#topedit\" name=\"explode\" value=\"EXPLODE\">&nbsp;<font color=\"red\">➡ </font><i>split</i> {…}&nbsp;<i>expressions (measures)</i>";
 		echo "</td></tr>";
 		if($imax > 0) {
 			echo "<tr><td colspan=\"2\" style=\"vertical-align:middle; padding:6px;\">";
-			echo "<input type=\"submit\" style=\"background-color:AquaMarine;\" formaction=\"".$url_this_page."#topedit\" name=\"implode\" value=\"IMPLODE\">&nbsp;<font color=\"red\">➡ </font><i>merge</i> {…} <i>expressions</i>";
+			echo "<input type=\"submit\" style=\"background-color:AquaMarine;\" formaction=\"".$url_this_page."#topedit\" name=\"implode\" value=\"IMPLODE\">&nbsp;<font color=\"red\">➡ </font><i>merge</i> {…}&nbsp;<i>expressions (measures)</i>";
 			echo "</td></tr>";
 			}
 		echo "</form>";
 		}
+	$current_legato = array();
+	$i_layer = array();
+	$current_legato[0] = $i_layer[0] = $layer = $level_bracket = 0;
+	// $layer is the index of the line setting events on the phase diagram
+	// $level_bracket is the level of polymetric expression
+	// Here we trace whether legato() instructions have been reset before the end of each "measure",
+	// i.e. polymetric expression at the lowest $level_bracket
+	// We also trace note ties which have not been completely bound at the end of the measure
+	// Both conditions prohibit chunking the item at the end of the measure
 	for($i = $j = 0; $i < $imax; $i++) {
 		$line = trim($table[$i]);
 		$error_mssg = $tie_mssg = '';
@@ -1706,14 +1716,15 @@ if(!$hide) {
 		$handle = fopen($data,"w");
 		fwrite($handle,$line_recoded."\n");
 		fclose($handle);
-		$initial_controls = $tie_error = '';
+		$initial_controls = '';
 		$chunked = FALSE;
 		$tie = $n = $brackets = $total_ties = 0;
 		if(is_integer($pos=strpos($line_recoded,"{"))) {
 			$initial_controls = trim(substr($line_recoded,0,$pos));
 			}
 		$line_chunked = ''; $first = TRUE; $chunk_number = 1; $start_chunk = "[chunk 1] ";
-		for($k = $level = 0; $k < strlen($line_recoded); $k++) {
+		$test_legato = FALSE;
+		for($k = 0; $k < strlen($line_recoded); $k++) {
 			$line_chunked .= $start_chunk;
 			$start_chunk = '';
 			$c = $line_recoded[$k];
@@ -1722,56 +1733,64 @@ if(!$hide) {
 				}
 			if($k < (strlen($line_recoded) - 1) AND $c == '&' AND ctype_alnum($line_recoded[$k+1])) $tie--;
 			if($c == '.' AND $k > 0 AND $line_recoded[$k-1]) $brackets++;
+			$get_legato = get_legato($c,$line_recoded,$k);
+			if($get_legato >= 0) {
+				$current_legato[$layer] = $get_legato;
+				if($test_legato) echo "_legato(".$current_legato[$layer].") field ".$layer." level ".$level_bracket."<br />";
+				}
 			if($c == '{') {
-				if($level == 0 AND !$first) $line_chunked .= $initial_controls;
+				if($level_bracket == 0 AND !$first) $line_chunked .= $initial_controls;
 				$first = FALSE;
 				$line_chunked .= $c;
 				$brackets++;
-				$level++;
+				$i_layer[$level_bracket] = $layer;
+				$level_bracket++;
 				continue;
+				}
+			if($c == ',') {
+				$layer++;
+				if(!isset($current_legato[$layer])) $current_legato[$layer] = 0;
 				}
 			$line_chunked .= $c;
 			if($c == '}') {
-				$level--; 
-				if($level == 0) {
+				$level_bracket--;
+				$layer = $i_layer[$level_bracket];
+				if($level_bracket == 0) {
 					$n++;
 					$ok_legato = TRUE;
-					$pos1 = $pos2 = $legato_value = 0;
-					while(TRUE) {  // Don't break a chunk containing legato
-						// Added by BB 2022-02-26
-						if(!is_integer($pos1=strpos($line_chunked,"_legato(",$pos1))) break;
-						$pos2 = strpos($line_chunked,")",$pos1);
-						$legato_value = substr($line_chunked,$pos1 + 8,$pos2 - $pos1 - 8);
-						$pos1 = $pos2 + 1;
-						if($legato_value > 0) break;
+					foreach($current_legato as $thisfield => $the_legato) {
+						if($test_legato) echo "(".$thisfield." -> ".$the_legato.")";
+						if($the_legato > 0) $ok_legato = FALSE;
 						}
-					if($legato_value > 0) $ok_legato = FALSE;
 					if(($ok_legato AND $tie <= 0 AND $n > $minchunk_size) OR $n > $maxchunk_size) {
+						$current_legato = $i_layer = array();
+						$current_legato[0] = $i_layer[0] = $layer = 0;
 						if(abs($tie) > 0) {
-							$tie_mssg =  "• <font color=\"red\">".abs($tie)." unbound tie(s) in chunk #".$chunk_number;
-							$tie_error = TRUE;
+							$tie_mssg .=  "• <font color=\"red\">".abs($tie)." unbound tie(s) in chunk #".$chunk_number."</font><br />";
+							}
+						if(!$ok_legato) {
+							$tie_mssg .=  "• <font color=\"red\">legato(s) not reset after chunk #".$chunk_number."</font> => avoid safe mode!<br />";
 							}
 						$line_chunked .= "\n";
 						$tie = $n = 0;
+						if($test_legato) echo " => chunk #".$chunk_number;
 						$start_chunk = "[chunk ".(++$chunk_number)."] ";
 						if($k < (strlen($line_recoded) - 1)) $chunked = TRUE;
 						}
+					if($test_legato) echo "<br />";
 					}
 				}
 			}
 		if($chunked) {
-			if($tie_mssg == '' AND $total_ties > 0) $tie_mssg = "<font color=\"blue\">";
-			if($total_ties > 0) $tie_mssg .=  " <i>total ".$total_ties." tied notes</i></font><br />";
-			else $tie_mssg .=  "</font><br />";
+		//	if($tie_mssg == '' AND $total_ties > 0) $tie_mssg = "<font color=\"blue\">";
+			if($total_ties > 0) $tie_mssg .=  " <i>total ".$total_ties." tied notes</i><br /><font color=\"blue\">";
 			$data_chunked = $temp_dir.$temp_folder.SLASH.$j."-chunked.bpda";
 			$handle = fopen($data_chunked,"w");
 			fwrite($handle,$line_chunked."\n");
 			fclose($handle);
 			}
-		else {
-			$data_chunked = '';
-			if($tie_mssg <> '') $tie_mssg .=  "</font><br />";
-			}
+		else $data_chunked = '';
+
 		echo "<tr><td>".$j."</td><td>";
 	//	$link_options .= "&item=".$j;
 		$link_options_play = $link_options."&output=".urlencode($bp_application_path.$output_folder.SLASH.$output_file)."&format=".$file_format."&item=".$j."&title=".urlencode($filename);
@@ -1814,7 +1833,7 @@ if(!$hide) {
 		else $line_show = $line_recoded;
 		echo "<small>";
 		if($title_this <> '') $line_show = "<b><font color=\"AquaMarine\">[".$title_this."]</font></b> ".$line_show;
-		echo $line_show;
+		echo "<font color=\"blue\">".$line_show."</font>";
 		echo "</small></td></tr>";
 		}
 	echo "</table>";
