@@ -113,8 +113,6 @@ for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
 		$file_link = $dir_scales.$scalefilename.".txt";
 		$new_file_link = $dir_scales.$scalefilename.".old";
 		rename($file_link,$new_file_link);
-		
-		
 		$clean_name_of_file = str_replace("#","_",$scalefilename);
 		$clean_name_of_file = str_replace("/","_",$clean_name_of_file);
 		@unlink($dir_scale_images.$clean_name_of_file.".png");
@@ -1183,9 +1181,12 @@ if($max_scales > 0) {
 		echo "</tr>";
 		echo "</table>";
 		}
-	if($done) echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"export_scales\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#export\" value=\"EXPORT TONAL SCALES\">&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"delete_scales\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#export\" value=\"DELETE SEVERAL SCALES\">";
+	if($done) {
+		echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"export_scales\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#export\" value=\"EXPORT TONAL SCALES\">";
+		echo "&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"delete_scales\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#export\" value=\"DELETE SEVERAL SCALES\">";
+		echo "&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"compare_scales\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#export\" value=\"COMPARE TONAL SCALES\">";
+		}
 	echo "&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"reassign_keys\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#topscales\" value=\"REASSIGN KEYS\">";
-//	echo "&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"align_scales\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."\" value=\"ALIGN SCALES ON THEIR BASE NOTES\">";
 	echo "</p>";
 	echo "<ol>";
 	$table_names = $p_interval = $q_interval = $cent_position = $ratio_interval = array();
@@ -1364,10 +1365,11 @@ if($max_scales > 0) {
 		
 	if(isset($_POST['export_scales'])) {
 		echo "<form method=\"post\" action=\"".$url_this_page."#export\" enctype=\"multipart/form-data\">";
-		echo "<table style=\"background-color:white;\">";
+		echo "<hr><table style=\"background-color:white;\">";
 		echo "<tr>";
 		echo "<td>";
-		echo "<input type=\"submit\" style=\"background-color:aquamarine; \" name=\"export_to\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#export\" value=\"EXPORT:\"><br />";
+		echo "<input type=\"submit\" style=\"background-color:azure; \" name=\"export_to\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."\" value=\"Cancel\">";
+		echo "&nbsp;<input type=\"submit\" style=\"background-color:aquamarine; \" name=\"export_to\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#export\" value=\"EXPORT:\"><br /><br />";
 		for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
 			echo "<input type=\"checkbox\" name=\"export_".$i_scale."\"><font color=\"blue\">".$scale_name[$i_scale]."</font><br />";
 			}
@@ -1385,6 +1387,24 @@ if($max_scales > 0) {
 			echo "<input type=\"radio\" name=\"file_choice\" value=\"".$thisfile."\">".$thisfile;
 			echo "<br />";
 			}
+		echo "</td>";
+		echo "</tr>";
+		echo "</table>";
+		echo "</form>";
+		}
+	
+	if(isset($_POST['compare_scales'])) {
+		echo "<form method=\"post\" action=\"".$url_this_page."#export\" enctype=\"multipart/form-data\">";
+		echo "<hr><table style=\"background-color:white;\">";
+		echo "<tr>";
+		echo "<td>";
+		$url_classification = "compare_scales.php?file=".urlencode($current_directory.SLASH.$filename);
+		echo "<input type=\"submit\" style=\"background-color:azure; \" name=\"export_to\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."\" value=\"Cancel\">";
+		echo "&nbsp;<input type=\"submit\" style=\"background-color:aquamarine; \" name=\"export_to\" onclick=\"this.form.target='_blank';return true;\" formaction=\"".$url_classification."\" value=\"COMPARE selected scales:\"><br /><br />";
+		for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
+			echo "<input type=\"checkbox\" name=\"compare_".$scale_name[$i_scale]."\"><font color=\"blue\">".$scale_name[$i_scale]."</font><br />";
+			}
+		echo "<input type=\"hidden\" name=\"dir_scales\" value=\"".$dir_scales."\">";
 		echo "</td>";
 		echo "</tr>";
 		echo "</table>";
@@ -1497,7 +1517,6 @@ if($number_instruments > 0) {
 		echo "<input type=\"hidden\" name=\"instrument_file\" value=\"".$instrument_file[$j]."\">";
 		
 		$this_index = $name_index[$CsoundInstrumentName[$j]];
-	//	echo "this_index = ".$this_index."<br />";
 		if(isset($done_index[$this_index])) {
 			$this_index = $number_instruments;
 			while(isset($done_index[$this_index])) $this_index++;
@@ -1550,4 +1569,5 @@ if($verbose) {
 	echo "<textarea name=\"thistext\" rows=\"20\" style=\"width:700px;\">".$content."</textarea>";
 	echo "</form>";
 	}
+echo "</body></html>";
 ?>
