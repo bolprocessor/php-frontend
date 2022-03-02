@@ -358,8 +358,9 @@ else $csound_orchestra = '';
 $show_production = $trace_production = $note_convention = $non_stop_improvize = $p_clock = $q_clock = $striated_time = $max_time_computing = $produce_all_items = $random_seed = $quantization = $time_resolution = 0;
 $csound_default_orchestra = '';
 $diapason = 440; $C4key = 60;
+$dir_base = str_replace($bp_application_path,'',$dir);
 $found_orchestra_in_settings = $quantize = FALSE;
-if($settings_file <> '') {
+if($settings_file <> '' AND file_exists($dir.$settings_file)) {
 	$show_production = get_setting("show_production",$settings_file);
 	$trace_production = get_setting("trace_production",$settings_file);
 	$note_convention = get_setting("note_convention",$settings_file);
@@ -436,7 +437,9 @@ if($alphabet_file <> '') {
 	}
 if($settings_file <> '') {
 	if(!file_exists($dir.$settings_file)) {
-		$error_mssg .= "<font color=\"red\">WARNING: ".$dir.$settings_file." not found.</font><br />";
+		$url_settings = "settings.php?file=".urlencode($dir_base.$settings_file);
+		$error_mssg .= "<font color=\"red\">WARNING: ".$dir_base.$settings_file." not found.</font>";
+		$error_mssg .= "&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_settings."','".$settings_file."','width=800,height=800,left=100'); return false;\" value=\"CREATE IT\"><br />";
 		$error = TRUE;
 		}
 	else $link_produce .= "&settings=".urlencode($dir.$settings_file);
@@ -465,7 +468,6 @@ if($csound_orchestra <> '') {
 	check_function_tables($dir,$csound_file);
 	if(file_exists($dir_csound_resources.$csound_orchestra)) $link_produce .= "&csound_orchestra=".urlencode($csound_orchestra);
 	}
-$dir_base = str_replace($bp_application_path,'',$dir);
 $url_settings = "settings.php?file=".urlencode($dir_base.$settings_file);
 if($error) echo $error_mssg;
 if($test) echo "output = ".$output."<br />";
@@ -478,15 +480,19 @@ if($trace_production > 0)
 $link_produce .= "&here=".urlencode($here);
 $window_name = window_name($filename);
 echo "<b>then…</b>";
-echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)\" title=\"Don't forget to save!\"";
-if($error) echo " disabled";
+echo "&nbsp;<input onclick=\"window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)\"";
+if($error) echo " disabled style=\"background-color:azure; box-shadow: none;\"";
+else echo " style=\"color:DarkBlue; background-color:Aquamarine;\"";
+echo " title=\"Don't forget to save!\"";
 echo ">";
+
+
 echo "</td></tr>";
 echo "<tr><td colspan=\"2\"><p style=\"text-align:center;\">➡ <i>You can change above settings, then save the grammar…</i></p></td></tr>";
 echo "</table>";
 echo "<br /><div style=\"background-color:white; padding:1em; width:690px; border-radius: 15px;\">";
-if($settings_file <> '') echo "<input style=\"background-color:yellow;float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_settings."','".$settings_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$settings_file."’\">";
-if($settings_file == '') {
+if($settings_file <> '' AND file_exists($dir.$settings_file)) echo "<input style=\"background-color:yellow;float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_settings."','".$settings_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$settings_file."’\">";
+if($settings_file == '' OR !file_exists($dir.$settings_file)) {
 	$time_resolution = 10; //  10 milliseconds by default
 	if($metronome > 0) {
 		$p_clock = intval($metronome * 10000);
@@ -553,7 +559,7 @@ else echo "• Note convention is <font color=\"red\">‘English’</font> by de
 if($produce_all_items == 1) echo "• Produce all items has been set ON by <font color=\"blue\">‘".$settings_file."’</font><br />";
 if($show_production == 1) echo "• Show production has been set ON by <font color=\"blue\">‘".$settings_file."’</font><br />";
 if($trace_production == 1) echo "• Trace production has been set ON by <font color=\"blue\">‘".$settings_file."’</font><br />";
-if($settings_file <> '' AND isset($random_seed)) {
+if($settings_file <> '' AND file_exists($dir.$settings_file) AND isset($random_seed)) {
 	if($random_seed > 0)
 		echo "• Random seed has been set to <font color=\"red\">".$random_seed."</font> by <font color=\"blue\">‘".$settings_file."’</font><br />";
 	else
@@ -667,11 +673,15 @@ echo "<p><input style=\"background-color:yellow; font-size:larger;\" type=\"subm
 if((file_exists($output.SLASH.$default_output_name.".wav") OR file_exists($output.SLASH.$default_output_name.".mid") OR file_exists($output.SLASH.$default_output_name.".html") OR file_exists($output.SLASH.$default_output_name.".sco")) AND file_exists($result_file)) {
 	echo "&nbsp;&nbsp;&nbsp;<input style=\"color:DarkBlue; background-color:azure; font-size:large;\" onclick=\"window.open('".$result_file."','result','width=800,height=600,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Show latests results\">";
 	}
-echo "&nbsp;<input style=\"color:DarkBlue; background-color:Aquamarine; font-size:large;\" onclick=\"window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)";
-if($error) echo " - disabled because of missing files";
-echo "\" title=\"Don't forget to save!\"";
-if($error) echo " disabled";
+echo "&nbsp;<input onclick=\"window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)";
+if($error) {
+	echo " - disabled because of missing files\"";
+	echo " disabled style=\"background-color:azure; box-shadow: none; font-size:large;\"";
+	}
+else echo "\" style=\"color:DarkBlue; background-color:Aquamarine; font-size:large;\"";
+echo " title=\"Don't forget to save!\"";
 echo ">";
+
 echo "</p>";
 
 if($error) echo "<p>".$error_mssg."</p>";
@@ -682,10 +692,14 @@ if($imax > $textarea_rows) $textarea_rows = $imax + 5;
 echo "<textarea name=\"thistext\" rows=\"".$textarea_rows."\" style=\"width:90%;\">".$content."</textarea>";
 // echo "<br />".$link_produce."<br />";
 
-echo "<div style=\"float:left; padding-top:12px;\"><input style=\"color:DarkBlue; background-color:Aquamarine; font-size:large;\" onclick=\"window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)";
-if($error) echo " - disabled because of missing files";
-echo "\" title=\"Don't forget to save!\"";
-if($error) echo " disabled";
+echo "<div style=\"float:left; padding-top:12px;\">";
+echo "<input onclick=\"window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)";
+if($error) {
+	echo " - disabled because of missing files\"";
+	echo " disabled style=\"background-color:azure; box-shadow: none; font-size:large;\"";
+	}
+else echo "\" style=\"color:DarkBlue; background-color:Aquamarine; font-size:large;\"";
+echo " title=\"Don't forget to save!\"";
 echo ">";
 $link_test = $link_produce."&test";
 $display_command_title = "DisplayCommand".$filename;
@@ -724,7 +738,7 @@ echo "<form method=\"post\" action=\"".$url_this_page."#expression\" enctype=\"m
 $action = "play";
 $link_produce = "produce.php?instruction=".$action."&grammar=".urlencode($this_file);
 if($alphabet_file <> '') $link_produce .= "&alphabet=".urlencode($dir.$alphabet_file);
-if($settings_file <> '') $link_produce .= "&settings=".urlencode($dir.$settings_file);
+if($settings_file <> '' AND file_exists($dir.$settings_file)) $link_produce .= "&settings=".urlencode($dir.$settings_file);
 if($objects_file <> '') $link_produce .= "&objects=".urlencode($dir.$objects_file);
 if($csound_file <> '') $link_produce .= "&csound_file=".urlencode($csound_file);
 if(file_exists($dir_csound_resources.$csound_orchestra)) $link_produce .= "&csound_orchestra=".urlencode($csound_orchestra);

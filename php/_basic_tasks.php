@@ -27,7 +27,7 @@ save_settings("trash_folder",$trash_folder);
 $max_sleep_time_after_bp_command = 240; // seconds. Maximum time waiting for the 'done.txt' file
 $default_output_format = "midi";
 
-$maxchunk_size = 700; // Max number of measures contained in a chunk
+$maxchunk_size = 200; // Max number of measures contained in a chunk
 $minchunk_size = 10; // Min number of measures contained in a chunk
 $max_term_in_fraction = 32768; // Used to simplify fractions when importing scores
 
@@ -1776,7 +1776,7 @@ function copyemz($file1,$file2){
     
  function save_settings($variable,$value) {
 	$settings_file = "_settings.php";
-//	echo "value = ".$value."<br />";
+//	echo "@@@ variable = ".$variable.", value = ".$value."<br />";
 	$content = @file_get_contents($settings_file,TRUE);
 	if($content != FALSE) {
 		$table = explode(chr(10),$content);
@@ -1788,7 +1788,7 @@ function copyemz($file1,$file2){
 			if(is_integer($pos=strpos($line,"<")) AND $pos == 0) continue;
 			if(is_integer($pos=strpos($line,">"))) continue;
 		//	echo "line =  ".$line."<br />";
-			if(is_integer($pos=strpos($line,$variable))) {
+			if(is_integer($pos=strpos($line,"$".$variable))) {
 				$line = preg_replace("/=\s?\".+\"\s?;/u","= \"".$value."\";",$line);
 		//		echo "line2 =  ".$line."<br />";
 				$found = TRUE;

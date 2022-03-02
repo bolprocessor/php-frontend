@@ -111,7 +111,7 @@ for($j = 0; $j < $num_scales; $j++) {
 	echo "<tr>";
 	echo "<td><font color=\"blue\">".$name[$j]."</font></td>";
 	for($i = 0; $i < $num_scales; $i++) {
-		if($i == $j) echo "<td></td>";
+		if($i < $j) echo "<td></td>";
 		else echo "<td>".round(distance($fifth_cents,$num_grades,$i,$j,0),1)." ¢</td>";
 		}
 	echo "</tr>";
@@ -127,7 +127,7 @@ for($j = 0; $j < $num_scales; $j++) {
 	echo "<tr>";
 	echo "<td><font color=\"blue\">".$name[$j]."</font></td>";
 	for($i = 0; $i < $num_scales; $i++) {
-		if($i == $j) echo "<td></td>";
+		if($i < $j) echo "<td></td>";
 		else {
 			$best_match = best_match($fifth_cents,$num_grades,$i,$j);
 			$number_fifth_shift = $best_match['shift'];

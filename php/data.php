@@ -1769,7 +1769,7 @@ if(!$hide) {
 							$tie_mssg .=  "• <font color=\"red\">".abs($tie)." unbound tie(s) in chunk #".$chunk_number."</font><br />";
 							}
 						if(!$ok_legato) {
-							$tie_mssg .=  "• <font color=\"red\">legato(s) not reset after chunk #".$chunk_number."</font> => avoid safe mode!<br />";
+							$tie_mssg .=  "• <font color=\"red\">legato(s) may be truncated after chunk #".$chunk_number."</font><br />";
 							}
 						$line_chunked .= "\n";
 						$tie = $n = 0;
