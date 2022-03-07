@@ -27,9 +27,10 @@ save_settings("trash_folder",$trash_folder);
 $max_sleep_time_after_bp_command = 240; // seconds. Maximum time waiting for the 'done.txt' file
 $default_output_format = "midi";
 
-$maxchunk_size = 200; // Max number of measures contained in a chunk
+$maxchunk_size = 400; // Max number of measures contained in a chunk
 $minchunk_size = 10; // Min number of measures contained in a chunk
-$max_term_in_fraction = 32768; // Used to simplify fractions when importing scores
+
+$max_term_in_fraction = 32768; // Used to simplify fractions when importing MusicXML scores
 
 $number_fields_csound_instrument = 67; // Never change this!
 $number_midi_parameters_csound_instrument = 6; // Never change this!
@@ -2239,21 +2240,15 @@ function cents($ratio) {
 	}
 
 function assign_default_keys($name,$basekey,$numgrades_fullscale) {
-	global $Indiannote,$AltIndiannote,$Englishnote,$AltEnglishnote,$Frenchnote,$AltFrenchnote;
 	$found = FALSE;
 	if(count($name) > 0) {
 		for($j = $kk = 0; $j < count($name); $j++) {
 			$this_note = $name[$j];
 			if($this_note == '' OR $this_note == '•') $key[$j] = 0;
 			else {
-				if(($kfound = array_search($this_note,$Indiannote)) !== FALSE) $k = $kfound;
-				else if(($kfound = array_search($this_note,$AltIndiannote)) !== FALSE) $k = $kfound;
-				else if(($kfound = array_search($this_note,$Englishnote)) !== FALSE) $k = $kfound;
-				else if(($kfound = array_search($this_note,$AltEnglishnote)) !== FALSE) $k = $kfound;
-				else if(($kfound = array_search($this_note,$Frenchnote)) !== FALSE) $k = $kfound;
-				else if(($kfound = array_search($this_note,$AltFrenchnote)) !== FALSE) $k = $kfound;
+				$k = note_position($this_note);
 				if($j == (count($name) - 1)) $k = 12;
-				if(isset($k)) {
+				if($k >= 0) {
 					$key[$j] = $basekey + $k;
 					$found = TRUE;
 					}
@@ -2266,6 +2261,18 @@ function assign_default_keys($name,$basekey,$numgrades_fullscale) {
 		$key[$k] = $basekey + $k;
 		}
 	return $key;
+	}
+
+function note_position($this_note) {
+	global $Indiannote,$AltIndiannote,$Englishnote,$AltEnglishnote,$Frenchnote,$AltFrenchnote;
+	if(($kfound = array_search($this_note,$Indiannote)) !== FALSE) $k = $kfound;
+	else if(($kfound = array_search($this_note,$AltIndiannote)) !== FALSE) $k = $kfound;
+	else if(($kfound = array_search($this_note,$Englishnote)) !== FALSE) $k = $kfound;
+	else if(($kfound = array_search($this_note,$AltEnglishnote)) !== FALSE) $k = $kfound;
+	else if(($kfound = array_search($this_note,$Frenchnote)) !== FALSE) $k = $kfound;
+	else if(($kfound = array_search($this_note,$AltFrenchnote)) !== FALSE) $k = $kfound;
+	else $k = -1;
+	return $k;
 	}
 	
 function list_of_good_positions($interval,$p_comma,$q_comma,$syntonic_comma) {
@@ -2358,6 +2365,8 @@ function simplify($fraction,$max_term) {
 		$gcd = gcd($num,$den);
 		$num = $num / $gcd;
 		$den = $den / $gcd;
+		$simplify['p'] = $num;
+		$simplify['q'] = $den;
 		if($den <> 1) $simplify['fraction'] = $num."/".$den;
 		else $simplify['fraction'] = $num;
 		$simplify['done'] = TRUE;
@@ -2510,5 +2519,13 @@ function get_legato($c,$line,$pos) {
 		return $legato_value;
 		}
 	else return -1;
+	}
+
+function date_sort($a,$b) {
+	return $a['start'] > $b['start'];
+	}
+
+function score_sort($a,$b) {
+	return $a['score'] < $b['score'];
 	}
 ?>

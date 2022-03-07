@@ -1,25 +1,27 @@
 <?php
 $save_codes_dir = urldecode($_GET['save_codes_dir']);
 $dir_scale_images = urldecode($_GET['dir_scale_images']);
-$csound_source = urldecode($_GET['csound_source']);
+if(isset($_GET['csound_source'])) $csound_source = urldecode($_GET['csound_source']);
+else $csound_source = '';
 $image_file = $save_codes_dir."/image.php";
-require_once($image_file);
-header('Content-Type: image/png; charset=utf-8');
-header('Title: "'.$filename.'"');
 $margin_left = 15;
 $width = 900;
-$height = 160;
-
+$top = 160;
+$image_width = $width + 100;
+$image_height = 820;
+// if($image_width < 1000) $image_width = 1000;
+require_once($image_file);
+header("title: ".$filename); // Does not work!
+header("Content-Type: image/png; charset=utf-8");
 if(isset($_GET['no_marks'])) $no_marks = $_GET['no_marks'];
 else $no_marks = 0;
 if(isset($_GET['no_cents'])) $no_cents = $_GET['no_cents'];
 else $no_cents = 0;
 if(isset($_GET['no_intervals'])) $no_intervals = $_GET['no_intervals'];
 else $no_intervals = 0;
+if(isset($_GET['no_hilite'])) $no_hilite = $_GET['no_hilite'];
+else $no_hilite = 0;
 
-$image_width = $width + 100;
-$image_height = 820;
-if($image_width < 1000) $image_width = 1000;
 $im = @imagecreatetruecolor($image_width,$image_height)
       or die('Cannot Initialize new GD image stream');
 $white = imagecolorallocate($im,255,255,255);
@@ -28,6 +30,7 @@ $grey = imagecolorallocate($im, 128, 128, 128);
 $red = imagecolorallocate($im,233,14,91);
 $olive = imagecolorallocate($im,220,210,60);
 $yellow = imagecolorallocate($im,255,255,5);
+$gold = imagecolorallocate($im,255,209,2);
 $blue = imagecolorallocate($im,1,13,245);
 $azure = imagecolorallocate($im,240,255,255);
 $green = imagecolorallocate($im,0,255,127);
@@ -45,7 +48,7 @@ if(isset($syntonic_comma)) {
 	$text = "Comma = ".round($syntonic_comma,1)." cents";
 	imagestring($im,10,$margin_left,30,$text,$black);
 	}
-if(isset($csound_source)) {
+if(isset($csound_source) AND $csound_source <> '') {
 	$text = "Source: ".$csound_source;
 	imagestring($im,10,$margin_left,50,$text,$black);
 	}
@@ -54,7 +57,7 @@ imagestring($im,10,$margin_left,70,$text,$black);
 
 $radius = 220;
 $x_center = $image_width /  2;
-$y_center = $radius + $height;
+$y_center = $radius + $top;
 $crown_thickness = 30;
 
 for($j = $numgrades_with_labels = 0; $j < $numgrades_fullscale; $j++) {
@@ -67,7 +70,17 @@ circle($im,$x_center,$y_center,$radius + $crown_thickness,$black);
 
 imagefilltoborder($im,$x_center + $radius + 4,$y_center,$black,$papayawhip);
 
+// Draw intervals highlighted by tonal analysis
+if($no_intervals) $color_hilite = $gold;
+else $color_hilite = $gold;
+if(isset($hilitewidth) AND !$no_hilite) foreach($hilitewidth as $i_match => $thiswidth) {
+	$j = $hilitej[$i_match];
+	$k = $hilitek[$i_match];
+	connect($im, $j, $k, $radius - 1,$color_hilite,$thiswidth);
+	}
+
 if(!$no_intervals) {
+	// Draw classical intervals
 	if(isset($wolffifth)) foreach($wolffifth as $j => $k) {
 		connect($im,$j,$k,$radius - 1,$red,2);
 		}

@@ -51,7 +51,6 @@ $series = array();
 $link_edit = "scale.php";
 $done = TRUE;
 
-
 $clean_name_of_file = str_replace("#","_",$filename);
 $clean_name_of_file = str_replace("/","_",$clean_name_of_file);
 $handle = fopen($dir_scale_images.$clean_name_of_file."-source.txt","w");

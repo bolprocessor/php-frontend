@@ -1,7 +1,7 @@
 <?php
 require_once("_basic_tasks.php");
 require_once("_settings.php");
-require_once("_musicxml.php");
+require_once("_musicxml.php"); 
 
 if(isset($_GET['file'])) $file = urldecode($_GET['file']);
 else $file = '';
@@ -53,7 +53,6 @@ $need_to_save = $error = FALSE;
 $error_mssg = '';
 
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-
 if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xml_import']['tmp_name'] <> '')) {
 	if(!$reload_musicxml) $upload_filename = $_FILES['music_xml_import']['name'];
 	if(!$reload_musicxml AND $_FILES["music_xml_import"]["size"] > MAXFILESIZE) {
@@ -1655,6 +1654,162 @@ if(!$hide) {
 	echo "<input type=\"hidden\" name=\"change_volume_max\" value=\"".$change_volume_max."\">";
 	}
 echo "</form>";
+echo "<hr>";
+echo "<h2 id=\"tonalanalysis\" style=\"text-align:center;\">Tonal analysis</h2>";
+$tonal_analysis_possible = !($note_convention > 2);
+if(!$tonal_analysis_possible) echo "<p><font color=\"red\">➡ Tonal analysis is only possible with names of notes in English, Italian/Spanish/French or Indian conventions.</font></p>";
+if(isset($_POST['analyze_tonal'])) {
+	echo "<p style=\"text-align:center;\"><i>Ignoring channels, instruments, periods, sound-objects and random performance controls</i></p>";
+	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+	echo "<input class=\"shadow\" style=\"float:right; font-size:large;\" type=\"submit\" value=\"HIDE ANALYSIS\">";
+	echo "</form><br />";
+	echo "<div style=\"background-color:white; padding-left:1em;\"><hr>";
+	$test_tonal = FALSE;
+	$test_intervals = FALSE;
+	$table = explode(chr(10),$content);
+	$imax = count($table);
+	for($i_line = $i_item = 0; $i_line < $imax; $i_line++) {
+		$error_mssg = '';
+		$line = trim($table[$i_line]);
+		if(is_integer($pos=strpos($line,"<?xml")) AND $pos == 0) break;
+		if(is_integer($pos=strpos($line,"//")) AND $pos == 0) continue;
+		if(is_integer($pos=strpos($line,"-")) AND $pos == 0) continue;
+		$segment = create_chunks($line,$i_item,$temp_dir,$temp_folder,1,0,"slice");;
+		if($segment['error'] == "break") break;
+		if($segment['error'] == "continue") continue;
+		$tonal_scale = $segment['tonal_scale'];
+		$i_item++;
+	//	if($i_item <> 2) continue;
+		echo "<p><b>Item #".$i_item."</b> — note convention is ‘<font color=\"red\">".ucfirst(note_convention(intval($note_convention)))."</font>’</p>";
+		if($tonal_scale <> '') echo "<p>Checking against tonal scale ‘<font color=\"blue\">".$tonal_scale."</font>’ defined in the <a target=\"_blank\" href=\"index.php?path=csound_resources\">Csound resource</a> folder</p>";
+		$tie_mssg = $segment['tie_mssg'];
+		$data_chunked = $segment['data_chunked']; 
+		$content_slice = @file_get_contents($data_chunked,TRUE);
+		$table_slice = explode("[slice]",$content_slice);
+		$i_slice_max = count($table_slice);
+		if($i_slice_max == 0) continue;
+		if($i_slice_max > 2) echo "<p>➡ Item has been sliced to speed up calculations</p>";
+		$p_tempo = $q_tempo = $q_abs_time = 1;
+		$level = $i_token = $p_abs_time = 0;
+		$poly = array(); $i_poly = 0;
+		$max_poly = 0;
+		$current_legato = $i_layer = array();
+		$i_layer[0] = $current_legato[0] = 0;
+		$p_loc_time = 0; $q_loc_time = 1;
+		for($i_slice = 0; $i_slice < $i_slice_max; $i_slice++) {
+			$slice = trim($table_slice[$i_slice]);
+			$slice = str_replace("_scale(".$tonal_scale.",0)",'',$slice);
+			if($slice == '') continue;
+			$slice = preg_replace("/\s*_vel\([^\)]+\)\s*/u",'',$slice);
+			$slice = preg_replace("/\s*_volume\([^\)]+\)\s*/u",'',$slice);
+			$slice = preg_replace("/\s*_chan\([^\)]+\)\s*/u",'',$slice);
+			$slice = preg_replace("/\s*_ins\([^\)]+\)\s*/u",'',$slice);
+			$slice = preg_replace("/\s*_rnd[^\(]+\([^\)]+\)\s*/u",'',$slice);
+			$slice = str_replace("{"," { ",$slice);
+			$slice = str_replace("}"," } ",$slice);
+			$slice = str_replace(","," , ",$slice);
+			$slice = str_replace("-"," - ",$slice);
+			do $slice = str_replace("  "," ",$slice,$count);
+			while($count > 0);
+			// Now we build a phase diagram of this slice
+			$mode = "harmonic";
+			$slice_test = $slice;
+		//	$slice_test = str_replace("_legato(0)",'',$slice);
+		//	$slice_test = str_replace("_legato(20)",'',$slice_test);
+		//	$slice_test = str_replace("_tempo(13/15)",'',$slice_test);
+			echo $slice_test."<br /><br />";
+			$result = list_events($slice,$poly,$max_poly,$level,$i_token,$p_tempo,$q_tempo,$p_abs_time,$q_abs_time,$i_layer,$current_legato);
+			if($result['error'] <> '') {
+				echo "<br />".$result['error'];
+				break;
+				}
+			$i_token = 0;
+			$poly = $result['poly'];
+			$p_tempo = $result['p_tempo'];
+			$q_tempo = $result['q_tempo'];
+			$max_poly = $result['max_poly'];
+			$p_abs_time = $result['p_abs_time'];
+			$q_abs_time = $result['q_abs_time'];
+			$current_legato = $result['current_legato'];
+			$level = $result['level'];
+			$i_layer = $result['i_layer'];
+			}
+		$make_event_table = make_event_table($poly);
+		$table_events = $make_event_table['table'];
+		$lcm = $make_event_table['lcm'];
+		if($test_tonal) {
+			echo "<br />";
+			for($i_event = 0; $i_event < count($table_events); $i_event++) {
+				$start = round($table_events[$i_event]['start'] / $lcm, 3);
+				$duration = round(($table_events[$i_event]['end'] - $table_events[$i_event]['start']) / $lcm, 3);
+				echo $table_events[$i_event]['token']." at ".$start." dur = ".$duration."<br />";
+				}
+			echo "<br />";
+			}
+		$matching_list = array();
+		echo "<center><table style=\"background-color:Gold;\">";
+		echo "<tr><th>Melodic intervals</th><th>Harmonic intervals</th></tr>";
+		echo "<tr><td>";
+		$mode = "melodic";
+		$match_notes = match_notes($table_events,$mode,$test_intervals,$lcm);
+		$matching_notes = $match_notes['matching_notes'];
+		$number_match = $match_notes['max_match'];
+		usort($matching_notes,"score_sort");
+		if($number_match > 0) {
+			echo "Number occurrences:<br />";
+			$max_score = $matching_notes[0]['score'];
+			for($i_match = 0; $i_match < count($matching_notes); $i_match++) {
+				if($max_score > 0)
+					$matching_notes[$i_match]['percent'] = round($matching_notes[$i_match]['score'] * 100 / $max_score);
+				else $matching_notes[$i_match]['percent'] = 0;
+				echo $matching_notes[$i_match][0]." ▹
+				 ".$matching_notes[$i_match][1]." (".$matching_notes[$i_match]['score']." times) ".$matching_notes[$i_match]['percent']."%<br />";
+				}
+			}
+		$matching_list[$i_item][$mode] = $matching_notes;
+		echo "</td><td>";
+		$mode = "harmonic";
+		$match_notes = match_notes($table_events,$mode,$test_intervals,$lcm);
+		$matching_notes = $match_notes['matching_notes'];
+		$number_match = $match_notes['max_match'];
+		usort($matching_notes,"score_sort");
+		if($number_match > 0) {
+			echo "Number occurrences:<br />";
+			$max_score = $matching_notes[0]['score'];
+			for($i_match = 0; $i_match < count($matching_notes); $i_match++) {
+				if($max_score > 0)
+					$matching_notes[$i_match]['percent'] = round($matching_notes[$i_match]['score'] * 100 / $max_score);
+				else $matching_notes[$i_match]['percent'] = 0;
+				echo $matching_notes[$i_match][0]." ≈ ".$matching_notes[$i_match][1]." (".$matching_notes[$i_match]['score']." times) ".$matching_notes[$i_match]['percent']."%<br />";
+				}
+			}
+		$matching_list[$i_item][$mode] = $matching_notes;
+		echo "</td></tr></table></center><br />";
+
+		$mode = "harmonic";
+		$result = show_relations_on_image($i_item,$matching_list,$mode,$tonal_scale,$note_convention);
+		$mode = "melodic";
+		$result = show_relations_on_image($i_item,$matching_list,$mode,$tonal_scale,$note_convention);
+		$scalename = $result['scalename'];
+		$resource_name = $result['resource_name'];
+		if($scalename == '' OR $resource_name == '')
+			echo "<div style=\"padding:12px; text-align:center;\">No tonal scale specified.<br />Images display equal-tempered scale.</div><br />";
+		else 
+			echo "<div style=\"padding:12px; text-align:center;\">Tonal scale ‘<font color=\"blue\">".$scalename."</font>’ was found in<br />in a temporary folder of ‘<font color=\"blue\">".$resource_name."</font>’.</div>";
+		echo "<hr>";
+		}
+	echo "</div>";
+	}
+else {
+	if($csound_file <> '') echo "<p>➡ It would be wise to <a target=\"_blank\" href=\"csound.php?file=".urlencode($csound_resources.SLASH.$csound_file)."\">open</a> the ‘<font color=\"blue\">".$csound_file."</font>’ Csound resource file to use its tonal scale definitions.</p>";
+	echo "</form>";
+	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+	echo "<p><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" formaction=\"".$url_this_page."#tonalanalysis\" title=\"Analyze tonal intervals\" name=\"analyze_tonal\" value=\"ANALYZE INTERVALS\"";
+	if(!$tonal_analysis_possible) echo " disabled";
+	echo ">";
+	echo " ➡ melodic and harmonic tonal intervals of (all) item(s)</p>";
+	echo "<hr>";
+	}
 echo "</td>";
 $window_name = window_name($filename);
 if(!$hide) {
@@ -1666,7 +1821,6 @@ if(!$hide) {
 		$window_name_grammar = $window_name."_grammar";
 		$link_grammar = "produce.php?data=".urlencode($this_file);
 		$link_grammar = $link_grammar."&instruction=create_grammar";
-
 		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		echo "<input type=\"hidden\" name=\"thistext\" value=\"".recode_tags($content)."\">";
 		echo "<input type=\"hidden\" name=\"file_format\" value=\"".$file_format."\">";
@@ -1682,118 +1836,25 @@ if(!$hide) {
 			}
 		echo "</form>";
 		}
-	$current_legato = array();
-	$i_layer = array();
-	$current_legato[0] = $i_layer[0] = $layer = $level_bracket = 0;
-	// $layer is the index of the line setting events on the phase diagram
-	// $level_bracket is the level of polymetric expression
-	// Here we trace whether legato() instructions have been reset before the end of each "measure",
-	// i.e. polymetric expression at the lowest $level_bracket
-	// We also trace note ties which have not been completely bound at the end of the measure
-	// Both conditions prohibit chunking the item at the end of the measure
-	for($i = $j = 0; $i < $imax; $i++) {
+	for($i = $i_item = 0; $i < $imax; $i++) {
+		$error_mssg = '';
 		$line = trim($table[$i]);
-		$error_mssg = $tie_mssg = '';
 		if(is_integer($pos=strpos($line,"<?xml")) AND $pos == 0) break;
 		if(is_integer($pos=strpos($line,"//")) AND $pos == 0) continue;
 		if(is_integer($pos=strpos($line,"-")) AND $pos == 0) continue;
-		if(is_integer($pos=strpos($line,"[")) AND $pos == 0)
-			$title_this = preg_replace("/\[([^\]]+)\].*/u",'$1',$line);
-		else $title_this = '';
-		$line = preg_replace("/\[[^\]]*\]/u",'',$line);
-		$line = preg_replace("/^i[0-9].*/u",'',$line); // Csound note statement
-		$line = preg_replace("/^f[0-9].*/u",'',$line); // Csound table statement
-		$line = preg_replace("/^t[ ].*/u",'',$line); // Csound tempo statement
-		$line = preg_replace("/^s\s*$/u",'',$line); // Csound "s" statement
-		$line = preg_replace("/^e\s*$/u",'',$line); // Csound "e" statement
-		if($line == '') continue;
-		if(is_integer($pos=strpos($line,"<?xml")) AND $pos == 0) break;
-		if(is_integer($pos=strpos($line,"//")) AND $pos == 0) continue;
-		if(is_integer($pos=strpos($line,"-")) AND $pos == 0) continue;
-		$line_recoded = recode_entities($line);
-		$j++;
-		$data = $temp_dir.$temp_folder.SLASH.$j.".bpda";
-		$handle = fopen($data,"w");
-		fwrite($handle,$line_recoded."\n");
-		fclose($handle);
-		$initial_controls = '';
-		$chunked = FALSE;
-		$tie = $n = $brackets = $total_ties = 0;
-		if(is_integer($pos=strpos($line_recoded,"{"))) {
-			$initial_controls = trim(substr($line_recoded,0,$pos));
-			}
-		$line_chunked = ''; $first = TRUE; $chunk_number = 1; $start_chunk = "[chunk 1] ";
-		$test_legato = FALSE;
-		for($k = 0; $k < strlen($line_recoded); $k++) {
-			$line_chunked .= $start_chunk;
-			$start_chunk = '';
-			$c = $line_recoded[$k];
-			if($k < (strlen($line_recoded) - 1) AND ctype_alnum($c) AND $line_recoded[$k+1] == '&') {
-				$tie++; $total_ties++;
-				}
-			if($k < (strlen($line_recoded) - 1) AND $c == '&' AND ctype_alnum($line_recoded[$k+1])) $tie--;
-			if($c == '.' AND $k > 0 AND $line_recoded[$k-1]) $brackets++;
-			$get_legato = get_legato($c,$line_recoded,$k);
-			if($get_legato >= 0) {
-				$current_legato[$layer] = $get_legato;
-				if($test_legato) echo "_legato(".$current_legato[$layer].") field ".$layer." level ".$level_bracket."<br />";
-				}
-			if($c == '{') {
-				if($level_bracket == 0 AND !$first) $line_chunked .= $initial_controls;
-				$first = FALSE;
-				$line_chunked .= $c;
-				$brackets++;
-				$i_layer[$level_bracket] = $layer;
-				$level_bracket++;
-				continue;
-				}
-			if($c == ',') {
-				$layer++;
-				if(!isset($current_legato[$layer])) $current_legato[$layer] = 0;
-				}
-			$line_chunked .= $c;
-			if($c == '}') {
-				$level_bracket--;
-				$layer = $i_layer[$level_bracket];
-				if($level_bracket == 0) {
-					$n++;
-					$ok_legato = TRUE;
-					foreach($current_legato as $thisfield => $the_legato) {
-						if($test_legato) echo "(".$thisfield." -> ".$the_legato.")";
-						if($the_legato > 0) $ok_legato = FALSE;
-						}
-					if(($ok_legato AND $tie <= 0 AND $n > $minchunk_size) OR $n > $maxchunk_size) {
-						$current_legato = $i_layer = array();
-						$current_legato[0] = $i_layer[0] = $layer = 0;
-						if(abs($tie) > 0) {
-							$tie_mssg .=  "• <font color=\"red\">".abs($tie)." unbound tie(s) in chunk #".$chunk_number."</font><br />";
-							}
-						if(!$ok_legato) {
-							$tie_mssg .=  "• <font color=\"red\">legato(s) may be truncated after chunk #".$chunk_number."</font><br />";
-							}
-						$line_chunked .= "\n";
-						$tie = $n = 0;
-						if($test_legato) echo " => chunk #".$chunk_number;
-						$start_chunk = "[chunk ".(++$chunk_number)."] ";
-						if($k < (strlen($line_recoded) - 1)) $chunked = TRUE;
-						}
-					if($test_legato) echo "<br />";
-					}
-				}
-			}
-		if($chunked) {
-		//	if($tie_mssg == '' AND $total_ties > 0) $tie_mssg = "<font color=\"blue\">";
-			if($total_ties > 0) $tie_mssg .=  " <i>total ".$total_ties." tied notes</i><br /><font color=\"blue\">";
-			$data_chunked = $temp_dir.$temp_folder.SLASH.$j."-chunked.bpda";
-			$handle = fopen($data_chunked,"w");
-			fwrite($handle,$line_chunked."\n");
-			fclose($handle);
-			}
-		else $data_chunked = '';
-
-		echo "<tr><td>".$j."</td><td>";
-	//	$link_options .= "&item=".$j;
-		$link_options_play = $link_options."&output=".urlencode($bp_application_path.$output_folder.SLASH.$output_file)."&format=".$file_format."&item=".$j."&title=".urlencode($filename);
+		$segment = create_chunks($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxchunk_size,"chunk");
+		if($segment['error'] == "break") break;
+		if($segment['error'] == "continue") continue;
+		$i_item++;
+		$tie_mssg = $segment['tie_mssg'];
+		$data = $segment['data'];
+		$data_chunked = $segment['data_chunked'];
+		$chunked = $segment['chunked'];
+		$chunk_number = $segment['chunk_number'];
+		$line_recoded = $segment['line_recoded'];
+		$title_this = $segment['title_this'];
+		echo "<tr><td>".$i_item."</td><td>";
+		$link_options_play = $link_options."&output=".urlencode($bp_application_path.$output_folder.SLASH.$output_file)."&format=".$file_format."&item=".$i_item."&title=".urlencode($filename);
 		$link_options_chunked = $link_options_play;
 		$output_file_expand = str_replace(".sco",'',$output_file);
 		$output_file_expand = str_replace(".mid",'',$output_file_expand);
@@ -1820,7 +1881,6 @@ if(!$hide) {
 		if($error_mssg == '') {
 			echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_play."','".$window_name_play."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Play this polymetric expression\" value=\"PLAY\">&nbsp;";
 			if($chunked) echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_play_chunked."','".$window_name_chunked."','width=800,height=800,left=150,toolbar=yes'); return false;\" type=\"submit\" name=\"produce\" title=\"Play polymetric expression in chunks (no graphics)\" value=\"PLAY safe (".$chunk_number." chunks)\">&nbsp;";
-		//	if($brackets > 0)
 			echo "&nbsp;<input style=\"background-color:azure;\" onclick=\"window.open('".$link_expand."','".$window_name_expand."','width=800,height=800,left=100'); return false;\" type=\"submit\" name=\"produce\" title=\"Expand this polymetric expression\" value=\"EXPAND\">&nbsp;";
 			}
 		if($tie_mssg <> '' AND $error_mssg == '') echo "<br />";
@@ -1841,5 +1901,672 @@ if(!$hide) {
 	}
 echo "</tr>";
 echo "</table>";
+echo "</body></html>";
 
+function create_chunks($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxchunk_size,$label) {
+	$test_legato = FALSE;
+	$current_legato = array();
+	$i_layer = array();
+	$current_legato[0] = $i_layer[0] = $layer = $level_bracket = 0;
+	// $layer is the index of the line setting events on the phase diagram
+	// $level_bracket is the level of polymetric expression (or "measure")
+	// Here we trace whether legato() instructions have been reset before the end of each "measure",
+	// i.e. polymetric expression at the lowest $level_bracket
+	// We also trace note ties which have not been completely bound at the end of the measure
+	// Both conditions prohibit chunking the item at the end of the measure
+	$tie_mssg = '';
+	$segment['error'] = $tonal_scale = $initial_tempo = '';
+	if(is_integer($pos=strpos($line,"[")) AND $pos == 0)
+		$title_this = preg_replace("/\[([^\]]+)\].*/u",'$1',$line);
+	else $title_this = '';
+	$line = preg_replace("/\[[^\]]*\]/u",'',$line);
+	$line = preg_replace("/^i[0-9].*/u",'',$line); // Csound note statement
+	$line = preg_replace("/^f[0-9].*/u",'',$line); // Csound table statement
+	$line = preg_replace("/^t[ ].*/u",'',$line); // Csound tempo statement
+	$line = preg_replace("/^s\s*$/u",'',$line); // Csound "s" statement
+	$line = preg_replace("/^e\s*$/u",'',$line); // Csound "e" statement
+	if($line == '') $segment['error'] = "continue";
+	if(is_integer($pos=strpos($line,"<?xml")) AND $pos == 0) $segment['error'] = "break";
+	if(is_integer($pos=strpos($line,"//")) AND $pos == 0) $segment['error'] = "continue";
+	if(is_integer($pos=strpos($line,"-")) AND $pos == 0) $segment['error'] = "continue";
+	if($segment['error'] <> '') return $segment;
+	$line_recoded = recode_entities($line);
+	$data = $temp_dir.$temp_folder.SLASH.$i_item.".bpda";
+	$handle = fopen($data,"w");
+	fwrite($handle,$line_recoded."\n");
+	fclose($handle);
+	$initial_controls = '';
+	$chunked = FALSE;
+	$tie = $n = $brackets = $total_ties = 0;
+	if(is_integer($pos=strpos($line_recoded,"{"))) {
+		$initial_controls = trim(substr($line_recoded,0,$pos));
+		if($label <> "chunk") {
+			// Pick up specified tonal scale if any
+			$scale = preg_replace("/\s*_scale\(([^\,]+)[^\)]+\).+/u","$1",$line_recoded);
+			if($scale <> $line_recoded) $tonal_scale = $scale;
+			// Pick up initial tempo if any
+			$tempo = preg_replace("/\s*_tempo\(([^\)]+)\).*/u","$1",$initial_controls);
+			if($tempo <> $initial_controls) $initial_tempo = "_tempo(".$tempo.")";
+			$initial_controls = '';
+			}
+		}
+	$line_chunked = ''; $first = TRUE; $chunk_number = 1;
+	$start_chunk = "[".$label;
+	if($label == "chunk") $start_chunk .= " 1";
+	$start_chunk .= "] ";
+	$test_legato = FALSE;
+	for($k = 0; $k < strlen($line_recoded); $k++) {
+		$line_chunked .= $start_chunk;
+		$start_chunk = '';
+		$c = $line_recoded[$k];
+		if($k < (strlen($line_recoded) - 1) AND ctype_alnum($c) AND $line_recoded[$k+1] == '&') {
+			$tie++; $total_ties++;
+			}
+		if($k < (strlen($line_recoded) - 1) AND $c == '&' AND ctype_alnum($line_recoded[$k+1])) $tie--;
+		if($c == '.' AND $k > 0 AND $line_recoded[$k-1]) $brackets++;
+		$get_legato = get_legato($c,$line_recoded,$k);
+		if($get_legato >= 0) {
+			$current_legato[$layer] = $get_legato;
+			if($test_legato) echo "_legato(".$current_legato[$layer].") layer ".$layer." level ".$level_bracket."<br />";
+			}
+		if($c == '{') {
+			if($level_bracket == 0 AND !$first) $line_chunked .= $initial_controls;
+			$first = FALSE;
+			$line_chunked .= $c;
+			$brackets++;
+			$i_layer[$level_bracket] = $layer;
+			$level_bracket++;
+			continue;
+			}
+		if($c == ',') {
+			$layer++;
+			if(!isset($current_legato[$layer])) $current_legato[$layer] = 0;
+			}
+		$line_chunked .= $c;
+		if($c == '}') {
+			$level_bracket--;
+			$layer = $i_layer[$level_bracket];
+			if($level_bracket == 0) {
+				$n++;
+				$ok_legato = TRUE;
+				foreach($current_legato as $thisfield => $the_legato) {
+					if($test_legato) echo "(".$thisfield." -> ".$the_legato.")";
+					if($the_legato > 0) $ok_legato = FALSE;
+					}
+				if(($ok_legato AND $tie <= 0 AND $n >= $minchunk_size) OR ($maxchunk_size > 0 AND $n > $maxchunk_size)) {
+					$current_legato = $i_layer = array();
+					$current_legato[0] = $i_layer[0] = $layer = 0;
+					if(abs($tie) > 0)
+						$tie_mssg .=  "• <font color=\"red\">".abs($tie)." unbound tie(s) in chunk #".$chunk_number."</font><br />";
+					if(!$ok_legato)
+						$tie_mssg .=  "• <font color=\"red\">legato(s) may be truncated after chunk #".$chunk_number."</font><br />";
+					$line_chunked .= "\n";
+					$tie = $n = 0;
+					if($test_legato) echo " => ".$label." #".$chunk_number;
+					$start_chunk = "[".$label;
+					if($label == "chunk") $start_chunk .= " ".(++$chunk_number);
+					$start_chunk .= "] ";
+					if($k < (strlen($line_recoded) - 1) OR $label == "slice") $chunked = TRUE;
+					}
+				if($test_legato) echo "<br />";
+				}
+			}
+		}
+	if($chunked) {
+		if($total_ties > 0) $tie_mssg .=  " <i>total ".$total_ties." tied notes</i><br /><font color=\"blue\">";
+		$data_chunked = $temp_dir.$temp_folder.SLASH.$i_item."-".$label.".bpda";
+		$handle = fopen($data_chunked,"w");
+		fwrite($handle,$line_chunked."\n");
+		fclose($handle);
+		}
+	else $data_chunked = '';
+	$segment['data'] = $data;
+	$segment['line_recoded'] = $line_recoded;
+	$segment['tie_mssg'] = $tie_mssg;
+	$segment['chunked'] = $chunked;
+	$segment['chunk_number'] = $chunk_number;
+	$segment['data_chunked'] = $data_chunked;
+	$segment['title_this'] = $title_this;
+	$segment['tonal_scale'] = $tonal_scale;
+	$segment['initial_tempo'] = $initial_tempo;
+	return $segment;
+	}
+
+function list_events($slice,$poly,$max_poly,$level_init,$i_token_init,$p_tempo,$q_tempo,$p_abs_time_init,$q_abs_time_init,$i_layer,$current_legato) {
+	global $max_term_in_fraction;
+	global $Englishnote,$Frenchnote,$Indiannote,$AltEnglishnote,$AltFrenchnote,$AltIndiannote;
+	$test_fraction = FALSE;
+	$test_float = FALSE;
+	$test_legato = FALSE;
+	$level = $level_init;
+	$p_tempo_deft = $p_tempo;
+	$q_tempo_deft = $q_tempo;
+	$result['p_tempo'] = $p_tempo;
+	$result['q_tempo'] = $q_tempo;
+	$p_abs_time = $p_abs_time_init;
+	$q_abs_time = $q_abs_time_init;
+	$max_poly++;
+	$i_poly = $max_poly;
+	$p_poly_start_date = $p_abs_time;
+	$q_poly_start_date = $q_abs_time;
+	$poly[$i_poly]['token'] = array();
+	$p_loc_time = $result['p_duration'] = $p_poly_duration = 0;
+	$q_loc_time = $result['q_duration'] = $q_poly_duration = 1;
+	$p_number_beats = $q_number_beats = array();
+	$j_token = 0;
+	$i_field = 0;
+	$layer = $i_layer[$level];
+	$p_number_beats[$i_field] = 0; $q_number_beats[$i_field] = 1;
+	$result['error'] = '';
+	$tokens = explode(" ",$slice);
+	$max_tokens = count($tokens);
+	for($i_token = $i_token_init; $i_token < $max_tokens; $i_token++) {
+		$token = trim($tokens[$i_token]);
+		if($token == '') continue;
+	//	echo $token." ";
+		if(is_integer($pos1=strpos($token,"_legato("))) {
+			$pos2 = strpos($token,")",$pos1);
+			$legato_value = substr($token,$pos1 + 8,$pos2 - $pos1 - 8);
+			$current_legato[$layer] = $legato_value;
+			if($test_legato) echo "_legato(".$current_legato[$layer].") layer ".$layer." level ".$level."<br />";
+			}
+		$p_rest = 0; $q_rest = 1;
+		$table = explode("/",$token);
+		if(intval($table[0]) > 0) {
+			$p_rest = intval($table[0]);
+			if(count($table) > 1) $q_rest = intval($table[1]);
+			$simplify = simplify($p_rest * $q_tempo."/".$q_rest * $p_tempo,$max_term_in_fraction);
+			$p_rest = $simplify['p'];
+			$q_rest = $simplify['q'];
+			$poly[$i_poly]['token'][$j_token] = "-";
+			$poly[$i_poly]['field'][$j_token] = $i_field;
+			$poly[$i_poly]['p_dur'][$j_token] = $p_rest;
+			$poly[$i_poly]['q_dur'][$j_token] = $q_rest;
+			$poly[$i_poly]['p_start'][$j_token] = $p_abs_time;
+			$poly[$i_poly]['q_start'][$j_token] = $q_abs_time;
+			$poly[$i_poly]['legato'][$j_token] = 100;
+			$j_token++;
+			$add = add($p_abs_time,$q_abs_time,$p_rest,$q_rest);
+			$p_abs_time = $add['p'];
+			$q_abs_time = $add['q'];
+			$add = add($p_loc_time,$q_loc_time,$p_rest,$q_rest);
+			$p_loc_time = $add['p'];
+			$q_loc_time = $add['q'];
+			$add = add($p_number_beats[$i_field],$q_number_beats[$i_field],$p_rest,$q_rest);
+			$p_number_beats[$i_field] = $add['p'];
+			$q_number_beats[$i_field] = $add['q'];
+			continue;
+			}
+		if($token == "," OR $token == "}") {
+			if($i_field == 0) {
+				$result['p_duration'] = $p_poly_duration = $p_loc_time;
+				$result['q_duration'] = $q_poly_duration = $q_loc_time;
+				}
+			if(isset($poly[$i_poly]['field']) AND $p_number_beats[$i_field] > 0) {
+				// Let us recalculate note dates and durations in this field
+				for($j = 0; $j < count($poly[$i_poly]['token']); $j++) {
+					if($poly[$i_poly]['field'][$j] == $i_field) {
+						// Note start date
+						$add = add($poly[$i_poly]['p_start'][$j],$poly[$i_poly]['q_start'][$j],-$p_poly_start_date,$q_poly_start_date);
+						$p_relative_date = $add['p'];
+						$q_relative_date = $add['q'];
+						$simplify = simplify(($p_relative_date * $p_poly_duration * $q_number_beats[$i_field])."/".($q_relative_date * $q_poly_duration * $p_number_beats[$i_field]),$max_term_in_fraction);
+						$p_relative_date = $simplify['p'];
+						$q_relative_date = $simplify['q'];
+						$add = add($p_relative_date,$q_relative_date,$p_poly_start_date,$q_poly_start_date);
+						$poly[$i_poly]['p_start'][$j] = $add['p'];
+						$poly[$i_poly]['q_start'][$j] = $add['q'];
+						// Note duration
+						$simplify = simplify(($poly[$i_poly]['p_dur'][$j] * $poly[$i_poly]['legato'][$j] * $p_poly_duration * $q_number_beats[$i_field])."/".($poly[$i_poly]['q_dur'][$j] * 100 * $q_poly_duration * $p_number_beats[$i_field]),$max_term_in_fraction);
+						$poly[$i_poly]['p_dur'][$j] = $simplify['p'];
+						$poly[$i_poly]['q_dur'][$j] = $simplify['q'];
+						// Note end date
+						$add = add($poly[$i_poly]['p_start'][$j],$poly[$i_poly]['q_start'][$j],$poly[$i_poly]['p_dur'][$j],$poly[$i_poly]['q_dur'][$j]);
+						$poly[$i_poly]['p_end'][$j] = $add['p'];
+						$poly[$i_poly]['q_end'][$j] = $add['q'];
+
+						if($test_fraction) echo $poly[$i_poly]['token'][$j]." date = ".$poly[$i_poly]['p_start'][$j]."/".$poly[$i_poly]['q_start'][$j]." ➡ ".$poly[$i_poly]['p_end'][$j]."/".$poly[$i_poly]['q_end'][$j]."; i_field = ".$i_field.", poly[".$i_poly."][dur] = ".$p_poly_duration."/".$q_poly_duration.", nr_beats = ".$p_number_beats[$i_field]."/".$q_number_beats[$i_field]." ➡ dur = ".$simplify['p']."/".$simplify['q']." (".$poly[$i_poly]['legato'][$j]."%)<br />";
+
+						if($test_float) echo $poly[$i_poly]['token'][$j]." dates = ".round($poly[$i_poly]['p_start'][$j]/$poly[$i_poly]['q_start'][$j],2)." ➡ ".round($poly[$i_poly]['p_end'][$j]/$poly[$i_poly]['q_end'][$j],2)."; i_field = ".$i_field.", poly[".$i_poly."][dur] = ".round($p_poly_duration/$q_poly_duration,2).", nr_beats = ".$p_number_beats[$i_field]."/".$q_number_beats[$i_field]." ➡ dur = ".round($simplify['p']/$simplify['q'],3)." (".$poly[$i_poly]['legato'][$j]."%)<br />";
+						}
+					}
+				}
+			}
+		if($token == ",") {
+			$i_field++;
+			$p_abs_time = $p_abs_time_init;
+			$q_abs_time = $q_abs_time_init;
+			$p_loc_time = 0; $q_loc_time = 1;
+			$p_number_beats[$i_field] = 0;
+			$q_number_beats[$i_field] = 1;
+			$layer++;
+			if(!isset($current_legato[$layer])) $current_legato[$layer] = 0;
+			continue;
+			}
+		if($token == "}" OR $i_token >= ($max_tokens - 1)) {
+			$result['i_token'] = $i_token;
+			$result['poly'] = $poly;
+			$result['max_poly'] = $max_poly;
+			$result['i_layer'] = $i_layer;
+			$result['level'] = $level;
+			$result['current_legato'] = $current_legato;
+			$result['p_abs_time'] = $p_abs_time;
+			$result['q_abs_time'] = $q_abs_time;
+			$layer = $i_layer[$level];
+			return $result;
+			}
+		if($token == "{") {
+			$i_layer[$level + 1] = $layer;
+			$result2 = list_events($slice,$poly,$max_poly,($level + 1),($i_token + 1),$p_tempo,$q_tempo,$p_abs_time,$q_abs_time,$i_layer,$current_legato);
+			$error = $result2['error'];
+			if($error <> '') {
+				$result['error'] = $result2['error'];
+				return $result;
+				}
+			$i_token = $result2['i_token'];
+			$p_tempo = $result2['p_tempo'];
+			$q_tempo = $result2['q_tempo'];
+			$poly = $result2['poly'];
+			$max_poly = $result2['max_poly'];
+			$add = add($p_loc_time,$q_loc_time,$result2['p_duration'],$result2['q_duration']);
+			$p_loc_time = $add['p'];
+			$q_loc_time = $add['q'];
+			$add = add($p_abs_time,$q_abs_time,$result2['p_duration'],$result2['q_duration']);
+			$p_abs_time = $add['p'];
+			$q_abs_time = $add['q'];
+			$add = add($p_number_beats[$i_field],$q_number_beats[$i_field],$result2['p_duration'],$result2['q_duration']);
+			$p_number_beats[$i_field] = $add['p'];
+			$q_number_beats[$i_field] = $add['q'];
+			continue;
+			}
+		$newtempo = preg_replace("/_tempo\(([^\)]+)\)/u","$1",$token);
+		if($newtempo <> $token) {
+			$table = explode("/",$newtempo);
+			$p_newtempo = $table[0]; $q_newtempo = 1;
+			if(count($table) > 1) $q_newtempo = $table[1];
+		//	echo " @newtempo = ".$p_newtempo."/".$q_newtempo."@@ ";
+			$p_tempo = $p_newtempo;
+			$q_tempo = $q_newtempo;
+			$simplify = simplify($p_tempo * $p_tempo_deft."/".$q_tempo * $q_tempo_deft,$max_term_in_fraction);
+			$p_tempo = $simplify['p'];
+			$q_tempo = $simplify['q'];
+		//	echo " @newtempo = ".$p_tempo."/".$q_tempo."@@ ";
+			continue;
+			}
+		// Find simple note
+		$i_next = $i_duration = 1;
+		while(isset($tokens[$i_token + $i_next])
+			AND ($more_duration=substr_count($tokens[$i_token + $i_next],'_')) > 0) {
+			$next_token = str_replace("_",'',$tokens[$i_token + $i_next]);
+			if($next_token <> '') break;
+			$i_duration += $more_duration;
+			$i_next++;
+			}
+		if(is_integer($pos=strpos($token,"_")) AND $pos == 0) continue;
+		$tie_before = $tie_after = FALSE;
+		$n_ties = substr_count($token,"&");
+		if($n_ties == 2) $tie_before = $tie_after = TRUE;
+		else if(is_integer($pos=strpos($token,"&")) AND $pos == 0) $tie_before = TRUE;
+		else if($n_ties == 1) $tie_after = TRUE;
+		$token = str_replace("&",'',$token);
+		$i_token += ($i_next - 1);
+		$i_duration += substr_count($token,"_");
+		$token = str_replace("_",'',$token);
+		$octave = intval(preg_replace("/[a-z A-Z #]+([0-9]+)/u","$1",$token));
+		$poly[$i_poly]['token'][$j_token] = $token;
+		$poly[$i_poly]['field'][$j_token] = $i_field;
+		$poly[$i_poly]['p_dur'][$j_token] = $q_tempo * $i_duration;
+		$poly[$i_poly]['q_dur'][$j_token] = $p_tempo;
+		$poly[$i_poly]['p_start'][$j_token] = $p_abs_time;
+		$poly[$i_poly]['q_start'][$j_token] = $q_abs_time;
+		$poly[$i_poly]['legato'][$j_token] = 100 + $current_legato[$layer];
+		// Calculate end date which not be revised for notes outside polymetric expressions
+		$p_temp_duration = $poly[$i_poly]['p_dur'][$j_token] * $poly[$i_poly]['legato'][$j_token];
+		$q_temp_duration = $poly[$i_poly]['q_dur'][$j_token] * 100;
+		$add = add($poly[$i_poly]['p_start'][$j_token],$poly[$i_poly]['q_start'][$j_token],$p_temp_duration,$q_temp_duration);
+		$poly[$i_poly]['p_end'][$j_token] = $add['p'];
+		$poly[$i_poly]['q_end'][$j_token] = $add['q'];
+		$j_token++;
+		$token = str_replace($octave,'',$token);
+		for($grade = 0; $grade < 12; $grade++) {
+			if($token == $Englishnote[$grade]) break;
+			if($token == $AltEnglishnote[$grade]) break;
+			if($token == $Frenchnote[$grade]) break;
+			if($token == $AltFrenchnote[$grade]) break;
+			if($token == $Indiannote[$grade]) break;
+			if($token == $AltIndiannote[$grade]) break;
+			}
+		if($token <> '-' AND ($octave == 0 OR $grade > 11)) {
+			$result['error'] = "Unknown token: ".$tokens[$i_token];
+			return $result;
+			}
+		$add = add($p_abs_time,$q_abs_time,$q_tempo * $i_duration,$p_tempo);
+		$p_abs_time = $add['p'];
+		$q_abs_time = $add['q'];
+		$add = add($p_loc_time,$q_loc_time,$q_tempo * $i_duration,$p_tempo);
+		$p_loc_time = $add['p'];
+		$q_loc_time = $add['q'];
+		$add = add($p_number_beats[$i_field],$q_number_beats[$i_field],$q_tempo * $i_duration,$p_tempo);
+		$p_number_beats[$i_field] = $add['p'];
+		$q_number_beats[$i_field] = $add['q'];
+		}
+	$result['poly'] = $poly;
+	$result['max_poly'] = $max_poly;
+	$result['i_token'] = $i_token;
+	$result['i_layer'] = $i_layer;
+	$result['level'] = $level;
+	$result['current_legato'] = $current_legato;
+	$result['p_abs_time'] = $p_abs_time;
+	$result['q_abs_time'] = $q_abs_time;
+	return $result;
+	}
+
+function make_event_table($poly) {
+	// All start/end dates will become integers to facilitate comparisons
+	global $max_term_in_fraction;
+	$lcm = 1;
+	$too_big = FALSE;
+	foreach($poly as $i_poly => $this_poly) {
+		for($j_token = 0; $j_token < count($this_poly['token']); $j_token++) {
+			$lcm = lcm($lcm,$this_poly['q_start'][$j_token]);
+			$lcm = lcm($lcm,$this_poly['q_end'][$j_token]);
+			if($lcm > $max_term_in_fraction) {
+				$too_big = TRUE;
+				$lcm = $max_term_in_fraction;
+				break;
+				}
+			}
+		if($too_big) break;
+		}
+	/* echo "lcm = ".$lcm;
+	if($too_big) echo " (too  big value)";
+	echo "<br />"; */
+	$i = 0; $table = array();
+	foreach($poly as $i_poly => $this_poly) {
+		for($j_token = 0; $j_token < count($this_poly['token']); $j_token++) {
+			$start = round(($poly[$i_poly]['p_start'][$j_token] * $lcm) / $poly[$i_poly]['q_start'][$j_token]);
+			$end = round(($poly[$i_poly]['p_end'][$j_token] * $lcm) / $poly[$i_poly]['q_end'][$j_token]);
+			if($poly[$i_poly]['token'][$j_token] == "-") continue;
+			$table[$i]['token'] = $poly[$i_poly]['token'][$j_token];
+			$table[$i]['start'] = $start;
+			$table[$i]['end'] = $end;
+			$i++;
+			}
+		}
+	usort($table,"date_sort");
+	$result['table'] = $table;
+	$result['lcm'] = $lcm;
+	return $result;
+	}
+
+function match_notes($table_events,$mode,$test_intervals,$lcm) {
+	$matching_notes = $match = array();
+	$i_match = 0;
+	if($test_intervals) echo "Dates in seconds:<br />";
+	for($i_event = 0; $i_event < (count($table_events) - 1); $i_event++) {
+		$start1 = $table_events[$i_event]['start'];
+		$end1 = $table_events[$i_event]['end'];
+		for($j_event = ($i_event + 1); $j_event < count($table_events); $j_event++) {
+			$found = FALSE;
+			$start2 = $table_events[$j_event]['start'];
+			$end2 = $table_events[$j_event]['end'];
+			if(matching_intervals($start1,$end1,$start2,$end2,$mode)) {
+				$token1 = preg_replace("/([a-z A-Z #]+)[0-9]*/u","$1",$table_events[$i_event]['token']);
+				$token2 = preg_replace("/([a-z A-Z #]+)[0-9]*/u","$1",$table_events[$j_event]['token']);
+				if($token1 == $token2) continue;
+				if(!isset($match[$token1][$token2]) AND !isset($match[$token2][$token1])) {
+					$match[$token1][$token2] = TRUE;
+					$matching_notes[$i_match][0] = $token1;
+					$matching_notes[$i_match][1] = $token2;
+					$matching_notes[$i_match]['score'] = 1;
+					$i_match++;
+					}
+				else {
+					for($j_match = 0; $j_match < $i_match; $j_match++) {
+						if(($matching_notes[$j_match][0] == $token1) AND ($matching_notes[$j_match][1] == $token2)) {
+							$matching_notes[$j_match]['score']++; $found = TRUE;
+							}
+						if(($matching_notes[$j_match][0] == $token2) AND ($matching_notes[$j_match][1] == $token1)) {
+							$matching_notes[$j_match]['score']++; $found = TRUE;
+							}
+						if($found) break;
+						}
+					}
+				}
+			if($found AND $test_intervals) {
+				if($mode == "harmonic")
+					echo $token1." [".round($start1/$lcm,1)." ↔︎ ".round($end1/$lcm,1)."] ≈ ".$token2." [".round($start2/$lcm,1)." ↔︎ ".round($end2/$lcm,1)."]<br />";
+				else
+					echo $token1." [".round($start1/$lcm,1)." ↔︎ ".round($end1/$lcm,1)."] ▹ ".$token2." [".round($start2/$lcm,1)." ↔︎ ".round($end2/$lcm,1)."]<br />";				
+				}
+			}
+		}
+	if($test_intervals) echo "<hr>";
+	$result['matching_notes'] = $matching_notes;
+	$result['max_match'] = $i_match;
+	return $result;
+	}
+
+function matching_intervals($start1,$end1,$start2,$end2,$mode) {
+	// Because of the sorting of events, $start2 >= $start1
+	$duration1 = $end1 - $start1;
+	$duration2 = $end2 - $start2;
+	$overlap = $end1 - $start2;
+	$smallest_duration = $duration1;
+	if($duration2 < $duration1) $smallest_duration = $duration2;
+	if($mode == "harmonic") {
+		if($start2 >= $end1) return FALSE;
+		if($end2 > $end1) return FALSE;
+		if($overlap < (0.25 * $smallest_duration)) return FALSE;
+		// Here we discard slurs (generally 20% when importing MusicXML files)
+		return TRUE;
+		}
+	else { // mode = "melodic"
+		if($start1 + ($duration1 / 2.) > $start2) return FALSE;
+		$end1_more = $end1 + (0.1 * $duration1); // Compensate rouding errors
+		if($end1_more > $start2 AND $end1 < ($start2 + (0.1 * $duration2))) return TRUE;
+		}
+	return FALSE;
+	}
+
+function show_relations_on_image($i_item,$matching_list,$mode,$scalename,$note_convention) {
+	global $dir_scale_images,$temp_dir,$temp_folder,$dir_scale_images;
+	global $Englishnote,$Frenchnote,$Indiannote;
+
+	$save_codes_dir = $temp_dir.$temp_folder.SLASH.$scalename."_codes_".$mode."_".$i_item.SLASH;
+//	echo "save_codes_dir = ".$save_codes_dir."<br />";
+	if(!is_dir($save_codes_dir)) mkdir($save_codes_dir);
+	$matching_notes = $matching_list[$i_item][$mode];
+	$width_max = 8;
+	for($i_match = 0; $i_match < count($matching_notes); $i_match++) {
+		if($matching_notes[$i_match]['percent'] < 6) $width[$i_match] = 0;
+		else $width[$i_match] = 6 + round((($matching_notes[$i_match]['percent'] * $width_max) / 100));
+		$position[$i_match][0] = note_position($matching_notes[$i_match][0]);
+		$position[$i_match][1] = note_position($matching_notes[$i_match][1]);
+		// We'll use note names of the score:
+		$note_name[$position[$i_match][0]] = $matching_notes[$i_match][0];
+		$note_name[$position[$i_match][1]] = $matching_notes[$i_match][1];
+		}
+	$found = FALSE;
+	if($scalename <> '') {
+		$dircontent = scandir($temp_dir);
+		foreach($dircontent as $resource_file) {
+			if(!is_dir($temp_dir.$resource_file)) continue;
+	//		echo $resource_file."<br />";
+			if(is_integer($pos=strpos($resource_file,"-cs")) AND $pos == 0) {
+				$scale_textfile = $temp_dir.$resource_file.SLASH."scales".SLASH.$scalename.".txt";
+			//	echo $scale_textfile." ???<br />";
+				if(file_exists($scale_textfile)) {
+					$found = TRUE;
+					break;
+					}
+				}
+			}
+		if(!$found) {
+			if($mode == "harmonic") {
+				echo "<p style=\"text-align:center;\"><font color=\"red\">Definition of tonal scale</font> ‘<font color=\"blue\">".$scalename."</font>’ <font color=\"red\">was not found.</font><br />";
+				echo "You need to open a <a target=\"_blank\" href=\"index.php?path=csound_resources\">Csound resource</a> containing a scale with exactly the same name.</p><br />";
+				}
+			$resource_file = '';
+			}
+		}
+	else $resource_file = '';
+	if(!$found) {
+		$scale_textfile = "equal_tempered.txt";
+		$scalename = "equal-tempered";
+		}
+	$found = FALSE;
+	$content = @file_get_contents($scale_textfile,TRUE);
+	$table = explode(chr(10),$content);
+	for($i = 0; $i < count($table); $i++) {
+		$line = trim($table[$i]);
+		if(is_integer($pos=strpos($line,"f")) AND $pos == 0) {
+		//	echo $line."<br />";
+			$table2 = explode(" ",$line);
+			if(count($table2) < 21) {
+				echo "<font color=\"red\">Definition of tonal scale</font> ‘<font color=\"blue\">".$scalename."</font>’ <font color=\"red\">is not compliant.</font><br />";
+				echo "➡ Check ‘<font color=\"blue\">".$scale_textfile."</font>’ in the opened Csound resource.<br />";
+				break;
+				}
+			$numgrades = $table2[4];
+			if($numgrades <> 12) break;
+			else {
+				for($grade = 0; $grade < 13; $grade++) {
+					$ratio[$grade] = $table2[8 + $grade];
+				//	echo $ratio[$grade]." ";
+					}
+				$found = TRUE;
+				}
+			}
+		if(is_integer($pos=strpos($line,"[")) AND $pos == 0) {
+			$line = str_replace("[",'',$line);
+			$line = str_replace("]",'',$line);
+			$table2 = explode(" ",$line);
+			for($grade = 0; $grade < 13; $grade++) {
+				$p[$grade] = $table2[0 + (2 * $grade)];
+				$q[$grade] = $table2[1 + (2 * $grade)];
+				}
+			}
+		if(is_integer($pos=strpos($line,"/")) AND $pos == 0) {
+			$line = str_replace("/",'',$line);
+			$table2 = explode(" ",$line);
+			for($grade = 0; $grade < 13; $grade++) {
+				if(!isset($note_name[$grade])) {
+					$this_note = $table2[$grade];
+					$this_position = note_position($this_note);
+					if($note_convention == 0) $this_note = $Englishnote[$this_position];
+					else if($note_convention == 1) $this_note = $Frenchnote[$this_position];
+					else $this_note = $Indiannote[$this_position];
+					$note_name[$grade] = $this_note;
+					}
+				}
+			}
+		}
+	if($found) {
+		$image_height = 820;
+		$image_width = 800;
+		$handle = fopen($save_codes_dir.SLASH."image.php","w");
+		$content = "<?php\n§filename = \"".$scalename."\";\n";
+		$content .= "§image_height = \"".$image_height."\";\n";
+		$content .= "§image_width = \"".$image_width."\";\n";
+		$content .= "§interval_cents = \"1200\";\n";
+		$content .= "§syntonic_comma = \"21.506289596715\";\n";
+		$content .= "§p_comma = \"81\";\n";
+		$content .= "§q_comma = \"80\";\n";
+		$content .= "§numgrades_fullscale = \"12\";\n";
+		for($grade = 0; $grade < 13; $grade++) {
+			$content .= "§ratio[".$grade."] = \"".$ratio[$grade]."\";\n";
+			$content .= "§series[".$grade."] = \"\";\n";
+			$content .= "§name[".$grade."] = \"".$note_name[$grade]."\";\n";
+			$content .= "§cents[".$grade."] = \"".cents($ratio[$grade])."\";\n";
+			$content .= "§p[".$grade."] = \"".$p[$grade]."\";\n";
+			$content .= "§q[".$grade."] = \"".$q[$grade]."\";\n";
+			}
+		$harmonic_third = cents(5/4);
+		$pythagorean_third = cents(81/64);
+		$wolf_fifth = cents(40/27);
+		$perfect_fifth = cents(3/2);
+		$content .= "§harmonic_third = \"".$harmonic_third."\";\n";
+		$content .= "§pythagorean_third = \"".$pythagorean_third."\";\n";
+		$content .= "§wolf_fifth = \"".$wolf_fifth."\";\n";
+		$content .= "§perfect_fifth = \"".$perfect_fifth."\";\n";
+		for($j = 0; $j < 12; $j++) {
+			for($k = 0; $k < 12; $k++) {
+				if($j == $k) continue;
+				$pos = cents($ratio[$k] / $ratio[$j]);
+				if($pos < 0) $pos += 1200;
+				$dist = $pos - $harmonic_third;
+				if(abs($dist) < 10) $content .= "§harmthird[".$j."] = \"".$k."\";\n";
+				}
+			}
+		for($j = 0; $j < 12; $j++) {
+			for($k = 0; $k < 12; $k++) {
+				if($j == $k) continue;
+				$pos = cents($ratio[$k] / $ratio[$j]);
+				if($pos < 0) $pos += 1200;
+				$dist = $pos - $pythagorean_third;
+				if(abs($dist) < 10) $content .= "§pyththird[".$j."] = \"".$k."\";\n";
+				}
+			}
+		for($j = 0; $j < 12; $j++) {
+			for($k = 0; $k < 12; $k++) {
+				if($j == $k) continue;
+				$pos = cents($ratio[$k] / $ratio[$j]);
+				if($pos < 0) $pos += 1200;
+				$dist = $pos - $perfect_fifth;
+				if(abs($dist) < 10) $content .= "§fifth[".$j."] = \"".$k."\";\n";
+				}
+			}
+		for($j = 0; $j < 12; $j++) {
+			for($k = 0; $k < 12; $k++) {
+				if($j == $k) continue;
+				$pos = cents($ratio[$k] / $ratio[$j]);
+				if($pos < 0) $pos += 1200;
+				$dist = $pos - $wolf_fifth;
+				if(abs($dist) < 10) $content .= "§wolffifth[".$j."] = \"".$k."\";\n";
+				}
+			}
+		// Create yellow links between matching notes
+		for($i_match = 0; $i_match < count($matching_notes); $i_match++) {
+			$w = $width[$i_match];
+			$j = $position[$i_match][0];
+			$k = $position[$i_match][1];
+		//	echo $j." with ".$k." width = ".$w."<br />";
+			$content .= "§hilitej[".$i_match."] = \"".$j."\";\n";
+			$content .= "§hilitek[".$i_match."] = \"".$k."\";\n";
+			$content .= "§hilitewidth[".$i_match."] = \"".$w."\";\n";
+			}
+		$content = str_replace('§','$',$content);
+		fwrite($handle,$content);
+		$line = "§>\n";
+		$line = str_replace('§','?',$line);
+		fwrite($handle,$line);
+		fclose($handle);
+		$image_name = $i_item."_".clean_folder_name($scalename)."_image_".$mode;
+		$image_name_full = $image_name."_full";
+		$image_name_reduced = $image_name."_reduced";
+		$image_name_only = $image_name."_only";
+		//echo "image_name = ".$image_name."<br />";
+		$link = "scale_image.php?save_codes_dir=".urlencode($save_codes_dir)."&dir_scale_images=".urlencode($save_codes_dir);
+		$link_full = $link."&csound_source=".urlencode('item #'.$i_item.' ('.$mode.')');
+		$link_reduced = $link_full."&no_marks=1&no_intervals=1&no_cents=1";
+		$link_only = $link."&no_hilite=1";
+		if($mode == "harmonic") {
+			$side = "right"; $left_position = 100;
+			}
+		else {
+			$side = "left"; $left_position = 0; // Doesn't seem to work!
+			}
+		echo "<div class=\"shadow\" style=\"border:2px solid gray; background-color:azure; width:15em;  padding:8px; text-align:center; border-radius: 6px; float:".$side.";\">SHOW IMAGE (".$mode.")<br />";
+		if($scalename <> '') echo "‘".$scalename."’<br />";
+		echo "<a onclick=\"window.open('".$link_full."','".$image_name_full."','width=".$image_width.",height=".$image_height.",left=".$left_position."'); return false;\" href=\"".$link_full."\">full</a>";
+		echo "&nbsp;-&nbsp;<a onclick=\"window.open('".$link_only."','".$image_name_only."','width=".$image_width.",height=".$image_height.",left=".$left_position."'); return false;\" href=\"".$link_only."\">only scale</a>";
+		echo "&nbsp;-&nbsp;<a onclick=\"window.open('".$link_reduced."','".$image_name_reduced."','width=".$image_width.",height=".$image_height.",left=".$left_position."'); return false;\" href=\"".$link_reduced."\">only links</a></div>";
+		}
+	$result['scalename'] = $scalename;
+	$table = explode('_',$resource_file);
+	$resource_name = $table[0];
+	$result['resource_name'] = $resource_name;
+	return $result;
+	}
 ?>
