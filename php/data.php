@@ -1666,6 +1666,8 @@ if(isset($_POST['analyze_tonal'])) {
 	echo "<div style=\"background-color:white; padding-left:1em;\"><hr>";
 	$test_tonal = FALSE;
 	$test_intervals = FALSE;
+	$min_duration = 500; // milliseconds for harmonic evaluation
+	$max_gap = 300; // milliseconds for melodic evaluation
 	$table = explode(chr(10),$content);
 	$imax = count($table);
 	for($i_line = $i_item = 0; $i_line < $imax; $i_line++) {
@@ -1751,7 +1753,7 @@ if(isset($_POST['analyze_tonal'])) {
 		echo "<tr><th>Melodic intervals</th><th>Harmonic intervals</th></tr>";
 		echo "<tr><td>";
 		$mode = "melodic";
-		$match_notes = match_notes($table_events,$mode,$test_intervals,$lcm);
+		$match_notes = match_notes($table_events,$mode,$min_duration,$max_gap,$test_intervals,$lcm);
 		$matching_notes = $match_notes['matching_notes'];
 		$number_match = $match_notes['max_match'];
 		usort($matching_notes,"score_sort");
@@ -1769,18 +1771,18 @@ if(isset($_POST['analyze_tonal'])) {
 		$matching_list[$i_item][$mode] = $matching_notes;
 		echo "</td><td>";
 		$mode = "harmonic";
-		$match_notes = match_notes($table_events,$mode,$test_intervals,$lcm);
+		$match_notes = match_notes($table_events,$mode,$min_duration,$max_gap,$test_intervals,$lcm);
 		$matching_notes = $match_notes['matching_notes'];
 		$number_match = $match_notes['max_match'];
 		usort($matching_notes,"score_sort");
 		if($number_match > 0) {
-			echo "Number occurrences:<br />";
+			echo "Seconds:<br />";
 			$max_score = $matching_notes[0]['score'];
 			for($i_match = 0; $i_match < count($matching_notes); $i_match++) {
 				if($max_score > 0)
 					$matching_notes[$i_match]['percent'] = round($matching_notes[$i_match]['score'] * 100 / $max_score);
 				else $matching_notes[$i_match]['percent'] = 0;
-				echo $matching_notes[$i_match][0]." ≈ ".$matching_notes[$i_match][1]." (".$matching_notes[$i_match]['score']." times) ".$matching_notes[$i_match]['percent']."%<br />";
+				echo $matching_notes[$i_match][0]." ≈ ".$matching_notes[$i_match][1]." (".round($matching_notes[$i_match]['score']/$lcm,2)." s) ".$matching_notes[$i_match]['percent']."%<br />";
 				}
 			}
 		$matching_list[$i_item][$mode] = $matching_notes;
@@ -2299,7 +2301,7 @@ function make_event_table($poly) {
 	return $result;
 	}
 
-function match_notes($table_events,$mode,$test_intervals,$lcm) {
+function match_notes($table_events,$mode,$min_duration,$max_gap,$test_intervals,$lcm) {
 	$matching_notes = $match = array();
 	$i_match = 0;
 	if($test_intervals) echo "Dates in seconds:<br />";
@@ -2310,24 +2312,29 @@ function match_notes($table_events,$mode,$test_intervals,$lcm) {
 			$found = FALSE;
 			$start2 = $table_events[$j_event]['start'];
 			$end2 = $table_events[$j_event]['end'];
-			if(matching_intervals($start1,$end1,$start2,$end2,$mode)) {
+			if(matching_intervals($start1,$end1,$start2,($min_duration * $lcm / 1000),($max_gap * $lcm / 1000),$end2,$mode,$lcm)) {
 				$token1 = preg_replace("/([a-z A-Z #]+)[0-9]*/u","$1",$table_events[$i_event]['token']);
 				$token2 = preg_replace("/([a-z A-Z #]+)[0-9]*/u","$1",$table_events[$j_event]['token']);
 				if($token1 == $token2) continue;
 				if(!isset($match[$token1][$token2]) AND !isset($match[$token2][$token1])) {
-					$match[$token1][$token2] = TRUE;
+					$match[$token1][$token2] = $found = TRUE;
 					$matching_notes[$i_match][0] = $token1;
 					$matching_notes[$i_match][1] = $token2;
-					$matching_notes[$i_match]['score'] = 1;
+					if($mode == "melodic") $matching_notes[$i_match]['score'] = 1;
+					else $matching_notes[$i_match]['score'] = $end1 - $start1;
 					$i_match++;
 					}
 				else {
 					for($j_match = 0; $j_match < $i_match; $j_match++) {
 						if(($matching_notes[$j_match][0] == $token1) AND ($matching_notes[$j_match][1] == $token2)) {
-							$matching_notes[$j_match]['score']++; $found = TRUE;
+							if($mode == "melodic") $matching_notes[$j_match]['score']++;
+							else $matching_notes[$j_match]['score'] += $end1 - $start1;
+							$match[$token1][$token2] = $found = TRUE;
 							}
 						if(($matching_notes[$j_match][0] == $token2) AND ($matching_notes[$j_match][1] == $token1)) {
-							$matching_notes[$j_match]['score']++; $found = TRUE;
+							if($mode == "melodic") $matching_notes[$j_match]['score']++;
+							else $matching_notes[$j_match]['score'] += $end2 - $start2;
+							$match[$token1][$token2] = $found = TRUE;
 							}
 						if($found) break;
 						}
@@ -2347,7 +2354,7 @@ function match_notes($table_events,$mode,$test_intervals,$lcm) {
 	return $result;
 	}
 
-function matching_intervals($start1,$end1,$start2,$end2,$mode) {
+function matching_intervals($start1,$end1,$start2,$min_dur,$max_gap,$end2,$mode,$lcm) {
 	// Because of the sorting of events, $start2 >= $start1
 	$duration1 = $end1 - $start1;
 	$duration2 = $end2 - $start2;
@@ -2355,18 +2362,17 @@ function matching_intervals($start1,$end1,$start2,$end2,$mode) {
 	$smallest_duration = $duration1;
 	if($duration2 < $duration1) $smallest_duration = $duration2;
 	if($mode == "harmonic") {
-		if($start2 >= $end1) return FALSE;
-		if($end2 > $end1) return FALSE;
+		if($smallest_duration < $min_dur) return FALSE;
+		if($start1 + ($duration1 / 2.) < $start2) return FALSE;
 		if($overlap < (0.25 * $smallest_duration)) return FALSE;
 		// Here we discard slurs (generally 20% when importing MusicXML files)
-		return TRUE;
 		}
-	else { // mode = "melodic"
-		if($start1 + ($duration1 / 2.) > $start2) return FALSE;
-		$end1_more = $end1 + (0.1 * $duration1); // Compensate rouding errors
-		if($end1_more > $start2 AND $end1 < ($start2 + (0.1 * $duration2))) return TRUE;
+	else { // "melodic"
+		if($start2 > ($end1 + $max_gap)) return FALSE;
+		if($start1 + ($duration1 / 2.) >= $start2) return FALSE;
+		if($overlap >= (0.25 * $smallest_duration)) return FALSE;
 		}
-	return FALSE;
+	return TRUE;
 	}
 
 function show_relations_on_image($i_item,$matching_list,$mode,$scalename,$note_convention) {
