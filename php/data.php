@@ -1659,15 +1659,54 @@ echo "<h2 id=\"tonalanalysis\" style=\"text-align:center;\">Tonal analysis</h2>"
 $tonal_analysis_possible = !($note_convention > 2);
 if(!$tonal_analysis_possible) echo "<p><font color=\"red\">➡ Tonal analysis is only possible with names of notes in English, Italian/Spanish/French or Indian conventions.</font></p>";
 if(isset($_POST['analyze_tonal'])) {
-	echo "<p style=\"text-align:center;\"><i>Ignoring channels, instruments, periods, sound-objects and random performance controls</i></p>";
-	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-	echo "<input class=\"shadow\" style=\"float:right; font-size:large;\" type=\"submit\" value=\"HIDE ANALYSIS\">";
-	echo "</form><br />";
-	echo "<div style=\"background-color:white; padding-left:1em;\"><hr>";
+	// These options should be accessible in web browsing
+	// Read https://bolprocessor.org/tonal-analysis/ for explanations
 	$test_tonal = FALSE;
-	$test_intervals = FALSE;
+	$test_intervals = TRUE;
+	$display_items = FALSE;
 	$min_duration = 500; // milliseconds for harmonic evaluation
 	$max_gap = 300; // milliseconds for melodic evaluation
+	$ratio_melodic = 0.25;
+	$position_mark = array();
+	$position_mark[0]['p'] = 6;
+	$position_mark[0]['q'] = 5;
+	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+	echo "<p><input style=\"background-color:yellow; float:right;\" type=\"submit\" formaction=\"".$url_this_page."#tonalanalysis\" title=\"Analyze tonal intervals\" name=\"analyze_tonal\" value=\"ANALYZE AGAIN\">";
+	echo "<div style=\"background-color:white; padding-left:1em;\">";
+	echo "<center><table style=\"background-color:Gold;\"><tr>";
+	echo "<td style=\"white-space:nowrap; padding:6px;\">";
+	for($i_mark = 0; $i_mark < 3; $i_mark++) {
+		if(isset($_POST["position_mark_p_".$i_mark]))
+			$position_mark[$i_mark]['p'] = intval($_POST["position_mark_p_".$i_mark]);
+		if(isset($_POST["position_mark_q_".$i_mark]))
+			$position_mark[$i_mark]['q'] = intval($_POST["position_mark_q_".$i_mark]);
+		if(!isset($position_mark[$i_mark]['p']) OR $position_mark[$i_mark]['p'] == 0) $position_mark[$i_mark]['p'] = '';
+		if(!isset($position_mark[$i_mark]['q']) OR $position_mark[$i_mark]['q'] == 0) $position_mark[$i_mark]['q'] = '';
+		echo "Add markings for intervals at ratio: <input type=\"text\" style=\"border:none; text-align:center;\" name=\"position_mark_p_".$i_mark."\" size=\"3\" value=\"".$position_mark[$i_mark]['p']."\">/<input type=\"text\" style=\"border:none; text-align:center;\" name=\"position_mark_q_".$i_mark."\" size=\"3\" value=\"".$position_mark[$i_mark]['q']."\"><br />";
+		}
+	$test_intervals = isset($_POST['test_intervals']);
+	echo "<input type=\"checkbox\" name=\"test_intervals\"";
+	if($test_intervals) echo " checked";
+	echo "> Display all dates (may be long!)<br />";
+	echo "</td><td style=\"white-space:nowrap; padding:6px;\">";
+	if(isset($_POST['overlap'])) $ratio_melodic = intval($_POST['overlap']) / 100;
+	echo "Max overlap ratio in melodic intervals: <input type=\"text\" style=\"border:none; text-align:center;\" name=\"overlap\" size=\"3\" value=\"".(100 * $ratio_melodic)."\">%<br />";
+	if(isset($_POST['min_duration'])) $min_duration = intval($_POST['min_duration']);
+	echo "Min duration of harmonic interval: <input type=\"text\" style=\"border:none; text-align:center;\" name=\"min_duration\" size=\"4\" value=\"".$min_duration."\">ms<br />";
+	if(isset($_POST['max_gap'])) $max_gap = intval($_POST['max_gap']);
+	echo "Min duration of harmonic interval: <input type=\"text\" style=\"border:none; text-align:center;\" name=\"max_gap\" size=\"4\" value=\"".$max_gap."\">ms<br />";
+	$display_items = isset($_POST['display_items']);
+	echo "<input type=\"checkbox\" name=\"display_items\"";
+	if($display_items) echo " checked";
+	echo "> Display items (may be long!)<br />";
+	echo "</td>";
+	echo "</tr></table></center>";
+	echo "</form>";
+	echo "<hr>";
+	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+	echo "<input class=\"shadow\" style=\"float:right; font-size:large;\" type=\"submit\" value=\"STOP ANALYSIS\">";
+	echo "</form>";
+	echo "<p><i>Ignoring channels, instruments, periods, sound-objects and random performance controls</i></p>";
 	$table = explode(chr(10),$content);
 	$imax = count($table);
 	for($i_line = $i_item = 0; $i_line < $imax; $i_line++) {
@@ -1719,7 +1758,7 @@ if(isset($_POST['analyze_tonal'])) {
 		//	$slice_test = str_replace("_legato(0)",'',$slice);
 		//	$slice_test = str_replace("_legato(20)",'',$slice_test);
 		//	$slice_test = str_replace("_tempo(13/15)",'',$slice_test);
-			echo $slice_test."<br /><br />";
+			if($display_items) echo $slice_test."<br /><br />";
 			$result = list_events($slice,$poly,$max_poly,$level,$i_token,$p_tempo,$q_tempo,$p_abs_time,$q_abs_time,$i_layer,$current_legato);
 			if($result['error'] <> '') {
 				echo "<br />".$result['error'];
@@ -1753,7 +1792,7 @@ if(isset($_POST['analyze_tonal'])) {
 		echo "<tr><th>Melodic intervals</th><th>Harmonic intervals</th></tr>";
 		echo "<tr><td>";
 		$mode = "melodic";
-		$match_notes = match_notes($table_events,$mode,$min_duration,$max_gap,$test_intervals,$lcm);
+		$match_notes = match_notes($table_events,$mode,$min_duration,$max_gap,$ratio_melodic,$test_intervals,$lcm);
 		$matching_notes = $match_notes['matching_notes'];
 		$number_match = $match_notes['max_match'];
 		usort($matching_notes,"score_sort");
@@ -1771,7 +1810,7 @@ if(isset($_POST['analyze_tonal'])) {
 		$matching_list[$i_item][$mode] = $matching_notes;
 		echo "</td><td>";
 		$mode = "harmonic";
-		$match_notes = match_notes($table_events,$mode,$min_duration,$max_gap,$test_intervals,$lcm);
+		$match_notes = match_notes($table_events,$mode,$min_duration,$max_gap,$ratio_melodic,$test_intervals,$lcm);
 		$matching_notes = $match_notes['matching_notes'];
 		$number_match = $match_notes['max_match'];
 		usort($matching_notes,"score_sort");
@@ -1782,34 +1821,34 @@ if(isset($_POST['analyze_tonal'])) {
 				if($max_score > 0)
 					$matching_notes[$i_match]['percent'] = round($matching_notes[$i_match]['score'] * 100 / $max_score);
 				else $matching_notes[$i_match]['percent'] = 0;
-				echo $matching_notes[$i_match][0]." ≈ ".$matching_notes[$i_match][1]." (".round($matching_notes[$i_match]['score']/$lcm,2)." s) ".$matching_notes[$i_match]['percent']."%<br />";
+				echo $matching_notes[$i_match][0]." ≈ ".$matching_notes[$i_match][1]." (".round($matching_notes[$i_match]['score']/$lcm,0)." s) ".$matching_notes[$i_match]['percent']."%<br />";
 				}
 			}
 		$matching_list[$i_item][$mode] = $matching_notes;
 		echo "</td></tr></table></center><br />";
 
 		$mode = "harmonic";
-		$result = show_relations_on_image($i_item,$matching_list,$mode,$tonal_scale,$note_convention);
+		$result = show_relations_on_image($i_item,$matching_list,$mode,$tonal_scale,$note_convention,$position_mark);
 		$mode = "melodic";
-		$result = show_relations_on_image($i_item,$matching_list,$mode,$tonal_scale,$note_convention);
+		$result = show_relations_on_image($i_item,$matching_list,$mode,$tonal_scale,$note_convention,$position_mark);
 		$scalename = $result['scalename'];
 		$resource_name = $result['resource_name'];
 		if($scalename == '' OR $resource_name == '')
 			echo "<div style=\"padding:12px; text-align:center;\">No tonal scale specified.<br />Images display equal-tempered scale.</div><br />";
 		else 
-			echo "<div style=\"padding:12px; text-align:center;\">Tonal scale ‘<font color=\"blue\">".$scalename."</font>’ was found in<br />in a temporary folder of ‘<font color=\"blue\">".$resource_name."</font>’.</div>";
+			echo "<div style=\"padding:12px; text-align:center;\">Tonal scale<br />‘<font color=\"blue\">".$scalename."</font>’<br />was found in<br />a temporary folder of<br />‘<font color=\"blue\">".$resource_name."</font>’.</div>";
 		echo "<hr>";
 		}
 	echo "</div>";
 	}
 else {
-	if($csound_file <> '') echo "<p>➡ It would be wise to <a target=\"_blank\" href=\"csound.php?file=".urlencode($csound_resources.SLASH.$csound_file)."\">open</a> the ‘<font color=\"blue\">".$csound_file."</font>’ Csound resource file to use its tonal scale definitions.</p>";
-	echo "</form>";
+	if($csound_file <> '') echo "<p><font color=\"red\">➡</font> It would be wise to <a target=\"_blank\" href=\"csound.php?file=".urlencode($csound_resources.SLASH.$csound_file)."\">open</a> the ‘<font color=\"blue\">".$csound_file."</font>’ Csound resource file to use its tonal scale definitions.</p>";
 	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 	echo "<p><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" formaction=\"".$url_this_page."#tonalanalysis\" title=\"Analyze tonal intervals\" name=\"analyze_tonal\" value=\"ANALYZE INTERVALS\"";
 	if(!$tonal_analysis_possible) echo " disabled";
 	echo ">";
 	echo " ➡ melodic and harmonic tonal intervals of (all) item(s)</p>";
+	echo "</form>";
 	echo "<hr>";
 	}
 echo "</td>";
@@ -2301,7 +2340,7 @@ function make_event_table($poly) {
 	return $result;
 	}
 
-function match_notes($table_events,$mode,$min_duration,$max_gap,$test_intervals,$lcm) {
+function match_notes($table_events,$mode,$min_duration,$max_gap,$ratio_melodic,$test_intervals,$lcm) {
 	$matching_notes = $match = array();
 	$i_match = 0;
 	if($test_intervals) echo "Dates in seconds:<br />";
@@ -2312,7 +2351,7 @@ function match_notes($table_events,$mode,$min_duration,$max_gap,$test_intervals,
 			$found = FALSE;
 			$start2 = $table_events[$j_event]['start'];
 			$end2 = $table_events[$j_event]['end'];
-			if(matching_intervals($start1,$end1,$start2,($min_duration * $lcm / 1000),($max_gap * $lcm / 1000),$end2,$mode,$lcm)) {
+			if(matching_intervals($start1,$end1,$start2,$end2,($min_duration * $lcm / 1000),($max_gap * $lcm / 1000),$ratio_melodic,$mode,$lcm)) {
 				$token1 = preg_replace("/([a-z A-Z #]+)[0-9]*/u","$1",$table_events[$i_event]['token']);
 				$token2 = preg_replace("/([a-z A-Z #]+)[0-9]*/u","$1",$table_events[$j_event]['token']);
 				if($token1 == $token2) continue;
@@ -2354,7 +2393,7 @@ function match_notes($table_events,$mode,$min_duration,$max_gap,$test_intervals,
 	return $result;
 	}
 
-function matching_intervals($start1,$end1,$start2,$min_dur,$max_gap,$end2,$mode,$lcm) {
+function matching_intervals($start1,$end1,$start2,$end2,$min_dur,$max_gap,$ratio_melodic,$mode,$lcm) {
 	// Because of the sorting of events, $start2 >= $start1
 	$duration1 = $end1 - $start1;
 	$duration2 = $end2 - $start2;
@@ -2364,18 +2403,19 @@ function matching_intervals($start1,$end1,$start2,$min_dur,$max_gap,$end2,$mode,
 	if($mode == "harmonic") {
 		if($smallest_duration < $min_dur) return FALSE;
 		if($start1 + ($duration1 / 2.) < $start2) return FALSE;
-		if($overlap < (0.25 * $smallest_duration)) return FALSE;
+		if($overlap < ((1 - $ratio_melodic) * $smallest_duration)) return FALSE;
 		// Here we discard slurs (generally 20% when importing MusicXML files)
 		}
 	else { // "melodic"
 		if($start2 > ($end1 + $max_gap)) return FALSE;
 		if($start1 + ($duration1 / 2.) >= $start2) return FALSE;
-		if($overlap >= (0.25 * $smallest_duration)) return FALSE;
+		if($overlap >= ($ratio_melodic * $smallest_duration)) return FALSE;
 		}
 	return TRUE;
 	}
 
-function show_relations_on_image($i_item,$matching_list,$mode,$scalename,$note_convention) {
+
+function show_relations_on_image($i_item,$matching_list,$mode,$scalename,$note_convention,$position_mark) {
 	global $dir_scale_images,$temp_dir,$temp_folder,$dir_scale_images;
 	global $Englishnote,$Frenchnote,$Indiannote;
 
@@ -2392,6 +2432,14 @@ function show_relations_on_image($i_item,$matching_list,$mode,$scalename,$note_c
 		// We'll use note names of the score:
 		$note_name[$position[$i_match][0]] = $matching_notes[$i_match][0];
 		$note_name[$position[$i_match][1]] = $matching_notes[$i_match][1];
+		}
+	for($i_mark = 0; $i_mark < count($position_mark); $i_mark++) {
+		if(intval($position_mark[$i_mark]['p']) < 1) continue; 
+		if($position_mark[$i_mark]['q'] == 0) {
+			if($mode == "harmonic") echo "<p style=\"text-align:center; color:red;\">Error marking additional position at ratio ".$position_mark[$i_mark]['p']."/".$position_mark[$i_mark]['q']."</p>";
+			continue;
+			}
+		$cent_mark[$i_mark] = cents($position_mark[$i_mark]['p'] / $position_mark[$i_mark]['q']);
 		}
 	$found = FALSE;
 	if($scalename <> '') {
@@ -2532,6 +2580,18 @@ function show_relations_on_image($i_item,$matching_list,$mode,$scalename,$note_c
 				if(abs($dist) < 10) $content .= "§wolffifth[".$j."] = \"".$k."\";\n";
 				}
 			}
+		for($i_mark = 0; $i_mark < count($position_mark); $i_mark++) {
+			if(intval($position_mark[$i_mark]['p']) < 1) continue; 
+			for($j = 0; $j < 12; $j++) {
+				for($k = 0; $k < 12; $k++) {
+					if($j == $k) continue;
+					$pos = cents($ratio[$k] / $ratio[$j]);
+					if($pos < 0) $pos += 1200;
+					$dist = $pos - $cent_mark[$i_mark];
+					if(abs($dist) < 10) $content .= "§mark[".$j."] = \"".$k."\";\n";
+					}
+				}
+			}
 		// Create yellow links between matching notes
 		for($i_match = 0; $i_match < count($matching_notes); $i_match++) {
 			$w = $width[$i_match];
@@ -2563,11 +2623,20 @@ function show_relations_on_image($i_item,$matching_list,$mode,$scalename,$note_c
 		else {
 			$side = "left"; $left_position = 0; // Doesn't seem to work!
 			}
-		echo "<div class=\"shadow\" style=\"border:2px solid gray; background-color:azure; width:15em;  padding:8px; text-align:center; border-radius: 6px; float:".$side.";\">SHOW IMAGE (".$mode.")<br />";
+		echo "<div class=\"shadow\" style=\"border:2px solid gray; background-color:azure; width:13em;  padding:8px; text-align:center; border-radius: 6px; float:".$side.";\">SHOW IMAGE (".$mode.")<br />";
 		if($scalename <> '') echo "‘".$scalename."’<br />";
 		echo "<a onclick=\"window.open('".$link_full."','".$image_name_full."','width=".$image_width.",height=".$image_height.",left=".$left_position."'); return false;\" href=\"".$link_full."\">full</a>";
 		echo "&nbsp;-&nbsp;<a onclick=\"window.open('".$link_only."','".$image_name_only."','width=".$image_width.",height=".$image_height.",left=".$left_position."'); return false;\" href=\"".$link_only."\">only scale</a>";
-		echo "&nbsp;-&nbsp;<a onclick=\"window.open('".$link_reduced."','".$image_name_reduced."','width=".$image_width.",height=".$image_height.",left=".$left_position."'); return false;\" href=\"".$link_reduced."\">only links</a></div>";
+		echo "&nbsp;-&nbsp;<a onclick=\"window.open('".$link_reduced."','".$image_name_reduced."','width=".$image_width.",height=".$image_height.",left=".$left_position."'); return false;\" href=\"".$link_reduced."\">only links</a>";
+		$said = FALSE;
+		for($i_mark = 0; $i_mark < count($position_mark); $i_mark++) {
+			if(intval($position_mark[$i_mark]['p']) < 1) continue;
+			if(!$said) echo "<br />Add positions (black):";
+			$said = TRUE;
+			if($i_mark > 0) echo " -";
+			echo " ".$position_mark[$i_mark]['p']."/".$position_mark[$i_mark]['q'];
+			}
+		echo "</div>";
 		}
 	$result['scalename'] = $scalename;
 	$table = explode('_',$resource_file);
