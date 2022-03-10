@@ -134,7 +134,7 @@ if(isset($_POST['savethisfile']) OR isset($_POST['create_object']) OR isset($_PO
 		}			
 	if(!$bad) {
 		echo "<p id=\"timespan\"><font color=\"red\">Saved file:</font> <font color=\"blue\">";
-		SaveObjectPrototypes(TRUE,$dir,$filename,$temp_dir.$temp_folder);
+		SaveObjectPrototypes(TRUE,$dir,$filename,$temp_dir.$temp_folder,TRUE);
 		}
 	}
 
@@ -283,7 +283,7 @@ if($handle_object) fclose($handle_object);
 echo "<p style=\"color:blue;\">".$comment_on_file."</p>";
 echo "<p style=\"text-align:left;\">";
 echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’ INCLUDING ALL CHANGES TO PROTOTYPES\"><br />";
-echo "➡ <i>This file is autosaved every 30 seconds. Still, it is safe to save it before quitting the editor.</i></p>";
+echo "<font color=\"red\">➡</font> Changes in prototypes are <font color=\"red\">autosaved</font> every 30 seconds. Still, it is safe to save this file before quitting the editor.</p>";
 if($autosave) echo "<script type=\"text/javascript\" src=\"autosaveObjects.js\"></script>";
 
 echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"create_object\" value=\"CREATE A NEW OBJECT\"> named <input type=\"text\" name=\"new_object\" size=\"10\" value=\"\"></p>";

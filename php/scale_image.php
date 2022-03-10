@@ -82,7 +82,10 @@ if(isset($hilitewidth) AND !$no_hilite) foreach($hilitewidth as $i_match => $thi
 if(!$no_intervals) {
 	// Draw classical intervals
 	if(isset($wolffifth)) foreach($wolffifth as $j => $k) {
-		connect($im,$j,$k,$radius - 1,$red,2);
+		connect($im,$j,$k,$radius - 1,$red,3);
+		}
+	if(isset($wolffourth)) foreach($wolffourth as $j => $k) {
+		connect($im,$j,$k,$radius - 1,$purple,3);
 		}
 	if(isset($pyththird)) foreach($pyththird as $j => $k) {
 		connect($im,$j,$k,$radius - 1,$brown,1);
@@ -246,7 +249,7 @@ for($j = 0; $j <= $numgrades_fullscale; $j++) {
 $x1 = $margin_left;
 $x2 = 60;
 $x_text = $x2 + 15;
-$y1 = 2 * $radius + 280;
+$y1 = 2 * $radius + 270;
 $y_text = $y1 - imagefontheight(10) / 2;
 
 if(!$no_intervals) {
@@ -254,19 +257,25 @@ if(!$no_intervals) {
 	
 	$y1 += 2 * imagefontheight(10);
 	$y_text = $y1 - imagefontheight(10) / 2;
-	imagelinethick($im,$x1,$y1,$x2,$y1,$blue,4);
+	imagelinethick($im,$x1,$y1,$x2,$y1,$blue,3);
 	$text = "Perfect fifth (".round($perfect_fifth)." cents)";
 	imagestring($im,10,$x_text,$y_text,$text,$black);
 	
 	$y1 += 1 * imagefontheight(10);
 	$y_text = $y1 - imagefontheight(10) / 2;
-	imagelinethick($im,$x1,$y1,$x2,$y1,$red,2);
+	imagelinethick($im,$x1,$y1,$x2,$y1,$red,3);
 	$text = "Wolf fifth (".round($wolf_fifth)." cents)";
 	imagestring($im,10,$x_text,$y_text,$text,$red);
+
+	$y1 += 1 * imagefontheight(10);
+	$y_text = $y1 - imagefontheight(10) / 2;
+	imagelinethick($im,$x1,$y1,$x2,$y1,$purple,3);
+	$text = "Wolf fourth (".round($wolf_fourth)." cents)";
+	imagestring($im,10,$x_text,$y_text,$text,$purple);
 	
 	$y1 += 1 * imagefontheight(10);
 	$y_text = $y1 - imagefontheight(10) / 2;
-	imagelinethick($im,$x1,$y1,$x2,$y1,$green,4);
+	imagelinethick($im,$x1,$y1,$x2,$y1,$green,3);
 	$text = "Harmonic major third (".round($harmonic_third)." cents)";
 	imagestring($im,10,$x_text,$y_text,$text,$green);
 	
@@ -275,26 +284,30 @@ if(!$no_intervals) {
 	imagelinethick($im,$x1,$y1,$x2,$y1,$brown,2);
 	$text = "Pythagorean major third (".round($pythagorean_third)." cents)";
 	imagestring($im,10,$x_text,$y_text,$text,$brown);
-	
-	if(!$no_marks) {
-		$x1 = $image_width - 230;
-		$y1 = 2 * $radius + 260;
-		$x_text = $x1 + 10;
-		$x2 = $x1;
-		$y2 = $y1 + 25;
-		$y_text = $y1 + 5;
-		imagelinethick($im,$x1,$y1,$x2,$y2,$blue,3);
-		$text = "Pythagorean position";
-		imagestring($im,10,$x_text,$y_text,$text,$blue);
-		
-		$y1 = $y2 + 25;
-		$y2 = $y1 + 25;
-		$y_text = $y1 + 5;
-		imagelinethick($im,$x1,$y1,$x2,$y2,$green,3);
-		$text = "Harmonic position";
-		imagestring($im,10,$x_text,$y_text,$text,$green);
-		}
 	}
+	
+$x1 = $image_width - 230;
+$y1 = 2 * $radius + 260;
+if(!$no_marks) {
+	$x_text = $x1 + 10;
+	$x2 = $x1;
+	$y2 = $y1 + 25;
+	$y_text = $y1 + 5;
+	imagelinethick($im,$x1,$y1,$x2,$y2,$blue,3);
+	$text = "Pythagorean position";
+	imagestring($im,10,$x_text,$y_text,$text,$blue);
+	$y1 = $y2 + 25;
+	$y2 = $y1 + 25;
+	$y_text = $y1 + 5;
+	imagelinethick($im,$x1,$y1,$x2,$y2,$green,3);
+	$text = "Harmonic position";
+	imagestring($im,10,$x_text,$y_text,$text,$green);
+	$y1 += 40;
+	}
+else $y1 += 95;
+$x1 -= 50;
+$text = "- Created by Bol Processor -";
+imagestring($im,10,$x1,$y1,$text,$black);
 
 imagepng($im);
 $clean_name_of_file = str_replace("#","_",$filename);

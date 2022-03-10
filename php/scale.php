@@ -18,7 +18,7 @@ $url_this_page = "scale.php?".$_SERVER["QUERY_STRING"];
 require_once("_header.php");
 
 $csound_source = $_POST['csound_source'];
-
+// echo $dir_scales." @@@<br />";
 $file_link = $dir_scales.$filename.".txt";
 if(!file_exists($file_link)) {
 	echo "File may have been mistakenly deleted: ".$file_link;
@@ -42,7 +42,7 @@ $p_comma = 81; $q_comma = 80;
 $syntonic_comma = cents($p_comma/$q_comma);
 $p_major_whole_tone = 9;
 $q_major_whole_tone = 8;
-$list_sensitive_notes = $list_wolffifth_notes = '';
+$list_sensitive_notes = $list_wolffifth_notes = $list_wolffourth_notes = '';
 $pythagorean_third = cents(81/64);
 $pythagorean_minor_sixth = 1200 - $pythagorean_third;
 $perfect_fifth = cents(3/2);
@@ -764,6 +764,9 @@ if(isset($_POST['savethisfile']) OR isset($_POST['fixkeynumbers']) OR isset($_PO
 	if($scale_comment <> '')
 		fwrite($handle,$scale_comment);
 	fclose($handle);
+	$file_changed = $dir_scales."_changed";
+	$handle = fopen($file_changed,"w");
+	fclose($handle);
 	}
 
 $content = file_get_contents($file_link,TRUE);
@@ -1043,6 +1046,7 @@ if(isset($_POST['change_comma']) AND isset($_POST['list_sensitive_notes']) AND $
 	
 	$list_sensitive_notes = $_POST['list_sensitive_notes'];
 	$list_wolffifth_notes = $_POST['list_wolffifth_notes'];
+	$list_wolffourth_notes = $_POST['list_wolffourth_notes'];
 	if($list_sensitive_notes <> '') {
 		$table_sensitive_notes = explode(' ',$list_sensitive_notes);
 		echo "<p>Sensitive notes: ";
@@ -1053,6 +1057,12 @@ if(isset($_POST['change_comma']) AND isset($_POST['list_sensitive_notes']) AND $
 		$table_wolffifth_notes = explode(' ',$list_wolffifth_notes);
 		echo "Wolffifth notes: ";
 		for($i = 0; $i < count($table_sensitive_notes); $i++) echo "<font color=\"blue\">".$name[$table_wolffifth_notes[$i]]."</font> ";
+		echo "</p>"; 
+		}
+	if($list_wolffourth_notes <> '') {
+		$table_wolffourth_notes = explode(' ',$list_wolffourth_notes);
+		echo "Wolffourth notes: ";
+		for($i = 0; $i < count($table_sensitive_notes); $i++) echo "<font color=\"blue\">".$name[$table_wolffourth_notes[$i]]."</font> ";
 		echo "</p>"; 
 		}
 	if($new_comma < 0 OR $new_comma > 56.8) echo "<p>➡ Cannot set syntonic comma to: <font color=\"red\">".$new_comma."</font> cents because it should stay in range 0 ... 56.8 cents</p>";
@@ -2093,10 +2103,12 @@ $harmonic_third = $pythagorean_third - $syntonic_comma;
 $harmonic_minor_sixth = 1200 - $harmonic_third;
 $pythagorean_minor_sixth = 1200 - $pythagorean_third;
 $wolf_fifth = $perfect_fifth - $syntonic_comma;
+$wolf_fourth = $perfect_fourth - $syntonic_comma;
 store($h_image,"harmonic_third",$harmonic_third);
 store($h_image,"pythagorean_third",$pythagorean_third);
 store($h_image,"wolf_fifth",$wolf_fifth);
 store($h_image,"perfect_fifth",$perfect_fifth);
+store($h_image,"wolf_fourth",$wolf_fourth);
 
 if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == '' AND !$warned_ratios) {
 	echo "<td id=\"topstruct\">";
@@ -2140,7 +2152,7 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 		$jj++;
 		}
 	echo "</tr>";
-	$list_sensitive_notes = $list_wolffifth_notes =  '';
+	$list_sensitive_notes = $list_wolffifth_notes = $list_wolffourth_notes = '';
 	foreach($sum as $var => $class) {
 		$moy[$var] = $sum[$var] / $num[$var];
 		}
@@ -2154,19 +2166,20 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 			if($scale_choice == "small_scale" AND $selected_grades <> '' AND !in_array($name[$k],$selected_grade_name)) continue;
 			$class = round($x[$j][$k] / 100);
 			$color = "black";
-			if($class == 7 AND (abs($perfect_fifth - $x[$j][$k])) < 4) $color = "blue";
-		//	if($class == 5 AND (abs($perfect_fourth - $x[$j][$k])) < 4) $color = "blue";
-			if($class == 4 AND (abs($harmonic_third - $x[$j][$k])) < 4) $color = "MediumTurquoise";
-		//	if($class == 8 AND (abs($harmonic_minor_sixth - $x[$j][$k])) < 4) $color = "MediumTurquoise";
-			if(($class == 7) AND (abs($wolf_fifth - $x[$j][$k])) < 4) {
+			if(($class == 7) AND (abs($wolf_fifth - $x[$j][$k])) < 15) {
 				// Wolf fifth
 				$list_sensitive_notes .= $k." ";
 				$list_wolffifth_notes .= $j." ";
 				$color = "red";
 				}
-		//	if(($class == 5) AND (abs((1200 - $wolf_fifth) - $x[$j][$k])) < 4) $color = "red";
-			if(($class == 4) AND (abs($pythagorean_third - $x[$j][$k])) < 4) $color = "brown";
-		//	if(($class == 8) AND (abs($pythagorean_minor_sixth - $x[$j][$k])) < 4) $color = "brown";
+			if(($class == 5) AND ((abs($wolf_fourth - $x[$j][$k])) < 15)) {
+				// Wolf fourth
+				$list_wolffourth_notes .= $j." ";
+				$color = "purple";
+				}
+			if(($class == 4) AND (abs($pythagorean_third - $x[$j][$k])) < 10) $color = "brown";
+			if($class == 4 AND (abs($harmonic_third - $x[$j][$k])) < 10) $color = "MediumTurquoise";
+			if($class == 7 AND (abs($perfect_fifth - $x[$j][$k])) < 10) $color = "blue";
 			$show = "<font color=\"".$color."\">".round($x[$j][$k])."</font>";
 			if($class == 7 OR $class == 5 OR $class == 4 OR $class == 8) $show = "<b>".$show."</b>";
 			if(round($x[$j][$k]) == 0) $show = '';
@@ -2186,16 +2199,17 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 			$string_sensitive_notes .= $name[$sensitive_note]." ";
 			}
 		}
-	echo "<p style=\"\"><b>Colors: <font color=\"blue\">Perfect fifth</font> / <font color=\"red\">Wolf fifth</font> — <font color=\"MediumTurquoise\">Harmonic major third</font> / <font color=\"brown\">Pythagorean major third</font></b><br />➡ <i>Wolf fifths indicate ‘sensitive notes’";
+	echo "<p style=\"\"><b>Colors: <font color=\"blue\">Perfect fifth</font> — <font color=\"red\">Wolf fifth</font> — <font color=\"purple\">Wolf fourth</font> — <font color=\"MediumTurquoise\">Harmonic major third</font> — <font color=\"brown\">Pythagorean major third</font></b><br />➡ <i>Wolf fifths indicate ‘sensitive notes’";
 	if($list_sensitive_notes <> '') echo ", here: </i><b><font color=\"red\">".trim($string_sensitive_notes)."</font></b><i>";
 	echo "</i></p>";
 	echo "<input type=\"hidden\" name=\"list_sensitive_notes\" value=\"".$list_sensitive_notes."\">";
 	echo "<input type=\"hidden\" name=\"list_wolffifth_notes\" value=\"".$list_wolffifth_notes."\">";
+	echo "<input type=\"hidden\" name=\"list_wolffourth_notes\" value=\"".$list_wolffourth_notes."\">";
 	
-	$fifth = $wolffifth = $harmthird = $pyththird = array();
+	$fifth = $fourth = $wolffifth = $wolffourth = $harmthird = $pyththird = array();
 	$nr_wolf = $sum_comma = 0;
 	echo "<table>";
-	echo "<tr><td style=\"vertical-align:middle; padding:4px;\"><b>Perfect 5th</b></td><td><b>Wolf 5th</b></td><td><b>Harm. maj. 3d</b></td><td><b>Pyth. maj. 3d</b></td></tr>";
+	echo "<tr><td style=\"vertical-align:middle; padding:4px;\"><b>Perfect 5th</b></td><td><b>Wolf 5th</b></td><td><b>Perfect 4th</b></td><td><b>Wolf 4th</b></td><td><b>Harm. maj. 3d</b></td><td><b>Pyth. maj. 3d</b></td></tr>";
 	echo "<tr><td style=\"vertical-align:middle; text-align:center; padding:4px;\">";
 	for($j = 0; $j < $numgrades_fullscale; $j++) {
 		if($name[$j] == '' OR $ratio[$j] == 0) continue; // By security
@@ -2230,7 +2244,7 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 			else $pos = cents($ratio[$k] / $ratio[$j]);
 			if($pos < 0) $pos += 1200;
 			$dist = $pos - $wolf_fifth;
-			if(abs($dist) < 10 /* AND !isset($fifth[$j]) */) {
+			if(abs($dist) < 15 AND !isset($fifth[$j])) { // Added !isset by BB 2022-03-10
 				$deviation = '';
 				if($dist > 1) {
 					$deviation = " (+".round(abs($dist)).")";
@@ -2243,6 +2257,57 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 				store2($h_image,"wolffifth",$j,$k);
 				$nr_wolf++;
 				$sum_comma += $perfect_fifth - $pos;
+				}
+			}
+		}
+	echo "<td style=\"vertical-align:middle; text-align:center; padding:4px;\">";
+	for($j = 0; $j < $numgrades_fullscale; $j++) {
+		if($name[$j] == '' OR $ratio[$j] == 0) continue; // By security
+		for($k = 0; $k < $numgrades_fullscale; $k++) {
+			if($j == $k OR $name[$k] == '') continue;
+			if(($p[$j] * $p[$k] * $q[$j] * $q[$k]) > 0)
+				$pos = cents($p[$k] * $q[$j] / $q[$k] / $p[$j]);
+			else $pos = cents($ratio[$k] / $ratio[$j]);
+			if($pos < 0) $pos += 1200;
+			$dist = $pos - $perfect_fourth;
+			if(abs($dist) < 10) {
+				$deviation = '';
+				if($dist > 1) {
+					$deviation = " (+".round(abs($dist)).")";
+					}
+				if($dist < -1) {
+					$deviation = " (-".round(abs($dist)).")";
+					}
+				echo "<font color=\"blue\">".$name[$j]." ".$name[$k]."</font><small>".$deviation."</small><br />";
+				$fourth[$j] = $k;
+			//	store2($h_image,"fourth",$j,$k);
+				$sum_comma += $perfect_fourth - $pos;
+				}
+			}
+		}
+	echo "<td style=\"vertical-align:middle; text-align:center; padding:4px;\">";
+	for($j = 0; $j < $numgrades_fullscale; $j++) {
+		if($name[$j] == '' OR $ratio[$j] == 0) continue; // By security
+		for($k = 0; $k < $numgrades_fullscale; $k++) {
+			if($j == $k OR $name[$k] == '') continue;
+			if(($p[$j] * $p[$k] * $q[$j] * $q[$k]) > 0)
+				$pos = cents($p[$k] * $q[$j] / $q[$k] / $p[$j]);
+			else $pos = cents($ratio[$k] / $ratio[$j]);
+			if($pos < 0) $pos += 1200;
+			$dist = $pos - $wolf_fourth;
+			if(abs($dist) < 15 AND !isset($fourth[$j])) { // Added !isset by BB 2022-03-10
+				$deviation = '';
+				if($dist > 1) {
+					$deviation = " (+".round(abs($dist)).")";
+					}
+				if($dist < -1) {
+					$deviation = " (-".round(abs($dist)).")";
+					}
+				echo "<font color=\"purple\">".$name[$j]." ".$name[$k]."</font><small>".$deviation."</small><br />";
+				$wolffourth[$j] = $k;
+				store2($h_image,"wolffourth",$j,$k);
+				$nr_wolf++;
+				$sum_comma += $perfect_fourth - $pos;
 				}
 			}
 		}
@@ -2280,7 +2345,7 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 			else $pos = cents($ratio[$k] / $ratio[$j]);
 			if($pos < 0) $pos += 1200;
 			$dist = $pos - $pythagorean_third;
-			if(abs($dist) < 10 /* AND !isset($harmthird[$j]) */) {
+			if(abs($dist) < 10 AND !isset($harmthird[$j])) { // Added !isset by BB 2022-03-10
 				$deviation = '';
 				if($dist > 1) {
 					$deviation = " (+".round(abs($dist)).")";

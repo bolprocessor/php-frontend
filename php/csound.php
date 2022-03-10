@@ -380,11 +380,11 @@ if($need_to_save OR isset($_POST['savealldata']) OR isset($_POST['delete_instrum
 		if(!$duplicated_scale) {
 			echo "<p><font color=\"red\">Saving file</font> <font color=\"blue\">".$filename."</font> <font color=\"red\">was not possible this time because it has been modified by an external procedure…<br />Probably importing microtonal scales from another resource.<br />➡</font> Now the page has been refreshed and it can be saved</p>";
 			}
-		else $warn_not_empty = SaveCsoundInstruments(FALSE,$dir,$filename,$temp_dir.$temp_folder);
+		else $warn_not_empty = SaveCsoundInstruments(FALSE,$dir,$filename,$temp_dir.$temp_folder,TRUE);
 		}
 	else {
 		echo "<p id=\"timespan\"><font color=\"red\">Saving file:</font> <font color=\"blue\">".$filename."</font></p>";
-		$warn_not_empty = SaveCsoundInstruments(FALSE,$dir,$filename,$temp_dir.$temp_folder);
+		$warn_not_empty = SaveCsoundInstruments(FALSE,$dir,$filename,$temp_dir.$temp_folder,TRUE);
 	//	sleep(1);
 		}
 	}

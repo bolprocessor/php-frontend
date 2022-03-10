@@ -14,7 +14,6 @@ if(isset($_POST['object_name'])) {
 else {
 	"Sound-object prototype's name is not known. First open the ‘-mi’ file!"; die();
 	}
-	
 $this_title = $expression = $object_name;
 require_once("_header.php");
 
@@ -426,28 +425,12 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 	fwrite($handle,"65535\n");
 	fwrite($handle,"65535\n");
 	fwrite($handle,"65535\n");
-/*	$jmax = $_POST['jmax'];
-	$first = TRUE;
-	for($j = $j; $j < $jmax; $j++) {
-		if(isset($_POST["object_param_".$j])) {
-			$value = $_POST["object_param_".$j];
-			if(trim($value) == '') {
-				if($first) $value = "_beginCsoundScore_";
-				else $value = "_endCsoundScore_";
-				$first = FALSE;
-				}
-			if($j == 53 AND $value <> "_endCsoundScore_") { // Csound score
-				$value = str_replace("\n","<BR>",$value);
-				$value = str_replace("\r",'',$value);
-				$value = "<HTML>".$value."</HTML>";
-				}
-			fwrite($handle,$value."\n");
-			}
-		} */
 	$object_comment = $_POST['object_comment'];
 	$object_comment = recode_tags($object_comment);
 	$line = "<HTML>".$object_comment."</HTML>\n";
 	fwrite($handle,$line."\n");
+	fclose($handle);
+	$handle = fopen($temp_dir.$temp_folder.SLASH."_changed",'w');
 	fclose($handle);
 	}
 

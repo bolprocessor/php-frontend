@@ -753,11 +753,14 @@ function my_rmdir($src) {
     return;
 	}
 
-function SaveObjectPrototypes($verbose,$dir,$filename,$temp_folder) {
+function SaveObjectPrototypes($verbose,$dir,$filename,$temp_folder,$force) {
 	global $top_header,$test,$temp_dir,$csound_resources;
 	$file_lock = $filename."_lock";
 	$time_start = time();
 	$time_end = $time_start + 3;
+	$file_changed = $temp_dir.$temp_folder.SLASH."_changed";
+	if(!$force AND !file_exists($file_changed)) return "skipped";
+	@unlink($file_changed);
 	while(TRUE) {
 		if(!file_exists($file_lock)) break;
 		if(time() > $time_end) unlink($file_lock);
@@ -848,10 +851,10 @@ function SaveObjectPrototypes($verbose,$dir,$filename,$temp_folder) {
 	if($verbose) echo "</font></p><hr>";
 //	sleep(1);
 	unlink($dir.$file_lock);
-	return;
+	return "saved";
 	}
 
-function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder) {
+function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder,$force) {
 	global $top_header, $test, $temp_dir;
 //	$verbose = TRUE;
 	if($verbose) echo "dir = ".$dir."<br />";
@@ -860,6 +863,10 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder) {
 	$file_lock2 = $dir.$filename."_lock2";
 	if(file_exists($file_lock2)) return "locked";
 	$file_lock = $filename."_lock";
+	$folder_scales = $temp_dir.$temp_folder.SLASH."scales";
+	$file_changed = $folder_scales.SLASH."_changed";
+	if(!$force AND !file_exists($file_changed)) return "skipped";
+	@unlink($file_changed);
 	$time_start = time();
 	$time_end = $time_start + 3;
 	while(TRUE) {
@@ -951,7 +958,7 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder) {
 		if($line == '') continue;
 		fwrite($handle,$line."\n");
 		}
-	$folder_scales = $temp_dir.$temp_folder.SLASH."scales";
+//	$folder_scales = $temp_dir.$temp_folder.SLASH."scales";
 	$dir_scale = scandir($folder_scales);
 	foreach($dir_scale as $this_scale) {
 		if($this_scale == '.' OR $this_scale == ".." OR $this_scale == ".DS_Store") continue;
