@@ -1671,12 +1671,18 @@ if(isset($_POST['analyze_tonal'])) {
 	$position_melodic_mark = $position_harmonic_mark = $display_result = array();
 	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 	echo "<input class=\"shadow\" style=\"float:right; font-size:large; background-color:azure;\" type=\"submit\" value=\"STOP ANALYSIS\">";
-	echo "</form>";
-	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-	echo "<p style=\"text-align:left;\"><input class=\"shadow\" style=\"background-color:yellow; font-size:large;\" type=\"submit\" formaction=\"".$url_this_page."#tonalanalysis\" title=\"Analyze tonal intervals\" name=\"analyze_tonal\" value=\"ANALYZE AGAIN\"></p>";
+/*	echo "</form>";
+	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">"; */
 	echo "<div style=\"background-color:white; padding-left:1em;\">";
+	if(isset($_POST['proceed_tonal_analysis'])) echo "<input class=\"shadow\" style=\"background-color:yellow; font-size:large; float:left;\" type=\"submit\" formaction=\"".$url_this_page."#tonalanalysis\" title=\"Analyze tonal intervals\" name=\"analyze_tonal\" value=\"ANALYZE AGAIN\"><br /><br />";
+	else echo "<br /><p style=\"text-align:center;\">Check documentation: <a target=\"_blank\" href=\"https://bolprocessor.org/tonal-analysis/\">https://bolprocessor.org/tonal-analysis/</a></p>";
 	echo "<center><table style=\"background-color:Gold;\">";
-	echo "<tr><th colspan=\"3\" style=\"text-align:center;\">Add markings to intervals</th></tr>";
+	echo "<tr><th colspan=\"3\" style=\"text-align:center;\">Add markings to intervals</tr>";
+	echo "<tr><td colspan=\"3\" style=\"white-space:nowrap; padding:6px; text-align:center;\">";
+	if(!isset($_POST['position_melodic_mark_up_p_0']) OR trim($_POST['position_melodic_mark_up_p_0']) == '') {
+		echo "<i>Checking additional intervals such as harmonic minor thirds (frequency ratio 6/5) may be advised</i>";
+		}
+	echo "</td></tr>";
 	echo "<tr><th style=\"text-align:center;\">Melodic up</th><th style=\"text-align:center;\">Melodic down</th><th style=\"text-align:center;\">Harmonic</th></tr>";
 	echo "<tr>";
 	echo "<td style=\"white-space:nowrap; padding:6px;\">";
@@ -1691,11 +1697,10 @@ if(isset($_POST['analyze_tonal'])) {
 		if(isset($_POST["score_melodic_mark_".$i_mark]) AND is_numeric($_POST["score_melodic_mark_".$i_mark]))
 			$score_melodic_mark_up[$i_mark] = $_POST["score_melodic_mark_".$i_mark];
 		else $score_melodic_mark_up[$i_mark] = 1;
-		echo " score: <input type=\"text\" style=\"border:none; text-align:center;\" name=\"score_melodic_mark_".$i_mark."\" size=\"3\" value=\"".$score_melodic_mark_up[$i_mark]."\">";
+		echo " weigh: <input type=\"text\" style=\"border:none; text-align:center;\" name=\"score_melodic_mark_".$i_mark."\" size=\"3\" value=\"".$score_melodic_mark_up[$i_mark]."\">";
 		echo "<br />";
 		}
 	echo "</td>";
-
 	echo "<td style=\"white-space:nowrap; padding:6px;\">";
 	for($i_mark = 0; $i_mark < 3; $i_mark++) {
 		if(isset($_POST["position_melodic_mark_down_p_".$i_mark]))
@@ -1708,11 +1713,10 @@ if(isset($_POST['analyze_tonal'])) {
 		if(isset($_POST["score_melodic_mark_".$i_mark]) AND is_numeric($_POST["score_melodic_mark_".$i_mark]))
 			$score_melodic_mark_down[$i_mark] = $_POST["score_melodic_mark_".$i_mark];
 		else $score_melodic_mark_down[$i_mark] = 1;
-		echo " score: <input type=\"text\" style=\"border:none; text-align:center;\" name=\"score_melodic_mark_".$i_mark."\" size=\"3\" value=\"".$score_melodic_mark_down[$i_mark]."\">";
+		echo " weigh: <input type=\"text\" style=\"border:none; text-align:center;\" name=\"score_melodic_mark_".$i_mark."\" size=\"3\" value=\"".$score_melodic_mark_down[$i_mark]."\">";
 		echo "<br />";
 		}
 	echo "</td>";
-	
 	echo "<td style=\"white-space:nowrap; padding:6px;\">";
 	for($i_mark = 0; $i_mark < 3; $i_mark++) {
 		if(isset($_POST["position_harmonic_mark_p_".$i_mark]))
@@ -1725,360 +1729,402 @@ if(isset($_POST['analyze_tonal'])) {
 		if(isset($_POST["score_harmonic_mark_".$i_mark]) AND is_numeric($_POST["score_harmonic_mark_".$i_mark]))
 			$score_harmonic_mark[$i_mark] = $_POST["score_harmonic_mark_".$i_mark];
 		else $score_harmonic_mark[$i_mark] = 1;
-		echo " score: <input type=\"text\" style=\"border:none; text-align:center;\" name=\"score_harmonic_mark_".$i_mark."\" size=\"3\" value=\"".$score_harmonic_mark[$i_mark]."\">";
+		echo " weigh: <input type=\"text\" style=\"border:none; text-align:center;\" name=\"score_harmonic_mark_".$i_mark."\" size=\"3\" value=\"".$score_harmonic_mark[$i_mark]."\">";
 		echo "<br />";
 		}
 	echo "</td></tr>";
+
+	echo "<tr><td style=\"white-space:nowrap; padding:6px; text-align:right;\">";
+	if(isset($_POST['score_perfect_fifth']) AND is_numeric($_POST['score_perfect_fifth']))
+		$score_perfect_fifth = $_POST['score_perfect_fifth'];
+	else $score_perfect_fifth = 2;
+	echo "Weigh of perfect fifth: <input type=\"text\" style=\"border:none; text-align:center;\" name=\"score_perfect_fifth\" size=\"3\" value=\"".$score_perfect_fifth."\"><br />";
+	if(isset($_POST['score_harmonic_third']) AND is_numeric($_POST['score_harmonic_third']))
+		$score_harmonic_third = $_POST['score_harmonic_third'];
+	else $score_harmonic_third = 1;
+	echo "Weigh of harmonic third: <input type=\"text\" style=\"border:none; text-align:center;\" name=\"score_harmonic_third\" size=\"3\" value=\"".$score_harmonic_third."\">";
+	echo "</td><td colspan=\"2\" style=\"white-space:nowrap; padding:6px; text-align:right;\">";
+	if(isset($_POST['score_wolf_fifth']) AND is_numeric($_POST['score_wolf_fifth']))
+		$score_wolf_fifth = $_POST['score_wolf_fifth'];
+	else $score_wolf_fifth = -2;
+	echo "Weigh of wolf fifth/fourth (negative): <input type=\"text\" style=\"border:none; text-align:center;\" name=\"score_wolf_fifth\" size=\"3\" value=\"".$score_wolf_fifth."\"><br />";
+	if(isset($_POST['score_pythagorean_third']) AND is_numeric($_POST['score_pythagorean_third']))
+		$score_pythagorean_third = $_POST['score_pythagorean_third'];
+	else $score_pythagorean_third = -1;
+	echo "Weigh of Pythagorean third (negative): <input type=\"text\" style=\"border:none; text-align:center;\" name=\"score_pythagorean_third\" size=\"3\" value=\"".$score_pythagorean_third."\">";
+	echo "</td></tr>";
+
+	echo "<tr><td style=\"white-space:nowrap; padding:6px;\">";
+	if(isset($_POST['weigh_melodic_up']) AND is_numeric($_POST['weigh_melodic_up']))
+		$weigh_melodic_up = abs(intval($_POST['weigh_melodic_up']));
+	else $weigh_melodic_up = 1;
+	echo "Global weigh ascending intervals:<input type=\"text\" style=\"border:none; text-align:center;\" name=\"weigh_melodic_up\" size=\"3\" value=\"".$weigh_melodic_up."\">";
+	echo "</td><td style=\"white-space:nowrap; padding:6px;\">";
+	if(isset($_POST['weigh_melodic_down']) AND is_numeric($_POST['weigh_melodic_down']))
+		$weigh_melodic_down = abs(intval($_POST['weigh_melodic_down']));
+	else $weigh_melodic_down = 1;
+	echo "Global weigh descending intervals:<input type=\"text\" style=\"border:none; text-align:center;\" name=\"weigh_melodic_down\" size=\"3\" value=\"".$weigh_melodic_down."\">";
+	echo "</td><td style=\"white-space:nowrap; padding:6px;\">";
+	if(isset($_POST['weigh_harmonic']) AND is_numeric($_POST['weigh_harmonic']))
+		$weigh_harmonic = abs(intval($_POST['weigh_harmonic']));
+	else $weigh_harmonic = 2;
+	echo "Global weigh harmonic intervals:<input type=\"text\" style=\"border:none; text-align:center;\" name=\"weigh_harmonic\" size=\"3\" value=\"".$weigh_harmonic."\">";
+	echo "</td>";
+	echo "</tr>";
 	echo "<tr><td colspan=\"3\" style=\"white-space:nowrap; padding:6px;\">";
 	if(isset($_POST['max_distance']) AND is_numeric($_POST['max_distance']))
 		$max_distance = abs(intval($_POST['max_distance']));
 	else $max_distance = 11;
 	echo "Maximum size of melodic intervals:<input type=\"text\" style=\"border:none; text-align:center;\" name=\"max_distance\" size=\"3\" value=\"".$max_distance."\"> semitones";
 	echo "</td></tr>";
-	echo "<tr><td style=\"white-space:nowrap; padding:6px;\">";
-	if(isset($_POST['score_perfect_fifth']) AND is_numeric($_POST['score_perfect_fifth']))
-		$score_perfect_fifth = $_POST['score_perfect_fifth'];
-	else $score_perfect_fifth = 2;
-	echo "Score of perfect fifth: <input type=\"text\" style=\"border:none; text-align:center;\" name=\"score_perfect_fifth\" size=\"3\" value=\"".$score_perfect_fifth."\"><br />";
-	if(isset($_POST['score_harmonic_third']) AND is_numeric($_POST['score_harmonic_third']))
-		$score_harmonic_third = $_POST['score_harmonic_third'];
-	else $score_harmonic_third = 1;
-	echo "Score of harmonic third: <input type=\"text\" style=\"border:none; text-align:center;\" name=\"score_harmonic_third\" size=\"3\" value=\"".$score_harmonic_third."\">";
-	echo "</td><td colspan=\"2\" style=\"white-space:nowrap; padding:6px;\">";
-	if(isset($_POST['score_wolf_fifth']) AND is_numeric($_POST['score_wolf_fifth']))
-		$score_wolf_fifth = $_POST['score_wolf_fifth'];
-	else $score_wolf_fifth = -2;
-	echo "Score of wolf fifth/fourth (negative): <input type=\"text\" style=\"border:none; text-align:center;\" name=\"score_wolf_fifth\" size=\"3\" value=\"".$score_wolf_fifth."\"><br />";
-	if(isset($_POST['score_pythagorean_third']) AND is_numeric($_POST['score_pythagorean_third']))
-		$score_pythagorean_third = $_POST['score_pythagorean_third'];
-	else $score_pythagorean_third = -1;
-	echo "Score of Pythagorean third (negative): <input type=\"text\" style=\"border:none; text-align:center;\" name=\"score_pythagorean_third\" size=\"3\" value=\"".$score_pythagorean_third."\">";
-	echo "</td></tr>";
-	echo "<tr><td style=\"white-space:nowrap; padding:6px;\">";
+	
+	
+
+	echo "<tr><td style=\"white-space:nowrap; padding:6px; text-align:right;\">";
 	if(isset($_POST['overlap'])) $ratio_melodic = intval($_POST['overlap']) / 100;
 	echo "Max overlap ratio in melodic intervals: <input type=\"text\" style=\"border:none; text-align:center;\" name=\"overlap\" size=\"3\" value=\"".(100 * $ratio_melodic)."\">%<br />";
 	if(isset($_POST['min_duration'])) $min_duration = intval($_POST['min_duration']);
 	echo "Min duration of harmonic interval: <input type=\"text\" style=\"border:none; text-align:center;\" name=\"min_duration\" size=\"4\" value=\"".$min_duration."\">ms<br />";
 	if(isset($_POST['max_gap'])) $max_gap = intval($_POST['max_gap']);
 	echo "Maximum gap in melodic interval: <input type=\"text\" style=\"border:none; text-align:center;\" name=\"max_gap\" size=\"4\" value=\"".$max_gap."\">ms<br />";
-	echo "</td><td colspan=\"2\" style=\"white-space:nowrap; padding:6px;\">";
+	echo "</td><td colspan=\"2\" style=\"white-space:nowrap; padding:6px; text-align:right;\">";
 	$test_intervals = isset($_POST['test_intervals']);
-	echo "<input type=\"checkbox\" name=\"test_intervals\"";
+	echo " Display all dates (may be long!)&nbsp;<input type=\"checkbox\" name=\"test_intervals\"";
 	if($test_intervals) echo " checked";
-	echo "> Display all dates (may be long!)<br />";
+	echo "><br />";
 	$display_items = isset($_POST['display_items']);
-	echo "<input type=\"checkbox\" name=\"display_items\"";
+	echo "Display sliced item(s)&nbsp;<input type=\"checkbox\" name=\"display_items\"";
 	if($display_items) echo " checked";
-	echo "> Display sliced item(s)";
+	echo ">";
 	echo "</td></tr><tr><td colspan=\"3\" style=\"white-space:nowrap; padding:6px;\">";
 	if($csound_file <> '') {
-		$compare_scales = isset($_POST['compare_scales']);
-		echo "<input type=\"checkbox\" name=\"compare_scales\"";
+		if(isset($_POST['compare_scales'])) $compare_scales = $_POST['compare_scales'];
+		else $compare_scales = FALSE;
+		echo "<p><input type=\"radio\" name=\"compare_scales\" value=\"0\"";
+		if(!$compare_scales) echo " checked";
+		echo "> Analyze item(s) with their specified tonal scales<br />";
+		echo "<input type=\"radio\" name=\"compare_scales\" value=\"1\"";
 		if($compare_scales) echo " checked";
-		echo "> Evaluate adequacy of all tuning schemes of ‘<font color=\"blue\">".$csound_file."</font>’ in terms of consonance<br />";
-		echo " ➡ Checking additional intervals such as minor thirds (ratio 6/5) may be necessary";
+		echo "> Evaluate adequacy of all tuning schemes of ‘<font color=\"blue\">".$csound_file."</font>’ in terms of consonance</p>";
 		}
 	else {
-		echo " ➡ You can also compare scales if you declare a ‘-cs’ resource file on top of data and open that file in the <a target=\"_blank\" href=\"csound.php?file=".urlencode($csound_resources.SLASH.$csound_file)."\">Csound resource folder</a>";
+		echo "<font color=\"red\">➡</font> You could also compare scales after declaring a ‘-cs’ resource file on top of data and open the file in the <a target=\"_blank\" href=\"csound.php?file=".urlencode($csound_resources.SLASH.$csound_file)."\">Csound resource folder</a>";
+		$compare_scales = FALSE;
 		}
 	echo "</td></tr>";
-	echo "</table></center>";
+	echo "</table>";
+	if(!isset($_POST['proceed_tonal_analysis'])) echo "<br /><input class=\"shadow\" style=\"background-color:yellow; font-size:large;\" type=\"submit\" formaction=\"".$url_this_page."#tonalanalysis\" title=\"Analyze tonal intervals\" name=\"analyze_tonal\" value=\"ANALYZE ITEM(s)\">";
+	echo "</center>";
+	echo "<input type=\"hidden\" name=\"proceed_tonal_analysis\" value=\"ok\">";
 	echo "</form>";
-	echo "<br/>";
-	$table = explode(chr(10),$content);
-	$imax = count($table);
-	for($i_line = $i_item = 0; $i_line < $imax; $i_line++) {
-		$error_mssg = '';
-		$line = trim($table[$i_line]);
-		if(is_integer($pos=strpos($line,"<?xml")) AND $pos == 0) break;
-		if(is_integer($pos=strpos($line,"//")) AND $pos == 0) continue;
-		if(is_integer($pos=strpos($line,"-")) AND $pos == 0) continue;
-		$segment = create_chunks($line,$i_item,$temp_dir,$temp_folder,1,0,"slice");;
-		if($segment['error'] == "break") break;
-		if($segment['error'] == "continue") continue;
-		$tonal_scale = $segment['tonal_scale'];
-		$i_item++;
-	//	if($i_item <> 2) continue;
-		echo "<p><b>Item #".$i_item."</b> — note convention is ‘<font color=\"red\">".ucfirst(note_convention(intval($note_convention)))."</font>’</p>";
-		if($segment['data_chunked'] == '') {
-			echo "This item is in a syntax that this version of tonal analysis does not support.<br />";
-			continue;
-			}
-		if($tonal_scale <> '') echo "<p>Checking against tonal scale ‘<font color=\"blue\">".$tonal_scale."</font>’ defined in the <a target=\"_blank\" href=\"index.php?path=csound_resources\">Csound resource</a> folder</p>";
-		$tie_mssg = $segment['tie_mssg'];
-		$data_chunked = $segment['data_chunked']; 
-		$content_slice = @file_get_contents($data_chunked,TRUE);
-		$table_slice = explode("[slice]",$content_slice);
-		$i_slice_max = count($table_slice);
-		if($i_slice_max == 0) continue;
-		if($display_items AND $i_slice_max > 2) echo "<p>➡ Item has been sliced to speed up calculations</p>";
-		$p_tempo = $q_tempo = $q_abs_time = 1;
-		$level = $i_token = $p_abs_time = 0;
-		$poly = array(); $i_poly = 0;
-		$max_poly = 0;
-		$current_legato = $i_layer = array();
-		$i_layer[0] = $current_legato[0] = 0;
-		$p_loc_time = 0; $q_loc_time = 1;
-		for($i_slice = 0; $i_slice < $i_slice_max; $i_slice++) {
-			$slice = trim($table_slice[$i_slice]);
-			$slice = str_replace("_scale(".$tonal_scale.",0)",'',$slice);
-			if($slice == '') continue;
-			$slice = preg_replace("/\s*_vel\([^\)]+\)\s*/u",'',$slice);
-			$slice = preg_replace("/\s*_volume\([^\)]+\)\s*/u",'',$slice);
-			$slice = preg_replace("/\s*_chan\([^\)]+\)\s*/u",'',$slice);
-			$slice = preg_replace("/\s*_ins\([^\)]+\)\s*/u",'',$slice);
-			$slice = preg_replace("/\s*_rnd[^\(]+\([^\)]+\)\s*/u",'',$slice);
-			$slice = str_replace("{"," { ",$slice);
-			$slice = str_replace("}"," } ",$slice);
-			$slice = str_replace(","," , ",$slice);
-			$slice = str_replace("-"," - ",$slice);
-			do $slice = str_replace("  "," ",$slice,$count);
-			while($count > 0);
-			// Now we build a phase diagram of this slice
-		//	$mode = "harmonic";
-			$slice_test = $slice;
-		//	$slice_test = str_replace("_legato(0)",'',$slice);
-		//	$slice_test = str_replace("_legato(20)",'',$slice_test);
-		//	$slice_test = str_replace("_tempo(13/15)",'',$slice_test);
-			if($display_items) echo $slice_test."<br /><br />";
-			$result = list_events($slice,$poly,$max_poly,$level,$i_token,$p_tempo,$q_tempo,$p_abs_time,$q_abs_time,$i_layer,$current_legato);
-			if($result['error'] <> '') {
-				echo "<br />".$result['error'];
-				break;
+	if(isset($_POST['proceed_tonal_analysis'])) {
+		$time_start = time();
+		echo "<br/>";
+		$table = explode(chr(10),$content);
+		$imax = count($table);
+		for($i_line = $i_item = 0; $i_line < $imax; $i_line++) {
+			$error_mssg = '';
+			$line = trim($table[$i_line]);
+			if(is_integer($pos=strpos($line,"<?xml")) AND $pos == 0) break;
+			if(is_integer($pos=strpos($line,"//")) AND $pos == 0) continue;
+			if(is_integer($pos=strpos($line,"-")) AND $pos == 0) continue;
+			$segment = create_chunks($line,$i_item,$temp_dir,$temp_folder,1,0,"slice");;
+			if($segment['error'] == "break") break;
+			if($segment['error'] == "continue") continue;
+			$tonal_scale = $segment['tonal_scale'];
+			$i_item++;
+		//	if($i_item <> 2) continue;
+			echo "<p><b>Item #".$i_item."</b> — note convention is ‘<font color=\"red\">".ucfirst(note_convention(intval($note_convention)))."</font>’</p>";
+			if($segment['data_chunked'] == '') {
+				echo "This item is in a syntax that this version of tonal analysis does not support.<br />";
+				continue;
 				}
-			$i_token = 0;
-			$poly = $result['poly'];
-			$p_tempo = $result['p_tempo'];
-			$q_tempo = $result['q_tempo'];
-			$max_poly = $result['max_poly'];
-			$p_abs_time = $result['p_abs_time'];
-			$q_abs_time = $result['q_abs_time'];
-			$current_legato = $result['current_legato'];
-			$level = $result['level'];
-			$i_layer = $result['i_layer'];
-			}
-		$make_event_table = make_event_table($poly);
-		$table_events = $make_event_table['table'];
-		$lcm = $make_event_table['lcm'];
-		if($test_tonal) {
-			echo "<br />";
-			for($i_event = 0; $i_event < count($table_events); $i_event++) {
-				$start = round($table_events[$i_event]['start'] / $lcm, 3);
-				$duration = round(($table_events[$i_event]['end'] - $table_events[$i_event]['start']) / $lcm, 3);
-				echo $table_events[$i_event]['token']." at ".$start." dur = ".$duration."<br />";
-				}
-			echo "<br />";
-			}
-		$matching_list = array();
-		if(!$compare_scales) {
-			echo "<center><table style=\"background-color:Gold;\">";
-			echo "<tr><th>Melodic intervals (up)</th><th>Melodic intervals (down)</th><th>Harmonic intervals</th></tr>";
-			echo "<tr><td>";
-			}
-		$direction = "up";
-		$mode = "melodic";
-		$match_notes = match_notes($table_events,$mode,$direction,$min_duration,$max_distance,$max_gap,$ratio_melodic,$test_intervals,$lcm);
-		$matching_notes = $match_notes['matching_notes'];
-		$number_match = $match_notes['max_match'];
-		usort($matching_notes,"score_sort");
-		if($number_match > 0) {
-			if(!$compare_scales)  echo "Number occurrences:<br />";
-			$max_score = $matching_notes[0]['score'];
-			for($i_match = 0; $i_match < count($matching_notes); $i_match++) {
-				if($max_score > 0)
-					$matching_notes[$i_match]['percent'] = round($matching_notes[$i_match]['score'] * 100 / $max_score);
-				else $matching_notes[$i_match]['percent'] = 0;
-				if(!$compare_scales) echo $matching_notes[$i_match][0]." ▹
-				 ".$matching_notes[$i_match][1]." (".$matching_notes[$i_match]['score']." times) ".$matching_notes[$i_match]['percent']."%<br />";
-				}
-			}
-		$matching_list[$i_item][$mode][$direction] = $matching_notes;
-		if(!$compare_scales) echo "</td><td>";
-		$direction = "down";
-		$mode = "melodic";
-		$match_notes = match_notes($table_events,$mode,$direction,$min_duration,$max_distance,$max_gap,$ratio_melodic,$test_intervals,$lcm);
-		$matching_notes = $match_notes['matching_notes'];
-		$number_match = $match_notes['max_match'];
-		usort($matching_notes,"score_sort");
-		if($number_match > 0) {
-			if(!$compare_scales)  echo "Number occurrences:<br />";
-			$max_score = $matching_notes[0]['score'];
-			for($i_match = 0; $i_match < count($matching_notes); $i_match++) {
-				if($max_score > 0)
-					$matching_notes[$i_match]['percent'] = round($matching_notes[$i_match]['score'] * 100 / $max_score);
-				else $matching_notes[$i_match]['percent'] = 0;
-				if(!$compare_scales) echo $matching_notes[$i_match][0]." ▹
-				 ".$matching_notes[$i_match][1]." (".$matching_notes[$i_match]['score']." times) ".$matching_notes[$i_match]['percent']."%<br />";
-				}
-			}
-		$matching_list[$i_item][$mode][$direction] = $matching_notes;
-		if(!$compare_scales) echo "</td><td>";
-		$direction = "both";
-		$mode = "harmonic";
-		$match_notes = match_notes($table_events,$mode,$direction,$min_duration,$max_distance,$max_gap,$ratio_melodic,$test_intervals,$lcm);
-		$matching_notes = $match_notes['matching_notes'];
-		$number_match = $match_notes['max_match'];
-		usort($matching_notes,"score_sort");
-		if($number_match > 0) {
-			if(!$compare_scales) echo "Seconds:<br />";
-			$max_score = $matching_notes[0]['score'];
-			for($i_match = 0; $i_match < count($matching_notes); $i_match++) {
-				if($max_score > 0)
-					$matching_notes[$i_match]['percent'] = round($matching_notes[$i_match]['score'] * 100 / $max_score);
-				else $matching_notes[$i_match]['percent'] = 0;
-				if(!$compare_scales) echo $matching_notes[$i_match][0]." ≈ ".$matching_notes[$i_match][1]." (".round($matching_notes[$i_match]['score']/$lcm,0)." s) ".$matching_notes[$i_match]['percent']."%<br />";
-				}
-			}
-		$matching_list[$i_item][$mode][$direction] = $matching_notes;
-		if(!$compare_scales) echo "</td></tr></table></center><br />";
-		if($compare_scales) {
-			// Comparing scales
-			$found_scale = FALSE;
-			$grand_total = 0;
-			$scale_known = $resource_file_known = array();
-			$dircontent = scandir($temp_dir);
-			foreach($dircontent as $resource_file) {
-				if(!is_dir($temp_dir.$resource_file)) continue;
-				if(!is_integer($pos=strpos($resource_file,$csound_file)) OR $pos > 0) continue;
-			//	echo $resource_file."<br />";
-				if(is_integer($pos=strpos($resource_file,"-cs")) AND $pos == 0) {
-					$table_name = explode('_',$resource_file);
-					$resource_name = $table_name[0];
-					if(isset($resource_file_known[$resource_name])) continue;
-					$resource_file_known[$resource_name] = TRUE;
-					$scale_folder = $temp_dir.$resource_file.SLASH."scales".SLASH;
-					$dir_scales = scandir($scale_folder);
-					foreach($dir_scales as $scale_textfile) {
-						if(!is_integer($pos=strpos($scale_textfile,".txt"))) continue;
-						$scale_name = str_replace(".txt",'',$scale_textfile);
-						if(isset($scale_known[$scale_name])) continue;
-						$found_scale = TRUE;
-						$good_scale = FALSE;
-						$content_scale = @file_get_contents($scale_folder.$scale_textfile,TRUE);
-						$table_scale = explode(chr(10),$content_scale);
-						for($i_scale_line = 0; $i_scale_line < count($table_scale); $i_scale_line++) {
-							$scale_line = trim($table_scale[$i_scale_line]);
-							if(is_integer($pos=strpos($scale_line,"f")) AND $pos == 0) {
-								$table_scale2 = explode(" ",$scale_line);
-								if(count($table_scale2) < 21) break;
-								$numgrades = $table_scale2[4];
-								if($numgrades <> 12) break;
-								else {
-									for($grade = 0; $grade < 13; $grade++) {
-										$ratio[$grade] = $table_scale2[8 + $grade];
-									//	echo $ratio[$grade]." ";
-										}
-									$good_scale = TRUE;
-									$scale_known[$scale_name] = TRUE;
-									}
-								}
-							if(is_integer($pos=strpos($scale_line,"[")) AND $pos == 0) {
-								$scale_line = str_replace("[",'',$scale_line);
-								$scale_line = str_replace("]",'',$scale_line);
-								$table_scale2 = explode(" ",$scale_line);
-								for($grade = 0; $grade < 13; $grade++) {
-									$p[$grade] = $table_scale2[0 + (2 * $grade)];
-									$q[$grade] = $table_scale2[1 + (2 * $grade)];
-									}
-								}
-							if(is_integer($pos=strpos($scale_line,"/")) AND $pos == 0) {
-								$scale_line = str_replace("/",'',$scale_line);
-								$table_scale2 = explode(" ",$scale_line);
-								for($grade = 0; $grade < 13; $grade++) {
-									if(!isset($note_name[$grade])) {
-										$this_note = $table_scale2[$grade];
-										$this_position = note_position($this_note);
-										if($this_position >= 0) {
-											if($note_convention == 0) $this_note = $Englishnote[$this_position];
-											else if($note_convention == 1) $this_note = $Frenchnote[$this_position];
-											else $this_note = $Indiannote[$this_position];
-											}
-										$note_name[$grade] = $this_note;
-										}
-									}
-								}
-							}
-						if(!$good_scale) continue;
-					//	if($scale_name <> "meantone_rameau_en_sib") continue;
-					//	echo $scale_name." ";
-						$mode = "melodic";
-						$direction = "up";
-						$score_melodic_up = evaluate_scale($i_item,$scale_name,$mode,$direction,$ratio,$matching_list,$position_melodic_mark_up,$position_melodic_mark_down,$position_harmonic_mark,$score_melodic_mark_up,$score_melodic_mark_down,$score_harmonic_mark,$score_perfect_fifth,$score_harmonic_third,$score_wolf_fifth,$score_pythagorean_third);
-						$direction = "down";
-						$score_melodic_down = evaluate_scale($i_item,$scale_name,$mode,$direction,$ratio,$matching_list,$position_melodic_mark_up,$position_melodic_mark_down,$position_harmonic_mark,$score_melodic_mark_up,$score_melodic_mark_down,$score_harmonic_mark,$score_perfect_fifth,$score_harmonic_third,$score_wolf_fifth,$score_pythagorean_third);
-						$mode = "harmonic";
-						$direction = "both";
-						$score_harmonic = evaluate_scale($i_item,$scale_name,$mode,$direction,$ratio,$matching_list,$position_melodic_mark_up,$position_melodic_mark_down,$position_harmonic_mark,$score_melodic_mark_up,$score_melodic_mark_down,$score_harmonic_mark,$score_perfect_fifth,$score_harmonic_third,$score_wolf_fifth,$score_pythagorean_third);
-						$evaluate['melodic_up'][$scale_name] = round($score_melodic_up);
-						$evaluate['melodic_down'][$scale_name] = round($score_melodic_down);
-						$evaluate['harmonic'][$scale_name] = round($score_harmonic);
-						$total_score[$scale_name] = $score_melodic_up + $score_melodic_down + $score_harmonic;
-						$grand_total += $total_score[$scale_name];
-						}
-					arsort($total_score);
-					if($grand_total > 0) {
-						echo "<center><table style=\"background-color:Gold;\">";
-						echo "<tr><th>Select</th><th>Scale</th><th>Melodic score (up)</th><th>Melodic score (down)</th><th>Harmonic score</th><th>Total</th></tr>";
-						foreach($total_score as $scale => $total) {
-							if($total == 0) continue;
-							echo "<tr>";
-							echo "<td>";
-							$display_result[$scale] = isset($_POST['display_result_'.$i_item."_".$scale]);
-							echo "<input type=\"checkbox\" name=\"display_result_".$i_item."_".$scale."\"";
-							if($display_result[$scale]) echo " checked";
-							echo ">";
-							echo "</td>";
-							echo "<td>".$scale."</td><td>".$evaluate['melodic_up'][$scale]."</td><td>".$evaluate['melodic_down'][$scale]."</td><td>".$evaluate['harmonic'][$scale]."</td><td>".round($total)."</td>";
-							echo "</tr>";
-							}
-						echo "</table></center><br />";
-						}
-					else echo "<p style=\"text-align:center;\"><font color=\"red\">No matching tonal scale was found.</font><br />";
+			if($tonal_scale <> '' AND !$compare_scales) echo "<p>Checking against tonal scale ‘<font color=\"blue\">".$tonal_scale."</font>’ defined in the <a target=\"_blank\" href=\"index.php?path=csound_resources\">Csound resource</a> folder</p>";
+			$tie_mssg = $segment['tie_mssg'];
+			$data_chunked = $segment['data_chunked']; 
+			$content_slice = @file_get_contents($data_chunked,TRUE);
+			$table_slice = explode("[slice]",$content_slice);
+			$i_slice_max = count($table_slice);
+			if($i_slice_max == 0) continue;
+			if($display_items AND $i_slice_max > 2) echo "<p>➡ Item has been sliced to speed up calculations</p>";
+			$p_tempo = $q_tempo = $q_abs_time = 1;
+			$level = $i_token = $p_abs_time = 0;
+			$poly = array(); $i_poly = 0;
+			$max_poly = 0;
+			$current_legato = $i_layer = array();
+			$i_layer[0] = $current_legato[0] = 0;
+			$p_loc_time = 0; $q_loc_time = 1;
+			for($i_slice = 0; $i_slice < $i_slice_max; $i_slice++) {
+				$slice = trim($table_slice[$i_slice]);
+				$slice = str_replace("_scale(".$tonal_scale.",0)",'',$slice);
+				if($slice == '') continue;
+				$slice = preg_replace("/\s*_vel\([^\)]+\)\s*/u",'',$slice);
+				$slice = preg_replace("/\s*_volume\([^\)]+\)\s*/u",'',$slice);
+				$slice = preg_replace("/\s*_chan\([^\)]+\)\s*/u",'',$slice);
+				$slice = preg_replace("/\s*_ins\([^\)]+\)\s*/u",'',$slice);
+				$slice = preg_replace("/\s*_rnd[^\(]+\([^\)]+\)\s*/u",'',$slice);
+				$slice = str_replace("{"," { ",$slice);
+				$slice = str_replace("}"," } ",$slice);
+				$slice = str_replace(","," , ",$slice);
+				$slice = str_replace("-"," - ",$slice);
+				do $slice = str_replace("  "," ",$slice,$count);
+				while($count > 0);
+				// Now we build a phase diagram of this slice
+			//	$mode = "harmonic";
+				$slice_test = $slice;
+			//	$slice_test = str_replace("_legato(0)",'',$slice);
+			//	$slice_test = str_replace("_legato(20)",'',$slice_test);
+			//	$slice_test = str_replace("_tempo(13/15)",'',$slice_test);
+				if($display_items) echo $slice_test."<br /><br />";
+				$result = list_events($slice,$poly,$max_poly,$level,$i_token,$p_tempo,$q_tempo,$p_abs_time,$q_abs_time,$i_layer,$current_legato);
+				if($result['error'] <> '') {
+					echo "<br />".$result['error'];
+					break;
 					}
-				if($found_scale AND isset($display_result)) {
-					foreach($display_result as $tonal_scale => $this_result) {
-						if(!$this_result) continue;
-						$mode = "harmonic";
-						$direction = "both";
-						$result = show_relations_on_image($i_item,$matching_list,$mode,$direction,$tonal_scale,$note_convention,$position_melodic_mark_up,$position_melodic_mark_down,$position_harmonic_mark,FALSE);
-						$mode = "melodic";
-						$direction = "both";
-						$result = show_relations_on_image($i_item,$matching_list,$mode,$direction,$tonal_scale,$note_convention,$position_melodic_mark_up,$position_melodic_mark_down,$position_harmonic_mark,FALSE);
-						echo "<br />";
-						}
+				$i_token = 0;
+				$poly = $result['poly'];
+				$p_tempo = $result['p_tempo'];
+				$q_tempo = $result['q_tempo'];
+				$max_poly = $result['max_poly'];
+				$p_abs_time = $result['p_abs_time'];
+				$q_abs_time = $result['q_abs_time'];
+				$current_legato = $result['current_legato'];
+				$level = $result['level'];
+				$i_layer = $result['i_layer'];
+				}
+			$make_event_table = make_event_table($poly);
+			$table_events = $make_event_table['table'];
+			$lcm = $make_event_table['lcm'];
+			if($test_tonal) {
+				echo "<br />";
+				for($i_event = 0; $i_event < count($table_events); $i_event++) {
+					$start = round($table_events[$i_event]['start'] / $lcm, 3);
+					$duration = round(($table_events[$i_event]['end'] - $table_events[$i_event]['start']) / $lcm, 3);
+					echo $table_events[$i_event]['token']." at ".$start." dur = ".$duration."<br />";
 					}
+				echo "<br />";
 				}
-			if(!$found_scale) { 
-				echo "<p style=\"text-align:center;\"><font color=\"red\">No definition of tonal scale was found.</font><br />";
-				echo "You need to <a target=\"_blank\" href=\"csound.php?file=".urlencode($csound_resources.SLASH.$csound_file)."\">open</a> the ‘<font color=\"blue\">".$csound_file."</font>’ Csound resource file to use its tonal scale definitions.</p><br />";
+			$matching_list = array();
+			if(!$compare_scales) {
+				echo "<center><table style=\"background-color:Gold;\">";
+				echo "<tr><th>Melodic intervals (up)</th><th>Melodic intervals (down)</th><th>Harmonic intervals</th></tr>";
+				echo "<tr><td>";
 				}
-			}
-		else {
-			$mode = "harmonic";
-			$direction = "both";
-			$result = show_relations_on_image($i_item,$matching_list,$mode,$direction,$tonal_scale,$note_convention,$position_melodic_mark_up,$position_melodic_mark_down,$position_harmonic_mark,TRUE);
+			$direction = "up";
 			$mode = "melodic";
+			$match_notes = match_notes($table_events,$mode,$direction,$min_duration,$max_distance,$max_gap,$ratio_melodic,$test_intervals,$lcm);
+			$matching_notes = $match_notes['matching_notes'];
+			$number_match = $match_notes['max_match'];
+			usort($matching_notes,"score_sort");
+			if($number_match > 0) {
+				if(!$compare_scales)  echo "Number occurrences:<br />";
+				$max_score = $matching_notes[0]['score'];
+				for($i_match = 0; $i_match < count($matching_notes); $i_match++) {
+					if($max_score > 0)
+						$matching_notes[$i_match]['percent'] = round($matching_notes[$i_match]['score'] * 100 / $max_score);
+					else $matching_notes[$i_match]['percent'] = 0;
+					if(!$compare_scales) echo $matching_notes[$i_match][0]." ▹
+					".$matching_notes[$i_match][1]." (".$matching_notes[$i_match]['score']." times) ".$matching_notes[$i_match]['percent']."%<br />";
+					}
+				}
+			$matching_list[$i_item][$mode][$direction] = $matching_notes;
+			if(!$compare_scales) echo "</td><td>";
+			$direction = "down";
+			$mode = "melodic";
+			$match_notes = match_notes($table_events,$mode,$direction,$min_duration,$max_distance,$max_gap,$ratio_melodic,$test_intervals,$lcm);
+			$matching_notes = $match_notes['matching_notes'];
+			$number_match = $match_notes['max_match'];
+			usort($matching_notes,"score_sort");
+			if($number_match > 0) {
+				if(!$compare_scales)  echo "Number occurrences:<br />";
+				$max_score = $matching_notes[0]['score'];
+				for($i_match = 0; $i_match < count($matching_notes); $i_match++) {
+					if($max_score > 0)
+						$matching_notes[$i_match]['percent'] = round($matching_notes[$i_match]['score'] * 100 / $max_score);
+					else $matching_notes[$i_match]['percent'] = 0;
+					if(!$compare_scales) echo $matching_notes[$i_match][0]." ▹
+					".$matching_notes[$i_match][1]." (".$matching_notes[$i_match]['score']." times) ".$matching_notes[$i_match]['percent']."%<br />";
+					}
+				}
+			$matching_list[$i_item][$mode][$direction] = $matching_notes;
+			if(!$compare_scales) echo "</td><td>";
 			$direction = "both";
-			$result = show_relations_on_image($i_item,$matching_list,$mode,$direction,$tonal_scale,$note_convention,$position_melodic_mark_up,$position_melodic_mark_down,$position_harmonic_mark,TRUE);
-			$scalename = $result['scalename'];
-			$resource_name = $result['resource_name'];
-			if($scalename == '' OR $resource_name == '')
-				echo "<div style=\"padding:12px; text-align:center;\">No tonal scale specified.<br />Images display<br />equal-tempered scale.</div><br />";
-			else 
-				echo "<div style=\"padding:12px; text-align:center;\">Tonal scale<br />‘<font color=\"blue\">".$scalename."</font>’<br />was found in<br />a temporary folder<br />of ‘<font color=\"blue\">".$resource_name."</font>’</div>";
+			$mode = "harmonic";
+			$match_notes = match_notes($table_events,$mode,$direction,$min_duration,$max_distance,$max_gap,$ratio_melodic,$test_intervals,$lcm);
+			$matching_notes = $match_notes['matching_notes'];
+			$number_match = $match_notes['max_match'];
+			usort($matching_notes,"score_sort");
+			if($number_match > 0) {
+				if(!$compare_scales) echo "Seconds:<br />";
+				$max_score = $matching_notes[0]['score'];
+				for($i_match = 0; $i_match < count($matching_notes); $i_match++) {
+					if($max_score > 0)
+						$matching_notes[$i_match]['percent'] = round($matching_notes[$i_match]['score'] * 100 / $max_score);
+					else $matching_notes[$i_match]['percent'] = 0;
+					if(!$compare_scales) echo $matching_notes[$i_match][0]." ≈ ".$matching_notes[$i_match][1]." (".round($matching_notes[$i_match]['score']/$lcm,0)." s) ".$matching_notes[$i_match]['percent']."%<br />";
+					}
+				}
+			$matching_list[$i_item][$mode][$direction] = $matching_notes;
+			if(!$compare_scales) echo "</td></tr></table></center><br />";
+			if($compare_scales) {
+				// Comparing scales
+				$found_scale = FALSE;
+				$grand_total = 0;
+				$scale_known = $resource_file_known = array();
+				$dircontent = scandir($temp_dir);
+				foreach($dircontent as $resource_file) {
+					if(!is_dir($temp_dir.$resource_file)) continue;
+					if(!is_integer($pos=strpos($resource_file,$csound_file)) OR $pos > 0) continue;
+				//	echo $resource_file."<br />";
+					if(is_integer($pos=strpos($resource_file,"-cs")) AND $pos == 0) {
+						$table_name = explode('_',$resource_file);
+						$resource_name = $table_name[0];
+						if(isset($resource_file_known[$resource_name])) continue;
+						$resource_file_known[$resource_name] = TRUE;
+						$scale_folder = $temp_dir.$resource_file.SLASH."scales".SLASH;
+						$dir_scales = scandir($scale_folder);
+						foreach($dir_scales as $scale_textfile) {
+							if(!is_integer($pos=strpos($scale_textfile,".txt"))) continue;
+							$scale_name = str_replace(".txt",'',$scale_textfile);
+							if(isset($scale_known[$scale_name])) continue;
+							$found_scale = TRUE;
+							$good_scale = FALSE;
+							$content_scale = @file_get_contents($scale_folder.$scale_textfile,TRUE);
+							$table_scale = explode(chr(10),$content_scale);
+							// Find real name of scale, e.g. "F#maj" in file "F_maj.txt"
+							$new_name = str_replace('"','',trim($table_scale[0]));
+							if($new_name <> '') $scale_name = $new_name;
+							for($i_scale_line = 0; $i_scale_line < count($table_scale); $i_scale_line++) {
+								$scale_line = trim($table_scale[$i_scale_line]);
+								if(is_integer($pos=strpos($scale_line,"f")) AND $pos == 0) {
+									$table_scale2 = explode(" ",$scale_line);
+									if(count($table_scale2) < 21) break;
+									$numgrades = $table_scale2[4];
+									if($numgrades <> 12) break;
+									else {
+										for($grade = 0; $grade < 13; $grade++) {
+											$ratio[$grade] = $table_scale2[8 + $grade];
+											}
+										$good_scale = TRUE;
+										$scale_known[$scale_name] = TRUE;
+										}
+									}
+								if(is_integer($pos=strpos($scale_line,"[")) AND $pos == 0) {
+									$scale_line = str_replace("[",'',$scale_line);
+									$scale_line = str_replace("]",'',$scale_line);
+									$table_scale2 = explode(" ",$scale_line);
+									for($grade = 0; $grade < 13; $grade++) {
+										$p[$grade] = $table_scale2[0 + (2 * $grade)];
+										$q[$grade] = $table_scale2[1 + (2 * $grade)];
+										}
+									}
+								if(is_integer($pos=strpos($scale_line,"/")) AND $pos == 0) {
+									$scale_line = str_replace("/",'',$scale_line);
+									$table_scale2 = explode(" ",$scale_line);
+									for($grade = 0; $grade < 13; $grade++) {
+										if(!isset($note_name[$grade])) {
+											$this_note = $table_scale2[$grade];
+											$this_position = note_position($this_note);
+											if($this_position >= 0) {
+												if($note_convention == 0) $this_note = $Englishnote[$this_position];
+												else if($note_convention == 1) $this_note = $Frenchnote[$this_position];
+												else $this_note = $Indiannote[$this_position];
+												}
+											$note_name[$grade] = $this_note;
+											}
+										}
+									}
+								}
+							if(!$good_scale) continue;
+							$mode = "melodic";
+							$direction = "up";
+							$score_melodic_up = evaluate_scale($i_item,$scale_name,$mode,$direction,$ratio,$matching_list,$position_melodic_mark_up,$position_melodic_mark_down,$position_harmonic_mark,$score_melodic_mark_up,$score_melodic_mark_down,$score_harmonic_mark,$score_perfect_fifth,$score_harmonic_third,$score_wolf_fifth,$score_pythagorean_third);
+							$direction = "down";
+							$score_melodic_down = evaluate_scale($i_item,$scale_name,$mode,$direction,$ratio,$matching_list,$position_melodic_mark_up,$position_melodic_mark_down,$position_harmonic_mark,$score_melodic_mark_up,$score_melodic_mark_down,$score_harmonic_mark,$score_perfect_fifth,$score_harmonic_third,$score_wolf_fifth,$score_pythagorean_third);
+							$mode = "harmonic";
+							$direction = "both";
+							$score_harmonic = evaluate_scale($i_item,$scale_name,$mode,$direction,$ratio,$matching_list,$position_melodic_mark_up,$position_melodic_mark_down,$position_harmonic_mark,$score_melodic_mark_up,$score_melodic_mark_down,$score_harmonic_mark,$score_perfect_fifth,$score_harmonic_third,$score_wolf_fifth,$score_pythagorean_third);
+							$evaluate['melodic_up'][$scale_name] = round($score_melodic_up);
+							$evaluate['melodic_down'][$scale_name] = round($score_melodic_down);
+							$evaluate['harmonic'][$scale_name] = round($score_harmonic);
+							$total_score[$scale_name] = $weigh_melodic_up * $score_melodic_up + $weigh_melodic_down * $score_melodic_down + $weigh_harmonic * $score_harmonic;
+							$grand_total += $total_score[$scale_name];
+							}
+						arsort($total_score);
+						if($grand_total > 0) {
+							echo "<center><table style=\"background-color:Gold;\">";
+							echo "<tr><th>Select</th><th>Scale</th><th>Melodic score (up)</th><th>Melodic score (down)</th><th>Harmonic score</th><th>Total</th></tr>";
+							foreach($total_score as $scale => $total) {
+								if($total == 0) continue;
+								echo "<tr>";
+								echo "<td>";
+								$display_result[$scale] = isset($_POST['display_result_'.$i_item."_".$scale]);
+								echo "<input type=\"checkbox\" name=\"display_result_".$i_item."_".$scale."\"";
+								if($display_result[$scale]) echo " checked";
+								echo ">";
+								echo "</td>";
+								$clean_name_of_file = str_replace("#","_",$scale);
+								$clean_name_of_file = str_replace("/","_",$clean_name_of_file);
+								$scale_link = $dir_scale_images.$clean_name_of_file.".png";
+								echo "<td>";
+								if(file_exists($scale_link))
+									echo "<a onclick=\"window.open('".$scale_link."','".$clean_name_of_file."_image','width=800,height=657,left=100'); return false;\" href=\"".$scale_link."\">".$scale."</a>";
+								else echo $scale;
+								echo "</td><td>".$evaluate['melodic_up'][$scale]."</td><td>".$evaluate['melodic_down'][$scale]."</td><td>".$evaluate['harmonic'][$scale]."</td><td>".round($total)."</td>";
+								echo "</tr>";
+								}
+							echo "<tr><td colspan=\"6\">&nbsp;<font color=\"red\"><b>↑</b></font>&nbsp;&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" formaction=\"".$url_this_page."#tonalanalysis\" title=\"Analyze tonal intervals\" name=\"analyze_tonal\" value=\"ANALYZE AGAIN\"> to display results for selected scales</td></tr>";
+							echo "</table></center><br />";
+							}
+						else echo "<p style=\"text-align:center;\"><font color=\"red\">No matching tonal scale was found.</font><br />";
+						}
+					if($found_scale AND isset($display_result)) {
+						foreach($display_result as $tonal_scale => $this_result) {
+							if(!$this_result) continue;
+							$mode = "harmonic";
+							$direction = "both";
+							$result = show_relations_on_image($i_item,$matching_list,$mode,$direction,$tonal_scale,$note_convention,$position_melodic_mark_up,$position_melodic_mark_down,$position_harmonic_mark,FALSE);
+							$mode = "melodic";
+							$direction = "both";
+							$result = show_relations_on_image($i_item,$matching_list,$mode,$direction,$tonal_scale,$note_convention,$position_melodic_mark_up,$position_melodic_mark_down,$position_harmonic_mark,FALSE);
+							echo "<br />";
+							}
+						}
+					}
+				if(!$found_scale) { 
+					echo "<p style=\"text-align:center;\"><font color=\"red\">No definition of tonal scale was found.</font><br />";
+					echo "You need to <a target=\"_blank\" href=\"csound.php?file=".urlencode($csound_resources.SLASH.$csound_file)."\">open</a> the ‘<font color=\"blue\">".$csound_file."</font>’ Csound resource file to use its tonal scale definitions.</p><br />";
+					}
+				}
+			else {
+				$mode = "harmonic";
+				$direction = "both";
+				$result = show_relations_on_image($i_item,$matching_list,$mode,$direction,$tonal_scale,$note_convention,$position_melodic_mark_up,$position_melodic_mark_down,$position_harmonic_mark,TRUE);
+				$mode = "melodic";
+				$direction = "both";
+				$result = show_relations_on_image($i_item,$matching_list,$mode,$direction,$tonal_scale,$note_convention,$position_melodic_mark_up,$position_melodic_mark_down,$position_harmonic_mark,TRUE);
+				$scalename = $result['scalename'];
+				$resource_name = $result['resource_name'];
+				if($scalename == '' OR $resource_name == '')
+					echo "<div style=\"padding:12px; text-align:center;\">No tonal scale specified.<br />Images display<br />equal-tempered scale.</div><br />";
+				else 
+					echo "<div style=\"padding:12px; text-align:center;\">Tonal scale<br />‘<font color=\"blue\">".$scalename."</font>’<br />was found in<br />a temporary folder<br />of ‘<font color=\"blue\">".$resource_name."</font>’</div>";
+				}
+			echo "<hr>";
 			}
-		echo "<hr>";
+		echo "<p style=\"text-align:center;\">Check documentation: <a target=\"_blank\" href=\"https://bolprocessor.org/tonal-analysis/\">https://bolprocessor.org/tonal-analysis/</a></p>";
+		$duration_process = time() - $time_start;
+		if($duration_process > 20 OR TRUE) echo "<p style=\"text-align:center; color:red;\"><small>All data processed in ".$duration_process." seconds</small></p>";
+		echo "<br /></div>";
 		}
-	echo "</div>";
 	}
 else {
-	if($csound_file <> '') echo "<p><font color=\"red\">➡</font> It would be wise to <a target=\"_blank\" href=\"csound.php?file=".urlencode($csound_resources.SLASH.$csound_file)."\">open</a> the ‘<font color=\"blue\">".$csound_file."</font>’ Csound resource file to use its tonal scale definitions.</p>";
 	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-	echo "<p><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" formaction=\"".$url_this_page."#tonalanalysis\" title=\"Analyze tonal intervals\" name=\"analyze_tonal\" value=\"ANALYZE INTERVALS\"";
+	echo "<p><input style=\"background-color:yellow; font-size:large; float:left; margin-right:1em;\" type=\"submit\" formaction=\"".$url_this_page."#tonalanalysis\" title=\"Analyze tonal intervals\" name=\"analyze_tonal\" value=\"ANALYZE INTERVALS\"";
 	if(!$tonal_analysis_possible) echo " disabled";
 	echo ">";
-	echo " ➡ melodic and harmonic tonal intervals of (all) item(s)</p>";
-	echo "<p><i>Ignoring channels, instruments, periods, sound-objects and random performance controls</i></p>";
+	echo "Melodic and harmonic tonal intervals of (all) item(s), ignoring channels, instruments, periods, sound-objects and random performance controls.</p>";
+	if($csound_file <> '') echo "<p style=\"text-align:center;\"><font color=\"red\">➡</font> It would be wise to <a target=\"_blank\" href=\"csound.php?file=".urlencode($csound_resources.SLASH.$csound_file)."\">open</a> the ‘<font color=\"blue\">".$csound_file."</font>’ Csound resource file to use its tonal scale definitions.</p>";
 	echo "</form>";
 	echo "<hr>";
 	}
@@ -2305,6 +2351,7 @@ function create_chunks($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxc
 	}
 
 function list_events($slice,$poly,$max_poly,$level_init,$i_token_init,$p_tempo,$q_tempo,$p_abs_time_init,$q_abs_time_init,$i_layer,$current_legato) {
+	set_time_limit(1000);
 	global $max_term_in_fraction;
 	global $Englishnote,$Frenchnote,$Indiannote,$AltEnglishnote,$AltFrenchnote,$AltIndiannote;
 	$test_fraction = FALSE;
@@ -2665,8 +2712,9 @@ function matching_intervals($start1,$end1,$start2,$end2,$min_dur,$max_gap,$ratio
 function show_relations_on_image($i_item,$matching_list,$mode,$direction,$scalename,$note_convention,$position_melodic_mark_up,$position_melodic_mark_down,$position_harmonic_mark,$float) {
 	global $dir_scale_images,$temp_dir,$temp_folder,$dir_scale_images;
 	global $Englishnote,$Frenchnote,$Indiannote;
-
-	$save_codes_dir = $temp_dir.$temp_folder.SLASH.$scalename."_codes_".$mode."_".$i_item.SLASH;
+	$clean_name_of_file = str_replace("#","_",$scalename);
+	$clean_name_of_file = str_replace("/","_",$clean_name_of_file);
+	$save_codes_dir = $temp_dir.$temp_folder.SLASH.$clean_name_of_file."_codes_".$mode."_".$i_item.SLASH;
 //	echo "save_codes_dir = ".$save_codes_dir."<br />";
 	$width_max = 8;
 	if(!is_dir($save_codes_dir)) mkdir($save_codes_dir);
@@ -2707,7 +2755,6 @@ function show_relations_on_image($i_item,$matching_list,$mode,$direction,$scalen
 			$note_name[$direction][$position[$direction][$i_match][1]] = $matching_notes[$direction][$i_match][1];
 			}
 		}
-		
 	for($i_mark = 0; $i_mark < count($position_melodic_mark_up); $i_mark++) {
 		if(intval($position_melodic_mark_up[$i_mark]['p']) < 1) continue; 
 		if($position_melodic_mark_up[$i_mark]['q'] == 0) {
@@ -2739,7 +2786,7 @@ function show_relations_on_image($i_item,$matching_list,$mode,$direction,$scalen
 			if(!is_dir($temp_dir.$resource_file)) continue;
 	//		echo $resource_file."<br />";
 			if(is_integer($pos=strpos($resource_file,"-cs")) AND $pos == 0) {
-				$scale_textfile = $temp_dir.$resource_file.SLASH."scales".SLASH.$scalename.".txt";
+				$scale_textfile = $temp_dir.$resource_file.SLASH."scales".SLASH.$clean_name_of_file.".txt";
 			//	echo $scale_textfile." ???<br />";
 				if(file_exists($scale_textfile)) {
 					$found = TRUE;

@@ -19,13 +19,16 @@ require_once("_header.php");
 
 $csound_source = $_POST['csound_source'];
 // echo $dir_scales." @@@<br />";
-$file_link = $dir_scales.$filename.".txt";
+
+$clean_filename = str_replace("#","_",$filename);
+$clean_filename = str_replace("/","_",$clean_filename);
+$file_link = $dir_scales.$clean_filename.".txt";
 if(!file_exists($file_link)) {
 	echo "File may have been mistakenly deleted: ".$file_link;
 	echo "<br />Return to the ‘-cs’ file to restore it!"; die();
 	}
 
-$save_codes_dir = $dir_scales.$filename."_codes";
+$save_codes_dir = $dir_scales.$clean_filename."_codes";
 if(!is_dir($save_codes_dir)) mkdir($save_codes_dir);
 $image_file = $save_codes_dir.SLASH."image.php";
 $h_image = fopen($image_file,"w");
@@ -70,16 +73,22 @@ if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST
 	if(isset($_POST['scale_name'])) $new_scale_name = trim($_POST['scale_name']);
 	else $new_scale_name = '';
 	if($new_scale_name == '') $new_scale_name = $filename;
-	$result1 = check_duplicate_name($dir_scales,$new_scale_name.".txt");
-	$result2 = check_duplicate_name($dir_scales,$new_scale_name.".old");
+	$clean_scale_name = str_replace("#","_",$new_scale_name);
+	$clean_scale_name = str_replace("/","_",$clean_scale_name);
+	$result1 = check_duplicate_name($dir_scales,$clean_scale_name.".txt");
+	$result2 = check_duplicate_name($dir_scales,$clean_scale_name.".old");
 	if($new_scale_name <> $filename AND ($result1 OR $result2)) {
 		echo "<p><font color=\"red\">WARNING</font>: This name <font color=\"blue\">‘".$new_scale_name."’</font> already exists</p>";
 		$scale_name = $filename;
 		}
 	else {
-		rename($dir_scales.$filename.".txt",$dir_scales.$new_scale_name.".txt");
+		$clean_scale_name1 = str_replace("#","_",$filename);
+		$clean_scale_name1 = str_replace("/","_",$clean_scale_name1);
+		rename($dir_scales.$clean_scale_name1.".txt",$dir_scales.$clean_scale_name.".txt");
 		$_GET['scalefilename'] = $filename = $scale_name = $new_scale_name;
-		$file_link = $dir_scales.$filename.".txt";
+		$clean_scale_name = str_replace("#","_",$filename);
+		$clean_scale_name = str_replace("/","_",$clean_scale_name);
+		$file_link = $dir_scales.$clean_scale_name.".txt";
 		}
 	$numgrades_fullscale = $_POST['numgrades'];
 	$interval = trim($_POST['interval']);
@@ -1453,6 +1462,8 @@ if($done AND $numgrades_with_labels > 2 AND !$warned_ratios) {
 			}
 		$new_scale_name = trim($_POST['reduce_scale_name']);
 		$new_scale_name = preg_replace("/\s+/u",' ',$new_scale_name);
+		$new_scale_name = str_replace("#","_",$new_scale_name);
+		$new_scale_name = str_replace("/","_",$new_scale_name);
 		$new_scale_file = $new_scale_name.".txt";
 		$old_scale_file = $new_scale_name.".old";
 		$result1 = check_duplicate_name($dir_scales,$new_scale_file);
@@ -1740,6 +1751,8 @@ if($done AND $numgrades_with_labels > 2 AND !$warned_ratios) {
 		if($new_scale_name == '')
 			$error_transpose .= "<font color=\"red\"> ➡ ERROR: Name of new scale has not been entered</font><br />";
 		$new_scale_name = preg_replace("/\s+/u",' ',$new_scale_name);
+		$new_scale_name = str_replace("#","_",$new_scale_name);
+		$new_scale_name = str_replace("/","_",$new_scale_name);
 		$new_scale_file = $new_scale_name.".txt";
 		$old_scale_file = $new_scale_name.".old";
 		$result1 = check_duplicate_name($dir_scales,$new_scale_file);

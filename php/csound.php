@@ -47,10 +47,10 @@ if(isset($_POST['create_scale'])) {
 	$new_scale_name = trim($_POST['scale_name']);
 	$new_scale_name = preg_replace("/\s+/u",' ',$new_scale_name);
 	if($new_scale_name <> '') {
-		$new_scale_file = $new_scale_name.".txt";
-		$old_scale_file = $new_scale_name.".old";
 		$clean_name_of_file = str_replace("#","_",$new_scale_name);
 		$clean_name_of_file = str_replace("/","_",$clean_name_of_file);
+		$new_scale_file = $clean_name_of_file.".txt";
+		$old_scale_file = $clean_name_of_file.".old";
 		$result1 = check_duplicate_name($dir_scale_images,$clean_name_of_file.".png");
 		$result2 = check_duplicate_name($dir_scale_images,$clean_name_of_file."-source.txt");
 		$result3 = check_duplicate_name($dir_scales,$new_scale_file);
@@ -110,14 +110,13 @@ if(isset($_POST['empty_trash'])) {
 for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
 	if(isset($_POST['delete_scale_'.$i_scale])) {
 		$scalefilename = urldecode($_GET['scalefilename']);
-		$file_link = $dir_scales.$scalefilename.".txt";
-		$new_file_link = $dir_scales.$scalefilename.".old";
-		rename($file_link,$new_file_link);
 		$clean_name_of_file = str_replace("#","_",$scalefilename);
 		$clean_name_of_file = str_replace("/","_",$clean_name_of_file);
+		$file_link = $dir_scales.$clean_name_of_file.".txt";
+		$new_file_link = $dir_scales.$clean_name_of_file.".old";
+		rename($file_link,$new_file_link);
 		@unlink($dir_scale_images.$clean_name_of_file.".png");
 		@unlink($dir_scale_images.$clean_name_of_file."-source.txt");
-		
 		$need_to_save = TRUE;
 		}
 	}
@@ -132,8 +131,10 @@ if(isset($_POST['copy_this_scale'])) {
 		if($destination == $filename) {
 			$new_scale_name = trim($_POST['duplicate_name']);
 			$new_scale_name = preg_replace("/\s+/u",' ',$new_scale_name);
-			$new_scale_file = $new_scale_name.".txt";
-			$old_scale_file = $new_scale_name.".old";
+			$clean_name_of_file = str_replace("#","_",$new_scale_name);
+			$clean_name_of_file = str_replace("/","_",$clean_name_of_file);
+			$new_scale_file = $clean_name_of_file.".txt";
+			$old_scale_file = $clean_name_of_file.".old";
 			$result1 = check_duplicate_name($dir_scales,$new_scale_file);
 			$result2 = check_duplicate_name($dir_scales,$old_scale_file);
 			if($result1 OR $result2) {
@@ -405,7 +406,7 @@ echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/fo
 echo "<p style=\"text-align:left;\"><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"savealldata\" onclick=\"this.form.target='_self';return true;\" value=\"SAVE ‘".$filename."’\"></p>";
 
 if($autosave) {
-	echo "<p><font color=\"red\">➡</font> This file is <font color=\"red\">autosaved</font> every 30 seconds. Keep this page open as long as you are editing instruments or scales!</p>";
+	echo "<p><font color=\"red\">➡</font> All data is <font color=\"red\">autosaved</font> if changes occurred every 30 seconds. Keep this page open as long as you are editing instruments or scales!</p>";
 	echo "<script type=\"text/javascript\" src=\"autosaveInstruments.js\"></script>";
 	}
 
@@ -719,7 +720,9 @@ for($i = $i + 1; $i < $imax_file; $i++) {
 	if($line[0] == '"') {
 		$i_scale++;
 		$scale_name[$i_scale] = str_replace('"','',$line);
-		$table_name = $dir_scales.$scale_name[$i_scale].".txt";
+		$clean_name_of_file = str_replace("#","_",$scale_name[$i_scale]);
+		$clean_name_of_file = str_replace("/","_",$clean_name_of_file);
+		$table_name = $dir_scales.$clean_name_of_file.".txt";
 		if(!file_exists($table_name)) {
 			$handle = fopen($table_name,"w");
 			fclose($handle);
@@ -778,7 +781,9 @@ for($i = $i + 1; $i < $imax_file; $i++) {
 		//	echo "2) i_scale = ".$i_scale."<br />";
 			$scale_name[$i_scale] = "scale_".$i_scale;
 			}
-		$table_name = $dir_scales.$scale_name[$i_scale].".txt";
+		$clean_name_of_file = str_replace("#","_",$scale_name[$i_scale]);
+		$clean_name_of_file = str_replace("/","_",$clean_name_of_file);
+		$table_name = $dir_scales.$clean_name_of_file.".txt";
 		if(!file_exists($table_name)) {
 			$handle = fopen($table_name,"w");
 			fclose($handle);
