@@ -1343,6 +1343,99 @@ function fix_new_name($name) {
 	return $name;
 	}
 
+function type_of_file($thisfile) {
+	$table = explode(".",$thisfile);
+	$prefix = $table[0];
+	if(strlen($prefix) <> 3 OR !is_integer($pos=strpos($prefix,"-")) OR $pos <> 0)
+		$prefix = '';
+	$extension = end($table);
+	if($prefix.".".$extension == $thisfile) $extension = '';
+	switch($prefix) {
+		case '-gr':
+			$type = "grammar"; break;
+		case '-da':
+			$type = "data"; break;
+		case '-ho':
+			$type = "alphabet"; break;
+		case '-se':
+			$type = "settings"; break;
+		case '-cs':
+			$type = "csound"; break;
+		case '-mi':
+			$type = "objects"; break;
+		case '-or':
+			$type = "orchestra"; break;
+		case '-in':
+			$type = "interaction"; break;
+		case '-md':
+			$type = "midisetup"; break;
+		case '-tb':
+			$type = "timebase"; break;
+		case '-kb':
+			$type = "keyboard"; break;
+		case '-gl':
+			$type = "glossary"; break;
+		case '-sc':
+			$type = "script"; break;
+		default:
+			$type = ''; break;
+		}
+	$found = FALSE;
+	switch($extension) {
+		case "bpgr": $type = "grammar"; $found = TRUE; break;
+		case "bpda": $type = "data"; $found = TRUE; break;
+		case "bpho": $type = "alphabet"; $found = TRUE; break;
+		case "bpse": $type = "settings"; $found = TRUE; break;
+		case "bpcs": $type = "csound"; $found = TRUE; break;
+		case "bpmi": $type = "objects"; $found = TRUE; break;
+		case "bpor": $type = "orchestra"; $found = TRUE; break;
+		case "bpin": $type = "interaction"; $found = TRUE; break;
+		case "bpmd": $type = "midisetup"; $found = TRUE; break;
+		case "bptb": $type = "timebase"; $found = TRUE; break;
+		case "bpkb": $type = "keyboard"; $found = TRUE; break;
+		case "bpgl": $type = "glossary"; $found = TRUE; break;
+		case "bpsc": $type = "script"; $found = TRUE; break;
+		case "orc": $type = "csorchestra"; $found = TRUE; break;
+		}
+	if($found) $name_mode = "extension";
+	else $name_mode = "prefix";
+	$type_of_file['type'] = $type;
+	$type_of_file['name_mode'] = $name_mode;
+	$type_of_file['prefix'] = $prefix;
+	$type_of_file['extension'] = $extension;
+	return $type_of_file;
+	}
+
+function change_occurrences_name_in_files($dir,$old_name,$new_name) {
+	$dircontent = scandir($dir);
+	$i_file = 0;
+	echo "old_name = ".$old_name."<br />";
+	foreach($dircontent as $thisfile) {
+		if($thisfile[0] == '.' OR $thisfile[0] == '_') continue;
+		if(is_dir($dir.SLASH.$thisfile)) continue;
+		$type_of_file = type_of_file($thisfile);
+		$type = $type_of_file['type'];
+		if($type <> "grammar" AND $type <> "data" AND $type <> "alphabet" AND $type <> "objects")
+			continue;
+		$content = file_get_contents($dir.SLASH.$thisfile,TRUE);
+	/*	$extract_data = extract_data(FALSE,$content);
+		$data = $extract_data['content']; */
+		$table = explode(chr(10),$content);
+		$imax = count($table);
+		$handle = fopen($dir.SLASH.$thisfile,"w");
+		for($i = 0; $i < $imax; $i++) {
+			$line = $table[$i];
+			if(is_integer(strpos($line,$old_name))) {
+				echo "Found ‘".$old_name."’ in ‘".$thisfile."’ and changed it to ‘".$new_name."’<br />";
+				$line = str_replace($old_name,$new_name,$line);
+				}
+			fwrite($handle,$line."\n");
+			}
+		fclose($handle);
+		}
+	return;
+	}
+
 function MIDIparameter_argument($i,$parameter,$StartIndex,$EndIndex,$TableIndex,$param_value,$IsLogX,$IsLogY,$GEN) {
 	$r = "<table>";
 	$r .= "<tr>";
@@ -1989,7 +2082,7 @@ function list_of_tonal_scales($csound_orchestra_file) {
 			if($line[0] == "|") {
 				$list[$j] .= " <font color=\"black\">baseoctave = ".str_replace("|",'',$line)."</font>";
 				$clean_name_of_file = str_replace("#","_",$name_of_file);
-				$clean_name_of_file = str_replace("/","_",$clean_name_of_file);
+				$clean_name_of_file = str_replace(SLASH,"_",$clean_name_of_file);
 				$dir_image = $dir_scale_images.$clean_name_of_file.".png";
 				if(file_exists($dir_image)) {
 					$k++; if($k > 10) $k = 0;

@@ -45,7 +45,7 @@ if(!file_exists($temp_dir.$temp_folder)) {
 if(isset($_POST['create_object'])) {
 	$new_object = trim($_POST['new_object']);
 	$new_object = str_replace(' ','-',$new_object);
-	$new_object = str_replace('/','-',$new_object);
+	$new_object = str_replace(SLASH,'-',$new_object);
 	$new_object = str_replace('#','-',$new_object);
 	$new_object = str_replace('"','',$new_object);
 	if($new_object <> '') {
@@ -96,7 +96,7 @@ if(isset($_POST['rename_object'])) {
 	$object = $_POST['object_name'];
 	$new_object = trim($_POST['object_new_name']);
 	$new_object = str_replace(' ','-',$new_object);
-	$new_object = str_replace('/','-',$new_object);
+	$new_object = str_replace(SLASH,'-',$new_object);
 	$new_object = str_replace('#','-',$new_object);
 	$new_object = str_replace('"','',$new_object);
 	if($new_object <> '') {
@@ -315,10 +315,10 @@ echo "<input type=\"hidden\" name=\"maxsounds\" value=\"".$maxsounds."\">";
 if($handle_object) fclose($handle_object);
 echo "<p style=\"color:blue;\">".$comment_on_file."</p>";
 echo "<p style=\"text-align:left;\">";
-echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’ INCLUDING ALL CHANGES TO PROTOTYPES\"><br />";
+echo "<input style=\"background-color:yellow; font-size:large;\" type=\"submit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’ INCLUDING ALL CHANGES TO PROTOTYPES\"><br />";
 echo "<font color=\"red\">➡</font> Changes in prototypes are <font color=\"red\">autosaved</font> if changes occurred every 30 seconds. Keep this page open as long as you are editing sound-object prototypes!</p>";
 if($autosave) echo "<script type=\"text/javascript\" src=\"autosaveObjects.js\"></script>";
-echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"create_object\" value=\"CREATE A NEW OBJECT\"> named <input type=\"text\" name=\"new_object\" size=\"10\" value=\"\"></p>";
+echo "<p><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" name=\"create_object\" value=\"CREATE A NEW OBJECT\"> named <input type=\"text\" name=\"new_object\" size=\"10\" value=\"\"></p>";
 if($deleted_objects <> '') echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"restore\" value=\"RESTORE ALL DELETED OBJECTS\"> = <font color=\"blue\"><big>".$deleted_objects."</big></font></p>";
 echo "</form>";
 
@@ -335,7 +335,7 @@ else $CsoundInstruments_file = '';
 
 if($iobj >= 0) {
 	echo "<hr>";
-	echo "<h3>Click any of these ".($iobj + 1)." object prototypes to edit it:</h3>";
+	echo "<h3 style=\"margin-left:1em;\"><font color=\"red\"><big>↓</big></font>&nbsp;&nbsp;Click any of these ".($iobj + 1)." object prototypes to edit it</h3>";
 	$temp_alphabet_file = $temp_dir.$temp_folder.SLASH."temp.bpho";
 	$handle = fopen($temp_alphabet_file,"w");
 	$file_header = $top_header."\n// Alphabet saved as \"temp.bpho\". Date: ".gmdate('Y-m-d H:i:s');

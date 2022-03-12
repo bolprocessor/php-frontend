@@ -225,16 +225,20 @@ if(isset($_POST['create_script'])) {
 		}
 	}
 
-if(isset($_POST['delete_files'])) $delete_files = TRUE;
-else $delete_files = FALSE;
+$delete_files = isset($_POST['delete_files']);
+$rename_files = isset($_POST['rename_files']);
 $folder = str_replace($bp_application_path,'',$dir);
 if($folder <> '') {
 	echo "<h3>Content of folder <font color=\"red\">".$folder."</font>";
-	if(!$delete_files AND $path <> $trash_folder) {
-		echo "<br /><br /><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+	if(!$delete_files AND !$rename_files AND $path <> $trash_folder) {
+		echo "<br /><br />";
 		echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"delete_files\" value=\"DELETE SOME FILES\">";
-		echo "</form>";
 		}
+	if(!$rename_files AND !$delete_files AND $path <> $trash_folder) {
+		echo "&nbsp;&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"rename_files\" value=\"RENAME SOME FILES\">";
+		}
+	echo "</form>";
 	echo "</h3>";
 	}
 // echo "dir = ".$dir."<br />";
@@ -331,11 +335,19 @@ if(isset($_POST['delete_checked_files'])) {
 	$delete_checked_files = TRUE;
 	}
 else $delete_checked_files = FALSE;
+if(isset($_POST['rename_checked_files'])) {
+	$rename_files = FALSE;
+	$rename_checked_files = TRUE;
+	}
+else $rename_checked_files = FALSE;
 	
-if($delete_files OR $delete_checked_files)
+if($delete_files OR $delete_checked_files OR $rename_files)
 	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 if($delete_files) {
-	echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"delete_checked_files\" value=\"DELETE CHECKED FILES\"> <font color=\"red\">➡</font> can be reversed <input style=\"background-color:azure;\" type=\"submit\" name=\"cancel\" value=\"CANCEL\"></p>";
+	echo "<p style=\"margin-left:6px;\"><font color=\"red\"><big>↓</big></font>&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"delete_checked_files\" value=\"DELETE CHECKED FILES\"> <font color=\"red\">➡</font> can be reversed <input style=\"background-color:azure;\" type=\"submit\" name=\"cancel\" value=\"CANCEL\"></p>";
+	}
+if($rename_files) {
+	echo "<p style=\"margin-left:6px;\"><font color=\"red\"><big>↓</big></font>&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"rename_checked_files\" value=\"RENAME CHECKED FILES\">&nbsp;&nbsp;<input style=\"background-color:azure;\" type=\"submit\" name=\"cancel\" value=\"CANCEL\"></p>";
 	}
 
 $dircontent = scandir($dir);
@@ -352,83 +364,86 @@ foreach($dircontent as $thisfile) {
 			echo "<b><a href=\"".$link."\">".$thisfile."</a></b><br />";
 		continue;
 		}
-	$table = explode(".",$thisfile);
-	$extension = end($table);
 	$table = explode("_",$thisfile);
 	$prefix = $table[0];
 	if($prefix == "trace") continue;
-	$prefix = substr($thisfile,0,3);
-	switch($prefix) {
-		case '-gr':
-			$type = "grammar"; break;
-		case '-da':
-			$type = "data"; break;
-		case '-ho':
-			$type = "alphabet"; break;
-		case '-se':
-			$type = "settings"; break;
-		case '-cs':
-			$type = "csound"; break;
-		case '-mi':
-			$type = "objects"; break;
-		case '-or':
-			$type = "orchestra"; break;
-		case '-in':
-			$type = "interaction"; break;
-		case '-md':
-			$type = "midisetup"; break;
-		case '-tb':
-			$type = "timebase"; break;
-		case '-kb':
-			$type = "keyboard"; break;
-		case '-gl':
-			$type = "glossary"; break;
-		case '-sc':
-			$type = "script"; break;
-		default:
-			$type = ''; break;
-		}
-	switch($extension) {
-		case "bpgr": $type = "grammar"; break;
-		case "bpda": $type = "data"; break;
-		case "bpho": $type = "alphabet"; break;
-		case "bpse": $type = "settings"; break;
-		case "bpcs": $type = "csound"; break;
-		case "bpmi": $type = "objects"; break;
-		case "bpor": $type = "orchestra"; break;
-		case "bpin": $type = "interaction"; break;
-		case "bpmd": $type = "midisetup"; break;
-		case "bptb": $type = "timebase"; break;
-		case "bpkb": $type = "keyboard"; break;
-		case "bpgl": $type = "glossary"; break;
-		case "bpsc": $type = "script"; break;
-		case "orc": $type = "csorchestra"; break;
-		}
+	$type_of_file = type_of_file($thisfile);
+	$type = $type_of_file['type'];
+	$name_mode = $type_of_file['name_mode'];
+	$prefix = $type_of_file['prefix'];
+	$extension = $type_of_file['extension'];
 	if($path <> $csound_resources AND $path <> $trash_folder AND ($type == "csound" OR $type == "csorchestra")) {
 		echo "Moved <font color=\"blue\">‘".$dir.SLASH.$thisfile."’</font> to <font color=\"blue\">‘".$dir_csound_resources.$thisfile."’</font><br />";
 		rename($dir.SLASH.$thisfile,$dir_csound_resources.$thisfile);
 		}
 	else {
 		$i_file++;
+		$renamed = FALSE;
 		if($delete_checked_files AND isset($_POST['delete_'.$i_file])) {
 			echo "<p><font color=\"red\">➡</font> Deleted <font color=\"blue\">‘".$thisfile."’</font> (moved to <a target=\"_blank\" href=\"index.php?path=".$trash_folder."\">trash folder</a>)</p>";
 			rename($dir.SLASH.$thisfile,$dir_trash_folder.$thisfile);
 			delete_settings($thisfile);
 			continue;
 			}
+		$new_name = '';
+		if($rename_checked_files AND $type <> '' AND (isset($_POST['rename_'.$i_file]) OR (isset($_POST['new_name_'.$i_file]) AND trim($_POST['new_name_'.$i_file]) <> ''))) {
+			$new_name = trim($_POST['new_name_'.$i_file]);
+			$new_name = fix_new_name($new_name);
+			if($new_name <> '') {
+			//	$new_prefix = substr($new_name,0,3);
+				$table2 = explode(".",$new_name);
+				$new_prefix = $table2[0];
+				if(strlen($new_prefix) <> 3 OR !is_integer($pos=strpos($new_prefix,"-")) OR $pos <> 0)
+				$new_prefix = '';
+				$new_extension = end($table2);
+				if($new_prefix.".".$new_extension == $new_name) $new_extension = '';
+			/*	echo "prefix = “".$prefix."”<br />";
+				echo "new_prefix = “".$new_prefix."”<br />";
+				echo "extension = “".$extension."”<br />";
+				echo "new_extension = “".$new_extension."”<br />"; */
+				if($extension <> '')
+					$short_type = str_replace("bp",'',$extension);
+				if($prefix <> '')
+					$short_type = str_replace("-",'',$prefix);
+				if($new_extension <> '')
+					$new_short_type = str_replace("bp",'',$new_extension);
+				if($new_prefix <> '')
+					$new_short_type = str_replace("-",'',$new_prefix);
+				if($new_extension <> '' AND $new_short_type == $short_type)
+					$name_mode = "extension";
+				if($new_prefix <> '' AND $new_short_type == $short_type)
+					$name_mode = "prefix";
+				$new_name = good_name($short_type,$new_name,$name_mode);
+				$old_name = $thisfile;
+				if(file_exists($dir.SLASH.$new_name)) {
+					echo "<font color=\"red\">➡</font> Can't rename to existing ‘".$new_name."’: ";
+					}
+				else {
+					rename($dir.SLASH.$old_name,$dir.SLASH.$new_name);
+					$thisfile = $new_name;
+					change_occurrences_name_in_files($dir,$old_name,$new_name);
+					$renamed = TRUE;
+					}
+				}
+			}
 		if($delete_files) echo "<input type=\"checkbox\" name=\"delete_".$i_file."\"> ";
 		if($type <> '') {
+			if($rename_files) echo "<input type=\"checkbox\" name=\"rename_".$i_file."\"> ";
 			$link = $type.".php?file=".urlencode($path.SLASH.$thisfile);
 			if($new_file == $thisfile) echo "<font color=\"red\">➡</font> ";
 			echo "<a target=\"_blank\" href=\"".$link."\">";
-			echo $thisfile."</a> ";
-			if($type == "grammar") echo "<font color=\"red\">";
-			else if($type == "data") echo "<font color=\"gold\">";
-			else if($type == "script") echo "<font color=\"blue\">";
-			else if($type <> "settings") echo "<font color=\"lightgreen\">";
-			echo $type."</font>";
-			$time_saved = filemtime($dir.SLASH.$thisfile);
-			echo " <small>➡ ".gmdate('Y-m-d H\hi',$time_saved)."</small>";
+			echo $thisfile."</a>&nbsp;";
+			if($renamed) echo "(<font color=\"red\">renamed</font>)&nbsp;";
+			if($rename_files) echo "&nbsp;➡&nbsp;&nbsp;<input type=\"text\" style=\"border:2px; solid #dadada; border-bottom-style: groove; text-align:left;\" name=\"new_name_".$i_file."\" size=\"30\" value=\"\">";
+			else {
+				if($type == "grammar") echo "<font color=\"red\">";
+				else if($type == "data") echo "<font color=\"gold\">";
+				else if($type == "script") echo "<font color=\"blue\">";
+				else if($type <> "settings") echo "<font color=\"lightgreen\">";
+				echo $type."</font>";
+				$time_saved = filemtime($dir.SLASH.$thisfile);
+				echo "&nbsp;<small>➡&nbsp;".gmdate('Y-m-d H\hi',$time_saved)."</small>";
+				}
 			echo "<br />";
 			}
 		else {
@@ -438,7 +453,9 @@ foreach($dircontent as $thisfile) {
 	}
 if($delete_files)
 	echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"delete_checked_files\" value=\"DELETE CHECKED FILES\"> <font color=\"red\">➡</font> can be reversed <input style=\"background-color:azure;\" type=\"submit\" name=\"cancel\" value=\"CANCEL\"></p>";
-if($delete_files OR $delete_checked_files) echo "</form>";
+if($rename_files)
+	echo "<p style=\"margin-left:6px;\"><font color=\"red\"><big>↑</big>&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"rename_checked_files\" value=\"RENAME CHECKED FILES\">&nbsp;&nbsp;<input style=\"background-color:azure;\" type=\"submit\" name=\"cancel\" value=\"CANCEL\"></p>";
+if($delete_files OR $delete_checked_files OR $rename_files) echo "</form>";
 
 $os_platform = getOS();
 if(PHP_OS <> "WINNT" AND !is_integer(strpos($os_platform,"Windows")) AND $path <> $csound_resources) {

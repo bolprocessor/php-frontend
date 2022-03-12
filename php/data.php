@@ -1677,20 +1677,22 @@ if(isset($_POST['analyze_tonal'])) {
 	if(isset($_POST['proceed_tonal_analysis'])) echo "<input class=\"shadow\" style=\"background-color:yellow; font-size:large; float:left;\" type=\"submit\" formaction=\"".$url_this_page."#tonalanalysis\" title=\"Analyze tonal intervals\" name=\"analyze_tonal\" value=\"ANALYZE AGAIN\"><br /><br />";
 	else echo "<br /><p style=\"text-align:center;\">Check documentation: <a target=\"_blank\" href=\"https://bolprocessor.org/tonal-analysis/\">https://bolprocessor.org/tonal-analysis/</a></p>";
 	echo "<center><table style=\"background-color:Gold;\">";
-	echo "<tr><th colspan=\"3\" style=\"text-align:center;\">Add markings to intervals</tr>";
-	echo "<tr><td colspan=\"3\" style=\"white-space:nowrap; padding:6px; text-align:center;\">";
+	echo "<tr><th colspan=\"6\" style=\"text-align:center;\">Additional intervals for the comparison</tr>";
+	echo "<tr><td colspan=\"6\" style=\"white-space:nowrap; padding:6px; text-align:center;\">";
 	if(!isset($_POST['position_melodic_mark_up_p_0']) OR trim($_POST['position_melodic_mark_up_p_0']) == '') {
 		echo "<i>Checking additional intervals such as harmonic minor thirds (frequency ratio 6/5) may be advised</i>";
 		}
 	echo "</td></tr>";
-	echo "<tr><th style=\"text-align:center;\">Melodic up</th><th style=\"text-align:center;\">Melodic down</th><th style=\"text-align:center;\">Harmonic</th></tr>";
+	echo "<tr><th colspan=\"2\" style=\"text-align:center;\">Melodic up</th><th colspan=\"2\" style=\"text-align:center;\">Melodic down</th><th colspan=\"2\" style=\"text-align:center;\">Harmonic</th></tr>";
 	echo "<tr>";
-	echo "<td style=\"white-space:nowrap; padding:6px;\">";
+	echo "<td colspan=\"2\" style=\"white-space:nowrap; padding:6px;\">";
 	for($i_mark = 0; $i_mark < 3; $i_mark++) {
 		if(isset($_POST["position_melodic_mark_up_p_".$i_mark]))
 			$position_melodic_mark_up[$i_mark]['p'] = intval($_POST["position_melodic_mark_up_p_".$i_mark]);
+		else if($i_mark == 0) $position_melodic_mark_up[$i_mark]['p'] = 6;
 		if(isset($_POST["position_melodic_mark_up_q_".$i_mark]))
 			$position_melodic_mark_up[$i_mark]['q'] = intval($_POST["position_melodic_mark_up_q_".$i_mark]);
+		else if($i_mark == 0) $position_melodic_mark_up[$i_mark]['q'] = 5;
 		if(!isset($position_melodic_mark_up[$i_mark]['p']) OR $position_melodic_mark_up[$i_mark]['p'] == 0) $position_melodic_mark_up[$i_mark]['p'] = $position_melodic_mark_up[$i_mark]['q'] = '';
 		if(!isset($position_melodic_mark_up[$i_mark]['q']) OR $position_melodic_mark_up[$i_mark]['q'] == 0) $position_melodic_mark_up[$i_mark]['q'] = $position_melodic_mark_up[$i_mark]['p'] = '';
 		echo "Ratio: <input type=\"text\" style=\"border:none; text-align:center;\" name=\"position_melodic_mark_up_p_".$i_mark."\" size=\"3\" value=\"".$position_melodic_mark_up[$i_mark]['p']."\">/<input type=\"text\" style=\"border:none; text-align:center;\" name=\"position_melodic_mark_up_q_".$i_mark."\" size=\"3\" value=\"".$position_melodic_mark_up[$i_mark]['q']."\">";
@@ -1701,12 +1703,14 @@ if(isset($_POST['analyze_tonal'])) {
 		echo "<br />";
 		}
 	echo "</td>";
-	echo "<td style=\"white-space:nowrap; padding:6px;\">";
+	echo "<td colspan=\"2\" style=\"white-space:nowrap; padding:6px;\">";
 	for($i_mark = 0; $i_mark < 3; $i_mark++) {
 		if(isset($_POST["position_melodic_mark_down_p_".$i_mark]))
 			$position_melodic_mark_down[$i_mark]['p'] = intval($_POST["position_melodic_mark_down_p_".$i_mark]);
+		else if($i_mark == 0) $position_melodic_mark_down[$i_mark]['p'] = 6;
 		if(isset($_POST["position_melodic_mark_down_q_".$i_mark]))
 			$position_melodic_mark_down[$i_mark]['q'] = intval($_POST["position_melodic_mark_down_q_".$i_mark]);
+		else if($i_mark == 0) $position_melodic_mark_down[$i_mark]['q'] = 5;
 		if(!isset($position_melodic_mark_down[$i_mark]['p']) OR $position_melodic_mark_down[$i_mark]['p'] == 0) $position_melodic_mark_down[$i_mark]['p'] = $position_melodic_mark_down[$i_mark]['q'] = '';
 		if(!isset($position_melodic_mark_down[$i_mark]['q']) OR $position_melodic_mark_down[$i_mark]['q'] == 0) $position_melodic_mark_down[$i_mark]['q'] = $position_melodic_mark_down[$i_mark]['p'] = '';
 		echo "Ratio: <input type=\"text\" style=\"border:none; text-align:center;\" name=\"position_melodic_mark_down_p_".$i_mark."\" size=\"3\" value=\"".$position_melodic_mark_down[$i_mark]['p']."\">/<input type=\"text\" style=\"border:none; text-align:center;\" name=\"position_melodic_mark_down_q_".$i_mark."\" size=\"3\" value=\"".$position_melodic_mark_down[$i_mark]['q']."\">";
@@ -1717,7 +1721,7 @@ if(isset($_POST['analyze_tonal'])) {
 		echo "<br />";
 		}
 	echo "</td>";
-	echo "<td style=\"white-space:nowrap; padding:6px;\">";
+	echo "<td colspan=\"2\" style=\"white-space:nowrap; padding:6px;\">";
 	for($i_mark = 0; $i_mark < 3; $i_mark++) {
 		if(isset($_POST["position_harmonic_mark_p_".$i_mark]))
 			$position_harmonic_mark[$i_mark]['p'] = intval($_POST["position_harmonic_mark_p_".$i_mark]);
@@ -1733,8 +1737,7 @@ if(isset($_POST['analyze_tonal'])) {
 		echo "<br />";
 		}
 	echo "</td></tr>";
-
-	echo "<tr><td style=\"white-space:nowrap; padding:6px; text-align:right;\">";
+	echo "<tr><td colspan=\"3\" style=\"white-space:nowrap; padding:6px; text-align:right;\">";
 	if(isset($_POST['weigh_perfect_fifth']) AND is_numeric($_POST['weigh_perfect_fifth']))
 		$weigh_perfect_fifth = $_POST['weigh_perfect_fifth'];
 	else $weigh_perfect_fifth = 2;
@@ -1743,51 +1746,48 @@ if(isset($_POST['analyze_tonal'])) {
 		$weigh_harmonic_third = $_POST['weigh_harmonic_third'];
 	else $weigh_harmonic_third = 1;
 	echo "Weigh of harmonic third: <input type=\"text\" style=\"border:none; text-align:center;\" name=\"weigh_harmonic_third\" size=\"3\" value=\"".$weigh_harmonic_third."\">";
-	echo "</td><td colspan=\"2\" style=\"white-space:nowrap; padding:6px; text-align:right;\">";
+	echo "</td><td colspan=\"3\" style=\"white-space:nowrap; padding:6px; text-align:right;\">";
 	if(isset($_POST['weigh_wolf_fifth']) AND is_numeric($_POST['weigh_wolf_fifth']))
 		$weigh_wolf_fifth = $_POST['weigh_wolf_fifth'];
 	else $weigh_wolf_fifth = -2;
-	echo "Weigh of wolf fifth/fourth (negative): <input type=\"text\" style=\"border:none; text-align:center;\" name=\"weigh_wolf_fifth\" size=\"3\" value=\"".$weigh_wolf_fifth."\"><br />";
+	echo "Weigh of wolf fifth/fourth (generally negative): <input type=\"text\" style=\"border:none; text-align:center;\" name=\"weigh_wolf_fifth\" size=\"3\" value=\"".$weigh_wolf_fifth."\"><br />";
 	if(isset($_POST['weigh_pythagorean_third']) AND is_numeric($_POST['weigh_pythagorean_third']))
 		$weigh_pythagorean_third = $_POST['weigh_pythagorean_third'];
 	else $weigh_pythagorean_third = -1;
-	echo "Weigh of Pythagorean third (negative): <input type=\"text\" style=\"border:none; text-align:center;\" name=\"weigh_pythagorean_third\" size=\"3\" value=\"".$weigh_pythagorean_third."\">";
+	echo "Weigh of Pythagorean third (generally negative): <input type=\"text\" style=\"border:none; text-align:center;\" name=\"weigh_pythagorean_third\" size=\"3\" value=\"".$weigh_pythagorean_third."\">";
 	echo "</td></tr>";
 
-	echo "<tr><td style=\"white-space:nowrap; padding:6px;\">";
+	echo "<tr><td colspan=\"2\" style=\"white-space:nowrap; padding:6px;\">";
 	if(isset($_POST['weigh_melodic_up']) AND is_numeric($_POST['weigh_melodic_up']))
 		$weigh_melodic_up = abs(intval($_POST['weigh_melodic_up']));
 	else $weigh_melodic_up = 1;
 	echo "Global weigh ascending intervals:<input type=\"text\" style=\"border:none; text-align:center;\" name=\"weigh_melodic_up\" size=\"3\" value=\"".$weigh_melodic_up."\">";
-	echo "</td><td style=\"white-space:nowrap; padding:6px;\">";
+	echo "</td><td colspan=\"2\" style=\"white-space:nowrap; padding:6px;\">";
 	if(isset($_POST['weigh_melodic_down']) AND is_numeric($_POST['weigh_melodic_down']))
 		$weigh_melodic_down = abs(intval($_POST['weigh_melodic_down']));
 	else $weigh_melodic_down = 1;
 	echo "Global weigh descending intervals:<input type=\"text\" style=\"border:none; text-align:center;\" name=\"weigh_melodic_down\" size=\"3\" value=\"".$weigh_melodic_down."\">";
-	echo "</td><td style=\"white-space:nowrap; padding:6px;\">";
+	echo "</td><td colspan=\"2\" style=\"white-space:nowrap; padding:6px;\">";
 	if(isset($_POST['weigh_harmonic']) AND is_numeric($_POST['weigh_harmonic']))
 		$weigh_harmonic = abs(intval($_POST['weigh_harmonic']));
 	else $weigh_harmonic = 2;
 	echo "Global weigh harmonic intervals:<input type=\"text\" style=\"border:none; text-align:center;\" name=\"weigh_harmonic\" size=\"3\" value=\"".$weigh_harmonic."\">";
 	echo "</td>";
 	echo "</tr>";
-	echo "<tr><td colspan=\"3\" style=\"white-space:nowrap; padding:6px;\">";
+	echo "<tr><td colspan=\"6\" style=\"white-space:nowrap; padding:6px;\">";
 	if(isset($_POST['max_distance']) AND is_numeric($_POST['max_distance']))
 		$max_distance = abs(intval($_POST['max_distance']));
 	else $max_distance = 11;
 	echo "Maximum size of melodic intervals:<input type=\"text\" style=\"border:none; text-align:center;\" name=\"max_distance\" size=\"3\" value=\"".$max_distance."\"> semitones";
 	echo "</td></tr>";
-	
-	
-
-	echo "<tr><td style=\"white-space:nowrap; padding:6px; text-align:right;\">";
+	echo "<tr><td colspan=\"3\" style=\"white-space:nowrap; padding:6px; text-align:right;\">";
 	if(isset($_POST['overlap'])) $ratio_melodic = intval($_POST['overlap']) / 100;
 	echo "Max overlap ratio in melodic intervals: <input type=\"text\" style=\"border:none; text-align:center;\" name=\"overlap\" size=\"3\" value=\"".(100 * $ratio_melodic)."\">%<br />";
 	if(isset($_POST['min_duration'])) $min_duration = intval($_POST['min_duration']);
 	echo "Min duration of harmonic interval: <input type=\"text\" style=\"border:none; text-align:center;\" name=\"min_duration\" size=\"4\" value=\"".$min_duration."\">ms<br />";
 	if(isset($_POST['max_gap'])) $max_gap = intval($_POST['max_gap']);
 	echo "Maximum gap in melodic interval: <input type=\"text\" style=\"border:none; text-align:center;\" name=\"max_gap\" size=\"4\" value=\"".$max_gap."\">ms<br />";
-	echo "</td><td colspan=\"2\" style=\"white-space:nowrap; padding:6px; text-align:right;\">";
+	echo "</td><td colspan=\"3\" style=\"white-space:nowrap; padding:6px; text-align:right;\">";
 	$test_intervals = isset($_POST['test_intervals']);
 	echo " Display all dates (may be long!)&nbsp;<input type=\"checkbox\" name=\"test_intervals\"";
 	if($test_intervals) echo " checked";
@@ -1796,7 +1796,8 @@ if(isset($_POST['analyze_tonal'])) {
 	echo "Display sliced item(s)&nbsp;<input type=\"checkbox\" name=\"display_items\"";
 	if($display_items) echo " checked";
 	echo ">";
-	echo "</td></tr><tr><td colspan=\"3\" style=\"white-space:nowrap; padding:6px;\">";
+	echo "</td></tr>";
+	echo "<tr><td colspan=\"6\" style=\"white-space:nowrap; padding:6px;\">";
 	if($csound_file <> '') {
 		if(isset($_POST['compare_scales'])) $compare_scales = $_POST['compare_scales'];
 		else $compare_scales = FALSE;
@@ -2064,7 +2065,7 @@ if(isset($_POST['analyze_tonal'])) {
 								echo ">";
 								echo "</td>";
 								$clean_name_of_file = str_replace("#","_",$scale);
-								$clean_name_of_file = str_replace("/","_",$clean_name_of_file);
+								$clean_name_of_file = str_replace(SLASH,"_",$clean_name_of_file);
 								$scale_link = $dir_scale_images.$clean_name_of_file.".png";
 								echo "<td>";
 								if(file_exists($scale_link))
@@ -2713,7 +2714,7 @@ function show_relations_on_image($i_item,$matching_list,$mode,$direction,$scalen
 	global $dir_scale_images,$temp_dir,$temp_folder,$dir_scale_images;
 	global $Englishnote,$Frenchnote,$Indiannote;
 	$clean_name_of_file = str_replace("#","_",$scalename);
-	$clean_name_of_file = str_replace("/","_",$clean_name_of_file);
+	$clean_name_of_file = str_replace(SLASH,"_",$clean_name_of_file);
 	$save_codes_dir = $temp_dir.$temp_folder.SLASH.$clean_name_of_file."_codes_".$mode."_".$i_item.SLASH;
 //	echo "save_codes_dir = ".$save_codes_dir."<br />";
 	$width_max = 8;
@@ -2840,7 +2841,7 @@ function show_relations_on_image($i_item,$matching_list,$mode,$direction,$scalen
 				}
 			}
 		if(is_integer($pos=strpos($line,"/")) AND $pos == 0) {
-			$line = str_replace("/",'',$line);
+			$line = str_replace(SLASH,'',$line);
 			$table2 = explode(" ",$line);
 			for($grade = 0; $grade < 13; $grade++) {
 				if(!isset($note_name[$grade])) {
