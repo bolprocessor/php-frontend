@@ -1694,10 +1694,10 @@ if(isset($_POST['analyze_tonal'])) {
 		if(!isset($position_melodic_mark_up[$i_mark]['p']) OR $position_melodic_mark_up[$i_mark]['p'] == 0) $position_melodic_mark_up[$i_mark]['p'] = $position_melodic_mark_up[$i_mark]['q'] = '';
 		if(!isset($position_melodic_mark_up[$i_mark]['q']) OR $position_melodic_mark_up[$i_mark]['q'] == 0) $position_melodic_mark_up[$i_mark]['q'] = $position_melodic_mark_up[$i_mark]['p'] = '';
 		echo "Ratio: <input type=\"text\" style=\"border:none; text-align:center;\" name=\"position_melodic_mark_up_p_".$i_mark."\" size=\"3\" value=\"".$position_melodic_mark_up[$i_mark]['p']."\">/<input type=\"text\" style=\"border:none; text-align:center;\" name=\"position_melodic_mark_up_q_".$i_mark."\" size=\"3\" value=\"".$position_melodic_mark_up[$i_mark]['q']."\">";
-		if(isset($_POST["score_melodic_mark_".$i_mark]) AND is_numeric($_POST["score_melodic_mark_".$i_mark]))
-			$score_melodic_mark_up[$i_mark] = $_POST["score_melodic_mark_".$i_mark];
-		else $score_melodic_mark_up[$i_mark] = 1;
-		echo " weigh: <input type=\"text\" style=\"border:none; text-align:center;\" name=\"score_melodic_mark_".$i_mark."\" size=\"3\" value=\"".$score_melodic_mark_up[$i_mark]."\">";
+		if(isset($_POST["weigh_melodic_mark_".$i_mark]) AND is_numeric($_POST["weigh_melodic_mark_".$i_mark]))
+			$weigh_melodic_mark_up[$i_mark] = $_POST["weigh_melodic_mark_".$i_mark];
+		else $weigh_melodic_mark_up[$i_mark] = 1;
+		echo " weigh: <input type=\"text\" style=\"border:none; text-align:center;\" name=\"weigh_melodic_mark_".$i_mark."\" size=\"3\" value=\"".$weigh_melodic_mark_up[$i_mark]."\">";
 		echo "<br />";
 		}
 	echo "</td>";
@@ -1710,10 +1710,10 @@ if(isset($_POST['analyze_tonal'])) {
 		if(!isset($position_melodic_mark_down[$i_mark]['p']) OR $position_melodic_mark_down[$i_mark]['p'] == 0) $position_melodic_mark_down[$i_mark]['p'] = $position_melodic_mark_down[$i_mark]['q'] = '';
 		if(!isset($position_melodic_mark_down[$i_mark]['q']) OR $position_melodic_mark_down[$i_mark]['q'] == 0) $position_melodic_mark_down[$i_mark]['q'] = $position_melodic_mark_down[$i_mark]['p'] = '';
 		echo "Ratio: <input type=\"text\" style=\"border:none; text-align:center;\" name=\"position_melodic_mark_down_p_".$i_mark."\" size=\"3\" value=\"".$position_melodic_mark_down[$i_mark]['p']."\">/<input type=\"text\" style=\"border:none; text-align:center;\" name=\"position_melodic_mark_down_q_".$i_mark."\" size=\"3\" value=\"".$position_melodic_mark_down[$i_mark]['q']."\">";
-		if(isset($_POST["score_melodic_mark_".$i_mark]) AND is_numeric($_POST["score_melodic_mark_".$i_mark]))
-			$score_melodic_mark_down[$i_mark] = $_POST["score_melodic_mark_".$i_mark];
-		else $score_melodic_mark_down[$i_mark] = 1;
-		echo " weigh: <input type=\"text\" style=\"border:none; text-align:center;\" name=\"score_melodic_mark_".$i_mark."\" size=\"3\" value=\"".$score_melodic_mark_down[$i_mark]."\">";
+		if(isset($_POST["weigh_melodic_mark_".$i_mark]) AND is_numeric($_POST["weigh_melodic_mark_".$i_mark]))
+			$weigh_melodic_mark_down[$i_mark] = $_POST["weigh_melodic_mark_".$i_mark];
+		else $weigh_melodic_mark_down[$i_mark] = 1;
+		echo " weigh: <input type=\"text\" style=\"border:none; text-align:center;\" name=\"weigh_melodic_mark_".$i_mark."\" size=\"3\" value=\"".$weigh_melodic_mark_down[$i_mark]."\">";
 		echo "<br />";
 		}
 	echo "</td>";
@@ -1726,32 +1726,32 @@ if(isset($_POST['analyze_tonal'])) {
 		if(!isset($position_harmonic_mark[$i_mark]['p']) OR $position_harmonic_mark[$i_mark]['p'] == 0) $position_harmonic_mark[$i_mark]['p'] = $position_harmonic_mark[$i_mark]['q'] = '';
 		if(!isset($position_harmonic_mark[$i_mark]['q']) OR $position_harmonic_mark[$i_mark]['q'] == 0) $position_harmonic_mark[$i_mark]['q'] = $position_harmonic_mark[$i_mark]['p'] = '';
 		echo "Ratio: <input type=\"text\" style=\"border:none; text-align:center;\" name=\"position_harmonic_mark_p_".$i_mark."\" size=\"3\" value=\"".$position_harmonic_mark[$i_mark]['p']."\">/<input type=\"text\" style=\"border:none; text-align:center;\" name=\"position_harmonic_mark_q_".$i_mark."\" size=\"3\" value=\"".$position_harmonic_mark[$i_mark]['q']."\">";
-		if(isset($_POST["score_harmonic_mark_".$i_mark]) AND is_numeric($_POST["score_harmonic_mark_".$i_mark]))
-			$score_harmonic_mark[$i_mark] = $_POST["score_harmonic_mark_".$i_mark];
-		else $score_harmonic_mark[$i_mark] = 1;
-		echo " weigh: <input type=\"text\" style=\"border:none; text-align:center;\" name=\"score_harmonic_mark_".$i_mark."\" size=\"3\" value=\"".$score_harmonic_mark[$i_mark]."\">";
+		if(isset($_POST["weigh_harmonic_mark_".$i_mark]) AND is_numeric($_POST["weigh_harmonic_mark_".$i_mark]))
+			$weigh_harmonic_mark[$i_mark] = $_POST["weigh_harmonic_mark_".$i_mark];
+		else $weigh_harmonic_mark[$i_mark] = 1;
+		echo " weigh: <input type=\"text\" style=\"border:none; text-align:center;\" name=\"weigh_harmonic_mark_".$i_mark."\" size=\"3\" value=\"".$weigh_harmonic_mark[$i_mark]."\">";
 		echo "<br />";
 		}
 	echo "</td></tr>";
 
 	echo "<tr><td style=\"white-space:nowrap; padding:6px; text-align:right;\">";
-	if(isset($_POST['score_perfect_fifth']) AND is_numeric($_POST['score_perfect_fifth']))
-		$score_perfect_fifth = $_POST['score_perfect_fifth'];
-	else $score_perfect_fifth = 2;
-	echo "Weigh of perfect fifth: <input type=\"text\" style=\"border:none; text-align:center;\" name=\"score_perfect_fifth\" size=\"3\" value=\"".$score_perfect_fifth."\"><br />";
-	if(isset($_POST['score_harmonic_third']) AND is_numeric($_POST['score_harmonic_third']))
-		$score_harmonic_third = $_POST['score_harmonic_third'];
-	else $score_harmonic_third = 1;
-	echo "Weigh of harmonic third: <input type=\"text\" style=\"border:none; text-align:center;\" name=\"score_harmonic_third\" size=\"3\" value=\"".$score_harmonic_third."\">";
+	if(isset($_POST['weigh_perfect_fifth']) AND is_numeric($_POST['weigh_perfect_fifth']))
+		$weigh_perfect_fifth = $_POST['weigh_perfect_fifth'];
+	else $weigh_perfect_fifth = 2;
+	echo "Weigh of perfect fifth: <input type=\"text\" style=\"border:none; text-align:center;\" name=\"weigh_perfect_fifth\" size=\"3\" value=\"".$weigh_perfect_fifth."\"><br />";
+	if(isset($_POST['weigh_harmonic_third']) AND is_numeric($_POST['weigh_harmonic_third']))
+		$weigh_harmonic_third = $_POST['weigh_harmonic_third'];
+	else $weigh_harmonic_third = 1;
+	echo "Weigh of harmonic third: <input type=\"text\" style=\"border:none; text-align:center;\" name=\"weigh_harmonic_third\" size=\"3\" value=\"".$weigh_harmonic_third."\">";
 	echo "</td><td colspan=\"2\" style=\"white-space:nowrap; padding:6px; text-align:right;\">";
-	if(isset($_POST['score_wolf_fifth']) AND is_numeric($_POST['score_wolf_fifth']))
-		$score_wolf_fifth = $_POST['score_wolf_fifth'];
-	else $score_wolf_fifth = -2;
-	echo "Weigh of wolf fifth/fourth (negative): <input type=\"text\" style=\"border:none; text-align:center;\" name=\"score_wolf_fifth\" size=\"3\" value=\"".$score_wolf_fifth."\"><br />";
-	if(isset($_POST['score_pythagorean_third']) AND is_numeric($_POST['score_pythagorean_third']))
-		$score_pythagorean_third = $_POST['score_pythagorean_third'];
-	else $score_pythagorean_third = -1;
-	echo "Weigh of Pythagorean third (negative): <input type=\"text\" style=\"border:none; text-align:center;\" name=\"score_pythagorean_third\" size=\"3\" value=\"".$score_pythagorean_third."\">";
+	if(isset($_POST['weigh_wolf_fifth']) AND is_numeric($_POST['weigh_wolf_fifth']))
+		$weigh_wolf_fifth = $_POST['weigh_wolf_fifth'];
+	else $weigh_wolf_fifth = -2;
+	echo "Weigh of wolf fifth/fourth (negative): <input type=\"text\" style=\"border:none; text-align:center;\" name=\"weigh_wolf_fifth\" size=\"3\" value=\"".$weigh_wolf_fifth."\"><br />";
+	if(isset($_POST['weigh_pythagorean_third']) AND is_numeric($_POST['weigh_pythagorean_third']))
+		$weigh_pythagorean_third = $_POST['weigh_pythagorean_third'];
+	else $weigh_pythagorean_third = -1;
+	echo "Weigh of Pythagorean third (negative): <input type=\"text\" style=\"border:none; text-align:center;\" name=\"weigh_pythagorean_third\" size=\"3\" value=\"".$weigh_pythagorean_third."\">";
 	echo "</td></tr>";
 
 	echo "<tr><td style=\"white-space:nowrap; padding:6px;\">";
@@ -2038,12 +2038,12 @@ if(isset($_POST['analyze_tonal'])) {
 							if(!$good_scale) continue;
 							$mode = "melodic";
 							$direction = "up";
-							$score_melodic_up = evaluate_scale($i_item,$scale_name,$mode,$direction,$ratio,$matching_list,$position_melodic_mark_up,$position_melodic_mark_down,$position_harmonic_mark,$score_melodic_mark_up,$score_melodic_mark_down,$score_harmonic_mark,$score_perfect_fifth,$score_harmonic_third,$score_wolf_fifth,$score_pythagorean_third);
+							$score_melodic_up = evaluate_scale($i_item,$scale_name,$mode,$direction,$ratio,$matching_list,$position_melodic_mark_up,$position_melodic_mark_down,$position_harmonic_mark,$weigh_melodic_mark_up,$weigh_melodic_mark_down,$weigh_harmonic_mark,$weigh_perfect_fifth,$weigh_harmonic_third,$weigh_wolf_fifth,$weigh_pythagorean_third);
 							$direction = "down";
-							$score_melodic_down = evaluate_scale($i_item,$scale_name,$mode,$direction,$ratio,$matching_list,$position_melodic_mark_up,$position_melodic_mark_down,$position_harmonic_mark,$score_melodic_mark_up,$score_melodic_mark_down,$score_harmonic_mark,$score_perfect_fifth,$score_harmonic_third,$score_wolf_fifth,$score_pythagorean_third);
+							$score_melodic_down = evaluate_scale($i_item,$scale_name,$mode,$direction,$ratio,$matching_list,$position_melodic_mark_up,$position_melodic_mark_down,$position_harmonic_mark,$weigh_melodic_mark_up,$weigh_melodic_mark_down,$weigh_harmonic_mark,$weigh_perfect_fifth,$weigh_harmonic_third,$weigh_wolf_fifth,$weigh_pythagorean_third);
 							$mode = "harmonic";
 							$direction = "both";
-							$score_harmonic = evaluate_scale($i_item,$scale_name,$mode,$direction,$ratio,$matching_list,$position_melodic_mark_up,$position_melodic_mark_down,$position_harmonic_mark,$score_melodic_mark_up,$score_melodic_mark_down,$score_harmonic_mark,$score_perfect_fifth,$score_harmonic_third,$score_wolf_fifth,$score_pythagorean_third);
+							$score_harmonic = evaluate_scale($i_item,$scale_name,$mode,$direction,$ratio,$matching_list,$position_melodic_mark_up,$position_melodic_mark_down,$position_harmonic_mark,$weigh_melodic_mark_up,$weigh_melodic_mark_down,$weigh_harmonic_mark,$weigh_perfect_fifth,$weigh_harmonic_third,$weigh_wolf_fifth,$weigh_pythagorean_third);
 							$evaluate['melodic_up'][$scale_name] = round($score_melodic_up);
 							$evaluate['melodic_down'][$scale_name] = round($score_melodic_down);
 							$evaluate['harmonic'][$scale_name] = round($score_harmonic);
@@ -2114,7 +2114,7 @@ if(isset($_POST['analyze_tonal'])) {
 			}
 		echo "<p style=\"text-align:center;\">Check documentation: <a target=\"_blank\" href=\"https://bolprocessor.org/tonal-analysis/\">https://bolprocessor.org/tonal-analysis/</a></p>";
 		$duration_process = time() - $time_start;
-		if($duration_process > 20 OR TRUE) echo "<p style=\"text-align:center; color:red;\"><small>All data processed in ".$duration_process." seconds</small></p>";
+		if($duration_process > 2) echo "<p style=\"text-align:center; color:red;\"><small>All data processed in ".$duration_process." seconds</small></p>";
 		echo "<br /></div>";
 		}
 	}
@@ -3045,7 +3045,7 @@ function show_relations_on_image($i_item,$matching_list,$mode,$direction,$scalen
 	return $result;
 	}
 
-function evaluate_scale($i_item,$scale_name,$mode,$direction,$ratio,$matching_list,$position_melodic_mark_up,$position_melodic_mark_down,$position_harmonic_mark,$score_melodic_mark_up,$score_melodic_mark_down,$score_harmonic_mark,$score_perfect_fifth,$score_harmonic_third,$score_wolf_fifth,$score_pythagorean_third) {
+function evaluate_scale($i_item,$scale_name,$mode,$direction,$ratio,$matching_list,$position_melodic_mark_up,$position_melodic_mark_down,$position_harmonic_mark,$weigh_melodic_mark_up,$weigh_melodic_mark_down,$weigh_harmonic_mark,$weigh_perfect_fifth,$weigh_harmonic_third,$weigh_wolf_fifth,$weigh_pythagorean_third) {
 	$score = 0;
 	$value = array();
 	for($i_mark = 0; $i_mark < count($position_melodic_mark_up); $i_mark++) {
@@ -3073,17 +3073,17 @@ function evaluate_scale($i_item,$scale_name,$mode,$direction,$ratio,$matching_li
 			if($pos < 0) $pos += 1200;
 			// THe order of the following checks is important because of oevrlapping intervals.
 			$dist = $pos - $pythagorean_third;
-			if(abs($dist) < 10) $value[$j][$k] = $score_pythagorean_third;
+			if(abs($dist) < 10) $value[$j][$k] = $weigh_pythagorean_third;
 			$dist = $pos - $wolf_fifth;
-			if(abs($dist) < 15) $value[$j][$k] = $score_wolf_fifth;
+			if(abs($dist) < 15) $value[$j][$k] = $weigh_wolf_fifth;
 			$dist = $pos - $wolf_fourth;
-			if(abs($dist) < 15) $value[$j][$k] = $score_wolf_fifth;
+			if(abs($dist) < 15) $value[$j][$k] = $weigh_wolf_fifth;
 			$dist = $pos - $harmonic_third;
-			if(abs($dist) < 10) $value[$j][$k] = $score_harmonic_third;
+			if(abs($dist) < 10) $value[$j][$k] = $weigh_harmonic_third;
 			$dist = $pos - $perfect_fifth;
-			if(abs($dist) < 10) $value[$j][$k] = $score_perfect_fifth;
+			if(abs($dist) < 10) $value[$j][$k] = $weigh_perfect_fifth;
 			$dist = $pos - $perfect_fourth;
-			if(abs($dist) < 10) $value[$j][$k] = $score_perfect_fifth;
+			if(abs($dist) < 10) $value[$j][$k] = $weigh_perfect_fifth;
 			}
 		}
 	if($mode == "melodic") {
@@ -3096,7 +3096,7 @@ function evaluate_scale($i_item,$scale_name,$mode,$direction,$ratio,$matching_li
 						$pos = cents($ratio[$k] / $ratio[$j]);
 						if($pos < 0) $pos += 1200;
 						$dist = $pos - $cent_mark_melodic_up[$i_mark];
-						if(abs($dist) < 10) $value[$j][$k] = $score_melodic_mark_up[$i_mark];
+						if(abs($dist) < 10) $value[$j][$k] = $weigh_melodic_mark_up[$i_mark];
 						}
 					}
 				}
@@ -3110,7 +3110,7 @@ function evaluate_scale($i_item,$scale_name,$mode,$direction,$ratio,$matching_li
 						$pos = cents($ratio[$k] / $ratio[$j]);
 						if($pos < 0) $pos += 1200;
 						$dist = $pos - $cent_mark_melodic_down[$i_mark];
-						if(abs($dist) < 10) $value[$j][$k] = $score_melodic_mark_down[$i_mark];
+						if(abs($dist) < 10) $value[$j][$k] = $weigh_melodic_mark_down[$i_mark];
 						}
 					}
 				}
@@ -3125,7 +3125,7 @@ function evaluate_scale($i_item,$scale_name,$mode,$direction,$ratio,$matching_li
 					$pos = cents($ratio[$k] / $ratio[$j]);
 					if($pos < 0) $pos += 1200;
 					$dist = $pos - $cent_mark_harmonic[$i_mark];
-					if(abs($dist) < 10) $value[$j][$k] = $score_harmonic_mark[$i_mark];
+					if(abs($dist) < 10) $value[$j][$k] = $weigh_harmonic_mark[$i_mark];
 					}
 				}
 			}

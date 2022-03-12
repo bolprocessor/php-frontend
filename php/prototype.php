@@ -111,6 +111,8 @@ if(isset($_POST['savecsound'])) {
 	$csound_score = $_POST['csound_score'];
 	fwrite($handle,$csound_score."\n");
 	fclose($handle);
+	$handle = fopen($temp_dir.$temp_folder.SLASH."_changed",'w');
+	fclose($handle);
 	}
 
 if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR isset($_POST['suppress_pitchbend']) OR isset($_POST['suppress_polyphonic_pressure']) OR isset($_POST['suppress_volume']) OR isset($_POST['suppress_modulation']) OR isset($_POST['suppress_panoramic']) OR isset($_POST['suppress_program']) OR isset($_POST['adjust_duration']) OR isset($_POST['adjust_beats']) OR isset($_POST['adjust_duration']) OR isset($_POST['silence_before']) OR isset($_POST['silence_after']) OR isset($_POST['add_allnotes_off']) OR isset($_POST['suppress_allnotes_off']) OR isset($_POST['quantize_NoteOn']) OR isset($_POST['delete_midi']) OR isset($_POST['cancel'])) {
@@ -441,7 +443,10 @@ echo "<h2>Object prototype <big><font color=\"red\">".$object_name."</font></big
 
 echo "<p><font color=\"red\">➡</font> Don’t close the “<font color=\"blue\">".$prototypes_name."</font>” page while editing this prototype!</p>";
 
-$content = file_get_contents($object_file,TRUE);
+$content = @file_get_contents($object_file,TRUE);
+if($content == '') {
+	exit("This prototype no longer exists.");
+	}
 $extract_data = extract_data(TRUE,$content);
 $source_file = $extract_data['objects'];
 echo "<p style=\"color:blue;\">".$extract_data['headers']."<br />// Source: ".$source_file."</p>";
@@ -2012,7 +2017,7 @@ echo "<p>DURATION OF MIDI SEQUENCE</p>";
 $real_duration = $Duration - $PreRoll + $PostRoll;
 store($h_image,"PreRoll",$PreRoll);
 store($h_image,"PostRoll",$PostRoll);
-echo "Real duration of this object will be:<br /><b>event duration - pre-roll + post-roll</b> = ".$Duration." - (".$PreRoll.") + (".$PostRoll.") = ".$real_duration." ms<br />for a metronome period Tref = ".$Tref." ms";
+echo "Real MIDI duration of this object will be:<br /><b>event duration - pre-roll + post-roll</b> = ".$Duration." - (".$PreRoll.") + (".$PostRoll.") = ".$real_duration." ms<br />for a metronome period Tref = ".$Tref." ms";
 if($duration_warning <> '') echo $duration_warning;
 echo "<input type=\"hidden\" name=\"Duration\" value=\"".$Duration."\">";
 echo "<p><input style=\"background-color:azure;\" type=\"submit\" name=\"adjust_duration\" formaction=\"".$url_this_page."#midi\" value=\"Adjust event time duration\"> to <input type=\"text\" name=\"NewDuration\" size=\"8\" value=\"".$Duration."\"> ms<br />";
@@ -2042,7 +2047,7 @@ store($h_image,"Tref",$Tref);
 
 $link = "prototype_image.php?save_codes_dir=".urlencode($save_codes_dir);
 
-if($Duration > 0)
+if($Duration > 0 OR $object_type > 3)
 	echo "<div class=\"shadow\" style=\"border:2px solid gray; background-color:azure; width:13em;  padding:8px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$link."','".clean_folder_name($object_name)."_image','width=800,height=625,left=100'); return false;\" href=\"".$link."\">IMAGE</a></div>";
 else echo "<p><font color=\"red\">➡</font> NO IMAGE since duration = 0</p>";
 
@@ -2051,7 +2056,7 @@ echo "</form>";
 
 echo "<hr>";
 echo "<p id=\"csound\">CSOUND</p>";
-$csound_score = file_get_contents($csound_file,TRUE);
+$csound_score = @file_get_contents($csound_file,TRUE);
 $csound_period = 0;
 $time_max_csound = 0;
 $table = explode(chr(10),$csound_score);

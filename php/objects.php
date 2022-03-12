@@ -45,6 +45,8 @@ if(!file_exists($temp_dir.$temp_folder)) {
 if(isset($_POST['create_object'])) {
 	$new_object = trim($_POST['new_object']);
 	$new_object = str_replace(' ','-',$new_object);
+	$new_object = str_replace('/','-',$new_object);
+	$new_object = str_replace('#','-',$new_object);
 	$new_object = str_replace('"','',$new_object);
 	if($new_object <> '') {
 		$template = "object_template";
@@ -56,6 +58,8 @@ if(isset($_POST['create_object'])) {
 		fwrite($handle,$filename."\n");
 		fwrite($handle,$template_content."\n");
 		fclose($handle);
+		$handle = fopen($temp_dir.$temp_folder.SLASH."_changed",'w');
+		fclose($handle);
 		}
 	}
 
@@ -63,6 +67,8 @@ if(isset($_POST['duplicate_object'])) {
 	$object = $_POST['object_name'];
 	$copy_object = trim($_POST['copy_object']);
 	$copy_object = str_replace(' ','-',$copy_object);
+	$copy_object = str_replace('/','-',$copy_object);
+	$copy_object = str_replace('#','-',$copy_object);
 	$copy_object = str_replace('"','',$copy_object);
 	$this_object_file = $temp_dir.$temp_folder.SLASH.$object.".txt";
 	$copy_object_file = $temp_dir.$temp_folder.SLASH.$copy_object.".txt";
@@ -82,6 +88,32 @@ if(isset($_POST['delete_object'])) {
 	$this_object_file = $temp_dir.$temp_folder.SLASH.$object.".txt";
 //	echo $this_object_file."<br />";
 	rename($this_object_file,$this_object_file.".old");
+	$handle = fopen($temp_dir.$temp_folder.SLASH."_changed",'w');
+	fclose($handle);
+	}
+
+if(isset($_POST['rename_object'])) {
+	$object = $_POST['object_name'];
+	$new_object = trim($_POST['object_new_name']);
+	$new_object = str_replace(' ','-',$new_object);
+	$new_object = str_replace('/','-',$new_object);
+	$new_object = str_replace('#','-',$new_object);
+	$new_object = str_replace('"','',$new_object);
+	if($new_object <> '') {
+		echo "<p><font color=\"red\">Renamed </font><font color=\"blue\"><big>“".$object."”</big></font> as <font color=\"blue\"><big>“".$new_object."”</big></font>…</p>";
+		$this_object_file = $temp_dir.$temp_folder.SLASH.$object.".txt";
+		$new_object_file = $temp_dir.$temp_folder.SLASH.$new_object.".txt";
+	//	echo $new_object_file."<br />";
+		if(file_exists($this_object_file)) {
+			rename($this_object_file,$new_object_file);
+		//	unlink($this_object_file);
+			$this_object_codes = $temp_dir.$temp_folder.SLASH.$object."_codes";
+			$new_object_codes = $temp_dir.$temp_folder.SLASH.$new_object."_codes";
+			rcopy($this_object_codes,$new_object_codes);
+			$handle = fopen($temp_dir.$temp_folder.SLASH."_changed",'w');
+			fclose($handle);
+			}
+		}
 	}
 
 if(isset($_POST['restore'])) {
@@ -99,6 +131,8 @@ if(isset($_POST['restore'])) {
 		rename($this_object_file,str_replace(".old",'',$this_object_file));
 		}
 	echo "</p>";
+	$handle = fopen($temp_dir.$temp_folder.SLASH."_changed",'w');
+	fclose($handle);
 	}
 
 $deleted_objects = '';
@@ -113,13 +147,12 @@ foreach($dircontent as $oldfile) {
 	$deleted_objects .= "“".$this_object."” ";
 	}
 
-if(isset($_POST['savethisfile']) OR isset($_POST['create_object']) OR isset($_POST['delete_object']) OR isset($_POST['restore']) OR isset($_POST['duplicate_object'])) {
+if(isset($_POST['savethisfile']) OR isset($_POST['create_object']) OR isset($_POST['delete_object']) OR isset($_POST['rename_object']) OR isset($_POST['restore']) OR isset($_POST['duplicate_object'])) {
 	$maxsounds = $_POST['maxsounds'];
 	if($test) echo "SaveObjectPrototypes() dir = ".$dir."<br />";
 	if($test) echo "filename = ".$filename."<br />";
 	if($test) echo "temp_folder = ".$temp_folder."<br />";
 	if($test) echo "maxsounds = ".$maxsounds."<br />";
-	
 	$lock_file = $dir.$filename."_lock";
 	$time_start = time();
 	$time_end = $time_start + 5;
@@ -341,8 +374,11 @@ if($iobj >= 0) {
 		echo "<input type=\"hidden\" name=\"object_name\" value=\"".$object_name[$i]."\">";
 		echo "<input style=\"background-color:yellow; \" type=\"submit\" name=\"delete_object\" value=\"DELETE\">";
 		echo "</td>";
-		echo "<td style=\"padding:4px; vertical-align:middle; text-align:right;\">";
-		echo "<input style=\"background-color:azure;\" type=\"submit\" name=\"duplicate_object\" value=\"DUPLICATE AS\">: <input type=\"text\" name=\"copy_object\" size=\"15\" value=\"\">";
+		echo "<td style=\"padding:4px; vertical-align:middle;\">";
+		echo "<input style=\"background-color:azure;\" type=\"submit\" name=\"rename_object\" value=\"RENAME AS\">: <input type=\"text\" name=\"object_new_name\" size=\"10\" value=\"\">";
+		echo "</td>";
+		echo "<td style=\"padding:4px; vertical-align:middle;\">";
+		echo "<input style=\"background-color:azure;\" type=\"submit\" name=\"duplicate_object\" value=\"DUPLICATE AS\">: <input type=\"text\" name=\"copy_object\" size=\"10\" value=\"\">";
 		echo "</td>";
 		echo "</tr>";
 		echo "</form>";
