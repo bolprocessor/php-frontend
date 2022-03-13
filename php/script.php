@@ -5,10 +5,13 @@ if(isset($_GET['file'])) $file = urldecode($_GET['file']);
 else $file = '';
 if($file == '') die();
 $url_this_page = "script.php?file=".urlencode($file);
+save_settings("last_page",$url_this_page);
 $table = explode(SLASH,$file);
 $filename = end($table);
 $this_file = $bp_application_path.$file;
 $dir = str_replace($filename,'',$this_file);
+$current_directory = str_replace(SLASH.$filename,'',$file);
+save_settings("last_directory",$current_directory);
 
 require_once("_header.php");
 echo "<p>Current directory = ".$dir."</p>";
@@ -47,6 +50,7 @@ if($content) {
 	}
 
 echo "<h2>Script <big>“<font color=\"MediumTurquoise\">".$filename."</font>”</big></h2>";
+save_settings("last_name",$filename); 
 
 if(isset($_POST['addinstruction'])) {
 	$index = $_POST['i'];

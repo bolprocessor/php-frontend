@@ -19,10 +19,9 @@ if($path <> '') {
 		}
 	else $upper_dir = '';
 	if($test) echo "upper_dir = ".$upper_dir."<br />";
-	if($upper_dir == '') $link = $this_page;
-	else $link = $this_page."?path=".urlencode($upper_dir);
-	if($test) echo "link = ".$link."<br />";
-	echo "<h3 style=\"text-align:center;\">[<a href=\"".$link."\">move to upper folder</a>]</h3></td>";
+	if($upper_dir == '') $upper_link = $this_page;
+	else $upper_link = $this_page."?path=".urlencode($upper_dir);
+	if($test) echo "link = ".$upper_link."<br />";
 	echo "</tr></table>";
 	}
 else {
@@ -56,7 +55,12 @@ else {
 		}
 	}
 
-if(isset($last_page) AND isset($last_name)) echo "<div style=\"float:right; background-color:white; padding:1em;\"><big>Last page visited:<br /><font color=\"red\">➡</font> <a target=\"_blank\" href=\"".$last_page."\">".$last_name."</a></big></div><br /><br />";
+$folder = str_replace($bp_application_path,'',$dir);
+if(isset($last_page) AND isset($last_name)) {
+	echo "<div style=\"float:right; background-color:white; padding:6px;\"><big>Last page visited:<br /><font color=\"red\">➡</font> <a target=\"_blank\" href=\"".$last_page."\">".$last_name."</a>";
+	if($folder <> $last_directory) echo "<br />in workspace</font> <a href=\"index.php?path=".$last_directory."\">".$last_directory."</a>";
+	echo "</big></div><br /><br />";
+	}
 
 echo link_to_help();
 
@@ -227,25 +231,16 @@ if(isset($_POST['create_script'])) {
 
 $delete_files = isset($_POST['delete_files']);
 $rename_files = isset($_POST['rename_files']);
-$folder = str_replace($bp_application_path,'',$dir);
+$show_dependencies = isset($_POST['show_dependencies']);
 if($folder <> '') {
-	echo "<h3>Content of folder <font color=\"red\">".$folder."</font>";
-	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-	if(!$delete_files AND !$rename_files AND $path <> $trash_folder) {
-		echo "<br /><br />";
-		echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"delete_files\" value=\"DELETE SOME FILES\">";
-		}
-	if(!$rename_files AND !$delete_files AND $path <> $trash_folder) {
-		echo "&nbsp;&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"rename_files\" value=\"RENAME SOME FILES\">";
-		}
-	echo "</form>";
-	echo "</h3>";
+	echo "<h3>Content of folder <font color=\"red\">".$folder."</font></h3>";
+	echo "<p><big><a href=\"".$upper_link."\">↑&nbsp;move to upper folder&nbsp;↑</a></big></p>";
 	}
 // echo "dir = ".$dir."<br />";
 $table = explode('_',$folder);
 $extension = end($table);
 if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension <> "temp" AND !$delete_files) {
-	echo "<div style=\"float:right; background-color:white; padding:6px;\">";
+	echo "<div style=\"float:right; background-color:white; padding:6px; border-radius: 15px;\">";
 	check_csound();
 	if($path <> $csound_resources AND $path <> '') {
 		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
@@ -328,6 +323,20 @@ if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension 
 		echo "</form>";
 		}
 	echo "</div>";
+	}
+
+if($folder <> '') {
+	echo "<div style=\"background-color:white; padding:1em; border-radius: 15px;\">";
+	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+	if(!$delete_files AND !$rename_files AND $path <> $trash_folder) {
+		echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"delete_files\" value=\"DELETE SOME FILES\">";
+		}
+	if(!$rename_files AND !$delete_files AND $path <> $trash_folder) {
+		echo "&nbsp;&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"rename_files\" value=\"RENAME SOME FILES\">";
+		}
+	if(!$show_dependencies) echo "<br /><br /><input style=\"background-color:yellow;\" type=\"submit\" name=\"show_dependencies\" value=\"SHOW DEPENDENCIES\"> (links between files)";
+	else echo "<br /><br /><input style=\"background-color:azure;\" type=\"submit\" value=\"HIDE DEPENDENCIES\">";
+	echo "</form></div>";
 	}
 
 if(isset($_POST['delete_checked_files'])) {
@@ -445,10 +454,15 @@ foreach($dircontent as $thisfile) {
 				echo "&nbsp;<small>➡&nbsp;".gmdate('Y-m-d H\hi',$time_saved)."</small>";
 				}
 			echo "<br />";
+			if($show_dependencies) {
+				$dependencies = find_dependencies($dir,$thisfile);
+				if(count($dependencies) > 0) {
+					for($i = 0; $i < count($dependencies); $i++)
+						echo "&nbsp;&nbsp;▹&nbsp;<small>".$dependencies[$i]."</small><br />";
+					}
+				}
 			}
-		else {
-			echo $thisfile."<br />";
-			}
+		else echo $thisfile."<br />";;
 		}
 	}
 if($delete_files)

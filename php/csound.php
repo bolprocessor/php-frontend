@@ -17,6 +17,7 @@ $dir = str_replace($filename,'',$this_file);
 $warn_not_empty = FALSE;
 $max_scales = 0;
 $current_directory = str_replace(SLASH.$filename,'',$file);
+save_settings("last_directory",$current_directory);
 
 require_once("_header.php");
 echo "<p><small>Current directory = <a href=\"index.php?path=".urlencode($current_directory)."\">".$dir;

@@ -11,6 +11,7 @@ $here = $filename = end($table);
 $this_file = $bp_application_path.$file;
 $dir = str_replace($filename,'',$this_file);
 $current_directory = str_replace(SLASH.$filename,'',$file);
+save_settings("last_directory",$current_directory);
 $textarea_rows = 20;
 
 if($test) echo "grammar_file = ".$this_file."<br />";

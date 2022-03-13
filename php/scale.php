@@ -6,12 +6,14 @@ require_once("_basic_tasks.php");
 if(isset($_POST['dir_scales']))
 	$dir_scales = $_POST['dir_scales'];
 else {
-	echo "=> Csound resource file is not known. First open the ‘-cs’ file!"; die();
+	echo "=> Csound resource file is not known. First open the ‘-cs’ file!";
+	die();
 	}
 if(isset($_GET['scalefilename']))
 	$filename = urldecode($_GET['scalefilename']);
 else {
-	echo "Scale name is not known. Call it from the ‘-cs’ file!"; die();
+	echo "Scale name is not known. Call it from the ‘-cs’ file!";
+	die();
 	}
 $this_title = $filename;
 $url_this_page = "scale.php?".$_SERVER["QUERY_STRING"];

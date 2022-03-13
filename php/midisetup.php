@@ -5,16 +5,20 @@ if(isset($_GET['file'])) $file = urldecode($_GET['file']);
 else $file = '';
 if($file == '') die();
 $url_this_page = "midisetup.php?file=".urlencode($file);
+save_settings("last_page",$url_this_page);
 $table = explode(SLASH,$file);
 $filename = end($table);
 $this_file = $bp_application_path.$file;
 $dir = str_replace($filename,'',$this_file);
+$current_directory = str_replace(SLASH.$filename,'',$file);
+save_settings("last_directory",$current_directory);
 
 require_once("_header.php");
 echo "<p>Current directory = ".$dir."</p>";
 echo link_to_help();
 
 echo "<h3>MIDI setup file “".$filename."”</h3>";
+save_settings("last_name",$filename); 
 
 if(isset($_POST['savethisfile'])) {
 	echo "<p id=\"timespan\" style=\"color:red;\">Saved file…</p>";

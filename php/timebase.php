@@ -11,6 +11,7 @@ $filename = end($table);
 $this_file = $bp_application_path.$file;
 $dir = str_replace($filename,'',$this_file);
 $current_directory = str_replace(SLASH.$filename,'',$file);
+save_settings("last_directory",$current_directory);
 
 require_once("_header.php");
 echo "<p>Current directory = <a href=\"index.php?path=".urlencode($current_directory)."\">".$dir."</a></p>";
@@ -23,6 +24,7 @@ if(!file_exists($temp_dir.$temp_folder)) {
 	}
 
 echo "<h3>Time base file “".$filename."”</h3>";
+save_settings("last_name",$filename); 
 
 $midi_import_file = $temp_dir.$temp_folder.SLASH."imported_codes.mid";
 $midi_import_mf2t = $temp_dir.$temp_folder.SLASH."imported_mf2t.txt";

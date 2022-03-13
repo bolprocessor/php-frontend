@@ -12,7 +12,8 @@ if(isset($_POST['object_name'])) {
 	$CsoundInstruments_file = $_POST['CsoundInstruments_file'];
 	}
 else {
-	"Sound-object prototype's name is not known. First open the ‘-mi’ file!"; die();
+	"Sound-object prototype's name is not known. First open the ‘-mi’ file!";
+	die();
 	}
 $this_title = $expression = $object_name;
 require_once("_header.php");

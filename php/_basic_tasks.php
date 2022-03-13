@@ -1407,9 +1407,8 @@ function type_of_file($thisfile) {
 	}
 
 function change_occurrences_name_in_files($dir,$old_name,$new_name) {
+	set_time_limit(1000);
 	$dircontent = scandir($dir);
-	$i_file = 0;
-	echo "old_name = ".$old_name."<br />";
 	foreach($dircontent as $thisfile) {
 		if($thisfile[0] == '.' OR $thisfile[0] == '_') continue;
 		if(is_dir($dir.SLASH.$thisfile)) continue;
@@ -1418,22 +1417,54 @@ function change_occurrences_name_in_files($dir,$old_name,$new_name) {
 		if($type <> "grammar" AND $type <> "data" AND $type <> "alphabet" AND $type <> "objects")
 			continue;
 		$content = file_get_contents($dir.SLASH.$thisfile,TRUE);
-	/*	$extract_data = extract_data(FALSE,$content);
-		$data = $extract_data['content']; */
 		$table = explode(chr(10),$content);
 		$imax = count($table);
-		$handle = fopen($dir.SLASH.$thisfile,"w");
+		$found = FALSE;
+		$new_table = array();
 		for($i = 0; $i < $imax; $i++) {
 			$line = $table[$i];
 			if(is_integer(strpos($line,$old_name))) {
-				echo "Found ‘".$old_name."’ in ‘".$thisfile."’ and changed it to ‘".$new_name."’<br />";
+				echo "• Found ‘".$old_name."’ in ‘".$thisfile."’ and changed it to ‘".$new_name."’<br />";
 				$line = str_replace($old_name,$new_name,$line);
+				$found = TRUE;
 				}
+			$new_table[$i] = $line;
+			}
+		if(!$found) continue;
+		$handle = fopen($dir.SLASH.$thisfile,"w");
+		for($i = 0; $i < $imax; $i++) {
+			$line = $new_table[$i];
 			fwrite($handle,$line."\n");
 			}
 		fclose($handle);
 		}
 	return;
+	}
+
+function find_dependencies($dir,$name) {
+	set_time_limit(1000);
+	$dependencies = array();
+	$dircontent = scandir($dir);
+	foreach($dircontent as $thisfile) {
+		if($thisfile[0] == '.' OR $thisfile[0] == '_') continue;
+		if($thisfile == $name) continue;
+		if(is_dir($dir.SLASH.$thisfile)) continue;
+		$type_of_file = type_of_file($thisfile);
+		$type = $type_of_file['type'];
+		if($type <> "grammar" AND $type <> "data" AND $type <> "alphabet" AND $type <> "objects")
+			continue;
+		$content = file_get_contents($dir.SLASH.$thisfile,TRUE);
+		$table = explode(chr(10),$content);
+		$imax = count($table);
+		for($i = 0; $i < $imax; $i++) {
+			$line = trim(str_replace('/','',$table[$i]));
+			if($line == $name) {
+				$dependencies[] = $thisfile;
+				break;
+				}
+			}
+		}
+	return $dependencies;
 	}
 
 function MIDIparameter_argument($i,$parameter,$StartIndex,$EndIndex,$TableIndex,$param_value,$IsLogX,$IsLogY,$GEN) {
