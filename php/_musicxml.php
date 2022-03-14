@@ -68,8 +68,12 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 		$sum_volume_part[$section] = $number_volume_part[$section] = array();
 		$default_volume[$section] = array();
 		$implicit[$section] = array();
-		if(!isset($default_tempo[$section - 1])) $default_tempo[$section] = $current_tempo;
-		else $default_tempo[$section] = $default_tempo[$section - 1];
+	/*	if(!isset($default_tempo[$section - 1])) $default_tempo[$section] = $current_tempo;
+		else {
+			$default_tempo[$section] = $default_tempo[$section - 1];
+			$report .= "Default tempo carried on from preceding section<br />";
+			} */
+		$default_tempo[$section] = $current_tempo; // Fixed by BB 2022-03-13
 		if($list_this OR $trace_tempo) $report .= "Default tempo set to ".$default_tempo[$section]." in section #".$section."<br />";
 		$beat_type = $beat_unit = array();
 		for($i_repeat = 1; $i_repeat <= $repeat_section[$section]; $i_repeat++) {
@@ -99,7 +103,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 				if($test_musicxml)
 					echo "<font color = red>• Measure ".$measure_label[$i_measure]."</font><br />";
 				$curr_event = $convert_measure = $p_fermata_total_duration[$i_measure] = $q_fermata_total_duration[$i_measure] = $p_fermata_date[$i_measure] = $q_fermata_date[$i_measure] = $p_fermata_duration[$i_measure] = $q_fermata_duration[$i_measure] = array();
-				if($include_measures AND !$first_measure AND $reload_musicxml) $data .= " [—".$i_measure."—] ";
+				if($include_measures /* AND !$first_measure */ AND $reload_musicxml) $data .= " [—".$i_measure."—] ";
 				if(($i_measure == $number_measures) AND ($extend_last_measure > 0)) $data .= " _legato(".$extend_last_measure.") ";
 				$first_measure = FALSE;
 				$data .= "{";
@@ -1389,28 +1393,28 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							$current_tempo = $old_tempo;
 							}
 					$data .= "_tempo(TEMPO_THIS_MEASURE)";
-					
-					if($number_volume_part[$section][$score_part] > 0) {
-						$volume = round($sum_volume_part[$section][$score_part] / $number_volume_part[$section][$score_part]);
-						if($volume > 127) $volume = 127;
-						if($dynamic_control[$score_part] == "volume") $data .= " _volume(".$volume.")";
-						else $data .= " _vel(".$volume.")"; 
-						if(!isset($default_volume[$section][$score_part]))
-							$default_volume[$section][$score_part] = $volume;
-					//	if(!isset($old_volume[$score_part])) $old_volume[$score_part] = $volume;
-						$old_volume[$score_part] = $volume; // Fixed by BB 2022-02-15
+					if(!$ignore_dynamics) { // Added by BB 2022-03-13
+						if($number_volume_part[$section][$score_part] > 0) {
+							$volume = round($sum_volume_part[$section][$score_part] / $number_volume_part[$section][$score_part]);
+							if($volume > 127) $volume = 127;
+							if($dynamic_control[$score_part] == "volume") $data .= " _volume(".$volume.")";
+							else $data .= " _vel(".$volume.")"; 
+							if(!isset($default_volume[$section][$score_part]))
+								$default_volume[$section][$score_part] = $volume;
+						//	if(!isset($old_volume[$score_part])) $old_volume[$score_part] = $volume;
+							$old_volume[$score_part] = $volume; // Fixed by BB 2022-02-15
+							}
+						else if(isset($default_volume[$section][$score_part])) {
+							// We must repeat volume on each measure to play it separately
+								if($dynamic_control[$score_part] == "volume") $data .= " _volume(".$default_volume[$section][$score_part].")";
+								else $data .= " _vel(".$default_volume[$section][$score_part].")";
+								}
+							else {
+								if(!isset($old_volume[$score_part])) $old_volume[$score_part] = 64;
+								if($dynamic_control[$score_part] == "volume") $data .= " _volume(".$old_volume[$score_part].")";
+								else $data .= " _vel(".$old_volume[$score_part].")";
+								}
 						}
-					else if(isset($default_volume[$section][$score_part])) {
-						// We must repeat volume on each measure to play it separately
-							if($dynamic_control[$score_part] == "volume") $data .= " _volume(".$default_volume[$section][$score_part].")";
-							else $data .= " _vel(".$default_volume[$section][$score_part].")";
-							}
-						else {
-							if(!isset($old_volume[$score_part])) $old_volume[$score_part] = 64;
-							if($dynamic_control[$score_part] == "volume") $data .= " _volume(".$old_volume[$score_part].")";
-							else $data .= " _vel(".$old_volume[$score_part].")";
-							}
-							
 					if($test_musicxml)
 						echo "End measure ".$i_measure." time_measure = ".$p_time_field."/".$q_time_field." tempo_this_measure = ".$sum_tempo_measure[$section][$i_measure]."/".$number_tempo_measure[$section][$i_measure]." default_tempo[section] = ".$default_tempo[$section]." implicit = ".(1 * $implicit[$section][$i_measure])." old_tempo = ".$old_tempo."<br /><br />";
 					if(!$ignore_channels AND isset($midi_channel[$score_part])) $data .= " _chan(".$midi_channel[$score_part].")";
@@ -1658,9 +1662,6 @@ function diatonic_scale($fifths) {
 				}
 			if($scale_pos > 6) $scale_pos -= 7;
 			}
-	/*	echo "scale = ";
-		for($i = 0; $i < count($diatonic_scale); $i++) echo $notes_bemol[$diatonic_scale[$i]]." ";
-		echo "<br />"; */
 		}
 	else $diatonic_scale = $standard_diatonic_scale;
 	return $diatonic_scale;

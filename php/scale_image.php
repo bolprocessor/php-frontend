@@ -96,8 +96,8 @@ if(!$no_intervals) {
 	if(isset($fifth)) foreach($fifth as $j => $k) {
 		connect($im,$j,$k,$radius - 1,$blue,3);
 		}
-	if(isset($mark)) foreach($mark as $j => $k) {
-		connect($im,$j,$k,$radius - 1,$black,2);
+	if(isset($mark)) foreach($mark as $the_mark) {
+		connect($im,$the_mark['j'],$the_mark['k'],$radius - 1,$black,2);
 		}
 	}
 
