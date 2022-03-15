@@ -8,7 +8,7 @@ $perfect_fourth = cents(4/3);
 $wolf_fourth = cents(320/243);
 
 function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_folder,$note_convention) {
-	global $max_term_in_fraction,$dir_scale_images;
+	global $max_term_in_fraction,$dir_scale_images,$csound_resources;
 	$test_tonal = FALSE;
 	$test_intervals = TRUE;
 	$display_items = FALSE;

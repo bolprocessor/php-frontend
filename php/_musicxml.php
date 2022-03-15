@@ -1077,8 +1077,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 						if(!isset($the_event['note']) OR $the_event['note'] == '') {
 							$is_chord = FALSE;
 							continue;
-							}
-						
+							}					
 						$altered_diatonic_scale = adjust_scale($diatonic_scale,$altered_diatonic_scale,$the_event['note']);
 						$diatonic_scale_string = '';
 						if(count($altered_diatonic_scale) > 0) {
@@ -1088,7 +1087,6 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 								}
 							}
 						$p_duration = $the_event['p_dur']; $q_duration = $the_event['q_dur'];
-				//		$breath = FALSE;
 						if(isset($the_event['breath_mark']) AND !$found_breath) {
 							$found_breath = TRUE;
 							$add_breath = add($p_duration,$q_duration,$p_stream_duration,$q_stream_duration);
@@ -1296,7 +1294,6 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 										if($trace_breath) $report .= "Breath in chord<br />";
 										}
 									}
-
 								}
 							$convert_measure[$score_part] .= ",";
 							}
@@ -1350,7 +1347,6 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 						$breath = FALSE;
 						$i_breath = 0;
 						}
-
 					$convert_measure[$score_part] .= "§".$i_field_of_part."§,";
 					$p_field_duration[$i_field_of_part] = $p_time_field;
 					$q_field_duration[$i_field_of_part] = $q_time_field * $divisions[$score_part];
@@ -1448,8 +1444,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							$p_duration_this_measure = $p_field_duration[$j];
 							$q_duration_this_measure = $q_field_duration[$j];
 							}
-						}
-					
+						}				
 					// Add missing rests to fill up gaps
 					for($j = 0; $j < $i_field_of_part; $j++) {
 						$add = add($p_duration_this_measure,$q_duration_this_measure,-$p_field_duration[$j],$q_field_duration[$j]);
@@ -1487,7 +1482,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 											$fraction = $p_initial_part."/".($q_initial_part * $divisions[$score_part]);
 											$simplify = simplify($fraction,$max_term_in_fraction);
 											$fraction = $simplify['fraction'];
-											$stream .= " ".$fraction." ";
+											if($fraction <> 0) $stream .= " ".$fraction." ";
 											// Reduce duration of rest by the initial part
 											// if($list_this) $report .= " initial_part = ".$p_initial_part."/".$q_initial_part." gap = ".$p_gap."/".$q_gap."<br />";
 											$add = add($p_gap * $divisions[$score_part],$q_gap,-$p_initial_part,$q_initial_part); // Fixed by BB 2022-01-29

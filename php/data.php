@@ -164,6 +164,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$ignore_arpeggios = isset($_POST['ignore_arpeggios']);
 			$p_breath_length = 1; $q_breath_length = 6;
 			$breath_tag = "🌱";
+			$list_settings = '';
 			$slur_length = 20; // Percentage in _legato()
 			if(isset($_POST['p_breath_length'])) $p_breath_length = round(abs(intval($_POST['p_breath_length'])));
 			if(isset($_POST['q_breath_length'])) $q_breath_length = round(abs(intval($_POST['q_breath_length'])));
@@ -207,11 +208,17 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				$current_metronome_max = intval($_POST['current_metronome_max']);
 			if(isset($_POST['current_metronome_average']))
 				$current_metronome_average = intval($_POST['current_metronome_average']);
+			if(($change_metronome_average + $change_metronome_min + $change_metronome_max) > 0) {
+				if($change_metronome_average == 0) $change_metronome_average = $current_metronome_average;
+				if($change_metronome_min == 0) $change_metronome_min = $current_metronome_min;
+				if($change_metronome_max == 0) $change_metronome_max = $current_metronome_max;
+				$list_settings .= "// Changed metronome to min ".$change_metronome_min.", average ".$change_metronome_average.", max ".$change_metronome_max."\n";
+				}
 			if($change_metronome_min < 1 AND ($change_metronome_max > 0 OR $change_metronome_average > 0))
 				$error_change_metronome .= "<font color=\"red\">ERROR changing metronome = minimum value should be positive</font><br />";
 			if(($change_metronome_min >= $change_metronome_max OR $change_metronome_average <= $change_metronome_min OR $change_metronome_average >= $change_metronome_max) AND ($change_metronome_max > 0 OR $change_metronome_average > 0))
 				$error_change_metronome .= "<font color=\"red\">ERROR changing metronome: values are not compatible</font><br />";
-			if($error_change_metronome <> '') $reload_musicxml = FALSE;
+			if($error_change_metronome <> '') $change_metronome_average = $change_metronome_min = $change_metronome_max = 0;
 			$file = fopen($music_xml_file,"r");
 			$print_info = FALSE;
 			$new_section = FALSE;
@@ -403,7 +410,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			if($number_metronome > 0)
 				$metronome_average = round($sum_metronome / $number_metronome);
 			else $metronome_average = 0;
-			$list_settings = '';
+		//	$list_settings = '';
 			$number_parts = $i_part;
 			if($reload_musicxml) {
 				switch($tempo_option) {
@@ -532,7 +539,6 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$window_name = $upload_filename;
 			$link_preview = "preview_musicxml.php?music_xml_file=".urlencode($music_xml_file)."&title=".urlencode($upload_filename);
 			echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_preview."','".$window_name."','width=600,height=800,left=200'); return false;\" type=\"submit\" name=\"preview\" value=\"PREVIEW MusicXML file\" title=\"\"> <b>(simplified)</b><br /><br />";
-
 			if($report <> '') {
 				echo $report;
 				echo "<hr>";
@@ -557,7 +563,6 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			echo "<input type=\"hidden\" name=\"current_metronome_min\" value=\"".$current_metronome_min."\">";
 			echo "<input type=\"hidden\" name=\"current_metronome_max\" value=\"".$current_metronome_max."\">";
 			echo "<input type=\"hidden\" name=\"current_metronome_average\" value=\"".$current_metronome_average."\">";
-			
 			if($error_change_metronome <> '') echo $error_change_metronome;
 			if($metronome_average > 0 AND $tempo_option <> "ignore") {
 				echo "<br /><table cellpadding=\"8px;\">";
@@ -1662,30 +1667,34 @@ if(!$hide) {
 	echo "<input type=\"hidden\" name=\"change_volume_max\" value=\"".$change_volume_max."\">";
 	}
 echo "</form>";
-echo "<hr>";
-echo "<h2 id=\"tonalanalysis\" style=\"text-align:center;\">Tonal analysis</h2>";
-$tonal_analysis_possible = !($note_convention > 2);
-if(!$tonal_analysis_possible) echo "<p><font color=\"red\">➡ Tonal analysis is only possible with names of notes in English, Italian/Spanish/French or Indian conventions.</font></p>";
-if(isset($_POST['analyze_tonal'])) {
-	tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_folder,$note_convention);
-	}
-else {
-	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-	echo "<p><input style=\"background-color:yellow; font-size:large; float:left; margin-right:1em;\" type=\"submit\" formaction=\"".$url_this_page."#tonalanalysis\" title=\"Analyze tonal intervals\" name=\"analyze_tonal\" value=\"ANALYZE INTERVALS\"";
-	if(!$tonal_analysis_possible) echo " disabled";
-	echo ">";
-	echo "Melodic and harmonic tonal intervals of (all) item(s), ignoring channels, instruments, periods, sound-objects and random performance controls.</p>";
-	if($csound_file <> '') echo "<p style=\"text-align:center;\"><font color=\"red\">➡</font> It would be wise to <a target=\"_blank\" href=\"csound.php?file=".urlencode($csound_resources.SLASH.$csound_file)."\">open</a> the ‘<font color=\"blue\">".$csound_file."</font>’ Csound resource file to use its tonal scale definitions.</p>";
-	echo "</form>";
+$table = explode(chr(10),$content);
+$imax = count($table);
+if($imax > 0 AND substr_count($content,'{') > 0) {
 	echo "<hr>";
+	echo "<h2 id=\"tonalanalysis\" style=\"text-align:center;\">Tonal analysis</h2>";
+	$tonal_analysis_possible = !($note_convention > 2);
+	if(!$tonal_analysis_possible) echo "<p><font color=\"red\">➡ Tonal analysis is only possible with names of notes in English, Italian/Spanish/French or Indian conventions.</font></p>";
+	if(isset($_POST['analyze_tonal'])) {
+		tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_folder,$note_convention);
+		}
+	else {
+		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+		echo "<p><input style=\"background-color:yellow; font-size:large; float:left; margin-right:1em;\" type=\"submit\" formaction=\"".$url_this_page."#tonalanalysis\" title=\"Analyze tonal intervals\" name=\"analyze_tonal\" value=\"ANALYZE INTERVALS\"";
+		if(!$tonal_analysis_possible) echo " disabled";
+		echo ">";
+		echo "Melodic and harmonic tonal intervals of (all) item(s), ignoring channels, instruments, periods, sound-objects and random performance controls.</p>";
+		if($csound_file <> '') echo "<p style=\"text-align:center;\"><font color=\"red\">➡</font> It would be wise to <a target=\"_blank\" href=\"csound.php?file=".urlencode($csound_resources.SLASH.$csound_file)."\">open</a> the ‘<font color=\"blue\">".$csound_file."</font>’ Csound resource file to use its tonal scale definitions.</p>";
+		echo "</form>";
+		echo "<hr>";
+		}
 	}
 echo "</td>";
 $window_name = window_name($filename);
 if(!$hide) {
 	echo "<td style=\"background-color:cornsilk;\">";
 	echo "<table style=\"background-color:Gold;\">";
-	$table = explode(chr(10),$content);
-	$imax = count($table);
+/*	$table = explode(chr(10),$content);
+	$imax = count($table); */
 	if($imax > 0 AND substr_count($content,'{') > 0) {
 		$window_name_grammar = $window_name."_grammar";
 		$link_grammar = "produce.php?data=".urlencode($this_file);
@@ -1811,8 +1820,9 @@ function create_chunks($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxc
 		$initial_controls = trim(substr($line_recoded,0,$pos));
 		if($label <> "chunk") {
 			// Pick up specified tonal scale if any
-			$scale = preg_replace("/\s*_scale\(([^\,]+)[^\)]+\).+/u","$1",$line_recoded);
+			$scale = preg_replace("/.*_scale\(([^\,]+)[^\)]+\).+/u","$1",$line_recoded);
 			if($scale <> $line_recoded) $tonal_scale = $scale;
+		//	echo $scale."<br />".$line_recoded."<br />";
 			// Pick up initial tempo if any
 			$tempo = preg_replace("/\s*_tempo\(([^\)]+)\).*/u","$1",$initial_controls);
 			if($tempo <> $initial_controls) $initial_tempo = "_tempo(".$tempo.")";

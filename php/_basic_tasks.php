@@ -2659,4 +2659,5 @@ function date_sort($a,$b) {
 function score_sort($a,$b) {
 	return $a['score'] < $b['score'];
 	}
+
 ?>
