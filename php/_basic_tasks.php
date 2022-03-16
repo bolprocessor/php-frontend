@@ -1424,7 +1424,7 @@ function change_occurrences_name_in_files($dir,$old_name,$new_name) {
 		for($i = 0; $i < $imax; $i++) {
 			$line = $table[$i];
 			if(is_integer(strpos($line,$old_name))) {
-				echo "• Found ‘".$old_name."’ in ‘".$thisfile."’ and changed it to ‘".$new_name."’<br />";
+				if($i > 1) echo "• Found ‘<font color=\"blue\">".$old_name."</font>’ in ‘<font color=\"blue\">".$thisfile."</font>’ and changed it to ‘<font color=\"blue\">".$new_name."</font>’<br />";
 				$line = str_replace($old_name,$new_name,$line);
 				$found = TRUE;
 				}

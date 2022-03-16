@@ -29,6 +29,7 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 	$p_default[3] = 320; $q_default[3] = 243; $weigh_default[3] = -2; $width_default[3] = 15; // Wolf fourth
 	$p_default[4] = 81; $q_default[4] = 64; $weigh_default[4] = -1; $width_default[4] = 10; // Pythagorean major third
 	$p_default[5] = 6; $q_default[5] = 5; $weigh_default[5] = 1; $width_default[5] = 10; // Harmonic minor third
+	$p_default[6] = 9; $q_default[6] = 8; $weigh_default[6] = 1; $width_default[6] = 10; // Pythagorean major second
 
 	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 	echo "<input class=\"shadow\" style=\"float:right; font-size:large; background-color:azure;\" type=\"submit\" value=\"STOP ANALYSIS\">";
@@ -90,7 +91,7 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 		echo "<br />";
 		}
 	echo "</td>";
-	$p_default[5] = $q_default[5] = ''; $weigh_default[5] = 1;
+	$p_default[6] = $q_default[6] = ''; $weigh_default[6] = 1;
 	echo "<td colspan=\"2\" style=\"white-space:nowrap; padding:6px;\">";
 	for($i_mark = 0; $i_mark < $max_marks; $i_mark++) {
 		if(isset($_POST["position_harmonic_mark_p_".$i_mark]))
@@ -275,14 +276,17 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 			$number_match = $match_notes['max_match'];
 			usort($matching_notes,"score_sort");
 			if($number_match > 0) {
-				if(!$compare_scales)  echo "Number occurrences:<br />";
+			//	if(!$compare_scales)  echo "Number occurrences:<br />";
+				if(!$compare_scales)  echo "Duration:<br />";
 				$max_score = $matching_notes[0]['score'];
 				for($i_match = 0; $i_match < count($matching_notes); $i_match++) {
 					if($max_score > 0)
 						$matching_notes[$i_match]['percent'] = round($matching_notes[$i_match]['score'] * 100 / $max_score);
 					else $matching_notes[$i_match]['percent'] = 0;
+			/*		if(!$compare_scales) echo $matching_notes[$i_match][0]." ▹
+					".$matching_notes[$i_match][1]." (".$matching_notes[$i_match]['score']." times) ".$matching_notes[$i_match]['percent']."%<br />"; */
 					if(!$compare_scales) echo $matching_notes[$i_match][0]." ▹
-					".$matching_notes[$i_match][1]." (".$matching_notes[$i_match]['score']." times) ".$matching_notes[$i_match]['percent']."%<br />";
+					".$matching_notes[$i_match][1]." (".round($matching_notes[$i_match]['score']/$lcm,1).")<br />";
 					}
 				}
 			$matching_list[$i_item][$mode][$direction] = $matching_notes;
@@ -294,14 +298,17 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 			$number_match = $match_notes['max_match'];
 			usort($matching_notes,"score_sort");
 			if($number_match > 0) {
-				if(!$compare_scales)  echo "Number occurrences:<br />";
+			//	if(!$compare_scales)  echo "Number occurrences:<br />";
+				if(!$compare_scales)  echo "Duration:<br />";
 				$max_score = $matching_notes[0]['score'];
 				for($i_match = 0; $i_match < count($matching_notes); $i_match++) {
 					if($max_score > 0)
 						$matching_notes[$i_match]['percent'] = round($matching_notes[$i_match]['score'] * 100 / $max_score);
 					else $matching_notes[$i_match]['percent'] = 0;
+				/*	if(!$compare_scales) echo $matching_notes[$i_match][0]." ▹
+					".$matching_notes[$i_match][1]." (".$matching_notes[$i_match]['score']." times) ".$matching_notes[$i_match]['percent']."%<br />"; */
 					if(!$compare_scales) echo $matching_notes[$i_match][0]." ▹
-					".$matching_notes[$i_match][1]." (".$matching_notes[$i_match]['score']." times) ".$matching_notes[$i_match]['percent']."%<br />";
+					".$matching_notes[$i_match][1]." (".round($matching_notes[$i_match]['score']/$lcm,1).")<br />";
 					}
 				}
 			$matching_list[$i_item][$mode][$direction] = $matching_notes;
@@ -319,7 +326,9 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 					if($max_score > 0)
 						$matching_notes[$i_match]['percent'] = round($matching_notes[$i_match]['score'] * 100 / $max_score);
 					else $matching_notes[$i_match]['percent'] = 0;
-					if(!$compare_scales) echo $matching_notes[$i_match][0]." ≈ ".$matching_notes[$i_match][1]." (".round($matching_notes[$i_match]['score']/$lcm,0)." s) ".$matching_notes[$i_match]['percent']."%<br />";
+				/*	if(!$compare_scales) echo $matching_notes[$i_match][0]." ≈ ".$matching_notes[$i_match][1]." (".round($matching_notes[$i_match]['score']/$lcm,0)." s) ".$matching_notes[$i_match]['percent']."%<br />";*/
+					if(!$compare_scales) echo $matching_notes[$i_match][0]." ▹
+					".$matching_notes[$i_match][1]." (".round($matching_notes[$i_match]['score']/$lcm,1).")<br />";
 					}
 				}
 			$matching_list[$i_item][$mode][$direction] = $matching_notes;
@@ -412,7 +421,8 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 						arsort($total_score);
 						if($grand_total > 0) {
 							echo "<center><table style=\"background-color:Gold;\">";
-							echo "<tr><th>Select</th><th>Scale</th><th>Melodic score (up)</th><th>Melodic score (down)</th><th>Harmonic score</th><th>Total</th></tr>";
+							echo "<tr><th></th><th></th><th>Melodic score (up)</th><th>Melodic score (down)</th><th>Harmonic score</th><th>Total</th></tr>";
+							echo "<th>Select</th><th style=\"text-align:right;\">Global weigh:&nbsp;</th><td>".$weigh_melodic_up."</td><td>".$weigh_melodic_down."</td><td>".$weigh_harmonic."</td><th></th></tr>";
 							foreach($total_score as $scale => $total) {
 								if($total == 0) continue;
 								echo "<tr>";
@@ -429,7 +439,7 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 								if(file_exists($scale_link))
 									echo "<a onclick=\"window.open('".$scale_link."','".$clean_name_of_file."_image','width=800,height=657,left=100'); return false;\" href=\"".$scale_link."\">".$scale."</a>";
 								else echo $scale;
-								echo "</td><td>".$evaluate['melodic_up'][$scale]."</td><td>".$evaluate['melodic_down'][$scale]."</td><td>".$evaluate['harmonic'][$scale]."</td><td>".round($total)."</td>";
+								echo "</td><td>".round($weigh_melodic_up * $evaluate['melodic_up'][$scale]/$lcm,0)."</td><td>".round($weigh_melodic_down * $evaluate['melodic_down'][$scale]/$lcm,0)."</td><td>".round($weigh_harmonic * $evaluate['harmonic'][$scale]/$lcm,0)."</td><td>".round($total/$lcm)."</td>";
 								echo "</tr>";
 								}
 							echo "<tr><td colspan=\"6\">&nbsp;<font color=\"red\"><b>↑</b></font>&nbsp;&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" formaction=\"".$url_this_page."#tonalanalysis\" title=\"Analyze tonal intervals\" name=\"analyze_tonal\" value=\"ANALYZE AGAIN\"> to display results for selected scales</td></tr>";
@@ -752,6 +762,8 @@ function make_event_table($poly) {
 function match_notes($table_events,$mode,$direction,$min_duration,$max_distance,$max_gap,$ratio_melodic,$test_intervals,$lcm) {
 	$matching_notes = $match = array();
 	$i_match = 0;
+	$min_d = $min_duration * $lcm / 1000;
+	$max_g = $max_gap * $lcm / 1000;
 	if($test_intervals) echo "Dates in seconds:<br />";
 	for($i_event = 0; $i_event < (count($table_events) - 1); $i_event++) {
 		$start1 = $table_events[$i_event]['start'];
@@ -766,12 +778,13 @@ function match_notes($table_events,$mode,$direction,$min_duration,$max_distance,
 			$grade2 = $table_events[$j_event]['grade'];
 			$octave2 = $table_events[$j_event]['octave'];
 			$position2 = $grade2 + 12 * $octave2;
+			if($position2 == $position1) continue;
 			if($mode == "melodic") {
 				if($direction == "up" AND $position2 < $position1) continue;
 				if($direction == "down" AND $position1 < $position2) continue;
 				if(abs($position1 - $position2) > $max_distance) continue;
 				}
-			if(matching_intervals($start1,$end1,$start2,$end2,($min_duration * $lcm / 1000),($max_gap * $lcm / 1000),$ratio_melodic,$mode,$direction,$lcm)) {
+			if(matching_intervals($start1,$end1,$start2,$end2,$min_d,$max_g,$ratio_melodic,$mode,$direction,$lcm)) {
 				$token1 = preg_replace("/([a-z A-Z #]+)[0-9]*/u","$1",$table_events[$i_event]['token']);
 				$token2 = preg_replace("/([a-z A-Z #]+)[0-9]*/u","$1",$table_events[$j_event]['token']);
 				if($token1 == $token2) continue;
@@ -779,21 +792,28 @@ function match_notes($table_events,$mode,$direction,$min_duration,$max_distance,
 					$match[$token1][$token2] = $found = TRUE;
 					$matching_notes[$i_match][0] = $token1;
 					$matching_notes[$i_match][1] = $token2;
-					if($mode == "melodic") $matching_notes[$i_match]['score'] = 1;
-					else $matching_notes[$i_match]['score'] = $end1 - $start1;
+				//	if($mode == "melodic") $matching_notes[$i_match]['score'] = 1;
+					if($mode == "melodic") $matching_notes[$i_match]['score'] = $end2 - $start1;
+				//	else $matching_notes[$i_match]['score'] = $end1 - $start1;
+					else $matching_notes[$i_match]['score'] = $end1 - $start2;
 					$i_match++;
 					}
 				else {
 					for($j_match = 0; $j_match < $i_match; $j_match++) {
 						if(($matching_notes[$j_match][0] == $token1) AND ($matching_notes[$j_match][1] == $token2)) {
-							if($mode == "melodic") $matching_notes[$j_match]['score']++;
-							else $matching_notes[$j_match]['score'] += $end1 - $start1;
+					//		if($mode == "melodic") $matching_notes[$j_match]['score']++;
+							if($mode == "melodic") $matching_notes[$j_match]['score'] += $end2 - $start1;
+					//		else $matching_notes[$j_match]['score'] += $end1 - $start1;
+							else $matching_notes[$j_match]['score'] += $end1 - $start2;
 							$match[$token1][$token2] = $found = TRUE;
 							}
 						if(($matching_notes[$j_match][0] == $token2) AND ($matching_notes[$j_match][1] == $token1)) {
-							if($mode == "melodic") $matching_notes[$j_match]['score']++;
-							else $matching_notes[$j_match]['score'] += $end2 - $start2;
-							$match[$token1][$token2] = $found = TRUE;
+					//		if($mode == "melodic") $matching_notes[$j_match]['score']++;
+							if($mode == "melodic") $matching_notes[$j_match]['score'] += $end2 - $start1;
+					//		else $matching_notes[$j_match]['score'] += $end2 - $start2;
+							else $matching_notes[$j_match]['score'] += $end1 - $start2;
+					//		$match[$token1][$token2] = $found = TRUE;
+							$match[$token2][$token1] = $found = TRUE;
 							}
 						if($found) break;
 						}
@@ -813,7 +833,7 @@ function match_notes($table_events,$mode,$direction,$min_duration,$max_distance,
 	return $result;
 	}
 
-function matching_intervals($start1,$end1,$start2,$end2,$min_dur,$max_gap,$ratio_melodic,$mode,$direction,$lcm) {
+function matching_intervals($start1,$end1,$start2,$end2,$min_d,$max_g,$ratio_melodic,$mode,$direction,$lcm) {
 	// Because of the sorting of events, $start2 >= $start1
 	$duration1 = $end1 - $start1;
 	$duration2 = $end2 - $start2;
@@ -821,13 +841,13 @@ function matching_intervals($start1,$end1,$start2,$end2,$min_dur,$max_gap,$ratio
 	$smallest_duration = $duration1;
 	if($duration2 < $duration1) $smallest_duration = $duration2;
 	if($mode == "harmonic") {
-		if($smallest_duration < $min_dur) return FALSE;
+		if($smallest_duration < $min_d) return FALSE;
 		if($start1 + ($duration1 / 2.) < $start2) return FALSE;
 		if($overlap < ((1 - $ratio_melodic) * $smallest_duration)) return FALSE;
 		// Here we discard slurs (generally 20% when importing MusicXML files)
 		}
 	else { // "melodic"
-		if($start2 > ($end1 + $max_gap)) return FALSE;
+		if($start2 > ($end1 + $max_g)) return FALSE;
 		if($start1 + ($duration1 / 2.) >= $start2) return FALSE;
 		if($overlap >= ($ratio_melodic * $smallest_duration)) return FALSE;
 		}
@@ -1217,12 +1237,10 @@ function evaluate_scale($i_item,$scale_name,$mode,$direction,$ratio,$matching_li
 	global $harmonic_third,$pythagorean_third,$wolf_fifth,$wolf_fourth,$perfect_fifth,$perfect_fourth,$Englishnote,$dir_scale_images;
 	$score = 0;
 	$value = array();
-	
 	$clean_name_of_file = str_replace("#","_",$scale_name);
 	$clean_name_of_file = str_replace(SLASH,"_",$clean_name_of_file);
 	$scale_link = $dir_scale_images.$clean_name_of_file.".png";
 	$scale_link = "<a onclick=\"window.open('".$scale_link."','".$clean_name_of_file."_image','width=800,height=657,left=100'); return false;\" href=\"".$scale_link."\">".$scale_name."</a>";
-
 	for($i_mark = 0; $i_mark < count($position_melodic_mark_up); $i_mark++) {
 		if(intval($position_melodic_mark_up[$i_mark]['p']) < 1) continue;
 		$cent_mark_melodic_up[$i_mark] = cents($position_melodic_mark_up[$i_mark]['p'] / $position_melodic_mark_up[$i_mark]['q']);
@@ -1318,10 +1336,8 @@ function evaluate_scale($i_item,$scale_name,$mode,$direction,$ratio,$matching_li
 	for($i_match = 0; $i_match < count($matching_notes); $i_match++) {
 		$j = note_position($matching_notes[$i_match][0]);
 		$k = note_position($matching_notes[$i_match][1]);
-		if(isset($value[$j][$k])) $score += $value[$j][$k] * $matching_notes[$i_match]['percent'];
-/*		if(isset($value[$j][$k]) AND $value[$j][$k] < 0 AND $scale_name == "meantone_werckmeister_4") {
-			echo $j." ".$k." ".$mode." ".$value[$j][$k]."<br />";
-			} */
+	//	if(isset($value[$j][$k])) $score += $value[$j][$k] * $matching_notes[$i_match]['percent'];
+		if(isset($value[$j][$k])) $score += $value[$j][$k] * $matching_notes[$i_match]['score'];
 		}
 	return $score;
 	}

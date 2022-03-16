@@ -488,19 +488,20 @@ foreach($dircontent as $thisfile) {
 		$extension = $type_of_file['extension'];
 		}
 	if($path <> $csound_resources AND $path <> $trash_folder AND ($type == "csound" OR $type == "csorchestra")) {
-		echo "Moved <font color=\"blue\">‘".$dir.SLASH.$thisfile."’</font> to <font color=\"blue\">‘".$dir_csound_resources.$thisfile."’</font><br />";
+		echo "Moved ‘<font color=\"blue\">".$dir.SLASH.$thisfile."</font>’ to ‘<font color=\"blue\">".$dir_csound_resources.$thisfile."</font>’<br />";
 		rename($dir.SLASH.$thisfile,$dir_csound_resources.$thisfile);
 		}
 	else {
 		$renamed = FALSE;
 		if($delete_checked_files AND isset($_POST['delete_'.$i_file])) {
-			echo "<p><font color=\"red\">➡</font> Deleted <font color=\"blue\">‘".$thisfile."’</font> (moved to <a target=\"_blank\" href=\"index.php?path=".$trash_folder."\">trash folder</a>)</p>";
+			echo "<p><font color=\"red\">➡</font> Deleted ‘<font color=\"blue\">".$thisfile."</font>’ (moved to <a target=\"_blank\" href=\"index.php?path=".$trash_folder."\">trash folder</a>)</p>";
 			rename($dir.SLASH.$thisfile,$dir_trash_folder.$thisfile);
 			delete_settings($thisfile);
 			continue;
 			}
 		$new_name = '';
-		if($rename_checked_files AND $type <> '' AND (isset($_POST['rename_'.$i_file]) OR (isset($_POST['new_name_'.$i_file]) AND trim($_POST['new_name_'.$i_file]) <> ''))) {
+//		if($rename_checked_files AND $type <> '' AND (isset($_POST['rename_'.$i_file]) OR (isset($_POST['new_name_'.$i_file]) AND trim($_POST['new_name_'.$i_file]) <> ''))) {
+		if($rename_checked_files AND $type <> '' AND isset($_POST['new_name_'.$i_file]) AND trim($_POST['new_name_'.$i_file]) <> '') {
 			$new_name = trim($_POST['new_name_'.$i_file]);
 			$make_copy = isset($_POST['copy_'.$i_file]);
 			$new_name = fix_new_name($new_name);
@@ -543,8 +544,8 @@ foreach($dircontent as $thisfile) {
 						}
 					else {
 						rename($dir.SLASH.$old_name,$dir.SLASH.$new_name);
-						$thisfile = $new_name;
 						if($type <> "directory") change_occurrences_name_in_files($dir,$old_name,$new_name);
+						$thisfile = $new_name;
 						$renamed = TRUE;
 						}
 					}
@@ -554,7 +555,7 @@ foreach($dircontent as $thisfile) {
 		if($this_is_directory) echo "▶︎ ";
 		if($delete_files) echo "<input type=\"checkbox\" name=\"delete_".$i_file."\"> ";
 		if($type <> '' AND !$this_file_moved) {
-			if($rename_files) echo "<input type=\"checkbox\" name=\"rename_".$i_file."\"> ";
+		//	if($rename_files) echo "<input type=\"checkbox\" name=\"rename_".$i_file."\"> ";
 			if($this_is_directory) {
 				$table = explode('_',$thisfile);
 				$extension = end($table);
