@@ -8,15 +8,13 @@ $perfect_fourth = cents(4/3);
 $wolf_fourth = cents(320/243);
 
 function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_folder,$note_convention) {
-	global $max_term_in_fraction,$dir_scale_images,$csound_resources;
+	global $max_term_in_fraction,$dir_scale_images,$csound_resources,$current_directory;
+	global $p_tonal_default_up,$q_tonal_default_up,$p_tonal_default_down,$p_tonal_default_down,$p_tonal_default_harmonic,$q_tonal_default_harmonic,$weigh_tonal_default_up,$weigh_tonal_default_down,$weigh_tonal_default_harmonic,$width_tonal_default_up,$width_tonal_default_down,$width_tonal_default_harmonic,$weigh_tonal_melodic_up,$weigh_tonal_melodic_down,$weigh_tonal_harmonic,$max_distance_tonal,$ratio_melodic_tonal,$min_duration_tonal,$max_gap_tonal;
 	$test_tonal = FALSE;
 	$test_intervals = TRUE;
 	$display_items = FALSE;
 	$compare_scales = FALSE;
 	$max_marks = 8;
-	$min_duration = 500; // milliseconds for harmonic evaluation
-	$max_gap = 300; // milliseconds for melodic evaluation
-	$ratio_melodic = 0.25;
 	$position_melodic_mark = $position_harmonic_mark = $display_result = array();
 	for($i_mark = 0; $i_mark < $max_marks; $i_mark++) {
 		$p_default[$i_mark] = $q_default[$i_mark] = '';
@@ -47,10 +45,14 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 	for($i_mark = 0; $i_mark < $max_marks; $i_mark++) {
 		if(isset($_POST["position_melodic_mark_up_p_".$i_mark]))
 			$position_melodic_mark_up[$i_mark]['p'] = intval($_POST["position_melodic_mark_up_p_".$i_mark]);
+		else if(isset($p_tonal_default_up[$current_directory][$i_mark])) $position_melodic_mark_up[$i_mark]['p'] = $p_tonal_default_up[$current_directory][$i_mark];
 		else $position_melodic_mark_up[$i_mark]['p'] = $p_default[$i_mark];
+		if(isset($_POST['reset_tonal_settings'])) $position_melodic_mark_up[$i_mark]['p'] = $p_default[$i_mark];
 		if(isset($_POST["position_melodic_mark_up_q_".$i_mark]))
 			$position_melodic_mark_up[$i_mark]['q'] = intval($_POST["position_melodic_mark_up_q_".$i_mark]);
+		else if(isset($q_tonal_default_up[$current_directory][$i_mark])) $position_melodic_mark_up[$i_mark]['q'] = $q_tonal_default_up[$current_directory][$i_mark];
 		else $position_melodic_mark_up[$i_mark]['q'] = $q_default[$i_mark];
+		if(isset($_POST['reset_tonal_settings'])) $position_melodic_mark_up[$i_mark]['q'] = $q_default[$i_mark];
 		if($position_melodic_mark_up[$i_mark]['p'] == 0)
 			$position_melodic_mark_up[$i_mark]['p'] = $position_melodic_mark_up[$i_mark]['q'] = '';
 		if($position_melodic_mark_up[$i_mark]['q'] == 0)
@@ -58,11 +60,15 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 		echo "ratio <input type=\"text\" style=\"border:none; text-align:center;\" name=\"position_melodic_mark_up_p_".$i_mark."\" size=\"3\" value=\"".$position_melodic_mark_up[$i_mark]['p']."\">/<input type=\"text\" style=\"border:none; text-align:center;\" name=\"position_melodic_mark_up_q_".$i_mark."\" size=\"3\" value=\"".$position_melodic_mark_up[$i_mark]['q']."\">";
 		if(isset($_POST["width_melodic_mark_up_".$i_mark]))
 			$width_melodic_mark_up[$i_mark] = intval($_POST["width_melodic_mark_up_".$i_mark]);
+		else if(isset($width_tonal_default_up[$current_directory][$i_mark])) $width_melodic_mark_up[$i_mark] = $width_tonal_default_up[$current_directory][$i_mark];
 		else $width_melodic_mark_up[$i_mark] = $width_default[$i_mark];
+		if(isset($_POST['reset_tonal_settings'])) $width_melodic_mark_up[$i_mark] = $width_default[$i_mark];
 		echo "&nbsp;&nbsp;±<input type=\"text\" style=\"border:none; text-align:center;\" name=\"width_melodic_mark_up_".$i_mark."\" size=\"3\" value=\"".$width_melodic_mark_up[$i_mark]."\">¢";
 		if(isset($_POST["weigh_melodic_mark_up_".$i_mark]))
 			$weigh_melodic_mark_up[$i_mark] = intval($_POST["weigh_melodic_mark_up_".$i_mark]);
+		else if(isset($weigh_tonal_default_up[$current_directory][$i_mark])) $weigh_melodic_mark_up[$i_mark] = $weigh_tonal_default_up[$current_directory][$i_mark];
 		else $weigh_melodic_mark_up[$i_mark] = $weigh_default[$i_mark];
+		if(isset($_POST['reset_tonal_settings'])) $weigh_melodic_mark_up[$i_mark] = $weigh_default[$i_mark];
 		echo "&nbsp;&nbsp;weigh <input type=\"text\" style=\"border:none; text-align:center;\" name=\"weigh_melodic_mark_up_".$i_mark."\" size=\"3\" value=\"".$weigh_melodic_mark_up[$i_mark]."\">";
 		echo "<br />";
 		}
@@ -71,10 +77,14 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 	for($i_mark = 0; $i_mark < $max_marks; $i_mark++) {
 		if(isset($_POST["position_melodic_mark_down_p_".$i_mark]))
 			$position_melodic_mark_down[$i_mark]['p'] = intval($_POST["position_melodic_mark_down_p_".$i_mark]);
+		else if(isset($p_tonal_default_down[$current_directory][$i_mark])) $position_melodic_mark_down[$i_mark]['p'] = $p_tonal_default_down[$current_directory][$i_mark];
 		else $position_melodic_mark_down[$i_mark]['p'] = $p_default[$i_mark];
+		if(isset($_POST['reset_tonal_settings'])) $position_melodic_mark_down[$i_mark]['p'] = $p_default[$i_mark];
 		if(isset($_POST["position_melodic_mark_down_q_".$i_mark]))
 			$position_melodic_mark_down[$i_mark]['q'] = intval($_POST["position_melodic_mark_down_q_".$i_mark]);
+		else if(isset($q_tonal_default_down[$current_directory][$i_mark])) $position_melodic_mark_down[$i_mark]['q'] = $q_tonal_default_down[$current_directory][$i_mark];
 		else $position_melodic_mark_down[$i_mark]['q'] = $q_default[$i_mark];
+		if(isset($_POST['reset_tonal_settings'])) $position_melodic_mark_down[$i_mark]['q'] = $q_default[$i_mark];
 		if($position_melodic_mark_down[$i_mark]['p'] == 0)
 			$position_melodic_mark_down[$i_mark]['p'] = $position_melodic_mark_down[$i_mark]['q'] = '';
 		if($position_melodic_mark_down[$i_mark]['q'] == 0)
@@ -82,11 +92,15 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 		echo "ratio <input type=\"text\" style=\"border:none; text-align:center;\" name=\"position_melodic_mark_down_p_".$i_mark."\" size=\"3\" value=\"".$position_melodic_mark_down[$i_mark]['p']."\">/<input type=\"text\" style=\"border:none; text-align:center;\" name=\"position_melodic_mark_down_q_".$i_mark."\" size=\"3\" value=\"".$position_melodic_mark_down[$i_mark]['q']."\">";
 		if(isset($_POST["width_melodic_mark_down_".$i_mark]))
 			$width_melodic_mark_down[$i_mark] = intval($_POST["width_melodic_mark_down_".$i_mark]);
+		else if(isset($width_tonal_default_down[$current_directory][$i_mark])) $width_melodic_mark_down[$i_mark] = $width_tonal_default_down[$current_directory][$i_mark];
 		else $width_melodic_mark_down[$i_mark] = $width_default[$i_mark];
+		if(isset($_POST['reset_tonal_settings'])) $width_melodic_mark_down[$i_mark] = $width_default[$i_mark];
 		echo "&nbsp;&nbsp;±<input type=\"text\" style=\"border:none; text-align:center;\" name=\"width_melodic_mark_down_".$i_mark."\" size=\"3\" value=\"".$width_melodic_mark_down[$i_mark]."\">¢";
 		if(isset($_POST["weigh_melodic_mark_down_".$i_mark]))
 			$weigh_melodic_mark_down[$i_mark] = intval($_POST["weigh_melodic_mark_down_".$i_mark]);
+		else if(isset($weigh_tonal_default_down[$current_directory][$i_mark])) $weigh_melodic_mark_down[$i_mark] = $weigh_tonal_default_down[$current_directory][$i_mark];
 		else $weigh_melodic_mark_down[$i_mark] = $weigh_default[$i_mark];
+		if(isset($_POST['reset_tonal_settings'])) $weigh_melodic_mark_down[$i_mark] = $weigh_default[$i_mark];
 		echo "&nbsp;&nbsp;weigh <input type=\"text\" style=\"border:none; text-align:center;\" name=\"weigh_melodic_mark_down_".$i_mark."\" size=\"3\" value=\"".$weigh_melodic_mark_down[$i_mark]."\">";
 		echo "<br />";
 		}
@@ -96,10 +110,14 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 	for($i_mark = 0; $i_mark < $max_marks; $i_mark++) {
 		if(isset($_POST["position_harmonic_mark_p_".$i_mark]))
 			$position_harmonic_mark[$i_mark]['p'] = intval($_POST["position_harmonic_mark_p_".$i_mark]);
+		else if(isset($p_tonal_default_harmonic[$current_directory][$i_mark])) $position_harmonic_mark[$i_mark]['p'] = $p_tonal_default_harmonic[$current_directory][$i_mark];
 		else $position_harmonic_mark[$i_mark]['p'] = $p_default[$i_mark];
+		if(isset($_POST['reset_tonal_settings'])) $position_harmonic_mark[$i_mark]['p'] = $p_default[$i_mark];
 		if(isset($_POST["position_harmonic_mark_q_".$i_mark]))
 			$position_harmonic_mark[$i_mark]['q'] = intval($_POST["position_harmonic_mark_q_".$i_mark]);
+		else if(isset($q_tonal_default_harmonic[$current_directory][$i_mark])) $position_harmonic_mark[$i_mark]['q'] = $q_tonal_default_harmonic[$current_directory][$i_mark];
 		else $position_harmonic_mark[$i_mark]['q'] = $q_default[$i_mark];
+		if(isset($_POST['reset_tonal_settings'])) $position_harmonic_mark[$i_mark]['q'] = $q_default[$i_mark];
 		if($position_harmonic_mark[$i_mark]['p'] == 0)
 			$position_harmonic_mark[$i_mark]['p'] = $position_harmonic_mark[$i_mark]['q'] = '';
 		if($position_harmonic_mark[$i_mark]['q'] == 0)
@@ -107,11 +125,15 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 		echo "ratio <input type=\"text\" style=\"border:none; text-align:center;\" name=\"position_harmonic_mark_p_".$i_mark."\" size=\"3\" value=\"".$position_harmonic_mark[$i_mark]['p']."\">/<input type=\"text\" style=\"border:none; text-align:center;\" name=\"position_harmonic_mark_q_".$i_mark."\" size=\"3\" value=\"".$position_harmonic_mark[$i_mark]['q']."\">";
 		if(isset($_POST["width_harmonic_mark_".$i_mark]))
 			$width_harmonic_mark[$i_mark] = intval($_POST["width_harmonic_mark_".$i_mark]);
+		else if(isset($width_tonal_default_harmonic[$current_directory][$i_mark])) $width_harmonic_mark[$i_mark] = $width_tonal_default_harmonic[$current_directory][$i_mark];
 		else $width_harmonic_mark[$i_mark] = $width_default[$i_mark];
+		if(isset($_POST['reset_tonal_settings'])) $width_harmonic_mark[$i_mark] = $width_default[$i_mark];
 		echo "&nbsp;&nbsp;±<input type=\"text\" style=\"border:none; text-align:center;\" name=\"width_harmonic_mark_".$i_mark."\" size=\"3\" value=\"".$width_harmonic_mark[$i_mark]."\">¢";
 		if(isset($_POST["weigh_harmonic_mark_".$i_mark]))
 			$weigh_harmonic_mark[$i_mark] = intval($_POST["weigh_harmonic_mark_".$i_mark]);
+		else if(isset($weigh_tonal_default_harmonic[$current_directory][$i_mark])) $weigh_harmonic_mark[$i_mark] = $weigh_tonal_default_harmonic[$current_directory][$i_mark];
 		else $weigh_harmonic_mark[$i_mark] = $weigh_default[$i_mark];
+		if(isset($_POST['reset_tonal_settings'])) $weigh_harmonic_mark[$i_mark] = $weigh_default[$i_mark];
 		echo "&nbsp;&nbsp;weigh <input type=\"text\" style=\"border:none; text-align:center;\" name=\"weigh_harmonic_mark_".$i_mark."\" size=\"3\" value=\"".$weigh_harmonic_mark[$i_mark]."\">";
 		echo "<br />";
 		}
@@ -119,32 +141,49 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 	echo "<tr><td colspan=\"2\" style=\"white-space:nowrap; padding:6px;\">";
 	if(isset($_POST['weigh_melodic_up']) AND is_numeric($_POST['weigh_melodic_up']))
 		$weigh_melodic_up = abs(intval($_POST['weigh_melodic_up']));
+	else if(isset($weigh_tonal_melodic_up[$current_directory])) $weigh_melodic_up = $weigh_tonal_melodic_up[$current_directory];
 	else $weigh_melodic_up = 1;
+	if(isset($_POST['reset_tonal_settings'])) $weigh_melodic_up = 1;
 	echo "Global weigh ascending intervals:<input type=\"text\" style=\"border:none; text-align:center;\" name=\"weigh_melodic_up\" size=\"3\" value=\"".$weigh_melodic_up."\">";
 	echo "</td><td colspan=\"2\" style=\"white-space:nowrap; padding:6px;\">";
 	if(isset($_POST['weigh_melodic_down']) AND is_numeric($_POST['weigh_melodic_down']))
 		$weigh_melodic_down = abs(intval($_POST['weigh_melodic_down']));
+	else if(isset($weigh_tonal_melodic_down[$current_directory])) $weigh_melodic_down = $weigh_tonal_melodic_down[$current_directory];
 	else $weigh_melodic_down = 1;
+	if(isset($_POST['reset_tonal_settings'])) $weigh_melodic_down = 1;
 	echo "Global weigh descending intervals:<input type=\"text\" style=\"border:none; text-align:center;\" name=\"weigh_melodic_down\" size=\"3\" value=\"".$weigh_melodic_down."\">";
 	echo "</td><td colspan=\"2\" style=\"white-space:nowrap; padding:6px;\">";
 	if(isset($_POST['weigh_harmonic']) AND is_numeric($_POST['weigh_harmonic']))
 		$weigh_harmonic = abs(intval($_POST['weigh_harmonic']));
+	else if(isset($weigh_tonal_harmonic[$current_directory])) $weigh_harmonic = $weigh_tonal_harmonic[$current_directory];
 	else $weigh_harmonic = 2;
+	if(isset($_POST['reset_tonal_settings'])) $weigh_harmonic = 2;
 	echo "Global weigh harmonic intervals:<input type=\"text\" style=\"border:none; text-align:center;\" name=\"weigh_harmonic\" size=\"3\" value=\"".$weigh_harmonic."\">";
 	echo "</td>";
 	echo "</tr>";
 	echo "<tr><td colspan=\"6\" style=\"white-space:nowrap; padding:6px;\">";
 	if(isset($_POST['max_distance']) AND is_numeric($_POST['max_distance']))
 		$max_distance = abs(intval($_POST['max_distance']));
+	else if(isset($max_distance_tonal[$current_directory])) $max_distance = $max_distance_tonal[$current_directory];
 	else $max_distance = 11;
+	if(isset($_POST['reset_tonal_settings'])) $max_distance = 11;
 	echo "Maximum size of melodic intervals:<input type=\"text\" style=\"border:none; text-align:center;\" name=\"max_distance\" size=\"3\" value=\"".$max_distance."\"> semitones";
 	echo "</td></tr>";
 	echo "<tr><td colspan=\"3\" style=\"white-space:nowrap; padding:6px; text-align:right;\">";
 	if(isset($_POST['overlap'])) $ratio_melodic = intval($_POST['overlap']) / 100;
+	else if(isset($ratio_melodic_tonal[$current_directory])) $ratio_melodic = $ratio_melodic_tonal[$current_directory];
+	else $ratio_melodic = 0.25;
+	if(isset($_POST['reset_tonal_settings'])) $ratio_melodic = 0.25;
 	echo "Max overlap ratio in melodic intervals: <input type=\"text\" style=\"border:none; text-align:center;\" name=\"overlap\" size=\"3\" value=\"".(100 * $ratio_melodic)."\">%<br />";
 	if(isset($_POST['min_duration'])) $min_duration = intval($_POST['min_duration']);
+	else if(isset($min_duration_tonal[$current_directory])) $min_duration = $min_duration_tonal[$current_directory];
+	else $min_duration = 500;
+	if(isset($_POST['reset_tonal_settings'])) $min_duration = 500;
 	echo "Min duration of harmonic interval: <input type=\"text\" style=\"border:none; text-align:center;\" name=\"min_duration\" size=\"4\" value=\"".$min_duration."\">ms<br />";
 	if(isset($_POST['max_gap'])) $max_gap = intval($_POST['max_gap']);
+	else if(isset($max_gap_tonal[$current_directory])) $max_gap = $max_gap_tonal[$current_directory];
+	else $max_gap = 300;
+	if(isset($_POST['reset_tonal_settings'])) $max_gap = 300;
 	echo "Maximum gap in melodic interval: <input type=\"text\" style=\"border:none; text-align:center;\" name=\"max_gap\" size=\"4\" value=\"".$max_gap."\">ms<br />";
 	echo "</td><td colspan=\"3\" style=\"white-space:nowrap; padding:6px; text-align:right;\">";
 	$test_intervals = isset($_POST['test_intervals']);
@@ -160,7 +199,11 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 	if($trace_critical_intervals) echo " checked";
 	echo ">";
 	echo "</td></tr>";
-	echo "<tr><td colspan=\"6\" style=\"white-space:nowrap; padding:6px;\">";
+	echo "<tr><td colspan=\"6\" style=\"white-space:nowrap; padding:4px;\">";
+	echo "<input style=\"background-color:yellow; float:left;\" type=\"submit\" formaction=\"".$url_this_page."#tonalanalysis\" title=\"\" name=\"reset_tonal_settings\" value=\"RESET SETTINGS TO DEFAULT\">";
+	echo "<input style=\"background-color:yellow; float:right;\" type=\"submit\" formaction=\"".$url_this_page."#tonalanalysis\" title=\"\" name=\"save_tonal_settings\" value=\"SAVE THESE SETTINGS TO WORKSPACE “".$current_directory."”\">";
+	echo "</td></tr>";
+	echo "<tr><td colspan=\"6\" style=\"white-space:nowrap; padding:4px;\">";
 	if($csound_file <> '') {
 		if(isset($_POST['compare_scales'])) $compare_scales = $_POST['compare_scales'];
 		else $compare_scales = FALSE;
@@ -181,9 +224,34 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 	echo "</center>";
 	echo "<input type=\"hidden\" name=\"proceed_tonal_analysis\" value=\"ok\">";
 	echo "</form>";
+	if(isset($_POST['save_tonal_settings'])) {
+		// Store default values for this workspace
+		for($i_mark = 0; $i_mark < $max_marks; $i_mark++) {
+			save_settings3("p_tonal_default_up",$current_directory,$i_mark,$position_melodic_mark_up[$i_mark]['p']);
+			save_settings3("q_tonal_default_up",$current_directory,$i_mark,$position_melodic_mark_up[$i_mark]['q']);
+			save_settings3("weigh_tonal_default_up",$current_directory,$i_mark,$weigh_melodic_mark_up[$i_mark]);
+			save_settings3("width_tonal_default_up",$current_directory,$i_mark,$width_melodic_mark_up[$i_mark]);
+			save_settings3("p_tonal_default_down",$current_directory,$i_mark,$position_melodic_mark_down[$i_mark]['p']);
+			save_settings3("q_tonal_default_down",$current_directory,$i_mark,$position_melodic_mark_down[$i_mark]['q']);
+			save_settings3("weigh_tonal_default_down",$current_directory,$i_mark,$weigh_melodic_mark_down[$i_mark]);
+			save_settings3("width_tonal_default_down",$current_directory,$i_mark,$width_melodic_mark_down[$i_mark]);
+			save_settings3("p_tonal_default_harmonic",$current_directory,$i_mark,$position_harmonic_mark[$i_mark]['p']);
+			save_settings3("q_tonal_default_harmonic",$current_directory,$i_mark,$position_harmonic_mark[$i_mark]['q']);
+			save_settings3("weigh_tonal_default_harmonic",$current_directory,$i_mark,$weigh_harmonic_mark[$i_mark]);
+			save_settings3("width_tonal_default_harmonic",$current_directory,$i_mark,$width_harmonic_mark[$i_mark]);
+			}
+		save_settings2("weigh_tonal_melodic_up",$current_directory,$weigh_melodic_up);
+		save_settings2("weigh_tonal_melodic_down",$current_directory,$weigh_melodic_down);
+		save_settings2("weigh_tonal_harmonic",$current_directory,$weigh_harmonic);
+		save_settings2("max_distance_tonal",$current_directory,$max_distance);
+		save_settings2("ratio_melodic_tonal",$current_directory,$ratio_melodic);
+		save_settings2("min_duration_tonal",$current_directory,$min_duration);
+		save_settings2("max_gap_tonal",$current_directory,$max_gap);
+		}
 	if(isset($_POST['proceed_tonal_analysis'])) {
 		$time_start = time();
 		echo "<br/>";
+
 		$table = explode(chr(10),$content);
 		$imax = count($table);
 		for($i_line = $i_item = 0; $i_line < $imax; $i_line++) {
@@ -266,7 +334,8 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 			$matching_list = array();
 			if(!$compare_scales) {
 				echo "<center><table style=\"background-color:Gold;\">";
-				echo "<tr><th>Melodic intervals (up)</th><th>Melodic intervals (down)</th><th>Harmonic intervals</th></tr>";
+				echo "<tr><th colspan=\"3\" style=\"text-align:center;\">Numbers are proportional to total durations</th></tr>";
+				echo "<tr><td style=\"padding:6px;\">Melodic intervals (up)</td><td style=\"padding:6px;\">Melodic intervals (down)</td><td style=\"padding:6px;\">Harmonic intervals</td></tr>";
 				echo "<tr><td>";
 				}
 			$direction = "up";
@@ -276,15 +345,11 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 			$number_match = $match_notes['max_match'];
 			usort($matching_notes,"score_sort");
 			if($number_match > 0) {
-			//	if(!$compare_scales)  echo "Number occurrences:<br />";
-				if(!$compare_scales)  echo "Duration:<br />";
 				$max_score = $matching_notes[0]['score'];
 				for($i_match = 0; $i_match < count($matching_notes); $i_match++) {
 					if($max_score > 0)
 						$matching_notes[$i_match]['percent'] = round($matching_notes[$i_match]['score'] * 100 / $max_score);
 					else $matching_notes[$i_match]['percent'] = 0;
-			/*		if(!$compare_scales) echo $matching_notes[$i_match][0]." ▹
-					".$matching_notes[$i_match][1]." (".$matching_notes[$i_match]['score']." times) ".$matching_notes[$i_match]['percent']."%<br />"; */
 					if(!$compare_scales) echo $matching_notes[$i_match][0]." ▹
 					".$matching_notes[$i_match][1]." (".round($matching_notes[$i_match]['score']/$lcm,1).")<br />";
 					}
@@ -298,15 +363,11 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 			$number_match = $match_notes['max_match'];
 			usort($matching_notes,"score_sort");
 			if($number_match > 0) {
-			//	if(!$compare_scales)  echo "Number occurrences:<br />";
-				if(!$compare_scales)  echo "Duration:<br />";
 				$max_score = $matching_notes[0]['score'];
 				for($i_match = 0; $i_match < count($matching_notes); $i_match++) {
 					if($max_score > 0)
 						$matching_notes[$i_match]['percent'] = round($matching_notes[$i_match]['score'] * 100 / $max_score);
 					else $matching_notes[$i_match]['percent'] = 0;
-				/*	if(!$compare_scales) echo $matching_notes[$i_match][0]." ▹
-					".$matching_notes[$i_match][1]." (".$matching_notes[$i_match]['score']." times) ".$matching_notes[$i_match]['percent']."%<br />"; */
 					if(!$compare_scales) echo $matching_notes[$i_match][0]." ▹
 					".$matching_notes[$i_match][1]." (".round($matching_notes[$i_match]['score']/$lcm,1).")<br />";
 					}
@@ -326,8 +387,7 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 					if($max_score > 0)
 						$matching_notes[$i_match]['percent'] = round($matching_notes[$i_match]['score'] * 100 / $max_score);
 					else $matching_notes[$i_match]['percent'] = 0;
-				/*	if(!$compare_scales) echo $matching_notes[$i_match][0]." ≈ ".$matching_notes[$i_match][1]." (".round($matching_notes[$i_match]['score']/$lcm,0)." s) ".$matching_notes[$i_match]['percent']."%<br />";*/
-					if(!$compare_scales) echo $matching_notes[$i_match][0]." ▹
+					if(!$compare_scales) echo $matching_notes[$i_match][0]." ≈
 					".$matching_notes[$i_match][1]." (".round($matching_notes[$i_match]['score']/$lcm,1).")<br />";
 					}
 				}
@@ -421,8 +481,8 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 						arsort($total_score);
 						if($grand_total > 0) {
 							echo "<center><table style=\"background-color:Gold;\">";
-							echo "<tr><th></th><th></th><th>Melodic score (up)</th><th>Melodic score (down)</th><th>Harmonic score</th><th>Total</th></tr>";
-							echo "<th>Select</th><th style=\"text-align:right;\">Global weigh:&nbsp;</th><td>".$weigh_melodic_up."</td><td>".$weigh_melodic_down."</td><td>".$weigh_harmonic."</td><th></th></tr>";
+							echo "<tr><td colspan=\"2\" style=\"background-color:azure; padding:6px;\"><i>Numbers are proportional to durations<br />of intervals matching the scale</i></td><th>&nbsp;Melodic score (up)&nbsp;</th><th>&nbsp;Melodic score (down)&nbsp;</th><th>&nbsp;Harmonic score&nbsp;</th><th></th></tr>";
+							echo "<th>Select</th><th style=\"text-align:right;\">Weigh:&nbsp;</th><td>".$weigh_melodic_up."</td><td>".$weigh_melodic_down."</td><td>".$weigh_harmonic."</td><th>Weighed total</th></tr>";
 							foreach($total_score as $scale => $total) {
 								if($total == 0) continue;
 								echo "<tr>";
@@ -439,10 +499,10 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 								if(file_exists($scale_link))
 									echo "<a onclick=\"window.open('".$scale_link."','".$clean_name_of_file."_image','width=800,height=657,left=100'); return false;\" href=\"".$scale_link."\">".$scale."</a>";
 								else echo $scale;
-								echo "</td><td>".round($weigh_melodic_up * $evaluate['melodic_up'][$scale]/$lcm,0)."</td><td>".round($weigh_melodic_down * $evaluate['melodic_down'][$scale]/$lcm,0)."</td><td>".round($weigh_harmonic * $evaluate['harmonic'][$scale]/$lcm,0)."</td><td>".round($total/$lcm)."</td>";
+								echo "</td><td>".round($evaluate['melodic_up'][$scale]/$lcm,0)."</td><td>".round($weigh_melodic_down * $evaluate['melodic_down'][$scale]/$lcm,0)."</td><td>".round($evaluate['harmonic'][$scale]/$lcm,0)."</td><td>".round($total/$lcm)."</td>";
 								echo "</tr>";
 								}
-							echo "<tr><td colspan=\"6\">&nbsp;<font color=\"red\"><b>↑</b></font>&nbsp;&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" formaction=\"".$url_this_page."#tonalanalysis\" title=\"Analyze tonal intervals\" name=\"analyze_tonal\" value=\"ANALYZE AGAIN\"> to display results for selected scales</td></tr>";
+							echo "<tr><td colspan=\"6\">&nbsp;<font color=\"red\"><b>↑</b></font>&nbsp;&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" formaction=\"".$url_this_page."#tonalanalysis\" title=\"Analyze tonal intervals\" name=\"analyze_tonal\" value=\"ANALYZE AGAIN\"> for a graphic display of results on selected scales</td></tr>";
 							echo "</table></center><br />";
 							}
 						else echo "<p style=\"text-align:center;\"><font color=\"red\">No matching tonal scale was found.</font><br />";
@@ -792,27 +852,20 @@ function match_notes($table_events,$mode,$direction,$min_duration,$max_distance,
 					$match[$token1][$token2] = $found = TRUE;
 					$matching_notes[$i_match][0] = $token1;
 					$matching_notes[$i_match][1] = $token2;
-				//	if($mode == "melodic") $matching_notes[$i_match]['score'] = 1;
 					if($mode == "melodic") $matching_notes[$i_match]['score'] = $end2 - $start1;
-				//	else $matching_notes[$i_match]['score'] = $end1 - $start1;
 					else $matching_notes[$i_match]['score'] = $end1 - $start2;
 					$i_match++;
 					}
 				else {
 					for($j_match = 0; $j_match < $i_match; $j_match++) {
 						if(($matching_notes[$j_match][0] == $token1) AND ($matching_notes[$j_match][1] == $token2)) {
-					//		if($mode == "melodic") $matching_notes[$j_match]['score']++;
 							if($mode == "melodic") $matching_notes[$j_match]['score'] += $end2 - $start1;
-					//		else $matching_notes[$j_match]['score'] += $end1 - $start1;
 							else $matching_notes[$j_match]['score'] += $end1 - $start2;
 							$match[$token1][$token2] = $found = TRUE;
 							}
 						if(($matching_notes[$j_match][0] == $token2) AND ($matching_notes[$j_match][1] == $token1)) {
-					//		if($mode == "melodic") $matching_notes[$j_match]['score']++;
 							if($mode == "melodic") $matching_notes[$j_match]['score'] += $end2 - $start1;
-					//		else $matching_notes[$j_match]['score'] += $end2 - $start2;
 							else $matching_notes[$j_match]['score'] += $end1 - $start2;
-					//		$match[$token1][$token2] = $found = TRUE;
 							$match[$token2][$token1] = $found = TRUE;
 							}
 						if($found) break;
@@ -1090,12 +1143,10 @@ function show_relations_on_image($i_item,$matching_list,$mode,$direction,$scalen
 				for($j = 0; $j < 12; $j++) {
 					for($k = 0; $k < 12; $k++) {
 						if($j == $k) continue;
-					//	if(isset($done[$j][$k])) continue;
 						$pos = cents($ratio[$k] / $ratio[$j]);
 						while($pos < 0) $pos += 1200;
 						while($pos >= 1200) $pos -= 1200;
 						if(special_position($pos) > 0) continue;
-					//	$done[$j][$k] = TRUE;
 						$dist = $pos - $cent_mark_harmonic[$i_mark];
 						if(abs($dist) < 10) {
 							$content .= "§mark[".$j_mark."]['j'] = \"".$j."\";\n";
@@ -1162,7 +1213,7 @@ function show_relations_on_image($i_item,$matching_list,$mode,$direction,$scalen
 		else {
 			$side = "left"; $left_position = 0; // Doesn't seem to work!
 			}
-		echo "<div class=\"shadow\" style=\"border:2px solid gray; background-color:azure; width:13em; padding:8px; text-align:center; border-radius: 6px;";
+		echo "<div class=\"shadow\" style=\"border:2px solid gray; background-color:azure; width:15em; padding:8px; text-align:center; border-radius: 6px;";
 		if($float OR $mode == "harmonic") echo " float:".$side.";";
 		echo "\">SHOW IMAGE (".$mode.")<br />";
 		if($scalename <> '') echo "‘<font color=\"red\">".$scalename."</font>’<br />";
@@ -1177,8 +1228,8 @@ function show_relations_on_image($i_item,$matching_list,$mode,$direction,$scalen
 				if(isset($done[$pos]) OR special_position($pos) > 0) continue;
 				$done[$pos] = TRUE;
 				if(!$said) echo "<br />Add positions (black):";
+				else echo " -";
 				$said = TRUE;
-				if($i_mark > 0) echo " -";
 				echo " ".$position_melodic_mark_up[$i_mark]['p']."/".$position_melodic_mark_up[$i_mark]['q'];
 				}
 			for($i_mark = 0; $i_mark < count($position_melodic_mark_down); $i_mark++) {
@@ -1187,8 +1238,8 @@ function show_relations_on_image($i_item,$matching_list,$mode,$direction,$scalen
 				if(isset($done[$pos]) OR special_position($pos) > 0) continue;
 				$done[$pos] = TRUE;
 				if(!$said) echo "<br />Add positions (black):";
+				else echo " -";
 				$said = TRUE;
-				if($i_mark > 0) echo " -";
 				echo " ".$position_melodic_mark_down[$i_mark]['p']."/".$position_melodic_mark_down[$i_mark]['q'];
 				}
 			if(!$said) echo "<br />&nbsp;";
@@ -1200,8 +1251,8 @@ function show_relations_on_image($i_item,$matching_list,$mode,$direction,$scalen
 				if(isset($done[$pos]) OR special_position($pos) > 0) continue;
 				$done[$pos] = TRUE;
 				if(!$said) echo "<br />Add positions (black):";
+				else echo " -";
 				$said = TRUE;
-				if($i_mark > 0) echo " -";
 				echo " ".$position_harmonic_mark[$i_mark]['p']."/".$position_harmonic_mark[$i_mark]['q'];
 				}
 			if(!$said) echo "<br />&nbsp;";

@@ -1669,12 +1669,12 @@ if(!$hide) {
 echo "</form>";
 $table = explode(chr(10),$content);
 $imax = count($table);
-if($imax > 0 AND substr_count($content,'{') > 0) {
+if($imax > 0 AND substr_count($content,'{') > 0 AND !$hide) {
 	echo "<hr>";
-	echo "<h2 id=\"tonalanalysis\" style=\"text-align:center;\">Tonal analysis</h2>";
+	echo "<h2 id=\"tonalanalysis\" style=\"text-align:center;\">Tonal analysis: “".$filename."”</h2>";
 	$tonal_analysis_possible = !($note_convention > 2);
 	if(!$tonal_analysis_possible) echo "<p><font color=\"red\">➡ Tonal analysis is only possible with names of notes in English, Italian/Spanish/French or Indian conventions.</font></p>";
-	if(isset($_POST['analyze_tonal'])) {
+	if(isset($_POST['analyze_tonal']) OR isset($_POST['save_tonal_settings']) OR isset($_POST['reset_tonal_settings'])) {
 		tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_folder,$note_convention);
 		}
 	else {
@@ -1683,7 +1683,7 @@ if($imax > 0 AND substr_count($content,'{') > 0) {
 		if(!$tonal_analysis_possible) echo " disabled";
 		echo ">";
 		echo "Melodic and harmonic tonal intervals of (all) item(s), ignoring channels, instruments, periods, sound-objects and random performance controls.</p>";
-		if($csound_file <> '') echo "<p style=\"text-align:center;\"><font color=\"red\">➡</font> It would be wise to <a target=\"_blank\" href=\"csound.php?file=".urlencode($csound_resources.SLASH.$csound_file)."\">open</a> the ‘<font color=\"blue\">".$csound_file."</font>’ Csound resource file to use its tonal scale definitions.</p>";
+		if($csound_file <> '') echo "<div style=\"background-color:white; padding:6px;\"><font color=\"red\">➡</font> It may be necessary to <a target=\"_blank\" href=\"csound.php?file=".urlencode($csound_resources.SLASH.$csound_file)."\">open</a> the ‘<font color=\"blue\">".$csound_file."</font>’ Csound resource file, allowing access to its tonal scale definitions.</div>";
 		echo "</form>";
 		echo "<hr>";
 		}
@@ -1693,8 +1693,6 @@ $window_name = window_name($filename);
 if(!$hide) {
 	echo "<td style=\"background-color:cornsilk;\">";
 	echo "<table style=\"background-color:Gold;\">";
-/*	$table = explode(chr(10),$content);
-	$imax = count($table); */
 	if($imax > 0 AND substr_count($content,'{') > 0) {
 		$window_name_grammar = $window_name."_grammar";
 		$link_grammar = "produce.php?data=".urlencode($this_file);

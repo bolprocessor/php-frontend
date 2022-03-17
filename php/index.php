@@ -60,7 +60,7 @@ else {
 	}
 
 $folder = str_replace($bp_application_path,'',$dir);
-if(isset($last_page) AND isset($last_name)) {
+if(isset($last_page) AND isset($last_name) AND $last_name <> '') {
 	echo "<div style=\"float:right; background-color:white; padding:6px;\"><big>Last page visited:<br /><font color=\"red\">➡</font> <a target=\"_blank\" href=\"".$last_page."\">".$last_name."</a>";
 	if($folder <> $last_directory) echo "<br />in workspace</font> <a href=\"index.php?path=".$last_directory."\">".$last_directory."</a>";
 	echo "</big></div><br /><br />";
