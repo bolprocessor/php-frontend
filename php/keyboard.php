@@ -14,7 +14,7 @@ $current_directory = str_replace(SLASH.$filename,'',$file);
 save_settings("last_directory",$current_directory);
 
 require_once("_header.php");
-echo "<p>Current directory = ".$dir."</p>";
+echo "<p>Workspace = <a href=\"index.php?path=".urlencode($current_directory)."\">".$current_directory."</a></p>";
 echo link_to_help();
 
 echo "<h3>Keyboard file “".$filename."”</h3>";

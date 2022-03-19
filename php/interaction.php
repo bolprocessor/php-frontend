@@ -14,7 +14,7 @@ $current_directory = str_replace(SLASH.$filename,'',$file);
 save_settings("last_directory",$current_directory);
 
 echo link_to_help();
-echo "<p>Current directory = <a href=\"index.php?path=".urlencode($current_directory)."\">".$dir."</a></p>";
+echo "<p>Workspace = <a href=\"index.php?path=".urlencode($current_directory)."\">".$current_directory."</a></p>";
 
 echo "<h3>Interaction file “".$filename."”</h3>";
 save_settings("last_name",$filename);

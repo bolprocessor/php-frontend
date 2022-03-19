@@ -60,6 +60,23 @@ $x_center = $image_width /  2;
 $y_center = $radius + $top;
 $crown_thickness = 30;
 
+if(!$no_intervals AND isset($p_addpos)) {
+	// List additional intervals (lines in black)
+	$text = "Added: ";
+	for($i = 0; $i < count($p_addpos); $i++) {
+		if($i > 0) $text .= "  ";
+		$text .= $p_addpos[$i]."/".$q_addpos[$i];
+		}
+	$x1 = $x_center + $radius / 3;
+	$x1 = $image_width - 10 * strlen($text) - 80;
+	$x2 = $x1 + 60;
+	$y1 = 20;
+	$y_text = $y1 - imagefontheight(10) / 2;
+	imagelinethick($im,$x1,$y1,$x2,$y1,$black,2);
+	$x1 = $x2 + 15;
+	if($i > 0) imagestring($im,10,$x1,$y_text,$text,$black);
+	}
+
 for($j = $numgrades_with_labels = 0; $j < $numgrades_fullscale; $j++) {
 	if($name[$j] == '') continue;
 	$numgrades_with_labels++;
@@ -74,9 +91,10 @@ imagefilltoborder($im,$x_center + $radius + 4,$y_center,$black,$papayawhip);
 if($no_intervals) $color_hilite = $gold;
 else $color_hilite = $gold;
 if(isset($hilitewidth) AND !$no_hilite) foreach($hilitewidth as $i_match => $thiswidth) {
+	if(!isset($hilitej[$i_match]) OR !isset($hilitek[$i_match])) continue;
 	$j = $hilitej[$i_match];
 	$k = $hilitek[$i_match];
-	connect($im, $j, $k, $radius - 1,$color_hilite,$thiswidth);
+	connect($im,$j,$k,$radius - 1,$color_hilite,$thiswidth);
 	}
 
 if(!$no_intervals) {
@@ -469,7 +487,7 @@ function imagesmoothline($image,$x1,$y1,$x2,$y2,$color) {
   }
 }
 
-function whitespaces_imagestring($image, $font, $x, $y, $string, $color) {
+function whitespaces_imagestring($image,$font,$x,$y,$string, $color) { // Not used
     $font_height = imagefontheight($font);
     $font_width = imagefontwidth($font);
     $image_height = imagesy($image);

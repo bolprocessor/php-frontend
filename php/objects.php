@@ -29,7 +29,7 @@ if(isset($_POST['createcsoundinstruments'])) {
 	}
 
 require_once("_header.php");
-echo "<p>Current directory = <a href=\"index.php?path=".urlencode($current_directory)."\">".$dir;
+echo "<p>Workspace = <a href=\"index.php?path=".urlencode($current_directory)."\">".$current_directory;
 echo "</a>   <span id='message1' style=\"margin-bottom:1em;\"></span>";
 echo "</p>";
 echo link_to_help();

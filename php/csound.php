@@ -20,9 +20,9 @@ $current_directory = str_replace(SLASH.$filename,'',$file);
 save_settings("last_directory",$current_directory);
 
 require_once("_header.php");
-echo "<p><small>Current directory = <a href=\"index.php?path=".urlencode($current_directory)."\">".$dir;
+echo "<p>Workspace = <a href=\"index.php?path=".urlencode($current_directory)."\">".$current_directory;
 echo "</a>   <span id='message2' style=\"margin-bottom:1em;\"></span>";
-echo "</small></p>";
+echo "</p>";
 echo link_to_help();
 
 echo "<h3>Csound resource file “".$filename."”</h3>";
@@ -434,8 +434,9 @@ if($CsoundOrchestraName == '') {
 	$warn_not_empty = TRUE;
 	}
 echo "Csound orchestra file = <input type=\"text\" name=\"CsoundOrchestraName\" size=\"30\" value=\"".$CsoundOrchestraName."\">";
+$link = "file_list.php?dir=".$dir_csound_resources."&extension=orc";
 echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"savealldata\" onclick=\"this.form.target='_self';return true;\" value=\"SAVE\">";
-echo " <input style=\"color:DarkBlue; background-color:Azure;\" onclick=\"window.open('csound_resources_list.php','listorchestra','width=200,height=300,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"which one?\">";
+echo " <input style=\"color:DarkBlue; background-color:Azure;\" onclick=\"window.open('".$link."','listorchestra','width=200,height=300,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"which one?\">";
 	echo " ➡ ";
 if($warn_not_empty)
 	echo "<font color=\"red\">WARNING: this field should’nt be empty. By default it has been set to ‘default.orc’. </font>";

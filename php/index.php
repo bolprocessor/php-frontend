@@ -260,6 +260,9 @@ if($folder <> '')
 $table = explode('_',$folder);
 $extension = end($table);
 
+$link_list = "file_list.php?dir=".$dir;
+echo " <input style=\"float:right; color:DarkBlue; background-color:Azure;\" onclick=\"window.open('".$link_list."','listfiles','width=300,height=600,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"copy list of files\">";
+
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 echo "<p style=\"text-align:left;\">";
 echo "<input style=\"background-color:azure;\" type=\"submit\" name=\"\" value=\"RELOAD THIS PAGE\">";
@@ -540,7 +543,7 @@ foreach($dircontent as $thisfile) {
 						if($type <> "directory") copy($dir.SLASH.$old_name,$dir.SLASH.$new_name);
 						else rcopy($dir.SLASH.$old_name,$dir.SLASH.$new_name);
 						$link = $type.".php?file=".urlencode($path.SLASH.$new_name);
-						echo "‘<font color=\"blue\">".$old_name."</font>’ <font color=\"red\">➡</font> copied to <a target=\"_blank\" href=\"".$link."\">".$new_name."</a><br />";
+						echo "‘<font color=\"green\">".$old_name."</font>’ <font color=\"red\">➡</font> copied to <a target=\"_blank\" href=\"".$link."\">".$new_name."</a><br />";
 						}
 					else {
 						rename($dir.SLASH.$old_name,$dir.SLASH.$new_name);
