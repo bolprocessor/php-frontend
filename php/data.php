@@ -1643,34 +1643,50 @@ if(!$hide) {
 	$found_tempo = substr_count($content,"_tempo(");
 	$found_volume = substr_count($content,"_volume(");
 	$found_velocity = substr_count($content,"_vel(");
-	if($found_chan > 0) echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"delete_chan\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _chan()\">&nbsp;";
-	if($found_ins > 0) echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"delete_ins\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _ins()\">&nbsp;";
-	if($found_tempo > 0) echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"delete_tempo\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _tempo()\">&nbsp;";
+	$found = FALSE;
+	if($found_chan > 0) {
+		echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"delete_chan\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _chan()\">&nbsp;";
+		$found = TRUE;
+		}
+	if($found_ins > 0) {
+		echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"delete_ins\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _ins()\">&nbsp;";
+		$found = TRUE;
+		}
+	if($found_tempo > 0) {
+		echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"delete_tempo\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _tempo()\">&nbsp;";
+		$found = TRUE;
+		}
 	if($found_volume > 0) {
 		echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"delete_volume\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _volume()\">&nbsp;";
 		echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"volume_velocity\" formaction=\"".$url_this_page."#topedit\" value=\"volume -> velocity\">&nbsp;";
+		$found = TRUE;
 		}
 	if($found_velocity > 0) {
 		echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"delete_velocity\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _vel()\">&nbsp;";
 		echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"velocity_volume\" formaction=\"".$url_this_page."#topedit\" value=\"velocity -> volume\">&nbsp;";
+		$found = TRUE;
 		}
 	if($found_volume > 0) {
 		echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"modify_volume\" formaction=\"".$url_this_page."#topchanges\" value=\"Modify _volume()\">&nbsp;";
+		$found = TRUE;
 		}
 	if($found_velocity > 0) {
 		echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"modify_velocity\" formaction=\"".$url_this_page."#topchanges\" value=\"Modify _vel()\">&nbsp;";
 		}
-	if($found_chan > 0  OR $found_ins > 0) echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"manage_instructions\" formaction=\"".$url_this_page."#topchanges\" value=\"MANAGE _chan() AND _ins()\">&nbsp;";
+	if($found_chan > 0  OR $found_ins > 0) {
+		echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"manage_instructions\" formaction=\"".$url_this_page."#topchanges\" value=\"MANAGE _chan() AND _ins()\">&nbsp;";
+		$found = TRUE;
+		}
 	echo "<input type=\"hidden\" name=\"change_velocity_average\" value=\"".$change_velocity_average."\">";
 	echo "<input type=\"hidden\" name=\"change_velocity_max\" value=\"".$change_velocity_max."\">";
 	echo "<input type=\"hidden\" name=\"change_volume_average\" value=\"".$change_volume_average."\">";
 	echo "<input type=\"hidden\" name=\"change_volume_max\" value=\"".$change_volume_max."\">";
+	if($found) echo "<hr>";
 	}
 echo "</form>";
 $table = explode(chr(10),$content);
 $imax = count($table);
-if($imax > 0 AND substr_count($content,'{') > 0 AND !$hide) {
-	echo "<hr>";
+if($imax > 0 AND (substr_count($content,'{') > 0 OR substr_count($content,"-da.") > 0  OR substr_count($content,".bpda") > 0) AND !$hide) {
 	echo "<h2 id=\"tonalanalysis\" style=\"text-align:center;\">Tonal analysis: “".$filename."”</h2>";
 	$tonal_analysis_possible = !($note_convention > 2);
 	if(!$tonal_analysis_possible) echo "<p><font color=\"red\">➡ Tonal analysis is only possible with names of notes in English, Italian/Spanish/French or Indian conventions.</font></p>";
@@ -1679,10 +1695,10 @@ if($imax > 0 AND substr_count($content,'{') > 0 AND !$hide) {
 		}
 	else {
 		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-		echo "<p><input style=\"background-color:yellow; font-size:large; float:left; margin-right:1em;\" type=\"submit\" formaction=\"".$url_this_page."#tonalanalysis\" title=\"Analyze tonal intervals\" name=\"analyze_tonal\" value=\"ANALYZE INTERVALS\"";
+		echo "<p><input style=\"background-color:yellow; font-size:large; margin-right:1em;\" type=\"submit\" formaction=\"".$url_this_page."#tonalanalysis\" title=\"Analyze tonal intervals\" name=\"analyze_tonal\" value=\"ANALYZE INTERVALS\"";
 		if(!$tonal_analysis_possible) echo " disabled";
 		echo ">";
-		echo "Melodic and harmonic tonal intervals of (all) item(s), ignoring channels, instruments, periods, sound-objects and random performance controls.</p>";
+		echo "Melodic and harmonic tonal intervals of (all) item(s)<br />➡ <i>ignoring channels, instruments, periods, sound-objects and random performance controls.</i></p>";
 		if($csound_file <> '') echo "<div style=\"background-color:white; padding:6px;\"><font color=\"red\">➡</font> It may be necessary to <a target=\"_blank\" href=\"csound.php?file=".urlencode($csound_resources.SLASH.$csound_file)."\">open</a> the ‘<font color=\"blue\">".$csound_file."</font>’ Csound resource file, allowing access to its tonal scale definitions.</div>";
 		echo "</form>";
 		echo "<hr>";
