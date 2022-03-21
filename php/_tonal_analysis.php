@@ -42,7 +42,7 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 	echo "</td></tr>";
 	echo "<tr><th colspan=\"2\" style=\"text-align:center;\">Ascending melodic</th><th colspan=\"2\" style=\"text-align:center;\">Descending melodic</th><th colspan=\"2\" style=\"text-align:center;\">Harmonic</th></tr>";
 	echo "<tr>";
-	echo "<td colspan=\"2\" style=\"white-space:nowrap; padding:6px;\">";
+	echo "<td colspan=\"2\" style=\"white-space:nowrap; padding:6px;\">"; // settings_table
 	for($i_mark = 0; $i_mark < $max_marks2; $i_mark++) {
 		if(isset($_POST["position_melodic_mark_up_p_".$i_mark]))
 			$position_melodic_mark_up[$i_mark]['p'] = intval($_POST["position_melodic_mark_up_p_".$i_mark]);
@@ -281,23 +281,9 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 	// Now we do it!
 	if(isset($_POST['proceed_tonal_analysis']) AND !isset($_POST['save_tonal_settings']) AND !isset($_POST['reset_tonal_settings'])) {
 		$time_start = time();
+		$errors = 0;
 		echo "<br/>";
-		$handle = NULL; $this_scale_score = array();
-		$batch_filename = str_replace("-da.",'',$filename)."_batch.html";
-		$batch_link = $temp_dir.$temp_folder.SLASH.$batch_filename;
-		if($batch_processing AND $compare_scales) {
-			$handle = fopen($batch_link,"w");
-			$this_header = "<style>
-			tr:nth-child(even) {
-				background-color: rgba(150, 212, 212, 0.4);
-			  }
-			  th:nth-child(even),td:nth-child(even) {
-				background-color: rgba(150, 212, 212, 0.4);
-			  }
-			 </style>";
-			fwrite($handle,"<html>\n<header>\n".$this_header."</header>\n");
-			fwrite($handle,"<body>\n");
-			}
+		$handle = NULL; $this_scale_score = $this_scale_average = array();
 		$table = explode(chr(10),$content);
 		$imax = count($table);
 		$found = FALSE;
@@ -321,7 +307,7 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 					$data_file = $dir.$line2;
 					$first_line2 = '';
 					if(file_exists($data_file)) {
-						echo "<font color=\"red\">➡</font> Item in file “<font color=\"blue\">".$data_file."</font>”<br />";
+						echo "➡ Item in file “<font color=\"blue\">".$data_file."</font>”<br />";
 						$table3 = explode('/',$data_file);
 						$item_name = end($table3);
 						$content2 = @file_get_contents($data_file,TRUE);
@@ -343,6 +329,10 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 							break;
 							}
 						}
+					else {
+						echo "<p><font color=\"red\">➡ ERROR: unable to open file</font> “<font color=\"blue\">".$data_file."</font>”</p>";
+						$errors++;
+						}
 					}
 				if(!$found) continue;
 				}
@@ -352,7 +342,7 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 			$tonal_scale = $segment['tonal_scale'];
 			$i_item++;
 			if($first_line <> '' AND $first_line2 == '') {
-				echo "➡ <i>This item =</i> <font color=\"blue\">".str_replace("// ",'',$first_line)."</font><br />";
+				echo "➡ This item = <font color=\"blue\">".str_replace("// ",'',$first_line)."</font><br />";
 				}
 			echo "<p><b>Item #".$i_item."</b>";
 			$batch_item[$i_batchline] = $i_item;
@@ -594,9 +584,10 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 								echo "<th></th><th>Select</th><th style=\"text-align:right;\">weight:&nbsp;</th><td>".$weight_melodic_up."</td><td>".$weight_melodic_down."</td><td>".$weight_harmonic."</td><th>Weighted total</th></tr>";
 								}
 							else echo "<tr><th></th><th>Select then</th><th><input style=\"background-color:yellow;\" type=\"submit\" formaction=\"".$url_this_page."#tonalanalysis\" title=\"Analyze tonal intervals\" name=\"analyze_tonal\" value=\"ANALYZE AGAIN\"></th><th>&nbsp;Melodic score (up)&nbsp;</th><th>&nbsp;Melodic score (down)&nbsp;</th><th>&nbsp;Harmonic score&nbsp;</th><th>Score</th></tr>";
-							$found_scale = FALSE; $display_ok = TRUE;
+							$found_declared_scale = FALSE;
+							$display_ok = TRUE;
 							foreach($total_score as $scale => $total) {
-								if($total == 0) continue;
+								if(!$batch_processing AND $total == 0) continue;
 								$i_line2++;
 								if($batch_processing AND $tonal_scale == '' AND ($i_rank > 2 OR $i_line2 > 10)) $display_ok = FALSE;
 								$same_rank = FALSE;
@@ -606,12 +597,14 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 									echo "<tr>";
 									if($same_rank) echo "<td style=\"background-color:Gold; text-align:left;\">".$i_rank."</td>";
 									else echo "<th>".$i_rank."</th>";
-									echo "<td>";
+									echo "<td style=\"white-space:nowrap;\">";
 									}
 								$rank[$i_item][$scale] = $i_rank;
 								if(!isset($this_scale_score[$scale])) $this_scale_score[$scale] = 0;
 								if($i_rank == 1) $this_scale_score[$scale]++;
-								if($scale == $tonal_scale OR $tonal_scale == '') $found_scale = TRUE;
+								if(!isset($this_scale_average[$scale])) $this_scale_average[$scale] = 0;
+								else $this_scale_average[$scale] += round($total/$lcm);
+								if($scale == $tonal_scale OR $tonal_scale == '') $found_declared_scale = TRUE;
 								$old_total = round($total/$lcm);
 								if($display_ok) {
 									$display_result[$i_item][$scale] = isset($_POST['display_result_'.$i_item."_".$scale]);
@@ -630,7 +623,7 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 									echo "</td><td>".round($evaluate['melodic_up'][$scale]/$lcm,0)."</td><td>".round($weight_melodic_down * $evaluate['melodic_down'][$scale]/$lcm,0)."</td><td>".round($evaluate['harmonic'][$scale]/$lcm,0)."</td><td>".$old_total."</td>";
 									echo "</tr>";
 									}
-								if($batch_processing AND $found_scale AND $i_rank > 2) $display_ok = FALSE;
+								if($batch_processing AND $found_declared_scale AND $i_rank > 2) $display_ok = FALSE;
 								}
 							if(!$batch_processing) echo "<tr><td colspan=\"6\">&nbsp;<font color=\"red\"><b>↑</b></font>&nbsp;&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" formaction=\"".$url_this_page."#tonalanalysis\" title=\"Analyze tonal intervals\" name=\"analyze_tonal\" value=\"ANALYZE AGAIN\"> for a graphic display of results on selected scales</td></tr>";
 							echo "</table></center><br />";
@@ -651,9 +644,10 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 							}
 						}
 					}
-				if(!$found_scale AND $image_shown) {
+				if(!$found_scale /* AND $image_shown */) {
 					echo "<p style=\"text-align:center;\"><font color=\"red\">No definition of tonal scale was found.</font><br />";
 					echo "You need to <a target=\"_blank\" href=\"csound.php?file=".urlencode($csound_resources.SLASH.$csound_file)."\">open</a> the ‘<font color=\"blue\">".$csound_file."</font>’ Csound resource file to use its tonal scale definitions.</p><br />";
+					break;
 					}
 				}
 			else {
@@ -673,10 +667,59 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 				}
 			echo "<hr>";
 			}
-		if($handle <> NULL) {
-			fwrite($handle,"<table><tr>\n");
-			$download_link = "<a href=\"".$batch_filename."\" download=\"".$batch_filename."\"><input style=\"background-color:azure; border-radius: 10px;\" type=\"submit\" value=\"DOWNLOAD\"></a>";
-			fwrite($handle,"<th>".$download_link."</th>\n");
+		
+		$batch_html_filename = str_replace("-da.",'',$filename)."_batch.html";
+		$batch_html_link = $temp_dir.$temp_folder.SLASH.$batch_html_filename;
+		$batch_csv_filename = str_replace("-da.",'',$filename)."_batch.csv";
+		$batch_csv_link = $temp_dir.$temp_folder.SLASH.$batch_csv_filename;
+		if($batch_processing AND $compare_scales AND isset($column_name)) {
+			$handle_html = fopen($batch_html_link,"w");
+			$handle_csv = fopen($batch_csv_link,"w");
+			$this_header = "<meta http-equiv=\"Content-type\" content=\"text/html; charset=utf-8\" />\n";
+			$this_header .= "<style>
+			tr:nth-child(even) {
+				background-color: rgba(150, 212, 212, 0.4);
+				}
+				th:nth-child(even),td:nth-child(even) {
+				background-color: rgba(150, 212, 212, 0.4);
+				}
+				</style>\n";
+			$this_header .= "<title>".$filename." (batch tonal analysis)</title>";
+			$settings_table = "<table>\n";
+			$settings_table .= "<tr><th>&nbsp;Ascending melodic intervals&nbsp;</th><th>&nbsp;Descending melodic intervals&nbsp;</th><th>&nbsp;Harmonic intervals&nbsp;</th></tr>\n";
+			for($i_mark = 0; $i_mark < $max_marks2; $i_mark++) {
+				$settings_table .= "<tr>";
+				if($position_melodic_mark_up[$i_mark]['p'] == '') $text = '';
+				else $text = $position_melodic_mark_up[$i_mark]['p']."/".$position_melodic_mark_up[$i_mark]['q']." ±".$width_melodic_mark_up[$i_mark]."¢ weight ".$weight_melodic_mark_up[$i_mark];
+				$settings_table .= "<td>&nbsp;".$text."</td>";
+				if($position_melodic_mark_down[$i_mark]['p'] == '') $text = '';
+				else $text = $position_melodic_mark_down[$i_mark]['p']."/".$position_melodic_mark_down[$i_mark]['q']." ±".$width_melodic_mark_down[$i_mark]."¢ weight ".$weight_melodic_mark_down[$i_mark];
+				$settings_table .= "<td>&nbsp;".$text."</td>";
+				if($position_harmonic_mark[$i_mark]['p'] == '') $text = '';
+				else $text = $position_harmonic_mark[$i_mark]['p']."/".$position_harmonic_mark[$i_mark]['q']." ±".$width_harmonic_mark[$i_mark]."¢ weight ".$weight_harmonic_mark[$i_mark];
+				$settings_table .= "<td>&nbsp;".$text."</td>";
+				$settings_table .= "</tr>\n";
+				}
+			$settings_table .= "<tr><td>&nbsp;Global weight: ".$weight_melodic_up."&nbsp;</td><td>&nbsp;Global weight: ".$weight_melodic_down."&nbsp;</td><td>&nbsp;Global weight: ".$weight_harmonic."&nbsp;</td></tr>\n";
+			$settings_table .= "<tr><td colspan=\"3\">&nbsp;Maximum size of melodic intervals: ".$max_distance." semitones&nbsp;</td></tr>\n";
+
+			$settings_table .= "<tr><td colspan=\"3\">";
+			$settings_table .= "Max overlap ratio in melodic intervals: ".(100 * $ratio_melodic)."%<br />";
+			$settings_table .= "Min duration of harmonic interval: ".$min_duration." ms<br />";
+			$settings_table .= "Maximum gap in melodic interval: ".$max_gap." ms<br />";
+			$settings_table .= "</td></tr>";
+			$settings_table .= "</table><br />\n";
+			fwrite($handle_html,"<html>\n<header>\n".$this_header."</header>\n");
+			fwrite($handle_html,"<body>\n");
+			fwrite($handle_html,"<h2>".$filename."</h2>\n");
+			fwrite($handle_html,"<p>Date: ".gmdate('Y-m-d H:i:s')." — check documentation: <a target=\"_blank\" href=\"https://bolprocessor.org/tonal-analysis/\">https://bolprocessor.org/tonal-analysis/</a></p>");
+			fwrite($handle_html,$settings_table);
+			fwrite($handle_html,"<table><tr>\n");
+			$download_link = "<p style=\"text-align:center;\"><b>Download:</b><br /><br />\n";
+			$download_link .= "<a href=\"".$batch_html_filename."\" download=\"".$batch_html_filename."\"><input style=\"background-color:yellow; border-radius: 10px;\" type=\"submit\" value=\"HTML\"></a><br /><br />";
+			$download_link .= "<a href=\"".$batch_csv_filename."\" download=\"".$batch_csv_filename."\"><input style=\"background-color:yellow; border-radius: 10px;\" type=\"submit\" value=\"CSV\"></a>";
+			echo "</p>";
+			fwrite($handle_html,"<th>".$download_link."</th>\n");
 			$best_score = 0;
 			for($j_batch = 0; $j_batch < count($column_name); $j_batch++) {
 				if($this_scale_score[$column_name[$j_batch]] > $best_score) {
@@ -686,40 +729,70 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 			for($j_batch = 0; $j_batch < count($column_name); $j_batch++) {
 				$column_text = $column_name[$j_batch];
 				if($this_scale_score[$column_text] == $best_score) $column_text = "<font color=\"red\">".$column_text."</font>";
-				fwrite($handle,"<th style=\"writing-mode:vertical-lr; text-orientation:mixed; text-align:right;\">".$column_text."</th>\n");
+				fwrite($handle_html,"<th style=\"writing-mode:vertical-lr; text-orientation:mixed; text-align:right;\">".$column_text."</th>\n");
+				fwrite($handle_csv,",");
+				fwrite($handle_csv,$column_name[$j_batch]);
 				}
-			fwrite($handle,"</tr>\n");
+			fwrite($handle_html,"</tr>\n");
 			for($i_batch = 0; $i_batch < count($batch_item); $i_batch++) {
-				fwrite($handle,"<tr>\n");
+				fwrite($handle_html,"<tr>\n");
+				fwrite($handle_csv,"\n");
 				if($batch_item_name[$i_batch] <> '') $line_title = $batch_item_name[$i_batch];
 				else $line_title = "#".$batch_item[$i_batch];
-				fwrite($handle,"<td style=\"white-space:nowrap; color:blue;\">".$line_title."</td>");
+				fwrite($handle_html,"<td style=\"white-space:nowrap; color:blue;\">".$line_title."</td>");
+				fwrite($handle_csv,str_replace("-da.","da.",$line_title));
 				for($j_batch = 0; $j_batch < count($column_name); $j_batch++) {
 					if(isset($rank[$batch_item[$i_batch]][$column_name[$j_batch]])) {
 						$this_score = $rank[$batch_item[$i_batch]][$column_name[$j_batch]];
 						if($this_score == 1) $this_score = "<font color=\"red\"><b>".$this_score."</b></font>";
-						fwrite($handle,"<td>".$this_score."</td>\n");
+						fwrite($handle_html,"<td>".$this_score."</td>\n");
+						fwrite($handle_csv,",".$rank[$batch_item[$i_batch]][$column_name[$j_batch]]);
 						}
-					else fwrite($handle,"<th></th>\n");
+					else {
+						fwrite($handle_html,"<th></th>\n");
+						fwrite($handle_csv,",");
+						}
 					}
-				fwrite($handle,"</tr>\n");
+				fwrite($handle_html,"</tr>\n");
+				fwrite($handle_csv,"\n");
 				}
-			fwrite($handle,"<tr>\n");
-			fwrite($handle,"<td style=\"white-space:nowrap; color:red;\">Matched (times)</td>");
+			fwrite($handle_html,"<tr>\n");
+			fwrite($handle_csv,"\n");
+			fwrite($handle_html,"<td style=\"white-space:nowrap; color:red;\">Matched (times)</td>");
+			fwrite($handle_csv,"Matched (times)");
 			for($j_batch = 0; $j_batch < count($column_name); $j_batch++) {
 				$column_text = $this_scale_score[$column_name[$j_batch]];
 				if($column_text == $best_score) $column_text = "<font color=\"red\"><b>".$column_text."</b></font>";
-				fwrite($handle,"<td style=\"\">".$column_text."</td>\n");
+				else $column_text = "<font color=\"green\"><b>".$column_text."</b></font>";
+				fwrite($handle_html,"<td style=\"\">".$column_text."</td>\n");
+				fwrite($handle_csv,",".$this_scale_score[$column_name[$j_batch]]);
 				}
-			fwrite($handle,"</tr>\n");
-			fwrite($handle,"</table>\n");
-			fwrite($handle,"</body></html>\n");
-			fclose($handle);
-			echo "<p style=\"text-align:center;\"><input class=\"shadow\" style=\"background-color:Azure; font-size:large;\" onclick=\"window.open('".$batch_link."','batch','width=1200,height=500,left=0'); return false;\" type=\"submit\" name=\"produce\" value=\"SHOW ALL RESULTS\"></p>";
+			fwrite($handle_html,"</tr>\n");
+			fwrite($handle_csv,"\n");
+
+			fwrite($handle_html,"<td style=\"white-space:nowrap; color:blue;\">Average score</td>");
+			fwrite($handle_csv,"Average score");
+			$imax = count($batch_item);
+			for($j_batch = 0; $j_batch < count($column_name); $j_batch++) {
+				$average = round($this_scale_average[$column_name[$j_batch]] / $imax);
+				$column_text = "<font color=\"blue\">".$average."</font>";
+				fwrite($handle_html,"<td style=\"\">".$column_text."</td>\n");
+				fwrite($handle_csv,",".$average);
+				}
+			fwrite($handle_html,"</tr>\n");
+			fwrite($handle_csv,"\n");
+			fwrite($handle_html,"</table>\n");
+			fwrite($handle_html,"</body></html>\n");
+			fclose($handle_html);
+			fclose($handle_csv); 
+			echo "<p style=\"text-align:center;\"><input class=\"shadow\" style=\"background-color:Azure; font-size:large;\" onclick=\"window.open('".$batch_html_link."','batch','width=1200,height=500,left=0'); return false;\" type=\"submit\" name=\"produce\" value=\"SHOW ALL RESULTS\"></p>";
 			}
-		echo "<p style=\"text-align:center;\">Check documentation: <a target=\"_blank\" href=\"https://bolprocessor.org/tonal-analysis/\">https://bolprocessor.org/tonal-analysis/</a></p>";
 		$duration_process = time() - $time_start;
-		if($duration_process > 2) echo "<p style=\"text-align:center; color:red;\"><small>All data processed in ".$duration_process." seconds</small></p>";
+		if($errors > 0) echo "<p style=\"text-align:center; color:red;\"><big><b>".$errors." ERROR(s) FOUND</b></big></p>";
+		else {
+			echo "<p style=\"text-align:center;\">Check documentation: <a target=\"_blank\" href=\"https://bolprocessor.org/tonal-analysis/\">https://bolprocessor.org/tonal-analysis/</a></p>";
+			if($duration_process > 2) echo "<p style=\"text-align:center; color:red;\"><small>All data processed in ".$duration_process." seconds</small></p>";
+			}
 		echo "<br /></div>";
 		}
 	return;
