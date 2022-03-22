@@ -1198,7 +1198,7 @@ echo "<tr><th style=\"background-color:azure; padding:4px; position: absolute;\"
 for($i = 0; $i <= $numgrades_fullscale; $i++) {
 	store2($h_image,"name",$i,$name[$i]);
 	echo "<td style=\"text-align:center; padding-top:4px; padding-bottom:4px; padding-left:0px; padding-right:0px; margin-left:0px; margin-right:0px; background-color:gold;\" colspan=\"2\">";
-	echo "<input type=\"text\" style=\"border:none; text-align:center; color:red; font-weight:bold;\" name=\"name_".$i."\" size=\"6\" value=\"".$name[$i]."\">";
+	echo "<input type=\"text\" style=\"border:none; text-align:center; color:red; font-weight:bold;\" name=\"name_".$i."\" size=\"10\" value=\"".$name[$i]."\">";
 	echo "</td>";
 	}
 echo "</tr>";

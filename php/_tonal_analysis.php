@@ -10,6 +10,7 @@ $wolf_fourth = round(cents(320/243));
 function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_folder,$note_convention) {
 	global $max_term_in_fraction,$dir_scale_images,$csound_resources,$current_directory,$dir,$filename;
 	global $p_tonal_default_up,$q_tonal_default_up,$p_tonal_default_down,$q_tonal_default_down,$p_tonal_default_harmonic,$q_tonal_default_harmonic,$weight_tonal_default_up,$weight_tonal_default_down,$weight_tonal_default_harmonic,$width_tonal_default_up,$width_tonal_default_down,$width_tonal_default_harmonic,$weight_tonal_melodic_up,$weight_tonal_melodic_down,$weight_tonal_harmonic,$max_distance_tonal,$ratio_melodic_tonal,$min_duration_tonal,$max_gap_tonal,$compare_scales_tonal;
+	global $Englishnote,$Frenchnote,$Indiannote;
 	set_time_limit(1000);
 	$test_tonal = FALSE;
 	$test_intervals = TRUE;
@@ -346,7 +347,9 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 				}
 			echo "<p><b>Item #".$i_item."</b>";
 			$batch_item[$i_batchline] = $i_item;
-			$batch_item_name[$i_batchline++] = $item_name;
+			$batch_item_name[$i_batchline] = $item_name;
+			$remark[$i_batchline] = $first_line2;
+			$i_batchline++;
 			if($item_name <> '') echo " <font color=\"red\">".$item_name."</font>";
 			if($tonal_scale <> '') echo " assigned scale <font color=\"red\">".$tonal_scale."</font>";
 			if(!$compare_scales) echo " — note convention is ‘<font color=\"red\">".ucfirst(note_convention(intval($note_convention)))."</font>’";
@@ -525,9 +528,11 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 										}
 									}
 								if(is_integer($pos=strpos($scale_line,"[")) AND $pos == 0) {
+					//				echo $scale_name."<br />".$scale_line."<br />";
 									$scale_line = str_replace("[",'',$scale_line);
 									$scale_line = str_replace("]",'',$scale_line);
 									$table_scale2 = explode(" ",$scale_line);
+									if(count($table_scale2) < 26) break;
 									for($grade = 0; $grade < 13; $grade++) {
 										$p[$grade] = $table_scale2[0 + (2 * $grade)];
 										$q[$grade] = $table_scale2[1 + (2 * $grade)];
@@ -537,6 +542,7 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 								if(is_integer($pos=strpos($scale_line,"/")) AND $pos == 0) {
 									$scale_line = str_replace("/",'',$scale_line);
 									$table_scale2 = explode(" ",$scale_line);
+									if(count($table_scale2) < 13) break;
 									for($grade = 0; $grade < 13; $grade++) {
 										if(!isset($note_name[$grade])) {
 											$this_note = $table_scale2[$grade];
@@ -585,7 +591,7 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 								}
 							else echo "<tr><th></th><th>Select then</th><th><input style=\"background-color:yellow;\" type=\"submit\" formaction=\"".$url_this_page."#tonalanalysis\" title=\"Analyze tonal intervals\" name=\"analyze_tonal\" value=\"ANALYZE AGAIN\"></th><th>&nbsp;Melodic score (up)&nbsp;</th><th>&nbsp;Melodic score (down)&nbsp;</th><th>&nbsp;Harmonic score&nbsp;</th><th>Score</th></tr>";
 							$found_declared_scale = FALSE;
-							$display_ok = TRUE;
+							$display_ok = TRUE; $max_total = 0;
 							foreach($total_score as $scale => $total) {
 								if(!$batch_processing AND $total == 0) continue;
 								$i_line2++;
@@ -593,6 +599,7 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 								$same_rank = FALSE;
 								if($old_total <> round($total/$lcm)) $i_rank++;
 								else $same_rank = TRUE;
+								if($max_total == 0) $max_total = $total;
 								if($display_ok) {
 									echo "<tr>";
 									if($same_rank) echo "<td style=\"background-color:Gold; text-align:left;\">".$i_rank."</td>";
@@ -602,8 +609,10 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 								$rank[$i_item][$scale] = $i_rank;
 								if(!isset($this_scale_score[$scale])) $this_scale_score[$scale] = 0;
 								if($i_rank == 1) $this_scale_score[$scale]++;
-								if(!isset($this_scale_average[$scale])) $this_scale_average[$scale] = 0;
-								else $this_scale_average[$scale] += round($total/$lcm);
+								if($max_total > 0) { // Normally always the case
+									if(!isset($this_scale_average[$scale])) $this_scale_average[$scale] = 0;
+									else $this_scale_average[$scale] += round(100 * ($total/$max_total));
+									}
 								if($scale == $tonal_scale OR $tonal_scale == '') $found_declared_scale = TRUE;
 								$old_total = round($total/$lcm);
 								if($display_ok) {
@@ -713,7 +722,6 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 			fwrite($handle_html,"<body>\n");
 			fwrite($handle_html,"<h2>".$filename."</h2>\n");
 			fwrite($handle_html,"<p>Date: ".gmdate('Y-m-d H:i:s')." — check documentation: <a target=\"_blank\" href=\"https://bolprocessor.org/tonal-analysis/\">https://bolprocessor.org/tonal-analysis/</a></p>");
-			fwrite($handle_html,$settings_table);
 			fwrite($handle_html,"<table><tr>\n");
 			$download_link = "<p style=\"text-align:center;\"><b>Download:</b><br /><br />\n";
 			$download_link .= "<a href=\"".$batch_html_filename."\" download=\"".$batch_html_filename."\"><input style=\"background-color:yellow; border-radius: 10px;\" type=\"submit\" value=\"HTML\"></a><br /><br />";
@@ -753,6 +761,8 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 						fwrite($handle_csv,",");
 						}
 					}
+				fwrite($handle_html,"<td>".$remark[$i_batch]."</td>\n");
+				fwrite($handle_csv,",".$remark[$i_batch]);
 				fwrite($handle_html,"</tr>\n");
 				fwrite($handle_csv,"\n");
 				}
@@ -769,7 +779,6 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 				}
 			fwrite($handle_html,"</tr>\n");
 			fwrite($handle_csv,"\n");
-
 			fwrite($handle_html,"<td style=\"white-space:nowrap; color:blue;\">Average score</td>");
 			fwrite($handle_csv,"Average score");
 			$imax = count($batch_item);
@@ -782,6 +791,8 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 			fwrite($handle_html,"</tr>\n");
 			fwrite($handle_csv,"\n");
 			fwrite($handle_html,"</table>\n");
+			fwrite($handle_html,"<h3>Settings:<h3>\n");
+			fwrite($handle_html,$settings_table);
 			fwrite($handle_html,"</body></html>\n");
 			fclose($handle_html);
 			fclose($handle_csv); 
