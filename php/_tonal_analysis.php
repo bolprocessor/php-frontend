@@ -654,8 +654,8 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 						}
 					}
 				if(!$found_scale /* AND $image_shown */) {
-					echo "<p style=\"text-align:center;\"><font color=\"red\">No definition of tonal scale was found.</font><br />";
-					echo "You need to <a target=\"_blank\" href=\"csound.php?file=".urlencode($csound_resources.SLASH.$csound_file)."\">open</a> the ‘<font color=\"blue\">".$csound_file."</font>’ Csound resource file to use its tonal scale definitions.</p><br />";
+					echo "<p style=\"text-align:center;\"><font color=\"red\"><big>No definition of tonal scale was found.</big></font><br /><br />";
+					echo "You need to open the ‘<a target=\"_blank\" href=\"csound.php?file=".urlencode($csound_resources.SLASH.$csound_file)."\">".$csound_file."</a>’ resource file to use its tonal scale definitions.</p>";
 					break;
 					}
 				}
@@ -694,34 +694,11 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 				}
 				</style>\n";
 			$this_header .= "<title>".$filename." (batch tonal analysis)</title>";
-			$settings_table = "<table>\n";
-			$settings_table .= "<tr><th>&nbsp;Ascending melodic intervals&nbsp;</th><th>&nbsp;Descending melodic intervals&nbsp;</th><th>&nbsp;Harmonic intervals&nbsp;</th></tr>\n";
-			for($i_mark = 0; $i_mark < $max_marks2; $i_mark++) {
-				$settings_table .= "<tr>";
-				if($position_melodic_mark_up[$i_mark]['p'] == '') $text = '';
-				else $text = $position_melodic_mark_up[$i_mark]['p']."/".$position_melodic_mark_up[$i_mark]['q']." ±".$width_melodic_mark_up[$i_mark]."¢ weight ".$weight_melodic_mark_up[$i_mark];
-				$settings_table .= "<td>&nbsp;".$text."</td>";
-				if($position_melodic_mark_down[$i_mark]['p'] == '') $text = '';
-				else $text = $position_melodic_mark_down[$i_mark]['p']."/".$position_melodic_mark_down[$i_mark]['q']." ±".$width_melodic_mark_down[$i_mark]."¢ weight ".$weight_melodic_mark_down[$i_mark];
-				$settings_table .= "<td>&nbsp;".$text."</td>";
-				if($position_harmonic_mark[$i_mark]['p'] == '') $text = '';
-				else $text = $position_harmonic_mark[$i_mark]['p']."/".$position_harmonic_mark[$i_mark]['q']." ±".$width_harmonic_mark[$i_mark]."¢ weight ".$weight_harmonic_mark[$i_mark];
-				$settings_table .= "<td>&nbsp;".$text."</td>";
-				$settings_table .= "</tr>\n";
-				}
-			$settings_table .= "<tr><td>&nbsp;Global weight: ".$weight_melodic_up."&nbsp;</td><td>&nbsp;Global weight: ".$weight_melodic_down."&nbsp;</td><td>&nbsp;Global weight: ".$weight_harmonic."&nbsp;</td></tr>\n";
-			$settings_table .= "<tr><td colspan=\"3\">&nbsp;Maximum size of melodic intervals: ".$max_distance." semitones&nbsp;</td></tr>\n";
-
-			$settings_table .= "<tr><td colspan=\"3\">";
-			$settings_table .= "Max overlap ratio in melodic intervals: ".(100 * $ratio_melodic)."%<br />";
-			$settings_table .= "Min duration of harmonic interval: ".$min_duration." ms<br />";
-			$settings_table .= "Maximum gap in melodic interval: ".$max_gap." ms<br />";
-			$settings_table .= "</td></tr>";
-			$settings_table .= "</table><br />\n";
 			fwrite($handle_html,"<html>\n<header>\n".$this_header."</header>\n");
 			fwrite($handle_html,"<body>\n");
 			fwrite($handle_html,"<h2>".$filename."</h2>\n");
 			fwrite($handle_html,"<p>Date: ".gmdate('Y-m-d H:i:s')." — check documentation: <a target=\"_blank\" href=\"https://bolprocessor.org/tonal-analysis/\">https://bolprocessor.org/tonal-analysis/</a></p>");
+
 			fwrite($handle_html,"<table><tr>\n");
 			$download_link = "<p style=\"text-align:center;\"><b>Download:</b><br /><br />\n";
 			$download_link .= "<a href=\"".$batch_html_filename."\" download=\"".$batch_html_filename."\"><input style=\"background-color:yellow; border-radius: 10px;\" type=\"submit\" value=\"HTML\"></a><br /><br />";
@@ -741,6 +718,8 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 				fwrite($handle_csv,",");
 				fwrite($handle_csv,$column_name[$j_batch]);
 				}
+			fwrite($handle_html,"<th>First line</th>\n");
+			fwrite($handle_csv,",First line");
 			fwrite($handle_html,"</tr>\n");
 			for($i_batch = 0; $i_batch < count($batch_item); $i_batch++) {
 				fwrite($handle_html,"<tr>\n");
@@ -761,7 +740,7 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 						fwrite($handle_csv,",");
 						}
 					}
-				fwrite($handle_html,"<td>".$remark[$i_batch]."</td>\n");
+				fwrite($handle_html,"<td style=\"white-space:nowrap; color:blue;\">".$remark[$i_batch]."</td>\n");
 				fwrite($handle_csv,",".$remark[$i_batch]);
 				fwrite($handle_html,"</tr>\n");
 				fwrite($handle_csv,"\n");
@@ -774,9 +753,11 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 				$column_text = $this_scale_score[$column_name[$j_batch]];
 				if($column_text == $best_score) $column_text = "<font color=\"red\"><b>".$column_text."</b></font>";
 				else $column_text = "<font color=\"green\"><b>".$column_text."</b></font>";
-				fwrite($handle_html,"<td style=\"\">".$column_text."</td>\n");
+				fwrite($handle_html,"<td>".$column_text."</td>\n");
 				fwrite($handle_csv,",".$this_scale_score[$column_name[$j_batch]]);
 				}
+			fwrite($handle_html,"<td></td>\n");
+			fwrite($handle_csv,",");
 			fwrite($handle_html,"</tr>\n");
 			fwrite($handle_csv,"\n");
 			fwrite($handle_html,"<td style=\"white-space:nowrap; color:blue;\">Average score</td>");
@@ -788,14 +769,68 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 				fwrite($handle_html,"<td style=\"\">".$column_text."</td>\n");
 				fwrite($handle_csv,",".$average);
 				}
+			fwrite($handle_html,"<td></td>\n");
+			fwrite($handle_csv,",");
 			fwrite($handle_html,"</tr>\n");
 			fwrite($handle_csv,"\n");
 			fwrite($handle_html,"</table>\n");
+			$settings_table = "<table>\n";
+			$settings_table .= "<tr><th>&nbsp;Ascending melodic intervals&nbsp;</th><th>&nbsp;Descending melodic intervals&nbsp;</th><th>&nbsp;Harmonic intervals&nbsp;</th></tr>\n";
+			for($i_mark = 0; $i_mark < $max_marks2; $i_mark++) {
+				$settings_table .= "<tr>";
+				if($position_melodic_mark_up[$i_mark]['p'] == '') $text = '';
+				else $text = $position_melodic_mark_up[$i_mark]['p']."/".$position_melodic_mark_up[$i_mark]['q']." ±".$width_melodic_mark_up[$i_mark]."¢ weight ".$weight_melodic_mark_up[$i_mark];
+				$settings_table .= "<td style=\"white-space:nowrap;\">&nbsp;".$text."</td>";
+				if($position_melodic_mark_down[$i_mark]['p'] == '') $text = '';
+				else $text = $position_melodic_mark_down[$i_mark]['p']."/".$position_melodic_mark_down[$i_mark]['q']." ±".$width_melodic_mark_down[$i_mark]."¢ weight ".$weight_melodic_mark_down[$i_mark];
+				$settings_table .= "<td style=\"white-space:nowrap;\">&nbsp;".$text."</td>";
+				if($position_harmonic_mark[$i_mark]['p'] == '') $text = '';
+				else $text = $position_harmonic_mark[$i_mark]['p']."/".$position_harmonic_mark[$i_mark]['q']." ±".$width_harmonic_mark[$i_mark]."¢ weight ".$weight_harmonic_mark[$i_mark];
+				$settings_table .= "<td style=\"white-space:nowrap;\">&nbsp;".$text."</td>";
+				$settings_table .= "</tr>\n";
+				}
+			$settings_table .= "<tr><td>&nbsp;Global weight: ".$weight_melodic_up."&nbsp;</td><td>&nbsp;Global weight: ".$weight_melodic_down."&nbsp;</td><td>&nbsp;Global weight: ".$weight_harmonic."&nbsp;</td></tr>\n";
+			$settings_table .= "<tr><td colspan=\"3\">&nbsp;Maximum size of melodic intervals: ".$max_distance." semitones&nbsp;</td></tr>\n";
+			$settings_table .= "<tr><td colspan=\"3\">";
+			$settings_table .= "Max overlap ratio in melodic intervals: ".(100 * $ratio_melodic)."%<br />";
+			$settings_table .= "Min duration of harmonic interval: ".$min_duration." ms<br />";
+			$settings_table .= "Maximum gap in melodic interval: ".$max_gap." ms<br />";
+			$settings_table .= "</td></tr>";
+			$settings_table .= "</table><br /><br />\n";
+			fwrite($handle_html,"<table style=\"border-spacing: 30px;\"><tr><td>\n");
 			fwrite($handle_html,"<h3>Settings:<h3>\n");
 			fwrite($handle_html,$settings_table);
+			fwrite($handle_html,"</td><td></td><td>\n");
+			fwrite($handle_html,"<h3>Best choices:</h3>\n");
+			fwrite($handle_html,"<table>\n");
+			fwrite($handle_html,"<tr><th>Item</th><th>Scale(s)</th></tr>\n");
+			
+			for($i_batch = 0; $i_batch < count($batch_item); $i_batch++) {
+				if($batch_item_name[$i_batch] <> '') $line_title = $batch_item_name[$i_batch];
+				else $line_title = "#".$batch_item[$i_batch];
+				fwrite($handle_html,"<tr><td style=\"white-space:nowrap; color:blue;\">".$line_title."</td>");
+
+				$best_choice = '';
+				for($j_batch = 0; $j_batch < count($column_name); $j_batch++) {
+					if(isset($rank[$batch_item[$i_batch]][$column_name[$j_batch]])) {
+						$this_score = $rank[$batch_item[$i_batch]][$column_name[$j_batch]];
+						if($this_score == 1) {
+							if($best_choice <> '') $best_choice .= ", ";
+							$best_choice .= "<font color=\"red\">".$column_name[$j_batch]."</font>";
+							}
+						}
+					}
+				if($best_choice == '') $best_choice = "???";
+				fwrite($handle_html,"<td>".$best_choice."</td></tr>\n");
+				}
+			
+
+			fwrite($handle_html,"</tr></table>\n");
+
+			fwrite($handle_html,"</td></tr></table>\n");
 			fwrite($handle_html,"</body></html>\n");
 			fclose($handle_html);
-			fclose($handle_csv); 
+			fclose($handle_csv);
 			echo "<p style=\"text-align:center;\"><input class=\"shadow\" style=\"background-color:Azure; font-size:large;\" onclick=\"window.open('".$batch_html_link."','batch','width=1200,height=500,left=0'); return false;\" type=\"submit\" name=\"produce\" value=\"SHOW ALL RESULTS\"></p>";
 			}
 		$duration_process = time() - $time_start;
@@ -1257,7 +1292,7 @@ function show_relations_on_image($i_item,$matching_list,$mode,$direction,$scalen
 		if(!$found) {
 			if($mode == "harmonic") {
 				echo "<p style=\"text-align:center;\"><font color=\"red\">Definition of tonal scale</font> ‘<font color=\"blue\">".$scalename."</font>’ <font color=\"red\">was not found.</font><br />";
-				echo "You need to open a <a target=\"_blank\" href=\"index.php?path=csound_resources\">Csound resource</a> containing a scale with exactly the same name.</p><br />";
+				echo "You need to open a <a target=\"_blank\" href=\"index.php?path=csound_resources\">Csound resource</a> containing a scale with exactly the same name.<br />Then click “ANALYZE AGAIN”</p><br />";
 				}
 			$resource_file = '';
 			}

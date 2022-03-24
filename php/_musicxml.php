@@ -1356,9 +1356,6 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 					$i_new_tempo = 0;
 					$last_i_new_tempo[$i_field_of_part] = -1;
 					if(count($the_measure) > 1) $convert_measure[$score_part] .= "}";
-					$convert_measure[$score_part] = str_replace("_pedalstart_","_switch_on_part(".$i_part.")",$convert_measure[$score_part]);
-					$convert_measure[$score_part] = str_replace("_pedalstop_","_switch_off_part(".$i_part.")",$convert_measure[$score_part]);
-					$convert_measure[$score_part] = str_replace("_pedalstopstart_","_switch_off_part(".$i_part.") _switch_on_part(".$i_part.")",$convert_measure[$score_part]);
 					$add = add($p_time_measure,$q_time_measure,(-$p_time_field),$q_time_field);
 					if(($add['p'] * $add['q']) < 0) {
 						$p_time_measure = $p_time_field;
@@ -1534,9 +1531,6 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 					if(!$empty_field[$i_field_of_part - 1] AND $physical_time > $max_physical_time)
 						$max_physical_time = $physical_time;
 					
-			/*		if($max_physical_time > 0.) $final_metronome = round(60 * $p_time_measure / ($q_time_measure * $divisions[$score_part]) / $max_physical_time);
-					else $final_metronome = $metronome_this_measure; */
-					// if($list_this) $report .= "Measure #".$i_measure." max_physical_time = ".round($max_physical_time,2)."s, time_measure = ".$p_time_measure."/".$q_time_measure.", divisions = ".$divisions[$score_part].", number_tempo_measure = ".$number_tempo_measure[$section][$i_measure].", sum_tempo_measure = ".$sum_tempo_measure[$section][$i_measure].", tempo_this_measure = ".$metronome_this_measure."<br />"; // Suppressed by BB 2022-02-14
 					if($metronome_this_measure == 0 OR abs(($metronome_this_measure - $final_metronome) / $metronome_this_measure) > 0.4) $warning = TRUE;
 					else $warning = FALSE;
 					$warning = FALSE; // Fixed by BB 2022-02-14
@@ -1591,6 +1585,9 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 	else $current_fifths = 0;
 	if($found_mordent OR $found_turn OR $found_trill OR $found_turn)
 		$data = process_ornamentation($data,$current_fifths,$trace_ornamentations);
+	$data = str_replace("_pedalstart_","_switch_on_part(".$i_part.") ",$data);
+	$data = str_replace("_pedalstop_","_switch_off_part(".$i_part.") ",$data);
+	$data = str_replace("_pedalstopstart_","_switch_off_part(".$i_part.") _switch_on_part(".$i_part.") ",$data); 	
 	$convert_score['data'] = $data;
 	$convert_score['metronome_min'] = $metronome_min;
 	$convert_score['metronome_max'] = $metronome_max;
@@ -1699,6 +1696,7 @@ function adjust_scale($diatonic_scale,$altered_diatonic_scale,$note) {
 
 function process_ornamentation($data,$fifths,$trace_ornamentations) {
 	global $notes_diesis,$notes_bemol;
+//	return $data;
 	$start_search = 0;
 	$tag = "ornament(";
 	$tag_length = strlen($tag);
