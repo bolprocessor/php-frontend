@@ -248,7 +248,7 @@ echo "<h3>Grammar file “".$filename."”</h3>";
 save_settings("last_name",$filename);
 
 $link = "test-image.html";
-echo "<div style=\"float:right;\"><p style=\"border:2px solid gray; background-color:azure; width:17em;  padding:2px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$link."','CANVAS test','width=500,height=500,left=200'); return false;\" href=\"".$link."\">Test image to verify that your<br />environment supports CANVAS</a></p></div>";
+echo "<div style=\"float:right;\"><p style=\"border:2px solid gray; background-color:azure; width:17em;  padding:2px; text-align:center; border-radius: 6px;\"><a onmouseover=\"window.open('".$link."','CANVAS test','width=500,height=500,left=200'); return false;\" href=\"".$link."\">Test image to verify that your<br />environment supports CANVAS</a></p></div>";
 
 	
 if(isset($_POST['compilegrammar'])) {
@@ -315,7 +315,7 @@ else {
 	echo "<input type=\"hidden\" name=\"random_seed\" value=\"".$random_seed."\">";
 	echo "Location of output files: <font color=\"blue\">".$bp_application_path."</font>";
 	echo "<input type=\"text\" name=\"output_folder\" size=\"25\" value=\"".$output_folder."\">";
-	echo "&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"change_output_folder\" value=\"SAVE THIS LOCATION\"><br />➡ global setting for all projects in this session<br /><i>Folder will be created if necessary…</i>";
+	echo "&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" name=\"change_output_folder\" value=\"SAVE THIS LOCATION\"><br />➡ global setting for all projects in this session<br /><i>Folder will be created if necessary…</i>";
 	echo "</form>";
 	}
 
@@ -392,7 +392,7 @@ if($file_format == "csound") {
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 echo "<table cellpadding=\"8px;\" style=\"background-color:white; border-radius: 15px; border: 1px solid black;\"><tr style=\"\">";
 echo "<td><p>Name of output file (with proper extension):<br /><input type=\"text\" name=\"output_file\" size=\"25\" value=\"".$output_file."\">&nbsp;";
-echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"savegrammar\" value=\"SAVE\"></p>";
+echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" name=\"savegrammar\" value=\"SAVE\"></p>";
 echo "</td>";
 echo "<td><p style=\"text-align:left;\">";
 if($test) echo "file_format = ".$file_format."<br />";
@@ -412,8 +412,8 @@ echo "</p></td>";
 echo "<td style=\"text-align:right; vertical-align:middle;\" rowspan=\"2\">";
 echo "<input type=\"hidden\" name=\"settings_file\" value=\"".$settings_file."\">";
 echo "<input type=\"hidden\" name=\"csound_file\" value=\"".$csound_file."\">";
-echo "<input style=\"background-color:azure;\" type=\"submit\" name=\"compilegrammar\" value=\"COMPILE GRAMMAR\"><br /><br />";
-echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"savegrammar\" value=\"SAVE ‘".$filename."’\"><br /><br />";
+echo "<input style=\"background-color:azure;\" type=\"submit\" onclick=\"clearsave();\" name=\"compilegrammar\" value=\"COMPILE GRAMMAR\"><br /><br />";
+echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" name=\"savegrammar\" value=\"SAVE ‘".$filename."’\"><br /><br />";
 
 $error = FALSE;
 if($templates) {
@@ -422,7 +422,7 @@ if($templates) {
 //	$link_produce .= "&trace_production=1";
 	$link_produce .= "&here=".urlencode($here);
 	$window_name = window_name($filename);
-	echo "<input style=\"color:DarkBlue; background-color:azure;\" onclick=\"window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"CHECK TEMPLATES\"><br /><br />";
+	echo "<input style=\"color:DarkBlue; background-color:azure;\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"CHECK TEMPLATES\"><br /><br />";
 	}
 	
 if($produce_all_items > 0) $action = "produce-all";
@@ -481,10 +481,9 @@ if($trace_production > 0)
 $link_produce .= "&here=".urlencode($here);
 $window_name = window_name($filename);
 echo "<b>then…</b>";
-echo "&nbsp;<input onclick=\"window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)\"";
+echo "&nbsp;<input onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)\"";
 if($error) echo " disabled style=\"background-color:azure; box-shadow: none;\"";
 else echo " style=\"color:DarkBlue; background-color:Aquamarine;\"";
-echo " title=\"Don't forget to save!\"";
 echo ">";
 
 
@@ -669,18 +668,17 @@ echo "<input type=\"hidden\" name=\"time_structure\" value=\"".$time_structure."
 echo "<input type=\"hidden\" name=\"alphabet_file\" value=\"".$alphabet_file."\">";
 
 echo "<span  id=\"topedit\">&nbsp;</span>";
-echo "<p><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"savegrammar\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".$filename."’\">";
+echo "<p><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" onclick=\"clearsave();\" name=\"savegrammar\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".$filename."’\">";
 
 if((file_exists($output.SLASH.$default_output_name.".wav") OR file_exists($output.SLASH.$default_output_name.".mid") OR file_exists($output.SLASH.$default_output_name.".html") OR file_exists($output.SLASH.$default_output_name.".sco")) AND file_exists($result_file)) {
 	echo "&nbsp;&nbsp;&nbsp;<input style=\"color:DarkBlue; background-color:azure; font-size:large;\" onclick=\"window.open('".$result_file."','result','width=800,height=600,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Show latests results\">";
 	}
-echo "&nbsp;<input onclick=\"window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)";
+echo "&nbsp;<input onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)";
 if($error) {
 	echo " - disabled because of missing files\"";
 	echo " disabled style=\"background-color:azure; box-shadow: none; font-size:large;\"";
 	}
 else echo "\" style=\"color:DarkBlue; background-color:Aquamarine; font-size:large;\"";
-echo " title=\"Don't forget to save!\"";
 echo ">";
 
 echo "</p>";
@@ -694,7 +692,7 @@ echo "<textarea name=\"thistext\" onchange=\"tellsave()\" rows=\"".$textarea_row
 // echo "<br />".$link_produce."<br />";
 
 echo "<div style=\"float:left; padding-top:12px;\">";
-echo "<input onclick=\"window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)";
+echo "<input onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)";
 if($error) {
 	echo " - disabled because of missing files\"";
 	echo " disabled style=\"background-color:azure; box-shadow: none; font-size:large;\"";
@@ -706,7 +704,7 @@ $link_test = $link_produce."&test";
 $display_command_title = "DisplayCommand".$filename;
 echo "&nbsp;<input style=\"color:DarkBlue; background-color:Azure; font-size:large;\" onclick=\"window.open('".$link_test."','".$display_command_title."','width=1000,height=100,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Display command line\">";
 echo "</div>";
-echo "<p style=\"width:90%; text-align:right;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" formaction=\"".$url_this_page."#topedit\" name=\"savegrammar\" value=\"SAVE ‘".$filename."’\"></p>";
+echo "<p style=\"width:90%; text-align:right;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savegrammar\" value=\"SAVE ‘".$filename."’\"></p>";
 echo "</form>";
 display_more_buttons(FALSE,$content,$url_this_page,$dir,'',$objects_file,$csound_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
 
@@ -762,7 +760,7 @@ if(count($variable) > 0) {
 		fclose($handle);
 		$link_play_variable = $link_produce;
 		$link_play_variable .= "&data=".urlencode($data);
-		echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_play_variable."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" value=\"".$var."\"> ";
+		echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onmouseover=\"checksaved();\"  onclick=\"if(checksaved()) window.open('".$link_play_variable."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" value=\"".$var."\"> ";
 		}
 	}
 	
@@ -799,7 +797,7 @@ if(isset($_POST['saveexpression'])) {
 		fclose($handle);
 		}
 	}
-echo "<input  type=\"submit\" name=\"saveexpression\" style=\"background-color:azure;\" value=\"SAVE THIS EXPRESSION\">&nbsp;then&nbsp;<input onclick=\"window.open('".$link_play_expression."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" value=\"PRODUCE ITEM\"";
+echo "<input  type=\"submit\" onclick=\"clearsave();\" name=\"saveexpression\" style=\"background-color:azure;\" value=\"SAVE THIS EXPRESSION\">&nbsp;then&nbsp;<input onclick=\"window.open('".$link_play_expression."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" value=\"PRODUCE ITEM\"";
 if(!file_exists($data_expression)) echo " disabled style=\"background-color:azure; box-shadow: none;\"";
 else echo " style=\"color:DarkBlue; background-color:Aquamarine;\"";
 echo ">";
@@ -917,7 +915,7 @@ if(!$hide) {
 		echo "<p>Current note convention for this grammar is <font color=\"red\">‘".ucfirst(note_convention(intval($note_convention)))."’</font> as per <font color=\"blue\">‘".$settings_file."’</font></p>";
 	echo "<table style=\"background-color:white;\">";
 	echo "<tr>";
-	echo "<td style=\"vertical-align:middle; white-space:nowrap;\"><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"change_convention\" formaction=\"".$url_this_page."#topchanges\" value=\"APPLY NOTE CONVENTION to this data\"> ➡</td>";
+	echo "<td style=\"vertical-align:middle; white-space:nowrap;\"><input style=\"background-color:Aquamarine;\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) {this.form.target='_self';return true;} else return false;\" name=\"change_convention\" formaction=\"".$url_this_page."#topchanges\" value=\"APPLY NOTE CONVENTION to this data\"> ➡</td>";
 	echo "<td style=\"vertical-align:middle; white-space:nowrap;\">";
 	echo "<input type=\"radio\" name=\"new_convention\" value=\"0\">English<br />";
 	echo "<input type=\"radio\" name=\"new_convention\" value=\"1\">Italian/Spanish/French<br />";

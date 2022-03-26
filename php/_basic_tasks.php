@@ -310,10 +310,10 @@ function display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,
 				}
 			else {
 				echo "<div style=\"float:right; margin-top:6px;\">";
-				echo "<form method=\"post\" action=\"".$url_this_page."#help_entries\" enctype=\"multipart/form-data\">";
+				echo "<form method=\"post\" id=\"thisone\" action=\"".$url_this_page."#help_entries\" enctype=\"multipart/form-data\">";
 				echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
 				echo "<input type=\"hidden\" name=\"file_format\" value=\"".$file_format."\">";
-				echo "<input style=\"background-color:azure;\" type=\"submit\" name=\"show_help_entries\" value=\"SHOW HELP ENTRIES\">";
+				echo "<button style=\"background-color:azure;\" type=\"submit\" onmouseover=\"checksaved();\" name=\"show_help_entries\">SHOW HELP ENTRIES</button>";
 				echo "</form></div>";
 				}
 			}

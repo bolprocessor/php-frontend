@@ -221,7 +221,7 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 		echo "> Analyze item(s) with their specified tonal scales<br />";
 		echo "<input type=\"radio\" name=\"compare_scales\" value=\"1\"";
 		if($compare_scales) echo " checked";
-		echo "> Evaluate adequacy of all tuning schemes of ‘<font color=\"blue\">".$csound_file."</font>’ in terms of consonance</p>";
+		echo "> Evaluate adequacy of all tuning schemes defined in ‘<a target=\"_blank\" href=\"csound.php?file=".urlencode($csound_resources.SLASH.$csound_file)."\">".$csound_file."</a>’ in terms of consonance</p>";
 		}
 	else {
 		echo "<font color=\"red\">➡</font> You could also compare scales after declaring a ‘-cs’ resource file on top of data and open the file in the <a target=\"_blank\" href=\"csound.php?file=".urlencode($csound_resources.SLASH.$csound_file)."\">Csound resource folder</a>";

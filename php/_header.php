@@ -78,13 +78,34 @@ echo "function toggledisplay() {
 	  }\n";
 echo "</script>\n";
 
-/* echo "<script>\n";
-echo "function tellsave() {";
-echo "alert('Save this page!'); }";
-echo "</script>\n"; */
+echo "<script>\n";
+echo "function tellsave() {\n";
+echo "localStorage.setItem('data','dirty');\n";
+echo "}</script>\n";
 
-// https://github.com/codedance/jquery.AreYouSure
-// https://stackoverflow.com/questions/16322042/jquery-warn-if-leaving-page-without-clicking-the-save-button
+echo "<script>\n";
+echo "function checksaved() {\n";
+echo "if(localStorage.getItem('data') == 'dirty') {\n";
+echo "alert('Data or grammar needs to be saved');\n";
+echo "disableButton();\n";
+echo "return false; }\n";
+echo "else return true;\n";
+echo "}</script>\n";
+
+echo "<script>\n";
+echo "function clearsave() {\n";
+echo "localStorage.removeItem('data');\n";
+echo "}</script>\n";
+
+echo "<script>\n";
+// Button SHOW HELP ENTRIES displayed on the 'Grammar' page
+  // https://masteringjs.io/tutorials/fundamentals/disable-button
+echo "function disableButton() {
+  document.querySelector('#thisone').addEventListener('submit', function(ev) {
+  ev.preventDefault(); });
+  document.querySelector('#thisone button').disabled = true;
+}";
+echo "</script>\n";
 
 echo "<script>\n";  // Not used: delaying the display of an element
 echo "$(document).ready(function() {\n

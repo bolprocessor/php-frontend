@@ -219,13 +219,9 @@ if(isset($_POST['create_csound_orchestra'])) {
 		$new_file = $filename;
 		if(file_exists($dir.SLASH.$filename)) {
 			echo "<p><font color=\"red\">This file already exists:</font> <font color=\"red\">".$filename."</font></p>";
-	//		unset($_POST['create_csound_orchestra']);
 			}
 		else {
 			$handle = fopen($dir.SLASH.$filename,"w");
-		/*	$template = "csound_template";
-			$template_content = @file_get_contents($template,TRUE);
-			fwrite($handle,$template_content."\n"); */
 			fclose($handle);
 			}
 		}

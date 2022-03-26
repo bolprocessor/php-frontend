@@ -1374,7 +1374,7 @@ $csound_is_responsive = check_csound();
 echo "</div>";
 echo "<table id=\"topedit\" style=\"background-color:white; border-radius: 15px; border: 1px solid black;\" cellpadding=\"8px;\"><tr style=\"\">";
 echo "<td><p>Name of output file (with proper extension):<br /><input type=\"text\" name=\"output_file\" size=\"25\" value=\"".$output_file."\">&nbsp;";
-echo "<input style=\"background-color:yellow;\" type=\"submit\" formaction=\"".$url_this_page."\" name=\"savethisfile\" value=\"SAVE\"></p>";
+echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savethisfile\" value=\"SAVE\"></p>";
 echo "</td>";
 echo "<td><p style=\"text-align:left;\">";
 echo "<input type=\"radio\" name=\"file_format\" value=\"\"";
@@ -1441,11 +1441,11 @@ echo "<td style=\"background-color:cornsilk;\">";
 
 echo "<div style=\"float:right; vertical-align:middle;\">Import MusicXML file: <input style=\"color:red;\" type=\"file\" name=\"music_xml_import\">&nbsp;<input type=\"submit\" style=\"background-color:AquaMarine;\" value=\"← IMPORT\"></div>";
 
-echo "<div style=\"text-align:left;\"><input style=\"background-color:yellow; font-size:large;\"  type=\"submit\" formaction=\"".$url_this_page."\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></div>";
+echo "<div style=\"text-align:left;\"><input style=\"background-color:yellow; font-size:large;\"  type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></div>";
 
 echo "<br /><textarea name=\"thistext\" onchange=\"tellsave()\" rows=\"40\" style=\"width:700px;\">".$content."</textarea>";
 
-echo "<div style=\"text-align:right;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></div>";
+echo "<div style=\"text-align:right;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></div>";
 
 echo "</form>";
 
@@ -1771,9 +1771,9 @@ if(!$hide) {
 		if($n1 > $n2) $error_mssg .= "• <font color=\"red\">This score contains ".($n1-$n2)." extra ‘{'</font><br />";
 		if($n2 > $n1) $error_mssg .= "• <font color=\"red\">This score contains ".($n2-$n1)." extra ‘}'</font><br />";
 		if($error_mssg == '') {
-			echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_play."','".$window_name_play."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Play this polymetric expression\" value=\"PLAY\">&nbsp;";
-			if($chunked) echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_play_chunked."','".$window_name_chunked."','width=800,height=800,left=150,toolbar=yes'); return false;\" type=\"submit\" name=\"produce\" title=\"Play polymetric expression in chunks (no graphics)\" value=\"PLAY safe (".$chunk_number." chunks)\">&nbsp;";
-			echo "&nbsp;<input style=\"background-color:azure;\" onclick=\"window.open('".$link_expand."','".$window_name_expand."','width=800,height=800,left=100'); return false;\" type=\"submit\" name=\"produce\" title=\"Expand this polymetric expression\" value=\"EXPAND\">&nbsp;";
+			echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_play."','".$window_name_play."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Play this polymetric expression\" value=\"PLAY\">&nbsp;";
+			if($chunked) echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_play_chunked."','".$window_name_chunked."','width=800,height=800,left=150,toolbar=yes'); return false;\" type=\"submit\" name=\"produce\" title=\"Play polymetric expression in chunks (no graphics)\" value=\"PLAY safe (".$chunk_number." chunks)\">&nbsp;";
+			echo "&nbsp;<input style=\"background-color:azure;\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_expand."','".$window_name_expand."','width=800,height=800,left=100'); return false;\" type=\"submit\" name=\"produce\" title=\"Expand this polymetric expression\" value=\"EXPAND\">&nbsp;";
 			}
 		if($tie_mssg <> '' AND $error_mssg == '') echo "<br />";
 		if($tie_mssg <> '') echo $tie_mssg;
