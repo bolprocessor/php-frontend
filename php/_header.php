@@ -78,6 +78,14 @@ echo "function toggledisplay() {
 	  }\n";
 echo "</script>\n";
 
+/* echo "<script>\n";
+echo "function tellsave() {";
+echo "alert('Save this page!'); }";
+echo "</script>\n"; */
+
+// https://github.com/codedance/jquery.AreYouSure
+// https://stackoverflow.com/questions/16322042/jquery-warn-if-leaving-page-without-clicking-the-save-button
+
 echo "<script>\n";  // Not used: delaying the display of an element
 echo "$(document).ready(function() {\n
   $('#doucement').hide().delay(3000).fadeIn('slow');
@@ -87,3 +95,6 @@ echo "</script>\n";
 echo "</head>";
 echo "<body onload=\"settoggledisplay()\">\n";
 ?>
+
+
+

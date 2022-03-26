@@ -1201,45 +1201,6 @@ else $value = '';
 echo ">Force to instrument";
 echo "&nbsp;<input type=\"text\" name=\"CsoundInstr\" size=\"5\" value=\"".$value."\"><br />";
 echo "<input type=\"hidden\" name=\"tempo\" value=\"".$tempo."\">";
-
-//echo "<p>CSOUND SCORE</p>";
-//echo "<input type=\"hidden\" name=\"object_param_".$j."\" value=\"".$object_param[$j++]."\">";
-/* $csound_score = str_ireplace("<HTML>",'',$object_param[$j]);
-$csound_score = str_ireplace("</HTML>",'',$csound_score);
-$csound_score = str_ireplace("<BR>","\n",$csound_score);
-echo "<textarea name=\"object_param_".($j++)."\" rows=\"20\" style=\"width:700px;\">".$csound_score."</textarea><br />"; */
-//echo "<input type=\"hidden\" name=\"object_param_".$j."\" value=\"".$object_param[$j++]."\">";
-
-/* $csound_period = 0;
-$time_max_csound = 0;
-$table = explode(chr(10),$csound_score);
-if(count($table) > 2) {
-	$csound_instruction = $table[0];
-	for($i = 0; $i < count($table); $i++) {
-		$csound_instruction = $table[$i];
-		do
-			$csound_instruction = str_replace("  ",' ',$csound_instruction,$count);
-		while($count > 0);
-		$table2 = explode(' ',$csound_instruction);
-		if($table2[0] == "t" AND count($table2) > 2) {
-			$csound_tempo = $table2[2];
-			if($csound_tempo > 0) {
-				$csound_period = 60000 / $csound_tempo;
-				}
-			}
-		else if($table2[0][0] == "i" AND count($table2) > 2) {
-			$start = $table2[1] * $csound_period;
-			$duration = $table2[2] * $csound_period;
-			$end = $start + $duration;
-			if($end > $time_max_csound)
-				$time_max_csound = $end;
-			store($h_image,"event_csound[]",$start);
-			store($h_image,"event_csound[]",$end);
-			}
-		}
-	store($h_image,"time_max_csound",$time_max_csound);
-	echo "<p>Duration of Csound sequence: ".$time_max_csound." ms</p>";
-	} */
 	
 $kmax = 0;
 $time_max_midi = 0;
@@ -2109,7 +2070,7 @@ echo "<input type=\"hidden\" name=\"Duration\" value=\"".$Duration."\">";
 echo "<input type=\"hidden\" name=\"division\" value=\"".$division."\">";
 echo "<input type=\"hidden\" name=\"tempo\" value=\"".$tempo."\">";
 echo "<input type=\"hidden\" name=\"timesig\" value=\"".$timesig."\">";
-echo "<textarea name=\"csound_score\" rows=\"20\" style=\"width:700px;\">".$csound_score."</textarea><br />";
+echo "<textarea name=\"csound_score\" onchange=\"tellsave()\" rows=\"20\" style=\"width:700px;\">".$csound_score."</textarea><br />";
 echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"savecsound\" value=\"SAVE THIS CODE\"></p><p><input style=\"background-color:yellow;\" type=\"submit\" name=\"createcsound\" value=\"CREATE Csound CODE\"> from MIDI codes in “<font color=\"blue\">".$object_name."</font>”</p>";
 echo "</form>";
 ?>

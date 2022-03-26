@@ -1441,9 +1441,9 @@ echo "<td style=\"background-color:cornsilk;\">";
 
 echo "<div style=\"float:right; vertical-align:middle;\">Import MusicXML file: <input style=\"color:red;\" type=\"file\" name=\"music_xml_import\">&nbsp;<input type=\"submit\" style=\"background-color:AquaMarine;\" value=\"← IMPORT\"></div>";
 
-echo "<div style=\"text-align:left;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" formaction=\"".$url_this_page."\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></div>";
+echo "<div style=\"text-align:left;\"><input style=\"background-color:yellow; font-size:large;\"  type=\"submit\" formaction=\"".$url_this_page."\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></div>";
 
-echo "<br /><textarea name=\"thistext\" rows=\"40\" style=\"width:700px;\">".$content."</textarea>";
+echo "<br /><textarea name=\"thistext\" onchange=\"tellsave()\" rows=\"40\" style=\"width:700px;\">".$content."</textarea>";
 
 echo "<div style=\"text-align:right;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></div>";
 

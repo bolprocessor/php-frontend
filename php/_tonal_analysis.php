@@ -681,9 +681,12 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 		$batch_html_link = $temp_dir.$temp_folder.SLASH.$batch_html_filename;
 		$batch_csv_filename = str_replace("-da.",'',$filename)."_batch.csv";
 		$batch_csv_link = $temp_dir.$temp_folder.SLASH.$batch_csv_filename;
+		$batch_abstract_filename = str_replace("-da.",'',$filename)."_abstract.html";
+		$batch_abstract_link = $temp_dir.$temp_folder.SLASH.$batch_abstract_filename;
 		if($batch_processing AND $compare_scales AND isset($column_name)) {
 			$handle_html = fopen($batch_html_link,"w");
 			$handle_csv = fopen($batch_csv_link,"w");
+			$handle_abstract = fopen($batch_abstract_link,"w");
 			$this_header = "<meta http-equiv=\"Content-type\" content=\"text/html; charset=utf-8\" />\n";
 			$this_header .= "<style>
 			tr:nth-child(even) {
@@ -695,13 +698,14 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 				</style>\n";
 			$this_header .= "<title>".$filename." (batch tonal analysis)</title>";
 			fwrite($handle_html,"<html>\n<header>\n".$this_header."</header>\n");
-			fwrite($handle_html,"<body>\n");
-			fwrite($handle_html,"<h2>".$filename."</h2>\n");
+			fwrite($handle_abstract,"<html>\n<header>\n".$this_header."</header>\n");
+			fwrite($handle_html,"<body>\n<h2>".$filename."</h2>\n");
+			fwrite($handle_abstract,"<body>\n<h2>".$filename."</h2>\n");
 			fwrite($handle_html,"<p>Date: ".gmdate('Y-m-d H:i:s')." — check documentation: <a target=\"_blank\" href=\"https://bolprocessor.org/tonal-analysis/\">https://bolprocessor.org/tonal-analysis/</a></p>");
-
 			fwrite($handle_html,"<table><tr>\n");
-			$download_link = "<p style=\"text-align:center;\"><b>Download:</b><br /><br />\n";
+			$download_link = "<p style=\"text-align:center;\"><h3>Download results:&nbsp;</h3>\n";
 			$download_link .= "<a href=\"".$batch_html_filename."\" download=\"".$batch_html_filename."\"><input style=\"background-color:yellow; border-radius: 10px;\" type=\"submit\" value=\"HTML\"></a><br /><br />";
+			$download_link .= "<a href=\"".$batch_abstract_filename."\" download=\"".$batch_abstract_filename."\"><input style=\"background-color:yellow; border-radius: 10px;\" type=\"submit\" value=\"abstract\"></a><br /><br />";
 			$download_link .= "<a href=\"".$batch_csv_filename."\" download=\"".$batch_csv_filename."\"><input style=\"background-color:yellow; border-radius: 10px;\" type=\"submit\" value=\"CSV\"></a>";
 			echo "</p>";
 			fwrite($handle_html,"<th>".$download_link."</th>\n");
@@ -718,7 +722,7 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 				fwrite($handle_csv,",");
 				fwrite($handle_csv,$column_name[$j_batch]);
 				}
-			fwrite($handle_html,"<th>First line</th>\n");
+			fwrite($handle_html,"<th>&nbsp;&nbsp;First line</th>\n");
 			fwrite($handle_csv,",First line");
 			fwrite($handle_html,"</tr>\n");
 			for($i_batch = 0; $i_batch < count($batch_item); $i_batch++) {
@@ -726,7 +730,7 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 				fwrite($handle_csv,"\n");
 				if($batch_item_name[$i_batch] <> '') $line_title = $batch_item_name[$i_batch];
 				else $line_title = "#".$batch_item[$i_batch];
-				fwrite($handle_html,"<td style=\"white-space:nowrap; color:blue;\">".$line_title."</td>");
+				fwrite($handle_html,"<td style=\"white-space:nowrap; color:blue;\">".$line_title."&nbsp;</td>");
 				fwrite($handle_csv,str_replace("-da.","da.",$line_title));
 				for($j_batch = 0; $j_batch < count($column_name); $j_batch++) {
 					if(isset($rank[$batch_item[$i_batch]][$column_name[$j_batch]])) {
@@ -747,8 +751,8 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 				}
 			fwrite($handle_html,"<tr>\n");
 			fwrite($handle_csv,"\n");
-			fwrite($handle_html,"<td style=\"white-space:nowrap; color:red;\">Matched (times)</td>");
-			fwrite($handle_csv,"Matched (times)");
+			fwrite($handle_html,"<td style=\"white-space:nowrap; color:red;\">Ranked first (times)&nbsp;</td>");
+			fwrite($handle_csv,"Ranked first (times)");
 			for($j_batch = 0; $j_batch < count($column_name); $j_batch++) {
 				$column_text = $this_scale_score[$column_name[$j_batch]];
 				if($column_text == $best_score) $column_text = "<font color=\"red\"><b>".$column_text."</b></font>";
@@ -801,15 +805,13 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 			fwrite($handle_html,"<h3>Settings:<h3>\n");
 			fwrite($handle_html,$settings_table);
 			fwrite($handle_html,"</td><td></td><td>\n");
-			fwrite($handle_html,"<h3>Best choices:</h3>\n");
-			fwrite($handle_html,"<table>\n");
-			fwrite($handle_html,"<tr><th>Item</th><th>Scale(s)</th></tr>\n");
-			
+			$abstract_table = "<h3>First-rank tuning schemes:</h3>\n";
+			$abstract_table .= "<table>\n";
+			$abstract_table .= "<tr><th>Item</th><th>Scale(s)</th></tr>\n";
 			for($i_batch = 0; $i_batch < count($batch_item); $i_batch++) {
 				if($batch_item_name[$i_batch] <> '') $line_title = $batch_item_name[$i_batch];
 				else $line_title = "#".$batch_item[$i_batch];
-				fwrite($handle_html,"<tr><td style=\"white-space:nowrap; color:blue;\">".$line_title."</td>");
-
+				$abstract_table .= "<tr><td style=\"white-space:nowrap; color:blue;\">".$line_title."</td>";
 				$best_choice = '';
 				for($j_batch = 0; $j_batch < count($column_name); $j_batch++) {
 					if(isset($rank[$batch_item[$i_batch]][$column_name[$j_batch]])) {
@@ -821,16 +823,17 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 						}
 					}
 				if($best_choice == '') $best_choice = "???";
-				fwrite($handle_html,"<td>".$best_choice."</td></tr>\n");
+				$abstract_table .= "<td>".$best_choice."</td></tr>\n";
 				}
-			
-
-			fwrite($handle_html,"</tr></table>\n");
-
+				$abstract_table .= "</tr></table>\n";
+			fwrite($handle_html,$abstract_table);
+			fwrite($handle_abstract,$abstract_table);
 			fwrite($handle_html,"</td></tr></table>\n");
 			fwrite($handle_html,"</body></html>\n");
+			fwrite($handle_abstract,"</body></html>\n");
 			fclose($handle_html);
 			fclose($handle_csv);
+			fclose($handle_abstract);
 			echo "<p style=\"text-align:center;\"><input class=\"shadow\" style=\"background-color:Azure; font-size:large;\" onclick=\"window.open('".$batch_html_link."','batch','width=1200,height=500,left=0'); return false;\" type=\"submit\" name=\"produce\" value=\"SHOW ALL RESULTS\"></p>";
 			}
 		$duration_process = time() - $time_start;

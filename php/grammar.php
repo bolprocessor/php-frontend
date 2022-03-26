@@ -690,7 +690,7 @@ $table = explode(chr(10),$content);
 $imax = count($table);
 if($imax > $textarea_rows) $textarea_rows = $imax + 5;
 
-echo "<textarea name=\"thistext\" rows=\"".$textarea_rows."\" style=\"width:90%;\">".$content."</textarea>";
+echo "<textarea name=\"thistext\" onchange=\"tellsave()\" rows=\"".$textarea_rows."\" style=\"width:90%;\">".$content."</textarea>";
 // echo "<br />".$link_produce."<br />";
 
 echo "<div style=\"float:left; padding-top:12px;\">";
