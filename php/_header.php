@@ -88,6 +88,9 @@ echo "function checksaved() {\n";
 echo "if(localStorage.getItem('data') == 'dirty') {\n";
 echo "alert('Data or grammar needs to be saved');\n";
 echo "disableButton();\n";
+/* echo "var x = document.getElementById(\"hideifnotsaved\");\n
+	    if(x) {
+	      x.className='hidden'; }\n"; */
 echo "return false; }\n";
 echo "else return true;\n";
 echo "}</script>\n";

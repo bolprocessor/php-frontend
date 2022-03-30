@@ -7,6 +7,8 @@ $perfect_fifth = round(cents(3/2));
 $perfect_fourth = round(cents(4/3));
 $wolf_fourth = round(cents(320/243));
 
+// Read documentation: https://bolprocessor.org/tonal-analysis/
+
 function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_folder,$note_convention) {
 	global $max_term_in_fraction,$dir_scale_images,$csound_resources,$current_directory,$dir,$filename;
 	global $p_tonal_default_up,$q_tonal_default_up,$p_tonal_default_down,$q_tonal_default_down,$p_tonal_default_harmonic,$q_tonal_default_harmonic,$weight_tonal_default_up,$weight_tonal_default_down,$weight_tonal_default_harmonic,$width_tonal_default_up,$width_tonal_default_down,$width_tonal_default_harmonic,$weight_tonal_melodic_up,$weight_tonal_melodic_down,$weight_tonal_harmonic,$max_distance_tonal,$ratio_melodic_tonal,$min_duration_tonal,$max_gap_tonal,$compare_scales_tonal;
@@ -233,7 +235,7 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 	echo "<input style=\"background-color:azure; float:right;\" type=\"submit\" formaction=\"".$url_this_page."#tonalanalysis\" title=\"\" name=\"save_tonal_settings\" value=\"SAVE SETTINGS TO WORKSPACE “".$current_directory."”\">";
 	echo "</td></tr>";
 	echo "</table>";
-	if(!isset($_POST['proceed_tonal_analysis']) OR  isset($_POST['save_tonal_settings']) OR isset($_POST['reset_tonal_settings'])) echo "<br /><input class=\"shadow\" style=\"background-color:yellow; font-size:large;\" type=\"submit\" formaction=\"".$url_this_page."#tonalanalysis\" title=\"Analyze tonal intervals\" name=\"analyze_tonal\" value=\"ANALYZE ITEM(s)\">";
+	if(!isset($_POST['proceed_tonal_analysis']) OR  isset($_POST['save_tonal_settings']) OR isset($_POST['reset_tonal_settings'])) echo "<br /><input class=\"shadow\" style=\"background-color:yellow; font-size:large;\" type=\"submit\" onmouseover=\"checksaved();\" formaction=\"".$url_this_page."#tonalanalysis\" title=\"Analyze tonal intervals\" name=\"analyze_tonal\" value=\"ANALYZE ITEM(s)\">";
 	echo "</center>";
 	echo "<input type=\"hidden\" name=\"proceed_tonal_analysis\" value=\"ok\">";
 	echo "</form>";
