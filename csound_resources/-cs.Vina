@@ -1,5 +1,5 @@
 // Bol Processor BP3 compatible with version BP2.9.8
-// Csound resource file saved as "-cs.Vina". Date: 2022-02-08 20:26:32
+// Csound resource file saved as "-cs.Vina". Date: 2022-02-20 09:16:21
 16
 1
 -1
@@ -106,4 +106,14 @@ f1 0 256 1 "vina-wave-table.aiff" 0 4 0
 |4|
 f2 0 128 -51 12 2 261.63 60 1 1.067 1.125 1.2 1.25 1.333 1.422 1.5 1.6 1.667 1.778 1.875 2
 <html>A traditional scale constructed with simple integer ratios<br /></html>
+"meantone_rameau_en_sib"
+/do reb re mib mi fa fa# sol lab la sib si do/
+c21.506289596715 81 80c
+k0 1 2 3 4 5 6 7 8 9 10 11 12k
+[1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1]
+sp • • • • • • • • • • • ps
+|4|
+f2 0 128 -51 12 2 261.63 60 1 1.054 1.118 1.193 1.25 1.337 1.397 1.495 1.591 1.672 1.789 1.869 2
+<html>Rameau meantone in B flat temperament (Asselin 2000 p.115)<br />Created 2021-01-16 18:41:56<br />Created meantone upward notes “do,sol,re,la,mi,si” fraction 3/2 adjusted -1/4 comma (2022-02-04 16:38:50)<br />Created meantone downward notes “do,fa,sib” fraction 3/2 adjusted -1/4 comma (2022-02-04 16:40:08)<br />Created meantone downward notes “sib,mib” fraction 3/2 (2022-02-04 16:58:49)<br />Created meantone upward notes “si,fa#” fraction 3/2 adjusted -1/4 comma (2022-02-04 17:10:32)<br />Created meantone downward notes “mib,lab” fraction 3/2 (2022-02-04 17:16:00)<br />Equalized intervals over series “fa#,reb,lab” approx fraction 3/2 adjusted 10.6 cents to ratio = 1.509 (2022-02-04 17:20:39)<br /></html>
 _end tables
+
