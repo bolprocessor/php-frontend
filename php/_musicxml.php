@@ -170,9 +170,9 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							$is_chord = FALSE;
 							}
 						if($note_on AND is_integer($pos=strpos($line,"</note>"))) {
-							if($j > 0 AND $is_chord) { // $j = 0 is very unlikely but make sure!
+							if($is_chord) {
 								// This is the first note tagged ‘chord’ which means the preceding one belongs to the same chord
-								$curr_event[$score_part][$j-1]['type'] = "chord";
+								if($j > 0) $curr_event[$score_part][$j-1]['type'] = "chord";
 								$chord_in_process = TRUE;
 								}
 							if(!$is_chord AND $chord_in_process) {
@@ -181,7 +181,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 								$q_this_dur = $curr_event[$score_part][$j]['q_dur'];
 								$sum_durations += ($p_this_dur / $q_this_dur);
 						//		if($list_this) $report .= ">> chord p/q = ".($p_this_dur / $q_this_dur).", sum_durations = ".$sum_durations."<br />";
-								$curr_event[$score_part][$j]['type'] = "seq"; // Create null event to  mark end of chord;
+								$curr_event[$score_part][$j]['type'] = "seq"; // Create null event to mark end of chord;
 								$curr_event[$score_part][$j]['note'] = '';
 								$curr_event[$score_part][$j]['p_dur'] = 0;
 								$curr_event[$score_part][$j]['q_dur'] = 1;
@@ -503,8 +503,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							$backup = TRUE;
 							$is_chord = FALSE;
 							$i_field_of_part2++;
-						//	$last_date = $p_date[$i_measure][$score_part] / $p_date[$i_measure][$score_part];
-							$last_date = $p_date[$i_measure][$score_part] / $q_date[$i_measure][$score_part]; // Fixed by BB 2022-02-14
+							$last_date = $p_date[$i_measure][$score_part] / $q_date[$i_measure][$score_part];
 							$p_date[$i_measure][$score_part] = 0;
 							$q_date[$i_measure][$score_part] = 1;
 							$n_breath = 0;
@@ -645,7 +644,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 						$q_date_next_fermata = $q_fermata_date[$i_measure][$score_part][$i_fermata];
 						}
 					$empty_field[0] = TRUE; $forward = FALSE;
-					$breath = $found_breath = FALSE;
+					$breath = $found_breath = $next_is_arpeggio = FALSE;
 					$last_i_new_tempo[0] = -1;
 					$p_last_next_date_new_tempo[0] = 0; $q_last_next_date_new_tempo[0] = 1;
 
@@ -982,8 +981,15 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							else $p_date_next_fermata = -1;
 							}	
 						$starting_chord = FALSE;
-							
+						
+						if(isset($the_event['arpeggio']) AND $the_event['type'] == "seq") {
+							// This sometimes happens!
+							if($list_this) $report .= "<font color=\"blue\">Arpeggio</font> measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)."<br />";
+							$next_is_arpeggio = TRUE;
+							}
+
 						if(!$is_chord AND $the_event['type'] == "chord") {
+							if($next_is_arpeggio) $convert_measure[$score_part] .= "arpeggio(".$i_measure.")";
 							if($new_tempo > 0) {
 								$convert_measure[$score_part] .= "||".$new_tempo."||";
 								$current_period = 60 / $new_tempo;
@@ -993,13 +999,13 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 									$fraction = $new_tempo."/60";
 									$simplify = simplify($fraction,$max_term_in_fraction);
 									$fraction = $simplify['fraction'];
-							//		$old_tempo = $current_tempo = $default_tempo[$section] = $fraction;
-									$old_tempo = $current_tempo = $fraction; // Fixed by BB 2022-02-14
+									$old_tempo = $current_tempo = $fraction;
 									}
 								$new_tempo = 0;
 								}
 							$p_duration = $the_event['p_dur']; $q_duration = $the_event['q_dur'];
 							if($stream_units > 0) {
+							//	$report .= "*<br />";
 								if($test_musicxml)
 									echo $the_event['note']." time_field = ".$p_time_field."/".$q_time_field." stream_duration = ".$p_stream_duration."/".$q_stream_duration." stream_units = ".$stream_units." closing stream = “".$stream."”<br />";
 								if($p_stream_duration == 0) { // Grace notes
@@ -1049,10 +1055,11 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 								$fraction2 = $simplify['fraction'];
 								$convert_measure[$score_part] = str_replace("FRACTION_0",$fraction2,$convert_measure[$score_part]);
 								}
-							if(isset($the_event['arpeggio'])) {
+							if(isset($the_event['arpeggio']) AND !$next_is_arpeggio) {
 								$convert_measure[$score_part] .= "arpeggio(".$i_measure.")";
 								if($list_this) $report .= "<font color=\"blue\">Arpeggio</font> measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)."<br />";
 								}
+							$next_is_arpeggio = FALSE;
 							$physical_time += $current_period * ($p_duration / $q_duration / $divisions[$score_part]);
 							$add = add($p_time_field,$q_time_field,$p_duration,$q_duration);
 							$p_time_field = $add['p']; $q_time_field = $add['q'];
@@ -1875,7 +1882,7 @@ function ornament($note,$long,$link,$diatonic_scale,$direction,$fifths,$trill,$t
 		if($link == '') $trill_step = $note." ".$note2;
 		else $trill_step = $note2." ".$note;
 		$expression = "{1,".$trill_step;
-		for($i = 0; $i < $trill_beats; $i++) $expression .= " ".$trill_step;
+		for($i = 0; $i < ($trill_beats - 1); $i++) $expression .= " ".$trill_step;
 		$expression .= $link."}";
 		}
 	else { // Mordent
@@ -1907,7 +1914,7 @@ function process_arpeggios($data,$score_divisions,$trace_ornamentations) {
 		$old_expression = substr($data,$pos1 + 8,$pos2 - $pos1 - 7);
 		$old_expression = str_replace(",}","}",$old_expression); // Not necessary but looks nicer when tracing
 		$i_measure = preg_replace("/\(([^\)]+)\).+/u","$1",$old_expression); // Beware that i_measure might not be a number!
-		// echo "old_expression = ".$old_expression." i_measure = ".$i_measure."<br />";
+	//	echo "old_expression = ".$old_expression." i_measure = ".$i_measure."<br />";
 		$old_expression = str_replace("(".$i_measure.")",'',$old_expression);
 		$old_length = strlen($old_expression);
 		$old_expression = str_replace(' ','',$old_expression);
