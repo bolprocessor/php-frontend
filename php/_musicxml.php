@@ -75,7 +75,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 			} */
 		$default_tempo[$section] = $current_tempo; // Fixed by BB 2022-03-13
 		if($list_this OR $trace_tempo) $report .= "Default tempo set to ".$default_tempo[$section]." in section #".$section."<br />";
-		$beat_type = $beat_unit = array();
+		$beat_type = $beat_unit = $last_notes = array();
 		for($i_repeat = 1; $i_repeat <= $repeat_section[$section]; $i_repeat++) {
 			$tie_type_start = $tie_type_stop = FALSE;
 			if($test_musicxml) echo "• Repetition ".$i_repeat."/".$repeat_section[$section]." section ".$section."<br />";
@@ -156,7 +156,6 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 					$this_octave = -1;
 					$curr_event[$score_part] = $convert_measure = array();
 					$j = 0;
-		//			$time_this_field = 0;
 					$curr_event[$score_part][$j]['type'] = "seq";
 					$curr_event[$score_part][$j]['fermata'] = FALSE;
 					$breath_in_stream = FALSE;
@@ -989,6 +988,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							}
 
 						if(!$is_chord AND $the_event['type'] == "chord") {
+							$last_notes = array();
 							if($next_is_arpeggio) $convert_measure[$score_part] .= "arpeggio(".$i_measure.")";
 							if($new_tempo > 0) {
 								$convert_measure[$score_part] .= "||".$new_tempo."||";
@@ -1009,7 +1009,6 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 								if($test_musicxml)
 									echo $the_event['note']." time_field = ".$p_time_field."/".$q_time_field." stream_duration = ".$p_stream_duration."/".$q_stream_duration." stream_units = ".$stream_units." closing stream = “".$stream."”<br />";
 								if($p_stream_duration == 0) { // Grace notes
-						//		if($list_this) $report .= "Grace stream = ".$stream." measure #".$i_measure." field #".($i_field_of_measure + 1)."<br />";
 									$this_grace_ratio = $grace_ratio;
 									if($stream_units < 2) $this_grace_ratio = 4 * $grace_ratio;
 									$p_grace = $stream_units * $divisions[$score_part];
@@ -1120,12 +1119,14 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 									$i_breath++;
 									$breath_in_stream = TRUE;
 									}
-								$stream = add_note($stream,$i_measure,$the_event,$long_ornamentation,$diatonic_scale_string,$accept_pedal[$i_part - 1]);
-								if($the_event['note'] <> "-" AND $the_event['note'] <> '') $empty_field[$i_field_of_part] = FALSE;
+								$stream = add_note($stream,$i_measure,$the_event,$long_ornamentation,$diatonic_scale_string,$accept_pedal[$i_part - 1],$last_notes);
+								if($the_event['note'] <> "-" AND $the_event['note'] <> '') {
+									$empty_field[$i_field_of_part] = FALSE;
+									$last_notes = array(); $last_notes[] = $the_event['note'];
+									}
 								$stream_units++;
 								$add = add($p_stream_duration,$q_stream_duration,$p_duration,$q_duration);
 								$p_stream_duration = $add['p']; $q_stream_duration = $add['q'];
-
 								}
 							else {
 								if($stream_units > 0) {
@@ -1180,7 +1181,6 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 									$convert_measure[$score_part] .= $stream;
 									$forward = FALSE;
 									if($stream_units <> $n) $convert_measure[$score_part] .= "}";
-									
 									if($new_tempo > 0) { // maybe useless
 										$convert_measure[$score_part] .= "||".$new_tempo."||";
 										$current_period = 60 / $new_tempo;
@@ -1196,7 +1196,6 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 										$new_tempo = 0;
 										}
 									}
-								
 								if($breath) {
 									if($trace_breath) $report .= "Breath outside of stream<br />";
 									$convert_measure[$score_part] .= $breath_trace_tag.$breath_rest;
@@ -1271,9 +1270,12 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 									else break;
 									}
 								$stream = '';
-								$stream = add_note($stream,$i_measure,$the_event,$long_ornamentation,$diatonic_scale_string,$accept_pedal[$i_part - 1]);
+								$stream = add_note($stream,$i_measure,$the_event,$long_ornamentation,$diatonic_scale_string,$accept_pedal[$i_part - 1],$last_notes);
 								$stream_units = 1;
-								if($the_event['note'] <> "-" AND $the_event['note'] <> '') $empty_field[$i_field_of_part] = FALSE;
+								if($the_event['note'] <> "-" AND $the_event['note'] <> '') {
+									$empty_field[$i_field_of_part] = FALSE;
+									$last_notes = array(); $last_notes[] = $the_event['note'];
+									}
 								$p_old_duration = $p_stream_duration = $p_duration;
 								$q_old_duration = $q_stream_duration = $q_duration;
 								}
@@ -1292,6 +1294,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							$convert_measure[$score_part] .= $the_event['note'];
 							if($the_event['note'] <> "-" AND $the_event['note'] <> '') {
 								$empty_field[$i_field_of_part] = FALSE;
+								$last_notes[] = $the_event['note']; // We collect all note names in this chord
 								if(isset($breath_location[$i_breath])) {
 									if($trace_breath) $report .= "@@@ in chord, breath_location[".$i_breath."] = ".$breath_location[$i_breath]." field = ".($i_field_of_measure + 1).", time_field = ".$p_time_field."/".$q_time_field.", stream_duration = ".$p_stream_duration."/".$q_stream_duration.", note “".$the_event['note']."”<br />";
 									$add = add($p_time_field,$q_time_field,$the_event['p_dur'],$the_event['q_dur']);
@@ -1611,7 +1614,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 	return $convert_score;
 	}
 
-function add_note($stream,$i_measure,$the_event,$long_ornamentation,$diatonic_scale_string,$ok_pedal) {
+function add_note($stream,$i_measure,$the_event,$long_ornamentation,$diatonic_scale_string,$ok_pedal,$last_notes) {
 	if(isset($the_event['ornament']) OR isset($the_event['turn'])) {
 		if($the_event['chromatic']) $mode = "chromatic";
 		else $mode = '';
@@ -1625,8 +1628,18 @@ function add_note($stream,$i_measure,$the_event,$long_ornamentation,$diatonic_sc
 			$stream .= " ornament(".$diatonic_scale_string."_".$i_measure."_upper,".$mode.",".$turn.",".$long_ornamentation."|";
 		if($the_event['ornament'] == "lower_mordent")
 			$stream .= " ornament(".$diatonic_scale_string."_".$i_measure."_lower,".$mode.",".$turn.",".$long_ornamentation."|";
-		if($the_event['ornament'] == "trill")
-			$stream .= " ornament(".$diatonic_scale_string."_".$i_measure."_trill,".$mode.",,".$the_event['trill-beats']."|";
+		if($the_event['ornament'] == "trill") {
+			$direction = "upper";
+			$this_note = str_replace("&",'',$the_event['note']);
+		//	echo "measure #".$i_measure." this_note = ".$this_note."<br />";
+			for($i = 0; $i < count($last_notes); $i++) {
+				$this_last_note = str_replace("&",'',$last_notes[$i]);
+		//		echo "• ".$this_last_note."<br />";
+				if($this_last_note == $this_note) $direction = "lower";
+				// Trill will start on lower movement if preceding note is identical
+				}
+			$stream .= " ornament(".$diatonic_scale_string."_".$i_measure."_".$direction."trill,".$mode.",,".$the_event['trill-beats']."|";
+			}
 		}
 	if(isset($the_event['slur'])) {
 		if($the_event['slur'] == "start") $stream .= " _legato_ ";
@@ -1733,7 +1746,7 @@ function process_ornamentation($data,$fifths,$trace_ornamentations) {
 		$trill = is_integer(strpos($old_expression,"trill"));
 		if($trill) {
 			$trill_beats = round(preg_replace("/.+([0-9]+)\|.+/u","$1",$old_expression));
-			$direction = "up";
+		//	$direction = "up";
 			$name_ornament = "Trill";
 			}
 		else $trill_beats = 3;
@@ -1879,8 +1892,11 @@ function ornament($note,$long,$link,$diatonic_scale,$direction,$fifths,$trill,$t
 		// https://en.wikipedia.org/wiki/Trill_(music)
 		// https://www.w3.org/2021/06/musicxml40/musicxml-reference/elements/trill-mark/
 		// trill beats = the number of distinct notes during playback, counting the starting note but not the two-note turn. It is 3 if not specified.
-		if($link == '') $trill_step = $note." ".$note2;
-		else $trill_step = $note2." ".$note;
+		if($link == '' AND $direction == "up") $trill_step = $note." ".$note2;
+		else {
+			$trill_step = $note2." ".$note;
+	//		if($direction <> "up") echo "=> trill down on ".$note."<br /><br />";
+			}
 		$expression = "{1,".$trill_step;
 		for($i = 0; $i < ($trill_beats - 1); $i++) $expression .= " ".$trill_step;
 		$expression .= $link."}";
