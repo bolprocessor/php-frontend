@@ -572,6 +572,12 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 						if($note_on AND !$ignore_arpeggios AND is_integer($pos=strpos($line,"<arpeggiate "))) {
 							$curr_event[$score_part][$j]['arpeggio'] = TRUE;
 							}
+						if($note_on AND (is_integer($pos=strpos($line,"<staccato")) OR is_integer($pos=strpos($line,"<spiccato")))) {
+							$curr_event[$score_part][$j]['staccato'] = 1;
+							}
+						if($note_on AND is_integer($pos=strpos($line,"<staccatissimo"))) {
+							$curr_event[$score_part][$j]['staccato'] = 2;
+							}
 						if($note_on AND !$ignore_trills AND is_integer($pos=strpos($line,"<trill-mark"))) {
 							$trill = $found_trill = TRUE;
 							$chromatic = $chromatic_trills;
@@ -1650,7 +1656,12 @@ function add_note($stream,$i_measure,$the_event,$long_ornamentation,$diatonic_sc
 		else if($the_event['pedal'] == "stop") $stream .= " _pedalstop_ ";
 		else if($the_event['pedal'] == "stopstart") $stream .= " _pedalstopstart_ ";
 		}
-	$stream .= $the_event['note'];
+	if(isset($the_event['staccato'])) {
+		if($the_event['staccato'] == 1) $stream .= "{1,".$the_event['note']." -}";
+		else if($the_event['staccato'] == 2) $stream .= "{1,".$the_event['note']." - - -}"; // staccatissimo
+		else $stream .= $the_event['note'];
+		}
+	else $stream .= $the_event['note'];
 	if(isset($the_event['ornament'])) $stream .= ") ";
 	else $stream .= " ";
 	return $stream;
