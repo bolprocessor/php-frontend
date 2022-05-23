@@ -13,7 +13,7 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 	global $max_term_in_fraction,$dir_scale_images,$csound_resources,$current_directory,$dir,$filename;
 	global $p_tonal_default_up,$q_tonal_default_up,$p_tonal_default_down,$q_tonal_default_down,$p_tonal_default_harmonic,$q_tonal_default_harmonic,$weight_tonal_default_up,$weight_tonal_default_down,$weight_tonal_default_harmonic,$width_tonal_default_up,$width_tonal_default_down,$width_tonal_default_harmonic,$weight_tonal_melodic_up,$weight_tonal_melodic_down,$weight_tonal_harmonic,$max_distance_tonal,$ratio_melodic_tonal,$min_duration_tonal,$max_gap_tonal,$compare_scales_tonal;
 	global $Englishnote,$Frenchnote,$Indiannote;
-	set_time_limit(1000);
+	set_time_limit(50000);
 	$test_tonal = FALSE;
 	$test_intervals = TRUE;
 	$display_items = FALSE;
@@ -25,7 +25,7 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 		$width_default[$i_mark] = 10;
 		}
 	$p_default[0] = 3; $q_default[0] = 2; $weight_default[0] = 2; $width_default[0] = 10; // Perfect fifth
-	$p_default[1] = 5; $q_default[1] = 4; $weight_default[1] = 1; $width_default[1] = 10; // HJarmonic major thirf
+	$p_default[1] = 5; $q_default[1] = 4; $weight_default[1] = 1; $width_default[1] = 10; // Harmonic major third
 	$p_default[2] = 40; $q_default[2] = 27; $weight_default[2] = -2; $width_default[2] = 15; // Wolf fifth
 	$p_default[3] = 320; $q_default[3] = 243; $weight_default[3] = -2; $width_default[3] = 15; // Wolf fourth
 	$p_default[4] = 81; $q_default[4] = 64; $weight_default[4] = -1; $width_default[4] = 10; // Pythagorean major third
@@ -339,7 +339,8 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 					}
 				if(!$found) continue;
 				}
-			$segment = create_chunks($line,$i_item,$temp_dir,$temp_folder,1,0,"slice");;
+			$segment = create_chunks($line,$i_item,$temp_dir,$temp_folder,1,0,"slice");
+	//		echo "<br />FINISH"; die();
 			if($segment['error'] == "break") break;
 			if($segment['error'] == "continue") continue;
 			$tonal_scale = $segment['tonal_scale'];
@@ -358,6 +359,7 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 			echo "</p>";
 			if($segment['data_chunked'] == '') {
 				echo "This item is in a syntax that this version of tonal analysis does not support.<br />";
+				echo $segment['tie_mssg'];
 				continue;
 				}
 			if($first_line2 <> '') {
@@ -851,7 +853,7 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 
 
 function list_events($slice,$poly,$max_poly,$level_init,$i_token_init,$p_tempo,$q_tempo,$p_abs_time_init,$q_abs_time_init,$i_layer,$current_legato) {
-	set_time_limit(1000);
+	set_time_limit(50000);
 	global $max_term_in_fraction;
 	global $Englishnote,$Frenchnote,$Indiannote,$AltEnglishnote,$AltFrenchnote,$AltIndiannote;
 	$test_fraction = FALSE;
@@ -1120,6 +1122,7 @@ function make_event_table($poly) {
 	}
 
 function match_notes($table_events,$mode,$direction,$min_duration,$max_distance,$max_gap,$ratio_melodic,$test_intervals,$lcm) {
+	set_time_limit(50000);
 	$matching_notes = $match = array();
 	$i_match = 0;
 	$min_d = $min_duration * $lcm / 1000;
@@ -1187,6 +1190,7 @@ function match_notes($table_events,$mode,$direction,$min_duration,$max_distance,
 	}
 
 function matching_intervals($start1,$end1,$start2,$end2,$min_d,$max_g,$ratio_melodic,$mode,$direction,$lcm) {
+	set_time_limit(50000);
 	// Because of the sorting of events, $start2 >= $start1
 	$duration1 = $end1 - $start1;
 	$duration2 = $end2 - $start2;
@@ -1212,6 +1216,7 @@ function show_relations_on_image($i_item,$matching_list,$mode,$direction,$scalen
 	global $dir_scale_images,$temp_dir,$temp_folder,$dir_scale_images;
 	global $Englishnote,$Frenchnote,$Indiannote;
 	global $harmonic_third,$pythagorean_third,$wolf_fifth,$wolf_fourth,$perfect_fifth,$perfect_fourth;
+	set_time_limit(50000);
 	$clean_name_of_file = str_replace("#","_",$scalename);
 	$clean_name_of_file = str_replace(SLASH,"_",$clean_name_of_file);
 	$save_codes_dir = $temp_dir.$temp_folder.SLASH.$clean_name_of_file."_codes_".$mode."_".$i_item.SLASH;
@@ -1671,9 +1676,7 @@ function evaluate_scale($i_item,$scale_name,$mode,$direction,$ratio,$matching_li
 						$dist = round(abs($pos - $cent_mark_melodic_up[$i_mark]),0);
 						while($dist >= 1200) $dist -= 1200;
 						if($dist > 600) $dist = 1200 - $dist;
-				//		if($scale_name == "Abmin" OR $scale_name == "Emaj") echo $scale_name." ".$j." ".$k." ".$position_melodic_mark_up[$i_mark]['p']."/".$position_melodic_mark_up[$i_mark]['q']." pos = ".$pos." cent_mark_melodic_up = ".$cent_mark_melodic_up[$i_mark]." dist = ".$dist."<br />";
 						if($dist > $width_melodic_mark_up[$i_mark]) continue;
-				//		if($scale_name == "Abmin" OR $scale_name == "Emaj") echo $scale_name." ok! ".$j." ".$k." matched, pos = ".$pos."<br />";
 						if($trace_critical_intervals AND isset($distance[$j][$k]) AND round($distance[$j][$k]) < round($dist)) {
 							echo "Ignored ascending interval matching ‘".$scale_link."’: ".$position_melodic_mark_up[$i_mark]['p']."/".$position_melodic_mark_up[$i_mark]['q']." ".$Englishnote[$j]." to ".$Englishnote[$k]." as ".$distance[$j][$k]."¢ < ".$dist."¢<br />";
 							continue;
@@ -1729,9 +1732,7 @@ function evaluate_scale($i_item,$scale_name,$mode,$direction,$ratio,$matching_li
 					$dist = round(abs($pos - $cent_mark_harmonic[$i_mark]),0);
 					while($dist >= 1200) $dist -= 1200;
 					if($dist > 600) $dist = 1200 - $dist;
-			//		if($scale_name == "meantone_rameau_en_do") echo $scale_name." ".$j." ".$k." ".$position_harmonic_mark[$i_mark]['p']."/".$position_harmonic_mark[$i_mark]['q']." pos = ".$pos." cent_harmonic = ".$cent_mark_harmonic[$i_mark]." dist = ".$dist."<br />";
 					if($dist > $width_harmonic_mark[$i_mark]) continue;
-			//		if($scale_name == "meantone_rameau_en_do") echo $scale_name." ok! ".$j." ".$k." matched, ".$position_harmonic_mark[$i_mark]['p']."/".$position_harmonic_mark[$i_mark]['q']." i_mark = ".$i_mark." pos = ".$pos."<br />";
 					if($trace_critical_intervals AND isset($distance[$j][$k]) AND round($distance[$j][$k]) < round($dist)) {
 						echo "Ignored harmonic interval matching ‘".$scale_link."’: ".$position_harmonic_mark[$i_mark]['p']."/".$position_harmonic_mark[$i_mark]['q']." ".$Englishnote[$j]." to ".$Englishnote[$k]." as ".$distance[$j][$k]."¢ < ".$dist."¢<br />";
 						continue;
@@ -1755,7 +1756,6 @@ function evaluate_scale($i_item,$scale_name,$mode,$direction,$ratio,$matching_li
 			$pos = round(cents($ratio[$k] / $ratio[$j]));
 			while($pos < 0) $pos += 1200;
 			while($pos >= 1200) $pos -= 1200;
-	//		if(($scale_name == "meantone_rameau_en_do") AND $mode == "harmonic" AND $direction == "both") echo $n++."] ".$j." ".$k." ".$scale_name." ".$matching_notes[$i_match][0]."-".$matching_notes[$i_match][1]."  value_match[".$i_item."][".$i_match."][".$mode."][".$direction."] = value[".$j."][".$k."] = ".$value[$j][$k]." => ".round($pos)." cents<br />";
 			}
 		}
 	$result['score'] = $score;

@@ -127,7 +127,7 @@ if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST
 		if(!isset($_POST['name_'.$i])) $name[$i] = "•";
 		else $name[$i] = trim($_POST['name_'.$i]);
 		// Slash is reserved for beginning and end of scale_note_names
-		$name[$i] = str_replace("/",'',$name[$i]);
+		$name[$i] = str_replace("/","|",$name[$i]);
 		if($name[$i] == '') $name[$i] = "•";
 		}
 	$new_basekey = abs(intval($_POST['basekey']));
@@ -285,7 +285,7 @@ if(isset($_POST['add_fifths_up']) OR isset($_POST['add_fifths_down'])) {
 	$names_notes_fifths = trim($_POST['names_notes_fifths']);
 	$names_notes_fifths = str_replace(' ','',$names_notes_fifths);
 	$names_notes_fifths = str_replace(';',',',$names_notes_fifths);
-	$names_notes_fifths = str_replace('/','=',$names_notes_fifths);
+	$names_notes_fifths = str_replace('/','|',$names_notes_fifths);
 	$names_notes_fifths = str_replace('•','=',$names_notes_fifths);
 	$table_names = array();
 	if($names_notes_fifths <> '') $table_names = explode(",",$names_notes_fifths);
@@ -480,7 +480,7 @@ if(isset($_POST['create_meantone'])) {
 	$ignore_unlabeled = isset($_POST['ignore_unlabeled']);
 	$names_notes_meantone = str_replace(' ','',$names_notes_meantone);
 	$names_notes_meantone = str_replace(';',',',$names_notes_meantone);
-	$names_notes_meantone = str_replace('/','=',$names_notes_meantone);
+	$names_notes_meantone = str_replace('/','|',$names_notes_meantone);
 	$names_notes_meantone = str_replace('•','=',$names_notes_meantone);
 	$table_names = array();
 	if($names_notes_meantone <> '') $table_names = explode(",",$names_notes_meantone);
@@ -575,7 +575,7 @@ $error_equalize = '';
 if(isset($_POST['equalize'])) {
 	$names_notes_equalize = str_replace(' ','',$names_notes_equalize);
 	$names_notes_equalize = str_replace(';',',',$names_notes_equalize);
-	$names_notes_equalize = str_replace('/','=',$names_notes_equalize);
+	$names_notes_equalize = str_replace('/','|',$names_notes_equalize);
 	$names_notes_equalize = str_replace('•','=',$names_notes_equalize);
 	$table_names = explode(",",$names_notes_equalize);
 	$num_notes_equalize = count($table_names);

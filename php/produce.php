@@ -491,7 +491,7 @@ if($instruction <> "help") {
 					echo "<p><small>command = <font color=\"red\">".$command."</font></small></p>";
 					exec($command,$result_csound,$return_var);
 					if($return_var <> 0) {
-						echo "<p><font color=\"red\">➡</font> Csound returned error code <font color=\"red\">‘".$return_var."’</font>.<br /><i>Probably trying to use instruments that do not match</i> <font color=\"blue\">‘".$csound_orchestra."’</font></p>";
+						echo "<p><font color=\"red\">➡</font> Csound returned error code <font color=\"red\">‘".$return_var."’</font>.<br /><i>Maybe you are trying to use instruments that do not match</i> <font color=\"blue\">‘".$csound_orchestra."’</font></p>";
 						}
 					else {
 						$time_spent = time() - $time_start;

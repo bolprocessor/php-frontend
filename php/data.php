@@ -1805,7 +1805,8 @@ function create_chunks($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxc
 	$current_legato[0] = $i_layer[0] = $layer = $level_bracket = 0;
 	// $layer is the index of the line setting events on the phase diagram
 	// $level_bracket is the level of polymetric expression (or "measure")
-	// Here we trace whether legato() instructions have been reset before the end of each "measure",
+	// $label = chunk when chunking data, $label = slice when slicing (in harmonic analysis)
+	// In chunking, we trace whether legato() instructions have been reset before the end of each "measure",
 	// i.e. polymetric expression at the lowest $level_bracket
 	// We also trace note ties which have not been completely bound at the end of the measure
 	// Both conditions prohibit chunking the item at the end of the measure
@@ -1884,18 +1885,21 @@ function create_chunks($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxc
 			$layer = $i_layer[$level_bracket];
 			if($level_bracket == 0) {
 				$n++;
-				$ok_legato = TRUE;
+				$ok_legato = 1;
 				foreach($current_legato as $thisfield => $the_legato) {
 					if($test_legato) echo "(".$thisfield." -> ".$the_legato.")";
-					if($the_legato > 0) $ok_legato = FALSE;
+					if($the_legato > 0) {
+						$ok_legato = 0;
+						}
 					}
-				if(($ok_legato AND $tie <= 0 AND $n >= $minchunk_size) OR ($maxchunk_size > 0 AND $n > $maxchunk_size)) {
+			//	if($label == "slice") echo "ok_legato = ".$ok_legato." n = ".$n." minchunk_size = ".$minchunk_size." maxchunk_size = ".$maxchunk_size." tie = ".$tie."<br />";
+				if((($label == "slice" OR $ok_legato) AND $tie <= 0 AND $n >= $minchunk_size) OR ($maxchunk_size > 0 AND $n > $maxchunk_size)) {
 					$current_legato = $i_layer = array();
 					$current_legato[0] = $i_layer[0] = $layer = 0;
-					if(abs($tie) > 0)
-						$tie_mssg .=  "• <font color=\"red\">".abs($tie)." unbound tie(s) in chunk #".$chunk_number."</font><br />";
-					if(!$ok_legato)
-						$tie_mssg .=  "• <font color=\"red\">legato(s) may be truncated after chunk #".$chunk_number."</font><br />";
+					if($label == "chunk" AND abs($tie) > 0)
+						$tie_mssg .=  "• <font color=\"red\">".$tie." unbound tie(s) in chunk #".$chunk_number."</font><br />";
+					if($label == "chunk" AND !$ok_legato)
+						$tie_mssg .=  "• <font color=\"red\">legato(s) may be truncated after chunk #".$chunk_number."</font><br />"; 
 					$line_chunked .= "\n";
 					$tie = $n = 0;
 					if($test_legato) echo " => ".$label." #".$chunk_number;
@@ -1911,6 +1915,7 @@ function create_chunks($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxc
 	if($chunked) {
 		if($total_ties > 0) $tie_mssg .=  " <i>total ".$total_ties." tied notes</i><br /><font color=\"blue\">";
 		$data_chunked = $temp_dir.$temp_folder.SLASH.$i_item."-".$label.".bpda";
+	//	echo $data_chunked."<br />";
 		$handle = fopen($data_chunked,"w");
 		fwrite($handle,$line_chunked."\n");
 		fclose($handle);

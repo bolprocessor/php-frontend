@@ -11,6 +11,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 	global $super_trace,$trace_breath;
 	global $max_term_in_fraction;
 	global $notes_diesis,$notes_bemol,$standard_diatonic_scale;
+	set_time_limit(1000);
 	$grace_ratio = 2;
 	// MakeMusic Finale dynamics https://en.wikipedia.org/wiki/Dynamics_(music)
 	$dynamic_sign_to_volume = array("pppp" => 10, "ppp" => 23, "pp" => 36, "p" => 49, "mp" => 62, "mf" => 75, "sfp" => 80, "f" => 88, "sf" => 90, "ff" => 101, "sff" => 110, "fff" => 114, "sfff" => 120, "ffff" => 127);
@@ -214,6 +215,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							if($pedalstop AND $pedalstart) $curr_event[$score_part][$j]['pedal'] = "stopstart";
 							else if($pedalstart) $curr_event[$score_part][$j]['pedal'] = "start";
 							else if($pedalstop) $curr_event[$score_part][$j]['pedal'] = "stop";
+							$curr_event[$score_part][$j]['approach'] = '';
 							if($rest) {
 								$curr_event[$score_part][$j]['note'] = "-";
 								if($fermata AND $fermata_show) $curr_event[$score_part][$j]['note'] .= "fermata";
@@ -235,6 +237,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 								if($upper_mordent) $curr_event[$score_part][$j]['ornament'] = "upper_mordent";
 								if($lower_mordent) $curr_event[$score_part][$j]['ornament'] = "lower_mordent";
 								if($upper_mordent OR $lower_mordent) $curr_event[$score_part][$j]['long'] = $long_ornamentation;
+								if($upper_mordent OR $lower_mordent) $curr_event[$score_part][$j]['approach'] = $approach_ornamentation;
 								$curr_event[$score_part][$j]['chromatic'] = $chromatic;
 								if($turn) {
 									$curr_event[$score_part][$j]['turn'] = TRUE;
@@ -256,7 +259,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 						//		$time_this_field += $curr_event[$score_part][$j]['p_dur'] / $curr_event[$score_part][$j]['q_dur'];
 								}
 							$note_on = $rest = $fermata = $is_chord = $upper_mordent = $lower_mordent = $trill = $turn = $chromatic = $pedalstart = $pedalstop = FALSE;
-							$long_ornamentation = $slur_type = '';
+							$long_ornamentation = $approach_ornamentation = $slur_type = '';
 							$tie_type_start = $tie_type_stop = FALSE;
 							$j++;
 							$curr_event[$score_part][$j]['type'] = "seq";
@@ -596,6 +599,9 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							if(is_integer($pos=strpos($line,"long")))
 								$long_ornamentation = trim(preg_replace("/.*long\s*=\s*\"(.+)\".*>/u","$1",$line));
 							else $long_ornamentation = "no";
+							if(is_integer($pos=strpos($line,"approach")))
+								$approach_ornamentation = trim(preg_replace("/.*approach\s*=\s*\"(.+)\".*>/u","$1",$line));
+							else $approach_ornamentation = '';
 							continue;
 							}
 						if(!$ignore_mordents AND $note_on AND is_integer($pos=strpos($line,"<mordent"))) {
@@ -604,6 +610,9 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							if(is_integer($pos=strpos($line,"long")))
 								$long_ornamentation = trim(preg_replace("/.*long\s*=\s*\"(.+)\".*>/u","$1",$line));
 							else $long_ornamentation = "no";
+							if(is_integer($pos=strpos($line,"approach")))
+								$approach_ornamentation = trim(preg_replace("/.*approach\s*=\s*\"(.+)\".*>/u","$1",$line));
+							else $approach_ornamentation = '';
 							continue;
 							}
 						if(!$ignore_turns AND $note_on AND is_integer($pos=strpos($line,"<turn"))) {
@@ -677,9 +686,11 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 								$trill_beats = $the_event['trill-beats'];
 								if($trill_beats <> 3 AND $list_this) $report .= "trill beats=\"".$trill_beats."\" ";
 								}
-							else {
+							else { // Mordent
 								$long_ornamentation = $the_event['long'];
 								if($list_this) $report .= "long = \"".$long_ornamentation."\" ";
+								$approach_ornamentation = $the_event['approach'];
+								if($list_this AND $approach_ornamentation <> '') $report .= "approach = \"".$approach_ornamentation."\" ";
 								}
 							if($list_this) $report .= "measure #".$i_measure." field #".($i_field_of_measure + 1)."<br />";
 							}
@@ -1125,7 +1136,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 									$i_breath++;
 									$breath_in_stream = TRUE;
 									}
-								$stream = add_note($stream,$i_measure,$the_event,$long_ornamentation,$diatonic_scale_string,$accept_pedal[$i_part - 1],$last_notes);
+								$stream = add_note($stream,$i_measure,$the_event,$long_ornamentation,$approach_ornamentation,$diatonic_scale_string,$accept_pedal[$i_part - 1],$last_notes);
 								if($the_event['note'] <> "-" AND $the_event['note'] <> '') {
 									$empty_field[$i_field_of_part] = FALSE;
 									$last_notes = array(); $last_notes[] = $the_event['note'];
@@ -1276,7 +1287,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 									else break;
 									}
 								$stream = '';
-								$stream = add_note($stream,$i_measure,$the_event,$long_ornamentation,$diatonic_scale_string,$accept_pedal[$i_part - 1],$last_notes);
+								$stream = add_note($stream,$i_measure,$the_event,$long_ornamentation,$approach_ornamentation,$diatonic_scale_string,$accept_pedal[$i_part - 1],$last_notes);
 								$stream_units = 1;
 								if($the_event['note'] <> "-" AND $the_event['note'] <> '') {
 									$empty_field[$i_field_of_part] = FALSE;
@@ -1620,7 +1631,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 	return $convert_score;
 	}
 
-function add_note($stream,$i_measure,$the_event,$long_ornamentation,$diatonic_scale_string,$ok_pedal,$last_notes) {
+function add_note($stream,$i_measure,$the_event,$long_ornamentation,$approach_ornamentation,$diatonic_scale_string,$ok_pedal,$last_notes) {
 	if(isset($the_event['ornament']) OR isset($the_event['turn'])) {
 		if($the_event['chromatic']) $mode = "chromatic";
 		else $mode = '';
@@ -1630,6 +1641,7 @@ function add_note($stream,$i_measure,$the_event,$long_ornamentation,$diatonic_sc
 			if(!isset($the_event['ornament'])) $the_event['ornament'] = "upper_mordent";
 			}
 		else $turn = '';
+		// $approach_ornamentation is not taken into account because it should be "above" for upper mordent and "below" for lower mordent
 		if($the_event['ornament'] == "upper_mordent")
 			$stream .= " ornament(".$diatonic_scale_string."_".$i_measure."_upper,".$mode.",".$turn.",".$long_ornamentation."|";
 		if($the_event['ornament'] == "lower_mordent")
