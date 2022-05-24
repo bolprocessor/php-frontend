@@ -568,7 +568,7 @@ if($settings_file <> '' AND file_exists($dir.$settings_file) AND isset($random_s
 		echo "• Random seed is ‘no seed’ as per <font color=\"blue\">‘".$settings_file."’</font><br />";
 	}
 if($max_time_computing > 0) {
-	echo "• Max computation time has been set to <font color=\"red\">".$max_time_computing."</font> seconds by <font color=\"blue\">‘".$settings_file."’</font>";
+	echo "• Max console computation time has been set to <font color=\"red\">".$max_time_computing."</font> seconds by <font color=\"blue\">‘".$settings_file."’</font>";
 	if($max_time_computing < 30) echo "&nbsp;<font color=\"red\">➡</font>&nbsp;probably too small!";
 	echo "<br />";
 	}

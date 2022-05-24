@@ -564,11 +564,14 @@ function add_help_links($line) {
 	}
 
 function gcd($a,$b) {
-    return $b ? gcd($b,$a % $b) : $a;
+ //   return $b ? gcd($b,$a % $b) : $a;
+    return $b ? gcd($b,fmod($a,$b)) : $a; // Avoid overflow
 	}
 	
 function lcm($a,$b) {
+	global $max_term_in_fraction;
 	if(($a * $b) == 0) return 0;
+	if($a >= $max_term_in_fraction OR $b >= $max_term_in_fraction) return $max_term_in_fraction;
 	$gcd = gcd($a,$b);
 	$aa = $a / $gcd;
 	$bb = $b / $gcd;

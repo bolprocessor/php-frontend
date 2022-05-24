@@ -1282,7 +1282,7 @@ else {
 	}
 echo "•&nbsp;Time structure is <font color=\"red\">".nature_of_time($nature_of_time)."</font> by default but it may be changed in data<br />";
 if($max_time_computing > 0) {
-	echo "• Max computation time has been set to <font color=\"red\">".$max_time_computing."</font> seconds by <font color=\"blue\">‘".$settings_file."’</font>";
+	echo "• Max console computation time has been set to <font color=\"red\">".$max_time_computing."</font> seconds by <font color=\"blue\">‘".$settings_file."’</font>";
 	if($max_time_computing < 30) echo "&nbsp;<font color=\"red\">➡</font>&nbsp;probably too small!";
 	echo "<br />";
 	}
@@ -1701,7 +1701,7 @@ if($imax > 0 AND (substr_count($content,'{') > 0 OR substr_count($content,"-da."
 		echo "<p><input style=\"background-color:yellow; font-size:large; margin-right:1em;\" type=\"submit\" onmouseover=\"checksaved();\" formaction=\"".$url_this_page."#tonalanalysis\" title=\"Analyze tonal intervals\" name=\"analyze_tonal\" value=\"ANALYZE INTERVALS\"";
 		if(!$tonal_analysis_possible) echo " disabled";
 		echo ">";
-		echo "Melodic and harmonic tonal intervals of (all) item(s)<br />➡ <i>ignoring channels, instruments, periods, sound-objects and random performance controls.</i></p>";
+		echo "Melodic and harmonic tonal intervals of (all) item(s)<br /><i>ignoring channels, instruments, periods, sound-objects and random performance controls.</i></p>";
 		if($csound_file <> '') echo "<div style=\"background-color:white; padding:6px;\"><font color=\"red\">➡</font> It may be necessary to <a target=\"_blank\" href=\"csound.php?file=".urlencode($csound_resources.SLASH.$csound_file)."\">open</a> the ‘<font color=\"blue\">".$csound_file."</font>’ Csound resource file, allowing access to its tonal scale definitions.</div>";
 		echo "</form>";
 		echo "<hr>";
@@ -1737,7 +1737,7 @@ if(!$hide) {
 		if(is_integer($pos=strpos($line,"<?xml")) AND $pos == 0) break;
 		if(is_integer($pos=strpos($line,"//")) AND $pos == 0) continue;
 		if(is_integer($pos=strpos($line,"-")) AND $pos == 0) continue;
-		$segment = create_chunks($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxchunk_size,"chunk");
+		$segment = create_chunks($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxchunk_size,0,0,"chunk");
 		if($segment['error'] == "break") break;
 		if($segment['error'] == "continue") continue;
 		$i_item++;
@@ -1798,7 +1798,9 @@ echo "</tr>";
 echo "</table>";
 echo "</body></html>";
 
-function create_chunks($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxchunk_size,$label) {
+function create_chunks($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxchunk_size,$measure_min,$measure_max,$label) {
+// echo "@@@ measure_min = ".$measure_min."<br />";
+// echo "@@@ measure_max = ".$measure_max."<br />";
 	$test_legato = FALSE;
 	$current_legato = array();
 	$i_layer = array();
@@ -1815,12 +1817,50 @@ function create_chunks($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxc
 	if(is_integer($pos=strpos($line,"[")) AND $pos == 0)
 		$title_this = preg_replace("/\[([^\]]+)\].*/u",'$1',$line);
 	else $title_this = '';
-	$line = preg_replace("/\[[^\]]*\]/u",'',$line);
+	$initial_controls = '';
+	if($label <> "chunk" AND is_integer($pos=strpos($line,"{"))) {
+		$initial_controls = trim(substr($line,0,$pos));
+		$initial_controls = preg_replace("/\[[^\]]*\]/u",'',$initial_controls);
+	//	echo "@@@ initial_controls = ".$initial_controls."<br />";
+		if($label <> "chunk") {
+			// Pick up specified tonal scale if any
+			$scale = preg_replace("/.*_scale\(([^\,]+)[^\)]+\).+/u","$1",$line);
+			if($scale <> $line) $tonal_scale = $scale;
+		//	echo "@@@ tonal_scale = ".$tonal_scale."<br />";
+		//	echo $scale."<br />".$line."<br />";
+			// Pick up initial tempo if any
+			$tempo = preg_replace("/.*_tempo\(([^\)]+)\).*/u","$1",$initial_controls);
+			if($tempo <> $initial_controls) $initial_tempo = "_tempo(".$tempo.")";
+		//	echo "@@@ initial_tempo = ".$initial_tempo."<br />";
+			$initial_controls = '';
+			}
+		}
 	$line = preg_replace("/^i[0-9].*/u",'',$line); // Csound note statement
 	$line = preg_replace("/^f[0-9].*/u",'',$line); // Csound table statement
 	$line = preg_replace("/^t[ ].*/u",'',$line); // Csound tempo statement
 	$line = preg_replace("/^s\s*$/u",'',$line); // Csound "s" statement
 	$line = preg_replace("/^e\s*$/u",'',$line); // Csound "e" statement
+	$restrict_analysis = FALSE;
+	// Beware that measure_min and measure_max may not be integers
+	if(!($measure_min === 0) AND strlen($measure_min) > 0) {
+		if(is_integer($pos=strpos($line,"[—".$measure_min."—]"))) {
+			echo "From measure [—".$measure_min."—]";
+			$restrict_analysis = TRUE;
+			$line = substr($line,$pos,strlen($line) - $pos);
+			}
+		}
+	if(!($measure_max === 0) AND strlen($measure_max) > 0) {
+		if($measure_min === 0) echo "From start";
+		if(is_integer($pos=strpos($line,"[—".$measure_max."—]"))) {
+			if(is_integer($pos2=strpos($line,"[—",$pos + 4))) {
+				echo " to measure [—".$measure_max."—]";
+				$restrict_analysis = TRUE;
+				$line = substr($line,0,$pos2);
+				}
+			}
+		}
+	if($restrict_analysis) echo ":<br /><small>".$line."</small><br /><br />";
+	$line = preg_replace("/\[[^\]]*\]/u",'',$line);
 	if($line == '') $segment['error'] = "continue";
 	if(is_integer($pos=strpos($line,"<?xml")) AND $pos == 0) $segment['error'] = "break";
 	if(is_integer($pos=strpos($line,"//")) AND $pos == 0) $segment['error'] = "continue";
@@ -1831,22 +1871,8 @@ function create_chunks($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxc
 	$handle = fopen($data,"w");
 	fwrite($handle,$line_recoded."\n");
 	fclose($handle);
-	$initial_controls = '';
 	$chunked = FALSE;
 	$tie = $n = $brackets = $total_ties = 0;
-	if(is_integer($pos=strpos($line_recoded,"{"))) {
-		$initial_controls = trim(substr($line_recoded,0,$pos));
-		if($label <> "chunk") {
-			// Pick up specified tonal scale if any
-			$scale = preg_replace("/.*_scale\(([^\,]+)[^\)]+\).+/u","$1",$line_recoded);
-			if($scale <> $line_recoded) $tonal_scale = $scale;
-		//	echo $scale."<br />".$line_recoded."<br />";
-			// Pick up initial tempo if any
-			$tempo = preg_replace("/\s*_tempo\(([^\)]+)\).*/u","$1",$initial_controls);
-			if($tempo <> $initial_controls) $initial_tempo = "_tempo(".$tempo.")";
-			$initial_controls = '';
-			}
-		}
 	$line_chunked = ''; $first = TRUE; $chunk_number = 1;
 	$start_chunk = "[".$label;
 	if($label == "chunk") $start_chunk .= " 1";
