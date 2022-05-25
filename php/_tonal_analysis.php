@@ -230,22 +230,24 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 		$compare_scales = 0;
 		}
 	echo "</td></tr>";
-	echo "<tr><td colspan=\"6\" style=\"white-space:nowrap; padding:4px;\">";
 	$measure_min = $measure_max = 0;
-	if(isset($_POST['restrict_analysis'])) {
-		$restrict_analysis = $_POST['restrict_analysis'];
-		if(isset($_POST['measure_min'])) $measure_min = trim($_POST['measure_min']);
-		if(isset($_POST['measure_max'])) $measure_max = trim($_POST['measure_max']);
+	if(substr_count($content,"[—") > 0) {
+		echo "<tr><td colspan=\"6\" style=\"white-space:nowrap; padding:4px;\">";
+		if(isset($_POST['restrict_analysis'])) {
+			$restrict_analysis = $_POST['restrict_analysis'];
+			if(isset($_POST['measure_min'])) $measure_min = trim($_POST['measure_min']);
+			if(isset($_POST['measure_max'])) $measure_max = trim($_POST['measure_max']);
+			}
+		else $restrict_analysis = 0;
+		if($measure_min === 0) $min_show = '';
+		else $min_show = $measure_min;
+		if($measure_max === 0) $max_show = '';
+		else $max_show = $measure_max;
+		echo "<input type=\"radio\" name=\"restrict_analysis\" value=\"1\"";
+		if($restrict_analysis) echo " checked";
+		echo "> Restrict analysis from measure <font color=\"blue\">[—</font><input type=\"text\" style=\"border:none; text-align:center;\" name=\"measure_min\" size=\"3\" value=\"".$min_show."\"><font color=\"blue\">—]</font> to <font color=\"blue\">[—</font><input type=\"text\" style=\"border:none; text-align:center;\" name=\"measure_max\" size=\"3\" value=\"".$max_show."\"><font color=\"blue\">—]</font>";
+		echo "</td></tr>";
 		}
-	else $restrict_analysis = 0;
-	if($measure_min === 0) $min_show = '';
-	else $min_show = $measure_min;
-	if($measure_max === 0) $max_show = '';
-	else $max_show = $measure_max;
-	echo "<input type=\"radio\" name=\"restrict_analysis\" value=\"1\"";
-	if($restrict_analysis) echo " checked";
-	echo "> Restrict analysis from measure #<input type=\"text\" style=\"border:none; text-align:center;\" name=\"measure_min\" size=\"4\" value=\"".$min_show."\"> to #<input type=\"text\" style=\"border:none; text-align:center;\" name=\"measure_max\" size=\"4\" value=\"".$max_show."\">";
-	echo "</td></tr>";
 	echo "<tr><td colspan=\"6\" style=\"white-space:nowrap; padding:4px;\">";
 	echo "<input style=\"background-color:azure; float:left;\" type=\"submit\" formaction=\"".$url_this_page."#tonalanalysis\" title=\"\" name=\"reset_tonal_settings\" value=\"RESET SETTINGS TO DEFAULT\">";
 	echo "<input style=\"background-color:azure; float:right;\" type=\"submit\" formaction=\"".$url_this_page."#tonalanalysis\" title=\"\" name=\"save_tonal_settings\" value=\"SAVE SETTINGS TO WORKSPACE “".$current_directory."”\">";

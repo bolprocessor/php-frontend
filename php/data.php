@@ -1844,22 +1844,25 @@ function create_chunks($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxc
 	// Beware that measure_min and measure_max may not be integers
 	if(!($measure_min === 0) AND strlen($measure_min) > 0) {
 		if(is_integer($pos=strpos($line,"[—".$measure_min."—]"))) {
-			echo "From measure [—".$measure_min."—]";
+			echo "<b>From measure [—".$measure_min."—]";
 			$restrict_analysis = TRUE;
 			$line = substr($line,$pos,strlen($line) - $pos);
+			if($measure_max === 0 OR strlen($measure_max) == 0)
+				echo " to the end";
 			}
 		}
+	else $measure_min = 0;
 	if(!($measure_max === 0) AND strlen($measure_max) > 0) {
-		if($measure_min === 0) echo "From start";
 		if(is_integer($pos=strpos($line,"[—".$measure_max."—]"))) {
 			if(is_integer($pos2=strpos($line,"[—",$pos + 4))) {
+				if($measure_min === 0) echo "<b>From start";
 				echo " to measure [—".$measure_max."—]";
 				$restrict_analysis = TRUE;
 				$line = substr($line,0,$pos2);
 				}
 			}
 		}
-	if($restrict_analysis) echo ":<br /><small>".$line."</small><br /><br />";
+	if($restrict_analysis) echo ":</b><br /><small>".$line."</small><br /><br />";
 	$line = preg_replace("/\[[^\]]*\]/u",'',$line);
 	if($line == '') $segment['error'] = "continue";
 	if(is_integer($pos=strpos($line,"<?xml")) AND $pos == 0) $segment['error'] = "break";

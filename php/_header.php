@@ -121,10 +121,10 @@ echo "<body onload=\"settoggledisplay()\">\n";
 
 function is_connected() {
   $connected = @fsockopen("www.midijs.net",80);
-  if($connected) return true;
-  else return false;
+  if($connected) {
+    fclose($connected);
+    return TRUE;
+    }
+  else return FALSE;
   }
 ?>
-
-
-
