@@ -564,8 +564,9 @@ function add_help_links($line) {
 	}
 
 function gcd($a,$b) {
- //   return $b ? gcd($b,$a % $b) : $a;
-    return $b ? gcd($b,fmod($a,$b)) : $a; // Avoid overflow
+	if($a < 0) $a = - $a;
+	if($b < 0) $b = - $b;
+    return $b ? gcd($b,fmod($a,$b)) : $a; // Use fmod() to avoid overflow
 	}
 	
 function lcm($a,$b) {
@@ -580,9 +581,7 @@ function lcm($a,$b) {
 
 function gcd_array($array,$a = 0) {
     $b = array_pop($array);
-    return($b === null) ?
-        (int)$a :
-        gcd_array($array, gcd($a,$b));
+    return($b === null) ? (int)$a : gcd_array($array, gcd($a,$b));
 	}
 
 function clean_up_encoding($create_bullets,$convert,$text) {
