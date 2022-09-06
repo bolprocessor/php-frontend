@@ -375,6 +375,10 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 			if($tonal_scale <> '') echo " assigned scale <font color=\"red\">".$tonal_scale."</font>";
 			if(!$compare_scales) echo " — note convention is ‘<font color=\"red\">".ucfirst(note_convention(intval($note_convention)))."</font>’";
 			echo "</p>";
+			if($note_convention > 0) {
+				echo "This item is in a note convention which tonal analysis does not support. Convert it to ‘English’!<br />";
+				continue;
+				}
 			if($segment['data_chunked'] == '') {
 				echo "This item is in a syntax that this version of tonal analysis does not support.<br />";
 				echo $segment['tie_mssg'];
@@ -1105,13 +1109,17 @@ function make_event_table($poly) {
 	$lcm = 1;
 	$too_big = FALSE;
 	foreach($poly as $i_poly => $this_poly) {
+	//	echo "i_poly = ".$i_poly."<br />";
 		for($j_token = 0; $j_token < count($this_poly['token']); $j_token++) {
-			$lcm = lcm($lcm,$this_poly['q_start'][$j_token]);
-			$lcm = lcm($lcm,$this_poly['q_end'][$j_token]);
-			if($lcm >= $max_term_in_fraction) {
-				$too_big = TRUE;
-				$lcm = $max_term_in_fraction;
-				break;
+		//	echo "j_token = ".$j_token." max ".count($this_poly['token'])."<br />";
+			if(isset($this_poly['q_start'][$j_token]) AND isset($this_poly['q_end'][$j_token])) {
+				$lcm = lcm($lcm,$this_poly['q_start'][$j_token]);
+				$lcm = lcm($lcm,$this_poly['q_end'][$j_token]);
+				if($lcm >= $max_term_in_fraction) {
+					$too_big = TRUE;
+					$lcm = $max_term_in_fraction;
+					break;
+					}
 				}
 			}
 		if($too_big) break;
@@ -1122,15 +1130,17 @@ function make_event_table($poly) {
 	$i = 0; $table = array();
 	foreach($poly as $i_poly => $this_poly) {
 		for($j_token = 0; $j_token < count($this_poly['token']); $j_token++) {
-			$start = round(($poly[$i_poly]['p_start'][$j_token] * $lcm) / $poly[$i_poly]['q_start'][$j_token]);
-			$end = round(($poly[$i_poly]['p_end'][$j_token] * $lcm) / $poly[$i_poly]['q_end'][$j_token]);
-			if($poly[$i_poly]['token'][$j_token] == "-") continue;
-			$table[$i]['token'] = $poly[$i_poly]['token'][$j_token];
-			$table[$i]['grade'] = $poly[$i_poly]['grade'][$j_token];
-			$table[$i]['octave'] = $poly[$i_poly]['octave'][$j_token];
-			$table[$i]['start'] = $start;
-			$table[$i]['end'] = $end;
-			$i++;
+			if(isset($poly[$i_poly]['q_start'][$j_token]) AND isset($poly[$i_poly]['q_end'][$j_token])) {
+				$start = round(($poly[$i_poly]['p_start'][$j_token] * $lcm) / $poly[$i_poly]['q_start'][$j_token]);
+				$end = round(($poly[$i_poly]['p_end'][$j_token] * $lcm) / $poly[$i_poly]['q_end'][$j_token]);
+				if($poly[$i_poly]['token'][$j_token] == "-") continue;
+				$table[$i]['token'] = $poly[$i_poly]['token'][$j_token];
+				$table[$i]['grade'] = $poly[$i_poly]['grade'][$j_token];
+				$table[$i]['octave'] = $poly[$i_poly]['octave'][$j_token];
+				$table[$i]['start'] = $start;
+				$table[$i]['end'] = $end;
+				$i++;
+				}
 			}
 		}
 	usort($table,"date_sort");
