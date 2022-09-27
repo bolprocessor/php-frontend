@@ -8,6 +8,7 @@ require_once("_header.php");
 
 $application_path = $bp_application_path;
 $bad_image = FALSE;
+$trace_csound = $temp_dir."trace_csound.txt";
 
 if(isset($_GET['startup'])) $startup = $_GET['startup'];
 else $startup = '';
@@ -114,6 +115,8 @@ else {
 	@unlink($result_file);
 	if($output <> '') @unlink($output);
 	if($tracefile <> '') @unlink($tracefile);
+	@unlink($trace_csound);
+	$trace_csound = '';
 	$time_start = time();
 	$time_end = $time_start + 5;
 	while(TRUE) {
@@ -489,6 +492,8 @@ if($instruction <> "help") {
 					$time_start = time();
 					$command = $csound_path."csound --wave -o ".$sound_file_link." ".$dir_csound_resources.$csound_orchestra." ".$csound_file_link;
 					echo "<p><small>command = <font color=\"red\">".$command."</font></small></p>";
+					$trace_csound = $temp_dir."trace_csound.txt";
+					$command .= " 2>".$trace_csound;
 					exec($command,$result_csound,$return_var);
 					if($return_var <> 0) {
 						echo "<p><font color=\"red\">➡</font> Csound returned error code <font color=\"red\">‘".$return_var."’</font>.<br /><i>Maybe you are trying to use instruments that do not match</i> <font color=\"blue\">‘".$csound_orchestra."’</font></p>";
@@ -573,15 +578,19 @@ if($n_messages > 0) {
 	if($handle) {
 		$window_name = $grammar_name."_".rand(0,99)."_result";
 		if($bad_image) echo "<p>(<font color=\"red\"><b>*</b></font>) Syntax error in image: negative argument</p>";
-		echo "<p style=\"font-size:larger;\"><input style=\"color:DarkBlue; background-color:yellow; font-size:large;\" onclick=\"window.open('".$result_file."','".$window_name."','width=800,height=600,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Show all ".$n_messages." messages\">";
+		echo "<p style=\"font-size:larger;\"><input style=\"color:DarkBlue; background-color:yellow; font-size:large;\" onclick=\"window.open('".$result_file."','".$window_name."','width=800,height=600,left=100'); return false;\" type=\"submit\" value=\"Show all ".$n_messages." messages\">";
 		if($warnings == 1) echo " <span class=\"blinking\">=> ".$warnings." warning</span>";
 		if($warnings > 1) echo " <span class=\"blinking\">=> ".$warnings." warnings</span>";
-		echo "</p>";
 		}
 	if($handle) fwrite($handle,"</body>\n");
 	if($handle) fclose($handle);
 	}
-else echo "No message produced…";
+else echo "<p>No message produced…";
+if($trace_csound <> '' AND file_exists($trace_csound)) {
+	$window_name = $grammar_name."_".rand(0,99)."_result";
+	echo "&nbsp;<input style=\"color:DarkBlue; background-color:yellow; font-size:large;\" onclick=\"window.open('".$trace_csound."','".$window_name."','width=800,height=600,left=100'); return false;\" type=\"submit\" value=\"Show Csound trace\">";
+	}
+echo "</p>";
 
 function check_image($link) {
 	$result = '';
