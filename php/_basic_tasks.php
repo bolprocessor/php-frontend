@@ -2052,8 +2052,11 @@ else echo "<p><font color=\"red\">File ‘_settings.php’ could nor be opened!<
  
 function check_csound() {
 	global $csound_path, $csound_resources, $dir_csound_resources, $path, $url_this_page, $file_format;
-	$command = $csound_path."csound --version";
-	exec($command,$result_csound,$return_var);
+	$return_var = 1;
+	if(file_exists($csound_path."csound")) {
+		$command = $csound_path."csound --version 2>".$csound_path."csound_version.txt";
+		exec($command,$result_csound,$return_var);
+		}
 	if($return_var <> 0) {
 		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		if(isset($file_format)) echo "<input type=\"hidden\" name=\"file_format\" value=\"".$file_format."\">";
@@ -2061,12 +2064,25 @@ function check_csound() {
 		echo "Try this path: <input type=\"text\" name=\"csound_path\" size=\"30\" style=\"background-color:CornSilk;\" value=\"".$csound_path."\">";
 		echo "&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" value=\"TRY\">";
 		echo "<br />";
-		echo "<font color=\"red\">➡</font>&nbsp;<a target=\"_blank\" href=\"https://csound.com/download.html\">Follow this link</a> to install Csound and convert scores to sound files.</p>";
+		echo "<br /><font color=\"red\">➡</font>&nbsp;<a target=\"_blank\" href=\"https://csound.com/download.html\">Follow this link</a> to install Csound and convert scores to sound files.</p>";
 		echo "</form><p>";
 		$result = FALSE;
 		}
 	else {
-		echo "<p style=\"vertical-align:middle;\"><img src=\"pict/logo_csound.jpg\" width=\"90px;\" style=\"vertical-align:middle;\" />&nbsp;is installed and responsive.<br />";
+		$version = '';
+		$this_file = $csound_path."csound_version.txt";
+		if(file_exists($this_file)) {
+			$content = @file_get_contents($this_file,TRUE);
+			$table = explode(chr(10),$content);
+			$imax = count($table);
+			for($i = 0; $i < $imax; $i++) {
+				$line = trim($table[$i]);
+				if(!is_integer(strpos($line,"Csound version "))) continue;
+				$version = "(".preg_replace("/.+version\s(.+)\(.+/u",'$1',$line).")&nbsp;";
+				break;
+				}
+			}
+		echo "<p style=\"vertical-align:middle;\"><img src=\"pict/logo_csound.jpg\" width=\"90px;\" style=\"vertical-align:middle;\" />".$version."is installed and responsive.<br />";
 		$result = TRUE;
 		}
 	if($path <> $csound_resources) echo "<font color=\"red\">➡</font>&nbsp;<a target=\"_blank\" href=\"index.php?path=csound_resources\">Visit Csound resource folder</a></p>";

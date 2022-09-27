@@ -926,6 +926,8 @@ function list_events($slice,$poly,$max_poly,$level_init,$i_token_init,$p_tempo,$
 			$poly[$i_poly]['q_dur'][$j_token] = $q_rest;
 			$poly[$i_poly]['p_start'][$j_token] = $p_abs_time;
 			$poly[$i_poly]['q_start'][$j_token] = $q_abs_time;
+			$poly[$i_poly]['p_end'][$j_token] = $poly[$i_poly]['p_start'][$j_token]; // Added 2022-09-07
+			$poly[$i_poly]['q_end'][$j_token] = $poly[$i_poly]['q_start'][$j_token];
 			$poly[$i_poly]['legato'][$j_token] = 100;
 			$j_token++;
 			$add = add($p_abs_time,$q_abs_time,$p_rest,$q_rest);
@@ -1112,7 +1114,7 @@ function make_event_table($poly) {
 	//	echo "i_poly = ".$i_poly."<br />";
 		for($j_token = 0; $j_token < count($this_poly['token']); $j_token++) {
 		//	echo "j_token = ".$j_token." max ".count($this_poly['token'])."<br />";
-			if(isset($this_poly['q_start'][$j_token]) AND isset($this_poly['q_end'][$j_token])) {
+			if(isset($this_poly['q_start'][$j_token]) AND isset($this_poly['q_end'][$j_token])) { // Probably not necessary
 				$lcm = lcm($lcm,$this_poly['q_start'][$j_token]);
 				$lcm = lcm($lcm,$this_poly['q_end'][$j_token]);
 				if($lcm >= $max_term_in_fraction) {
@@ -1130,7 +1132,7 @@ function make_event_table($poly) {
 	$i = 0; $table = array();
 	foreach($poly as $i_poly => $this_poly) {
 		for($j_token = 0; $j_token < count($this_poly['token']); $j_token++) {
-			if(isset($poly[$i_poly]['q_start'][$j_token]) AND isset($poly[$i_poly]['q_end'][$j_token])) {
+			if(isset($poly[$i_poly]['p_end'][$j_token]) AND isset($poly[$i_poly]['q_end'][$j_token])) { // Probably not necessary
 				$start = round(($poly[$i_poly]['p_start'][$j_token] * $lcm) / $poly[$i_poly]['q_start'][$j_token]);
 				$end = round(($poly[$i_poly]['p_end'][$j_token] * $lcm) / $poly[$i_poly]['q_end'][$j_token]);
 				if($poly[$i_poly]['token'][$j_token] == "-") continue;
