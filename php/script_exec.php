@@ -12,8 +12,10 @@ else {
 	echo "No script file has been specified…";
 	die();
 	}
+if($file[0] == ' ') $file[0] = "+"; // (compatibility with BP2)
 $dir = urldecode($_GET['dir']);
 $temp_folder = urldecode($_GET['temp_folder']);
+$temp_folder = str_replace(' ','+',$temp_folder); // (compatibility with BP2)
 $script_variables = $temp_dir.$temp_folder.SLASH."script_variables.php";
 
 echo "<p>Current directory = ".$dir."</p>";
@@ -28,6 +30,7 @@ echo "</html>";
 
 function run_script($dir,$file,$script_variables,$note_convention,$grammar,$output_format) {
 	global $temp_dir,$bp_application_path,$top_header;
+	// echo "script_variables = ".$script_variables."<br />"; 
 	require($script_variables);
 	require("_settings.php");
 	$temp_folder = urldecode($_GET['temp_folder']);
@@ -36,7 +39,6 @@ function run_script($dir,$file,$script_variables,$note_convention,$grammar,$outp
 	$content = $extract_data['content'];
 	$table = explode(chr(10),$content);
 	$imax = count($table);
-//	echo $truc."<br />";
 	for($i = 0; $i < $imax; $i++) {
 		$line = trim($table[$i]);
 		$line = preg_replace("/^\/\/.*/u",'',$line);

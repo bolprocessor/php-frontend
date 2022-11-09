@@ -423,7 +423,7 @@ function compile_help($text_help_file,$html_help_file) {
 	$help[0] = '';
 	$no_entry = array("ON","OFF","vel");
 	if(!file_exists($text_help_file)) {
-		echo "<p style=\"color:MediumTurquoise;\">Warning: “BP2_help.html” has not been reconstructed.</p>";
+		echo "<p style=\"color:MediumTurquoise;\">Warning: “BP2_help.html” has not yet been reconstructed.</p>";
 		return '';
 		}
 	$content = @file_get_contents($text_help_file,TRUE);
@@ -1348,8 +1348,9 @@ function fix_new_name($name) {
 function type_of_file($thisfile) {
 	$table = explode(".",$thisfile);
 	$prefix = $table[0];
-	if(strlen($prefix) <> 3 OR !is_integer($pos=strpos($prefix,"-")) OR $pos <> 0)
-		$prefix = '';
+//	if(strlen($prefix) <> 3 OR (!is_integer($pos=strpos($prefix,"-") AND !is_integer($pos=strpos($prefix,"+")))) OR $pos <> 0)
+//		$prefix = '';
+	if(strlen($prefix) <> 3 OR ($prefix[0] <> '-' AND $prefix[0] <> '+')) $prefix = '';
 	$extension = end($table);
 	if($prefix.".".$extension == $thisfile) $extension = '';
 	switch($prefix) {
@@ -1378,6 +1379,7 @@ function type_of_file($thisfile) {
 		case '-gl':
 			$type = "glossary"; break;
 		case '-sc':
+		case '+sc':
 			$type = "script"; break;
 		default:
 			$type = ''; break;
@@ -1398,6 +1400,9 @@ function type_of_file($thisfile) {
 		case "bpgl": $type = "glossary"; $found = TRUE; break;
 		case "bpsc": $type = "script"; $found = TRUE; break;
 		case "orc": $type = "csorchestra"; $found = TRUE; break;
+		case "sco": $type = "csorchestra"; $found = TRUE; break;
+		case "aiff": $type = "csorchestra"; $found = TRUE; break;
+		case "wav": $type = "csorchestra"; $found = TRUE; break;
 		}
 	if($found) $name_mode = "extension";
 	else $name_mode = "prefix";
@@ -1406,7 +1411,7 @@ function type_of_file($thisfile) {
 	$type_of_file['prefix'] = $prefix;
 	$type_of_file['extension'] = $extension;
 	return $type_of_file;
-	}
+	} 
 
 function change_occurrences_name_in_files($dir,$old_name,$new_name) {
 	set_time_limit(1000);
@@ -2051,10 +2056,10 @@ else echo "<p><font color=\"red\">File ‘_settings.php’ could nor be opened!<
  	}
  
 function check_csound() {
-	global $csound_path, $csound_resources, $dir_csound_resources, $path, $url_this_page, $file_format;
+	global $csound_path, $csound_resources, $path, $url_this_page, $file_format;
 	$return_var = 1;
 	if(file_exists($csound_path."csound")) {
-		$command = $csound_path."csound --version 2>".$csound_path."csound_version.txt";
+		$command = $csound_path."csound --version 2>csound_version.txt";
 		exec($command,$result_csound,$return_var);
 		}
 	if($return_var <> 0) {
@@ -2070,7 +2075,7 @@ function check_csound() {
 		}
 	else {
 		$version = '';
-		$this_file = $csound_path."csound_version.txt";
+		$this_file = "csound_version.txt";
 		if(file_exists($this_file)) {
 			$content = @file_get_contents($this_file,TRUE);
 			$table = explode(chr(10),$content);

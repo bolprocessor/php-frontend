@@ -32,7 +32,7 @@ else {
 	echo "<h2 style=\"text-align:center;\">Welcome to Bol Processor ‘BP3’</h2>";
 	echo "</td>";
 	echo "<td style=\"padding-left:2em; vertical-align:middle;\">";
-	echo "<p><i>This is a evaluation version of the interface<br />running the ‘bp’ multi-platform console.</i></p>";
+	echo "<p><i>This is an evaluation version of the interface<br />running the ‘bp’ multi-platform console.</i></p>";
 	echo "</td>";
 	echo "</tr></table>";
 	$dir = $bp_application_path;
@@ -49,12 +49,12 @@ else {
 	$console = $dir."bp";
 	$console_exe = $dir."bp.exe";
 	if(!$no_error OR (!file_exists($console) AND !file_exists($console_exe))) {
-		echo "<p>The console application ‘bp’ is not working or missing or misplaced… You can't run the application.</p>";
+		echo "<p>The console application (file “bp”) is not working or missing or misplaced…</p>";
 		$source = $dir."source";
 		if(file_exists($source))
-			echo "<p>Source files have been found. You can try to recompile ‘bp’, then reload this page.<br />➡ <a href=\"".$dir."compile.php\">Run the compiler</a></p>";
+			echo "<p>Source files have been found. You can try to recompile “bp”, then return to this page.<br /><br />➡ <a href=\"".$dir."compile.php\">Run the compiler</a> (this works in MacOS)</p>";
 		else
-			echo "<p>Source files have not been found. Return to <a target=\"_blank\" href=\"https://bolprocessor.org/check-bp3/#install\">https://bolprocessor.org/check-bp3/</a> and check your installation!</p>";
+			echo "<p>Source files (the “source” folder) have not been found.<br />Return to <a target=\"_blank\" href=\"https://bolprocessor.org/check-bp3/#install\">https://bolprocessor.org/check-bp3/</a> and follow instructions!</p>";
 		die();
 		}
 	}
@@ -442,10 +442,13 @@ if($move_files) {
 
 $dircontent = scandir($dir);
 $i_file = 0;
-foreach($dircontent as $thisfile) {
-	if($thisfile[0] == '.' OR $thisfile[0] == '_' OR $thisfile == "php") continue;
-	if($thisfile == "DerivedData" OR $thisfile == "resources" OR $thisfile == "scripts" OR $thisfile == "source" OR $thisfile == "temp_bolprocessor" OR $thisfile == "Makefile" OR $thisfile == "my_output") continue;
+foreach($dircontent as $thisfile) { 
 	$i_file++;
+	if($thisfile[0] == '.' OR $thisfile[0] == '_') continue;
+	if(is_integer($pos=strpos($thisfile,"BP2")) AND $pos == 0) continue;
+	if(is_integer($pos=strpos($thisfile,"License")) AND $pos == 0) continue;
+	if(is_integer($pos=stripos($thisfile,"ReadMe")) AND $pos == 0) continue; 
+	if($thisfile == "DerivedData" OR $thisfile == "resources" OR $thisfile == "scripts" OR $thisfile == "source" OR $thisfile == "temp_bolprocessor" OR $thisfile == "Makefile" OR $thisfile == "my_output" OR $thisfile == "php" OR $thisfile == "-se.startup" OR $thisfile == "LICENSE" OR $thisfile == "HowToBuild.txt" OR $thisfile == "BP3-To-Do.txt" OR $thisfile == "Bugs.txt" OR $thisfile == "ChangeLog" OR $thisfile == "Credits.txt" OR $thisfile == "HowToMakeARelease.txt" OR $thisfile == "y2k" OR $thisfile == "bp_compile_result.txt") continue;
 	if($move_files) echo "<input type=\"checkbox\" name=\"move_".$i_file."\"> ";
 	$this_file_moved = FALSE;
 	if($move_checked_files AND isset($_POST['move_'.$i_file])) {
@@ -485,6 +488,7 @@ foreach($dircontent as $thisfile) {
 		$name_mode = $type_of_file['name_mode'];
 		$prefix = $type_of_file['prefix'];
 		$extension = $type_of_file['extension'];
+	//	echo " prefix = ".$prefix." thisfile = ".$thisfile."<br />";
 		}
 	if($path <> $csound_resources AND $path <> $trash_folder AND ($type == "csound" OR $type == "csorchestra")) {
 		echo "Moved ‘<font color=\"blue\">".$dir.SLASH.$thisfile."</font>’ to ‘<font color=\"blue\">".$dir_csound_resources.$thisfile."</font>’<br />";
@@ -499,7 +503,6 @@ foreach($dircontent as $thisfile) {
 			continue;
 			}
 		$new_name = '';
-//		if($rename_checked_files AND $type <> '' AND (isset($_POST['rename_'.$i_file]) OR (isset($_POST['new_name_'.$i_file]) AND trim($_POST['new_name_'.$i_file]) <> ''))) {
 		if($rename_checked_files AND $type <> '' AND isset($_POST['new_name_'.$i_file]) AND trim($_POST['new_name_'.$i_file]) <> '') {
 			$new_name = trim($_POST['new_name_'.$i_file]);
 			$make_copy = isset($_POST['copy_'.$i_file]);
@@ -512,10 +515,6 @@ foreach($dircontent as $thisfile) {
 					$new_prefix = '';
 					$new_extension = end($table2);
 					if($new_prefix.".".$new_extension == $new_name) $new_extension = '';
-				/*	echo "prefix = “".$prefix."”<br />";
-					echo "new_prefix = “".$new_prefix."”<br />";
-					echo "extension = “".$extension."”<br />";
-					echo "new_extension = “".$new_extension."”<br />"; */
 					if($extension <> '')
 						$short_type = str_replace("bp",'',$extension);
 					if($prefix <> '')
@@ -581,7 +580,7 @@ foreach($dircontent as $thisfile) {
 			else if(!$this_is_directory) {
 				if($type == "grammar") echo "<font color=\"red\">";
 				else if($type == "data") echo "<font color=\"gold\">";
-				else if($type == "script") echo "<font color=\"blue\">";
+				else if($type == "script") echo "<font color=\"brown\">";
 				else if($type <> "settings") echo "<font color=\"lightgreen\">";
 				echo $type."</font>";
 				$time_saved = filemtime($dir.SLASH.$thisfile);

@@ -250,7 +250,7 @@ echo "<h3>Grammar file “".$filename."”</h3>";
 save_settings("last_name",$filename);
 
 $link = "test-image.html";
-echo "<div style=\"float:right;\"><p style=\"border:2px solid gray; background-color:azure; width:17em;  padding:2px; text-align:center; border-radius: 6px;\"><a onmouseover=\"window.open('".$link."','CANVAS test','width=500,height=500,left=200'); return false;\" href=\"".$link."\">Test image to verify that your<br />environment supports CANVAS</a></p></div>";
+echo "<div style=\"float:right;\"><p style=\"border:2px solid gray; background-color:azure; width:17em;  padding:2px; text-align:center; border-radius: 6px;\"><a onmouseover=\"window.open('".$link."','CANVAS test','width=500,height=500,left=200'); return false;\" href=\"".$link."\">Test image to verify that your<br />environment supports CANVAS</a><br />(You may need to authorize pop-ups)</p></div>";
 
 	
 if(isset($_POST['compilegrammar'])) {

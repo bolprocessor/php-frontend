@@ -4,10 +4,13 @@ require_once("_basic_tasks.php");
 if(isset($_GET['file'])) $file = urldecode($_GET['file']);
 else $file = '';
 if($file == '') die();
-$url_this_page = "script.php?file=".urlencode($file);
+$file = str_replace(' ','+',$file); // (compatibility with BP2)
+// $url_this_page = "script.php?file=".urlencode($file);
+$url_this_page = "script.php?file=".$file;
 save_settings("last_page",$url_this_page);
 $table = explode(SLASH,$file);
 $filename = end($table);
+if($filename[0] == ' ') $filename[0] = "+"; // (compatibility with BP2)
 $this_file = $bp_application_path.$file;
 $dir = str_replace($filename,'',$this_file);
 $current_directory = str_replace(SLASH.$filename,'',$file);
@@ -25,7 +28,6 @@ if(!file_exists($temp_dir.$temp_folder)) {
 $script_variables = $temp_dir.$temp_folder.SLASH."script_variables.php";
 $h_variables = fopen($script_variables,"w");
 fwrite($h_variables,"<?php\n");
-store($h_variables,"truc","3");
 
 $script_status = $script_more = array();
 $content = @file_get_contents("script-instructions.txt",TRUE);
