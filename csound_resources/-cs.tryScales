@@ -1,5 +1,5 @@
 // Bol Processor BP3 compatible with version BP2.9.8
-// Csound resource file saved as "-cs.tryScales". Date: 2021-02-18 15:56:45
+// Csound resource file saved as "-cs.tryScales". Date: 2022-04-26 16:45:42
 16
 -1
 -1
@@ -45,6 +45,15 @@ sp p h h p p h h p p h h h h p p h h p p h h p ps
 |4|
 f2 0 128 -51 23 2 261.63 60 1 1.053 1.067 1.111 1.125 1.185 1.2 1.25 1.266 1.333 1.35 1.406 1.422 1.481 1.5 1.58 1.6 1.667 1.688 1.778 1.8 1.875 1.898 2
 <html>The Indian grama scale as conceptualized by E. J. Arnold.<br />Publication: ‘L'intonation juste dans la théorie ancienne de l'Inde : les applications aux musiques modale et harmonique’. Revue de Musicologie, vol. 71c n° 1-2, 1985, p. 11-38. Edited and translated by Bernard Bel. https://doi.org/10.2307/928592<br /></html>
+"intervals"
+c21.506289596715 81 80c
+/do sol-1|4c sol-1|5c sol do/
+k0 1 2 3 4k
+sp • • • ps
+[1 1 0 0 0 0 0 0 2 1]
+|4|
+f2 0 128 -51 4 2 261.63 60 1 1.495 1.496 1.5 2
+<html>This is an equal-tempered scale for BP3 + Csound.<br />Created 2022-04-26 16:11:43<br />Created meantone upward notes “do,sol” fraction 3/2 (2022-04-26 16:14:01)<br />Created meantone upward notes “do,sol-1=4c” fraction 3/2 adjusted -1/4 comma (2022-04-26 16:16:04)<br />Created meantone upward notes “do,sol-1|5c” fraction 3/2 adjusted -1/5 comma (2022-04-26 16:32:40)<br /></html>
 "just intonation"
 /C C# D D# E F F# G G# A A# B C/
 [1 1 16 15 9 8 6 5 5 4 4 3 64 45 3 2 8 5 5 3 16 9 15 8 2 1]

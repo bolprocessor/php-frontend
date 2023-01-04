@@ -6,227 +6,8 @@
 The cursor becomes a question mark.  Select a menu command, click a button or
 select any word or group of words you need information about.
 • In the "Help" text, expressions between quotes are hyperlinks to more entries.
-### BP2 help
-The information you are reading now is taken from a text file called "BP2 help".
-### Hypertext (HTML)
-HTML (HyperText Markup Language) is a universal text format for electronic documents.
-Documents in HTML format can be read by 'Web browsers' such as Mosaic or Netscape Navigator.
-Use this format for exchanging BP2 text files via the Internet or multiplatform supports
-    like CD-ROMs.
-BP2 automatically identifies and converts HTML files.  If a window (grammar, alphabet, script, etc.)
-    contains text loaded from a HTML file, it will be saved in the same format unless its name is
-    changed and a different format is selected by the user.  (See "BP2 file format").
-BP2 identifies the file as a HTML one after finding:
-• flag "<HTML>" or "<html>";
-• a flag "</…>" where "…" is a non-empty string of alphabetic chars;
-• a token "&…;" where "…" is a non-empty string of alphabetic chars;
-• a token "&#…;" where "…" is a non-empty string of 1 to 3 digits.
-Conversion from HTML to BP2 removes all <> </> flags and translates tokens "&…;" to
-    the Macintosh character set.  Unknown characters are replaced with '$'.
-Conversion is suspended if a "</html>" flag is encountered.  It is resumed with "<html>". 
-When converting text to HTML format, BP2 converts high-ASCII characters and a few
-    punctuation signs (as per the HTML 3.0 specification) to HTML tokens.  The conversion is
-    consistent with the widely accepted mapping between Macintosh characters and ISO 8859-1
-    (Latin-1 code).
-Character '…' (used for "Undetermined rests") is converted to "_rest".
-HTML files are sliced to approximately 80 character paragraphs terminated with CR and LF, which
-makes them compatible with DOS/Windows.
-### Types-creators
-• The following are the prefixes, file types and creators of Macintosh files handled by BP2.
-• Starting with BP2.9.6, file extensions are also recognized for each type.  The following
-    extensions are also recognized for text files: .txt, .sco, .htm, .html, .trace, .bptr
-  Prefix    Exten.  type    creator   description
-  -da       .bpda   TEXT    Bel0      Bol Processor BP2 data
-  -kb       .bpkb   BP02    Bel0      Bol Processor BP2 keyboard
-  -mi       .bpmi   BP03    Bel0      Bol Processor BP2 sound-object prototypes
-  <none>    .bpde   BP04    Bel0      Bol Processor BP2 decisions
-  -gr       .bpgr   BP05    Bel0      Bol Processor BP2 grammar
-  -ho       .bpho   BP06    Bel0      Bol Processor BP2 alphabet
-  -da       .bpda   BP07    Bel0      Bol Processor BP2 data (old versions)
-  -in       .bpin   BP08    Bel0      Bol Processor BP2 interaction
-  -se       .bpse   BP09    Bel0      Bol Processor BP2 settings
-  -wg       .bpwg   BP10    Bel0      Bol Processor BP2 weights
-  +sc       .bpsc   BP11    Bel0      Bol Processor BP2 script
-  -gl       .bpgl   BP12    Bel0      Bol Processor BP2 glossary
-  -tb       .bptb   BP13    Bel0      Bol Processor BP2 time base
-  -cs       .bpcs   BP14    Bel0      Bol Processor BP2 Csound instrument file
-  -or       .bpor   BP15    Bel0      Bol Processor BP2 MIDI orchestra file
-  -md       .bpmd   BP16    Bel0      Bol Processor BP2 MIDI driver settings
-  <any>     <any>   TEXT    Bel0      BP2 text file 
-  <any>     <any>   TEXT    <any>     Any text file
-  <none>    .mid    Midi    <any>     MIDI file type 0, 1 or 2 (extension .midi is OK too)
-• All text files may also be stored in "Hypertext (HTML)" format with creator 'MOSS'
-    (which is Netscape Navigator).
-### BP2 file formats
-When saving a file for the first time or after changing its name, the user is given four format
-options:
-• Normal BP2 file (signature 'Bel0', file type depending on type of data (see "Types-creators");
-• Pure text (signature 'Bel0', file type 'TEXT');
-• HTML text (signature 'MOSS', file type 'TEXT');
-• HTML BP2 (signature 'Bel0', file type depending on type of data (see "Types-creators");
-Signature 'Bel0' (registered with Apple) identifies a file as belonging to BP2.  Clicking 
-    such files will automatically launch BP2.
-Signature 'MOSS' makes the file open directly with Netscape Navigator.
-Use HTML BP2 if the file should be reused by BP2 while being readable by Web browsers.
-Use HTML text if the file should be able to be opened by other applications that
-    understand HTML.  (For instance, it needs to be inserted in an electronic mail message
-    or to include the file on a web site).
-• Pure text files can also be opened by BP2: select 'Open' from the 'File' menu with the
-    'option' key down.  (In BP2.9.6 and later, you can also select Show 'All Readable
-    Documents' when opening a file to open a text file created by any application).
-• Csound scores are stored as Mac text files (default), or DOS or Unix depending on the
-    choice in the "File saving preferences" dialog accessed from "Settings"
-• MIDI files are saved with type 'Midi' and creator 'Bel0'.
-### Why don't I hear any sound?
-
-    To hear sound interactively from Bol Processor, you generally need to
-  have MIDI output turned on.  Go to the 'Devices' menu and select "MIDI" to
-  turn it on if it does not have a checkmark next to it.  (A checkmark means
-  that it is on).
-  
-    When using MIDI output, you can either play music with an external MIDI
-  device such as a electronic keyboard or you can play it through your Mac's
-  internal speaker (or audio output jack).
-
-  USING YOUR MAC'S INTERNAL SPEAKER ON MACOS X:
-
-    Bol Processor uses CoreMIDI on MacOS X and QuickTime MIDI instruments are
-  not directly available as an output destination.  To use your Mac's internal
-  speaker for playback, you will need to install and run a software
-  synthesizer.  A good free one is SimpleSynth by Pete Yandell.  You can
-  download SimpleSynth from <http://pete.yandell.com/software/>.
-  
-    After you download and install SimpleSynth, launch it, then launch BP2 if
-  it is not already running.  Go to the 'Devices' menu and choose "CoreMIDI
-  settings...". In the window that appears, make sure that "SimpleSynth virtual
-  input" is selected.
-
-    To use a different program to play BP2's MIDI output, run that program and
-  select its name in the output list of BP2's "CoreMIDI settings".  If the
-  program does not appear in BP2's output destinations list, then you will need
-  to configure a MIDI "Interapplication Communications Bus".  Choose "Open
-  Audio Midi Setup" from BP2's 'Devices' menu and use this utility to create an
-  IAC Bus.  You can then choose the IAC Bus as BP2's output and the softsynth's
-  input.  (IAC Bus's are not available on MacOS X 10.2.  You can instead use a
-  program named MIDI Patchbay available from the same web site as Pete
-  Yandell's SimpleSynth above).
-
-    If you are still not hearing sound after configuring a softsynth, see below.
-  
-  USING YOUR MAC'S INTERNAL SPEAKER ON MACOS 7-9:
-
-    On MacOS 7-9, you need QuickTime Musical Instruments.  BP2 works with
-  QuickTime Music only if both "Opcode OMS" (Open Music System) and QuickTime
-  are installed and active.  QuickTime is supplied with MacOS 8 and later. You
-  may need to install it with System 7.  You can confirm that they are
-  installed by looking for the 'QuickTime™ Musical Instruments' and 'Open Music
-  System' extensions in the Extensions folder.
-
-    The last version of OMS available was 2.3.8 and you can find it on popular
-  Mac download sites such as <http://www.tucows.com/preview/206415>.  After
-  installing OMS, you should run the OMS Setup application and save a studio
-  setup with QuickTime Music enabled.  (QuickTime Music is disabled if you do
-  not see an icon for it or if the icon has a red slash through it.  In the
-  latter case, you can double-click the icon and turn it on).
-
-    Next, confirm that "MIDI" and "Opcode OMS" are both checked in BP2's 
-  'Devices' menu.  Then choose "OMS input-output" from BP2's 'Devices' menu 
-  and confirm that "QuickTime Music" is selected.  Finally, to test that the
-  output is working, open the "Control panel" in BP2's "Windows" menu and click
-  the "MIDI check output" button.  Choose channel 1 and a stream of notes will
-  be played.
-
-  USING AN EXTERNAL MIDI DEVICE:
-
-    Instead of using QuickTime Music or another softsynth, BP2 can also produce
-  sounds on external MIDI hardware.  A MIDI device (synthesizer or sampler)
-  should be hooked to the Macintosh via a standard MIDI interface plugged into
-  one of its serial ports.  (A USB port on most computers today or the modem or
-  printer port on old Macs).
-  
-    On MacOS X, you should create a studio setup using the Audio Midi Setup
-  application in the Applications/Utilities folder of your hard drive.  Then
-  go to BP2's 'Devices' menu and choose "CoreMIDI settings...". In the window
-  that appears, select the name(s) of the output devices that you want to use.
-  
-    On MacOS 9 or earlier, if you are using OMS, you should first create a
-  studio setup using the OMS Setup application and then select the correct
-  output device in BP2's "OMS input-output" window.  When "Opcode OMS" is not
-  active, BP2 uses its built-in MIDI driver.  When using the built-in serial
-  driver, make sure that the correct port (modem or printer) is selected in
-  BP2's 'Devices' menu.
-
-  MORE TROUBLESHOOTING
-  
-    If no sound is heard check the entire MIDI setup: cables, input/output,
-  volume faders, channel assignments, etc.  Remember that the interface, MIDI
-  device(s) and amplifiers should be powered! If things still don't work, read
-  on...
-
-    Starting with BP 2.9.6, relaying of messages, i.e. 'MIDI thru', is OFF by
-  default to prevent some unpleasant problems when the same program or device
-  is connected to both the input and output.  Thus if a MIDI keyboard connected
-  to the MIDI input should control a different sound device (or MIDI softsynth)
-  connected to the output, it is wise to make sure that MIDI messages are
-  properly received and transmitted by BP2.  Open the "MIDI filter" window from
-  the 'Devices' menu and make sure that the required messages are transmitted.
-
-    If using the internal speaker for playback, is the sound muted or the 
-  volume set too low?  Check BP2's "Default performance values" window (under 
-  the "Settings" menu) and increase the "Default volume" or "Default velocity" 
-  values.  (They are initially set rather conservatively). 
-  
-    If you use OMS and run BP2 in background, e.g. from a FileMaker Pro 
-  data-base, make sure that "Run MIDI in background" is checked in the "OMS
-  MIDI setup" (see the "Devices" menu).
-
-    The modem/printer port on some portable computers does not work well with a 
-  MIDI interface unless "Opcode OMS" (Open Music System) is installed and
-  active. Installing OMS is therefore strongly recommended.  (See above)
-
-    To use the built-in MIDI driver with a combined modem/printer port, try this:
-  1) PowerBook 150/190: no hope.
-  2) PowerBook 5300cs, PowerBook 1400: AppleTalk on and 'Alternate Ethernet' 
-     'Remote Only', or 'IRTalk' chosen in the 'Network' or 'AppleTalk' 
-     Control Panel.  Use BP2's default MIDI output ('modem').
-    
-    Choosing Ethernet may result in an error message unless the Mac is really
-    connected to an Ethernet adapter with a valid network.  Therefore 'Remote
-    Only' is often the best choice.
-    
-    Read the beginning of the "QuickStart" manual in the documentation for more
-  detailed procedures.
-
-• Related topics: "OMS input-output", "Opcode OMS", "CoreMIDI settings..."
-
-### OMS setting default input device
-• BP2 needs to access an existing input MIDI device at startup in order to open the OMS input port.
-    This may create a problem when an old device is no longer available and is still recorded in
-    '-se.startup'.  This problem occured now if the present help item popped up.
-• Below are the guidelines BP2 will follow to solve it:
-1) If a default input device was saved in '-se.startup' and connection to it could not be opened,
-    BP2 will help you to select a device, modify '-se.startup' and restart;
-2) If no default input device was saved in '-se.startup', BP2 attempts to connect to an existing
-    input MIDI device. This makes it possible to change the device (see "OMS input-output" in the
-    “Devices” menu) without restarting BP2;
-3) When modifying '-se.startup' ('File' menu), if an input MIDI device is selected, you will still
-    be given the option of setting 'no input device' as the default.
-• Related topics: "OMS input-output", "Opcode OMS"
-### How can I make music with BP2?
-There are three ways of producing music with BP2:
-• A grammar may describe a set of musical pieces produced randomly (a formal language) and played
-    in sequence -- for instance Mozart's musical dice, see '-gr.Mozart'.
-    This is the 'Improvize' mode, in which MIDI input may also be used to monitor processes
-    interactively, e.g. synchronise the performance (see the "Interaction" window).
-• A grammar may otherwise describe a unique musical piece.  This is particularly useful for
-    complex structures that require a comprehensible hierarchical description.
-• The third method is to edit or import a musical score, ignoring the inference system.
-• Related topics:
-"How does the output of BP2 look like?"
-"How does the input of BP2 look like?"
-"Why don't I hear any sound?"
-### What style of music is BP2 dealing with?
-• BP2 is not designed for a particular musical style. It stemmed out of formalizing
+### What style of music is BP2/BP3 dealing with?
+• BP2/BP3 is not designed for a particular musical style. It stemmed out of formalizing
     music representation and composition tasks in the context of non-western music, notably
     North-Indian rhythm. For this reason it focused on text-oriented representations and formal
     grammmars.  'Bol Processor' originates from the word 'bol' (Hindi/Urdu 'bolna', to speak)
@@ -235,16 +16,16 @@ There are three ways of producing music with BP2:
     were replaced with "sound-objects", i.e. arbitrary sequences of events encoded as MIDI messages.
 • Simplified sound-objects named "simple notes" have later been introduced to facilitate work
     with western tonal systems in English, French or Indian "note conventions".
-• BP2 is now able to deal with polyphony, and does it in a smart way. See "polymetric structures".
-• BP2 also deals with incomplete representations of polyrhythmic sequences.
+• BP2/BP3 is now able to deal with polyphony, and does it in a smart way. See "polymetric structures".
+• BP2/BP3 also deals with incomplete representations of polyrhythmic sequences.
     See "period notation".
-• BP2 is able to control all MIDI parameters, including continuous parameters such as pitchbend,
+• BP2/BP3 is able to control all MIDI parameters, including continuous parameters such as pitchbend,
     polyphonic pressure, panoramic, etc.  See "performance controls".
-• BP2 has interactive features used in the "improvize mode".  It responds to MIDI messages
+• BP2/BP3 has interactive features used in the "improvize mode".  It responds to MIDI messages
     (see "Interactive mode") and to "Apple Events".
-• Thanks to Csound, BP2 bypasses limitations of MIDI, and takes advantage of both environments.
+• Thanks to Csound, BP2/BP3 bypasses limitations of MIDI, and takes advantage of both environments.
     (See "Csound implementation")
-### How does the output of BP2 look like?
+### How does the output of BP2/BP3 look like?
 • There are three representation levels:
 1) The symbolic level, at which music is represented as a TEXT score. This score uses either
     "simple notes" or "sound-objects" completed with "performance controls".
@@ -261,13 +42,13 @@ There are three ways of producing music with BP2:
     is given to display the text score.
 • A text score may be displayed in graphic and played on the MIDI output: select the text and do
     "Play selection" in the "Action" menu.
-### How does the input of BP2 look like?
+### How does the input of BP2/BP3 look like?
 • A score in text format may be selected and played on the MIDI output: select "Play selection"
     in the "Action" menu.  Try it for example on "C5 C5 C5 D5 E5_ D5_ C5 E5 D5 D5 C5_ _ _".
 • Examples of (less trivial) text format scores are stored in '-da' files that may be loaded to
     the "Data" window.  There are more examples in the enclosed data-base "TryAppleEvents.fm"
     which may be opened under Claris FileMaker Pro.
-• A grammar is the formal description of a process producing musical text scores which BP2 is able
+• A grammar is the formal description of a process producing musical text scores which BP2/BP3 is able
     to play on its MIDI output.  Load for instance '-gr.Mozart' in the "Grammar" window, then
     type command-R or select "Produce items" in the "Action" window.
 • A script is a sequence of meta-instructions performing all operations automatically in BP2.
@@ -287,50 +68,9 @@ Assignments are listed as script instructions in the "Interaction" window.
     assigns controller #7 on channel 16 to fix the value of parameter K1.
     This parameter may control weights in grammar rules, velocities, etc. (see "Variable arguments")
 • Related topic: "Apple Events"
-### Where can I get the latest version of BP2?
-• The Bol Processor project is now hosted by Sourceforge at 
-   <http://bolprocessor.sourceforge.net/>
-  You can obtain the latest versions and information from this site.
-• Older versions of Bol Processor BP2 used to be available on Info-Mac mirror sites.
-  The official info-mac.org site has been retired and most of the mirror sites are no
-  longer available; but you can try the links below which were still available as of
-  May 2007.  For a list of mirrors: <http://www.macmaps.com/imacarchives496.html>
-• A few sites in Europe:
-• In North America:
-   <ftp://ftp.agt.net/pub/info-mac/>
-   <http://hyperarchive.lcs.mit.edu/HyperArchive.html>
-• In Africa:
-• In Asia and Pacific:
-### How do I register for BP2?
-Bol Processor BP2 used to be a shareware product, but is now open source software (a.k.a
-"free software", refering to the freedoms granted to the user, not necessarily the price).
-Therefore, it is no longer necessary to register or to pay to use Bol Processor.
-Both the application and the complete source code for BP2 are available under a BSD-style
-license that allow them to be liberally used, modified, and distributed.  Please click on
-"License" in the About box, or see the accompanying file, 'License.txt' for details.
-### Where can I find more information?
-• BP2 comes with HTML documentation that you can read with any web browser.  Try working
-    through the "QuickStart" section first.
-• Alternatively, you can print the MS-Word document extracted from "BP2doc.sea" and 
-    follow the "QuickStart" manual step by step.
-• BP2 is also documented on-line. You are reading this documentation now!
-To get information about any feature, type command-? or select "Help" in the "Action" menu.
-    The cursor is changed to a question mark. Then click any button, select any menu item or
-    any segment of text to get information.
-In this "Help" text, any expression between quotes is a link to more entries.
-• You may also open "BP2 help" with a word-processor.
-• Contact the designers to report bugs or request information not available from other
-    sources:
-        • Bernard Bel    <bel@lpl.univ-aix.fr>
-        • Anthony Kozar  <anthonykozar@sbcglobal.net>
-    Please first make sure the information you need is not in the documentation :-)
-### Action menu
 Contains most commands of BP2. You may document them with the on-line "Help".
-### About Bol Processor…
-Displays the version and compilation date of Bol Processor BP2, some credits and 
-contact addresses.
 ### Variables
-BP2 recognizes strings starting with an uppercase character as "variables" in grammars
+BP2/BP3 recognizes strings starting with an uppercase character as "variables" in grammars
     or in its glossary. It creates a variable if it is not already there, so be careful
     with spelling mistakes.
 • You may however start a variable with a lower-case character provided that you write
@@ -349,13 +89,13 @@ A structure of "sound-objects" represented as a "polymetric expression".
     Example:
     {C4 D4 E4,G3 E3} (brackets optional) means that "C4 D4 E4" will be played in the same
     time as "G3 E3".
-• BP2 manages to adjust durations.  Here, the duration of each beat is determined by the
+• BP2/BP3 manages to adjust durations.  Here, the duration of each beat is determined by the
     first beat "C4 D4 E4", hence three beats. It will be interpreted:
       /2 {C4_ D4_ E4_,G3_ _ E3 _ _}
     yielding the phase diagram:
         C4 _  D4 _  E4 _
         G3 _  _  E3 _  _
-• BP2 uses the same algorithm to deal with polymetric expressions and with "period notation".
+• BP2/BP3 uses the same algorithm to deal with polymetric expressions and with "period notation".
 • A polymetric expression can contain another polymetric expression, including expressions in
     "period notation".
     Try to play: {C4 D4 E4,{G3,C3} E3} for instance [with "English convention" checked
@@ -392,7 +132,7 @@ A structure of "sound-objects" represented as a "polymetric expression".
 • The duration of each beat is determined by the first beat "C4 D4 E4", hence three
 	time units. It will be interpreted:
         /2 C4_ D4_ E4_ • G3_ _ E3_ _
-• BP2 uses the same algorithm to deal with period notation and with "polymetric expressions".
+• BP2/BP3 uses the same algorithm to deal with period notation and with "polymetric expressions".
     Thus, {C4 D4 E4,G3 E3}  (the period has been replaced with a comma)
     will be interpreted:
         /2 {C4_ D4_ E4_,G3_ _ E3_ _}
@@ -420,7 +160,7 @@ See "Terminal alphabet"
 • Terminal symbols are mapped to "sound-object prototypes" thanks to the information
     contained in "-mi.filename".  The name of this file should be inserted on top of the
     'alphabet' window.
-• BP2 also recognizes predefined terminal symbols called "simple notes".
+• BP2/BP3 also recognizes predefined terminal symbols called "simple notes".
 • Related topics: "Variables", "sound-objects".
 ### Metavariables
 See "Wild cards"
@@ -444,7 +184,7 @@ The time when a grammar is being compiled, or some data is being "tokenized". Th
     be opposed to "performance time".
 ### Tokenized data
 Grammars and musical items are represented with reserved words, "terminal symbols"
-    and variables. Before using them, BP2 replaces them with tokens, i.e. numeric
+    and variables. Before using them, BP2/BP3 replaces them with tokens, i.e. numeric
     codes. These codes are not visible to users.
 ### Performance time
 The time when a musical item is being played on the sound output. This may be opposed
@@ -493,7 +233,7 @@ Turns on real-time MIDI output.  See "Use MIDI in/out".
 This dialog makes it possible to modify the MIDI keyboard mapping and diapason
     reference used by Csound.
 • Usually, key 60 is assigned to C4 (do3 in French, sa4 in Indian), but some MIDI programs,
-    notably old versions of BP2, use alternate note names such as C5 (do4).
+    notably old versions of BP2/BP3, use alternate note names such as C5 (do4).
 • The diapason value has no effect on the MIDI output.  Its is used by Csound for
     instruments requiring a "cps (Hz)" format for pitch.
 ### Csound
@@ -513,7 +253,7 @@ A "sound-object" that may be relocated by the "time-setting algorithm".
 See "Sound-objects"
 ### Sound-objects
 See the reference manual and publications.
-• In short, a sound-object in BP2 is a sequence of 'elementary' events, such as MIDI
+• In short, a sound-object in BP2/BP3 is a sequence of 'elementary' events, such as MIDI
     or Csound instructions.
 • A typical simple sound-object is a "simple note", i.e. a NoteOn/NoteOff
     pair on the same MIDI key and channel.
@@ -525,7 +265,7 @@ These contain information about "sound-objects" bearing the same name: the list 
 elementary events, and metric and topologic properties used by the "time-setting algorithm".
 • Elementary events may be MIDI events, Csound events, or both.
 ### Time-setting algorithm
-An algorithm used by BP2 to calculate the timings of elementary events (e.g.
+An algorithm used by BP2/BP3 to calculate the timings of elementary events (e.g.
    MIDI or Csound events) in a musical item. It takes into account the properties of
     "sound-objects" (defined by their "sound-object prototypes") and may relocate or
     truncate objects in order to satisfy all constraints arising therefrom.
@@ -626,10 +366,6 @@ X --> a /myflag = 3/   assigns 3 to 'myflag'.
 • Note: flag syntax is likely to evolve but it will remain consistent with this one.
 ### BP grammar
 See "true BP grammar"
-### 0 (Number streaks from…)
-Refers to the numbering of time streaks on graphics
-### 1 (Number streaks from…)
-Refers to the numbering of time streaks on graphics
 ### RND [Subgrammar type or rule derivation mode]
 • As a "subgrammar" type, it means that when producing an item rules may be used in
     a random order.  When analysing an item, RND works like ORD.
@@ -670,7 +406,6 @@ A "subgrammar" in which the candidate rule is selected for the (1) leftmost and 
     of its left argument in the "work string".
 • This type works in "production" mode only.
 • If several rules are candidate the uppermost one is selected. There is no random choice.
-• A typical use of POSLONG subgrammars is the transcoding of alphabets, see "Transliterate text file".
 ### Glossary
 • A glossary is a special "subgrammar" that is applied to the "work string" just before
     it is played on the MIDI outup or displayed on the graphic window.  A convenient
@@ -679,29 +414,6 @@ A "subgrammar" in which the candidate rule is selected for the (1) leftmost and 
     any synthesizer in the "General MIDI" standard.
 ### TEMPLATES: [Subgrammar type]
 A list of 'templates' used by a true BP grammar. See reference manual.
-### Close window
-Hides the current window.  Unlike most other Mac applications, this operation does not close
-    the file currently loaded in the window (if any), and if the window is redisplayed (from
-    the 'Windows' menu, for example), the contents of the window will be unchanged.
-EXCEPTIONS:  The Trace and Help windows are cleared when they are closed.  BP2 may also 
-    automatically clear the Trace and Notice windows at other times.  It is not advisable
-    to store important text that you create in these windows.  Use the Scrap window instead.
-IMPORTANT:  The first time you choose "Close Window", you will be prompted to save any unsaved
-    changes just as in other programs.  Beware that if you choose "No", you may not be asked 
-    again to save your changes before loading another file or project or before quitting BP2.
-    We understand that this a potentially confusing situation and are considering how to 
-    redesign the interface taking into consideration BP2's special needs. 
-### Save file
-Saves the current window to its corresponding file on disk.  You will be prompted for
-a location if there is not an existing file for this window.
-### Save file as…
-Prompts you for a location to save the current window to a file on disk.
-### Revert to saved...
-Throws away any changes that have been made to the current window and reloads it from
-    the version saved on disk.  You will prompted to confirm this operation before any
-    data is lost.
-### Clear
-Clears the current window. This is also a script command.
 ### REC
 Starts/stops recording actions as a script (in the script window).
 ### _randomize
@@ -718,9 +430,9 @@ A "grammar procedure" or a "tool".
     "New seed".
 ### _goto(igram,irul) [Grammar procedure]
 This procedure is found in the right argument of a rule.
-• _goto(igram,irul) will cause BP2 to jump to "subgrammar" igram, rule irul, when the rule
+• _goto(igram,irul) will cause BP2/BP3 to jump to "subgrammar" igram, rule irul, when the rule
     that contains it has been applied.  If (igram,irul) does not point at a candidate rule,
-    BP2 will either execute a "_failed" conditional jump or search a candidate rule in
+    BP2/BP3 will either execute a "_failed" conditional jump or search a candidate rule in
     subgrammar igram.  If none is found it will jump to subgrammar igram+1, etc. as usual.
 • _goto(igram,0) causes to jump to "subgrammar" igram and go on selecting rules according to the
     subgrammar type.
@@ -773,15 +485,15 @@ Sets the random generator's seed to 'x' and resets the random sequence.
     grammars.  The range is 0..32767.
 • The effect of _srand(x) is cancelled by "_randomize".
 • Using _srand(x) is a proper way of repeating random patterns. However, it is not
-    certain that these patterns will remain the same ones each time BP2 is run.
-    Sequences of random choices depend on machines, system versions, BP2 versions,
+    certain that these patterns will remain the same ones each time BP2/BP3 is run.
+    Sequences of random choices depend on machines, system versions, BP2/BP3 versions,
     and the grammar itself.
 • Related topics: "_randomize", "Randomize", "Reset random sequence", "Set random seed",
     "New seed".
 ### OFF (quantization)
 Cancels the effect of ON (quantization).
 ### ON (quantization)
-When checked, BP2 will use the quantization setting (in milliseconds) to simplify
+When checked, BP2/BP3 will use the quantization setting (in milliseconds) to simplify
     tables containing "sound-object" structures (the phase diagram, see manual).
 • The result is a saving of memory space and "computation" time making it possible to
     compute very complex items.
@@ -797,180 +509,23 @@ If microtonal scales have been defined in the Csound instruments file, they can 
 • In a _scale() statement, blockkey may be specified as a note, e.g. 'G4', instead of a key number. Beware of using the same note convention as in the grammar...
 • _scale(0,blockkey) will reset the scale to equal-tempered, in which case 'blockkey' is irrelevant.
 • If exactly 1 scale has been loaded from the Csound instruments file, it will be used by default, i.e. even if no _scale(name,blockkey) instruction is used.
-• Values of 'scale' and 'blockkey' are carried through fields of polymetric expressions and not influenced by _chan() nor _ins() instructions.
-### New Project
-"New project" erases the current project (grammar and "terminal alphabet").
-• This is also a script command.
-### Load
-Loads a file.
-### Load Project «filename» [Script command]
-Erases the current project and loads a new one (grammar and "terminal alphabet") along
-    with attached settings (-se.file), interactive codes (-in.file) and glossary (-gl.file).
-• BP2 will read the name of the corresponding '-ho' "Terminal alphabet" file in the grammar
-    file and, if found, will load the alphabet file automatically.
-### Load Project... [File menu]
-Erases the current project and loads a new one (grammar and "terminal alphabet") along
-    with attached settings (-se.file), interactive codes (-in.file) and glossary (-gl.file).
-• You will be prompted to select a grammar file.
-• BP2 will read the name of the corresponding '-ho' "Terminal alphabet" file in the grammar
-    file and, if found, will load the alphabet file automatically.
-• This is also a script command: "Load Project «filename»"
-### Check script syntax
-Checks the syntax of the script displayed in the "Script" window, and of other scripts
-    called at the time the current script is executed.
-• Even if the syntax is correct, it may be necessary to update directory information in
-    case a file used by the script has been moved.  This will be done automatically when
-    invoking this command.
-• Tip: if you want to save time on checking scripts, you should put aliases of all
-    files used by a script into the same folder.
-### Alphabet (cmd-H)
-"Alphabet" brings to front the "Terminal alphabet" window, which may contain a '-ho' file.
-• This is also a script command.
-### Glossary
-"Glossary" brings to front the 'glossary' window, which may contain a '-gl' file.
-• This is also a script command.
-### Clear
-Clears current selection. This is also a script command.
-### Cut
-Cuts  current selection. This is also a script command.
-### Copy
-Copies current selection. This is also a script command.
-### Paste
-Pastes the content of scrap in replacement of current selection.
-• This is also a script command.
-### Find… replace
-Finds and replaces strings. It accepts special characters:
-  ^t  for tabulation
-  ^r or ^p for paragraph
-  ^n for new line
-• This is also a script command.
-### Control panel
-Brings to front the control panel. This is also a script command.
-### Data (cmd-D)
-"Data" brings to front the "Data" window, which may contain a '-da' file.
-• This is also a script command.
-### Grammar (cmd-G)
-"Grammar" brings to front the "Grammar" window, which may contain a '-gr' file.
-• This is also a script command.
-### Graphics
-Brings to front the "Graphics" window. This is also a script command.
-### Interaction
-"Interaction" brings to front the "Interaction" window, which may contain a '-in' file.
-• See "Interactive mode".
-• This is also a script command.
-### Scrap
-"Scrap" brings to front the "Scrap" window, which may contain whatever you want.
-    Scrap is saved as pure text.
-• This is also a script command.
-### Info
-"Info" brings to front the "Info" window. It should not be used to type any
-    data because it may be erased without warning.
-• This is also a script command.
-### Keyboard
-"Keyboard" brings to front the "Keyboard" window, which may contain tokens loaded from
-    a '-kb' file. (See "Type tokens")
-• This is also a script command.
-### Settings
-Brings to front the two "Settings" windows.
-• This is also a script command.
-### Objects (cmd-E)
-"Objects" gives access to the "sound-object" editor.
-• This is also a script command.
-### Produce items (cmd-R)
-This 'runs' the current project: alphabet and grammar are compiled, then items are
-    produced, displayed, played on the MIDI output, etc., depending on the settings.
-    (See "Settings")
-• Beware of the settings because they may force "production" to
-    continue forever ("Improvize") or the item to be played repeatedly ("Cyclic play").
-• This is also a script command.
-### Produce and play «int» items [script command]
-Uses the current grammar to produce the specified number of items. It sets "Cyclic play"
-    to "false".
-### Play «any item» [Script command]
-Play specified item.  An item is an expression containing "terminal symbols",
-    "simple notes" and "performance controls".
-### Play-show «int» times selection in window «windowname» [script command]
-Plays the selection several times.
-### Set output window «windowname» [script command]
-Displays grammar productions in specified window. Default is "Data".
-### Produce templates
-If the grammar is a 'true BP' grammar (see manual) then "Produce templates" creates
-    all templates generated/recognized by the current grammar, and displays them at
-    the end of the grammar.  (See "-gr.dhin--" for example.)
-• This is also a script command.
-### Quit
-To quit BP2.
-• This is also a script command.
-### Randomize [Script command]
-Creates a new random seed (based on the internal clock). This allows future random
-    choices to take place unpredictably.
-• Calling "Randomize" in a script produces the same effect as inserting "_randomize"
-    on top of a grammar, or clicking the "New seed" button in the "Random sequence" dialog.
-• Related topics: "_randomize", "_srand", "Reset random sequence", "Set random seed",
-    "New seed".
-### Script
-This brings to front the "Script" window.
-• This is also a script command.
-### Start string
-This brings to front the "Start string" window.
-• This is also a script command.
-### Trace
-This brings to front the "Trace" window.
-• This is also a script command.
-### Activate window «windowname» [Script command]
-Brings to front specified window and makes it active.
-### Hide window «windowname» [Script command]
-Hides specified window (and erases its content if it is 'Help', 'Graphics' or 'Trace').
-### Analyze selection in window «windowname»
-Analyses the selected item using the current grammar.
-• This is possible only if it is a 'true BP' grammar (see manual), which BP2
-    will recognize.
-• If the result is 'S' then the item belongs to the language produced by the grammar.
-• This is also a script command.
-### Buffer size «long» symbols [Script command]
-Sets the limit of the "work string".
-• It will increase automatically once the limit has been reached.
-• This is a good way of controlling the length of items produced by a grammar
-    describing an infinite language.
-• Related topics: "don't stop [computation]", "stop [computation]", "Default buffer size"
-### Default buffer size «long» symbols [Script command]
-Sets the value of "Buffer size" in the beginning of a "production".
-• Related topics: "don't stop [computation]", "stop [computation]", "Buffer size"
-### don't stop [computation]
-When checked, allows the "work string" ("Buffer size") to grow indefinitely.
-• This is risky if the grammar contains self-imbedding rules and no control on derivations.
-• Related topics: "stop [computation]", "Buffer size", "Default buffer size"
-### stop [computation]
-When checked, prompts the user to allow the "work string" ("Buffer size") to grow beyond
-   a specified limit.
-• This is convenient when the grammar contains self-imbedding rules, and no other control
-   on derivations.
-• Related topics: "don't stop [computation]", "Buffer size", "Default buffer size"
-### Clear window «windowname» [Script command]
-Clears specified window
-### Define «variable» «sound item» [Script command in glossary]
-This a 'glossary' instruction allowing a variable (any string starting with an uppercase
-    character) to be replaced with an expression that makes sense to the sound output. A
-    typical case is the assignment of MIDI program numbers (the 'patches' of a synthesizer)
-    to names denoting different 'instruments'.
-• See for instance '-gl.GeneralMIDI' for standard names of instruments in
-    the "General MIDI" standard.
+• Values of 'scale' and 'blockkey' are carried through fields of polymetric expressions and not influenced by _chan() nor 
 ### MIDI format
 Musical Instrument Digital Interface: a standard for communications between between
     computers and electronic musical instruments.
 ### Csound format
 • Csound uses two text files as an input: an 'orchestra' file describing sound production
     procedures (a set of virtual instruments), and a 'score' file describing sound events.
-• BP2 (above version 2.6.2) produces Csound score files using its own representation
+• BP2/BP3 (above version 2.6.2) produces Csound score files using its own representation
     of musical items, grammars and scripts, and a minimum amount of information about
     the arguments expected by instruments in the Csound orchestra file.
 • Related topic: "Csound implementation"
 ### Delete «unsigned» chars [Script command]
 Deletes specified number of chars in current edit window
 ### Expand selection window «windowname»
-Displays selected "polymetric structure" as interpreted by BP2.
+Displays selected "polymetric structure" as interpreted by BP2/BP3.
 • Two equivalent interprations are displayed.  The first one is the most compact
-    representation (the one used internally by BP2).  The second one is the complete
+    representation (the one used internally by BP2/BP3).  The second one is the complete
     expression, containing no explicit "tempo marker".  The first expression may
     imply a rescaling.
 • For instance,
@@ -995,189 +550,20 @@ If a, b, c are sound objects, a sequence may be notated:
 • Note that there must be a period before a line break, otherwise the last beat would be
     merged with the first one of the next line.
 • The old notation "3/4/2/4 abbabccabcca /3 abcccbaab /1 bbb" is no more valid.
-### Prompt ON [Script command]
-Cancels the effect of "Prompt OFF".
-### Prompt OFF [Script command]
-When encountered in a script, all "wait for..." instructions and
-    interactive commands are bypassed until the "Prompt ON" instruction resets interactivity
-    to normal. This is a useful debugging technique allowing a script to be executed
-    without interruption.
-### Freeze windows ON [Script command]
-"Freeze windows on" prevents BP2 from recording the new positions and sizes of windows
-    when saving the settings of the current project.  It also prevents windows from being moved
-    or resized when new settings are loaded.  This is very useful when running a script that
-    sequentially loads and plays several projects.  You can reverse the effects of this command
-    with "Freeze windows OFF".
-### Freeze windows OFF [Script command]
-Cancels the effects of Freeze windows ON.
-### Graphic scale «long» pixels = «long» milliseconds [Script command]
-Changes settings of the graphics window. (See "Graphic settings" dialog)
-### Open file «filename» [Script command]
-Opens a file. Different windows may force you to open certain types of files only.
-### Open file... [File menu]
-Opens a file that you select in the current window. Each window will only allow you to open
-    appropriate types of files.  (eg. the grammar window only allows opening grammar files
-    and text files which BP2 assumes are grammars).  Any type of (text) file may be opened
-    in the Scrap window.  To force BP2 to allow you to select any file, hold down the Option
-    key while opening the File menu and choosing this command.
-• This is also a script command: "Open file «filename»".
-### Load settings «filename» [Script command]
-Loads settings for a specified work environment or project.
-### Load settings... [File menu]
-Prompts you to select a settings file which BP2 then loads.  Settings files allow you save
-   and restore a specific work environment including computation and input-output settings,
-   window positions and text sizes, etc. -- essentially, all BP2 configuration options
-   accessible from the 'Settings' menu are included.
-• This is also a script command: "Load settings «filename»".
-### Save settings [File menu]
-Saves all settings for the current working environment -- including computation, 
-   input-output settings, window positions, window text sizes, and most other configuration
-   options accessible from the 'Settings' menu and elsewhere -- to a file on disk.
-NOTE: If the current settings were already loaded from or saved to disk, then the title
-   of this menu item will change to reflect the name of the current settings file.  That
-   file will be the one that is saved to when this menu item is chosen.
-• If there is no current settings file, then this command behaves like "Save settings as..."
-### Save settings as... [File menu]
-Saves all settings for the current working environment -- including computation, 
-   input-output settings, window positions, window text sizes, and most other configuration
-   options accessible from the 'Settings' menu and elsewhere -- to a file on disk.
-   You will be prompted to choose a location and the name of the file that you specify
-   will be added to the top of the grammar and data windows so that it can be automatically
-   loaded with those files.  
-### Modify ‘-se.startup’... [File menu]
-Saves all settings for the current working environment to a special file named "-se.startup".
-   This settings file is automatically loaded when Bol Processor is launched.
-• See "-se.startup" for more information.
-### -se.startup
-This settings file is automatically loaded when Bol Processor is launched.  On MacOS X, it is
-    stored inside of your user folder in the 'Bol Processor' subfolder of the 'Preferences'
-    folder inside of your 'Library' folder.  If this file does not exist at launch time, BP2
-    will try to create it from a default copy inside of the Bol Processor application package.
-    If it is unable to create it, then BP2 will try to open the file in the application
-    package.  On MacOS 9, this file is expected to be in the same folder as the BP2 application.
-NOTE:  BP2 will not find this file if you rename it or move it.  It cannot be named 
-    'startup.bpse' either; it must be '-se.startup'. 
-### Maximum production time «long» ticks [Script command]
-Sets the maximum time during which items will be produced. Time is measured in
-    ticks, i.e. 60ths of a second. Beware that the effect will depend on the speed of
-    the machine. In general it is better to specify the number of items to produce.
-• Related topic: "Produce «int» items"
-### File save preferences [Settings menu]
-Displays a settings window that allows you to control how BP2 writes MIDI files and
-    Csound scores.
-• See also: "Prompt for changing file name", "Save each item to a new file", 
-    "Store all items to same file", "Csound file format", "MIDI file format", 
-    "Write item immediately", "Write item after playing on MIDI", and "MIDI fade-out"
-### Write MIDI files
-When checked, BP2 will create a MIDI file containing the items that it produces.
-    You may control how MIDI files are created from the "File save preferences" window.
-• This setting is also accessible from the 'Devices' menu as "MIDI files".
-• May be toggled with the script commands: "MIDI file ON" and "MIDI file OFF".
-### MIDI files [Devices menu]
-This menu item can be toggled off and on.  When checked, BP2 will create a MIDI file
-    containing the items that it produces.  You may control how MIDI files are created
-    from the "File save preferences" window.
-• This setting is also accessible from the Input-output settings window as 
-    "Write MIDI files").
-• May be toggled with the script commands: "MIDI file ON" and "MIDI file OFF".
-### MIDI file ON [Script command]
-Turns on the "Write MIDI files" option.
-### MIDI file OFF [Script command]
-Turns off the "Write MIDI files" option.
-### Time setting display
-When checked, intermediary results of time-setting calculations are displayed
-• Related topic: "time-setting algorithm"
-### Time setting step ON [Script command]
-Allows sep-by-step calculations during time-setting.
-• Related topic: "time-setting algorithm"
-### Time setting step OFF [Script command]
-Cancels effect of "Time setting step ON".
-### Time setting trace ON [Script command]
-Forces the display of calculations during time-setting.
-• Related topic: "time-setting algorithm"
-### Time setting trace OFF [Script command]
-Cancels effect of "Time setting trace ON".
-• Related topic: "time-setting algorithm"
-### MIDI file (Format…)
-When checked, allows the "production" and edition of MIDI orchestra and score files.
-### MIDI program «0..127» [basic channel] [Script command]
-Sets MIDI program to number assigned.  Generally this is used for selecting different
-    'patches' (instruments) on a synthesizer.  Numbering is 0 to 127, following MIDI
-    specification 1.0, but some constructors are numbering 1 to 128 instead -- notably in
-    the case of "General MIDI"...
-### MIDI set-up time «int» milliseconds [Script command]
-Changes set-up time in the "Time accuracy" dialog. It is the estimated delay of
-    MIDI messages sent by BP2 to various devices.
-### MIDI controller #«0..127» = «0..127» channel «1..16» [Script command]
-Sets specified controller to specified value.
-### MIDI local control OFF channel «1..16» [Script command]
-Sets local control to OFF on MIDI devices having specified channel as default channel.
-### MIDI local control ON channel «1..16» [Script command]
-Sets local control to ON on MIDI devices having specified channel as default channel.
-### MIDI all notes OFF channel «1..16» [Script command]
-Sends an AllNotesOff message on specified channel.
-### MIDI Omni mode OFF channel «1..16» [Script command]
-Sets Omni mode OFF on MIDI device(s) controlled by specified channel.
-### MIDI Omni mode ON channel «1..16» [Script command]
-Sets Omni mode ON on MIDI device(s) controlled by specified channel.
-### MIDI Mono mode ON [«0..16» voices] channel «1..16» [Script command]
-Sets Mono mode ON on MIDI device(s) controlled by specified channel.
-### MIDI Poly mode ON channel «1..16» [Script command]
-Sets Poly mode ON on MIDI device(s) controlled by specified channel.
-### MIDI decimal send «decimal data» [Script command]
-Sends deciimal data to the MIDI output. Using this low-level command is
-    not recommended, except for system-exclusive messages.
-### MIDI hexa send «hexadecimal data» [Script command]
-Sends hexadecimal data to the MIDI output. Using this low-level command is
-    not recommended, except for system-exclusive messages.
-### MIDI switch ON «64..95» channel «1..16» [Script command]
-Switches ON specified switch on specified channel (e.g. the 'hold' pedal).
-• This is the same as _switchon(«64..95»,«1..16»)
-### MIDI switch OFF «64..95» channel «1..16» [Script command]
-Switches OFF specified switch on specified channel (e.g. the 'hold' pedal).
-• This is the same as _switchoff(«64..95»,«1..16»)
-### MIDI set basic channel to «1..16» [Script command]
-Specifies on which channel the following program change messages should be sent.
-### Return [Script command]
-Returns to the script in which a subscript was called.
-### Resume
-Allows current process to continue if it has been interrupted by "Pause".
-• This may also be done by receiving an "Apple Event" of class 'Bel0' and ID 'cont'.
-### Pause
-Allows current process to pause until the 'Resume' command is activated by clicking the
-    "Resume" button or sending an "Apple Event" of class 'Bel0' and ID 'cont'.
-• This is also a script command.
 ### French convention
 Use French names of notes: dob, do, do#, reb, re, re#, mib, mi, mi#, fab, fa, fa#, solb,
     sol, sol#, lab, la, la#, sib, si, si# and octave numbers such that la3 = 440 Hz.
-• The keyboard displayed by this command allows you to select alternate names, e.g. "reb"
-    instead of "do#". These choices are stored along with settings. BP2 does recognize
-    both names anyway, so the choice is only for screen display.
-• Also note that changing the "note convention" causes BP2 to recompile the script (if any)
-    displayed in the "Interaction" window (and saved as '-in.filename').
 • Related topic: "Tuning"
 ### English convention
 Use English names of notes: Cb, C, C#, Db, D, D#, Eb, E, E#, Fb, F, F#, Gb, G,
-    G#, Ab, A, A#, Bb, B, B# and octave numbers such that A4 = 440 HzgThe keyboard
-    displayed by this command allows you to select alternate names, e.g. "Db"
-    instead of "C#". These choices are stored along with settings. BP2 does recognize
-    both names anyway, so the choice is only for screen display.
-• Also note that changing the "note convention" causes BP2 to recompile the script (if any)
-    displayed in the "Interaction" window (and saved as '-in.filename').
+    G#, Ab, A, A#, Bb, B, B# and octave numbers such that A4 = 440 Hz
 • Related topic: "Tuning"
 ### Indian convention
 Use Indian names of notes: sab, sa, sa#, reb, re, re#, gab, ga, ga#, mab, ma, ma#, pab,
 pa, pa#, dhab, dha, dha#, nib, ni, ni# and octave numbers such that dha4 = 440 Hz.
-• The keyboard displayed by this command allows you to select alternate names, e.g. "sa#"
-    instead of "rek". These choices are stored along with settings. BP2 does recognize
-    both names anyway, so the choice is only for screen display.
-• Also note that changing the "note convention" causes BP2 to recompile the script (if any)
-    displayed in the "Interaction" window (and saved as '-in.filename').
 • Related topic: "Tuning"
 ### Key numbers
 Use MIDI key numbers to represent notes, for example 'key#60' is middle C.
-• Changing the "note convention" causes BP2 to recompile the script (if any) displayed in
-    the "Interaction" window (and saved as '-in.filename').
 • Related topic: "Tuning"
 ### Note conventions
 Conventions used for writing "simple notes".
@@ -1187,31 +573,10 @@ Conventions used for writing "simple notes".
     "Note convention = Indian"
     "Note convention = key numbers"
     "Tuning"
-### Note convention = English [Script command]
-Use English names of notes: Cb, C, C#, Db, D, D#, Eb, E, E#, Fb, F, F#, Gb, G,
-    G#, Ab, A, A#, Bb, B, B# and octave numbers such that A4 = 440 Hz.
-• Related topic: "Tuning"
-### Note convention = French [Script command]
-Use French names of notes: dob, do, do#, reb, re, re#, mib, mi, mi#, fab, fa , fa#, solb,
-    sol, sol#, lab, la, la#, sib, si, si# and octave numbers such that la3 = 440 Hz.
-• Related topic: "Tuning"
-### Note convention = Indian [Script command]
-Use Indian names of notes: sab, sa, sa#, reb, re, re#, gab, ga, ga#, mab, ma, ma#, pab,
-    pa, pa#, dhab, dha, dha#, nib, ni, ni# and octave numbers such that dha4 = 440 Hz.
-• Related topic: "Tuning"
-### Note convention = key numbers [Script command]
-Use MIDI key numbers, for example 'key#60' is middle C.
-• Related topic: "Tuning"
-### Number streaks from 0 [Script command]
-Refers to the numbering of time streaks on graphics. (See "Graphic settings" dialog)
-### Number streaks from 1 [Script command]
-Refers to the numbering of time streaks on graphics. (See "Graphic settings" dialog)
-### Print window «windowname» [Script command]
-Prints current active window.
 ### Quantization «long» milliseconds [Script command]
 The minimum significant duration. It is convenient to set quantization to the largest
     acceptable value in order to save "computation" time and space.
-• Note that quantization in BP2 has no effect on long-term accuracy.
+• Note that quantization in BP2/BP3 has no effect on long-term accuracy.
 ### Quantize OFF [Script command]
 Cancels the effect of "Quantize ON".
 ### Quantize ON [Script command]
@@ -1219,26 +584,8 @@ See "Quantization".
 ### Reset random sequence  [Script command]
 Reseeds the random number generator with the value specified by "Set random seed"
 • Related topics: "_srand", "_randomize", "Randomize", "Set random seed", "New seed".
-### Reset keyboard [Script command]
-Resets keyboard tokens. (See "Type tokens")
 ### Run script «filename» [Script command]
 Runs the specified script, if found on the disk in current directory.
-### Select all in window «windowname» [Script command]
-Selects entire specified window.
-### Set directory «long» [Script command]
-Sets current directory to specified value. Normally this value is not typed.
-• The instruction is created wherever necessary bu running "Check current script".
-### Set random seed «unsigned» [Script command]
-Sets the value of the random seed to specified value, and restarts the random
-    sequence. This makes it possible to reproduce a sequence of 'random' decisions.
-• Related topics: "_srand", "_randomize", "Randomize", "Reset random sequence", "New seed".
-### Set selection start «long» [Script command]
-Sets the beginning of text selection to specified position.
-### Set selection end «long» [Script command]
-Sets the end of text selection to specified position.
-### Set Vref «int» [Script command]
-Sets current volume to specified value. Normally this value is not typed.
-• The instruction is created wherever necessary bu running "Check current script".
 ### _smooth
 • Related topic: "Smooth time"
 ### Smooth time [Script command]
@@ -1255,36 +602,12 @@ Sets time to striated.  (See the "Metronome" dialog)
 • Related topic: "Smooth time"
 ### Tempo «long» ticks in «long» secs [Script command]
 Sets the time base to specified values.  (See the "Time base" dialog.)
-### Time base dialog
-A dialog containing specifications for the time base. On top, the current metronome
-    value (matching the one in the "Metronome" dialog) is expressed with a ratio of
-    ticks against seconds, e.g. 3 ticks in 2 seconds means 1.5 beats per second,
-    i.e. mm = 90.
-• Below are three cycles of tick patterns.  Enter a duration for
-    each cycle (between 1 and 40). Square check boxes indicating beats become hilited.
-• Check squares for hearing the ticks.
-• Clicking a square with the Option key down allows a more detailed specification.
-### Reset cycle
-In the "Time base" dialog, resets all cycles to the first beat.
-### Clear cycle
-In the "Time base" dialog, unchecks all ticked beats in a tick pattern.
 ### Time resolution «long» milliseconds [Script command]
 Sets time resolution to specified value.  (See the "Time accuracy" dialog.)
 ### Type «line» [Script command]
 When this script is executed, «line» is printed in the window previously selected by
    script instruction "Activate window".
 • "Type <return>" inserts line feeds.
-### Use buffer limit
-It forces BP2 to check the length of the "work string" (the item being produced) against
-    the limit value fixed in window "Buffer size".
-### Use buffer limit OFF [Script command]
-Cancels the effect of "Use buffer limit ON".
-### Use buffer limit ON [Script command]
-When checked, "production" will stop each time the "work string" reaches the size
-    specified in dialog "Buffer".  BP2 will prompt the user to allow expanding the
-    buffer, or terminate production.
-### Wait «long» milliseconds [Script command]
-Instructs BP2 to wait for the specified number of milliseconds.
 ### Wait for «key stroke or MIDI event» [Script command]
 To define the wait event, the easiest is to check 'REC' in the script window,
     then click 'WAIT FOR:'.
@@ -1299,165 +622,11 @@ To define the wait event, the easiest is to check 'REC' in the script window,
     Wait for Continue -- waiting for a 'Continue' MIDI message
     Wait for Stop -- waiting for a 'Stop' MIDI message
 • Clicking the mouse exits any the wait loop.
-### Reset interaction [Script command]
-Resets the interactive environment, i.e. all features
-    that allow the real-time control of BP2 by an external MIDI device.
-• This environment is saved in a '-in.filename' file.
-• Resetting the interactive environment can also be achieved by clearing the window
-    "Interaction".
-### IN Derive further «note» channel «1..16» [toggle]
-This is a script command modifying the interactive environment set by the '-in' file.
-• When flag "Derive further" is ON (see also "Settings" window), instead of initializing
-    the "work string" to the start string (generally 'S'), BP2 will try to produce a derivation
-    of the last item it generated.
-### IN On «note» channel «1..16» do «script instruction»
-Specified NoteOn received by BP2 provokes the execution of script instruction.
-### IN Reset weights «note» channel «1..16» [toggle]
-This is a script command modifying the interactive environment set by the '-in' file.
-• Specified NoteOn allows rule weights in the grammar to be reset once an item has been
-    produced.
-### IN Start play «note» channel «1..16»
-This is a script command modifying the interactive environment set by the '-in' file.
-• Sets the NoteOn message allowing the synchronization of the item to be played.
-• See "Synchronize start".
-### IN Repeat 'v' times «note» channel «1..16» [v = velocity]
-This is a script command modifying the interactive environment set by the '-in' file.
-• Specified NoteOn forces 'v' times repetition of the item currently played.
-• To stop repeating, you may also use "IN End repeat" or "IN Quit".
-### IN End repeat «note» channel «1..16»
-This is a script command modifying the interactive environment set by the '-in' file.
-• When the note is received, it cancels the effect of "IN Repeat forever".
-### IN Repeat forever «note» channel «1..16»
-This is a script command modifying the interactive environment set by the '-in' file.
-• If the note is received then the current item will be played forver.
-    (The effect is the same as "Cyclic play" in the "Settings" window.)
-• To stop repeating, use "IN End repeat" or "IN Quit".
-### IN Quit «note» channel «1..16»
-This is a script command modifying the interactive environment set by the '-in' file.
-• Aborts improvisation or "computation".
-### IN Use each substitution «note» channel «1..16» [toggle]
-This is a script command modifying the interactive environment set by the '-in' file.
-• When the note is received, it changes the status of the "Use each substitution" flag.
-    (See the "Settings" window.)  This relates to "SUB" "subgrammars": if the flag is on,
-    then each substitution is played on the sound output.
-### IN Control tempo controller #«0..127» channel «1..16» range «float»
-This is a script command modifying the interactive environment set by the '-in' file.
-• Sets specified MIDI controller to modify tempo in specified range. When the controller's
-    position is medium (64) tempo is the one set by the metronome value. When it is
-    maximum (127) tempo is multiplied by range. When it is minimum (0) tempo is
-    divided by range.
-### Synchronize start ON-OFF «note» channel «1..16» [toggle]
-This is a script command modifying the interactive environment set by the '-in' file.
-• Changes the status of "Synchronize start". (See "Settings" dialog)
-### IN Set computation time to 'v' «note» channel «1..16» [v = velocity]
-This is a script command modifying the interactive environment set by the '-in' file.
-• When the mentioned note is received it will set a new "computation" time limit for the
-    item being computed.
-### IN Smooth-striated time «note» channel «1..16» [toggle]
-This is a script command modifying the interactive environment set by the '-in' file.
-• Specified NoteOn changes time from smooth to striated and conversely.
-    (See "Striated time").
-### IN Use-ignore object constraints «note» channel «1..16» [toggle]
-This is a script command modifying the interactive environment set by the '-in' file.
-• Specified NoteOn changes the status of "Ignore constraints". (See "Settings" dialog)
-### IN Skip next item «note» channel «1..16»
-This is a script command modifying the interactive environment set by the '-in' file.
-• Specified NoteOn instructs BP2 to skip the item being computed. This is required, for
-   instance, if important parameters like tempo have been modified.
-### IN Play again item «note» channel «1..16»
-This is a script command modifying the interactive environment set by the '-in' file.
-• Specified NoteOn instructs BP2 to play once again the item being played.
-### IN Synchro tag «Wx» = «note» channel «1..16»
-This is a script command modifying the interactive environment set by the '-in' file.
-• Sets specified tag to respond to specified NoteOn. When this tag is encountered in an
-    item, BP2 will wait for the NoteOn.  (A message will be displayed.) 
-### IN Param «Kx» = controller #«0..127» channel «1..16»
-This is a script command modifying the interactive environment set by the '-in' file.
-• Sets specified MIDI controller to control the value of parameter Kx.
-### IN Parameter «Kx» = velocity «note» channel «1..16»
-This is a script command modifying the interactive environment set by the '-in' file.
-• Sets specified key to control the value of parameter Kx.  Value is changed on NoteOn
-    and set to the velocity.
-### IN Min «long» tick in «long» s «note» max «long» tick in «long» s «note» channel «1..16»
-This is a script command modifying the interactive environment set by the '-in' file.
-• The first «note» will set the time base to its minimum value (in ticks per second).
-• The second «note» will set the time base to its maximum value.
-• Both notes must be on the same channel.
-• Intermediate notes will set the time base to an interpolated value.
-• Time base setting is expressed by the number of ticks against the number of seconds,
-    for example: 13287 ticks in 4563 seconds.  (Accuracy is absolute!)
-### Text Color ON [script command]
-Forces color text display. Subsequent changes in settings will be ignored.
-### Text Color OFF [script command]
-Forces black and white text display. Subsequent changes in settings will be ignored.
-### Graphic Color ON [script command]
-Forces color graphic display. Subsequent changes in settings will be ignored.
-### Graphic Color OFF [script command]
-Forces black and white graphic display. Subsequent changes in settings will be ignored.
-### BP2 script
-This command does nothing. It may be inserted on top of a script to enable BP2 and other
-    software to figure out that a file contains a BP2 script.
-• It is compulsory on top of '-in' interactive files for BP2 to recognize 'new' formats.
-### Random sequence
-Displays this dialog.
-### Time accuracy
-Displays this dialog.
-Related topic: "Quantization".
-### Buffer size
-Displays this dialog.
-### Graphic settings
-Displays this dialog.
-### Modem port
-Sets BP2 to send MIDI messages through the 'Modem' serial port.
-• This setting has no effect under "Opcode OMS" (Open Music System)
-### Printer port
-Sets BP2 to send MIDI messages through the 'Printer' serial port. Make sure that 
-AppleTalk is not active.
-• This setting has no effect under "Opcode OMS" (Open Music System)
-### Reset windows
-Resets window sizes and locations to default.
 ### Split terminal symbols
 When checked, inserts spaces between terminal symbols in items produced by the grammar.
 ### Split |variables|
 When checked, marks variables with vertical lines in items produced by the grammar.
 • This is only useful with black and white display.
-### Type text
-When checked, key presses will type characters into the current window normally.  Choosing
-    this command cancels the effect of "Type tokens".
-### RECEIVE... [MIDI filter]
-Items checked in this list indicate the types of MIDI messages that BP2 should receive.
-• Related topic: "TRANSMIT"
-### TRANSMIT... [MIDI filter]
-Items checked in this list indicate the types of MIDI messages that BP2 should transmit.
-• Every transmitted message must have been received.  Therefore the 'receive' box is
-    also checked.
-• Related topic: "RECEIVE"
-### Receive MIDI data to file...
-This command allows you to store in-coming MIDI data to a text file. It may be used,
-    for instance, to save the set-up of any MIDI device using its bulk transfer facility.
-• Time information is not saved, i.e. this is convenient for system exclusive messages.
-• Note: on a slow machine like Mac II-ci you won't be able to receive a bulk transfer
-    properly. Some data gets lost. If you have such problems, use the 'D-50' bulk tranfer
-    facility in HyperMIDI. It works with any type of transfer and will be successful
-    provided that the in/out buffer of SoundObjectEditor is set to a sufficient value
-    (approximately 120 000 bytes for a D-50 bulk transfer producing exactly 36 048 MIDI
-    events).
-### Send MIDI data from file...
-This command allows you to send data to a MIDI device from a text file. It may be used,
-    for instance, to initialize a MIDI device using its bulk transfer facility.
-• Data is sent at the maximum rate allowed by the MIDI interface.
-### Type from MIDI [toggle]
-When "Type from MIDI" is active (special cursor), any key you hit on the MIDI keyboard
-    types the corresponding note in the currently active window. Names of notes depend on
-    the convention you select: English, French, Indian, key numbers.
-• Pushing the "Hold" pedal displays a prolongation symbol '_'.
-• In the same mode, program changes are recorded as script commands, and it is possible
-    to enter automatically the arguments of the following "performance controls":
-_chan(),_vel(),_volume(),_pan(),_mod(),_press(),_pitchbend(),_pancontrol(),_volumecontrol().
-• Click on the control's name, move the corresponding MIDI control an hit any key on the
-    computer to freeze the correct value.
-• This parameter capture looks at preceding _pitchrange(), _pancontrol() and
-    _volumecontrol() in order to check the proper controller and assess its range.
 ### Time patterns
 Sequences of time intervals characterized by precise ratios, to be used in "smooth time".
 • These are processed like (codeless) "sound-objects". They are usually put together in
@@ -1669,71 +838,21 @@ Indicates that panoramic should change stepwise between two specified values.
 Indicates that panoramic should change continuously between two specified values.
 • See "Continuous performance control"
 ### _volumecontrol(x) [Current channel]  [Performance control]
-Informs BP2 that MIDI controller x controls the volume (on the current channel).
+Informs BP2/BP3 that MIDI controller x controls the volume (on the current channel).
 • Default value is 7, in agreement with "General MIDI" specs.
 ### _pancontrol(x) [Current channel]  [Performance control]
-informs BP2 that MIDI controller x controls the panoramic (on the current channel).
+informs BP2/BP3 that MIDI controller x controls the panoramic (on the current channel).
 • Default value is 10, in agreement with "General MIDI" specs.
 ### Wait for:
 When in RECording script mode, this allows you to enter a script line
     "Wait for «key stroke or MIDI event»" interactively.
 ### Execute
 Execute the script displayed in the script window, if any.
-### MIDI check input
-• Displays the 'Data' window and sets the "Type from MIDI" mode in which notes played on
-    an external MIDI device are typed to the window.
-### MIDI check output
-• Play random sequences on the MIDI port to check the output.
-• Select instruments on polytimbral synthesizers (including QuickTime Music).
-### RESET (Keyboard window)
-Delete all tokens attached to keys. (See "Type tokens")
-### MIDI PANIC
-This command does three things:
-• It sends a "AllNotesOff" message to each of the 16 MIDI channels;
-• It sends a "NoteOff" to each key of channel 1 and of every channel that has been assigned a
-    MIDI instrument (see "MIDI orchestra");
-• It clears the current buffer so that no more MIDI message is sent to the MIDI device.
-    
-• A good idea is to reset your MIDI device (synth, keyboard, etc.) by switching it off and on.
-### Expand selection window «windowname»
-You selected text in the current edit window that will be interpreted by BP2 as a
-    "polymetric expression". The complete (expanded) polymetric expression will be shown
-    if the syntax is correct and if terminal symbols belong to the current alphabet.
-• This is also a script command.
-### Tables…
-Displays a window allowing the edition of tables used by Csound instruments.
-### Play selection in window «windowname»
-If symbols and syntax are correct, the selection in the current edit window will be
-    played on the MIDI output. You may check "Show graphics" on the "Settings" dialog to
-    see how "sound-objects" are set in time.
-• This is also a script command.
-### Ignore constraints
-If checked, then all object properties will be ignored when setting time.
-### Ignore constraints OFF [Script command]
-Cancels effect of "Ignore constraints ON".
-### Ignore constraints ON [Script command]
-See "Ignore constraints".
-### Show messages
-Allows BP2 to display messages during "computation".
-### Show messages OFF [Script command]
-Cancels effect of "Show messages ON".
-### Show messages ON [Script command]
-See "Show messages".
-### Interactive (use input)
-When this is checked, BP2 tries to make sense of in-coming MIDI messages. It will display
-    some of them (message line, bottom of the screen) and may take actions according to
-    interactive commands defined in window "Interaction" (-in.filename).
-### Interactive OFF [Script command]
-Cancels the effect of Interactive ON.
-### Interactive ON [Script command]
-When this is checked, BP2 tries to make sense of in-coming MIDI messages. It will display
-    some of them (message line, bottom of the screen) and may take actions according to
-    interactive commands defined in window "Interaction" (-in.filename).
 ### Reset controllers [Settings dialog]
 Resets switches, pitch benders, modulation, channel pressure, panoramic and volume
     on all channels once an item has been played. This option is recommended although it may
     be time consuming.
-• Note that BP2 keeps track of the channels on which controllers
+• Note that BP2/BP3 keeps track of the channels on which controllers
     have been changed, so normal reset will only occur on those channels. (Consequently,
     if a controller has been changed by another device than BP2, it may not be reset
     properly.)  However, general reset is forced when invoking "Produce items" if this
@@ -1757,19 +876,8 @@ Resets "flags" in grammar to 'zero' before producing a new item.
 Cancels the effect of "Reset rule flags ON".
 ### Reset rule flags ON [Script command]
 See "Reset rule flags".
-### Synchronize start
-If checked, BP2 will wait for a specific MIDI NoteOn before playing the current item.
-• The synchronize message may be set in the interactive file "-mi.filename".
-• See "IN Start play".
-### Synchronize start OFF [Script command]
-Cancels the effect of "Synchronize start ON".
-### Synchronize start ON [Script command]
-See "Synchronize start".
-### Compute while playing
-Allows BP2 to compute the next item while playing current one. Usually this option
-    is active. It may be de-activated to save memory space.
 ### Non-stop improvize
-Allows BP2 to produce unlimited number of items with the same grammar.
+Allows BP2/BP3 to produce unlimited number of items with the same grammar.
 ### Non-stop improvize OFF [Script command]
 Cancels the effect of "Non-stop improvize ON".
 ### Non-stop improvize ON [Script command]
@@ -1781,7 +889,7 @@ Cancels the effect of "Cyclic play ON".
 ### Cyclic play ON [Script command]
 See "Cyclic play".
 ### Use each substitution
-When SUB "subgrammars" are used, allows BP2 to play items produced after each substitution.
+When SUB "subgrammars" are used, allows BP2/BP3 to play items produced after each substitution.
     (See "-gr.koto3" for instance)
 ### Use each substitution OFF [Script command]
 Cancels the effect of "Use each substitution ON".
@@ -1796,9 +904,9 @@ Produces all items generated by grammar.
 ### Display production
 Displays all steps of the "production" in the "Trace" window.
 ### Step-by-step produce
-Displays all steps of the "production" in the "Trace" window, and allows BP2 to pause.
+Displays all steps of the "production" in the "Trace" window, and allows BP2/BP3 to pause.
 ### Step subgrammars
-Allows BP2 to pause each time a "subgrammar" has been used entirely in "production".
+Allows BP2/BP3 to pause each time a "subgrammar" has been used entirely in "production".
 ### Trace production
 Displays all steps of the "production" in the "Trace" window along with decisions
     taken while producing an item.
@@ -1830,23 +938,6 @@ Computation comprizes:
     of text selection as a musical item;
 • the expansion of the item as a "polymetric expression"
 • the "time-setting" of the expanded expression.
-### Type tokens [toggle]
-Instead of typing the characters indicated on the computer's keyboard, when 
-   "Type tokens" is on, key presses are mapped to tokens (strings of characters)
-   as defined in a 'keyboard' file (-kb.filename).  Tokens are entered into
-   the current edit window as you type, separated by spaces as necessary.
-• To edit, save and load tokens, display the "Keyboard" window.
-• This setting can be changed in the "Keyboard" window or from the 'Settings' menu.
-• Can be changed with the script commands "Use tokens ON" and "Use tokens OFF".
-### Use tokens ON [Script command]
-Turns on "Type tokens".
-### Use tokens OFF [Script command]
-Turns off "Type tokens".
-### Use these tokens (Keyboard window)
-See "Use tokens".
-### OK
-Tells BP2 that you want it to accept the changes made in the current window
-    and then hides the window.
 ### New seed (Random sequence)
 Creates an arbitrary new seed that will be used for random generation. This is the
     'randomize' procedure used by programmers. The new seed will be displayed and may
@@ -1855,10 +946,6 @@ Creates an arbitrary new seed that will be used for random generation. This is t
     a grammar.
 • Related topics: "_srand", "_randomize", "Randomize", "Reset random sequence",
     "Set random seed".
-### Use buffer limit OFF
-Ignore specified buffer limit: the "work string" may grow forever.
-### Use buffer limit ON
-Use the specified value to limit the length of the "work string" during "production".
 ### Rule arrows
 <-> --> and <-- are the three derive modes in grammars.
 --> means that the rule may be used in "production" only
@@ -1867,7 +954,7 @@ Use the specified value to limit the length of the "work string" during "product
     (This is the usual format for "true BP grammars")
 ### true BP grammars
 These grammars can be used both in "production" and in analysis (parsing).
-    See the reference manual. When compiling a grammar, BP2 checks whether it may be taken
+    See the reference manual. When compiling a grammar, BP2/BP3 checks whether it may be taken
     as a true BP grammar.
 ### GEN type of a Csound parameter
 Indicates the Csound generator used with function tables describing variations of this
@@ -1920,60 +1007,13 @@ This menu item can be toggled off and on.  When checked, musical items that BP2 
     "Write Csound scores").
 • May be toggled with the script commands: "Csound score ON" and "Csound score OFF".
 • Related topics: "Csound format", "Csound implementation"
-### Copy from ...
-Copy part of properties from specified "sound-object prototype".
-### Go to ...
-Jumps to specified "sound-object prototype" or "Csound instrument".
-### Edit/record MIDI stream
-Opens dialog for recording and editing MIDI codes for this sound-object prototype.
 ### (striated time)
 Decide to play expression in striated or smooth time. (See "Striated time")
-### Show graphics
-Decide to play expression with or without graphics.
-### Ignore properties
-If checked, "sound-object prototype" constraints will be ignored when playing expression.
-### with parameters:
-If checked, following parameters will be used when playing object.
-### Load prototype file
-Load a '-mi' "sound-object prototype" file. Note that 'old' files (before 2.5) will
-    not be loaded unless the corresponding '-ho' alphabet has been loaded.
-### Save prototype file
-Saves current "sound-object prototype" file.
-### RECORD
-Records new MIDI codes for current "sound-object prototype".
-### PLAY
-Plays current "sound-object prototype" exactly at the tempo it was recorded.
-### Play ticks
-When checked, metronome ticks will be heard.
-### Time ticks OFF
-This is a script command.
-Switches off metronome ticks.
-### Time ticks ON
-This is a script command.
-Switches on metronome ticks.
-### Tick cycle ON
-This is a script command.
-• Allows the hearing of metronome ticks, if combined with "Play ticks ON", mixed with
-    the performance of items.
-### Tick cycle OFF
-This is a script command.
-• Inhibits metronome ticks when items are performed.
-### Reset tick cycle
-This is a script command.
-• Resets the cycles of ticks played by the time base during the performance of items.
-### Reference period
-See "Striated object".
 ### Striated object:  Tref =...
 This "sound-object prototype" is declared as 'striated', i.e. based on a
     metronome setting the period of which is Tref, and may be rescaled accordingly when
     performed on a different tempo.  For instance, if Tref = 1000ms and metronome value
     is mm = 120, this object will be rescaled at 50% its nominal duration.
-### Record tick
-Select the MIDI key and channel to play ticks.
-### Import...
-Import MIDI codes for current "sound-object prototype" from a MIDI file.
-### Show codes
-Display MIDI codes recorded for current "sound-object prototype".
 ### Adjust duration to...
 Adjust the duration of current "sound-object prototype" to the value specified
 in milliseconds.
@@ -2140,15 +1180,6 @@ This indicates the number of ticks per minute in the "Time base".
 If checked, and if non zero value is specified, then all notes entered from the MIDI
     keyboard are transposed accordingly.  For instance, if the transposition value is
     -3 semitones, the C5 key will be transcribed as A4.
-### INIT: <initialisation line>
-Use this line on top of a grammar to define a process that should be activated (ONCE)
-    before improvizing.  A typical example is the setting of a 'patch' on the synthesizer.
-• The initialisation line itself is a single script instruction. There are two cases:
-1) A "Play «any item»" instruction is executed when the first item has been produced and is
-    ready to be performed; thus there is no delay between initialisation and the
-    beginning of the performance.
-2) Any other instruction is executed before producing the first item.  This allows a
-    sufficient delay, for instance in the case of a patch change.
 ### Performance controls
 To display the list of currently implemented performance controls, select
     "Pick tool or performance control" in the "Edit" menu.
@@ -2156,96 +1187,12 @@ To display the list of currently implemented performance controls, select
     adding expressiveness to the performance (e.g. _legato, _volume, etc.) or changing
     MIDI parameters (e.g. _pitchbend) that are not mapped to specific "sound-objects".
 • Related topic: "Continuous performance control"
-### Apple Events
-These are used to handle communication between several applications running under
-    MacOS on the same, or several interconnected machines.
-    BP2 responds to local Apple Events (sent by the same computer) and to remote ones
-    (sent by other computers over a local network).
-
-    A test client application named "TryAppleEvents.fm" running under FileMaker Pro is
-    supplied.
-
-    In addition, scripts commands like "AE send" and "AE wait" make it possible to send
-    (local) Apple Events or wait for events sent by other applications.
-
-BP2 handles the following Apple Events:
-• The four core Apple Events of class 'aevt':
-   Open application (ID 'oapp');
-   Open document (ID 'odoc');
-   Print document (ID 'pdoc');
-   Quit application (ID 'quit');
-• Events of class 'Bel0', with no parameter, controlling BP2:
-    ID 'beep' beeps BP2 (usefull for tests);
-    ID 'impr' tells BP2 to improvize with the current grammar;
-    ID 'dosc' tells BP2 to run the current script;
-    ID 'quit' aborts current process;
-    ID 'paus' interrupts the current process;
-    ID 'cont' resumes the current process;
-    ID 'fast' tells the inference engine and the interpreter that an item shall be
-        played as soon as possible;
-    ID 'more' tells the inference engine and the interpreter that the current item
-        shall be played again;
-    ID 'skip' tells the interpreter that the item being produced shall not be played.
-• Events of class 'Bel0' sending a 'TEXT' parameter and expecting BP2 to do something with it:
-    ID 'scri' loads the text as a BP2 script;
-    ID 'gram' loads the text as a BP2 grammar;
-    ID 'alph' loads the text as a BP2 alphabet;
-    ID 'glos' loads the text as a BP2 glossary;
-    ID 'inte' loads the text as a BP2 interactive file;
-    ID 'data' loads the text as a BP2 data file;
-    ID 'csin' loads the text as a BP2 "Csound instrument file";
-    ID 'name' reads each line in text and tries to assign it to one of the current
-        BP2 files (grammar,alphabet,data,glossary,interaction,time base,
-        keyboard,sound-object prototypes,settings,script). Names may be separated by
-        spaces or returns. Each name should start with a valid BP2 prefix.
-    ID 'play' interprets the text as a musical item in BP2 syntax;
-    ID 'scln' interprets the text as a single BP2 script line, with the
-        advantage of not writing in the Script window;
-    ID 'sett' loads the settings file specified in the text;
-    ID 'conv' sets "note convention" to specified option: English, French,Indian or Keys.
-        (These keywords are NOT case-sensitive.)
-• Related topics:
-"Interactive mode"
-"AE send fast"
-"AE send normal"
-"AE wait"
-### AE send fast class '«AEclass»' ID '«AEID»' to application '«signature»'
-See "AE send normal". The difference lies in the high priority of the event. Use this
-    version if the AE is needed for synchronisation.
-### AE send normal class '«AEclass»' ID '«AEID»' to application '«signature»'
-This script command sends an "Apple Event" with normal priority to an application
-    running on the same machine.  (Remote Apple Events can be received, not sent,
-    by this version.)
-• For high priority, use "AE send fast".
-• «AEclass» is the class of the Apple Event. For instance, most events processed by BP2
-    have class 'Bel0'.
-• «AEID» is the identification of the event in that class. See the documentation about the
-    target application. See "Apple Events" for a complete documentation of events
-    processed by BP2.
-• «signature» is the signature (creator) of the target application. If not documented,
-    it can be found by opening the application with ResEdit and selecting "Get Info..."
-    in the "File" menu.  The signature of BP2 is also 'Bel0'.
-### AE wait class '«AEclass»' ID '«AEID»'
-This script command forces BP2 to wait for an Apple Event.  (Clicking the mouse also
-    aborts the process.)
-• «AEclass» is the class of the Apple Event. For instance, most events processed by BP2
-    have class 'Bel0'.
-• «AEID» is the identification of the event in that class. See the documentation about the
-    target application. See "Apple Events" for a complete documentation of events
-    processed by BP2.
-• Related topics:
-"AE send fast"
-"AE send normal"
 ### Time resolution:
-The accuracy of the MIDI driver. Typically 10ms.
+The accuracy of the MIDI driver. Typically 10 ms.
 ### Quantization:
 Expected accuracy of the positions of "sound-objects".  This may be set to the maximum
     auditive tolerance on the perception of durations. 50ms is a good idea.
 • A large quantization requires less memory space and computation time.
-### beat(s) [max 40]
-The number of beats of this tick cycle.
-### beats
-A "beat" of a sound-object is the time interval defined by its "Reference period".
 ### vel
 Abbreviation for velocity.
 ### ms
@@ -2256,19 +1203,9 @@ Each cycle of ticks may run at a speed different from the time base.
 When checked, prevents tick cycle from being heard.
 ### _rest
 See "Undetermined rests"
-### Reset session time
-Resets a clock counting seconds during BP2's operation. See "Tell session time".
-### Tell session time
-Tells the time elapsed since BP2 was started, or since "Reset session time" was last called.
-• Related topic: "Reset session time".
-• This is also a script command.
-### TryAppleEvents.fm
-A very comprehensive introduction of BP2 in a client-server envoronment will be found in the
-    enclosed data-base "TryAppleEvents.fm" that may be opened under Claris FileMaker Pro.
-• Related topics: "Apple Events".
 ### Set weights
 Sets all rule weights in the grammar to a specified value.
-### Learn weights
+### Learn weights (BP2 only)
 If the grammar is a "true BP grammar", it is possible to derive rule weights from a set of
     examples, i.e. a set of musical items that could have been produced by the grammar.
 • The result is a grammar that produces musical items very close to the ones used for the
@@ -2285,29 +1222,29 @@ If the grammar is a "true BP grammar", it is possible to derive rule weights fro
 "Load weights"
 "Set weights"
 "Save weights"
-### Show weights
+### Show weights (BP2 only)
 Displays the grammar with the current values of its rule weights. This is useful when the production
     of items changes rule weights.
-### Load weights
+### Load weights (BP2 only)
 Changes weights in a grammar according to values previously saved in a '-wg' file. In many cases
     a warning is issued saying that the grammar has been modified since its weights were saved,
     because the weight file keeps a record of compilation time. Be careful not to load weights
-    obtained in a grammar with a different arrrangement of rules, otherwise BP2 may crash…
+    obtained in a grammar with a different arrangement of rules, otherwise BP2 may crash…
 • Related topics:
 "Save weights"
 "Set weights"
 "Learn weights"
-### Save weights
+### Save weights (BP2 only)
 Saves the weights of rules in the current grammar to a '-wg' weight file.
 • Related topics:
 "Load weights"
 "Set weights"
 "Learn weights"
-### Load decisions
+### Load decisions (BP2 only)
 When producing items step by step in the "Choose candidate rule" mode, it is possible to load
     decisions taken previously from a decision file.
 • Related topic: "Save decisions"
-### Save decisions
+### Save decisions (BP2 only)
 When producing items step by step in the "Choose candidate rule" mode, it is possible to save
     the decisions taken so far to a decision file.
 • Related topic: "Load decisions"
@@ -2355,13 +1292,13 @@ Delay between the last event of a "sound-object" and the end of its time-span in
 ### Cyclic sound-objects
 Any sound-object may contain a periodical part starting at an arbitrary point of its
     time-span interval (see "Periodical after").
-• BP2 handles two typical cases:
+• BP2/BP3 handles two typical cases:
     1) The sequence of events in the periodical part must be sent again
        to the sound device when that part is repeated.  This happens for instance
        with sound-objects produced by a MIDI synthesizer.
     2) Cyclic properties are defined but there is no need to repeat the sequence in
        the periodical part.  This happens for instance with sound-objects produced
-       by a MIDI sampler: the sampler expects BP2 to trigger the sample with a
+       by a MIDI sampler: the sampler expects BP2/BP3 to trigger the sample with a
        NoteOn and it takes care of repetitions until a NoteOff is received.
   In '-mi.abc1', for instance, 'cycle1' illustrates case 1 and 'cycle2' case 2.
 • Property "Discard NoteOff's except in last period" is useful with objects in case 2.
@@ -2375,7 +1312,7 @@ Any sound-object may contain a periodical part starting at an arbitrary point of
 	time are ignored.
 • Beware when setting the startpoint of the periodical part: the balance between
     NoteOn's and NoteOff's should be equal in the periodical part.
-    BP2 compensates some balance problems by avoiding two successive NoteOn's on the
+    BP2/BP3 compensates some balance problems by avoiding two successive NoteOn's on the
     same key and channel (see "Strike NoteOn's according to default") and appending
     extra NoteOff's after the item when necessary, but an improper balance may result
     in unwanted auditive results.
@@ -2412,127 +1349,64 @@ This property is used with cyclic sound-objects, notably the ones representing s
 • Related topic: "Cyclic sound-objects".
 ### Strike again NoteOn's
 If a NoteOn must be sent while the same key of the same channel is already active
-    (because a NoteOn has already been sent) then BP2 will first send a NoteOff to
+    (because a NoteOn has already been sent) then BP2/BP3 will first send a NoteOff to
     deactivate the key.
-This is the default mode in BP2 (see "Strike NoteOn's according to default").
+This is the default mode in BP2/BP3 (see "Strike NoteOn's according to default").
 • Some MIDI sound devices may hang if two successive NoteOn's are sent to the same
-    key and the same channel.  BP2 keeps track of key on/off status to make sure this
+    key and the same channel.  BP2/BP3 keeps track of key on/off status to make sure this
     never happens.
 • Related topic: "Don't strike again NoteOn's"
 ### Don't strike again NoteOn's
 If a NoteOn must be sent while the same key of the same channel is already active
-    (because a NoteOn has already been sent) then BP2 will ignore it.
-• This is not BP2's default mode: see "Strike NoteOn's according to default"
+    (because a NoteOn has already been sent) then BP2/BP3 will ignore it.
+• This is not BP2/BP3's default mode: see "Strike NoteOn's according to default"
 • Related topics: "Strike again NoteOn's", "Discard NoteOff's except in last period"
 ### Strike NoteOn's according to default
 If a NoteOn must be sent while the same key of the same channel is already active
-    (because a NoteOn has already been sent) then BP2 will behave as per its default
+    (because a NoteOn has already been sent) then BP2/BP3 will behave as per its default
     setting.
-• BP2's default setting is the behaviour defined as "Strike again NoteOn's".
+• BP2/BP3's default setting is the behaviour defined as "Strike again NoteOn's".
 • Related topic: "Don't strike again NoteOn's"
 ### % of duration
 The specified value is a percentage of the sound-object's duration, so the actual
     value will vary according to its "dilation ratio".
-### Capture…
-• If a "sound-object prototype" is being displayed:
-    Copies MIDI codes of this "sound-object prototype" to a MIDI stream
-    that may later be pasted to another (or the same) prototype.
-• If the "Time base" dialog is being displayed:
-    Capture the current tick cycle and paste it later to a "sound-object prototype".
-• Related topic: "Paste MIDI stream"
-### Capture selection as…
-Takes the text selection in the current edit window, tries to interpret it as a musical
-    item, using the current alphabet of "terminal symbols", plays it to the MIDI
-    output and capture the MIDI codes so a MIDI stream that may later be pasted to
-    a "sound-object prototype".
-• Related topic: "Paste MIDI stream"
-### Paste MIDI stream
-Takes the currently captured MIDI stream (see "Capture selection as…" and "Capture…")
-    and pastes it to the currently displayed "sound-object prototype.
-There are several options:
-• Option "Delete and replace"
-    erases the MIDI sequence of the sound-object prototype and replaces it with the
-    MIDI stream.
-• Option "Insert at insert point"
-    inserts the MIDI stream at the insert point marked by a vertical red line on the
-    sound-object prototype.
-• Option "Replace from insert point"
-    replaces part of the MIDI sequence of the sound-object prototype, starting at the
-    insert point marked by a vertical red line, with the MIDI stream.
-• Option "Merge from insert point"
-    merges MIDI messages in the MIDI stream with the ones contained in the sound-object
-    prototype, starting at the insert point marked by a vertical red line.
-• Option "Insert before"
-    inserts the MIDI stream before the MIDI sequence of the sound-object prototype.
-• Option "Append"
-    appends the MIDI stream after the MIDI sequence of the sound-object prototype.
-### Write Csound scores
-When checked, musical items that BP2 produces are also written as Csound scores.
-    You may control how score files are created from the "File save preferences" window.
-• This setting is also accessible from the 'Devices' menu as "Csound scores".
-• May be toggled with the script commands: "Csound score ON" and "Csound score OFF".
-• Related topics: "Csound format", "Csound implementation"
 ### Csound implementation
 • Csound is a 100% software environment for the design and transformation of digitized
     sounds.  It runs on most platforms, including MacOS 9 & X, Linux, and Windows.
     Csound is "free software" (open source) distributed under the GNU LGPL license.
-• To download Csound, connect to http://csound.sourceforge.net/
-• BP2 produces Csound scores in the same way it produces MIDI files or real-time MIDI:
+• To download Csound, connect to https://csound.com
+• BP2/BP3 produces Csound scores in the same way it produces MIDI files or real-time MIDI:
     the "Csound scores" option may be selected in the "Output" menu and is saved with 
     the options of the current project or data.
 • Once the option has been selected you may produce a Csound score for each musical item
-    produced by a grammar or played from its text representation (a BP2 "score").  Items
+    produced by a grammar or played from its text representation (a BP2/BP3 "score").  Items
     may be played on real-time MIDI, saved to Csound scores, to MIDI files, or any
     combination of these.
 • If the musical item contains simple notes or sound-objects defined as streams of MIDI
-    messages, BP2 converts the stream to a sequence of Csound events, using the
+    messages, BP2/BP3 converts the stream to a sequence of Csound events, using the
     specifications of Csound instruments defined in a "Csound instrument file".  This file
     can be created and edited in the "Csound instruments" dialog accessible from the
     "Devices" menu.  Csound instrument specifications should contain data that is
     consistent with the "orchestra" file that will be invoked by Csound when compiling
-    the score produced by BP2.
-• If no "Csound instrument file" is loaded, BP2 uses a default instrument which has only
+    the score produced by BP2/BP3.
+• If no "Csound instrument file" is loaded, BP2/BP3 uses a default instrument which has only
     the start/end timing arguments and accepts pitch in the "octave point pitch-class"
     representation.  It is more clever to design a Cound orchestra with instruments
-    accepting parameters like pitchbend, pressure, modulation etc., which BP2 handles
+    accepting parameters like pitchbend, pressure, modulation etc., which BP2/BP3 handles
     in a smart way, using a "vector" representation of continuous parameter changes.
-• Sound-object protoypes may also contain Csound scores.  In this case, BP2 creates a
+• Sound-object protoypes may also contain Csound scores.  In this case, BP2/BP3 creates a
     score of the musical item arranging these individual scores after changing their
     timings and arguments according to the musical item and specifications of Csound
-    instruments.  BP2 may therefore produce Csound scores using only Csound events and
+    instruments.  BP2/BP3 may therefore produce Csound scores using only Csound events and
     Csound instrument specifications as an input, thereby bypassing current limitations
     of MIDI.
 • The mapping between Csound argument values (the ones found in the Csound score) and
-    MIDI / BP2 ranges is defined automatically once the user has supplied three typical
-    pairs of values.  BP2 performs linear or quadratic interpolation, plus logarithmic
+    MIDI / BP2/BP3 ranges is defined automatically once the user has supplied three typical
+    pairs of values.  BP2/BP3 performs linear or quadratic interpolation, plus logarithmic
     mapping if requested to do so.
-• In addition, BP2 handles "Performance parameters" with arbitrary names the values
+• In addition, BP2/BP3 handles "Performance parameters" with arbitrary names the values
     of which may be taken as arguments by Csound instruments.
 • Related topic: "Csound format"
-### Devices [menu]
-Contains menu commands for turning on or off BP2's various output options ("MIDI",
-"MIDI files", and "Csound scores"), choosing between multiple MIDI drivers when
-available, and for configuring MIDI and Csound output options.
-### Pitch argument:
-Put here the index of the argument controlling pitch in this Csound instrument.
-### Check orchestra file
-This feature not yet implemented.  A future version of BP2 will check the consistency
-    of information contained in this dialog with the one contained in the Csound
-    orchestra file it describes.
-### Copy from…
-Copy instrument specifications from another instrument.
-### log
-If checked, it means that the 3 values shown on the left are on a logarithmic scale.
-• If 'log' is checked on both lines of the mapping, it has no effect.
-### Assign as default to channel:
-If a number in range 1..16 is indicated here, it means that the corresponding MIDI
-    channel is assigned by default to this Csound instrument.
-• This feature facilitates the mapping to Csound of musical items that contain
-    MIDI channel information instead of Csound instrument assignments.
-### Number of arguments:
-This box contains the maximum number of arguments used by this Csound instrument.
-• Csound arguments that are not explicitly mapped to MIDI or BP2 parameters are
-    written as zero values.
 ### octave point pitch-class
 In this representation, pitch is represented as a decimal number in which the integer
     part is the octave number and the decimal part is the pitch class.
@@ -2564,7 +1438,7 @@ Boxes contain the indexes of arguments sending pitchbend information to this
 ### Pitchbender range (cents) +/-
 This box contains the range (in cents) of the pitchbend used in MIDI format, which
     may have been specified in the data or grammar with "_pitchrange(x)".
-• This information may be needed by BP2 for a correct remapping of pitchbend values
+• This information may be needed by BP2/BP3 for a correct remapping of pitchbend values
     from MIDI to Csound.
 ### Volume arguments:
 Boxes contain the indexes of arguments sending volume information to this
@@ -2618,19 +1492,6 @@ This box contains the index of the argument of this Csound instrument which shou
 This box contains the index of the argument of this Csound instrument which should
     contain the "dilation ratio" information.
 • Leave the box empty if this instrument does not need the information.
-### Csound instruments
-This dialog contains a description of arguments used by an instrument defined in a
-    Csound orchestra file.
-• Type command-? and click any button or static text to get the information.
-• Clicking the "MORE…" button displays a few additional arguments that can be mapped to
-    arbitrary "Performance parameters".
-• Related topic: "Csound implementation", "Csound instrument file".
-### Parameter name
-This field is accessed by clicking "MORE…" in the "Csound instruments" dialog.
-The name of this parameter should match the one of a "Performance parameter" used in
-    the data or grammar, otherwise the argument(s) listed under this name will
-    always remain 0.
-• Related topics: "_step", "_cont", "_value", "Performance parameter".
 ### Start argument
 This is the index of the argument used in a Csound event to pass on the value of this
     parameter, or the initial value in case it varies continuously.
@@ -2656,14 +1517,14 @@ This is the index of the argument used in a Csound event to pass on the index of
 • The middle box is only used for "continuous performance control".  It contains the
     index of the argument taking the final value of this control.
 • The rightmost box contains the index of the argument taking the reference of the
-    function table that BP2 creates for defining complex parameter variations.
+    function table that BP2/BP3 creates for defining complex parameter variations.
     (See "Continuous performance control")
 ### Continuous performance control
 • A few MIDI parameters such as pitchbend, modulation, volume, channel pressure and
     panoramic may be controlled continuously at a given sampling rate.  For example,
-    a portamento may be produced by the following BP2 score:
+    a portamento may be produced by the following BP2/BP3 score:
         _pitchcont _pitchrate(20) _pitchbend(6000) A4 B4 _pitchbend(9000)
-    in which BP2 will insert 20 pitchbend messages per second.
+    in which BP2/BP3 will insert 20 pitchbend messages per second.
 • Similarly, arbitrary parameters may be handled with effect only on the Csound
    output.  (See "Performance parameter").  For instance,
        _cont(blurb) _value(blurb,154.2) A4 B4 _value(blurb,-21) C4
@@ -2672,17 +1533,17 @@ This is the index of the argument used in a Csound event to pass on the index of
     necessary to supply the start and end values of the argument which will be
     interpolated by the procedure associated with the Csound instrument.  For instance,
     let the start value of pitchbend be sent as argument 5 and the end value as
-    argument 6.  The score produced by BP2 using the preceding item reads:
+    argument 6.  The score produced by BP2/BP3 using the preceding item reads:
         i1 0 1 8.09 6000 7500
         i1 1 1 8.11 7500 9000
    ("8.09" and "8.11" are the respective pitch values of A4 and B4.)
-• Another option with Csound is to allow BP2 to create function tables to control
+• Another option with Csound is to allow BP2/BP3 to create function tables to control
     the values.  An argument of the instrument should be reserved to passing on the
     table reference.
 • Related topic: "Step performance control"
 ### Step performance control
 • By default, all MIDI controls are modified only when explicit values are assigned
-    to them by the BP2 score.  For instance, the following score assigns different
+    to them by the BP2/BP3 score.  For instance, the following score assigns different
     modulation values to notes B4, C5 and D5:
         _modstep A4 _mod(2000) B4 C5 _mod(9000) D5
     Replacing "_modstep" (which is optional here) with "_modcont" would
@@ -2695,30 +1556,18 @@ If checked, all musical items are stored to the same MIDI or Csound score file.
 ### Change name
 Click this button to close the current MIDI or Csound score file and create a new one.
 ### MIDI file format
-BP2 supports three MIDI file formats: types 0, 1 and 2.  Here are tips for choosing
+BP2/BP3 supports three MIDI file formats: types 0, 1 and 2.  Here are tips for choosing
     an output format:
 •	If the file will contain a single musical item, or a sequence of items produced by a
     grammar in the "Improvize" mode, any format is OK.  Keep in mind, however, that
     format 2 may be rejected by single-track MIDI programs.
-•	In the current version, BP2 saves each item to a single track. Types 0 and 1 may
+•	In the current version, BP2/BP3 saves each item to a single track. Types 0 and 1 may
     therefore be considered equivalent.
 •	If the file will contain several independent musical items (each of which might
     have a different tempo or time signature), then type 2 must be used.
-• BP2 imports files type 0, 1 or 2.  With format 1 it superimposes the tracks even if
+• BP2/BP3 imports files type 0, 1 or 2.  With format 1 it superimposes the tracks even if
     they have different time signatures.  With format 2, however, an error message
     will be displayed if the file contains several items.
-### Prompt for changing file name
-If checked, a new MIDI or Csound score file may be optionaly created for each
-    musical item.
-### Save each item to a new file
-If checked, a new MIDI or Csound score file is created for each musical item.
-### Write item immediately
-If checked, musical items are immediately written as MIDI files and/or Csound scores.
-### Write item after playing on MIDI
-If checked, musical items are first played on MIDI and then optionaly written as
-    MIDI files and/or Csound scores.
-### Trace Csound
-If checked, displays Csound scores in the "Trace" window.
 ### Convert to Csound
 Creates a Csound score attached to this "sound-object prototype" on the basis of events
     contained in its MIDI stream.
@@ -2744,10 +1593,6 @@ Define or change a '-cs' "Csound instrument file" attached to these "sound-objec
 • "Sound-object prototypes" may contain a Csound score that must relate to these
     Csound instruments.
 • Related topics: "Csound implementation", "Csound format"
-### MORE…
-See "Csound instruments" dialog.
-### New file
-Creates a new file for storing the information of this window.
 ### Period (cyclic object) / strike mode
 Displays the dialog for setting these parameters.
 • Related topics:
@@ -2774,10 +1619,7 @@ Opens dialog for changing these properties.
 ### Chan / instr / accept
 Opens dialog for changing these properties.
 ### Csound file format
-Csound scores are text files saved under either Mac, DOS or Unix format.
-• In Mac format, lines terminate with ASCII 13 (return)
-• In DOS format, lines terminate with ASCII 13 (return) and ASCII 10 (line feed)
-• In Unix format, lines terminate with ASCII 10 (line feed)
+Csound scores are text files saved as Unicode UTF8.
 ### ADDval
 If checked, values of this parameter are combined additively.
 • The formula is the following:
@@ -2799,131 +1641,15 @@ The default value of this Csound parameter.  It is used when "sound-objects" con
     incomplete Csound score lines, and in the combination of parameters (see related
     topics).
 • Related topics: "MULTval", "ADDval"
-### MIDI filter
-Displays the MIDI filter dialog.
-• Related topics: "RECEIVE", "TRANSMIT"
-### Number streaks from:
-Decides whether time streaks should start from 0 or 1.
-### 500 pixels represent:
-Determines the scale of the time axis in graphics.
-### Allow randomize
-• When this button is unchecked, BP2 does not reset the random sequence before producing items.
-    Therefore, the same sequence of items might be produced again in the same context.
-• When this button is checked, BP2 resets the random sequence before producing items, if allowed
-    to do so.  Identical sequences are unlikely to occur.
-### Opcode OMS
-• When checked, MIDI input/output is conveyed via Opcode Open Music System.
-    This solution is strongly recommended for MacOS 9 users of BP2.  On MacOS X,
-    "CoreMIDI" is used instead.  OMS can be installed free on all Macs.
-    Dowload from <http://www.opcode.com> or <ftp://ftp.opcode.com/pub/oms/mac>
-    OMS also makes it possible to get loudspeaker output via QuickTime Music: select "OMS input-output"
-      in the 'Devices' menu.
-• When unchecked, MIDI input/output is conveyed via the in-built MIDI driver.
-	In this case, the proper port ('Printer' or 'Modem') must be selected in the 'Devices' menu.
-    This may not work with some Macs unless either EtherTalk or IRtalk is active.
-    See "Why don't I hear any sound?" for details.
-• Related topics: "OMS input-output", "OMS setting default input device"
-### OMS input-output
-Allows the selection of devices used as input and output for BP2.
-• If OMS has been set-up properly before running BP2, the names of devices connected to
-    the MIDI interface(s) will appear in a list.
-• 'IAC' (Inter-Application Communication) buses may also be displayed, allowing the routing
-    of BP2 input/output to and from other MIDI programs running on the same machine.
-• IAC buses are visible if the IAC driver has been installed. Run the customised installation
-    of OMS to install the IAC driver.
-• See "OMS setting default input device" for details about startup problems.
-• Related topic: "Opcode OMS"
-### OMS MIDI setup…
-Opens a dialog for changing parameters in OMS communication.
-• Related topics: "OMS input-output", "Opcode OMS"
-### OMS studio setup
-Opens a dialog for changing parameters in the OMS studio.
-• Related topics: "OMS input-output", "Opcode OMS"
-### MIDI send Start
-This script command causes BP2 to send a 'Start' message.
-### MIDI send Continue
-This script command causes BP2 to send a 'Continue' message.
-### MIDI send Stop
-This script command causes BP2 to send a 'Stop' message.
-### Wait for Start
-This script command causes BP2 to hang waiting for a 'Start' message.
-### Wait for Continue
-This script command causes BP2 to hang waiting for a 'Continue' message.
-### Wait for Stop
-This script command causes BP2 to hang waiting for a 'Stop' message.
-### MIDI orchestra
-A list of (General MIDI) instruments assigned to each MIDI channel.
-• Beware that some instruments may not yet be implemented in your version of "QuickTime Music".
-    These will be replaced with a default instrument.
-### Show current orchestra
-Displays a list of (General MIDI) instruments assigned to each MIDI channel.
-• Beware that some instruments may not yet be implemented in your version of "QuickTime Music".
-    These will be replaced with a default instrument.
-### List all names
-Displays the complete list of available General MIDI instruments.
-• Beware that some instruments may not yet be implemented in your version of "QuickTime Music".
-    These will be replaced with a default instrument.
-### Click button to set MIDI program on specified channel
-• Clicking a button ends a Program change message on the specified MIDI channel.
-    The instrument selected in this way (in the General MIDI standard) is added to the
-   "MIDI orchestra".
-• Beware that some instruments may not yet be implemented in your version of "QuickTime Music".
-    These will be replaced with a default instrument.
-### All Notes Off
-This command does two things:
-• It sends a "AllNotesOff" message to each of the 16 MIDI channels
-• It sends a "NoteOff" to each key of channel 1 and of every channel that has been assigned a
-    MIDI instrument (see "MIDI orchestra");
-• Related topic: "MIDI PANIC"
-### Modify '-se.startup'
-Modifies the startup setting file, using the current settings.
-• You may want to keep a backup of the current file. Duplicate '-se.startup' in the program's
-    folder.
-### Default performance values
-Displays the "Default performance values" dialog.
-### Default velocity [1..127]
-Velocity, by default, in the beginning of a performance. A typical value is 64.
-This value is stored along with the '-se' settings file of the project.
-### Default volume [1..127]
-Volume, by default, in the beginning of a performance. A typical value is 90.
-This value is stored along with the '-se' settings file of the project.
-### Default panoramic [0..127]
-Panoramic, by default, in the beginning of a performance. A typical value is 64.
-This value is stored along with the '-se' settings file of the project.
-### Panoramic control # [0..127]
-The index of the controller setting the panoramic position.  Typically 10.
-This value is stored along with the '-se' settings file of the project.
-### Volume control # [0..127]
-The index of the controller setting the volume.  Typically 7.
-This value is stored along with the '-se' settings file of the project.
-### Sampling rate
-The default sampling rate of performance controls. Typically 50 samples per second.
-### Display as text…
-Displays content of current dialog values to a text window.
-### Export all instruments
-Displays specifications of all Csound instruments to the ‘Trace’ window so that they may be saved
-as text.
 ### DATA:
 Below this header, anything written is ignored by the grammar compiler.
 • "DATA:" is quivalent to "COMMENT:"
 ### COMMENT:
 Below this header, anything written is ignored by the grammar compiler.
 • "COMMENT:" is equivalent to "DATA:"
-### Pick tool or performance control...
-Displays a list of available tools and "performance controls" so that you can choose one
-to enter into the current window.
-### Pick grammar procedure...
-Displays a list of available "grammar procedures" so that you can choose one to enter into
-the grammar window.
-### Tools
-A set of operators modifying the "work string" during the production of an item.
-• "Tools" and "performance controls" are listed together in a dialog that is displayed when
-    selecting "Pick tool or performance control" in the "Edit" menu.
 ### Grammar procedures
 A set of tools modifying the application of rules in a grammar.
-• To display the list of currently implemented grammar procedures, select
-    "Pick grammar procedure" in the "Edit" menu.
-### Serial music with BP2
+### Serial music with BP2/BP3
 • Version 2.8.1 of BP2 introduced a few tools facilitating the design of musical structures
     following principles of serial music. However, these tools are applied to structures
     that may be more complex than simple sequences of sound-objects: "polymetric expressions",
@@ -3008,7 +1734,7 @@ Multiplies the tempo by 'x'
 • The above example shows that speed change is relative.
     Thus, '_tempo(2)' is not the strict equivalent of '/2' (the obsolete "tempo marker"
     notation) although it should replace it in most cases. "Tempo markers" are kept only
-    for compatibility with old BP2 projects.
+    for compatibility with old BP2/BP3 projects.
 ### Variable arguments
 Some "performance controls", "tools", and rule weights in a grammar, can be given arguments
     notated K1, K2, ... Kx.
@@ -3022,140 +1748,6 @@ Some "performance controls", "tools", and rule weights in a grammar, can be give
 • Note that this fade-out is performed during a silence and does not affect notes played
     during the performance.  Use "_volume" and "_volumecont" to change volume during
     the performance.
-### Transliterate text file…
-Using the current grammar, BP2 will attempt to change codes in a text file (without actually
-    displaying it.
-• The text file may represent a database, in which case fields are separated with tabs and records
-    are separated with line feeds.
-• BP2 will offer options to take any start field, process it with "subgrammars" in a specified
-    range, and save it to the same or another field.  In this process, new fields may also
-    be created.
-• Subgrammars are generally of "POSLONG" type.  The left argument of each rule in the
-    first subgrammar contains strings of "terminal symbols" representing the ASCII codes found in
-    the target text.  For instance, "f139" represents ASCII code 139.
-    The right argument of each rule in the last subgrammar contains strings of "terminal symbols"
-    representing ASCII codes to be used in the transliterated text.
-• Related topic: "Make grammar from table"
-### Make grammar from table...
-A grammar may be designed in a table, e.g. an Excel file, and saved as 'tabulated text'.
-BP2 reads the table and creates a "subgrammar" of a specified type, using a specified column
-    for left arguments and another one for right arguments.
-• Each line of the table contains a single rule.
-• Columns are selected at the time the table is read and converted.  The same table may therefore
-    yield different grammars, depending on which pair of columns has been selected.
-    Columns are labelled 'A' to 'Z'.  (Maximum 26 columns in this version...)
-• The first and last line to be used in the table may be specified.  By default the entire table is
-    considered.
-• There are several options for data format:
-    1) ASCII machine code
-        BP2 will read the actual sequence of ASCII codes in the cell and create terminal symbols
-        starting with the specified character and indicating the actual code.  For example, if
-        the start character is 'f' an ASCII code 78 will yield 'f78'.
-    2) text
-        BP2 will read the entire cell as a text string representing the actual rule's left or
-        right argument.
-    3) numeric
-        BP2 expects a string of integer numbers separated with spaces or punctuation signs.
-        For instance, a cell containing "128+45+7" will yield a rule argument "f128 f45 f7" if
-        'f' is the selected starting character.
-• Related topic: "Transliterate text file"
-### License
-Starting with version 2.9.5, the license for Bol Processor has changed.  BP2 is now "free software"
-distributed under a simple permissive license called the 'BSD license'.  This license permits
-anyone who receives a copy of the Bol Processor program or source code to use, modify, and 
-distribute the program or source code provided that they comply with some simple conditions.
-For the complete terms under which BP2 may be used and redistributed, please read the new license.
-To view the license for BP2, please click on 'License' in the About box, or read the 
-accompanying file, 'License.txt' for details.
-### Free software
-Free software is a term used to describe software that gives all users the freedom to use, modify,
-and distribute the software.  It does not refer to the price of the software.  Since modifying the
-software requires the source code, it is implied that access to the source code is given to all
-users as well.  This concept originated with the GNU project which is supported by the Free Software
-Foundation.  For more information about the free software philosophy, you can visit their web site
-at <http://www.fsf.org/>.
-### Computation settings [Settings menu]
-Displays a window allowing you to configure how BP2 computes musical items.
-• See also: "Non-stop improvize", "Cyclic play", "Use each substitution", "Produce all items", etc.
-### Input-output settings
-Displays a window allowing you to configure various input and output-related settings
-• See also: "Use MIDI in/out", "Interactive (use input)", "Write MIDI files", "Show messages",
-    "Write Csound scores", etc.
-### Open Audio MIDI Setup
-Launches the 'Audio MIDI Setup' utility application that comes with MacOS X.  Using this
-    application, you can configure the hardware devices in your MIDI studio and create virtual
-    MIDI "buses" for inter-application communication of MIDI messages.  This menu command is
-    available when the CoreMIDI driver is active (on OS X).
-### CoreMIDI settings...
-Opens a window where you can configure Bol Processor's CoreMIDI "driver" on OS X.  In this
-    window, you can select input sources and ouput destinations for MIDI messages, save and load
-    "MIDI driver settings" files, and access other MIDI-related configuration options.
-• Selecting MIDI sources/destinations:
-    Two lists are available in this window: one for input sources and the other for output
-  destinations.  Each item in a list represents a different device or program that you can
-  receive MIDI messages from or send MIDI messages to in real-time.  The available sources and
-  destinations are automatically updated whenever MacOS X tells BP2 that your MIDI configuration
-  has changed.
-    You select a source or a destination to connect to by clicking on its name and you can select
-  multiple sources and destinations by Command-clicking or Shift-clicking on them.  BP2 will
-  listen to all selected inputs simultaneously and currently all MIDI output generated by BP2
-  will be copied to each of the selected output destinations.  (We are planning to implement
-  selective routing of output in the future).
-• Auto-selection of MIDI sources/destinations:
-    To ensure that first-time users can easily get MIDI working with BP2, we have implemented a
-  feature where an input source and output destination are automatically selected under some
-  conditions.  When BP2 is launched, it will connect to the first source and first destination
-  that it finds if any are available at that time.  Also, if a new MIDI source becomes available
-  and there were previously NO sources in BP2's list, then BP2 will connect to it.  The same is
-  true for MIDI destinations.  We hope that this will allow users with simple setups to make
-  music without having to discover the CoreMIDI settings window and without causing any annoyance
-  to experienced users with more complex needs.  NOTE:  Any connections automatically made at
-  launch will be overridden if a "-md.startup" file exists in your preferences folder.  BP2
-  will also not auto-connect after launch time if this file lists at least one source and one
-  destination, even if those are not currently "online".
-• Offline MIDI sources/destinations:
-    Sometimes, existing MIDI sources and destinations can become unavailable while BP2 is
-  running due to quitting another MIDI program or changing one's studio configuration.  BP2's
-  CoreMIDI interface keeps track of every MIDI input and output that it has seen since it was
-  launched and it marks any that become unavailable with "offline" after their names in the
-  CoreMIDI Settings window.  You can still select these sources and destinations but they will
-  of course not do anything until they become available again.  When they do, BP2 will reconnect
-  to them for you.  You may also see "offline" sources and destinations after loading a
-  "MIDI driver settings" file that references ones that are not currently available.
-• This window contains three buttons for saving and restoring its configuration.  The 'Load' and
-  "Save As..." buttons allow you to choose files to load MIDI settings from or save them to.
-  With BP2 for MacOS X, these settings are now saved in a new file type called a
-  "MIDI driver settings" file which has either a prefix of '-md' or an extension of '.bpmd'.
-  The names of these files will be entered at the top of the grammar and data windows, similarly
-  to the general settings files, so that BP2 can reload your settings with a project.
-• The "Save Startup..." button will save BP2's current CoreMIDI settings to a special file
-  in your user preferences folder named "-md.startup".  This file is loaded automatically at
-  application launch time.
-• Related Topics: "Open Audio MIDI Setup", "MIDI driver settings", "-md.startup"
-### Save Startup... [CoreMIDI Settings window]
-Saves BP2's current CoreMIDI settings to a special file named "-md.startup".  This file is 
-    automatically loaded when Bol Processor is launched.
-• See "-md.startup" for more information.
-### -md.startup
-This "MIDI driver settings" file is automatically loaded if it exists when Bol Processor is
-    launched.  On MacOS X, it is stored inside of your user folder in the 'Bol Processor'
-    subfolder of the 'Preferences' folder inside of your 'Library' folder.  If this file does not
-    exist BP2 will look for a file with the same name inside of the Bol Processor application
-    package. On MacOS 9, MIDI settings are currently stored in the general settings files and the
-    configuration in "-se.startup" is used when BP2 is launched.
-NOTE:  BP2 will not find this file if you rename it or move it.  It cannot be named 
-    'startup.bpmd' either; it must be '-md.startup'. 
-### MIDI driver settings
-Starting with Bol Processor 2.9.6, a new file type for storing MIDI settings exists.  These
-    files have either a recommended prefix of '-md' or an extension of '.bpmd'.  The current
-    implementation only uses this file type for CoreMIDI settings on MacOS X, but in the
-    future, other MIDI drivers will use it as well.  A special file named "-md.startup" is
-    automatically loaded when BP2 is launched if it exists.
-• See also:  "Types-creators"
-### Metronome
-Displays a window where you can set the number of beats per minute and the choose between
-smooth and striated time.
-• Related topics: "Striated time" and "Smooth time"
 ### TIMEPATTERNS
 A set of time ratios used to fix relative durations (only in the context of smooth time)
-### END OF BP2 help
+### END OF BP2/BP3 help
