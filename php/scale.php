@@ -3,16 +3,16 @@ require_once("_basic_tasks.php");
 
 // $test = TRUE;
 
-if(isset($_POST['dir_scales']))
-	$dir_scales = $_POST['dir_scales'];
-else {
-	echo "=> Csound resource file is not known. First open the ‘-cs’ file!";
-	die();
-	}
 if(isset($_GET['scalefilename']))
 	$filename = urldecode($_GET['scalefilename']);
 else {
 	echo "Scale name is not known. Call it from the ‘-cs’ file!";
+	die();
+	}
+if(isset($_POST['dir_scales']))
+	$dir_scales = $_POST['dir_scales'];
+else {
+	echo "=> Csound resource file is not known. First open the ‘-cs’ file containing ‘".$filename."’<br />=> You will find a link to it in the <a href=\"index.php?path=csound_resources\">csound_resources folder</a>";
 	die();
 	}
 $this_title = $filename;
@@ -865,7 +865,7 @@ $image_height = 820;
 echo "<div class=\"shadow\" style=\"border:2px solid gray; background-color:azure; width:20em;  padding:8px; text-align:center; border-radius: 6px;\">IMAGE:<br /><a onclick=\"window.open('".$link."','".$image_name."','width=1000,height=".$image_height.",left=100'); return false;\" href=\"".$link."\">full</a> - <a onclick=\"window.open('".$link_no_marks."','".$image_name."','width=1000,height=".$image_height.",left=100'); return false;\" href=\"".$link_no_marks."\">no marks</a> - <a onclick=\"window.open('".$link_no_cents."','".$image_name."','width=1000,height=".$image_height.",left=100'); return false;\" href=\"".$link_no_cents."\">no cents</a> - <a onclick=\"window.open('".$link_no_intervals."','".$image_name."','width=1000,height=".$image_height.",left=100'); return false;\" href=\"".$link_no_intervals."\">no intervals</a></div>";
 
 echo "</div>";
-echo "<p>➡ <a target=\"_blank\" href=\"https://www.csounds.com/manual/html/GEN51.html\">Read the documentation</a></p>";
+echo "<p>➡ <a target=\"_blank\" href=\"https://www.csounds.com/manual/html/GEN51.html\">Read the Csound documentation</a></p>";
 $numgrades_fullscale = $table2[4];
 $interval = $table2[5];
 $basefreq = $table2[6];
@@ -978,6 +978,9 @@ if($the_width < 10) $the_width = 10;
 echo "<input type=\"text\" style=\"font-size:large;\" name=\"scale_name\" size=\"".$the_width."\" value=\"".$scale_name."\">";
 if(is_integer(strpos($scale_name,' '))) echo " <font color=\"red\">➡</font> avoiding spaces is prefered";
 echo "</h3>";
+
+echo "<p>➡ <a target=\"_blank\" href=\"https://bolprocessor.org/microtonality/\">Read the documentation on microtonality</a></p>";
+
 echo "<table style=\"background-color:cornsilk;\">";
 echo "<tr>";
 echo "<td style=\"white-space:nowrap; padding:6px; vertical-align:middle;\"><font color=\"blue\">numgrades</font> = <input type=\"text\" name=\"numgrades\" size=\"5\" value=\"".$numgrades_fullscale."\"></td>";
@@ -2092,10 +2095,10 @@ if($done AND !$warned_ratios) {
 	echo "<li>Start from note with name: <input type=\"text\" name=\"note_start_meantone\" size=\"6\" value=\"".$note_start_meantone."\">";
 	if($name[0] <> '' AND $name[0] <> '•') echo " (typically ‘".$name[0]."’)";
 	echo "</li>";
-	echo "<li>List of note names separated by commas, including the starting note, e.g. “C, G, E” etc.:<br /><input type=\"text\" name=\"names_notes_meantone\" size=\"80\" value=\"".$names_notes_meantone."\"></li>";
+	echo "<li>List of note names separated by commas, including the starting note, e.g. “C, G, D” etc.:<br /><input type=\"text\" name=\"names_notes_meantone\" size=\"80\" value=\"".$names_notes_meantone."\"></li>";
 	echo "<li><input type=\"checkbox\" name=\"ignore_unlabeled\">Hide unlabeled positions</li>";
 	echo "<li>Fraction of each step <input type=\"text\" name=\"p_step_meantone\" size=\"3\" value=\"".$p_step_meantone."\">&nbsp;/&nbsp;<input type=\"text\" name=\"q_step_meantone\" size=\"3\" value=\"".$q_step_meantone."\"> (typically 3/2 for fifths or 5/4 for thirds)</li>";
-	echo "<li>Add <input type=\"text\" name=\"p_fraction_comma\" size=\"3\" value=\"".$p_fraction_comma."\">&nbsp;/&nbsp;<input type=\"text\" name=\"q_fraction_comma\" size=\"3\" value=\"".$q_fraction_comma."\"> comma to each step (can be negative, for instance -2/7)</li>";
+	echo "<li>Add <input type=\"text\" name=\"p_fraction_comma\" size=\"3\" value=\"".$p_fraction_comma."\">&nbsp;/&nbsp;<input type=\"text\" name=\"q_fraction_comma\" size=\"3\" value=\"".$q_fraction_comma."\"> comma to each step (can be negative, for example -2/7)</li>";
 	echo "<li><input type=\"radio\" name=\"meantone_direction\" value=\"up\">Up (ascending steps)<br />";
 	echo "<input type=\"radio\" name=\"meantone_direction\" value=\"down\">Down (descending steps)</li>";
 	echo "</ul>";
@@ -2105,7 +2108,7 @@ if($done AND !$warned_ratios) {
 	if($error_fifths <> '') echo "<font color=\"red\">".$error_fifths."</font>";
 	echo "</p><ul>";
 	echo "<li>Start from fraction <input type=\"text\" style=\"text-align:right;\" name=\"p_start_fifths\" size=\"6\" value=\"".$p_start_fifths."\">/<input type=\"text\" name=\"q_start_fifths\" size=\"6\" value=\"".$q_start_fifths."\"></li>";
-	echo "<li>List of note names separated by commas, including the starting note, e.g. “C, G, E” etc.:<br /><input type=\"text\" name=\"names_notes_fifths\" size=\"80\" value=\"\"></li>";
+	echo "<li>List of note names separated by commas, including the starting note, e.g. “C, G, D” etc.:<br /><input type=\"text\" name=\"names_notes_fifths\" size=\"80\" value=\"\"></li>";
 	echo "<li><input type=\"checkbox\" name=\"ignore_unlabeled\">Hide unlabeled positions</li>";
 	echo "</ul>";
 	echo "<hr>";

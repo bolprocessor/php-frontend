@@ -1,5 +1,8 @@
 <?php
 session_start();
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 require('midi.class.php');
 // Source: https://github.com/robbie-cao/midi-class-php
 
@@ -35,10 +38,15 @@ $max_term_in_fraction = 32768; // Used to simplify fractions when importing Musi
 $number_fields_csound_instrument = 67; // Never change this!
 $number_midi_parameters_csound_instrument = 6; // Never change this!
 
-
+$permissions = 0777;
+$oldmask = umask(0);
 $temp_dir = $bp_application_path."temp_bolprocessor";
-if(!file_exists($temp_dir)) mkdir($temp_dir);
+if(!file_exists($temp_dir)) mkdir($temp_dir,$permissions,true);
 $temp_dir .= SLASH;
+if(!file_exists($temp_dir."messages")) mkdir($temp_dir."messages",$permissions,true);
+umask($oldmask);
+$stopfile = $temp_dir."messages/_stop";
+// This will be used by createFile() after clicking the STOP button in produce.php
 
 if(!file_exists($bp_application_path.$csound_resources)) {
 	mkdir($bp_application_path.$csound_resources);
@@ -1824,6 +1832,16 @@ function getOS() {
     return $os_platform;
 	}
 
+function linux_system() {
+	$os_platform = getOS();
+	if((is_integer(strpos($os_platform,"Linux")) OR is_integer(strpos($os_platform,"Ubuntu")))) return TRUE;
+	}
+
+function mac_system() {
+	$os_platform = getOS();
+	if(is_integer(strpos($os_platform,"Mac OS"))) return TRUE;
+	}
+
 function windows_system() {
 	global $which_system;
 	if($which_system == "Windows") return TRUE;
@@ -1833,20 +1851,30 @@ function windows_system() {
 	}
 	
 function send_to_console($command) {
-	global $test;
-	$system = getOS();
-	$exec = escapeshellcmd($command);
-	$table = array();
+	global $test,$pid,$bp_application_path;
+	$table = null;
+//	$command .= " > /dev/null 2>&1"; // This makes it possible to get the pid.
 	if(windows_system()) {
-		$exec = str_replace("..".SLASH."bp ","bp ",$exec);
-		$exec = str_replace("..".SLASH,dirname(getcwd()).SLASH,$exec);
-	//	$exec = str_replace(DIRECTORY_SEPARATOR,"/",$exec);
-		echo "<small>Windows: exec = <font color=\"red\">".$exec."</font></small><br />";
+		$command = windows_command($command);
+		echo "<small>Windows: exec = <font color=\"red\">".$command."</font></small><br />";
 		}
-	exec($exec,$table);
-//	system($exec,$o);
-//	passthru($exec,$o);
+	exec($command,$table);
+//	$command = "pgrep -f ".$bp_application_path."bp";
+	$command = "pgrep -f ".$command;
+	$pid = exec($command);
+	$_SESSION['pid'] = $pid;
+//	system($command,$o);
+//	passthru($command,$o);
 	return $table;
+	}
+
+function windows_command($command) {
+	$command = str_replace("..".SLASH."bp ","bp ",$command);
+	$command = str_replace("..".SLASH,dirname(getcwd()).SLASH,$command);
+	$command = "cmd /c ".$command;
+	$command = escapeshellcmd($command);
+	$command = preg_replace("'(?<!^) '","^ ",$command);
+	return $command;
 	}
 
 function get_orchestra_filename($csound_file) {

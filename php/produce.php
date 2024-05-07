@@ -5,6 +5,53 @@ $url_this_page = "produce.php";
 if(isset($_GET['title'])) $this_title = urldecode($_GET['title']);
 else $this_title = '';
 require_once("_header.php");
+set_time_limit(0);
+
+?>
+<script>
+function checkFile() {
+    $.ajax({
+        url: 'produce.php',
+        data: { waitcall: "do_this" },
+        success: function(data) {
+            document.getElementById("donestatus").innerHTML = data;
+            if (data === "File has been found") {
+                clearInterval(interval); // Stops the interval when the file exists
+            }
+        },
+        error: function() {
+            document.getElementById("donestatus").innerHTML = "Error checking the file status.";
+        }
+    });
+}
+var interval = setInterval(checkFile,1000); // Check every second
+</script>
+
+
+<?php
+echo "<script>";
+echo "function createFile(pathToFile) {
+    $.ajax({
+        url: '_createfile.php',
+        data: { path_to_file: pathToFile },
+        success: function(response) {
+            document.getElementById('message').innerHTML = response;
+        },
+        error: function() {
+            document.getElementById('message').innerHTML = \"Error creating the file.\";
+        }
+    });\n";
+echo "}
+</script>";
+
+$donefile = $temp_dir."trace_".session_id()."_done.txt";
+
+$waitcall = $_GET['waitcall'] ?? '';
+if($waitcall == "do_this") {
+	if(file_exists($donefile))
+		echo "File has been found";
+	die();
+	}
 
 $application_path = $bp_application_path;
 $bad_image = FALSE;
@@ -27,6 +74,7 @@ if(isset($_GET['csound_file'])) $csound_file = $_GET['csound_file'];
 else $csound_file = '';
 if(isset($_GET['item'])) $item = $_GET['item'];
 else $item = 0;
+
 
 $check_command_line = FALSE;
 $sound_file_link = $result_file = '';
@@ -178,7 +226,7 @@ else {
 				$command .= " -d --csoundout ".$output;
 				break;
 			default:
-				$command .= " -d --rtmidi";
+				$command .= " -d --rtmidi"; // We use the default destination
 				break;
 			}
 		}
@@ -255,7 +303,8 @@ if($instruction <> "help") {
 				}
 			}
 		}
-	echo "<p id=\"wait\" style=\"text-align:center; background-color:yellow;\"><big><b><span class=\"blinking\">… Bol Processor console is working …</span></b></big><br />(Don't close this window!)</p>\n";
+	echo "<p id=\"wait\" style=\"text-align:center; background-color:yellow;\"><br /><big><b><span class=\"blinking\">… Bol Processor console is working …</span></b></big><br />(Don't close this window!)<br /><br /><button type=\"button\" class=\"bouton\" onclick=\"createFile('".$stopfile."');\">Click to STOP</button><br /><br /></p>\n";
+//	echo "<p id=\"wait\" style=\"text-align:center; background-color:yellow;\"><br /><big><b><span class=\"blinking\">… Bol Processor console is working …</span></b></big><br />(Don't close this window!)<br /><br /><button type=\"button\" class=\"bouton\" onclick=\"session_write_close();\">Click to STOP</button><br /><br /></p>\n";
 	}
 
 ob_flush();
@@ -292,8 +341,9 @@ if(isset($data_path) AND $data_path <> '') {
 		echo "</b></p>";
 		}
 	}
-
-$o = send_to_console($command); 
+if(file_exists($stopfile)) unlink($stopfile);
+$o = send_to_console($command);
+if($pid > 0) echo "The pid was ".$pid."<br />";
 $n_messages = count($o);
 $no_error = FALSE;
 for($i = 0; $i < $n_messages; $i++) {
@@ -313,9 +363,13 @@ if($instruction == "help") {
 if($instruction <> "help") {
 	$last_warning = $time_start = time();
 	$time_end = $time_start + $max_sleep_time_after_bp_command;
-	$donefile = $temp_dir."trace_".session_id()."_done.txt";
+//	$donefile = $temp_dir."trace_".session_id()."_done.txt";
 //	echo $donefile."<br />";
-	$dots = 0;
+
+	echo "<p id=\"donestatus\">Waiting for ‘done’ file…</p>";
+	
+
+/*	$dots = 0;
 	while(TRUE) {
 		if(file_exists($donefile)) break;
 		if(time() > $time_end) {
@@ -331,7 +385,7 @@ if($instruction <> "help") {
 			$dots++;
 			}
 		}
-	if($dots > 0) echo "<br /><br />";
+	if($dots > 0) echo "<br /><br />"; */
 	@unlink($donefile);
 	$tracefile_html = clean_up_file_to_html($tracefile);
 	$trace_link = $tracefile_html;
@@ -349,6 +403,7 @@ if($instruction <> "help") {
 	echo "document.getElementById('miwait').style.display = \"none\";";
 	echo "document.getElementById('cswait').style.display = \"none\";";
 	echo "</script>";
+
 	if(!$no_error) {
 		$content_trace = @file_get_contents($tracefile,TRUE);
 		if($content_trace AND strlen($content_trace) > 4) {
@@ -528,7 +583,7 @@ else {
 		$header .= "<link rel=\"stylesheet\" href=\"".$bp_application_path."php/bp.css\" />\n";
 		$header .= "<title>".$result_file."</title>\n";
 		$header .= "<script type='text/javascript' src='https://www.midijs.net/lib/midi.js'></script>\n";
-		$header .= "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js\"></script>\n";
+		$header .= "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js\"></script>\n";
 		$header .= "</head><body>\n";
 		fwrite($handle,$header."\n");
 		fwrite($handle,"<h2 id=\"midi\">".$grammar_name."</h2>\n");

@@ -24,7 +24,7 @@ echo "</script>\n";
 if(!is_connected()) echo "<p style=\"color:red;\">➡ Cannot find “midijs.net”… Are you connected to Internet?</p>";
 
 echo "<script type='text/javascript' src='https://www.midijs.net/lib/midi.js'></script>";
-echo "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js\"></script>\n";
+echo "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js\"></script>\n";
 
 echo "<script>\n";
 echo "setTimeout(function() {
@@ -39,15 +39,17 @@ echo "setTimeout(function() {
 echo "</script>\n";
 
 echo "<script>\n";
-echo "$(window).keydown(function(evt) {
-    var key = String.fromCharCode(evt.keyCode);
-    if (key.toLowerCase() === \"s\" && evt.metaKey) {
-    	alert(\"Soon this key will be programmed to save data...\");
-        evt.preventDefault(true);
-        return false;
-    }
-    return true;
-});";
+// Capture Command S and call the save() function defined at the bottom of data.php
+// This doesn't work yet. It should be implemented to save grammars, alphabets, etc. as well.
+echo "document.addEventListener('keydown', function(event) {
+  // Check if Command (metaKey) and S are pressed
+    var key = String.fromCharCode(event.keyCode);
+    if (key.toLowerCase() === \"s\" && event.metaKey) {
+      alert(\"Soon this key will be programmed to save data...\");
+        event.preventDefault(true);  // Prevent the default action to avoid triggering browser's save dialog
+        save();  // Call the save function
+      }
+  });";
 echo "</script>\n";
 
 echo "<script>\n";

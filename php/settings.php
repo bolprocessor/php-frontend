@@ -28,9 +28,9 @@ for($i = 0; $i < $imax; $i++) {
 	if($line == "-- end --") break;
 	$imax_parameters++;
 	$table2 = explode(chr(9),$line);
-	$x = str_replace(chr(9),".",$line);
-//	echo $x."<br />";
-	if(count($table2) < 3) echo "ERR: ".$table2[0]."<br />";
+/*	$x = str_replace(chr(9),"_",$line);
+	echo $x."<br />"; */
+	if(count($table2) < 3) echo "ERROR: ".$table2[0]."<br />";
 	$parameter_name[$i] = $table2[0];
 	$parameter_unit[$i] = $table2[1];
 	$parameter_edit[$i] = $table2[2];
@@ -102,7 +102,6 @@ if(isset($_POST['saveparameters'])) {
 			$value = "<no input device>";
 		if($i == 53 AND $value == '')
 			$value = "<no output device>";
-			
 		if($i == 54) $value = 0; // Display bullets
 		if($i == 58) $value = 1; // MIDI file format
 		if($i == 62 AND (!is_numeric($value) OR $value < 0 OR $value > 127 OR intval($value) <> $value)) {

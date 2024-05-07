@@ -2,7 +2,8 @@
 require_once("_basic_tasks.php");
 require_once("_settings.php");
 require_once("_musicxml.php");
-require_once("_tonal_analysis.php"); 
+require_once("_tonal_analysis.php");
+set_time_limit(0);
 
 if(isset($_GET['file'])) $file = urldecode($_GET['file']);
 else $file = '';
@@ -75,13 +76,8 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				}
 			}
 		if($more_data <> '') $save_content = $more_data."\n\n".$save_content;
-		$handle = fopen($this_file,"w");
-		$file_header = $top_header."\n// Data saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
-		do $save_content = str_replace("  ",' ',$save_content,$count);
-		while($count > 0);
-		fwrite($handle,$file_header."\n");
-		fwrite($handle,$save_content);
-		fclose($handle);
+		$save_content = preg_replace("/ +/u",' ',$save_content);
+		save($this_file,$filename,$top_header,$save_content);
 		$content = str_replace(chr(13).chr(10),chr(10),$content);
 		$content = str_replace(chr(13),chr(10),$content);
 		$declarations = '';
@@ -1166,13 +1162,8 @@ if($need_to_save OR isset($_POST['savethisfile'])) {
 	if(isset($_POST['thistext'])) $content = $_POST['thistext'];
 	else $content = '';
 	if($more_data <> '') $content = $more_data."\n\n".$content;
-	$handle = fopen($this_file,"w");
-	$file_header = $top_header."\n// Data saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
-	do $content = str_replace("  ",' ',$content,$count);
-	while($count > 0);
-	fwrite($handle,$file_header."\n");
-	fwrite($handle,$content);
-	fclose($handle);
+	$content = preg_replace("/ +/u",' ',$content);
+	save($this_file,$filename,$top_header,$content);
 	}
 
 try_create_new_file($this_file,$filename);
@@ -1305,7 +1296,7 @@ $output_file = str_replace(".sco",'',$output_file);
 switch($file_format) {
 	case "midi": $output_file = $output_file.".mid"; break;
 	case "csound": $output_file = $output_file.".sco"; break;
-	default: $output_file = ''; break;
+//	default: $output_file = ''; break;
 	}
 $project_name = preg_replace("/\.[a-z]+$/u",'',$output_file);
 $result_file = $bp_application_path.$output_folder.SLASH.$project_name."-result.html";
@@ -1444,9 +1435,9 @@ echo "<td style=\"background-color:cornsilk;\">";
 
 echo "<div style=\"float:right; vertical-align:middle;\">Import MusicXML file: <input style=\"color:red;\" type=\"file\" name=\"music_xml_import\">&nbsp;<input type=\"submit\" style=\"background-color:AquaMarine;\" value=\"← IMPORT\"></div>";
 
-echo "<div style=\"text-align:left;\"><input style=\"background-color:yellow; font-size:large;\"  type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></div>";
+echo "<div style=\"text-align:left;\"><input id=\"saveButton\" style=\"background-color:yellow; font-size:large;\"  type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></div>";
 
-echo "<br /><textarea name=\"thistext\" onchange=\"tellsave()\" rows=\"40\" style=\"width:700px;\">".$content."</textarea>";
+echo "<br /><textarea id=\"textArea\" name=\"thistext\" onchange=\"tellsave()\" rows=\"40\" style=\"width:700px;\">".$content."</textarea>";
 
 echo "<div style=\"text-align:right;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></div>";
 
@@ -1774,7 +1765,7 @@ if(!$hide) {
 		if($n1 > $n2) $error_mssg .= "• <font color=\"red\">This score contains ".($n1-$n2)." extra ‘{'</font><br />";
 		if($n2 > $n1) $error_mssg .= "• <font color=\"red\">This score contains ".($n2-$n1)." extra ‘}'</font><br />";
 		if($error_mssg == '') {
-			echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_play."','".$window_name_play."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Play this polymetric expression\" value=\"PLAY\">&nbsp;";
+			echo "<input id=\"playButton\" style=\"color:DarkBlue; background-color:Aquamarine;\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_play."','".$window_name_play."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Play this polymetric expression\" value=\"PLAY\">&nbsp;";
 			if($chunked) echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_play_chunked."','".$window_name_chunked."','width=800,height=800,left=150,toolbar=yes'); return false;\" type=\"submit\" name=\"produce\" title=\"Play polymetric expression in chunks (no graphics)\" value=\"PLAY safe (".$chunk_number." chunks)\">&nbsp;";
 			echo "&nbsp;<input style=\"background-color:azure;\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_expand."','".$window_name_expand."','width=800,height=800,left=100'); return false;\" type=\"submit\" name=\"produce\" title=\"Expand this polymetric expression\" value=\"EXPAND\">&nbsp;";
 			}
@@ -1961,4 +1952,50 @@ function create_chunks($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxc
 	$segment['initial_tempo'] = $initial_tempo;
 	return $segment;
 	}
+
+function save($this_file,$filename,$top_header,$save_content) {
+	$handle = fopen($this_file, "w");
+	if($handle) {
+		$file_header = $top_header . "\n// Data saved as \"" . $filename . "\". Date: " . gmdate('Y-m-d H:i:s');
+		fwrite($handle, $file_header . "\n");
+		fwrite($handle, $save_content);
+		fclose($handle);
+		}
+	return;
+	}
+
+// The follwing does not work yet. It is meant to handle "save" when typing command S
+// The code for capturing the key is in _header.php
+
+/* if($_SERVER['REQUEST_METHOD'] == 'POST') {
+	$data = json_decode(file_get_contents('php://input'), true);
+	save('".$this_file."', $data['filename'], $data['topHeader'], $data['content']);
+	}
+
+echo "<script>\n
+function save() {
+    const textAreaContent = document.getElementById('textArea').value;
+    const thisFile = '".$this_file."';  // Adjust this path
+    const filename = '".$filename."';  // Example filename
+    const topHeader = '".$top_header."';  // Example header
+    fetch(thisFile, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            content: textAreaContent,
+            filename: filename,
+            topHeader: topHeader
+        })
+    })
+    .then(response => response.text())
+    .then(data => {
+        console.log('Success:', data);
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+</script>"; */
 ?>

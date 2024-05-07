@@ -324,7 +324,7 @@ if(!$no_marks) {
 	}
 else $y1 += 95;
 $x1 -= 50;
-$text = "- Created by Bol Processor -";
+$text = "- Created by the Bol Processor -";
 imagestring($im,10,$x1,$y1,$text,$black);
 
 imagepng($im);

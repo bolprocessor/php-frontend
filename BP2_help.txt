@@ -1,4 +1,4 @@
-// This is the help file for Bol Processor BP2 and BP3.
+// This is the help file of Bol Processor BP2 and BP3.
 // When editing it, beware that BP3 looks for prefixes. Therefore, if an item is
 // the prefix of another one then it should precede it in this file.
 ### Help 

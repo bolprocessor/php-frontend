@@ -448,7 +448,7 @@ foreach($dircontent as $thisfile) {
 	if(is_integer($pos=strpos($thisfile,"BP2")) AND $pos == 0) continue;
 	if(is_integer($pos=strpos($thisfile,"License")) AND $pos == 0) continue;
 	if(is_integer($pos=stripos($thisfile,"ReadMe")) AND $pos == 0) continue; 
-	if($thisfile == "DerivedData" OR $thisfile == "resources" OR $thisfile == "scripts" OR $thisfile == "source" OR $thisfile == "temp_bolprocessor" OR $thisfile == "Makefile" OR $thisfile == "my_output" OR $thisfile == "php" OR $thisfile == "-se.startup" OR $thisfile == "LICENSE" OR $thisfile == "HowToBuild.txt" OR $thisfile == "BP3-To-Do.txt" OR $thisfile == "Bugs.txt" OR $thisfile == "ChangeLog" OR $thisfile == "Credits.txt" OR $thisfile == "HowToMakeARelease.txt" OR $thisfile == "y2k" OR $thisfile == "bp_compile_result.txt") continue;
+	if($thisfile == "DerivedData" OR $thisfile == "resources" OR $thisfile == "scripts" OR $thisfile == "source" OR $thisfile == "temp_bolprocessor" OR $thisfile == "Makefile" OR $thisfile == "my_output" OR $thisfile == "php" OR $thisfile == "-se.startup" OR $thisfile == "LICENSE" OR $thisfile == "HowToBuild.txt" OR $thisfile == "BP3-To-Do.txt" OR $thisfile == "Bugs.txt" OR $thisfile == "ChangeLog" OR $thisfile == "Credits.txt" OR $thisfile == "HowToMakeARelease.txt" OR $thisfile == "y2k" OR $thisfile == "bp_compile_result.txt" OR $thisfile == "test.php") continue;
 	if($move_files) echo "<input type=\"checkbox\" name=\"move_".$i_file."\"> ";
 	$this_file_moved = FALSE;
 	if($move_checked_files AND isset($_POST['move_'.$i_file])) {
@@ -492,7 +492,8 @@ foreach($dircontent as $thisfile) {
 		}
 	if($path <> $csound_resources AND $path <> $trash_folder AND ($type == "csound" OR $type == "csorchestra")) {
 		echo "Moved ‘<font color=\"blue\">".$dir.SLASH.$thisfile."</font>’ to ‘<font color=\"blue\">".$dir_csound_resources.$thisfile."</font>’<br />";
-		rename($dir.SLASH.$thisfile,$dir_csound_resources.$thisfile);
+		if(file_exists($dir_csound_resources.$thisfile)) @unlink($dir.SLASH.$thisfile);
+		else rename($dir.SLASH.$thisfile,$dir_csound_resources.$thisfile);
 		}
 	else {
 		$renamed = FALSE;

@@ -1,0 +1,294 @@
+Port		0	
+Csound orchestra	By default: "0-default.orc"	1	
+Quantization	ms	1
+Time resolution	ms	1
+Set-up time	ms	1
+Quantize		1	1
+Striated time	(otherwise smooth)	1	1
+Pclock	Pclock/Qclock is the period of metronome (seconds)	1
+Qclock		1
+Jbutt (28 radio button settings)		0
+Non-stop improvize		1	1
+Cyclic play		1	1
+Use each substitution		1	1
+Produce all items		1	1
+Display production		1	1
+Step-by-step produce		1	1
+Step subrammars		1	1
+Trace production		1	1
+Choose candidate rule		1	1
+Display items		1	1
+Show graphics		1	1
+Allow randomize		1	1
+Time setting display		1	1
+Time setting step		1	1
+Time setting trace		1	1
+Csound trace		1	1
+Use MIDI in/out		0	1
+Synchronize start		1	1
+Compute while playing		1	1
+Interactive (use input)		1	1
+Reset rule weights		1	1
+Reset rule flags		1	1
+Reset controllers		1	1
+Ignore constraints		1	1
+Write MIDI files		0	1
+Show messages		0	1
+Write Csound scores		0	1
+Opcode OMS (obsolete)		0	1
+Split terminal symbols		1	1
+Split |variables|		1	1
+Use text color		0	1
+Default buffer size	symbols	1
+Use color in graphics		0	1
+Use buffer limit		0	1
+Max computation time	seconds	1		Time assigned for console's work
+Seed for randomization	(positive integer or 0 for no seed)	1
+Use keyboard tokens		0	1
+Note convention	0 = English: C, D, E...<br />1 = Italian/Spanish/French: do, re, mi...<br />2 = Indian: sa, re, ga...<br />3 = Keys<br />4 = Only from imported scales(s) with Csound	1
+StartFromOne		0	1
+Smart cursor		0
+GraphicScaleP		1
+GraphicScaleQ		1
+Input device		1
+Output ID and OMS output name		1
+Display bullets "&bull;"		0	1
+Play metronome ticks		0
+File save mode	0 = Prompt for changing filename<br />1 = Save each item to a new file<br />2 = Store all items to same file	0
+File write mode	0 = Write item immediately<br />1 = Write item after playing on MIDI	0
+MIDI file format	(0, 1 or 2)	0
+Csound file format	0 = MacOS<br />1 = Windows<br />2 = Unix	0
+ProgNrFrom		0
+Fade-out time	seconds (end of MIDI files and Csound scores)	1
+C4 (middle C) key number	(0..127) usually 60	1
+A4 frequency (diapason)	Hz (usually 440)	1
+Strike again NoteOn's	Keep selected unless you know why!	1	1
+Default volume	(1..127)	1
+Volume controller	(0..127) usually 7	1
+Default velocity	(1..127)	1
+Default panoramic	(0..127)	1
+Panoramic controller	(0..127) usually 10	1
+SamplingRate	samples per second, usually 50	1
+WMAX (39 windows)		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Default block key for scale in Csound	(0..127) e.g. 60 for 'C4' or 69 for 'A4'	1
+MIDI output filter	(will be explained later)	0
+B# instead of C		1	1
+Db instead of C#		1	1
+NameChoice		0	1
+Eb instead of D#		1	1
+Fb instead of E		1	1
+E# instead of F		1	1
+Gb instead of F#		1	1
+NameChoice		0	1
+Ab instead of G#		1	1
+NameChoice		0	1
+Bb instead of A#		1	1
+Cb instead of B		1	1
+MIDI input filter	(will be explained later)	0
+ShowObjectGraph		1	1
+ShowPianoRoll		1	1
+-- end --
+MAXCHAN (16)		0
+36044		0
+24903		0
+13762		0
+65535		0
+0		0
+0		0
+65535		0
+45219		0
+5898		0
+65535		0
+65535		0
+0		0
+24903		0
+55049		0
+43908		0
+0		0
+NewEnvironment && !FreezeWindows		0
+65535		0
+65535		0
+0		0
+65535		0
+37354		0
+37354		0
+37354		0
+55049		0
+60947		0
+60292		0
+21626		0
+21626		0
+21626		0
+49151		0
+34078		0
+19005		0
+65535		0
+30146		0
+23592		0
+62913		0
+51772		0
+36044		0
+65535		0
+65535		0
+39976		0
+0		0
+65535		0
+0		0
+23592		0
+51117		0
+65535		0
+1		0
+39		0
+1		0
+43		0
+259		0
+265		0
+634		0
+0		0
+0		0
+1		0
+468		0
+0		0
+480		0
+640		0
+1		0
+259		0
+8		0
+461		0
+357		0
+1		0
+55		0
+20		0
+370		0
+419		0
+1		0
+455		0
+213		0
+467		0
+640		0
+1		0
+42		0
+12		0
+122		0
+635		0
+0		0
+0		0
+0		0
+0		0
+0		0
+0		0
+0		0
+0		0
+0		0
+0		0
+1		0
+220		0
+40		0
+322		0
+468		0
+1		0
+56		0
+304		0
+132		0
+570		0
+0		0
+0		0
+0		0
+0		0
+1		0
+39		0
+0		0
+101		0
+640		0
+1		0
+425		0
+0		0
+480		0
+640		0
+0		0
+0		0
+0		0
+0		0
+0		0
+0		0
+0		0
+0		0
+0		0
+0		0
+0		0
+0		0
+0		0
+11		0
+60928		0
+0		0
+0		0
+30976		0
+18944		0
+0		0
+0		0
+0		0
+48896		0
+0		0
+55808		0
+0		0
+4096		0
+24576		0
+32512		0
+39936		0
+0		0
+20736		0
+50944		0
+47104		0
+0		0
+65535		0
+65535		0
+0		0
+0		0
+2		0
+38010		0
+60292		0
+0		0
+0		0
+0		0
+0		0
+0		0
+Title		0
+Start string		1

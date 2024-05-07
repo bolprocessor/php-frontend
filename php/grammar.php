@@ -1,6 +1,7 @@
 <?php
 require_once("_basic_tasks.php");
 require_once("_settings.php");
+set_time_limit(0);
 
 if(isset($_GET['file'])) $file = urldecode($_GET['file']);
 else $file = '';
@@ -33,7 +34,7 @@ switch($file_format) {
 	case "data": $output_file = $default_output_name.".bpda"; break;
 	case "midi": $output_file = $default_output_name.".mid"; break;
 	case "csound": $output_file = $default_output_name.".sco"; break;
-	default: $output_file = ''; break;
+	default: $output_file = $default_output_name; break;
 	}
 if(isset($_POST['output_file'])) $output_file = $_POST['output_file'];
 
@@ -50,6 +51,7 @@ require_once("_header.php");
 
 $url = "index.php?path=".urlencode($current_directory);
 echo "<p>Workspace = <input style=\"background-color:yellow;\" name=\"workspace\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$url."','_self');\" value=\"".$current_directory."\">";
+// echo "&nbsp;&nbsp;session_id = ".session_id();
 
 $hide = $need_to_save = FALSE;
 
@@ -208,15 +210,10 @@ if($need_to_save OR isset($_POST['savegrammar']) OR isset($_POST['compilegrammar
 		if($output_file == '') $output_file = $default_output_name;
 		$output_file .= ".mid";
 		}
-	if($file_format == '') $output_file = '';
-	$handle = fopen($this_file,"w");
+	if($file_format == '') $output_file = $default_output_name;
 	$content = recode_entities($content);
-	$file_header = $top_header."\n// Grammar file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
-	do $content = str_replace("  ",' ',$content,$count);
-	while($count > 0);
-	fwrite($handle,$file_header."\n");
-	fwrite($handle,$content);
-	fclose($handle);
+	$content = preg_replace("/ +/u",' ',$content);
+	save($this_file,$filename,$top_header,$content);
 	}
 // echo "</small></p>";
 
@@ -250,9 +247,11 @@ echo "<h3>Grammar file “".$filename."”</h3>";
 save_settings("last_name",$filename);
 
 $link = "test-image.html";
-echo "<div style=\"float:right;\"><p style=\"border:2px solid gray; background-color:azure; width:17em;  padding:2px; text-align:center; border-radius: 6px;\"><a onmouseover=\"window.open('".$link."','CANVAS test','width=500,height=500,left=200'); return false;\" href=\"".$link."\">Test image to verify that your<br />environment supports CANVAS</a><br />(You may need to authorize pop-ups)</p></div>";
+echo "<div style=\"float:right;\"><p style=\"border:2px solid gray; background-color:azure; width:17em; padding:2px; text-align:center; border-radius: 6px;\">
+<a onmouseover=\"popupWindow = window.open('".$link."','CANVAS_test','width=500,height=500,left=200'); return false;\"
+   onmouseout=\"popupWindow.close();\"
+   href=\"".$link."\">Test image to verify that your<br />environment supports CANVAS</a><br />(You may need to authorize pop-ups)</p></div>";
 
-	
 if(isset($_POST['compilegrammar'])) {
 	if(isset($_POST['alphabet_file'])) $alphabet_file = $_POST['alphabet_file'];
 	else $alphabet_file = '';
@@ -939,4 +938,15 @@ if(!$hide) {
 echo "</form>";
 echo "</body>";
 echo "</html>";
+
+function save($this_file,$filename,$top_header,$save_content) {
+	$handle = fopen($this_file, "w");
+	if($handle) {
+		$file_header = $top_header . "\n// Grammar saved as \"" . $filename . "\". Date: " . gmdate('Y-m-d H:i:s');
+		fwrite($handle, $file_header . "\n");
+		fwrite($handle, $save_content);
+		fclose($handle);
+		}
+	return;
+	}
 ?>

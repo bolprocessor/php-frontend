@@ -469,6 +469,12 @@ $clean_line = str_ireplace("<HTML>",'',$line);
 $clean_line = str_ireplace("</HTML>",'',$clean_line);
 $object_comment = $clean_line;
 
+$no_midi = TRUE;
+if(file_exists($midi_bytes)) {
+	$all_bytes = @file_get_contents($midi_bytes,TRUE);
+	if(strlen(trim($all_bytes)) > 0) $no_midi = FALSE;
+	}
+
 $message_create_sound = '';
 if(isset($_POST['createcsound'])) {
 	$csound_score = trim($_POST['csound_score']);
@@ -477,7 +483,7 @@ if(isset($_POST['createcsound'])) {
 		}
 	else {
 		$Duration = intval($_POST['Duration']);
-		if($Duration == 0) {
+		if($no_midi) {
 			$message_create_sound .= "<p><font color=\"red\">➡ </font>Cannot create Csound score because MIDI sequence is empty…</p>";
 			}
 		else {
@@ -497,16 +503,17 @@ if(isset($_POST['createcsound'])) {
 			$o = send_to_console($command);
 			$n_messages = count($o);
 			if($n_messages > 0) {
-				for($i=0; $i < $n_messages; $i++) {
-					$mssg[$i] = $o[$i];
-					$mssg[$i] = clean_up_encoding(FALSE,TRUE,$mssg[$i]);
-				//	echo $mssg[$i]."<br />";
-					if(is_integer($pos=strpos($mssg[$i],"Errors: 0")) AND $pos == 0) $no_error = TRUE;
+				for($i=$j=0; $i < $n_messages; $i++) {
+			//		echo $o[$i]."<br />";
+					$mssg[$j] = $o[$i];
+					$mssg[$j] = clean_up_encoding(FALSE,TRUE,$mssg[$j]);
+					if(is_integer($pos=strpos($mssg[$j],"Errors: 0")) AND $pos == 0) $no_error = TRUE;
+					$j++;
 					}
 				}
 			if(!$no_error) {
 				$message_create_sound .= "<p><font color=\"red\">➡ </font>Errors in the conversion:<br /><small>";
-				for($i=0; $i < $n_messages; $i++) {
+				for($i=0; $i < count($mssg); $i++) {
 					$message_create_sound .= "&nbsp;&nbsp;&nbsp;".$mssg[$i]."<br />";
 					}
 				$message_create_sound .= "</small></p>";
@@ -2019,6 +2026,7 @@ echo "</form>";
 echo "<hr>";
 echo "<p id=\"csound\">CSOUND</p>";
 $csound_score = @file_get_contents($csound_file,TRUE);
+$csound_score = fix_csound_score($csound_score,$csound_file,$temp_dir,$temp_folder);
 $csound_period = 0;
 $time_max_csound = 0;
 $table = explode(chr(10),$csound_score);
@@ -2027,9 +2035,8 @@ if(count($table) > 2) {
 	for($i = 0; $i < count($table); $i++) {
 		$csound_instruction = trim($table[$i]);
 		if($csound_instruction == '') continue;
-	//	echo $csound_instruction."<br />";
-		do
-			$csound_instruction = str_replace("  ",' ',$csound_instruction,$count);
+	//	echo "@@@ ".$csound_instruction."<br />";
+		do $csound_instruction = str_replace("  ",' ',$csound_instruction,$count);
 		while($count > 0);
 		$table2 = explode(' ',$csound_instruction);
 		if($table2[0] == "t" AND count($table2) > 2) {
@@ -2073,4 +2080,32 @@ echo "<input type=\"hidden\" name=\"timesig\" value=\"".$timesig."\">";
 echo "<textarea name=\"csound_score\" onchange=\"tellsave()\" rows=\"20\" style=\"width:700px;\">".$csound_score."</textarea><br />";
 echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"savecsound\" value=\"SAVE THIS CODE\"></p><p><input style=\"background-color:yellow;\" type=\"submit\" name=\"createcsound\" value=\"CREATE Csound CODE\"> from MIDI codes in “<font color=\"blue\">".$object_name."</font>”</p>";
 echo "</form>";
+
+function fix_csound_score($csound_score,$csound_file,$temp_dir,$temp_folder) {
+	$table = explode(chr(10),$csound_score);
+	$changed = FALSE;
+	$table2 = array();
+	for($i = 0; $i < count($table); $i++) {
+		$csound_instruction = trim($table[$i]);
+		$bad = FALSE;
+		if(is_integer($pos=strpos($csound_instruction,"e")) AND $pos == 0) $bad = TRUE;
+		if(is_integer($pos=strpos($csound_instruction,"f")) AND $pos == 0) $bad = TRUE;
+		if(is_integer($pos=strpos($csound_instruction,"s")) AND $pos == 0) $bad = TRUE;
+		if(is_integer($pos=strpos($csound_instruction,"<void>"))) $bad = TRUE;
+		if(is_integer($pos=strpos($csound_instruction,"silence"))) $bad = TRUE;
+		if(!$bad) $table2[] = $csound_instruction;
+		else $changed = TRUE;
+		$score = implode(chr(10),$table2);
+		}
+	if($changed) {
+		$handle = fopen($csound_file,"w");
+		if($handle) {
+			fwrite($handle,$score."\n");
+			fclose($handle);
+			$handle = fopen($temp_dir.$temp_folder.SLASH."_changed",'w');
+			fclose($handle);
+			}
+		}
+	return $score;
+	}
 ?>
