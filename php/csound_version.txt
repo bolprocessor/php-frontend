@@ -1,7 +1,0 @@
---Csound version 6.18 (double samples) Nov 24 2022
-[commit: a1580f9cdf331c35dceb486f4231871ce0b00266]
-[mend of score.		   overall amps:[m      0.0
-	   overall samples out of range:[m        0[m
-0 errors in performance
-[mElapsed time at end of performance: real: 0.000s, CPU: 0.000s
-[m

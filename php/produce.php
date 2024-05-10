@@ -310,7 +310,6 @@ if($instruction <> "help") {
 ob_flush();
 flush();
 
-echo "<hr>";
 
 if(isset($data_path) AND $data_path <> '') {
 	$content = @file_get_contents($data_path,TRUE);
@@ -343,7 +342,8 @@ if(isset($data_path) AND $data_path <> '') {
 	}
 if(file_exists($stopfile)) unlink($stopfile);
 $o = send_to_console($command);
-if($pid > 0) echo "The pid was ".$pid."<br />";
+if($pid > 0) echo "<small>The pid was <font color=\"red\">".$pid."</font></small><br />";
+echo "<hr>";
 $n_messages = count($o);
 $no_error = FALSE;
 for($i = 0; $i < $n_messages; $i++) {
@@ -420,7 +420,7 @@ if($instruction <> "help") {
 				}
 			echo "<font color=\"red\">➡</font> Read the <a onclick=\"window.open('".$output_link."','".$grammar_name."','width=800,height=700,left=300'); return false;\" href=\"".$output_link."\">output file</a> (or <a href=\"".$output_link."\" download>download it</a>)<br />";
 			}
-		if($trace_production OR $instruction == "templates" OR $show_production OR $trace_production) echo "<font color=\"red\">➡</font> Read the <a onclick=\"window.open('".$trace_link."','trace','width=800,height=600,left=400'); return false;\" href=\"".$trace_link."\">trace file</a> (or <a href=\"".$trace_link."\" download>download it</a>)";
+		if($trace_production OR $instruction == "templates" OR $show_production) echo "<font color=\"red\">➡</font> Read the <a onclick=\"window.open('".$trace_link."','trace','width=800,height=600,left=400'); return false;\" href=\"".$trace_link."\">trace file</a> (or <a href=\"".$trace_link."\" download>download it</a>)";
 		echo "</p>";
 		 
 		// Show MIDI file

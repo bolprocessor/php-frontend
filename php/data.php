@@ -1377,9 +1377,11 @@ echo ">No file (real-time MIDI)";
 echo "<br /><input type=\"radio\" name=\"file_format\" value=\"midi\"";
 if($file_format == "midi") echo " checked";
 echo ">MIDI file";
-echo "<br /><input type=\"radio\" name=\"file_format\" value=\"csound\"";
-if($file_format == "csound") echo " checked";
-echo ">CSOUND file";
+if(file_exists("csound_version.txt")) {
+	echo "<br /><input type=\"radio\" name=\"file_format\" value=\"csound\"";
+	if($file_format == "csound") echo " checked";
+	echo ">CSOUND file";
+	}
 echo "</p></td></tr></table>";
 
 $link_options = '';

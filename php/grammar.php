@@ -406,9 +406,11 @@ echo ">BP data file";
 echo "<br /><input type=\"radio\" name=\"file_format\" value=\"midi\"";
 if($file_format == "midi") echo " checked";
 echo ">MIDI file";
-echo "<br /><input type=\"radio\" name=\"file_format\" value=\"csound\"";
-if($file_format == "csound") echo " checked";
-echo ">CSOUND file";
+if(file_exists("csound_version.txt")) {
+	echo "<br /><input type=\"radio\" name=\"file_format\" value=\"csound\"";
+	if($file_format == "csound") echo " checked";
+	echo ">CSOUND file";
+	}
 echo "</p></td>";
 echo "<td style=\"text-align:right; vertical-align:middle;\" rowspan=\"2\">";
 echo "<input type=\"hidden\" name=\"settings_file\" value=\"".$settings_file."\">";
