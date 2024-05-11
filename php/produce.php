@@ -537,7 +537,7 @@ if($instruction <> "help") {
 				if(time() > $time_end) break;
 				}
 			if(file_exists($csound_file_link)) {
-				$command = $csound_path."csound --version";
+				$command = $csound_path.$csound_name." --version";
 				exec($command,$result_csound,$return_var);
 				if($return_var <> 0) {
 					echo "<p><font color=\"red\">➡</font> Test of Csound was unsuccessful. May be not installed? The command was: <font color=\"blue\">".$command."</font></p>";
@@ -545,7 +545,7 @@ if($instruction <> "help") {
 				else {
 					sleep(1);
 					$time_start = time();
-					$command = $csound_path."csound --wave -o ".$sound_file_link." ".$dir_csound_resources.$csound_orchestra." ".$csound_file_link;
+					$command = $csound_path.$csound_name." --wave -o ".$sound_file_link." ".$dir_csound_resources.$csound_orchestra." ".$csound_file_link;
 					echo "<p><small>command = <font color=\"red\">".$command."</font></small></p>";
 					$trace_csound = $temp_dir."trace_csound.txt";
 					$command .= " 2>".$trace_csound;

@@ -23,6 +23,7 @@ $test = FALSE;
 
 $bp_application_path = "..".SLASH;
 if(!isset($csound_path) OR $csound_path == '') $csound_path = "/usr/local/bin/";
+if(!isset($csound_name) OR $csound_name == '') $csound_name = "csound";
 if(!isset($csound_resources) OR $csound_resources == '') $csound_resources = "csound_resources";
 save_settings("csound_resources",$csound_resources);
 if(!isset($trash_folder) OR $trash_folder == '') $trash_folder = "trash_bolprocessor";
@@ -72,6 +73,10 @@ if(isset($_POST['csound_path'])) {
 			$new_csound_path .= "/";
 		save_settings("csound_path",$new_csound_path);
 		$csound_path = $new_csound_path;
+		}
+	$new_csound_name = trim($_POST['csound_name']);
+	if($new_csound_name <> '') {
+		save_settings("csound_name",$new_csound_name);
 		}
 	}
 
@@ -2084,17 +2089,19 @@ else echo "<p><font color=\"red\">File ‘_settings.php’ could nor be opened!<
  	}
  
 function check_csound() {
-	global $csound_path, $csound_resources, $path, $url_this_page, $file_format;
+	global $csound_path, $csound_resources, $path, $url_this_page, $file_format,$csound_name;
 	$return_var = 1;
-	if(file_exists($csound_path."csound")) {
-		$command = $csound_path."csound --version 2>csound_version.txt";
+	$command = $csound_path.$csound_name." --version 2>csound_version.txt";
+	if(file_exists($csound_path.$csound_name)) {
 		exec($command,$result_csound,$return_var);
 		}
 	if($return_var <> 0) {
+		echo "&nbsp;&nbsp;&nbsp;<small><font color=\"red\">".$csound_path.$csound_name."</font></small>";
 		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		if(isset($file_format)) echo "<input type=\"hidden\" name=\"file_format\" value=\"".$file_format."\">";
 		echo "<p><img src=\"pict/logo_csound.jpg\" width=\"90px;\" style=\"vertical-align:middle;\" />&nbsp;is not installed or its path (<font color= \"blue\">".$csound_path."</font>) is incorrect.<br/>";
-		echo "Try this path: <input type=\"text\" name=\"csound_path\" size=\"30\" style=\"background-color:CornSilk;\" value=\"".$csound_path."\">";
+		echo "Try this path to Csound: <input type=\"text\" name=\"csound_path\" size=\"20\" style=\"background-color:CornSilk;text-align:right;\" value=\"".$csound_path."\"><font color=\"green\"> csound_name</font><br />";
+		echo "Name of the Csound application: <font color=\"green\">/path_to_csound/ </font><input type=\"text\" name=\"csound_name\" size=\"10\" style=\"background-color:CornSilk;\" value=\"".$csound_name."\">";
 		echo "&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" value=\"TRY\">";
 		echo "<br />";
 		echo "<br /><font color=\"red\">➡</font>&nbsp;<a target=\"_blank\" href=\"https://csound.com/download.html\">Follow this link</a> to install Csound and convert scores to sound files.</p>";
@@ -2118,7 +2125,8 @@ function check_csound() {
 		echo "<p style=\"vertical-align:middle;\"><img src=\"pict/logo_csound.jpg\" width=\"90px;\" style=\"vertical-align:middle;\" />".$version."is installed and responsive.<br />";
 		$result = TRUE;
 		}
-	if($path <> $csound_resources) echo "<font color=\"red\">➡</font>&nbsp;<a target=\"_blank\" href=\"index.php?path=csound_resources\">Visit Csound resource folder</a></p>";
+	if($path <> $csound_resources) echo "<font color=\"red\">➡</font>&nbsp;<a target=\"_blank\" href=\"index.php?path=csound_resources\">Visit Csound resource folder</a>";
+	echo "</p>";
 	return $result;
 	}
 
