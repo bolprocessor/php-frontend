@@ -29,20 +29,6 @@ var interval = setInterval(checkFile,1000); // Check every second
 
 
 <?php
-echo "<script>";
-echo "function createFile(pathToFile) {
-    $.ajax({
-        url: '_createfile.php',
-        data: { path_to_file: pathToFile },
-        success: function(response) {
-            document.getElementById('message').innerHTML = response;
-        },
-        error: function() {
-            document.getElementById('message').innerHTML = \"Error creating the file.\";
-        }
-    });\n";
-echo "}
-</script>";
 
 $donefile = $temp_dir."trace_".session_id()."_done.txt";
 
@@ -154,11 +140,14 @@ else {
 	$grammar_name = str_replace(" ","_",$grammar_name);
 	$data_name = str_replace(" ","_",$data_name);
 	
+	// echo "output = ".$output."<br />";
 	$project_name = preg_replace("/\.[a-z]+$/u",'',$output);
+	// echo "project_name = ".$project_name."<br />";
 	if($instruction == "play" OR $instruction == "play-all")
-		$result_file = $project_name."_".$instruction."-result.html";
-	else $result_file = $project_name."-result.html";
-//	echo "result_file = ".$result_file."<br />";
+		$result_file = $temp_dir.$project_name."_".$instruction."-result.html";
+	else $result_file = $temp_dir.$project_name."-result.html";
+	// echo "temp_dir = ".$temp_dir."<br />";
+	// echo "result_file = ".$result_file."<br />";
 	
 	@unlink($result_file);
 	if($output <> '') @unlink($output);
@@ -363,13 +352,9 @@ if($instruction == "help") {
 if($instruction <> "help") {
 	$last_warning = $time_start = time();
 	$time_end = $time_start + $max_sleep_time_after_bp_command;
-//	$donefile = $temp_dir."trace_".session_id()."_done.txt";
 //	echo $donefile."<br />";
-
-	echo "<p id=\"donestatus\">Waiting for ‘done’ file…</p>";
-	
-
-/*	$dots = 0;
+/*	echo "<p id=\"donestatus\">Waiting for ‘done’ file…</p>";
+	$dots = 0;
 	while(TRUE) {
 		if(file_exists($donefile)) break;
 		if(time() > $time_end) {
@@ -390,7 +375,7 @@ if($instruction <> "help") {
 	$tracefile_html = clean_up_file_to_html($tracefile);
 	$trace_link = $tracefile_html;
 	$output_link = $output;
-//	$test = TRUE;
+	// $test = TRUE;
 	if($test) echo "<br />output = ".$output."<br />";
 	if($test) echo "tracefile_html = ".$tracefile_html."<br />";
 	if($test) echo "dir = ".$dir."<br />";
@@ -413,12 +398,12 @@ if($instruction <> "help") {
 		}
 	else {
 		echo "<p>";
-		if($output <> '' AND $file_format <> "midi") {
+		if($output <> '' AND $file_format <> "midi" AND $file_format <> "rtmidi") {
 			if($file_format <> "csound") {
 				$output_html = clean_up_file_to_html($output);
 				$output_link = $output_html;
 				}
-			echo "<font color=\"red\">➡</font> Read the <a onclick=\"window.open('".$output_link."','".$grammar_name."','width=800,height=700,left=300'); return false;\" href=\"".$output_link."\">output file</a> (or <a href=\"".$output_link."\" download>download it</a>)<br />";
+			echo "<font color=\"red\">➡</font>@ Read the <a onclick=\"window.open('".$output_link."','".$grammar_name."','width=800,height=700,left=300'); return false;\" href=\"".$output_link."\">output file</a> (or <a href=\"".$output_link."\" download>download it</a>)<br />";
 			}
 		if($trace_production OR $instruction == "templates" OR $show_production) echo "<font color=\"red\">➡</font> Read the <a onclick=\"window.open('".$trace_link."','trace','width=800,height=600,left=400'); return false;\" href=\"".$trace_link."\">trace file</a> (or <a href=\"".$trace_link."\" download>download it</a>)";
 		echo "</p>";
@@ -455,7 +440,13 @@ if($instruction <> "help") {
 			// echo "this_name = ".$this_name.", data_name = ".$data_name.", grammar_name = ".$grammar_name."<br />";
 			if(!$found OR ($this_name <> $grammar_name AND $this_name <> $data_name) OR isset($table[$i + 2])) continue;
 			echo "<td style=\"background-color:white; border-radius: 6px; border: 4px solid Gold; vertical-align:middle; text-align: center; padding:8px; margin:0px;\>";
-			$number = intval(str_replace(".html",'',$table[$i + 1]));
+			$number_and_time = str_replace(".html",'',$table[$i + 1]);
+			$table_number = explode('-',$number_and_time);
+			$number = $table_number[0];
+			$image_time = '';
+			if(count($table_number) > 1) $image_time = $table_number[1]."s";
+	//		if($image_time == "0.00s") $image_time = '';
+	//		$number = intval($number_and_time);
 			$content = @file_get_contents($temp_dir.$thisfile,TRUE);
 			$table2 = explode(chr(10),$content);
 			$imax = count($table2);
@@ -488,7 +479,7 @@ if($instruction <> "help") {
 			if($HeightMax < $window_height) $window_height = $HeightMax + 60;
 			$window_width = 1200;
 			if($WidthMax < $window_width) $window_width = $WidthMax +  20;
-			echo "<div style=\"border:2px solid gray; background-color:azure; width:8em;  padding:2px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$link."','".$title1."','width=".$window_width.",height=".$window_height.",left=".$left."'); return false;\" href=\"".$link."\">Image ".$number."</a>";
+			echo "<div style=\"border:2px solid gray; background-color:azure; width:8em;  padding:2px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$link."','".$title1."','width=".$window_width.",height=".$window_height.",left=".$left."'); return false;\" href=\"".$link."\">Image ".$number."</a><br />".$image_time;
 			if(check_image($link) <> '') {
 				$bad_image = TRUE;
 				echo " <font color=\"red\"><b>*</b></font>";
@@ -572,6 +563,7 @@ if($instruction <> "help") {
 		}
 	}
 $handle = FALSE;
+// echo "number_and_time = ".$number_and_time."<br />";
 if($n_messages > 6000) echo "<p><font color=\"red\">➡</font> Too many messages produced! (".$n_messages.")</p>";
 else {
 	if($result_file <> '') $handle = fopen($result_file,"w");

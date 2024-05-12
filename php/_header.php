@@ -118,6 +118,21 @@ echo "$(document).ready(function() {\n
 });\n";
 echo "</script>\n";
 
+echo "<script>";
+echo "function createFile(pathToFile) {
+    $.ajax({
+        url: '_createfile.php',
+        data: { path_to_file: pathToFile },
+        success: function(response) {
+            document.getElementById('message').innerHTML = response;
+        },
+        error: function() {
+            document.getElementById('message').innerHTML = \"Error creating the file.\";
+        }
+    });\n";
+echo "}
+</script>";
+
 echo "</head>";
 echo "<body onload=\"settoggledisplay()\">\n";
 
@@ -129,4 +144,6 @@ function is_connected() {
     }
   else return FALSE;
   }
+
+  echo "<div style=\"float:right; \"><button type=\"button\" class=\"bouton\" onclick=\"createFile('".$stopfile."');\">PANIC!</button></div>\n";
 ?>

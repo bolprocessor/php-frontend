@@ -1371,9 +1371,9 @@ echo "<td><p>Name of output file (with proper extension):<br /><input type=\"tex
 echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savethisfile\" value=\"SAVE\"></p>";
 echo "</td>";
 echo "<td><p style=\"text-align:left;\">";
-echo "<input type=\"radio\" name=\"file_format\" value=\"\"";
-if($file_format == "") echo " checked";
-echo ">No file (real-time MIDI)";
+echo "<input type=\"radio\" name=\"file_format\" value=\"rtmidi\"";
+if($file_format == "rtmidi") echo " checked";
+echo ">Real-time MIDI";
 echo "<br /><input type=\"radio\" name=\"file_format\" value=\"midi\"";
 if($file_format == "midi") echo " checked";
 echo ">MIDI file";

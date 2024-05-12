@@ -396,10 +396,14 @@ echo "<td><p>Name of output file (with proper extension):<br /><input type=\"tex
 echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" name=\"savegrammar\" value=\"SAVE\"></p>";
 echo "</td>";
 echo "<td><p style=\"text-align:left;\">";
-if($test) echo "file_format = ".$file_format."<br />";
-echo "<input type=\"radio\" name=\"file_format\" value=\"\"";
-if($file_format == "") echo " checked";
-echo ">No file (real-time MIDI)";
+// if($test) echo "file_format = ".$file_format."<br />";
+if($file_format == '') {
+	$file_format = "rtmidi";
+	save_settings2("grammar_file_format",$filename,$file_format);
+	}
+echo "<input type=\"radio\" name=\"file_format\" value=\"rtmidi\"";
+if($file_format == "rtmidi") echo " checked";
+echo ">Real-time MIDI";
 echo "<br /><input type=\"radio\" name=\"file_format\" value=\"data\"";
 if($file_format == "data") echo " checked";
 echo ">BP data file";
@@ -705,7 +709,7 @@ echo " title=\"Don't forget to save!\"";
 echo ">";
 $link_test = $link_produce."&test";
 $display_command_title = "DisplayCommand".$filename;
-echo "&nbsp;<input style=\"color:DarkBlue; background-color:Azure; font-size:large;\" onclick=\"window.open('".$link_test."','".$display_command_title."','width=1000,height=100,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Display command line\">";
+echo "&nbsp;<input style=\"color:DarkBlue; background-color:Azure; font-size:large;\" onclick=\"window.open('".$link_test."','".$display_command_title."','width=1000,height=200,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Display command line\">";
 echo "</div>";
 echo "<p style=\"width:90%; text-align:right;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savegrammar\" value=\"SAVE ‘".$filename."’\"></p>";
 echo "</form>";
