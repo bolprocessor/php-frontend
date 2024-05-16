@@ -26,6 +26,8 @@ if(!isset($csound_path) OR $csound_path == '') $csound_path = "/usr/local/bin/";
 if(!isset($csound_name) OR $csound_name == '') $csound_name = "csound";
 if(!isset($csound_resources) OR $csound_resources == '') $csound_resources = "csound_resources";
 save_settings("csound_resources",$csound_resources);
+if(!isset($midi_resources) OR $midi_resources == '') $midi_resources = "midi_resources";
+save_settings("midi_resources",$midi_resources);
 if(!isset($trash_folder) OR $trash_folder == '') $trash_folder = "trash_bolprocessor";
 save_settings("trash_folder",$trash_folder);
 $max_sleep_time_after_bp_command = 240; // seconds. Maximum time waiting for the 'done.txt' file
@@ -51,8 +53,18 @@ $stopfile = $temp_dir."messages/_stop";
 
 if(!file_exists($bp_application_path.$csound_resources)) {
 	mkdir($bp_application_path.$csound_resources);
+	chmod($bp_application_path.$midi_resources,$permissions);
 	}
 $dir_csound_resources = $bp_application_path.$csound_resources.SLASH;
+
+if(!file_exists($bp_application_path.$midi_resources)) {
+	mkdir($bp_application_path.$midi_resources);
+	chmod($bp_application_path.$midi_resources,$permissions);
+	}
+$dir_midi_resources = $bp_application_path.$midi_resources.SLASH;
+
+$MIDIsource = $MIDIoutput = -1;
+$MIDIsourcename = $MIDIoutputname = '';
 
 if(!file_exists($bp_application_path.$csound_resources.SLASH."scale_images")) {
 	mkdir($bp_application_path.$csound_resources.SLASH."scale_images");
@@ -2750,5 +2762,81 @@ function date_sort($a,$b) {
 
 function score_sort($a,$b) {
 	return $a['score'] < $b['score'];
+	}
+
+function read_midiressources($name) {
+	global $dir_midi_resources;
+	$result['found'] = false;
+	if(file_exists($dir_midi_resources.$name)) {
+		$file = fopen($dir_midi_resources.$name,'r');
+		if($file) {
+			$midisource = $midioutput = -1;
+			$midisourcename = $midioutputname = '';
+			while(!feof($file)) {
+				$line = fgets($file);
+				$table = explode("\t",$line);
+				if(count($table) < 2) continue;
+				if(trim($table[0]) == "MIDIsource") {
+					if(($midisource == -1) AND ctype_digit($table[1])) $midisource = trim($table[1]);
+					if((count($table) > 2) AND $midisourcename == '') $midisourcename = trim($table[2]);
+					}
+				else if(trim($table[0]) == "MIDIoutput") {
+					if(($midioutput == -1) AND ctype_digit($table[1])) $midioutput = trim($table[1]);
+					if((count($table) > 2) AND $midioutputname == '') $midioutputname = trim($table[2]);
+					}
+				}
+			fclose($file);
+			$result['found'] = true;
+			$result['midisource'] = $midisource;
+			$result['midisourcename'] = $midisourcename;
+			$result['midioutput'] = $midioutput;
+			$result['midioutputname'] = $midioutputname;
+			}
+		}
+	return $result;
+	}
+
+function load_midiressources($name) {
+	global $dir_midi_resources, $MIDIsource, $MIDIoutput, $MIDIsourcename, $MIDIoutputname;
+	if(file_exists($dir_midi_resources.$name)) {
+		$file = fopen($dir_midi_resources.$name,'r');
+		if($file) {
+			$MIDIsource = $MIDIoutput = -1;
+			$MIDIsourcename = $MIDIoutputname = '';
+			while(!feof($file)) {
+				$line = fgets($file);
+				$table = explode("\t",$line);
+				if(count($table) < 2) continue;
+				if(trim($table[0]) == "MIDIsource") {
+					if(($MIDIsource == -1) AND ctype_digit($table[1])) $MIDIsource = trim($table[1]);
+					if((count($table) > 2) AND $MIDIsourcename == '') $MIDIsourcename = trim($table[2]);
+					}
+				else if(trim($table[0]) == "MIDIoutput") {
+					if(($MIDIoutput == -1) AND ctype_digit($table[1])) $MIDIoutput = trim($table[1]);
+					if((count($table) > 2) AND $MIDIoutputname == '') $MIDIoutputname = trim($table[2]);
+					}
+				}
+			fclose($file);
+			return true;
+			}
+		}
+	return false;
+	}
+
+function save_midiressources($filename) {
+	global $dir_midi_resources, $MIDIsource, $MIDIoutput, $MIDIsourcename, $MIDIoutputname;
+	if(isset($_POST['MIDIsource'])) $MIDIsource = trim($_POST['MIDIsource']);
+	if(isset($_POST['MIDIsourcename'])) $MIDIsourcename = trim($_POST['MIDIsourcename']);
+	if(isset($_POST['MIDIoutput'])) $MIDIoutput = trim($_POST['MIDIoutput']);
+	if(isset($_POST['MIDIoutputname'])) $MIDIoutputname = trim($_POST['MIDIoutputname']);
+	$name = $filename;
+	$file = fopen($dir_midi_resources.$name,'w');
+	if($file) {
+		fwrite($file,"MIDIsource\t".$MIDIsource."\t".$MIDIsourcename."\n");
+		fwrite($file,"MIDIoutput\t".$MIDIoutput."\t".$MIDIoutputname."\n");
+		fclose($file);
+		return true;
+		}
+	return false;
 	}
 ?>

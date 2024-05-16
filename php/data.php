@@ -1157,6 +1157,14 @@ if(isset($_POST['apply_changes_instructions'])) {
 	$need_to_save = TRUE;
 	}
 
+if(!load_midiressources("midisetup_".$filename)) {
+	if(!load_midiressources("last_midisetup")) {
+		$MIDIsource = 1;
+		$MIDIoutput = 0;
+		$MIDIsourcename = $MIDIoutputname = '';
+		}
+	}
+
 if($need_to_save OR isset($_POST['savethisfile'])) {
 	echo "<p id=\"timespan\" style=\"color:red; float:right;\">Saved ‘".$filename."’file…</p>";
 	if(isset($_POST['thistext'])) $content = $_POST['thistext'];
@@ -1164,6 +1172,8 @@ if($need_to_save OR isset($_POST['savethisfile'])) {
 	if($more_data <> '') $content = $more_data."\n\n".$content;
 	$content = preg_replace("/ +/u",' ',$content);
 	save($this_file,$filename,$top_header,$content);
+	save_midiressources("midisetup_".$filename);
+	save_midiressources("last_midisetup");
 	}
 
 try_create_new_file($this_file,$filename);
@@ -1367,8 +1377,33 @@ echo "<div style=\"float:right; background-color:white; padding-right:6px; paddi
 $csound_is_responsive = check_csound();
 echo "</div>";
 echo "<table id=\"topedit\" style=\"background-color:white; border-radius: 15px; border: 1px solid black;\" cellpadding=\"8px;\"><tr style=\"\">";
-echo "<td><p>Name of output file (with proper extension):<br /><input type=\"text\" name=\"output_file\" size=\"25\" value=\"".$output_file."\">&nbsp;";
-echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savethisfile\" value=\"SAVE\"></p>";
+echo "<td>";
+if($file_format <> "rtmidi") {
+	echo "<input type=\"hidden\" name=\"MIDIsource\" value=\"".$MIDIsource."\">";
+	echo "<input type=\"hidden\" name=\"MIDIsourcename\" value=\"".$MIDIsourcename."\">";
+	echo "<input type=\"hidden\" name=\"MIDIoutput\" value=\"".$MIDIoutput."\">";
+	echo "<input type=\"hidden\" name=\"MIDIoutputname\" value=\"".$MIDIoutputname."\">";
+	echo "<p>Name of output file (with proper extension):<br />";
+	echo "<input type=\"text\" name=\"output_file\" size=\"25\" value=\"".$output_file."\">&nbsp;";
+	echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savethisfile\" value=\"SAVE\"></p>";
+	}
+else {
+	echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
+	$last_midisetup = read_midiressources("last_midisetup");
+	echo "<br />";
+	if($last_midisetup['found']) {
+		if($last_midisetup['midisource'] <> $MIDIsource) echo "➡ MIDIsource was ".$last_midisetup['midisource']."<br />";
+		if($last_midisetup['midisourcename'] != $MIDIsourcename) echo "➡ MIDI source name was “".$last_midisetup['midisourcename']."”<br />";
+		}
+	echo "MIDI source <input type=\"text\" onchange=\"tellsave()\" name=\"MIDIsource\" size=\"3\" value=\"".$MIDIsource."\">&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIsourcename\" size=\"25\" value=\"".$MIDIsourcename."\"><br />";
+	if($last_midisetup['found']) {
+		echo "<br />";
+		if($last_midisetup['midioutput'] <> $MIDIoutput) echo "➡ MIDI output was ".$last_midisetup['midioutput']."<br />";
+		if($last_midisetup['midioutputname'] != $MIDIoutputname) echo "➡ MIDI output name was “".$last_midisetup['midioutputname']."”<br />";
+		}
+	echo "MIDI output <input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutput\" size=\"3\" value=\"".$MIDIoutput."\">&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutputname\" size=\"25\" value=\"".$MIDIoutputname."\">";
+	}
+echo "<p>➡ <i>After changing the settings above, click SAVE…</i></p>";
 echo "</td>";
 echo "<td><p style=\"text-align:left;\">";
 echo "<input type=\"radio\" name=\"file_format\" value=\"rtmidi\"";
@@ -1382,7 +1417,8 @@ if(file_exists("csound_version.txt")) {
 	if($file_format == "csound") echo " checked";
 	echo ">CSOUND file";
 	}
-echo "</p></td></tr></table>";
+echo "</p></td></tr>";
+echo "</table>";
 
 $link_options = '';
 if($grammar_file <> '') {
@@ -1789,6 +1825,15 @@ if(!$hide) {
 	}
 echo "</tr>";
 echo "</table>";
+echo "<pre>";  // Preformatted tag to display output neatly
+    // Execute a shell command to list MIDI devices
+    // Using `system_profiler` to get audio device information which includes MIDI
+    system("system_profiler SPAudioDataType | grep MIDI");
+    echo "</pre>";
+echo "<pre>";
+// send_to_console("python3 midi_list.py");
+system("python3 midi_list.py");
+echo "</pre>";
 echo "</body></html>";
 
 function create_chunks($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxchunk_size,$measure_min,$measure_max,$label) {

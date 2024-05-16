@@ -187,6 +187,14 @@ if(isset($_POST['apply_changes_instructions'])) {
 	$need_to_save = TRUE;
 	}
 
+if(!load_midiressources("midisetup_".$filename)) {
+	if(!load_midiressources("last_midisetup")) {
+		$MIDIsource = 1;
+		$MIDIoutput = 0;
+		$MIDIsourcename = $MIDIoutputname = '';
+		}
+	}
+
 if($need_to_save OR isset($_POST['savegrammar']) OR isset($_POST['compilegrammar'])) {
 	if(isset($_POST['savegrammar'])) echo "<span id=\"timespan\" style=\"color:red; float:right;\">&nbsp;…&nbsp;Saved “".$filename."” file…</span>";
 	$content = $_POST['thistext'];
@@ -214,6 +222,8 @@ if($need_to_save OR isset($_POST['savegrammar']) OR isset($_POST['compilegrammar
 	$content = recode_entities($content);
 	$content = preg_replace("/ +/u",' ',$content);
 	save($this_file,$filename,$top_header,$content);
+	save_midiressources("midisetup_".$filename);
+	save_midiressources("last_midisetup");
 	}
 // echo "</small></p>";
 
@@ -392,8 +402,33 @@ if($file_format == "csound") {
 	}
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 echo "<table cellpadding=\"8px;\" style=\"background-color:white; border-radius: 15px; border: 1px solid black;\"><tr style=\"\">";
-echo "<td><p>Name of output file (with proper extension):<br /><input type=\"text\" name=\"output_file\" size=\"25\" value=\"".$output_file."\">&nbsp;";
-echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" name=\"savegrammar\" value=\"SAVE\"></p>";
+echo "<td>";
+if($file_format <> "rtmidi") {
+	echo "<input type=\"hidden\" name=\"MIDIsource\" value=\"".$MIDIsource."\">";
+	echo "<input type=\"hidden\" name=\"MIDIsourcename\" value=\"".$MIDIsourcename."\">";
+	echo "<input type=\"hidden\" name=\"MIDIoutput\" value=\"".$MIDIoutput."\">";
+	echo "<input type=\"hidden\" name=\"MIDIoutputname\" value=\"".$MIDIoutputname."\">";
+	echo "<p>Name of output file (with proper extension):<br />";
+	echo "<input type=\"text\" name=\"output_file\" size=\"25\" value=\"".$output_file."\">&nbsp;";
+	echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" name=\"savegrammar\" value=\"SAVE\"></p>";
+	}
+else {
+	$last_midisetup = read_midiressources("last_midisetup");
+	echo "<br />";
+	if($last_midisetup['found']) {
+		if($last_midisetup['midisource'] <> $MIDIsource) echo "➡ MIDIsource was ".$last_midisetup['midisource']."<br />";
+		if($last_midisetup['midisourcename'] != $MIDIsourcename) echo "➡ MIDI source name was “".$last_midisetup['midisourcename']."”<br />";
+		}
+	echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
+	echo "MIDI source <input type=\"text\" onchange=\"tellsave()\" name=\"MIDIsource\" size=\"3\" value=\"".$MIDIsource."\">&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIsourcename\" size=\"25\" value=\"".$MIDIsourcename."\"><br />";
+	if($last_midisetup['found']) {
+		echo "<br />";
+		if($last_midisetup['midioutput'] <> $MIDIoutput) echo "➡ MIDI output was ".$last_midisetup['midioutput']."<br />";
+		if($last_midisetup['midioutputname'] != $MIDIoutputname) echo "➡ MIDI output name was “".$last_midisetup['midioutputname']."”<br />";
+		}
+	echo "MIDI output <input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutput\" size=\"3\" value=\"".$MIDIoutput."\">&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutputname\" size=\"25\" value=\"".$MIDIoutputname."\">";
+	}
+echo "<p style=\"text-align:center;\">➡ <i>After changing the settings above, click SAVE…</i></p>";
 echo "</td>";
 echo "<td><p style=\"text-align:left;\">";
 // if($test) echo "file_format = ".$file_format."<br />";
@@ -492,10 +527,7 @@ echo "&nbsp;<input onmouseover=\"checksaved();\" onclick=\"if(checksaved()) wind
 if($error) echo " disabled style=\"background-color:azure; box-shadow: none;\"";
 else echo " style=\"color:DarkBlue; background-color:Aquamarine;\"";
 echo ">";
-
-
 echo "</td></tr>";
-echo "<tr><td colspan=\"2\"><p style=\"text-align:center;\">➡ <i>You can change above settings, then save the grammar…</i></p></td></tr>";
 echo "</table>";
 echo "<br /><div style=\"background-color:white; padding:1em; width:690px; border-radius: 15px;\">";
 if($settings_file <> '' AND file_exists($dir.$settings_file)) echo "<input style=\"background-color:yellow;float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_settings."','".$settings_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$settings_file."’\">";
