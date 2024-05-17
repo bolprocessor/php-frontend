@@ -1825,7 +1825,7 @@ if(!$hide) {
 	}
 echo "</tr>";
 echo "</table>";
-echo "<pre>";  // Preformatted tag to display output neatly
+/* echo "<pre>";  // Preformatted tag to display output neatly
     // Execute a shell command to list MIDI devices
     // Using `system_profiler` to get audio device information which includes MIDI
     system("system_profiler SPAudioDataType | grep MIDI");
@@ -1833,7 +1833,7 @@ echo "<pre>";  // Preformatted tag to display output neatly
 echo "<pre>";
 // send_to_console("python3 midi_list.py");
 system("python3 midi_list.py");
-echo "</pre>";
+echo "</pre>"; */
 echo "</body></html>";
 
 function create_chunks($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxchunk_size,$measure_min,$measure_max,$label) {

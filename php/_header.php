@@ -145,5 +145,5 @@ function is_connected() {
   else return FALSE;
   }
 
-  echo "<div style=\"float:right; \"><button type=\"button\" class=\"bouton\" onclick=\"createFile('".$stopfile."');\">PANIC!</button></div>\n";
+  echo "<div style=\"float:right; \"><button type=\"button\" class=\"bouton\" onclick=\"createFile('".$panicfile."');\">PANIC!</button></div>\n";
 ?>

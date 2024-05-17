@@ -52,7 +52,6 @@ if($instruction == '') {
 	echo "ERROR: No instruction has been sent";
 	die();
 	}
-// ob_start(); ob_flush(); flush();
 
 if(isset($_GET['here'])) $here = urldecode($_GET['here']);
 else $here = '???';
@@ -328,7 +327,8 @@ if(isset($data_path) AND $data_path <> '') {
 		}
 	}
 if(file_exists($stopfile)) unlink($stopfile);
-session_abort();
+if(file_exists($panicfile)) unlink($panicfile);
+session_abort(); // Added 2024-05-17
 $o = send_to_console($command);
 if($pid > 0) echo "<small>The pid was <font color=\"red\">".$pid."</font></small><br />";
 echo "<hr>";
@@ -402,7 +402,7 @@ if($instruction <> "help") {
 				$output_html = clean_up_file_to_html($output);
 				$output_link = $output_html;
 				}
-			echo "<font color=\"red\">➡</font>@ Read the <a onclick=\"window.open('".$output_link."','".$grammar_name."','width=800,height=700,left=300'); return false;\" href=\"".$output_link."\">output file</a> (or <a href=\"".$output_link."\" download>download it</a>)<br />";
+			echo "<font color=\"red\">➡</font> Read the <a onclick=\"window.open('".$output_link."','".$grammar_name."','width=800,height=700,left=300'); return false;\" href=\"".$output_link."\">output file</a> (or <a href=\"".$output_link."\" download>download it</a>)<br />";
 			}
 		if($trace_production OR $instruction == "templates" OR $show_production) echo "<font color=\"red\">➡</font> Read the <a onclick=\"window.open('".$trace_link."','trace','width=800,height=600,left=400'); return false;\" href=\"".$trace_link."\">trace file</a> (or <a href=\"".$trace_link."\" download>download it</a>)";
 		echo "</p>";
