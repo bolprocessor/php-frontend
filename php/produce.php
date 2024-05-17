@@ -295,10 +295,8 @@ if($instruction <> "help") {
 	echo "<p id=\"wait\" style=\"text-align:center; background-color:yellow;\"><br /><big><b><span class=\"blinking\">… Bol Processor console is working …</span></b></big><br />(Don't close this window!)<br /><br /><button type=\"button\" class=\"bouton\" onclick=\"createFile('".$stopfile."');\">Click to STOP</button><br /><br /></p>\n";
 //	echo "<p id=\"wait\" style=\"text-align:center; background-color:yellow;\"><br /><big><b><span class=\"blinking\">… Bol Processor console is working …</span></b></big><br />(Don't close this window!)<br /><br /><button type=\"button\" class=\"bouton\" onclick=\"session_write_close();\">Click to STOP</button><br /><br /></p>\n";
 	}
-
 ob_flush();
 flush();
-
 
 if(isset($data_path) AND $data_path <> '') {
 	$content = @file_get_contents($data_path,TRUE);
@@ -330,6 +328,7 @@ if(isset($data_path) AND $data_path <> '') {
 		}
 	}
 if(file_exists($stopfile)) unlink($stopfile);
+session_abort();
 $o = send_to_console($command);
 if($pid > 0) echo "<small>The pid was <font color=\"red\">".$pid."</font></small><br />";
 echo "<hr>";
