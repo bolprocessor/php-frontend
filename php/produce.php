@@ -30,14 +30,12 @@ var interval = setInterval(checkFile,1000); // Check every second
 
 <?php
 
-$donefile = $temp_dir."trace_".session_id()."_done.txt";
-
-$waitcall = $_GET['waitcall'] ?? '';
+/* $waitcall = $_GET['waitcall'] ?? '';
 if($waitcall == "do_this") {
 	if(file_exists($donefile))
 		echo "File has been found";
 	die();
-	}
+	} */
 
 $application_path = $bp_application_path;
 $bad_image = FALSE;
@@ -62,24 +60,23 @@ else $item = 0;
 
 
 $check_command_line = FALSE;
-$sound_file_link = $result_file = '';
+$sound_file_link = $result_file = $tracefile = '';
+$project_fullname = '';
 if($instruction == "help") {
 	$command = $application_path."bp --help";
 	}
 else {
-	if(isset($_GET['grammar'])) $grammar_path = urldecode($_GET['grammar']);
+	if(isset($_GET['grammar'])) $project_fullname = $grammar_path = urldecode($_GET['grammar']);
 	else $grammar_path = '';
-	if(isset($_GET['data'])) $data_path = urldecode($_GET['data']);
+	if(isset($_GET['data'])) $project_fullname = $data_path = urldecode($_GET['data']);
 	else $data_path = '';
 	if($grammar_path == '' AND $data_path == '') {
 		echo "Link to data and/or grammar is missing";
 		die();
 		}
 	if($instruction == "create_grammar") {
-	//	echo "Creating grammar from ".$data_path;
 		$create_grammar = create_grammar($data_path);
 		echo $create_grammar;
-	//	echo "<br />----------";
 		die();
 		}
 	if(isset($_GET['settings'])) $settings_path = urldecode($_GET['settings']);
@@ -141,25 +138,38 @@ else {
 	
 	// echo "output = ".$output."<br />";
 	$project_name = preg_replace("/\.[a-z]+$/u",'',$output);
-	// echo "project_name = ".$project_name."<br />";
+//	 echo "project_name = ".$project_name."<br />";
 	if($instruction == "play" OR $instruction == "play-all")
 		$result_file = $temp_dir.$project_name."_".$instruction."-result.html";
 	else $result_file = $temp_dir.$project_name."-result.html";
 	// echo "temp_dir = ".$temp_dir."<br />";
 	// echo "result_file = ".$result_file."<br />";
-	
-	@unlink($result_file);
-	if($output <> '') @unlink($output);
-	if($tracefile <> '') @unlink($tracefile);
-	@unlink($trace_csound);
-	$trace_csound = '';
+	$project_fullname = str_replace($temp_dir,'',$project_fullname);
+	$project_fullname = preg_replace("/\/[0-9]+\.bpda/u",'',$project_fullname);
+	$project_fullname = str_replace("_".session_id()."_temp",'',$project_fullname);
+	$table = explode(SLASH,$project_fullname);
+	$project_fullname = end($table);
+//	echo "project_fullname = ".$project_fullname."<br />";
+	$tracefile = $temp_dir."trace_".session_id()."_".$project_fullname.".txt";
+//	echo "<p>Trace file = ".$tracefile."</p>";
+
+$midifile = $project_name.".mid";
+if(file_exists($midifile)) {
+//	echo "<p>midifile = ".$midifile."</p>";
+	@unlink($midifile);
+	}
+
 	$time_start = time();
-	$time_end = $time_start + 5;
-	while(TRUE) {
+	$time_end = $time_start + 3;
+/*	while(TRUE) {
 		if(!file_exists($output) AND !file_exists($tracefile) AND !file_exists($result_file)) break;
 		if(time() > $time_end) break;
 		sleep(1);
-		}
+		} */
+	@unlink($result_file);
+	if($output <> '') @unlink($output);
+	@unlink($trace_csound);
+	$trace_csound = '';
 	
 	$command = $application_path."bp ".$instruction;
 	
@@ -225,6 +235,7 @@ else {
 	}
 
 if($instruction <> "help") {
+	// Delete old images
 	$dircontent = scandir($temp_dir);
 	foreach($dircontent as $thisfile) {
 		$time_saved = filemtime($temp_dir.$thisfile);
@@ -234,25 +245,24 @@ if($instruction <> "help") {
 		if(!isset($table[2]) OR $table[1] <> session_id()) continue;
 		$found = FALSE; $this_name = '';
 		for($i = 2; $i < (count($table) - 1); $i++) {
-			if($table[$i] == "image") {
-				$found = TRUE; break;
-				}
-			else {
-				if($this_name == '') $this_name .= $table[$i];
-				else $this_name .= "_".$table[$i];
+			if($table[$i] == "image" AND $table[$i-1] == $project_fullname) {
+				$this_name = $table[$i - 1];
+				$found = TRUE;
+				break;
 				}
 			}
+		if(!$found) continue;
+
 		// Delete this image to be replaced with the current one
-		if($this_name == $grammar_name OR $this_name == $data_name) {
-			$rep = @unlink($temp_dir.$thisfile);
-			// Make sure deletion is complete before launching the command
-			$time_start = time();
-			$time_end = $time_start + 5;
-			if($rep) while(TRUE) {
-				if(!file_exists($temp_dir.$thisfile)) break;
-				if(time() > $time_end) break;
-				sleep(1);
-				}
+		$rep = @unlink($temp_dir.$thisfile);
+//		echo "deleted<br />"; 
+		// Make sure deletion is complete before launching the command
+		$time_start = time();
+		$time_end = $time_start + 5;
+		if($rep) while(TRUE) {
+			if(!file_exists($temp_dir.$thisfile)) break;
+			if(time() > $time_end) break;
+			sleep(1);
 			}
 		}
 	}
@@ -264,7 +274,17 @@ if($check_command_line) {
 	}
 echo "<p><small>command = <font color=\"red\">".$command."</font></small></p>\n";
 
+$stopfile = $temp_dir."trace_".session_id()."_".$project_fullname."_stop";
+// This will be used by createFile() after clicking the STOP button in produce.php
+
+$donefile = $temp_dir."trace_".session_id()."_".$project_fullname."_done";
+// This is created by the console to tell its job is over
+
 if($instruction <> "help") {
+	if($tracefile <> '') @unlink($tracefile);
+	if(file_exists($dir_midi_resources."midisetup_".$project_fullname))
+		// We need to use midisetup of this project
+		copy($dir_midi_resources."midisetup_".$project_fullname, $dir_midi_resources."last_midisetup");
 	if($csound_file <> '') {
 		$lock_file = $dir_csound_resources.$csound_file."_lock";
 	//	echo "Csound instruments lock_file = ".$lock_file."<br />";
@@ -332,6 +352,7 @@ session_abort(); // Added 2024-05-17
 $o = send_to_console($command);
 if($pid > 0) echo "<small>The pid was <font color=\"red\">".$pid."</font></small><br />";
 echo "<hr>";
+session_reset();
 $n_messages = count($o);
 $no_error = FALSE;
 for($i = 0; $i < $n_messages; $i++) {
@@ -410,6 +431,7 @@ if($instruction <> "help") {
 		// Show MIDI file
 		if($file_format == "midi") {
 			$midi_file_link = $output;
+		//	echo "<p>output = ".$output."</p>";
 			if(file_exists($midi_file_link) AND filesize($midi_file_link) > 59) {
 		//		echo "midi_file_link = ".$midi_file_link."<br />";
 				echo "<p class=\"shadow\" style=\"width:25em;\"><a href=\"#midi\" onClick=\"MIDIjs.play('".$midi_file_link."');\"><img src=\"pict/loudspeaker.png\" width=\"70px;\" style=\"vertical-align:middle;\" />Play MIDI file</a>";
@@ -428,16 +450,13 @@ if($instruction <> "help") {
 			if(!isset($table[2]) OR $table[1] <> session_id()) continue;
 			$found = FALSE; $this_name = '';
 			for($i = 2; $i < (count($table) - 1); $i++) {
-				if($table[$i] == "image") {
-					$found = TRUE; break;
-					}
-				else {
-					if($this_name == '') $this_name .= $table[$i];
-					else $this_name .= "_".$table[$i];
+				if($table[$i] == "image" AND $table[$i-1] == $project_fullname) {
+					$this_name = $table[$i - 1];
+					$found = TRUE;
+					break;
 					}
 				}
-			// echo "this_name = ".$this_name.", data_name = ".$data_name.", grammar_name = ".$grammar_name."<br />";
-			if(!$found OR ($this_name <> $grammar_name AND $this_name <> $data_name) OR isset($table[$i + 2])) continue;
+			if(!$found) continue;
 			echo "<td style=\"background-color:white; border-radius: 6px; border: 4px solid Gold; vertical-align:middle; text-align: center; padding:8px; margin:0px;\>";
 			$number_and_time = str_replace(".html",'',$table[$i + 1]);
 			$table_number = explode('-',$number_and_time);
@@ -561,6 +580,13 @@ if($instruction <> "help") {
 			}
 		}
 	}
+
+// Let's copy midi_ressources/last_midisetup to the midi setup specific to this project.
+if(file_exists($dir_midi_resources."last_midisetup")) {
+	echo "<small>Copied “last_midisetup” to “".$dir_midi_resources."midisetup_".$project_fullname."”</small><br /><br />";
+	@copy($dir_midi_resources."last_midisetup",$dir_midi_resources."midisetup_".$project_fullname);
+	}
+
 $handle = FALSE;
 // echo "number_and_time = ".$number_and_time."<br />";
 if($n_messages > 6000) echo "<p><font color=\"red\">➡</font> Too many messages produced! (".$n_messages.")</p>";

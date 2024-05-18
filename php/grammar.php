@@ -423,8 +423,8 @@ else {
 	echo "MIDI source <input type=\"text\" onchange=\"tellsave()\" name=\"MIDIsource\" size=\"3\" value=\"".$MIDIsource."\">&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIsourcename\" size=\"25\" value=\"".$MIDIsourcename."\"><br />";
 	if($last_midisetup['found']) {
 		echo "<br />";
-		if($last_midisetup['midioutput'] <> $MIDIoutput) echo "➡ MIDI output was ".$last_midisetup['midioutput']."<br />";
-		if($last_midisetup['midioutputname'] != $MIDIoutputname) echo "➡ MIDI output name was “".$last_midisetup['midioutputname']."”<br />";
+		if($last_midisetup['midioutput'] <> $MIDIoutput) echo "➡ Last MIDI output was ".$last_midisetup['midioutput']."<br />";
+		if($last_midisetup['midioutputname'] != $MIDIoutputname) echo "➡ Last MIDI output name was “".$last_midisetup['midioutputname']."”<br />";
 		}
 	echo "MIDI output <input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutput\" size=\"3\" value=\"".$MIDIoutput."\">&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutputname\" size=\"25\" value=\"".$MIDIoutputname."\">";
 	}

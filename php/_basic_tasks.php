@@ -49,8 +49,6 @@ $temp_dir .= SLASH;
 if(!file_exists($temp_dir."messages")) mkdir($temp_dir."messages",$permissions,true);
 umask($oldmask);
 $panicfile = $temp_dir."messages".SLASH."_panic";
-$stopfile = $temp_dir."trace_".session_id()."_stop";
-// This will be used by createFile() after clicking the STOP button in produce.php
 
 if(!file_exists($bp_application_path.$csound_resources)) {
 	mkdir($bp_application_path.$csound_resources);
@@ -147,7 +145,6 @@ if($test) {
 
 $html_help_file = "BP2_help.html";
 $help = compile_help($text_help_file,$html_help_file);
-$tracefile = $temp_dir."trace_".session_id().".txt";
 $top_header = "// Bol Processor BP3 compatible with version BP2.9.8";
 
 $KeyString = "key#";
