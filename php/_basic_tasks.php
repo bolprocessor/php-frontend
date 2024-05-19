@@ -52,7 +52,7 @@ $panicfile = $temp_dir."messages".SLASH."_panic";
 
 if(!file_exists($bp_application_path.$csound_resources)) {
 	mkdir($bp_application_path.$csound_resources);
-	chmod($bp_application_path.$midi_resources,$permissions);
+	chmod($bp_application_path.$csound_resources,$permissions);
 	}
 $dir_csound_resources = $bp_application_path.$csound_resources.SLASH;
 

@@ -7,7 +7,6 @@
 
 set_time_limit(0);
 $path_to_file = $_GET['path_to_file'] ?? '';
-// $path_to_file = "../temp_bolprocessor/messages/_stop";
 /* if(isset($_SESSION['pid'])) $pid = $_SESSION['pid']; // This works only if session_start() has been called.
 else $pid = ''; */
 if(!empty($path_to_file)) {
@@ -16,7 +15,6 @@ if(!empty($path_to_file)) {
 	else file_put_contents($path_to_file,"ok"); // Probably better not to create empty files
 	fclose($handle);
 	exec('sync'); // This makes it easier for the console to find the file, see the stop() function in ConsoleMain.c
-//	sleep(1);
 	}
 // Attempt to kill the console!, doesn't work
 /* if(!empty($pid)) {

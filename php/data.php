@@ -25,6 +25,7 @@ echo "<p>Workspace = <input style=\"background-color:yellow;\" name=\"workspace\
 echo link_to_help();
 
 $test_musicxml = FALSE;
+$no_chunk_real_time_midi = FALSE;
 
 echo "<h3>Data file “".$filename."”</h3>";
 save_settings("last_name",$filename); 
@@ -1774,6 +1775,10 @@ if(!$hide) {
 		$data = $segment['data'];
 		$data_chunked = $segment['data_chunked'];
 		$chunked = $segment['chunked'];
+		if($file_format == "rtmidi" AND $no_chunk_real_time_midi) {
+			$data_chunked = $chunked = FALSE;
+			$tie_mssg = '';
+			}
 		$chunk_number = $segment['chunk_number'];
 		$line_recoded = $segment['line_recoded'];
 		$title_this = $segment['title_this'];
@@ -1856,7 +1861,8 @@ function create_chunks($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxc
 		$title_this = preg_replace("/\[([^\]]+)\].*/u",'$1',$line);
 	else $title_this = '';
 	$initial_controls = '';
-	if($label <> "chunk" AND is_integer($pos=strpos($line,"{"))) {
+	if(is_integer($pos=strpos($line,"{"))) { // Fixed 2024-05-19
+//	if($label <> "chunk" AND is_integer($pos=strpos($line,"{"))) {
 		$initial_controls = trim(substr($line,0,$pos));
 		$initial_controls = preg_replace("/\[[^\]]*\]/u",'',$initial_controls);
 	//	echo "@@@ initial_controls = ".$initial_controls."<br />";
