@@ -1301,14 +1301,13 @@ if(isset($data_file_format[$filename])) $file_format = $data_file_format[$filena
 if(isset($_POST['file_format'])) $file_format = $_POST['file_format'];
 save_settings2("data_file_format",$filename,$file_format); // To _settings.php
 $output_file = $default_output_name;
-if(isset($_POST['output_file'])) $output_file = $_POST['output_file'];
-$output_file = str_replace(".mid",'',$output_file);
-$output_file = str_replace(".sco",'',$output_file);
-switch($file_format) {
-	case "midi": $output_file = $output_file.".mid"; break;
-	case "csound": $output_file = $output_file.".sco"; break;
-//	default: $output_file = ''; break;
+if(isset($_POST['output_file'])) {
+	$output_file = $_POST['output_file'];
+	$output_file = fix_new_name($output_file);
 	}
+$output_file = add_proper_extension($file_format,$output_file);
+// echo "<p>output_file = ".$output_file."</p>";
+
 $project_name = preg_replace("/\.[a-z]+$/u",'',$output_file);
 $result_file = $bp_application_path.$output_folder.SLASH.$project_name."-result.html";
 
@@ -1386,7 +1385,7 @@ if($file_format <> "rtmidi") {
 	echo "<input type=\"hidden\" name=\"MIDIoutputname\" value=\"".$MIDIoutputname."\">";
 	echo "<p>Name of output file (with proper extension):<br />";
 	echo "<input type=\"text\" name=\"output_file\" size=\"25\" value=\"".$output_file."\">&nbsp;";
-	echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savethisfile\" value=\"SAVE\"></p>";
+	echo "</p>";
 	}
 else {
 	echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
@@ -1404,7 +1403,7 @@ else {
 		}
 	echo "MIDI output <input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutput\" size=\"3\" value=\"".$MIDIoutput."\">&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutputname\" size=\"25\" value=\"".$MIDIoutputname."\">";
 	}
-echo "<p>➡ <i>After changing the settings above, click SAVE…</i></p>";
+echo "<p>➡ <i>After changing these settings, click SAVE…</i></p>";
 echo "</td>";
 echo "<td><p style=\"text-align:left;\">";
 echo "<input type=\"radio\" name=\"file_format\" value=\"rtmidi\"";
@@ -1418,7 +1417,9 @@ if(file_exists("csound_version.txt")) {
 	if($file_format == "csound") echo " checked";
 	echo ">CSOUND file";
 	}
-echo "</p></td></tr>";
+echo "<br /><br />&nbsp;&nbsp;&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savethisfile\" value=\"SAVE\">";
+echo "</p>";
+echo "</td></tr>";
 echo "</table>";
 
 $link_options = '';

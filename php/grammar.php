@@ -26,17 +26,17 @@ if(!file_exists($temp_dir.$temp_folder)) {
 	
 $default_output_name = str_replace("-gr.",'',$filename);
 $default_output_name = str_replace(".bpgr",'',$default_output_name);
+$output_file = $default_output_name;
 $file_format = $default_output_format;
 if(isset($grammar_file_format[$filename])) $file_format = $grammar_file_format[$filename]; // From _settings.php
 if(isset($_POST['file_format'])) $file_format = $_POST['file_format'];
-save_settings2("grammar_file_format",$filename,$file_format); // To _settings.php
-switch($file_format) {
-	case "data": $output_file = $default_output_name.".bpda"; break;
-	case "midi": $output_file = $default_output_name.".mid"; break;
-	case "csound": $output_file = $default_output_name.".sco"; break;
-	default: $output_file = $default_output_name; break;
+if(isset($_POST['output_file'])) {
+	$output_file = $_POST['output_file'];
+	$output_file = fix_new_name($output_file);
 	}
-if(isset($_POST['output_file'])) $output_file = $_POST['output_file'];
+save_settings2("grammar_file_format",$filename,$file_format); // To _settings.php
+
+$output_file = add_proper_extension($file_format,$output_file);
 
 $project_name = preg_replace("/\.[a-z]+$/u",'',$output_file);
 $result_file = $bp_application_path.$output_folder.SLASH.$project_name."-result.html";
@@ -55,10 +55,6 @@ echo "<p>Workspace = <input style=\"background-color:yellow;\" name=\"workspace\
 
 $hide = $need_to_save = FALSE;
 
-if(isset($_POST['output_file'])) {
-	$output_file = $_POST['output_file'];
-	$output_file = fix_new_name($output_file);
-	}
 if(isset($_POST['file_format']))
 	$file_format = $_POST['file_format'];
 if(isset($_POST['show_production']))
@@ -195,8 +191,8 @@ if(!load_midiressources("midisetup_".$filename)) {
 		}
 	}
 
-if($need_to_save OR isset($_POST['savegrammar']) OR isset($_POST['compilegrammar'])) {
-	if(isset($_POST['savegrammar'])) echo "<span id=\"timespan\" style=\"color:red; float:right;\">&nbsp;…&nbsp;Saved “".$filename."” file…</span>";
+if($need_to_save OR isset($_POST['savethisfile']) OR isset($_POST['compilegrammar'])) {
+	if(isset($_POST['savethisfile'])) echo "<span id=\"timespan\" style=\"color:red; float:right;\">&nbsp;…&nbsp;Saved “".$filename."” file…</span>";
 	$content = $_POST['thistext'];
 	if(isset($_POST['alphabet_file'])) $alphabet_file = $_POST['alphabet_file'];
 	else $alphabet_file = '';
@@ -409,8 +405,7 @@ if($file_format <> "rtmidi") {
 	echo "<input type=\"hidden\" name=\"MIDIoutput\" value=\"".$MIDIoutput."\">";
 	echo "<input type=\"hidden\" name=\"MIDIoutputname\" value=\"".$MIDIoutputname."\">";
 	echo "<p>Name of output file (with proper extension):<br />";
-	echo "<input type=\"text\" name=\"output_file\" size=\"25\" value=\"".$output_file."\">&nbsp;";
-	echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" name=\"savegrammar\" value=\"SAVE\"></p>";
+	echo "<input type=\"text\" name=\"output_file\" size=\"25\" value=\"".$output_file."\"></p>";
 	}
 else {
 	$last_midisetup = read_midiressources("last_midisetup");
@@ -428,7 +423,7 @@ else {
 		}
 	echo "MIDI output <input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutput\" size=\"3\" value=\"".$MIDIoutput."\">&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutputname\" size=\"25\" value=\"".$MIDIoutputname."\">";
 	}
-echo "<p style=\"text-align:center;\">➡ <i>After changing the settings above, click SAVE…</i></p>";
+echo "<p style=\"text-align:center;\">➡ <i>After changing these settings, click SAVE…</i></p>";
 echo "</td>";
 echo "<td><p style=\"text-align:left;\">";
 // if($test) echo "file_format = ".$file_format."<br />";
@@ -450,12 +445,13 @@ if(file_exists("csound_version.txt")) {
 	if($file_format == "csound") echo " checked";
 	echo ">CSOUND file";
 	}
+echo "<br />&nbsp;&nbsp;&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savethisfile\" value=\"SAVE\">";
 echo "</p></td>";
 echo "<td style=\"text-align:right; vertical-align:middle;\" rowspan=\"2\">";
 echo "<input type=\"hidden\" name=\"settings_file\" value=\"".$settings_file."\">";
 echo "<input type=\"hidden\" name=\"csound_file\" value=\"".$csound_file."\">";
 echo "<input style=\"background-color:azure;\" type=\"submit\" onclick=\"clearsave();\" name=\"compilegrammar\" value=\"COMPILE GRAMMAR\"><br /><br />";
-echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" name=\"savegrammar\" value=\"SAVE ‘".$filename."’\"><br /><br />";
+echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"><br /><br />";
 
 $error = FALSE;
 if($templates) {
@@ -707,7 +703,7 @@ echo "<input type=\"hidden\" name=\"time_structure\" value=\"".$time_structure."
 echo "<input type=\"hidden\" name=\"alphabet_file\" value=\"".$alphabet_file."\">";
 
 echo "<span  id=\"topedit\">&nbsp;</span>";
-echo "<p><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" onclick=\"clearsave();\" name=\"savegrammar\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".$filename."’\">";
+echo "<p><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" onclick=\"clearsave();\" name=\"savethisfile\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".$filename."’\">";
 
 if((file_exists($output.SLASH.$default_output_name.".wav") OR file_exists($output.SLASH.$default_output_name.".mid") OR file_exists($output.SLASH.$default_output_name.".html") OR file_exists($output.SLASH.$default_output_name.".sco")) AND file_exists($result_file)) {
 	echo "&nbsp;&nbsp;&nbsp;<input style=\"color:DarkBlue; background-color:azure; font-size:large;\" onclick=\"window.open('".$result_file."','result','width=800,height=600,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Show latests results\">";
@@ -743,7 +739,7 @@ $link_test = $link_produce."&test";
 $display_command_title = "DisplayCommand".$filename;
 echo "&nbsp;<input style=\"color:DarkBlue; background-color:Azure; font-size:large;\" onclick=\"window.open('".$link_test."','".$display_command_title."','width=1000,height=200,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Display command line\">";
 echo "</div>";
-echo "<p style=\"width:90%; text-align:right;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savegrammar\" value=\"SAVE ‘".$filename."’\"></p>";
+echo "<p style=\"width:90%; text-align:right;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></p>";
 echo "</form>";
 display_more_buttons(FALSE,$content,$url_this_page,$dir,'',$objects_file,$csound_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
 

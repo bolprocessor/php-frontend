@@ -23,8 +23,8 @@ if($return_var !== 0) {
 	echo "<p style=\"text-align:center;  width:50%;\">Compilation failed… Check the “source/BP3” folder!</p>";
 	if(file_exists($this_file)) {
 		$content = trim(@file_get_contents($this_file,TRUE));
-		if($content <> '') echo $content;
-		else echo "<p style=\"text-align:center;  width:50%;\">Compilation worked!</p>";
+		echo "<p style=\"color:red; text-align:center; width:50%;\">Compilation Errors:</p>";
+		echo "<pre style=\"color:red; text-align:left; width:50%; margin:auto;\">". htmlspecialchars($content) ."</pre>";
 		}
 	}
 else

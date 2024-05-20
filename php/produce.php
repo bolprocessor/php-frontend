@@ -7,36 +7,6 @@ else $this_title = '';
 require_once("_header.php");
 set_time_limit(0);
 
-?>
-<script>
-function checkFile() {
-    $.ajax({
-        url: 'produce.php',
-        data: { waitcall: "do_this" },
-        success: function(data) {
-            document.getElementById("donestatus").innerHTML = data;
-            if (data === "File has been found") {
-                clearInterval(interval); // Stops the interval when the file exists
-            }
-        },
-        error: function() {
-            document.getElementById("donestatus").innerHTML = "Error checking the file status.";
-        }
-    });
-}
-var interval = setInterval(checkFile,1000); // Check every second
-</script>
-
-
-<?php
-
-/* $waitcall = $_GET['waitcall'] ?? '';
-if($waitcall == "do_this") {
-	if(file_exists($donefile))
-		echo "File has been found";
-	die();
-	} */
-
 $application_path = $bp_application_path;
 $bad_image = FALSE;
 $trace_csound = $temp_dir."trace_csound.txt";
@@ -70,7 +40,6 @@ if(isset($_GET['csound_file'])) $csound_file = $_GET['csound_file'];
 else $csound_file = '';
 if(isset($_GET['item'])) $item = $_GET['item'];
 else $item = 0;
-
 
 $check_command_line = FALSE;
 $sound_file_link = $result_file = $tracefile = '';
@@ -278,7 +247,7 @@ if($instruction <> "help") {
 		if(!isset($table[2]) OR $table[1] <> session_id()) continue;
 		$found = FALSE; $this_name = '';
 		for($i = 2; $i < (count($table) - 1); $i++) {
-			if($table[$i] == "image" AND $table[$i-1] == $project_fullname) {
+			if($table[$i] == "image" AND is_integer(strpos($thisfile,$project_fullname))) {
 				$this_name = $table[$i - 1];
 				$found = TRUE;
 				break;
@@ -344,7 +313,6 @@ if($instruction <> "help") {
 			}
 		}
 	echo "<p id=\"wait\" style=\"text-align:center; background-color:yellow;\"><br /><big><b><span class=\"blinking\">… Bol Processor console is working …</span></b></big><br />(Don't close this window!)<br /><br /><button type=\"button\" class=\"bouton\" onclick=\"createFile('".$stopfile."');\">Click to STOP</button><br /><br /></p>\n";
-//	echo "<p id=\"wait\" style=\"text-align:center; background-color:yellow;\"><br /><big><b><span class=\"blinking\">… Bol Processor console is working …</span></b></big><br />(Don't close this window!)<br /><br /><button type=\"button\" class=\"bouton\" onclick=\"session_write_close();\">Click to STOP</button><br /><br /></p>\n";
 	}
 ob_flush();
 flush();
@@ -475,19 +443,22 @@ else {
 	$dircontent = scandir($temp_dir);
 	echo "<table style=\"background-color:snow; padding:0px;\"><tr>";
 	$position_image = 0;
+	// echo "<p>project_fullname = ".$project_fullname."</p>";
 	foreach($dircontent as $thisfile) {
 		$table = explode('_',$thisfile);
 		if($table[0] <> "trace") continue;
 		if(!isset($table[2]) OR $table[1] <> session_id()) continue;
 		$found = FALSE; $this_name = '';
+	//	echo "<p>".$thisfile."</p>";
 		for($i = 2; $i < (count($table) - 1); $i++) {
-			if($table[$i] == "image" AND $table[$i-1] == $project_fullname) {
+			if($table[$i] == "image" AND is_integer(strpos($thisfile,$project_fullname))) {
 				$this_name = $table[$i - 1];
 				$found = TRUE;
 				break;
 				}
 			}
 		if(!$found) continue;
+	//	echo "<p>FOUND: ".$thisfile."</p>";
 		echo "<td style=\"background-color:white; border-radius: 6px; border: 4px solid Gold; vertical-align:middle; text-align: center; padding:8px; margin:0px;\>";
 		$number_and_time = str_replace(".html",'',$table[$i + 1]);
 		$table_number = explode('-',$number_and_time);
@@ -687,7 +658,7 @@ if($n_messages > 0) {
 	if($handle) fwrite($handle,"</body>\n");
 	if($handle) fclose($handle);
 	}
-else echo "<p>No message produced…";
+else echo "<p>No message produced… Maybe a memory overflow.";
 if($trace_csound <> '' AND file_exists($trace_csound)) {
 	$window_name = $grammar_name."_".rand(0,99)."_result";
 	echo "&nbsp;<input style=\"color:DarkBlue; background-color:yellow; font-size:large;\" onclick=\"window.open('".$trace_csound."','".$window_name."','width=800,height=600,left=100'); return false;\" type=\"submit\" value=\"Show Csound trace\">";

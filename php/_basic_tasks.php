@@ -35,6 +35,7 @@ $default_output_format = "midi";
 
 $maxchunk_size = 400; // Max number of measures contained in a chunk
 $minchunk_size = 10; // Min number of measures contained in a chunk
+// $minchunk_size = 1; // Use this value to check the chunking to single measures
 
 $max_term_in_fraction = 32768; // Used to simplify fractions when importing MusicXML scores
 
@@ -2836,5 +2837,19 @@ function save_midiressources($filename) {
 		return true;
 		}
 	return false;
+	}
+
+function add_proper_extension($format,$filename) {
+	$filename = str_replace(".mid",'',$filename);
+	$filename = str_replace(".sco",'',$filename);
+	$filename = str_replace(".bpda",'',$filename);
+	switch($format) {
+		case "midi": $output_file = $filename.".mid"; break;
+		case "csound": $output_file = $filename.".sco"; break;
+		case "data": $output_file = $filename.".bpda"; break;
+		case "rtmidi": $output_file = $filename; break;
+		default: $output_file = $filename; break;
+		}
+	return $output_file;
 	}
 ?>
