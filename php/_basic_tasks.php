@@ -2852,4 +2852,40 @@ function add_proper_extension($format,$filename) {
 		}
 	return $output_file;
 	}
+
+function find_replace_form() {
+	echo "<p>";
+	echo "<label for=\"find\">Search for: </label>";
+	echo "<input type=\"text\" name=\"find\" style=\"background-color:white;\" id=\"find\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+	echo "<label for=\"regex\">Check for regular expression:</label>";
+	echo "<input type=\"checkbox\" name=\"regex\" id=\"regex\">";
+//	echo "&nbsp;&nbsp;&nbsp;<button class=\"bouton\" type=\"submit\" name=\"action\" value=\"find\">Find</button>";
+	echo "</p>";
+	echo "<p>";
+	echo "<label for=\"replace\">and replace it with: </label>";
+	echo "<input type=\"text\" name=\"replace\" style=\"background-color:white;\" id=\"replace\">&nbsp;&nbsp;&nbsp;<button class=\"bouton\" type=\"submit\" name=\"action\" value=\"replace\" onclick=\"clearsave()\">Search and Replace</button>";
+//	echo "&nbsp;&nbsp;<span style=\"color:red;\">➡ Warning: this cannot be undone!</span>";
+	return;
+	}
+
+function do_replace($content) {
+	if(isset($_POST['replace'])) {
+		$text = $_POST['thistext'] ?? '';
+		$find = $_POST['find'] ?? '';
+		$replace = $_POST['replace'] ?? '';
+		$useRegex = isset($_POST['regex']);
+		if(!$useRegex) {
+			// Standard replace (case-sensitive)
+			$content = str_replace($find,$replace,$text);
+			echo "<p>Text = <font color=\"blue\">".$find."</font> should be replaced by <font color=\"blue\">".$replace."</font><font color=\"red\"> ➡ Don't forget to save!</font></p>";
+			}
+		else {
+			// Replace using regex
+			$pattern = '/'.$find.'/';
+			$content = preg_replace($pattern,$replace,$text);
+			echo "<p>Pattern = <font color=\"blue\">".$pattern."</font> should be replaced by <font color=\"blue\">".$replace."</font><font color=\"red\"> ➡ Don't forget to save!</font></p>";
+			}
+		}
+	return $content;
+	}
 ?>

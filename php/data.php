@@ -1470,6 +1470,7 @@ if($error_mssg <> '') {
 if(intval($note_convention) <> intval($new_convention) AND $new_convention <> '')
 	echo "<p><font color=\"red\">➡</font> WARNING: Note convention should be set to <font color=\"red\">‘".ucfirst(note_convention(intval($new_convention)))."’</font> in the <font color=\"blue\">‘".$settings_file."’</font> settings file</p>";
 
+echo "&nbsp;&nbsp;👉&nbsp;&nbsp;<font color=\"red\"><i>There is a search-and-replace function below this data!</i></font>&nbsp;😀";
 echo "<table style=\"background-color:GhostWhite;\" border=\"0\"><tr>";
 echo "<td style=\"background-color:cornsilk;\">";
 
@@ -1477,10 +1478,14 @@ echo "<div style=\"float:right; vertical-align:middle;\">Import MusicXML file: <
 
 echo "<div style=\"text-align:left;\"><input id=\"saveButton\" style=\"background-color:yellow; font-size:large;\"  type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></div>";
 
-echo "<br /><textarea id=\"textArea\" name=\"thistext\" onchange=\"tellsave()\" rows=\"40\" style=\"width:700px;\">".$content."</textarea>";
+$content = do_replace($content);
 
-echo "<div style=\"text-align:right;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></div>";
+echo "<br /><textarea id=\"textArea\" name=\"thistext\" onchange=\"tellsave()\" rows=\"40\" style=\"width:700px;\">".$content."</textarea><br />";
 
+echo "<div style=\"float:right;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></div>";
+
+find_replace_form();
+echo "<hr>";
 echo "</form>";
 
 display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,$objects_file,$csound_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);

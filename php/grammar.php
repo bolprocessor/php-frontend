@@ -714,17 +714,21 @@ if($error) {
 	echo " disabled style=\"background-color:azure; box-shadow: none; font-size:large;\"";
 	}
 else echo "\" style=\"color:DarkBlue; background-color:Aquamarine; font-size:large;\"";
-echo ">";
-
+echo ">&nbsp;&nbsp;&nbsp;👉&nbsp;&nbsp;<font color=\"red\"><i>There is a search-and-replace function below this grammar!</i></font>&nbsp;😀";
 echo "</p>";
+
+$content = do_replace($content);
 
 if($error) echo "<p>".$error_mssg."</p>";
 $table = explode(chr(10),$content);
 $imax = count($table);
 if($imax > $textarea_rows) $textarea_rows = $imax + 5;
 
-echo "<textarea name=\"thistext\" onchange=\"tellsave()\" rows=\"".$textarea_rows."\" style=\"width:90%;\">".$content."</textarea>";
-// echo "<br />".$link_produce."<br />";
+echo "<textarea name=\"thistext\" onchange=\"tellsave()\" rows=\"".$textarea_rows."\" style=\"width:90%;\">".$content."</textarea><br />";
+
+echo "<p style=\"float:right;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></p>";
+find_replace_form();
+echo "<hr>";
 
 echo "<div style=\"float:left; padding-top:12px;\">";
 echo "<input onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)";
@@ -739,7 +743,6 @@ $link_test = $link_produce."&test";
 $display_command_title = "DisplayCommand".$filename;
 echo "&nbsp;<input style=\"color:DarkBlue; background-color:Azure; font-size:large;\" onclick=\"window.open('".$link_test."','".$display_command_title."','width=1000,height=200,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Display command line\">";
 echo "</div>";
-echo "<p style=\"width:90%; text-align:right;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></p>";
 echo "</form>";
 display_more_buttons(FALSE,$content,$url_this_page,$dir,'',$objects_file,$csound_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
 
