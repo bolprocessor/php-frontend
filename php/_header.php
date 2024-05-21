@@ -39,6 +39,12 @@ echo "setTimeout(function() {
 echo "</script>\n";
 
 echo "<script>\n";
+echo "setTimeout(function() {
+    $('#timespan3').fadeOut('fast');
+	}, 8000);\n";
+echo "</script>\n";
+
+echo "<script>\n";
 // Capture Command S and call the save() function defined at the bottom of data.php
 // This doesn't work yet. It should be implemented to save grammars, alphabets, etc. as well.
 echo "document.addEventListener('keydown', function(event) {

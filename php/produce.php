@@ -415,105 +415,103 @@ if(!$no_error) {
 		echo "Check the <a onclick=\"window.open('".$trace_link."','errors','width=800,height=500,left=400'); return false;\" href=\"".$trace_link."\">error trace</a> file!</p>";
 		}
 	}
-else {
-	echo "<p>";
-	if($output <> '' AND $file_format <> "midi" AND $file_format <> "rtmidi") {
-		if($file_format <> "csound") {
-			$output_html = clean_up_file_to_html($output);
-			$output_link = $output_html;
-			}
-		echo "<font color=\"red\">➡</font> Read the <a onclick=\"window.open('".$output_link."','".$grammar_name."','width=800,height=700,left=300'); return false;\" href=\"".$output_link."\">output file</a> (or <a href=\"".$output_link."\" download>download it</a>)<br />";
+echo "<p>";
+if($output <> '' AND $file_format <> "midi" AND $file_format <> "rtmidi") {
+	if($file_format <> "csound") {
+		$output_html = clean_up_file_to_html($output);
+		$output_link = $output_html;
 		}
-	if($trace_production OR $instruction == "templates" OR $show_production) echo "<font color=\"red\">➡</font> Read the <a onclick=\"window.open('".$trace_link."','trace','width=800,height=600,left=400'); return false;\" href=\"".$trace_link."\">trace file</a> (or <a href=\"".$trace_link."\" download>download it</a>)";
-	echo "</p>";
-		
-	// Show MIDI file
-	if($file_format == "midi") {
-		$midi_file_link = $output;
-	//	echo "<p>output = ".$output."</p>";
-		if(file_exists($midi_file_link) AND filesize($midi_file_link) > 59) {
-	//		echo "midi_file_link = ".$midi_file_link."<br />";
-			echo "<p class=\"shadow\" style=\"width:25em;\"><a href=\"#midi\" onClick=\"MIDIjs.play('".$midi_file_link."');\"><img src=\"pict/loudspeaker.png\" width=\"70px;\" style=\"vertical-align:middle;\" />Play MIDI file</a>";
-			echo " (<a href=\"#midi\" onClick=\"MIDIjs.stop();\">Stop playing</a>)";
-			echo "&nbsp;or <a href=\"".$midi_file_link."\" download>download it</a></p>";
-			}
-		}
+	echo "<font color=\"red\">➡</font> Read the <a onclick=\"window.open('".$output_link."','".$grammar_name."','width=800,height=700,left=300'); return false;\" href=\"".$output_link."\">output file</a> (or <a href=\"".$output_link."\" download>download it</a>)<br />";
+	}
+if($trace_production OR $instruction == "templates" OR $show_production) echo "<font color=\"red\">➡</font> Read the <a onclick=\"window.open('".$trace_link."','trace','width=800,height=600,left=400'); return false;\" href=\"".$trace_link."\">trace file</a> (or <a href=\"".$trace_link."\" download>download it</a>)";
+echo "</p>";
 	
-	// Prepare images if any
-	$dircontent = scandir($temp_dir);
-	echo "<table style=\"background-color:snow; padding:0px;\"><tr>";
-	$position_image = 0;
-	// echo "<p>project_fullname = ".$project_fullname."</p>";
-	foreach($dircontent as $thisfile) {
-		$table = explode('_',$thisfile);
-		if($table[0] <> "trace") continue;
-		if(!isset($table[2]) OR $table[1] <> session_id()) continue;
-		$found = FALSE; $this_name = '';
-	//	echo "<p>".$thisfile."</p>";
-		for($i = 2; $i < (count($table) - 1); $i++) {
-			if($table[$i] == "image" AND is_integer(strpos($thisfile,$project_fullname))) {
-				$this_name = $table[$i - 1];
-				$found = TRUE;
-				break;
-				}
+// Show MIDI file
+if($file_format == "midi") {
+	$midi_file_link = $output;
+//	echo "<p>output = ".$output."</p>";
+	if(file_exists($midi_file_link) AND filesize($midi_file_link) > 59) {
+//		echo "midi_file_link = ".$midi_file_link."<br />";
+		echo "<p class=\"shadow\" style=\"width:25em;\"><a href=\"#midi\" onClick=\"MIDIjs.play('".$midi_file_link."');\"><img src=\"pict/loudspeaker.png\" width=\"70px;\" style=\"vertical-align:middle;\" />Play MIDI file</a>";
+		echo " (<a href=\"#midi\" onClick=\"MIDIjs.stop();\">Stop playing</a>)";
+		echo "&nbsp;or <a href=\"".$midi_file_link."\" download>download it</a></p>";
+		}
+	}
+
+// Prepare images if any
+$dircontent = scandir($temp_dir);
+echo "<table style=\"background-color:snow; padding:0px;\"><tr>";
+$position_image = 0;
+// echo "<p>project_fullname = ".$project_fullname."</p>";
+foreach($dircontent as $thisfile) {
+	$table = explode('_',$thisfile);
+	if($table[0] <> "trace") continue;
+	if(!isset($table[2]) OR $table[1] <> session_id()) continue;
+	$found = FALSE; $this_name = '';
+	// echo "<p>".$thisfile."</p>";
+	for($i = 2; $i < (count($table) - 1); $i++) {
+		if($table[$i] == "image" AND is_integer(strpos($thisfile,$project_fullname))) {
+			$this_name = $table[$i - 1];
+			$found = TRUE;
+			break;
 			}
-		if(!$found) continue;
-	//	echo "<p>FOUND: ".$thisfile."</p>";
-		echo "<td style=\"background-color:white; border-radius: 6px; border: 4px solid Gold; vertical-align:middle; text-align: center; padding:8px; margin:0px;\>";
-		$number_and_time = str_replace(".html",'',$table[$i + 1]);
-		$table_number = explode('-',$number_and_time);
-		$number = $table_number[0];
-		$image_time = '';
-		if(count($table_number) > 1) $image_time = $table_number[1]."s";
+		}
+	if(!$found) continue;
+	// echo "<p>FOUND: ".$thisfile."</p>";
+	echo "<td style=\"background-color:white; border-radius: 6px; border: 4px solid Gold; vertical-align:middle; text-align: center; padding:8px; margin:0px;\>";
+	$number_and_time = str_replace(".html",'',$table[$i + 1]);
+	$table_number = explode('-',$number_and_time);
+	$number = $table_number[0];
+	$image_time = '';
+	if(count($table_number) > 1) $image_time = $table_number[1]."s";
 //		if($image_time == "0.00s") $image_time = '';
 //		$number = intval($number_and_time);
-		$content = @file_get_contents($temp_dir.$thisfile,TRUE);
-		$table2 = explode(chr(10),$content);
-		$imax = count($table2);
-		$table3 = array();
-		$title1 = $this_name."_Image_".$number;
-		$WidthMax = $HeightMax = 0;
-		$position_image++;
-		for($i = 0; $i < $imax; $i++) {
-			$line = trim($table2[$i]);
-		//	echo $i." ".recode_tags($line)."<br />";
-			if(is_integer($pos=strpos($line,"canvas.width"))) {
-				$table4 = explode("=",$line);
-				$WidthMax = round(intval($table4[2])) + 10;
-			//	echo $i.") WidthMax = ".$WidthMax."<br />";
-				}
-			if(is_integer($pos=strpos($line,"canvas.height"))) {
-				$table4 = explode("=",$line);
-				$HeightMax = round(intval($table4[2]));
-			//	echo $i.") HeightMax = ".$HeightMax."<br />";
-				}
+	$content = @file_get_contents($temp_dir.$thisfile,TRUE);
+	$table2 = explode(chr(10),$content);
+	$imax = count($table2);
+	$table3 = array();
+	$title1 = $this_name."_Image_".$number;
+	$WidthMax = $HeightMax = 0;
+	$position_image++;
+	for($i = 0; $i < $imax; $i++) {
+		$line = trim($table2[$i]);
+	//	echo $i." ".recode_tags($line)."<br />";
+		if(is_integer($pos=strpos($line,"canvas.width"))) {
+			$table4 = explode("=",$line);
+			$WidthMax = round(intval($table4[2])) + 10;
+		//	echo $i.") WidthMax = ".$WidthMax."<br />";
 			}
-		for($i = $j = 0; $i < $imax; $i++) {
-			$line = trim($table2[$i]);
-			$table3[$j] = $line;
-			$j++;
-			}
-		$link = $temp_dir.$thisfile;
-		$left = 10 + (50 * ($position_image - 1));
-		$window_height = 600;
-		if($HeightMax < $window_height) $window_height = $HeightMax + 60;
-		$window_width = 1200;
-		if($WidthMax < $window_width) $window_width = $WidthMax +  20;
-		echo "<div style=\"border:2px solid gray; background-color:azure; width:8em;  padding:2px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$link."','".$title1."','width=".$window_width.",height=".$window_height.",left=".$left."'); return false;\" href=\"".$link."\">Image ".$number."</a><br />".$image_time;
-		if(check_image($link) <> '') {
-			$bad_image = TRUE;
-			echo " <font color=\"red\"><b>*</b></font>";
-			}
-		echo "</div>&nbsp;";
-		echo "</td>";
-		if(++$position_image > 11) {
-			$position_image = 0;
-			echo "</tr><tr>";
+		if(is_integer($pos=strpos($line,"canvas.height"))) {
+			$table4 = explode("=",$line);
+			$HeightMax = round(intval($table4[2]));
+		//	echo $i.") HeightMax = ".$HeightMax."<br />";
 			}
 		}
-	echo "</tr></table>";
-	echo "<br />";
+	for($i = $j = 0; $i < $imax; $i++) {
+		$line = trim($table2[$i]);
+		$table3[$j] = $line;
+		$j++;
+		}
+	$link = $temp_dir.$thisfile;
+	$left = 10 + (50 * ($position_image - 1));
+	$window_height = 600;
+	if($HeightMax < $window_height) $window_height = $HeightMax + 60;
+	$window_width = 1200;
+	if($WidthMax < $window_width) $window_width = $WidthMax +  20;
+	echo "<div style=\"border:2px solid gray; background-color:azure; width:8em;  padding:2px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$link."','".$title1."','width=".$window_width.",height=".$window_height.",left=".$left."'); return false;\" href=\"".$link."\">Image ".$number."</a><br />".$image_time;
+	if(check_image($link) <> '') {
+		$bad_image = TRUE;
+		echo " <font color=\"red\"><b>*</b></font>";
+		}
+	echo "</div>&nbsp;";
+	echo "</td>";
+	if(++$position_image > 11) {
+		$position_image = 0;
+		echo "</tr><tr>";
+		}
 	}
+echo "</tr></table>";
+echo "<br />";
 	
 // Process Csound score if possible
 if($no_error AND $file_format == "csound") {

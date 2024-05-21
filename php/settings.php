@@ -23,6 +23,7 @@ if($bp_parameter_names === FALSE) echo "ERROR reading ‘settings_names.txt’";
 $table = explode(chr(10),$bp_parameter_names);
 $imax = count($table);
 $imax_parameters = 0;
+$saved_warning2 = '';
 for($i = 0; $i < $imax; $i++) {
 	$line = trim($table[$i]);
 	if($line == "-- end --") break;
@@ -40,7 +41,9 @@ for($i = 0; $i < $imax; $i++) {
 	}
 
 if(isset($_POST['saveparameters'])) {
-	echo "<p id=\"timespan2\" style=\"color:red;\">Saved parameters ➡ don't forget to save again related grammar or data!</p>";
+	$saved_warning1 = "<p id=\"timespan2\" style=\"color:red;\">Saved parameters ➡ don't forget to save again related grammar or data!</p>";
+	$saved_warning2 = "<p id=\"timespan3\" style=\"color:red;\">Saved parameters ➡ don't forget to save again related grammar or data!</p>";
+	echo $saved_warning1;
 	$handle = fopen($this_file,"w");
 	$file_header = $top_header."\n// Settings file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
 	fwrite($handle,$file_header."\n");
@@ -244,5 +247,6 @@ for($i = $j = 0; $i < $imax; $i++) {
 	}
 echo "</table>";
 echo "<p id=\"bottom\" style=\"text-align:left;\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"saveparameters\" formaction=\"".$url_this_page."#bottom\" value=\"SAVE PARAMETERS TO ‘".$filename."’\"></p>";
+echo $saved_warning2;
 echo "</form>";
 ?>
