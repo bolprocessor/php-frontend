@@ -27,7 +27,7 @@ Csound trace		1	1
 Use MIDI in/out		0	1
 Synchronize start		1	1
 Compute while playing		1	1
-Interactive (use input)		1	1
+Trace MIDI input		1	1
 Reset rule weights		1	1
 Reset rule flags		1	1
 Reset controllers		1	1

@@ -2863,7 +2863,7 @@ function find_replace_form() {
 	echo "</p>";
 	echo "<p>";
 	echo "<label for=\"replace\">and replace it with: </label>";
-	echo "<input type=\"text\" name=\"replace\" style=\"background-color:white;\" id=\"replace\">&nbsp;&nbsp;&nbsp;<button class=\"bouton\" type=\"submit\" name=\"action\" value=\"replace\" onclick=\"clearsave()\">Search and Replace</button>";
+	echo "<input type=\"text\" name=\"replace\" style=\"background-color:white;\" id=\"replace\">&nbsp;&nbsp;&nbsp;<button class=\"bouton\" type=\"submit\" name=\"action\" value=\"replace\" onclick=\"clearsave()\">Search and Replace (all)</button>";
 //	echo "&nbsp;&nbsp;<span style=\"color:red;\">➡ Warning: this cannot be undone!</span>";
 	return;
 	}
@@ -2874,10 +2874,11 @@ function do_replace($content) {
 		$find = $_POST['find'] ?? '';
 		$replace = $_POST['replace'] ?? '';
 		$useRegex = isset($_POST['regex']);
+		if($find == '') return $content;;
 		if(!$useRegex) {
 			// Standard replace (case-sensitive)
 			$content = str_replace($find,$replace,$text);
-			echo "<p>Text = <font color=\"blue\">".$find."</font> should be replaced by <font color=\"blue\">".$replace."</font><font color=\"red\"> ➡ Don't forget to save!</font></p>";
+			echo "<p>Text = “<font color=\"blue\">".$find."</font>” should be replaced by “<font color=\"blue\">".$replace."</font>”&nbsp;<font color=\"red\"> ➡ Don't forget to save!</font></p>";
 			}
 		else {
 			// Replace using regex
@@ -2887,5 +2888,32 @@ function do_replace($content) {
 			}
 		}
 	return $content;
+	}
+
+function set_output_folder($output_folder) {
+	global $bp_application_path;
+	if(isset($_POST['change_output_folder'])) {
+		$output_folder = trim($_POST['output_folder']);
+		$output_folder = str_replace('+','_',$output_folder);
+		$output_folder = trim(str_replace(SLASH,' ',$output_folder));
+		$output_folder = str_replace(' ',SLASH,$output_folder);
+		if(!ok_output_location($output_folder)) $output_folder = "my_output";
+		save_settings("output_folder",$output_folder);
+		}
+	return $output_folder;
+	}
+
+function ok_output_location($folder) {
+	$result = TRUE;
+	if($folder == "php") $result = FALSE;
+	if($folder == "source") $result = FALSE;
+	if($folder == "midi_resources") $result = FALSE;
+	if($folder == "csound_resources") $result = FALSE;
+	if($folder == "temp_bolprocessor") $result = FALSE;
+	if($folder == "trash_bolprocessor") $result = FALSE;
+	if($folder == "scripts") $result = FALSE;
+	if($folder == "docs-developer") $result = FALSE;
+	if(!$result) echo "<p><font color=\"red\">ERROR:</font> Folder “<font color=\"blue\">".$folder."</font>” cannot be used for output files.</p>";
+	return $result;
 	}
 ?>

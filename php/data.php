@@ -1403,7 +1403,8 @@ else {
 		}
 	echo "MIDI output <input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutput\" size=\"3\" value=\"".$MIDIoutput."\">&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutputname\" size=\"25\" value=\"".$MIDIoutputname."\">";
 	}
-echo "<p>➡ <i>After changing these settings, click SAVE…</i></p>";
+if($file_format == "rtmidi") echo "<br /><br /><i>Delete the name if you change a number!</i>";
+echo "<br />➡ <i>After changing these settings, click SAVE…</i>";
 echo "</td>";
 echo "<td><p style=\"text-align:left;\">";
 echo "<input type=\"radio\" name=\"file_format\" value=\"rtmidi\"";
@@ -1470,7 +1471,7 @@ if($error_mssg <> '') {
 if(intval($note_convention) <> intval($new_convention) AND $new_convention <> '')
 	echo "<p><font color=\"red\">➡</font> WARNING: Note convention should be set to <font color=\"red\">‘".ucfirst(note_convention(intval($new_convention)))."’</font> in the <font color=\"blue\">‘".$settings_file."’</font> settings file</p>";
 
-echo "&nbsp;&nbsp;👉&nbsp;&nbsp;<font color=\"red\"><i>There is a search-and-replace function below this data!</i></font>&nbsp;😀";
+echo "&nbsp;&nbsp;👉&nbsp;&nbsp;<font color=\"red\"><i>There is a search-and-replace tool below this data!</i></font>&nbsp;😀";
 echo "<table style=\"background-color:GhostWhite;\" border=\"0\"><tr>";
 echo "<td style=\"background-color:cornsilk;\">";
 

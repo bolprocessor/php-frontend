@@ -52,7 +52,7 @@ else {
 		echo "<p>The console application (file “bp”) is not working or missing or misplaced…</p>";
 		$source = $dir."source";
 		if(file_exists($source))
-			echo "<p>Source files have been found. You can try to recompile “bp”, then return to this page.<br /><br />➡ <a href=\"".$dir."compile.php\">Run the compiler</a> (this works in MacOS)</p>";
+			echo "<p>Source files have been found. You can try to recompile “bp”, then return to this page.<br /><br />➡ <a href=\"".$dir."compile.php\">Run the compiler</a> (this works at least in MacOS)</p>";
 		else
 			echo "<p>Source files (the “source” folder) have not been found.<br />Return to <a target=\"_blank\" href=\"https://bolprocessor.org/check-bp3/#install\">https://bolprocessor.org/check-bp3/</a> and follow instructions!</p>";
 		die();

@@ -1,8 +1,0 @@
-// Bol Processor BP3 compatible with version BP2.9.8
-// Data created from template
--se.<settings file>
--ho.<alphabet file>
--mi.<sound-object prototypes file>
--cs.<Csound resource file>
-
-// Write data here or import MusicXML file

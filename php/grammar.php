@@ -223,28 +223,13 @@ if($need_to_save OR isset($_POST['savethisfile']) OR isset($_POST['compilegramma
 	}
 // echo "</small></p>";
 
-if(isset($_POST['change_output_folder'])) {
-	$output_folder = trim($_POST['output_folder']);
-	$output_folder = str_replace('+','_',$output_folder);
-	$output_folder = trim(str_replace(SLASH,' ',$output_folder));
-	$output_folder = str_replace(' ',SLASH,$output_folder);
-	$output = $bp_application_path.SLASH.$output_folder;
-	do $output = str_replace(SLASH.SLASH,SLASH,$output,$count);
-	while($count > 0);
-	if(!file_exists($output)) {
-		echo "<p><font color=\"red\">Created folder:</font><font color=\"blue\"> ".$output."</font><br />";
-		mkdir($output);
-		}
-	save_settings("output_folder",$output_folder);
-	}
-else {
-	$output = $bp_application_path.SLASH.$output_folder;
-	do $output = str_replace(SLASH.SLASH,SLASH,$output,$count);
-	while($count > 0);
-	if(!file_exists($output)) {
-		echo "<p><font color=\"red\">Created folder:</font><font color=\"blue\"> ".$output."</font><br />";
-		mkdir($output);
-		}
+$output_folder = set_output_folder($output_folder);
+$output = $bp_application_path.SLASH.$output_folder;
+do $output = str_replace(SLASH.SLASH,SLASH,$output,$count);
+while($count > 0);
+if(!file_exists($output)) {
+	echo "<p><font color=\"red\">Created folder:</font><font color=\"blue\"> ".$output."</font><br />";
+	mkdir($output);
 	}
 
 echo link_to_help();
@@ -423,7 +408,8 @@ else {
 		}
 	echo "MIDI output <input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutput\" size=\"3\" value=\"".$MIDIoutput."\">&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutputname\" size=\"25\" value=\"".$MIDIoutputname."\">";
 	}
-echo "<p style=\"text-align:center;\">➡ <i>After changing these settings, click SAVE…</i></p>";
+if($file_format == "rtmidi") echo "<br /><br /><i>Delete the name if you change a number!</i>";
+echo "<br />➡ <i>After changing these settings, click SAVE…</i>";
 echo "</td>";
 echo "<td><p style=\"text-align:left;\">";
 // if($test) echo "file_format = ".$file_format."<br />";
@@ -714,7 +700,7 @@ if($error) {
 	echo " disabled style=\"background-color:azure; box-shadow: none; font-size:large;\"";
 	}
 else echo "\" style=\"color:DarkBlue; background-color:Aquamarine; font-size:large;\"";
-echo ">&nbsp;&nbsp;&nbsp;👉&nbsp;&nbsp;<font color=\"red\"><i>There is a search-and-replace function below this grammar!</i></font>&nbsp;😀";
+echo ">&nbsp;&nbsp;&nbsp;👉&nbsp;&nbsp;<font color=\"red\"><i>There is a search-and-replace tool below this grammar!</i></font>&nbsp;😀";
 echo "</p>";
 
 $content = do_replace($content);

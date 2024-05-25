@@ -8,6 +8,17 @@ require_once("_header.php");
 set_time_limit(0);
 
 $application_path = $bp_application_path;
+$console = $application_path."bp";
+$console_exe = $application_path."bp.exe";
+if(!file_exists($console) AND !file_exists($console_exe)) {
+	echo "<p>The console application (file “bp”) is not working or missing or misplaced…</p>";
+	$source = $application_path."source";
+	if(file_exists($source))
+		echo "<p>Source files have been found. You can try to recompile “bp”, then return to this page.<br /><br />➡ <a href=\"".$application_path."compile.php\">Run the compiler</a> (this works at least in MacOS)</p>";
+	else
+		echo "<p>Source files (the “source” folder) have not been found.<br />Return to <a target=\"_blank\" href=\"https://bolprocessor.org/check-bp3/#install\">https://bolprocessor.org/check-bp3/</a> and follow instructions!</p>";
+	die();
+	}
 $bad_image = FALSE;
 $trace_csound = $temp_dir."trace_csound.txt";
 
@@ -656,7 +667,7 @@ if($n_messages > 0) {
 	if($handle) fwrite($handle,"</body>\n");
 	if($handle) fclose($handle);
 	}
-else echo "<p>No message produced… Maybe a memory overflow.";
+else echo "<p>No message produced… It could be a memory overflow. Did you compile BP3?";
 if($trace_csound <> '' AND file_exists($trace_csound)) {
 	$window_name = $grammar_name."_".rand(0,99)."_result";
 	echo "&nbsp;<input style=\"color:DarkBlue; background-color:yellow; font-size:large;\" onclick=\"window.open('".$trace_csound."','".$window_name."','width=800,height=600,left=100'); return false;\" type=\"submit\" value=\"Show Csound trace\">";
