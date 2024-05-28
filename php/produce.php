@@ -294,9 +294,9 @@ $donefile = $temp_dir."trace_".session_id()."_".$project_fullname."_done";
 
 if($instruction <> "help") {
 	if($tracefile <> '') @unlink($tracefile);
-	if(file_exists($dir_midi_resources."midisetup_".$project_fullname))
+	if(file_exists($dir_midi_resources."midiport_".$project_fullname))
 		// We need to use midisetup of this project
-		copy($dir_midi_resources."midisetup_".$project_fullname, $dir_midi_resources."last_midisetup");
+		copy($dir_midi_resources."midiport_".$project_fullname, $dir_midi_resources."last_midiport");
 	if($csound_file <> '') {
 		$lock_file = $dir_csound_resources.$csound_file."_lock";
 	//	echo "Csound instruments lock_file = ".$lock_file."<br />";
@@ -591,10 +591,10 @@ if($no_error AND $file_format == "csound") {
 		}
 	}
 
-// Let's copy midi_ressources/last_midisetup to the midi setup specific to this project.
-if(file_exists($dir_midi_resources."last_midisetup")) {
-	echo "<small>Copied “last_midisetup” to “".$dir_midi_resources."midisetup_".$project_fullname."”</small><br /><br />";
-	@copy($dir_midi_resources."last_midisetup",$dir_midi_resources."midisetup_".$project_fullname);
+// Let's copy midi_ressources/last_midiport to the midi setup specific to this project.
+if(file_exists($dir_midi_resources."last_midiport")) {
+	echo "<small>Copied “last_midiport” to “".$dir_midi_resources."midiport_".$project_fullname."”</small><br /><br />";
+	@copy($dir_midi_resources."last_midiport",$dir_midi_resources."midiport_".$project_fullname);
 	}
 
 $handle = FALSE;

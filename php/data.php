@@ -12,10 +12,18 @@ $url_this_page = "data.php?file=".urlencode($file);
 save_settings("last_page",$url_this_page);
 $table = explode(SLASH,$file);
 $filename = end($table);
+echo "<script>
+window.name = '".$filename."'
+</script>";
 $this_file = $bp_application_path.$file;
 $dir = str_replace($filename,'',$this_file);
 $current_directory = str_replace(SLASH.$filename,'',$file);
 save_settings("last_directory",$current_directory);
+
+if(isset($_POST['reload'])) {
+    header("Location: ".$url_this_page);
+    exit();	
+	}
 
 require_once("_header.php");
 
@@ -1158,24 +1166,23 @@ if(isset($_POST['apply_changes_instructions'])) {
 	$need_to_save = TRUE;
 	}
 
-if(!load_midiressources("midisetup_".$filename)) {
-	if(!load_midiressources("last_midisetup")) {
-		$MIDIsource = 1;
-		$MIDIoutput = 0;
-		$MIDIsourcename = $MIDIoutputname = '';
-		}
-	}
-
 if($need_to_save OR isset($_POST['savethisfile'])) {
 	echo "<p id=\"timespan\" style=\"color:red; float:right;\">Saved ‘".$filename."’file…</p>";
 	if(isset($_POST['thistext'])) $content = $_POST['thistext'];
+	$file_format = $default_output_format;
+	if(isset($data_file_format[$filename])) $file_format = $data_file_format[$filename];
 	else $content = '';
 	if($more_data <> '') $content = $more_data."\n\n".$content;
 	$content = preg_replace("/ +/u",' ',$content);
 	save($this_file,$filename,$top_header,$content);
-	save_midiressources("midisetup_".$filename);
-	save_midiressources("last_midisetup");
+	if($file_format == "rtmidi") {
+		save_midiressources("midiport_".$filename);
+		save_midiressources("last_midiport");
+		}
 	}
+else read_anyMIDIresource($filename);
+
+echo "<p>MIDIsourcename = ".$MIDIsourcename."</p>";
 
 try_create_new_file($this_file,$filename);
 $content = @file_get_contents($this_file,TRUE);
@@ -1389,20 +1396,25 @@ if($file_format <> "rtmidi") {
 	}
 else {
 	echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
-	$last_midisetup = read_midiressources("last_midisetup");
+	$last_midiport = read_midiressources("last_midiport");
 	echo "<br />";
-	if($last_midisetup['found']) {
-		if($last_midisetup['midisource'] <> $MIDIsource) echo "➡ MIDIsource was ".$last_midisetup['midisource']."<br />";
-		if($last_midisetup['midisourcename'] != $MIDIsourcename) echo "➡ MIDI source name was “".$last_midisetup['midisourcename']."”<br />";
+	if($last_midiport['found']) {
+		if($last_midiport['midisource'] <> $MIDIsource) echo "➡ Last MIDI input was ".$last_midiport['midisource']."<br />";
+		if($last_midiport['midisourcename'] != $MIDIsourcename) echo "➡ MIDI input name was “<font color=\"blue\">".$last_midiport['midisourcename']."</font>”<br />";
+	/*	if($last_midiport['midisource'] <> $MIDIsource) $MIDIsource = $last_midiport['midisource'];
+		if($last_midiport['midisourcename'] != $MIDIsourcename) $MIDIsourcename = $last_midiport['midisourcename']; */
 		}
-	echo "MIDI source <input type=\"text\" onchange=\"tellsave()\" name=\"MIDIsource\" size=\"3\" value=\"".$MIDIsource."\">&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIsourcename\" size=\"25\" value=\"".$MIDIsourcename."\"><br />";
-	if($last_midisetup['found']) {
+	echo "MIDI input <input type=\"text\" onchange=\"tellsave()\" name=\"MIDIsource\" size=\"3\" value=\"".$MIDIsource."\">&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIsourcename\" size=\"25\" value=\"".$MIDIsourcename."\"><br />";
+	if($last_midiport['found']) {
 		echo "<br />";
-		if($last_midisetup['midioutput'] <> $MIDIoutput) echo "➡ Last MIDI output was ".$last_midisetup['midioutput']."<br />";
-		if($last_midisetup['midioutputname'] != $MIDIoutputname) echo "➡ Last MIDI output name was “".$last_midisetup['midioutputname']."”<br />";
+		if($last_midiport['midioutput'] <> $MIDIoutput) echo "➡ Last MIDI output was ".$last_midiport['midioutput']."<br />";
+		if($last_midiport['midioutputname'] != $MIDIoutputname) echo "➡ MIDI output name was “<font color=\"blue\">".$last_midiport['midioutputname']."</font>”<br />";
+	/*	if($last_midiport['midioutput'] <> $MIDIoutput) $MIDIoutput = $last_midiport['midioutput'];
+		if($last_midiport['midioutputname'] != $MIDIoutputname) $MIDIoutputname = $last_midiport['midioutputname']; */
 		}
 	echo "MIDI output <input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutput\" size=\"3\" value=\"".$MIDIoutput."\">&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutputname\" size=\"25\" value=\"".$MIDIoutputname."\">";
 	}
+read_anyMIDIresource($filename);
 if($file_format == "rtmidi") echo "<br /><br /><i>Delete the name if you change a number!</i>";
 echo "<br />➡ <i>After changing these settings, click SAVE…</i>";
 echo "</td>";
@@ -1419,8 +1431,11 @@ if(file_exists("csound_version.txt")) {
 	echo ">CSOUND file";
 	}
 echo "<br /><br />&nbsp;&nbsp;&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savethisfile\" value=\"SAVE\">";
+if($file_format == "rtmidi") echo "&nbsp;<input id=\"refresh\" style=\"background-color:yellow; display:none;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"reload\" value=\"REFRESH\">";
 echo "</p>";
-echo "</td></tr>";
+echo "</td>";
+if($file_format == "rtmidi") filter_form();
+echo "</tr>";
 echo "</table>";
 
 $link_options = '';
@@ -1471,9 +1486,11 @@ if($error_mssg <> '') {
 if(intval($note_convention) <> intval($new_convention) AND $new_convention <> '')
 	echo "<p><font color=\"red\">➡</font> WARNING: Note convention should be set to <font color=\"red\">‘".ucfirst(note_convention(intval($new_convention)))."’</font> in the <font color=\"blue\">‘".$settings_file."’</font> settings file</p>";
 
-echo "&nbsp;&nbsp;👉&nbsp;&nbsp;<font color=\"red\"><i>There is a search-and-replace tool below this data!</i></font>&nbsp;😀";
+echo "<p><button style=\"background-color:aquamarine; border-radius: 6px;\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button></p>";
 echo "<table style=\"background-color:GhostWhite;\" border=\"0\"><tr>";
 echo "<td style=\"background-color:cornsilk;\">";
+
+find_replace_form();
 
 echo "<div style=\"float:right; vertical-align:middle;\">Import MusicXML file: <input style=\"color:red;\" type=\"file\" name=\"music_xml_import\">&nbsp;<input type=\"submit\" style=\"background-color:AquaMarine;\" value=\"← IMPORT\"></div>";
 
@@ -1481,12 +1498,10 @@ echo "<div style=\"text-align:left;\"><input id=\"saveButton\" style=\"backgroun
 
 $content = do_replace($content);
 
-echo "<br /><textarea id=\"textArea\" name=\"thistext\" onchange=\"tellsave()\" rows=\"40\" style=\"width:700px;\">".$content."</textarea><br />";
+echo "<br /><textarea id=\"textArea\" name=\"thistext\" onchange=\"tellsave()\" rows=\"40\" style=\"width:700px;\">".$content."</textarea><br /><br />";
 
 echo "<div style=\"float:right;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></div>";
 
-find_replace_form();
-echo "<hr>";
 echo "</form>";
 
 display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,$objects_file,$csound_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
@@ -1814,9 +1829,11 @@ if(!$hide) {
 		$n2 = substr_count($line_recoded,'}');
 		if($n1 > $n2) $error_mssg .= "• <font color=\"red\">This score contains ".($n1-$n2)." extra ‘{'</font><br />";
 		if($n2 > $n1) $error_mssg .= "• <font color=\"red\">This score contains ".($n2-$n1)." extra ‘}'</font><br />";
+		if($file_format == "rtmidi") $refresh_instruction = "document.getElementById('refresh').style.display = 'inline';";
+		else $refresh_instruction = '';
 		if($error_mssg == '') {
-			echo "<input id=\"playButton\" style=\"color:DarkBlue; background-color:Aquamarine;\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_play."','".$window_name_play."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" title=\"Play this polymetric expression\" value=\"PLAY\">&nbsp;";
-			if($chunked) echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_play_chunked."','".$window_name_chunked."','width=800,height=800,left=150,toolbar=yes'); return false;\" type=\"submit\" name=\"produce\" title=\"Play polymetric expression in chunks (no graphics)\" value=\"PLAY safe (".$chunk_number." chunks)\">&nbsp;";
+			echo "<input id=\"playButton\" style=\"color:DarkBlue; background-color:Aquamarine;\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) {".$refresh_instruction." window.open('".$link_play."','".$window_name_play."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" title=\"Play this polymetric expression\" value=\"PLAY\">&nbsp;";
+			if($chunked) echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) {".$refresh_instruction." window.open('".$link_play_chunked."','".$window_name_chunked."','width=800,height=800,left=150,toolbar=yes'); return false;}\" type=\"submit\" name=\"produce\" title=\"Play polymetric expression in chunks (no graphics)\" value=\"PLAY safe (".$chunk_number." chunks)\">&nbsp;";
 			echo "&nbsp;<input style=\"background-color:azure;\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_expand."','".$window_name_expand."','width=800,height=800,left=100'); return false;\" type=\"submit\" name=\"produce\" title=\"Expand this polymetric expression\" value=\"EXPAND\">&nbsp;";
 			}
 		if($tie_mssg <> '' AND $error_mssg == '') echo "<br />";

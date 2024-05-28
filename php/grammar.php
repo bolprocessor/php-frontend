@@ -29,12 +29,10 @@ $default_output_name = str_replace(".bpgr",'',$default_output_name);
 $output_file = $default_output_name;
 $file_format = $default_output_format;
 if(isset($grammar_file_format[$filename])) $file_format = $grammar_file_format[$filename]; // From _settings.php
-if(isset($_POST['file_format'])) $file_format = $_POST['file_format'];
 if(isset($_POST['output_file'])) {
 	$output_file = $_POST['output_file'];
 	$output_file = fix_new_name($output_file);
 	}
-save_settings2("grammar_file_format",$filename,$file_format); // To _settings.php
 
 $output_file = add_proper_extension($file_format,$output_file);
 
@@ -47,6 +45,12 @@ if(isset($_POST['new_convention']))
 	$new_convention = $_POST['new_convention'];
 else $new_convention = '';
 
+if(isset($_POST['reload'])) {
+    header("Location: $url");
+    header("Location: ".$url_this_page);
+    exit();	
+	}
+
 require_once("_header.php");
 
 $url = "index.php?path=".urlencode($current_directory);
@@ -55,15 +59,6 @@ echo "<p>Workspace = <input style=\"background-color:yellow;\" name=\"workspace\
 
 $hide = $need_to_save = FALSE;
 
-if(isset($_POST['file_format']))
-	$file_format = $_POST['file_format'];
-if(isset($_POST['show_production']))
-	$show_production = $_POST['show_production'];
-if(isset($_POST['trace_production']))
-	$trace_production = $_POST['trace_production'];
-if(isset($_POST['produce_all_items']))
-	$produce_all_items = $_POST['produce_all_items'];
-	
 if(isset($_POST['use_convention'])) {
 	$content = @file_get_contents($this_file,TRUE);
 	$extract_data = extract_data(TRUE,$content);
@@ -183,14 +178,6 @@ if(isset($_POST['apply_changes_instructions'])) {
 	$need_to_save = TRUE;
 	}
 
-if(!load_midiressources("midisetup_".$filename)) {
-	if(!load_midiressources("last_midisetup")) {
-		$MIDIsource = 1;
-		$MIDIoutput = 0;
-		$MIDIsourcename = $MIDIoutputname = '';
-		}
-	}
-
 if($need_to_save OR isset($_POST['savethisfile']) OR isset($_POST['compilegrammar'])) {
 	if(isset($_POST['savethisfile'])) echo "<span id=\"timespan\" style=\"color:red; float:right;\">&nbsp;…&nbsp;Saved “".$filename."” file…</span>";
 	$content = $_POST['thistext'];
@@ -199,29 +186,42 @@ if($need_to_save OR isset($_POST['savethisfile']) OR isset($_POST['compilegramma
 	if(isset($_POST['note_convention'])) $note_convention = $_POST['note_convention'];
 	if(isset($_POST['random_seed'])) $random_seed = $_POST['random_seed'];
 	else $random_seed = 0;
-	$output_file = trim(str_replace(".bpda",'',$output_file));
-	$output_file = trim(str_replace(".sco",'',$output_file));
-	$output_file = trim(str_replace(".mid",'',$output_file));
-	if($file_format == "data") {
-		if($output_file == '') $output_file = $default_output_name;
-		$output_file .= ".bpda";
-		}
-	if($file_format == "csound") {
-		if($output_file == '') $output_file = $default_output_name;
-		$output_file .= ".sco";
-		}
-	if($file_format == "midi") {
-		if($output_file == '') $output_file = $default_output_name;
-		$output_file .= ".mid";
-		}
-	if($file_format == '') $output_file = $default_output_name;
 	$content = recode_entities($content);
 	$content = preg_replace("/ +/u",' ',$content);
 	save($this_file,$filename,$top_header,$content);
-	save_midiressources("midisetup_".$filename);
-	save_midiressources("last_midisetup");
+	if($file_format == "rtmidi") {
+		save_midiressources("midiport_".$filename);
+		save_midiressources("last_midiport");
+		}
 	}
-// echo "</small></p>";
+else read_anyMIDIresource($filename);
+
+
+if(isset($_POST['file_format'])) $file_format = $_POST['file_format'];
+save_settings2("grammar_file_format",$filename,$file_format); // To _settings.php
+$output_file = trim(str_replace(".bpda",'',$output_file));
+$output_file = trim(str_replace(".sco",'',$output_file));
+$output_file = trim(str_replace(".mid",'',$output_file));
+if($file_format == "data") {
+	if($output_file == '') $output_file = $default_output_name;
+	$output_file .= ".bpda";
+	}
+if($file_format == "csound") {
+	if($output_file == '') $output_file = $default_output_name;
+	$output_file .= ".sco";
+	}
+if($file_format == "midi") {
+	if($output_file == '') $output_file = $default_output_name;
+	$output_file .= ".mid";
+	}
+if($file_format == '') $output_file = $default_output_name;
+
+if(isset($_POST['show_production']))
+	$show_production = $_POST['show_production'];
+if(isset($_POST['trace_production']))
+	$trace_production = $_POST['trace_production'];
+if(isset($_POST['produce_all_items']))
+	$produce_all_items = $_POST['produce_all_items'];
 
 $output_folder = set_output_folder($output_folder);
 $output = $bp_application_path.SLASH.$output_folder;
@@ -393,21 +393,26 @@ if($file_format <> "rtmidi") {
 	echo "<input type=\"text\" name=\"output_file\" size=\"25\" value=\"".$output_file."\"></p>";
 	}
 else {
-	$last_midisetup = read_midiressources("last_midisetup");
+	$last_midiport = read_midiressources("last_midiport");
 	echo "<br />";
-	if($last_midisetup['found']) {
-		if($last_midisetup['midisource'] <> $MIDIsource) echo "➡ MIDIsource was ".$last_midisetup['midisource']."<br />";
-		if($last_midisetup['midisourcename'] != $MIDIsourcename) echo "➡ MIDI source name was “".$last_midisetup['midisourcename']."”<br />";
+	if($last_midiport['found']) {
+		if($last_midiport['midisource'] <> $MIDIsource) echo "➡ Last MIDI input was ".$last_midiport['midisource']."<br />";
+		if($last_midiport['midisourcename'] != $MIDIsourcename) echo "➡ MIDI input name was “<font color=\"blue\">".$last_midiport['midisourcename']."</font>”<br />";
+	/*	if($last_midiport['midisource'] <> $MIDIsource) $MIDIsource = $last_midiport['midisource'];
+		if($last_midiport['midisourcename'] != $MIDIsourcename) $MIDIsourcename = $last_midiport['midisourcename']; */
 		}
 	echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
-	echo "MIDI source <input type=\"text\" onchange=\"tellsave()\" name=\"MIDIsource\" size=\"3\" value=\"".$MIDIsource."\">&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIsourcename\" size=\"25\" value=\"".$MIDIsourcename."\"><br />";
-	if($last_midisetup['found']) {
+	echo "MIDI input <input type=\"text\" onchange=\"tellsave()\" name=\"MIDIsource\" size=\"3\" value=\"".$MIDIsource."\">&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIsourcename\" size=\"25\" value=\"".$MIDIsourcename."\"><br />";
+	if($last_midiport['found']) {
 		echo "<br />";
-		if($last_midisetup['midioutput'] <> $MIDIoutput) echo "➡ Last MIDI output was ".$last_midisetup['midioutput']."<br />";
-		if($last_midisetup['midioutputname'] != $MIDIoutputname) echo "➡ Last MIDI output name was “".$last_midisetup['midioutputname']."”<br />";
+		if($last_midiport['midioutput'] <> $MIDIoutput) echo "➡ Last MIDI output was ".$last_midiport['midioutput']."<br />";
+		if($last_midiport['midioutputname'] != $MIDIoutputname) echo "➡ MIDI output name was “<font color=\"blue\">".$last_midiport['midioutputname']."</font>”<br />";
+	/*	if($last_midiport['midioutput'] <> $MIDIoutput) $MIDIoutput = $last_midiport['midioutput'];
+		if($last_midiport['midioutputname'] != $MIDIoutputname) $MIDIoutputname = $last_midiport['midioutputname']; */
 		}
 	echo "MIDI output <input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutput\" size=\"3\" value=\"".$MIDIoutput."\">&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutputname\" size=\"25\" value=\"".$MIDIoutputname."\">";
 	}
+read_anyMIDIresource($filename);
 if($file_format == "rtmidi") echo "<br /><br /><i>Delete the name if you change a number!</i>";
 echo "<br />➡ <i>After changing these settings, click SAVE…</i>";
 echo "</td>";
@@ -431,9 +436,11 @@ if(file_exists("csound_version.txt")) {
 	if($file_format == "csound") echo " checked";
 	echo ">CSOUND file";
 	}
-echo "<br />&nbsp;&nbsp;&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savethisfile\" value=\"SAVE\">";
+echo "<br />&nbsp;&nbsp;&nbsp;";
+if($file_format == "rtmidi") echo "<input id=\"refresh\" style=\"background-color:yellow; display:none;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"reload\" value=\"REFRESH\">&nbsp;";
+echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savethisfile\" value=\"SAVE\">";
 echo "</p></td>";
-echo "<td style=\"text-align:right; vertical-align:middle;\" rowspan=\"2\">";
+echo "<td id=\"hideshow\" style=\"text-align:right; vertical-align:middle;\" rowspan=\"2\">";
 echo "<input type=\"hidden\" name=\"settings_file\" value=\"".$settings_file."\">";
 echo "<input type=\"hidden\" name=\"csound_file\" value=\"".$csound_file."\">";
 echo "<input style=\"background-color:azure;\" type=\"submit\" onclick=\"clearsave();\" name=\"compilegrammar\" value=\"COMPILE GRAMMAR\"><br /><br />";
@@ -505,11 +512,15 @@ if($trace_production > 0)
 $link_produce .= "&here=".urlencode($here);
 $window_name = window_name($filename);
 echo "<b>then…</b>";
-echo "&nbsp;<input onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)\"";
+if($file_format == "rtmidi") $refresh_instruction = "document.getElementById('refresh').style.display = 'inline';";
+else $refresh_instruction = '';
+echo "&nbsp;<input onmouseover=\"checksaved();\" onclick=\"if(checksaved()) {".$refresh_instruction." window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)\"";
 if($error) echo " disabled style=\"background-color:azure; box-shadow: none;\"";
 else echo " style=\"color:DarkBlue; background-color:Aquamarine;\"";
 echo ">";
-echo "</td></tr>";
+echo "</td>";
+if($file_format == "rtmidi") filter_form();
+echo "</tr>";
 echo "</table>";
 echo "<br /><div style=\"background-color:white; padding:1em; width:690px; border-radius: 15px;\">";
 if($settings_file <> '' AND file_exists($dir.$settings_file)) echo "<input style=\"background-color:yellow;float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_settings."','".$settings_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$settings_file."’\">";
@@ -689,18 +700,19 @@ echo "<input type=\"hidden\" name=\"time_structure\" value=\"".$time_structure."
 echo "<input type=\"hidden\" name=\"alphabet_file\" value=\"".$alphabet_file."\">";
 
 echo "<span  id=\"topedit\">&nbsp;</span>";
-echo "<p><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" onclick=\"clearsave();\" name=\"savethisfile\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".$filename."’\">";
 
+echo "<button style=\"background-color:aquamarine; border-radius: 6px;\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button>";
+
+echo "<p><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" onclick=\"clearsave();\" name=\"savethisfile\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".$filename."’\">";
 if((file_exists($output.SLASH.$default_output_name.".wav") OR file_exists($output.SLASH.$default_output_name.".mid") OR file_exists($output.SLASH.$default_output_name.".html") OR file_exists($output.SLASH.$default_output_name.".sco")) AND file_exists($result_file)) {
 	echo "&nbsp;&nbsp;&nbsp;<input style=\"color:DarkBlue; background-color:azure; font-size:large;\" onclick=\"window.open('".$result_file."','result','width=800,height=600,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Show latests results\">";
 	}
-echo "&nbsp;<input onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)";
+echo "&nbsp;<input onmouseover=\"checksaved();\" onclick=\"if(checksaved()) {".$refresh_instruction." window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)";
 if($error) {
 	echo " - disabled because of missing files\"";
 	echo " disabled style=\"background-color:azure; box-shadow: none; font-size:large;\"";
 	}
 else echo "\" style=\"color:DarkBlue; background-color:Aquamarine; font-size:large;\"";
-echo ">&nbsp;&nbsp;&nbsp;👉&nbsp;&nbsp;<font color=\"red\"><i>There is a search-and-replace tool below this grammar!</i></font>&nbsp;😀";
 echo "</p>";
 
 $content = do_replace($content);
@@ -709,15 +721,14 @@ if($error) echo "<p>".$error_mssg."</p>";
 $table = explode(chr(10),$content);
 $imax = count($table);
 if($imax > $textarea_rows) $textarea_rows = $imax + 5;
-
+find_replace_form();
 echo "<textarea name=\"thistext\" onchange=\"tellsave()\" rows=\"".$textarea_rows."\" style=\"width:90%;\">".$content."</textarea><br />";
 
-echo "<p style=\"float:right;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></p>";
-find_replace_form();
-echo "<hr>";
-
-echo "<div style=\"float:left; padding-top:12px;\">";
-echo "<input onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)";
+echo "<div style=\"float:right;\">";
+echo "<p ><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></p>";
+echo "</div>";
+echo "<div>";
+echo "<input onmouseover=\"checksaved();\" onclick=\"if(checksaved()) {".$refresh_instruction." window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)";
 if($error) {
 	echo " - disabled because of missing files\"";
 	echo " disabled style=\"background-color:azure; box-shadow: none; font-size:large;\"";
@@ -756,7 +767,6 @@ for($i = 0; $i < $imax; $i++) {
 		$variable[$word] = TRUE;
 		}
 	}
-
 echo "<form method=\"post\" action=\"".$url_this_page."#expression\" enctype=\"multipart/form-data\">";
 $action = "play";
 $link_produce = "produce.php?instruction=".$action."&grammar=".urlencode($this_file);

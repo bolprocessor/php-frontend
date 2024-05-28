@@ -4,7 +4,10 @@ echo "<html lang=\"en\">";
 echo "<head>";
 echo "<meta content=\"text/html; charset=utf-8\" http-equiv=\"Content-Type\" />";
 echo "<link rel=\"stylesheet\" href=\"bp.css\" />\n";
-if(isset($filename)) echo "<title>".$filename."</title>\n";
+if(isset($filename)) {
+  echo "<title>".$filename."</title>\n";
+
+  }
 else if(isset($this_title)) echo "<title>".$this_title."</title>\n";
 echo "<link rel=\"icon\" href=\"pict/bp3_logo.ico\" type =\"image/x-icon\" />";
 echo "<script>\n";
@@ -77,13 +80,30 @@ echo "</script>\n";
 echo "<script>\n";
 echo "function settoggledisplay() {
 		var x = document.getElementById(\"showhide\");
+		var y = document.getElementById(\"hideshow\");
 	    if(x) {
-	      x.className='hidden'; }}\n";
+	      x.className='hidden'; }
+      if(y) {
+        y.className='unhidden'; }
+      }\n";
 echo "function toggledisplay() {
 	    var x = document.getElementById(\"showhide\");
+      var y = document.getElementById(\"hideshow\");
 	    if(x) {
 	      x.className=(x.className=='hidden')?'unhidden':'hidden'; }
+      if(y) {
+        y.className=(y.className=='hidden')?'unhidden':'hidden'; }
 	  }\n";
+echo "function settogglesearch() {
+      var z = document.getElementById(\"search\");
+      if(z) {
+        z.className='hidden'; }
+      }\n";
+echo "function togglesearch() {
+      var z = document.getElementById(\"search\");
+      if(z) {
+        z.className=(z.className=='hidden')?'unhidden':'hidden'; }
+    }\n";
 echo "</script>\n";
 
 echo "<script>\n";
@@ -140,7 +160,7 @@ echo "}
 </script>";
 
 echo "</head>";
-echo "<body onload=\"settoggledisplay()\">\n";
+echo "<body onload=\"settoggledisplay(); settogglesearch();\">\n";
 
 function is_connected() {
   $connected = @fsockopen("www.midijs.net",80);

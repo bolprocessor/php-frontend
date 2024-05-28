@@ -11,6 +11,13 @@ table {
 	border-spacing: 4px;
 	text-align: left;
 	}
+/* CSS to style the table, rows, and cells */
+.no-border-spacing {
+	border-collapse: collapse; /* Ensures there's no space between cells */		
+	}
+.no-border-spacing, .no-border-spacing th, .no-border-spacing td {
+	border: none; /* Removes borders */
+	}
 .gauche {
 	display: inline-table;
     }
@@ -198,3 +205,11 @@ div.horizontalgap {
 		font-size: small !important;
 		}
      }
+
+@keyframes flash {
+	0%, 100% { opacity: 1; }   /* Fully visible */
+	50% { opacity: 0; }        /* Fully transparent */
+    }
+#refresh {
+    animation: flash 1s infinite; /* Animation name, duration, and repeat */
+    }
