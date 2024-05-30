@@ -147,7 +147,7 @@ if($test) {
 	}
 
 $html_help_file = "BP2_help.html";
-$help = compile_help($text_help_file,$html_help_file);
+if(isset($filename)  AND $filename <> "Compilation") $help = compile_help($text_help_file,$html_help_file);
 $top_header = "// Bol Processor BP3 compatible with version BP2.9.8";
 
 $KeyString = "key#";
@@ -2765,12 +2765,13 @@ function score_sort($a,$b) {
 	return $a['score'] < $b['score'];
 	}
 
-function read_midiressources($name) {
-	global $dir_midi_resources, $MIDIinputFilter, $MIDIoutputFilter;
+function read_midiressources($filename) {
+	global $temp_midi_ressources, $MIDIinputFilter, $MIDIoutputFilter;
+	global $dir_midi_resources,$MIDIsource,$MIDIoutput,$MIDIsourcename,$MIDIoutputname;
 	$result['found'] = false;
-	if(file_exists($dir_midi_resources.$name)) {
-		$file = fopen($dir_midi_resources.$name,'r');
-	//	echo "<p> 1) ".$dir_midi_resources.$name."</p>";
+	// First try to read  in the "temp" folder
+	if(file_exists($temp_midi_ressources."midiport")) {
+		$file = fopen($temp_midi_ressources."midiport",'r');
 		if($file) {
 			$midisource = $midioutput = -1;
 			$midisourcename = $midioutputname = '';
@@ -2790,7 +2791,6 @@ function read_midiressources($name) {
 				else if(trim($table[0]) == "MIDIoutputFilter") $MIDIoutputFilter = trim($table[1]);
 				}
 			fclose($file);
-	//		echo "<p>MIDIinputFilter = ".$MIDIinputFilter."</p>";
 			convert_midi_filter_to_params();
 			$result['found'] = true;
 			$result['midisource'] = $midisource;
@@ -2798,35 +2798,58 @@ function read_midiressources($name) {
 			$result['midioutput'] = $midioutput;
 			$result['midioutputname'] = $midioutputname;
 			}
+		if($result['found']) {
+			$MIDIsource = $result['midisource'];
+			$MIDIoutput = $result['midioutput'];
+			$MIDIsourcename = $result['midisourcename'];
+			$MIDIoutputname = $result['midioutputname'];
+			return $result;
+			}
 		}
+	// Then try the "midi_ressources" folder, which is permanent
+	if(file_exists($dir_midi_resources.$filename."_midiport")) {
+		$file = fopen($dir_midi_resources.$filename."_midiport",'r');
+		if($file) {
+			$midisource = $midioutput = -1;
+			$midisourcename = $midioutputname = '';
+			while(!feof($file)) {
+				$line = fgets($file);
+				$table = explode("\t",$line);
+				if(count($table) < 2) continue;
+				if(trim($table[0]) == "MIDIsource") {
+					if(($midisource == -1) AND ctype_digit($table[1])) $midisource = trim($table[1]);
+					if((count($table) > 2) AND $midisourcename == '') $midisourcename = trim($table[2]);
+					}
+				else if(trim($table[0]) == "MIDIoutput") {
+					if(($midioutput == -1) AND ctype_digit($table[1])) $midioutput = trim($table[1]);
+					if((count($table) > 2) AND $midioutputname == '') $midioutputname = trim($table[2]);
+					}
+				else if(trim($table[0]) == "MIDIinputFilter") $MIDIinputFilter = trim($table[1]);
+				else if(trim($table[0]) == "MIDIoutputFilter") $MIDIoutputFilter = trim($table[1]);
+				}
+			fclose($file);
+			convert_midi_filter_to_params();
+			$result['found'] = true;
+			$result['midisource'] = $midisource;
+			$result['midisourcename'] = $midisourcename;
+			$result['midioutput'] = $midioutput;
+			$result['midioutputname'] = $midioutputname;
+			}
+		if($result['found']) {
+			$MIDIsource = $result['midisource'];
+			$MIDIoutput = $result['midioutput'];
+			$MIDIsourcename = $result['midisourcename'];
+			$MIDIoutputname = $result['midioutputname'];
+			return $result;
+			}
+		}
+	$MIDIsource = 1;
+	$MIDIoutput = 0;
+	$MIDIsourcename = $MIDIoutputname = '';
+	// In this case, no MIDI filters have been set. The form will set undefined parameters to value '1'.
 	return $result;
 	}
 
-function read_anyMIDIresource($filename) {
-	global $MIDIsource,$MIDIoutput,$MIDIsourcename,$MIDIoutputname;
-	$read_midiressources = read_midiressources("midiport_".$filename);
-	if(!$read_midiressources['found']) {
-		$read_midiressources = read_midiressources("last_midiport");
-		if(!$read_midiressources['found']) {
-			$MIDIsource = 1;
-			$MIDIoutput = 0;
-			$MIDIsourcename = $MIDIoutputname = '';
-			}
-		else {
-			$MIDIsource = $read_midiressources['midisource'];
-			$MIDIoutput = $read_midiressources['midioutput'];
-			$MIDIsourcename = $read_midiressources['midisourcename'];
-			$MIDIoutputname = $read_midiressources['midioutputname'];
-			}
-		}
-	else {
-		$MIDIsource = $read_midiressources['midisource'];
-		$MIDIoutput = $read_midiressources['midioutput'];
-		$MIDIsourcename = $read_midiressources['midisourcename'];
-		$MIDIoutputname = $read_midiressources['midioutputname'];
-		}
-	return;
-	}
 
 function convert_midi_filter_to_params() {
 	global $NoteOffFilter, $NoteOnFilter, $KeyPressureFilter, $ControlTypeFilter, $ProgramTypeFilter, $ChannelPressureFilter, $PitchBendFilter, $SysExFilter, $TimeCodeFilter, $SongPosFilter, $SongSelFilter, $TuneTypeFilter, $EndSysExFilter, $ClockTypeFilter, $StartTypeFilter, $ContTypeFilter, $ActiveSenseFilter, $ResetFilter;
@@ -2858,6 +2881,7 @@ function convert_midi_filter_to_params() {
 
 function save_midiressources($filename) {
 	global $dir_midi_resources, $MIDIsource, $MIDIoutput, $MIDIsourcename, $MIDIoutputname;
+	global $temp_midi_ressources;
 	$NoteOffFilter = get_parameter("NoteOffFilter");
 	$NoteOnFilter = get_parameter("NoteOnFilter");
 	$KeyPressureFilter = get_parameter("KeyPressureFilter");
@@ -2905,15 +2929,23 @@ function save_midiressources($filename) {
     $inputFilters = str_pad($inputFilters, 18, '0', STR_PAD_LEFT);
     $outputFilters = str_pad($outputFilters, 18, '0', STR_PAD_LEFT);
 
-	$name = $filename;
-	$file = fopen($dir_midi_resources.$name,'w');
+	$file = fopen($temp_midi_ressources."midiport",'w');
 	if($file) {
 		fwrite($file,"MIDIsource\t".$MIDIsource."\t".$MIDIsourcename."\n");
 		fwrite($file,"MIDIoutput\t".$MIDIoutput."\t".$MIDIoutputname."\n");
 		fwrite($file,"MIDIinputFilter\t".$inputFilters."\n");
 		fwrite($file,"MIDIoutputFilter\t".$outputFilters."\n");
 		fclose($file);
-		return true;
+		// Let's now save it to the "midi_ressources" folder
+		$file = fopen($dir_midi_resources.$filename."_midiport",'w');
+		if($file) {
+			fwrite($file,"MIDIsource\t".$MIDIsource."\t".$MIDIsourcename."\n");
+			fwrite($file,"MIDIoutput\t".$MIDIoutput."\t".$MIDIoutputname."\n");
+			fwrite($file,"MIDIinputFilter\t".$inputFilters."\n");
+			fwrite($file,"MIDIoutputFilter\t".$outputFilters."\n");
+			fclose($file);
+			return true;
+			}
 		}
 	return false;
 	}
@@ -2942,16 +2974,16 @@ function add_proper_extension($format,$filename) {
 	}
 
 function find_replace_form() {
+	global $url_this_page;
 	echo "<div id=\"search\">";
 	echo "<label for=\"find\">Search for: </label>";
 	echo "<input type=\"text\" name=\"find\" style=\"background-color:white;\" id=\"find\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
 	echo "<label for=\"regex\">Check for regular expression:</label>";
 	echo "<input type=\"checkbox\" name=\"regex\" id=\"regex\">";
-//	echo "&nbsp;&nbsp;&nbsp;<button class=\"bouton\" type=\"submit\" name=\"action\" value=\"find\">Find</button>";
 	echo "</p>";
 	echo "<p>";
 	echo "<label for=\"replace\">and replace it with: </label>";
-	echo "<input type=\"text\" name=\"replace\" style=\"background-color:white;\" id=\"replace\">&nbsp;&nbsp;&nbsp;<button class=\"bouton\" type=\"submit\" name=\"action\" value=\"replace\" onclick=\"clearsave()\">Search and Replace (all)</button>";
+	echo "<input type=\"text\" name=\"replace\" style=\"background-color:white;\" id=\"replace\">&nbsp;&nbsp;&nbsp;<button class=\"bouton\" type=\"submit\" formaction=\"".$url_this_page."#replace\" name=\"action\" value=\"replace\" onclick=\"clearsave()\">Search and Replace (all)</button>";
 	echo "</div>";
 	return;
 	}
@@ -3010,7 +3042,7 @@ function filter_form() {
 	echo "<td style=\"background-color: Snow;\">";
 	echo "<button style=\"background-color:aquamarine; border-radius: 6px;\" onclick=\"toggledisplay(); return false;\">Show/hide MIDI input filter</button>";
 	echo "<p>0 = reject<br />1 = treat<br />2 = treat + pass</p>";
-	echo "<div id=\"showhide\" style=\"border-radius: 15px; padding:6px;\">";
+	echo "<div id=\"showhide\">";
 	// Beware that "showhide" is also used for displaying scales
 	echo "<table   class=\"no-border-spacing\">";
 	echo "<tr>";
@@ -3065,5 +3097,18 @@ function filter_buttons($param) {
 	echo "</td>";
 	echo "</tr>";
 	return;
+	}
+
+function filter_explanation() {
+	global $file_format;
+	if($file_format <> "rtmidi") return;
+	echo "<div id=\"showhide2\" style=\"width:400px; margin-top:48px; background-color:Snow; padding:12px; border-radius: 12px;\">";
+	echo "<p>MIDI input filters are used to process incoming events, for example from a connected piano keyboard or other MIDI devices — including another instance of the BP3.</p>
+	<ul>
+	<li>By default (option ‘0’), events are ‘rejected’ and nothing happens.</li>
+	<li>If an event is accepted (option ‘1’), it can trigger a script command that is announced in the score.</li>
+	<li>Accepted events can also be routed to the current MIDI output (option ‘3’).
+	</ul>";
+	echo "</div>";
 	}
 ?>

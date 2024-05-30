@@ -11,12 +11,12 @@ $application_path = $bp_application_path;
 $console = $application_path."bp";
 $console_exe = $application_path."bp.exe";
 if(!file_exists($console) AND !file_exists($console_exe)) {
-	echo "<p>The console application (file “bp”) is not working or missing or misplaced…</p>";
+	echo "<p style=\"text-align:center; width:90%;\">The console application (file “bp”) is not working, or missing, or misplaced…</p>";
 	$source = $application_path."source";
 	if(file_exists($source))
-		echo "<p>Source files have been found. You can try to recompile “bp”, then return to this page.<br /><br />➡ <a href=\"".$application_path."compile.php\">Run the compiler</a> (this works at least in MacOS)</p>";
+		echo "<p style=\"text-align:center; width:90%;\">The source files of BP3 have been found. You can recompile “bp”, then try again.<br /><br /><big>👉👉👉&nbsp;&nbsp;<a href=\"".$application_path."compile.php?return=produce.php\">Run the compiler</a></big></p>";
 	else
-		echo "<p>Source files (the “source” folder) have not been found.<br />Return to <a target=\"_blank\" href=\"https://bolprocessor.org/check-bp3/#install\">https://bolprocessor.org/check-bp3/</a> and follow instructions!</p>";
+		echo "<p style=\"text-align:center; width:90%;\">Source files (the “source” folder) have not been found.<br />Visit <a target=\"_blank\" href=\"https://bolprocessor.org/check-bp3/#install\">https://bolprocessor.org/check-bp3/</a> and follow instructions!</p>";
 	die();
 	}
 $bad_image = FALSE;
@@ -589,12 +589,6 @@ if($no_error AND $file_format == "csound") {
 			}
 		else echo "<p><font color=\"red\">➡</font> The score file (".$csound_file_link.") was not found by Csound.</p>";
 		}
-	}
-
-// Let's copy midi_ressources/last_midiport to the midi setup specific to this project.
-if(file_exists($dir_midi_resources."last_midiport")) {
-	echo "<small>Copied “last_midiport” to “".$dir_midi_resources."midiport_".$project_fullname."”</small><br /><br />";
-	@copy($dir_midi_resources."last_midiport",$dir_midi_resources."midiport_".$project_fullname);
 	}
 
 $handle = FALSE;

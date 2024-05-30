@@ -46,6 +46,8 @@ $music_xml_file = $temp_dir.$temp_folder.SLASH."temp.musicxml";
 $more_data = ''; $dynamic_control = array();
 $link_edit = "data.php";
 
+$temp_midi_ressources = $temp_dir."trace_".session_id()."_".$filename."_";
+
 $objects_file = $csound_file = $alphabet_file = $grammar_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = $csound_default_orchestra = '';
 
 if(isset($_POST['alphabet_file'])) $alphabet_file = $_POST['alphabet_file'];
@@ -1176,13 +1178,10 @@ if($need_to_save OR isset($_POST['savethisfile'])) {
 	$content = preg_replace("/ +/u",' ',$content);
 	save($this_file,$filename,$top_header,$content);
 	if($file_format == "rtmidi") {
-		save_midiressources("midiport_".$filename);
-		save_midiressources("last_midiport");
+		save_midiressources($filename);
 		}
 	}
-else read_anyMIDIresource($filename);
-
-echo "<p>MIDIsourcename = ".$MIDIsourcename."</p>";
+else read_midiressources($filename);
 
 try_create_new_file($this_file,$filename);
 $content = @file_get_contents($this_file,TRUE);
@@ -1396,27 +1395,28 @@ if($file_format <> "rtmidi") {
 	}
 else {
 	echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
-	$last_midiport = read_midiressources("last_midiport");
+	$midiport = read_midiressources($filename);
 	echo "<br />";
-	if($last_midiport['found']) {
-		if($last_midiport['midisource'] <> $MIDIsource) echo "➡ Last MIDI input was ".$last_midiport['midisource']."<br />";
-		if($last_midiport['midisourcename'] != $MIDIsourcename) echo "➡ MIDI input name was “<font color=\"blue\">".$last_midiport['midisourcename']."</font>”<br />";
-	/*	if($last_midiport['midisource'] <> $MIDIsource) $MIDIsource = $last_midiport['midisource'];
-		if($last_midiport['midisourcename'] != $MIDIsourcename) $MIDIsourcename = $last_midiport['midisourcename']; */
-		}
-	echo "MIDI input <input type=\"text\" onchange=\"tellsave()\" name=\"MIDIsource\" size=\"3\" value=\"".$MIDIsource."\">&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIsourcename\" size=\"25\" value=\"".$MIDIsourcename."\"><br />";
-	if($last_midiport['found']) {
+	if($midiport['found']) {
 		echo "<br />";
-		if($last_midiport['midioutput'] <> $MIDIoutput) echo "➡ Last MIDI output was ".$last_midiport['midioutput']."<br />";
-		if($last_midiport['midioutputname'] != $MIDIoutputname) echo "➡ MIDI output name was “<font color=\"blue\">".$last_midiport['midioutputname']."</font>”<br />";
-	/*	if($last_midiport['midioutput'] <> $MIDIoutput) $MIDIoutput = $last_midiport['midioutput'];
-		if($last_midiport['midioutputname'] != $MIDIoutputname) $MIDIoutputname = $last_midiport['midioutputname']; */
+		if($midiport['midioutput'] <> $MIDIoutput) echo "➡ Last MIDI output was ".$midiport['midioutput']."<br />";
+		if($midiport['midioutputname'] != $MIDIoutputname) echo "➡ MIDI output name was “<font color=\"blue\">".$midiport['midioutputname']."</font>”<br />";
+	/*	if($midiport['midioutput'] <> $MIDIoutput) $MIDIoutput = $midiport['midioutput'];
+		if($midiport['midioutputname'] != $MIDIoutputname) $MIDIoutputname = $midiport['midioutputname']; */
 		}
-	echo "MIDI output <input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutput\" size=\"3\" value=\"".$MIDIoutput."\">&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutputname\" size=\"25\" value=\"".$MIDIoutputname."\">";
+	echo "MIDI output&nbsp;&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutput\" size=\"3\" value=\"".$MIDIoutput."\">&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutputname\" size=\"25\" value=\"".$MIDIoutputname."\"><br /><br />";
+	if($midiport['found']) {
+		if($midiport['midisource'] <> $MIDIsource) echo "➡ Last MIDI input was ".$midiport['midisource']."<br />";
+		if($midiport['midisourcename'] != $MIDIsourcename) echo "➡ MIDI input name was “<font color=\"blue\">".$midiport['midisourcename']."</font>”<br />";
+	/*	if($midiport['midisource'] <> $MIDIsource) $MIDIsource = $midiport['midisource'];
+		if($midiport['midisourcename'] != $MIDIsourcename) $MIDIsourcename = $midiport['midisourcename']; */
+		}
+	echo "MIDI input&nbsp;&nbsp;&nbsp;&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIsource\" size=\"3\" value=\"".$MIDIsource."\">&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIsourcename\" size=\"25\" value=\"".$MIDIsourcename."\">";
 	}
-read_anyMIDIresource($filename);
+read_midiressources($filename);
 if($file_format == "rtmidi") echo "<br /><br /><i>Delete the name if you change a number!</i>";
 echo "<br />➡ <i>After changing these settings, click SAVE…</i>";
+filter_explanation();
 echo "</td>";
 echo "<td><p style=\"text-align:left;\">";
 echo "<input type=\"radio\" name=\"file_format\" value=\"rtmidi\"";
@@ -1938,7 +1938,7 @@ function create_chunks($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxc
 	if(is_integer($pos=strpos($line,"-")) AND $pos == 0) $segment['error'] = "continue";
 	if($segment['error'] <> '') return $segment;
 	$line_recoded = recode_entities($line);
-	$data = $temp_dir.$temp_folder.SLASH.$i_item.".bpda";
+	$data = $temp_dir.$temp_folder.SLASH.$i_item.".bpda"; 
 	$handle = fopen($data,"w");
 	fwrite($handle,$line_recoded."\n");
 	fclose($handle);

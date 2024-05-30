@@ -81,18 +81,24 @@ echo "<script>\n";
 echo "function settoggledisplay() {
 		var x = document.getElementById(\"showhide\");
 		var y = document.getElementById(\"hideshow\");
+		var z = document.getElementById(\"showhide2\");
 	    if(x) {
 	      x.className='hidden'; }
       if(y) {
         y.className='unhidden'; }
+      if(z) {
+        z.className='hidden'; }
       }\n";
 echo "function toggledisplay() {
 	    var x = document.getElementById(\"showhide\");
       var y = document.getElementById(\"hideshow\");
+	    var z = document.getElementById(\"showhide2\");
 	    if(x) {
 	      x.className=(x.className=='hidden')?'unhidden':'hidden'; }
       if(y) {
         y.className=(y.className=='hidden')?'unhidden':'hidden'; }
+      if(z) {
+        z.className=(z.className=='hidden')?'unhidden':'hidden'; }
 	  }\n";
 echo "function settogglesearch() {
       var z = document.getElementById(\"search\");
@@ -171,5 +177,5 @@ function is_connected() {
   else return FALSE;
   }
 
-echo "<div style=\"float:right; \"><button type=\"button\" class=\"bouton\" onclick=\"createFile('".$panicfile."');\">PANIC!</button></div>\n";
+if(isset($filename)  AND $filename <> "Compilation" AND $filename <> "Produce") echo "<div style=\"float:right; \"><button type=\"button\" class=\"bouton\" onclick=\"createFile('".$panicfile."');\">PANIC!</button></div>\n";
 ?>

@@ -53,6 +53,8 @@ if(isset($_POST['reload'])) {
 
 require_once("_header.php");
 
+$temp_midi_ressources = $temp_dir."trace_".session_id()."_".$filename."_";
+
 $url = "index.php?path=".urlencode($current_directory);
 echo "<p>Workspace = <input style=\"background-color:yellow;\" name=\"workspace\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$url."','_self');\" value=\"".$current_directory."\">";
 // echo "&nbsp;&nbsp;session_id = ".session_id();
@@ -190,11 +192,10 @@ if($need_to_save OR isset($_POST['savethisfile']) OR isset($_POST['compilegramma
 	$content = preg_replace("/ +/u",' ',$content);
 	save($this_file,$filename,$top_header,$content);
 	if($file_format == "rtmidi") {
-		save_midiressources("midiport_".$filename);
-		save_midiressources("last_midiport");
+		save_midiressources($filename);
 		}
 	}
-else read_anyMIDIresource($filename);
+else read_midiressources($filename);
 
 
 if(isset($_POST['file_format'])) $file_format = $_POST['file_format'];
@@ -393,28 +394,29 @@ if($file_format <> "rtmidi") {
 	echo "<input type=\"text\" name=\"output_file\" size=\"25\" value=\"".$output_file."\"></p>";
 	}
 else {
-	$last_midiport = read_midiressources("last_midiport");
+	$midiport = read_midiressources($filename);
 	echo "<br />";
-	if($last_midiport['found']) {
-		if($last_midiport['midisource'] <> $MIDIsource) echo "➡ Last MIDI input was ".$last_midiport['midisource']."<br />";
-		if($last_midiport['midisourcename'] != $MIDIsourcename) echo "➡ MIDI input name was “<font color=\"blue\">".$last_midiport['midisourcename']."</font>”<br />";
-	/*	if($last_midiport['midisource'] <> $MIDIsource) $MIDIsource = $last_midiport['midisource'];
-		if($last_midiport['midisourcename'] != $MIDIsourcename) $MIDIsourcename = $last_midiport['midisourcename']; */
+	if($midiport['found']) {
+		echo "<br />";
+		if($midiport['midioutput'] <> $MIDIoutput) echo "➡ Last MIDI output was ".$midiport['midioutput']."<br />";
+		if($midiport['midioutputname'] != $MIDIoutputname) echo "➡ MIDI output name was “<font color=\"blue\">".$midiport['midioutputname']."</font>”<br />";
+	/*	if($midiport['midioutput'] <> $MIDIoutput) $MIDIoutput = $midiport['midioutput'];
+		if($midiport['midioutputname'] != $MIDIoutputname) $MIDIoutputname = $midiport['midioutputname']; */
+		}
+	echo "MIDI output&nbsp;&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutput\" size=\"3\" value=\"".$MIDIoutput."\">&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutputname\" size=\"25\" value=\"".$MIDIoutputname."\"><br /><br />";
+	if($midiport['found']) {
+		if($midiport['midisource'] <> $MIDIsource) echo "➡ Last MIDI input was ".$midiport['midisource']."<br />";
+		if($midiport['midisourcename'] != $MIDIsourcename) echo "➡ MIDI input name was “<font color=\"blue\">".$midiport['midisourcename']."</font>”<br />";
+	/*	if($midiport['midisource'] <> $MIDIsource) $MIDIsource = $midiport['midisource'];
+		if($midiport['midisourcename'] != $MIDIsourcename) $MIDIsourcename = $midiport['midisourcename']; */
 		}
 	echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
-	echo "MIDI input <input type=\"text\" onchange=\"tellsave()\" name=\"MIDIsource\" size=\"3\" value=\"".$MIDIsource."\">&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIsourcename\" size=\"25\" value=\"".$MIDIsourcename."\"><br />";
-	if($last_midiport['found']) {
-		echo "<br />";
-		if($last_midiport['midioutput'] <> $MIDIoutput) echo "➡ Last MIDI output was ".$last_midiport['midioutput']."<br />";
-		if($last_midiport['midioutputname'] != $MIDIoutputname) echo "➡ MIDI output name was “<font color=\"blue\">".$last_midiport['midioutputname']."</font>”<br />";
-	/*	if($last_midiport['midioutput'] <> $MIDIoutput) $MIDIoutput = $last_midiport['midioutput'];
-		if($last_midiport['midioutputname'] != $MIDIoutputname) $MIDIoutputname = $last_midiport['midioutputname']; */
-		}
-	echo "MIDI output <input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutput\" size=\"3\" value=\"".$MIDIoutput."\">&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutputname\" size=\"25\" value=\"".$MIDIoutputname."\">";
+	echo "MIDI input&nbsp;&nbsp;&nbsp;&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIsource\" size=\"3\" value=\"".$MIDIsource."\">&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIsourcename\" size=\"25\" value=\"".$MIDIsourcename."\"><br />";
 	}
-read_anyMIDIresource($filename);
+read_midiressources($filename);
 if($file_format == "rtmidi") echo "<br /><br /><i>Delete the name if you change a number!</i>";
 echo "<br />➡ <i>After changing these settings, click SAVE…</i>";
+filter_explanation();
 echo "</td>";
 echo "<td><p style=\"text-align:left;\">";
 // if($test) echo "file_format = ".$file_format."<br />";
@@ -722,11 +724,11 @@ $table = explode(chr(10),$content);
 $imax = count($table);
 if($imax > $textarea_rows) $textarea_rows = $imax + 5;
 find_replace_form();
-echo "<textarea name=\"thistext\" onchange=\"tellsave()\" rows=\"".$textarea_rows."\" style=\"width:90%;\">".$content."</textarea><br />";
+echo "<textarea name=\"thistext\" onchange=\"tellsave()\" rows=\"".$textarea_rows."\" style=\"width:90%;\">".$content."</textarea>";
 
-echo "<div style=\"float:right;\">";
-echo "<p ><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></p>";
-echo "</div>";
+// echo "<div style=\"float:right; margin-right:100px;\">";
+echo "<p style=\"float:right; margin-right:100px;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></p>";
+// echo "</div>";
 echo "<div>";
 echo "<input onmouseover=\"checksaved();\" onclick=\"if(checksaved()) {".$refresh_instruction." window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)";
 if($error) {
