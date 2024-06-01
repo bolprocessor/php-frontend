@@ -386,40 +386,26 @@ echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/fo
 echo "<table cellpadding=\"8px;\" style=\"background-color:white; border-radius: 15px; border: 1px solid black;\"><tr style=\"\">";
 echo "<td>";
 if($file_format <> "rtmidi") {
-	echo "<input type=\"hidden\" name=\"MIDIsource\" value=\"".$MIDIsource."\">";
-	echo "<input type=\"hidden\" name=\"MIDIsourcename\" value=\"".$MIDIsourcename."\">";
-	echo "<input type=\"hidden\" name=\"MIDIoutput\" value=\"".$MIDIoutput."\">";
-	echo "<input type=\"hidden\" name=\"MIDIoutputname\" value=\"".$MIDIoutputname."\">";
+	for($i = 0; $i < $NumberMIDIoutputs; $i++) {
+		echo "<input type=\"hidden\" name=\"MIDIoutput_".$i."\" value=\"".$MIDIoutput[$i]."\">";
+		echo "<input type=\"hidden\" name=\"MIDIoutputname_".$i."\" value=\"".$MIDIoutputname[$i]."\">";
+		}
+	for($i = 0; $i < $NumberMIDIinputs; $i++) {
+		echo "<input type=\"hidden\" name=\"MIDIinput_".$i."\" value=\"".$MIDIinput[$i]."\">";
+		echo "<input type=\"hidden\" name=\"MIDIinputname_".$i."\" value=\"".$MIDIinputname[$i]."\">";
+		}
 	echo "<p>Name of output file (with proper extension):<br />";
 	echo "<input type=\"text\" name=\"output_file\" size=\"25\" value=\"".$output_file."\"></p>";
 	}
 else {
-	$midiport = read_midiressources($filename);
-	echo "<br />";
-	if($midiport['found']) {
-		echo "<br />";
-		if($midiport['midioutput'] <> $MIDIoutput) echo "➡ Last MIDI output was ".$midiport['midioutput']."<br />";
-		if($midiport['midioutputname'] != $MIDIoutputname) echo "➡ MIDI output name was “<font color=\"blue\">".$midiport['midioutputname']."</font>”<br />";
-	/*	if($midiport['midioutput'] <> $MIDIoutput) $MIDIoutput = $midiport['midioutput'];
-		if($midiport['midioutputname'] != $MIDIoutputname) $MIDIoutputname = $midiport['midioutputname']; */
-		}
-	echo "MIDI output&nbsp;&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutput\" size=\"3\" value=\"".$MIDIoutput."\">&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutputname\" size=\"25\" value=\"".$MIDIoutputname."\"><br /><br />";
-	if($midiport['found']) {
-		if($midiport['midisource'] <> $MIDIsource) echo "➡ Last MIDI input was ".$midiport['midisource']."<br />";
-		if($midiport['midisourcename'] != $MIDIsourcename) echo "➡ MIDI input name was “<font color=\"blue\">".$midiport['midisourcename']."</font>”<br />";
-	/*	if($midiport['midisource'] <> $MIDIsource) $MIDIsource = $midiport['midisource'];
-		if($midiport['midisourcename'] != $MIDIsourcename) $MIDIsourcename = $midiport['midisourcename']; */
-		}
 	echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
-	echo "MIDI input&nbsp;&nbsp;&nbsp;&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIsource\" size=\"3\" value=\"".$MIDIsource."\">&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIsourcename\" size=\"25\" value=\"".$MIDIsourcename."\"><br />";
+	display_midi_ports($filename);
 	}
 read_midiressources($filename);
 if($file_format == "rtmidi") echo "<br /><br /><i>Delete the name if you change a number!</i>";
 echo "<br />➡ <i>After changing these settings, click SAVE…</i>";
-filter_explanation();
 echo "</td>";
 echo "<td><p style=\"text-align:left;\">";
-// if($test) echo "file_format = ".$file_format."<br />";
 if($file_format == '') {
 	$file_format = "rtmidi";
 	save_settings2("grammar_file_format",$filename,$file_format);
@@ -521,7 +507,6 @@ if($error) echo " disabled style=\"background-color:azure; box-shadow: none;\"";
 else echo " style=\"color:DarkBlue; background-color:Aquamarine;\"";
 echo ">";
 echo "</td>";
-if($file_format == "rtmidi") filter_form();
 echo "</tr>";
 echo "</table>";
 echo "<br /><div style=\"background-color:white; padding:1em; width:690px; border-radius: 15px;\">";
@@ -650,8 +635,9 @@ if($csound_file <> '') {
 		$list_of_tonal_scales = list_of_tonal_scales($dir_csound_resources.$csound_file);
 		if(($max_scales = count($list_of_tonal_scales)) > 0) {
 			if($max_scales > 1)  {
-				echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains definitions of tonal scales&nbsp;<font color=\"red\">➡</font>&nbsp;<button style=\"background-color:aquamarine; border-radius: 6px; font-size:large;\" onclick=\"toggledisplay(); return false;\">Show/hide tonal scales</button>";
-				echo "<div id=\"showhide\"  style=\"border-radius: 15px; padding:6px;\"><br />";
+				$i = 0;
+				echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains definitions of tonal scales&nbsp;<font color=\"red\">➡</font>&nbsp;<button style=\"background-color:aquamarine; border-radius: 6px; font-size:large;\" onclick=\"toggledisplay(".$i."); return false;\">Show/hide tonal scales</button>";
+				echo "<div id=\"showhide0\"  style=\"border-radius: 15px; padding:6px;\"><br />";
 				}
 			else {
 				echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains the definition of tonal scale:";
@@ -703,8 +689,9 @@ echo "<input type=\"hidden\" name=\"alphabet_file\" value=\"".$alphabet_file."\"
 
 echo "<span  id=\"topedit\">&nbsp;</span>";
 
-echo "<button style=\"background-color:aquamarine; border-radius: 6px;\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button>";
+echo "<button style=\"background-color:aquamarine; border-radius: 6px;\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button><p></p>";
 
+find_replace_form();
 echo "<p><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" onclick=\"clearsave();\" name=\"savethisfile\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".$filename."’\">";
 if((file_exists($output.SLASH.$default_output_name.".wav") OR file_exists($output.SLASH.$default_output_name.".mid") OR file_exists($output.SLASH.$default_output_name.".html") OR file_exists($output.SLASH.$default_output_name.".sco")) AND file_exists($result_file)) {
 	echo "&nbsp;&nbsp;&nbsp;<input style=\"color:DarkBlue; background-color:azure; font-size:large;\" onclick=\"window.open('".$result_file."','result','width=800,height=600,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Show latests results\">";
@@ -723,7 +710,6 @@ if($error) echo "<p>".$error_mssg."</p>";
 $table = explode(chr(10),$content);
 $imax = count($table);
 if($imax > $textarea_rows) $textarea_rows = $imax + 5;
-find_replace_form();
 echo "<textarea name=\"thistext\" onchange=\"tellsave()\" rows=\"".$textarea_rows."\" style=\"width:90%;\">".$content."</textarea>";
 
 // echo "<div style=\"float:right; margin-right:100px;\">";
@@ -971,6 +957,11 @@ if(!$hide) {
 	if($found_chan > 0  OR $found_ins > 0) echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"manage_instructions\" formaction=\"".$url_this_page."#topchanges\" value=\"MANAGE _chan() AND _ins()\">&nbsp;";
 	}
 echo "</form>";
+echo "<script>\n";
+echo "window.onload = function() {
+    toggleAllDisplays($NumberMIDIinputs); settogglesearch();
+	};\n";
+echo "</script>\n";
 echo "</body>";
 echo "</html>";
 

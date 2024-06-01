@@ -78,27 +78,26 @@ echo "$(document).ready(function() {
 echo "</script>\n";
 
 echo "<script>\n";
-echo "function settoggledisplay() {
-		var x = document.getElementById(\"showhide\");
+echo "function settoggledisplay(i) {
+		var x = document.getElementById('showhide' + i);
 		var y = document.getElementById(\"hideshow\");
-		var z = document.getElementById(\"showhide2\");
 	    if(x) {
 	      x.className='hidden'; }
       if(y) {
         y.className='unhidden'; }
-      if(z) {
-        z.className='hidden'; }
       }\n";
-echo "function toggledisplay() {
-	    var x = document.getElementById(\"showhide\");
+echo "function toggleAllDisplays(imax) {
+      for (var i = 0; i <= imax; i++) {
+          settoggledisplay(i);
+      }
+    }\n";
+echo "function toggledisplay(i) {
+	    var x = document.getElementById('showhide' + i);
       var y = document.getElementById(\"hideshow\");
-	    var z = document.getElementById(\"showhide2\");
 	    if(x) {
 	      x.className=(x.className=='hidden')?'unhidden':'hidden'; }
       if(y) {
         y.className=(y.className=='hidden')?'unhidden':'hidden'; }
-      if(z) {
-        z.className=(z.className=='hidden')?'unhidden':'hidden'; }
 	  }\n";
 echo "function settogglesearch() {
       var z = document.getElementById(\"search\");
@@ -166,7 +165,8 @@ echo "}
 </script>";
 
 echo "</head>";
-echo "<body onload=\"settoggledisplay(); settogglesearch();\">\n";
+echo "<body>\n";
+
 
 function is_connected() {
   $connected = @fsockopen("www.midijs.net",80);

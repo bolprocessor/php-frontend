@@ -1333,9 +1333,10 @@ if($csound_file <> '') {
 		$list_of_tonal_scales = list_of_tonal_scales($dir_csound_resources.$csound_file);
 		if(($max_scales = count($list_of_tonal_scales)) > 0) {
 			if($max_scales > 1) {
+				$i = 0;
 				echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains definitions of tonal scales";
-				echo "&nbsp;<font color=\"red\">➡</font>&nbsp;<button style=\"background-color:aquamarine; border-radius: 6px; font-size:large;\" onclick=\"toggledisplay(); return false;\">Show/hide tonal scales</button>";
-				echo "<div id=\"showhide\" style=\"border-radius: 15px; padding:6px;\"><br />";
+				echo "&nbsp;<font color=\"red\">➡</font>&nbsp;<button style=\"background-color:aquamarine; border-radius: 6px; font-size:large;\" onclick=\"toggledisplay(".$i."); return false;\">Show/hide tonal scales</button>";
+				echo "<div id=\"showhide0\" style=\"border-radius: 15px; padding:6px;\"><br />";
 				}
 			else {
 				echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains the definition of tonal scale:";
@@ -1385,38 +1386,25 @@ echo "</div>";
 echo "<table id=\"topedit\" style=\"background-color:white; border-radius: 15px; border: 1px solid black;\" cellpadding=\"8px;\"><tr style=\"\">";
 echo "<td>";
 if($file_format <> "rtmidi") {
-	echo "<input type=\"hidden\" name=\"MIDIsource\" value=\"".$MIDIsource."\">";
-	echo "<input type=\"hidden\" name=\"MIDIsourcename\" value=\"".$MIDIsourcename."\">";
-	echo "<input type=\"hidden\" name=\"MIDIoutput\" value=\"".$MIDIoutput."\">";
-	echo "<input type=\"hidden\" name=\"MIDIoutputname\" value=\"".$MIDIoutputname."\">";
+	for($i = 0; $i < $NumberMIDIoutputs; $i++) {
+		echo "<input type=\"hidden\" name=\"MIDIoutput_".$i."\" value=\"".$MIDIoutput[$i]."\">";
+		echo "<input type=\"hidden\" name=\"MIDIoutputname_".$i."\" value=\"".$MIDIoutputname[$i]."\">";
+		}
+	for($i = 0; $i < $NumberMIDIinputs; $i++) {
+		echo "<input type=\"hidden\" name=\"MIDIinput_".$i."\" value=\"".$MIDIinput[$i]."\">";
+		echo "<input type=\"hidden\" name=\"MIDIinputname_".$i."\" value=\"".$MIDIinputname[$i]."\">";
+		}
 	echo "<p>Name of output file (with proper extension):<br />";
 	echo "<input type=\"text\" name=\"output_file\" size=\"25\" value=\"".$output_file."\">&nbsp;";
 	echo "</p>";
 	}
 else {
 	echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
-	$midiport = read_midiressources($filename);
-	echo "<br />";
-	if($midiport['found']) {
-		echo "<br />";
-		if($midiport['midioutput'] <> $MIDIoutput) echo "➡ Last MIDI output was ".$midiport['midioutput']."<br />";
-		if($midiport['midioutputname'] != $MIDIoutputname) echo "➡ MIDI output name was “<font color=\"blue\">".$midiport['midioutputname']."</font>”<br />";
-	/*	if($midiport['midioutput'] <> $MIDIoutput) $MIDIoutput = $midiport['midioutput'];
-		if($midiport['midioutputname'] != $MIDIoutputname) $MIDIoutputname = $midiport['midioutputname']; */
-		}
-	echo "MIDI output&nbsp;&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutput\" size=\"3\" value=\"".$MIDIoutput."\">&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutputname\" size=\"25\" value=\"".$MIDIoutputname."\"><br /><br />";
-	if($midiport['found']) {
-		if($midiport['midisource'] <> $MIDIsource) echo "➡ Last MIDI input was ".$midiport['midisource']."<br />";
-		if($midiport['midisourcename'] != $MIDIsourcename) echo "➡ MIDI input name was “<font color=\"blue\">".$midiport['midisourcename']."</font>”<br />";
-	/*	if($midiport['midisource'] <> $MIDIsource) $MIDIsource = $midiport['midisource'];
-		if($midiport['midisourcename'] != $MIDIsourcename) $MIDIsourcename = $midiport['midisourcename']; */
-		}
-	echo "MIDI input&nbsp;&nbsp;&nbsp;&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIsource\" size=\"3\" value=\"".$MIDIsource."\">&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIsourcename\" size=\"25\" value=\"".$MIDIsourcename."\">";
+	display_midi_ports($filename);
 	}
 read_midiressources($filename);
 if($file_format == "rtmidi") echo "<br /><br /><i>Delete the name if you change a number!</i>";
 echo "<br />➡ <i>After changing these settings, click SAVE…</i>";
-filter_explanation();
 echo "</td>";
 echo "<td><p style=\"text-align:left;\">";
 echo "<input type=\"radio\" name=\"file_format\" value=\"rtmidi\"";
@@ -1434,7 +1422,7 @@ echo "<br /><br />&nbsp;&nbsp;&nbsp;<input style=\"background-color:yellow;\" ty
 if($file_format == "rtmidi") echo "&nbsp;<input id=\"refresh\" style=\"background-color:yellow; display:none;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"reload\" value=\"REFRESH\">";
 echo "</p>";
 echo "</td>";
-if($file_format == "rtmidi") filter_form();
+// if($file_format == "rtmidi") filter_form();
 echo "</tr>";
 echo "</table>";
 
@@ -1492,7 +1480,7 @@ echo "<td style=\"background-color:cornsilk;\">";
 
 find_replace_form();
 
-echo "<div style=\"float:right; vertical-align:middle;\">Import MusicXML file: <input style=\"color:red;\" type=\"file\" name=\"music_xml_import\">&nbsp;<input type=\"submit\" style=\"background-color:AquaMarine;\" value=\"← IMPORT\"></div>";
+echo "<div style=\"float:right; vertical-align:middle;\">Import MusicXML: <input style=\"color:red;\" type=\"file\" name=\"music_xml_import\">&nbsp;<input type=\"submit\" style=\"background-color:AquaMarine;\" value=\"← IMPORT\"></div>";
 
 echo "<div style=\"text-align:left;\"><input id=\"saveButton\" style=\"background-color:yellow; font-size:large;\"  type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></div>";
 
@@ -1854,6 +1842,11 @@ if(!$hide) {
 	}
 echo "</tr>";
 echo "</table>";
+echo "<script>\n";
+echo "window.onload = function() {
+    toggleAllDisplays($NumberMIDIinputs); settogglesearch();
+	};\n";
+echo "</script>\n";
 /* echo "<pre>";  // Preformatted tag to display output neatly
     // Execute a shell command to list MIDI devices
     // Using `system_profiler` to get audio device information which includes MIDI
