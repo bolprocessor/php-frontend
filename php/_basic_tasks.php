@@ -54,8 +54,8 @@ $panicfile = $temp_dir."messages".SLASH."_panic";
 $MIDIinput = $MIDIoutput = array();
 $MIDIinput[0] = -1;
 $MIDIoutput[0] = 0;
-$MIDIinputname = $MIDIoutputname = array();
-$MIDIinputname[0] = $MIDIoutputname[0] = '';
+$MIDIinputname = $MIDIoutputname = $MIDIoutputcomment = $MIDIinputcomment = array();
+$MIDIinputname[0] = $MIDIoutputname[0] = $MIDIoutputcomment[0] = $MIDIinputcomment[0] = '';
 $NumberMIDIinputs = $NumberMIDIoutputs = 1;
 if(isset($_POST['NumberMIDIinputs'])) $NumberMIDIinputs = $_POST['NumberMIDIinputs'];
 if(isset($_POST['NumberMIDIoutputs'])) $NumberMIDIoutputs = $_POST['NumberMIDIoutputs'];
@@ -2850,7 +2850,7 @@ function ok_output_location($folder) {
 
 
 function read_midiport($thefile) {
-	global $MIDIinput,$MIDIoutput,$MIDIinputname,$MIDIoutputname; // These are tables!
+	global $MIDIinput,$MIDIoutput,$MIDIinputname,$MIDIinputcomment,$MIDIoutputname,$MIDIoutputcomment; // These are tables!
 	global $MIDIinputFilter, $MIDIoutputFilter; // These are tables!
 	global $NumberMIDIinputs, $NumberMIDIoutputs;
 	$result['found'] = false;
@@ -2869,6 +2869,7 @@ function read_midiport($thefile) {
 						$i = trim($table[1]);
 						$MIDIinput[$i] = trim($table[2]);
 						if(count($table) > 3) $MIDIinputname[$i] = trim($table[3]);
+						if(count($table) > 4) $MIDIinputcomment[$i] = trim($table[4]);
 						}
 					}
 				else if(trim($table[0]) == "MIDIoutput") {
@@ -2877,6 +2878,7 @@ function read_midiport($thefile) {
 						$i = trim($table[1]);
 						$MIDIoutput[$i] = trim($table[2]);
 						if(count($table) > 3) $MIDIoutputname[$i] = trim($table[3]);
+						if(count($table) > 4) $MIDIoutputcomment[$i] = trim($table[4]);
 						}
 					}
 				else if(trim($table[0]) == "MIDIinputFilter") {
@@ -2895,6 +2897,7 @@ function read_midiport($thefile) {
 					}
 				}
 			fclose($file);
+			if($NumberMIDIoutputs == 0) $NumberMIDIoutputs = 1;
 	//		echo $found." => MIDIinputFilter = ".$MIDIinputFilter[0]."<br />MIDIoutputFilter = ".$MIDIoutputFilter[0]."<br />";
 			if($found > 1) for($i = 0; $i < $NumberMIDIinputs; $i++) convert_midi_filter_to_params($i);
 			$result['found'] = true;
@@ -2905,18 +2908,17 @@ function read_midiport($thefile) {
 
 function read_midiressources() {
 	global $filename, $temp_midi_ressources, $MIDIinputFilter, $MIDIoutputFilter;
-	global $dir_midi_resources,$MIDIinput,$MIDIoutput,$MIDIinputname,$MIDIoutputname;
+	global $dir_midi_resources,$MIDIinput,$MIDIoutput,$MIDIinputname,$MIDIoutputname,$MIDIinputcomment,$MIDIoutputcomment;
 	
 	// First try to read  in the "temp" folder
 	$result = read_midiport($temp_midi_ressources."midiport");
-	
 	// Then try the "midi_ressources" folder, which is permanent
 	if(!$result['found'])
 		$result = read_midiport($dir_midi_resources.$filename."_midiport");
 	if(!$result['found']) {
 		$MIDIinput[0] = 1;
 		$MIDIoutput[0] = 0;
-		$MIDIinputname[0] = $MIDIoutputname[0] = '';
+		$MIDIinputname[0] = $MIDIoutputname[0] = $MIDIoutputcomment[0] = $MIDIinputcomment[0] = '';
 		// In this case, no MIDI filters have been set. The form will set undefined parameters to value '1'.
 		}
 	return $result;
@@ -2964,15 +2966,17 @@ function get_parameter($param) {
 	}
 
 function save_midiressources($filename) {
-	global $MIDIinput, $MIDIoutput, $MIDIinputname, $MIDIoutputname; // These are tables!
+	global $MIDIinput, $MIDIoutput, $MIDIinputname, $MIDIoutputname, $MIDIinputcomment, $MIDIoutputcomment; // These are tables!
 	global $dir_midi_resources, $temp_midi_ressources, $NumberMIDIinputs, $NumberMIDIoutputs;
 	for($i = 0; $i < $NumberMIDIinputs; $i++) {
 		if(isset($_POST["MIDIinput_".$i])) $MIDIinput[$i] = trim($_POST["MIDIinput_".$i]);
 		if(isset($_POST["MIDIinputname_".$i])) $MIDIinputname[$i] = trim($_POST["MIDIinputname_".$i]);
+		if(isset($_POST["MIDIinputcomment_".$i])) $MIDIinputcomment[$i] = trim($_POST["MIDIinputcomment_".$i]);
 		}
 	for($i = 0; $i < $NumberMIDIoutputs; $i++) {
 		if(isset($_POST["MIDIoutput_".$i])) $MIDIoutput[$i] = trim($_POST["MIDIoutput_".$i]);
 		if(isset($_POST["MIDIoutputname_".$i])) $MIDIoutputname[$i] = trim($_POST["MIDIoutputname_".$i]);
+		if(isset($_POST["MIDIoutputcomment_".$i])) $MIDIoutputcomment[$i] = trim($_POST["MIDIoutputcomment_".$i]);
 		}
 	$inputFilters = $outputFilters = array();
 	for($i = 0; $i < $NumberMIDIinputs; $i++) {
@@ -3024,18 +3028,23 @@ function save_midiressources($filename) {
 	}
 
 function save_midiport($thisfilename,$inputFilters,$outputFilters) {
-	global $MIDIinput, $MIDIoutput, $MIDIinputname, $MIDIoutputname; // These are tables!
+	global $MIDIinput, $MIDIoutput, $MIDIinputname, $MIDIinputcomment, $MIDIoutputname, $MIDIoutputcomment; // These are tables!
 	global $NumberMIDIinputs, $NumberMIDIoutputs;
 	$file = fopen($thisfilename,'w');
 	if($file) {
 		for($i = 0; $i < $NumberMIDIoutputs; $i++) {
-			if($MIDIoutput[$i] == '' AND $MIDIoutputname[$i] == '') continue;
-			fwrite($file,"MIDIoutput\t".$i."\t".$MIDIoutput[$i]."\t".$MIDIoutputname[$i]."\n");
+			if($MIDIoutput[$i] == '' AND $MIDIoutputname[$i] == '' AND $MIDIoutputcomment[$i] == '') continue;
+			if($MIDIoutput[$i] == '') $MIDIoutput[$i] = 0;
+			if($MIDIoutputname[$i] == '') $MIDIoutputname[$i] = "new output";
+			if($MIDIoutputcomment[$i] == '') $MIDIoutputcomment[$i] = "void";
+			fwrite($file,"MIDIoutput\t".$i."\t".$MIDIoutput[$i]."\t".$MIDIoutputname[$i]."\t".$MIDIoutputcomment[$i]."\n");
 			}
 		for($i = 0; $i < $NumberMIDIinputs; $i++) {
-			if($MIDIinput[$i] == '' AND $MIDIinputname[$i] == '') continue;
+			if($MIDIinput[$i] == '' AND $MIDIinputname[$i] == '' AND $MIDIinputcomment[$i] == '') continue;
 			if($MIDIinput[$i] == '') $MIDIinput[$i] = -1;
-			fwrite($file,"MIDIinput\t".$i."\t".$MIDIinput[$i]."\t".$MIDIinputname[$i]."\n");
+			if($MIDIinputname[$i] == '') $MIDIinputname[$i] = "new intput";
+			if($MIDIinputcomment[$i] == '') $MIDIinputcomment[$i] = "void";
+			fwrite($file,"MIDIinput\t".$i."\t".$MIDIinput[$i]."\t".$MIDIinputname[$i]."\t".$MIDIinputcomment[$i]."\n");
 			if(isset($inputFilters[$i])) fwrite($file,"MIDIinputFilter\t".$i."\t".$inputFilters[$i]."\n");
 			if(isset($outputFilters[$i])) fwrite($file,"MIDIoutputFilter\t".$i."\t".$outputFilters[$i]."\n");
 			}
@@ -3118,30 +3127,46 @@ function filter_explanation() {
 	}
 
 function display_midi_ports($filename) {
-	global $MIDIoutput, $MIDIoutputname, $MIDIinput, $MIDIinputname, $NumberMIDIinputs, $NumberMIDIoutputs;
+	global $MIDIoutput, $MIDIoutputname, $MIDIoutputcomment, $MIDIinput, $MIDIinputname, $MIDIinputcomment, $NumberMIDIinputs, $NumberMIDIoutputs, $url_this_page;
 	$midiport = read_midiressources($filename);
 	if(isset($_POST['create_input'])) {
-		echo "<p id=\"timespan\" style=\"color:red;\">Created an input!</p>";
-		$MIDIinput[$NumberMIDIinputs] = -1;
-		$MIDIinputname[$NumberMIDIinputs] = '';
-		$NumberMIDIinputs++;
+		if($NumberMIDIinputs > 31) {
+			echo "<p id=\"timespan2\" style=\"color:red;\">You can't have more than 32 inputs!</p>";
+			}
+		else {
+			echo "<p id=\"timespan2\" style=\"color:red;\">Created an input!</p>";
+			$MIDIinput[$NumberMIDIinputs] = -1;
+			$MIDIinputname[$NumberMIDIinputs] = "new input";
+			$MIDIinputcomment[$NumberMIDIinputs] = "";
+			$NumberMIDIinputs++;
+			}
 		}
 	echo "<input type=\"hidden\" name=\"NumberMIDIinputs\" value=\"".$NumberMIDIinputs."\">";
 	echo "<input type=\"hidden\" name=\"NumberMIDIoutputs\" value=\"".$NumberMIDIoutputs."\">";
 	for($i = 0; $i < $NumberMIDIoutputs; $i++) {
 		if($MIDIoutput[$i] == -1) $value = '';
 		else $value = $MIDIoutput[$i];
-		echo "MIDI output&nbsp;&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutput_".$i."\" size=\"3\" value=\"".$value."\">&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutputname_".$i."\" size=\"25\" value=\"".$MIDIoutputname[$i]."\"><br /><br />";
+		if(!isset($MIDIoutputcomment[$i]) OR $MIDIoutputcomment[$i] == "void") $comment = '';
+		else $comment = $MIDIoutputcomment[$i];
+		echo "MIDI output&nbsp;&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutput_".$i."\" size=\"2\" value=\"".$value."\">";
+		echo "&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutputname_".$i."\" size=\"20\" value=\"".$MIDIoutputname[$i]."\">";
+		echo "&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutputcomment_".$i."\" size=\"20\" value=\"".$comment."\">";
+		echo "<br /><br />";
 		}
 	for($i = 0; $i < $NumberMIDIinputs; $i++) {
 		if($MIDIinput[$i] == -1) $value = '';
 		else $value = $MIDIinput[$i];
-		echo "MIDI input&nbsp;&nbsp;&nbsp;&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIinput_".$i."\" size=\"3\" value=\"".$value."\">&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIinputname_".$i."\" size=\"25\" value=\"".$MIDIinputname[$i]."\">";
-		echo "&nbsp;<button style=\"background-color:aquamarine; border-radius: 6px;\" onclick=\"toggledisplay(".$i."); return false;\">filter</button>";
+		if(!isset($MIDIinputcomment[$i]) OR $MIDIinputcomment[$i] == "void") $comment = '';
+		else $comment = $MIDIinputcomment[$i];
+		echo "MIDI input&nbsp;&nbsp;&nbsp;&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIinput_".$i."\" size=\"2\" value=\"".$value."\">";
+		echo "&nbsp;<input type=\"text\" style=\"margin-bottom:6px;\" onchange=\"tellsave()\" name=\"MIDIinputname_".$i."\" size=\"20\" value=\"".$MIDIinputname[$i]."\">";
+		echo "&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIinputcomment_".$i."\" size=\"20\" value=\"".$comment."\">";
+		echo "&nbsp;<button style=\"background-color:azure; border-radius: 6px;\" onclick=\"toggledisplay(".$i."); return false;\">FILTER</button>";
 		filter_form($i);
 		echo "<br />";
 		}
-	echo "<input style=\"float:right; color:DarkBlue; backgroundsave_-color:yellow;\" type=\"submit\" name=\"create_input\" value=\"Add an input\">";
+	echo "<input style=\"float:right; color:DarkBlue; backgroundsave_-color:yellow;\" onclick=\"tellsave()\" type=\"submit\" name=\"create_input\" value=\"Add an input\">";
+	echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savethisfile\" value=\"SAVE\">";
 	return;
 	}
 ?>

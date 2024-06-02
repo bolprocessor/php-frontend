@@ -28,7 +28,7 @@ if(isset($_POST['reload'])) {
 require_once("_header.php");
 
 $url = "index.php?path=".urlencode($current_directory);
-echo "<p>Workspace = <input style=\"background-color:yellow;\" name=\"workspace\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$url."','_self');\" value=\"".$current_directory."\">";
+echo "<p>Workspace = <input style=\"background-color:azure;\" name=\"workspace\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$url."','_self');\" value=\"".$current_directory."\">";
 
 echo link_to_help();
 
@@ -1403,8 +1403,7 @@ else {
 	display_midi_ports($filename);
 	}
 read_midiressources($filename);
-if($file_format == "rtmidi") echo "<br /><br /><i>Delete the name if you change a number!</i>";
-echo "<br />➡ <i>After changing these settings, click SAVE…</i>";
+if($file_format == "rtmidi") echo " 👉 Delete the name if you change a number!";
 echo "</td>";
 echo "<td><p style=\"text-align:left;\">";
 echo "<input type=\"radio\" name=\"file_format\" value=\"rtmidi\"";
@@ -1474,7 +1473,7 @@ if($error_mssg <> '') {
 if(intval($note_convention) <> intval($new_convention) AND $new_convention <> '')
 	echo "<p><font color=\"red\">➡</font> WARNING: Note convention should be set to <font color=\"red\">‘".ucfirst(note_convention(intval($new_convention)))."’</font> in the <font color=\"blue\">‘".$settings_file."’</font> settings file</p>";
 
-echo "<p><button style=\"background-color:aquamarine; border-radius: 6px;\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button></p>";
+echo "<p><button style=\"background-color:yellow; border-radius: 6px; font-size:large;\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button></p>";
 echo "<table style=\"background-color:GhostWhite;\" border=\"0\"><tr>";
 echo "<td style=\"background-color:cornsilk;\">";
 

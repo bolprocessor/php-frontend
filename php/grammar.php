@@ -56,7 +56,7 @@ require_once("_header.php");
 $temp_midi_ressources = $temp_dir."trace_".session_id()."_".$filename."_";
 
 $url = "index.php?path=".urlencode($current_directory);
-echo "<p>Workspace = <input style=\"background-color:yellow;\" name=\"workspace\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$url."','_self');\" value=\"".$current_directory."\">";
+echo "<p>Workspace = <input style=\"background-color:azure;\" name=\"workspace\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$url."','_self');\" value=\"".$current_directory."\">";
 // echo "&nbsp;&nbsp;session_id = ".session_id();
 
 $hide = $need_to_save = FALSE;
@@ -278,7 +278,7 @@ if(isset($_POST['compilegrammar'])) {
 			}
 		else $command .= " -cs ".$dir_csound_resources.$csound_file;
 		}
-	$command .= " --traceout ".$tracefile;
+	if(isset($tracefile)) $command .= " --traceout ".$tracefile;
 	echo "<p style=\"color:red;\" id=\"timespan\"><small>".$command."</small></p>";
 	$no_error = FALSE;
 	$o = send_to_console($command);
@@ -402,10 +402,9 @@ else {
 	display_midi_ports($filename);
 	}
 read_midiressources($filename);
-if($file_format == "rtmidi") echo "<br /><br /><i>Delete the name if you change a number!</i>";
-echo "<br />➡ <i>After changing these settings, click SAVE…</i>";
+if($file_format == "rtmidi") echo " 👉 Delete the name if you change a number!";
 echo "</td>";
-echo "<td><p style=\"text-align:left;\">";
+echo "<td>";
 if($file_format == '') {
 	$file_format = "rtmidi";
 	save_settings2("grammar_file_format",$filename,$file_format);
@@ -427,11 +426,10 @@ if(file_exists("csound_version.txt")) {
 echo "<br />&nbsp;&nbsp;&nbsp;";
 if($file_format == "rtmidi") echo "<input id=\"refresh\" style=\"background-color:yellow; display:none;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"reload\" value=\"REFRESH\">&nbsp;";
 echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savethisfile\" value=\"SAVE\">";
-echo "</p></td>";
+echo "</td>";
 echo "<td id=\"hideshow\" style=\"text-align:right; vertical-align:middle;\" rowspan=\"2\">";
 echo "<input type=\"hidden\" name=\"settings_file\" value=\"".$settings_file."\">";
 echo "<input type=\"hidden\" name=\"csound_file\" value=\"".$csound_file."\">";
-echo "<input style=\"background-color:azure;\" type=\"submit\" onclick=\"clearsave();\" name=\"compilegrammar\" value=\"COMPILE GRAMMAR\"><br /><br />";
 echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"><br /><br />";
 
 $error = FALSE;
@@ -689,19 +687,21 @@ echo "<input type=\"hidden\" name=\"alphabet_file\" value=\"".$alphabet_file."\"
 
 echo "<span  id=\"topedit\">&nbsp;</span>";
 
-echo "<button style=\"background-color:aquamarine; border-radius: 6px;\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button><p></p>";
+echo "<button style=\"background-color:yellow; border-radius: 6px; font-size:large;\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button><p></p>";
 
 find_replace_form();
 echo "<p><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" onclick=\"clearsave();\" name=\"savethisfile\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".$filename."’\">";
 if((file_exists($output.SLASH.$default_output_name.".wav") OR file_exists($output.SLASH.$default_output_name.".mid") OR file_exists($output.SLASH.$default_output_name.".html") OR file_exists($output.SLASH.$default_output_name.".sco")) AND file_exists($result_file)) {
 	echo "&nbsp;&nbsp;&nbsp;<input style=\"color:DarkBlue; background-color:azure; font-size:large;\" onclick=\"window.open('".$result_file."','result','width=800,height=600,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Show latests results\">";
 	}
+echo "&nbsp;<input style=\"background-color:azure; font-size:large;\" type=\"submit\" onclick=\"clearsave();\" name=\"compilegrammar\" value=\"COMPILE GRAMMAR\">";
 echo "&nbsp;<input onmouseover=\"checksaved();\" onclick=\"if(checksaved()) {".$refresh_instruction." window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)";
 if($error) {
 	echo " - disabled because of missing files\"";
 	echo " disabled style=\"background-color:azure; box-shadow: none; font-size:large;\"";
 	}
 else echo "\" style=\"color:DarkBlue; background-color:Aquamarine; font-size:large;\"";
+echo ">";
 echo "</p>";
 
 $content = do_replace($content);

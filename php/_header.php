@@ -38,13 +38,13 @@ echo "</script>\n";
 echo "<script>\n";
 echo "setTimeout(function() {
     $('#timespan2').fadeOut('fast');
-	}, 4000);\n";
+	}, 3000);\n";
 echo "</script>\n";
 
 echo "<script>\n";
 echo "setTimeout(function() {
     $('#timespan3').fadeOut('fast');
-	}, 4000);\n";
+	}, 3000);\n";
 echo "</script>\n";
 
 echo "<script>\n";
