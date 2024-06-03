@@ -21,6 +21,7 @@ $current_directory = str_replace(SLASH.$filename,'',$file);
 save_settings("last_directory",$current_directory);
 
 if(isset($_POST['reload'])) {
+	@unlink($refresh_file);
     header("Location: ".$url_this_page);
     exit();	
 	}
@@ -1168,6 +1169,14 @@ if(isset($_POST['apply_changes_instructions'])) {
 	$need_to_save = TRUE;
 	}
 
+$refresh_file = $temp_dir."trace_".session_id()."_".$filename."_midiport_refresh";
+echo $refresh_file."<br />";
+if(isset($_POST['savemidiport'])) {
+	save_midiressources($filename);
+	echo "<span id=\"timespan\" style=\"color:red; float:right;\">&nbsp;…&nbsp;Saved “".$filename."_midiport” file…</span>";
+	@unlink($refresh_file);
+	}
+
 if($need_to_save OR isset($_POST['savethisfile'])) {
 	echo "<p id=\"timespan\" style=\"color:red; float:right;\">Saved ‘".$filename."’file…</p>";
 	if(isset($_POST['thistext'])) $content = $_POST['thistext'];
@@ -1178,7 +1187,11 @@ if($need_to_save OR isset($_POST['savethisfile'])) {
 	$content = preg_replace("/ +/u",' ',$content);
 	save($this_file,$filename,$top_header,$content);
 	if($file_format == "rtmidi") {
-		save_midiressources($filename);
+		if(file_exists($refresh_file)) {
+			read_midiressources($filename);
+			@unlink($refresh_file);
+			}
+		else save_midiressources($filename);
 		}
 	}
 else read_midiressources($filename);
@@ -1417,7 +1430,7 @@ if(file_exists("csound_version.txt")) {
 	if($file_format == "csound") echo " checked";
 	echo ">CSOUND file";
 	}
-echo "<br /><br />&nbsp;&nbsp;&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savethisfile\" value=\"SAVE\">";
+echo "<br /><br />&nbsp;&nbsp;&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savethisfile\" value=\"SAVE format\">";
 if($file_format == "rtmidi") echo "&nbsp;<input id=\"refresh\" style=\"background-color:yellow; display:none;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"reload\" value=\"REFRESH\">";
 echo "</p>";
 echo "</td>";
@@ -1816,7 +1829,7 @@ if(!$hide) {
 		$n2 = substr_count($line_recoded,'}');
 		if($n1 > $n2) $error_mssg .= "• <font color=\"red\">This score contains ".($n1-$n2)." extra ‘{'</font><br />";
 		if($n2 > $n1) $error_mssg .= "• <font color=\"red\">This score contains ".($n2-$n1)." extra ‘}'</font><br />";
-		if($file_format == "rtmidi") $refresh_instruction = "document.getElementById('refresh').style.display = 'inline';";
+		if($file_format == "rtmidi" AND file_exists($refresh_file)) $refresh_instruction = "document.getElementById('refresh').style.display = 'inline';";
 		else $refresh_instruction = '';
 		if($error_mssg == '') {
 			echo "<input id=\"playButton\" style=\"color:DarkBlue; background-color:Aquamarine;\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) {".$refresh_instruction." window.open('".$link_play."','".$window_name_play."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" title=\"Play this polymetric expression\" value=\"PLAY\">&nbsp;";

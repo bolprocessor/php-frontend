@@ -46,7 +46,7 @@ if(isset($_POST['new_convention']))
 else $new_convention = '';
 
 if(isset($_POST['reload'])) {
-    header("Location: $url");
+	@unlink($refresh_file);
     header("Location: ".$url_this_page);
     exit();	
 	}
@@ -180,6 +180,13 @@ if(isset($_POST['apply_changes_instructions'])) {
 	$need_to_save = TRUE;
 	}
 
+$refresh_file = $temp_dir."trace_".session_id()."_".$filename."_midiport_refresh";
+if(isset($_POST['savemidiport'])) {
+	save_midiressources($filename);
+	echo "<span id=\"timespan\" style=\"color:red; float:right;\">&nbsp;…&nbsp;Saved “".$filename."_midiport” file…</span>";
+	@unlink($refresh_file);
+	}
+
 if($need_to_save OR isset($_POST['savethisfile']) OR isset($_POST['compilegrammar'])) {
 	if(isset($_POST['savethisfile'])) echo "<span id=\"timespan\" style=\"color:red; float:right;\">&nbsp;…&nbsp;Saved “".$filename."” file…</span>";
 	$content = $_POST['thistext'];
@@ -192,7 +199,11 @@ if($need_to_save OR isset($_POST['savethisfile']) OR isset($_POST['compilegramma
 	$content = preg_replace("/ +/u",' ',$content);
 	save($this_file,$filename,$top_header,$content);
 	if($file_format == "rtmidi") {
-		save_midiressources($filename);
+		if(file_exists($refresh_file)) {
+			read_midiressources($filename);
+			@unlink($refresh_file);
+			}
+		else save_midiressources($filename);
 		}
 	}
 else read_midiressources($filename);
@@ -278,7 +289,8 @@ if(isset($_POST['compilegrammar'])) {
 			}
 		else $command .= " -cs ".$dir_csound_resources.$csound_file;
 		}
-	if(isset($tracefile)) $command .= " --traceout ".$tracefile;
+	$tracefile = $temp_dir."trace_".session_id()."_".$filename.".txt";
+	$command .= " --traceout ".$tracefile;
 	echo "<p style=\"color:red;\" id=\"timespan\"><small>".$command."</small></p>";
 	$no_error = FALSE;
 	$o = send_to_console($command);
@@ -291,9 +303,10 @@ if(isset($_POST['compilegrammar'])) {
 			}
 		}
 	if(!$no_error) {
-		$trace_link = clean_up_file_to_html($dir.$tracefile);
-		if($trace_link == '') echo "<p><font color=\"red\">Errors found, but no trace file has been created.</font></p>";
-		else echo "<p><font color=\"red\">Errors found! Open the </font> <a onclick=\"window.open('".$trace_link."','trace','width=800,height=800'); return false;\" href=\"".$trace_link."\">trace file</a>!</p>";
+		if(file_exists($dir.$tracefile)) $trace_link = clean_up_file_to_html($dir.$tracefile);
+		else $trace_link = '';
+		if($trace_link == '') echo "<p><big>👉 <font color=\"red\">Errors found, but no trace file has been created.</font></big></p>";
+		else echo "<p><big>👉 <font color=\"red\">Errors found! Open the </font> <a onclick=\"window.open('".$trace_link."','trace','width=800,height=800'); return false;\" href=\"".$trace_link."\">trace file</a>!</big></p>";
 		}
 	else echo "<p><font color=\"red\">➡</font> <font color=\"blue\">No error.</font></p>";
 	// Now reformat the grammar
@@ -425,7 +438,7 @@ if(file_exists("csound_version.txt")) {
 	}
 echo "<br />&nbsp;&nbsp;&nbsp;";
 if($file_format == "rtmidi") echo "<input id=\"refresh\" style=\"background-color:yellow; display:none;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"reload\" value=\"REFRESH\">&nbsp;";
-echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savethisfile\" value=\"SAVE\">";
+echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savethisfile\" value=\"SAVE format\">";
 echo "</td>";
 echo "<td id=\"hideshow\" style=\"text-align:right; vertical-align:middle;\" rowspan=\"2\">";
 echo "<input type=\"hidden\" name=\"settings_file\" value=\"".$settings_file."\">";
@@ -498,7 +511,7 @@ if($trace_production > 0)
 $link_produce .= "&here=".urlencode($here);
 $window_name = window_name($filename);
 echo "<b>then…</b>";
-if($file_format == "rtmidi") $refresh_instruction = "document.getElementById('refresh').style.display = 'inline';";
+if($file_format == "rtmidi" AND file_exists($refresh_file)) $refresh_instruction = "document.getElementById('refresh').style.display = 'inline';";
 else $refresh_instruction = '';
 echo "&nbsp;<input onmouseover=\"checksaved();\" onclick=\"if(checksaved()) {".$refresh_instruction." window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)\"";
 if($error) echo " disabled style=\"background-color:azure; box-shadow: none;\"";

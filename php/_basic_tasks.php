@@ -152,7 +152,7 @@ if($test) {
 	}
 
 $html_help_file = "BP2_help.html";
-if(isset($filename)  AND $filename <> "Compilation") $help = compile_help($text_help_file,$html_help_file);
+if(!(isset($filename)  AND $filename == "Compilation")) $help = compile_help($text_help_file,$html_help_file);
 $top_header = "// Bol Processor BP3 compatible with version BP2.9.8";
 
 $KeyString = "key#";
@@ -3166,7 +3166,7 @@ function display_midi_ports($filename) {
 		echo "<br />";
 		}
 	echo "<input style=\"float:right; color:DarkBlue; backgroundsave_-color:yellow;\" onclick=\"tellsave()\" type=\"submit\" name=\"create_input\" value=\"Add an input\">";
-	echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savethisfile\" value=\"SAVE\">";
+	echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savemidiport\" value=\"SAVE ports\">";
 	return;
 	}
 ?>

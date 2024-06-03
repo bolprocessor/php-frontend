@@ -488,6 +488,7 @@ foreach($dircontent as $thisfile) {
 		$name_mode = $type_of_file['name_mode'];
 		$prefix = $type_of_file['prefix'];
 		$extension = $type_of_file['extension'];
+		if($extension == "mid" OR  $extension == "txt" OR $extension == "mp3" OR $extension == "zip" OR $extension == "aif" OR $extension == "pdf" OR $extension == "php") continue;
 	//	echo " prefix = ".$prefix." thisfile = ".$thisfile."<br />";
 		}
 	if($path <> $csound_resources AND $path <> $trash_folder AND ($type == "csound" OR $type == "csorchestra")) {
@@ -582,7 +583,7 @@ foreach($dircontent as $thisfile) {
 				if($type == "grammar") echo "<font color=\"red\">";
 				else if($type == "data") echo "<font color=\"gold\">";
 				else if($type == "script") echo "<font color=\"brown\">";
-				else if($type <> "settings") echo "<font color=\"lightgreen\">";
+				else if($type <> "settings") echo "<font color=\"asparagus\">";
 				echo $type."</font>";
 				$time_saved = filemtime($dir.SLASH.$thisfile);
 				echo "&nbsp;<small>➡&nbsp;".gmdate('Y-m-d H\hi',$time_saved)."</small>";
