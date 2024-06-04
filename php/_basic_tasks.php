@@ -3055,9 +3055,9 @@ function save_midiport($thisfilename,$inputFilters,$outputFilters) {
 	}
 
 function filter_form($i) {
-	global $NoteOffFilter, $NoteOnFilter, $KeyPressureFilter, $ControlTypeFilter, $ProgramTypeFilter, $ChannelPressureFilter, $PitchBendFilter, $SysExFilter, $TimeCodeFilter, $SongPosFilter, $SongSelFilter, $TuneTypeFilter, $EndSysExFilter, $ClockTypeFilter, $StartTypeFilter, $ContTypeFilter, $ActiveSenseFilter, $ResetFilter;
+	global $NoteOffFilter, $NoteOnFilter, $KeyPressureFilter, $ControlTypeFilter, $ProgramTypeFilter, $ChannelPressureFilter, $PitchBendFilter, $SysExFilter, $TimeCodeFilter, $SongPosFilter, $SongSelFilter, $TuneTypeFilter, $EndSysExFilter, $ClockTypeFilter, $StartTypeFilter, $ContTypeFilter, $ActiveSenseFilter, $ResetFilter, $MIDIinput;
 	echo "<div id=\"showhide".$i."\"  style=\"background-color: Snow; width:300px;\">";
-	echo "<p style=\"margin-left:12px;\"><b>Input filter ".($i + 1).":</b></p>";
+	echo "<p style=\"margin-left:12px;\"><b>Input filter ".$MIDIinput[$i].":</b></p>";
 	echo "<p style=\"margin-left:12px;\">0 = reject<br />1 = treat<br />2 = treat + pass</p>";
 	echo "<table class=\"no-border-spacing\">";
 	echo "<tr>";
@@ -3134,11 +3134,23 @@ function display_midi_ports($filename) {
 			echo "<p id=\"timespan2\" style=\"color:red;\">You can't have more than 32 inputs!</p>";
 			}
 		else {
-			echo "<p id=\"timespan2\" style=\"color:red;\">Created an input!</p>";
+		//	echo "<p id=\"timespan2\" style=\"color:red;\">Created an input!</p>";
 			$MIDIinput[$NumberMIDIinputs] = -1;
 			$MIDIinputname[$NumberMIDIinputs] = "new input";
 			$MIDIinputcomment[$NumberMIDIinputs] = "";
 			$NumberMIDIinputs++;
+			}
+		}
+	if(isset($_POST['create_output'])) {
+		if($NumberMIDIoutputs > 31) {
+			echo "<p id=\"timespan2\" style=\"color:red;\">You can't have more than 32 inputs!</p>";
+			}
+		else {
+		//	echo "<p id=\"timespan2\" style=\"color:red;\">Created an output!</p>";
+			$MIDIoutput[$NumberMIDIoutputs] = -1;
+			$MIDIoutputname[$NumberMIDIoutputs] = "new output";
+			$MIDIoutputcomment[$NumberMIDIoutputs] = "";
+			$NumberMIDIoutputs++;
 			}
 		}
 	echo "<input type=\"hidden\" name=\"NumberMIDIinputs\" value=\"".$NumberMIDIinputs."\">";
@@ -3151,8 +3163,11 @@ function display_midi_ports($filename) {
 		echo "MIDI output&nbsp;&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutput_".$i."\" size=\"2\" value=\"".$value."\">";
 		echo "&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutputname_".$i."\" size=\"20\" value=\"".$MIDIoutputname[$i]."\">";
 		echo "&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutputcomment_".$i."\" size=\"20\" value=\"".$comment."\">";
-		echo "<br /><br />";
+		echo "<br />";
 		}
+	echo "<input style=\"float:right; color:DarkBlue; backgroundsave_-color:yellow;\" onclick=\"tellsave()\" type=\"submit\" name=\"create_output\" value=\"Add an output\"><br />";
+	echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savemidiport\" value=\"SAVE ports\">";
+	echo " 👉 Delete the name if you change a number!<br /><br />";
 	for($i = 0; $i < $NumberMIDIinputs; $i++) {
 		if($MIDIinput[$i] == -1) $value = '';
 		else $value = $MIDIinput[$i];
@@ -3166,7 +3181,6 @@ function display_midi_ports($filename) {
 		echo "<br />";
 		}
 	echo "<input style=\"float:right; color:DarkBlue; backgroundsave_-color:yellow;\" onclick=\"tellsave()\" type=\"submit\" name=\"create_input\" value=\"Add an input\">";
-	echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savemidiport\" value=\"SAVE ports\">";
 	return;
 	}
 ?>

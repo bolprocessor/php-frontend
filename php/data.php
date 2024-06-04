@@ -1416,7 +1416,7 @@ else {
 	display_midi_ports($filename);
 	}
 read_midiressources($filename);
-if($file_format == "rtmidi") echo " 👉 Delete the name if you change a number!";
+// if($file_format == "rtmidi") echo " 👉 Delete the name if you change a number!";
 echo "</td>";
 echo "<td><p style=\"text-align:left;\">";
 echo "<input type=\"radio\" name=\"file_format\" value=\"rtmidi\"";
