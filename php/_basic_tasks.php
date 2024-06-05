@@ -3117,6 +3117,10 @@ function save_midiressources($filename) {
 		$outFilters[$i] = str_pad($outFilters[$i], 18, '0', STR_PAD_LEFT);
 		if($NoteOffFilter_out <> $NoteOnFilter_out)
 			echo "<p id=\"refresh\" style=\"color:red;\">👉  Warning: NoteOn and NoteOff should have the same status in the filter of MIDI output ".$MIDIoutput[$i]."</p>";
+		if($SystemExclusiveFilter_out <> $EndSysExFilter_out)
+			echo "<p id=\"refresh\" style=\"color:red;\">👉  Warning: SystemExclusive and EndSysEx should have the same status in the filter of MIDI output ".$MIDIoutput[$i]."</p>";
+			if($StartFilter_out <> $ContinueFilter_out)
+				echo "<p id=\"refresh\" style=\"color:red;\">👉  Warning: Start and Continue should have the same status in the filter of MIDI output ".$MIDIoutput[$i]."</p>";
 		}
 	save_midiport($temp_midi_ressources."midiport",$acceptFilters,$passFilters,$outFilters);
 	save_midiport($dir_midi_resources.$filename."_midiport",$acceptFilters,$passFilters,$outFilters);
@@ -3155,7 +3159,7 @@ function save_midiport($thisfilename,$acceptFilters,$passFilters,$outFilters) {
 function filter_form_input($i) {
 	global $NoteOffFilter_in, $NoteOnFilter_in, $KeyPressureFilter_in, $ControlChangeFilter_in, $ProgramChangeFilter_in, $ChannelPressureFilter_in, $PitchBendFilter_in, $SystemExclusiveFilter_in, $TimeCodeFilter_in, $SongPositionFilter_in, $SongSelectFilter_in, $TuneRequestFilter_in, $EndSysExFilter_in, $TimingClockFilter_in, $StartFilter_in, $ContinueFilter_in, $ActiveSensingFilter_in, $SystemResetFilter_in, $MIDIinput;
 	echo "<div id=\"showhide_input".$i."\"  style=\"background-color: Snow; width:300px;\">";
-	echo "<p style=\"margin-left:12px;\"><b>Input filter ".$MIDIinput[$i]."</b></p>";
+	echo "<p style=\"margin-left:12px;\"><b>Filter MIDI input ".$MIDIinput[$i]."</b></p>";
 	echo "<p style=\"margin-left:12px;\">0 = reject<br />1 = treat<br />2 = treat + pass</p>";
 	echo "<table class=\"no-border-spacing\">";
 	echo "<tr>";
@@ -3193,8 +3197,8 @@ function filter_form_output($i) {
 	global $NoteOffFilter_out, $NoteOnFilter_out, $KeyPressureFilter_out, $ControlChangeFilter_out, $ProgramChangeFilter_out, $ChannelPressureFilter_out, $PitchBendFilter_out, $SystemExclusiveFilter_out, $TimeCodeFilter_out, $SongPositionFilter_out, $SongSelectFilter_out, $TuneRequestFilter_out, $EndSysExFilter_out, $TimingClockFilter_out, $StartFilter_out, $ContinueFilter_out, $ActiveSensingFilter_out, $SystemResetFilter_out;
 	global $url_this_page, $MIDIoutput;
 	echo "<div id=\"showhide_output".$i."\"  style=\"background-color: Snow; width:300px;\">";
-	echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savemidiport\" value=\"SAVE ports\">";
-	echo "<p style=\"margin-left:12px;\"><b>Output filter ".$MIDIoutput[$i]."</b></p>";
+	echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savemidiport\" value=\"SAVE MIDI ports\">";
+	echo "<p style=\"margin-left:12px;\"><b>Filter MIDI output ".$MIDIoutput[$i]."</b></p>";
 	echo "<table style=\"background-color:azure;\">";
 	echo "<tr>";
 	echo "<td>";
@@ -3355,8 +3359,8 @@ function display_midi_ports($filename) {
 		echo "<br />";
 		}
 	echo "<input style=\"float:right; color:DarkBlue; backgroundsave_-color:yellow;\" onclick=\"tellsave()\" type=\"submit\" name=\"create_output\" value=\"Add an output\"><br />";
-	echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savemidiport\" value=\"SAVE ports\">";
-	echo " 👉 Delete the name if you change a number!<br /><br />";
+	echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savemidiport\" value=\"SAVE MIDI ports\">";
+	echo " 👉 Delete names if changing numbers<br /><br />";
 	for($i = 0; $i < $NumberMIDIinputs; $i++) {
 		if($MIDIinput[$i] == -1) $value = '';
 		else $value = $MIDIinput[$i];

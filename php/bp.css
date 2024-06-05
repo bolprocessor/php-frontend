@@ -211,5 +211,5 @@ div.horizontalgap {
 	50% { opacity: 0; }        /* Fully transparent */
     }
 #refresh {
-    animation: flash 1s infinite; /* Animation name, duration, and repeat */
+    animation: flash 2s infinite; /* Animation name, duration, and repeat */
     }

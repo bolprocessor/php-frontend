@@ -647,8 +647,8 @@ if($csound_file <> '') {
 		if(($max_scales = count($list_of_tonal_scales)) > 0) {
 			if($max_scales > 1)  {
 				$i = 0;
-				echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains definitions of tonal scales&nbsp;<font color=\"red\">➡</font>&nbsp;<button style=\"background-color:aquamarine; border-radius: 6px; font-size:large;\" onclick=\"toggledisplay(".$i."); return false;\">Show/hide tonal scales</button>";
-				echo "<div id=\"showhide0\"  style=\"border-radius: 15px; padding:6px;\"><br />";
+				echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains definitions of tonal scales&nbsp;<font color=\"red\">➡</font>&nbsp;<button style=\"background-color:aquamarine; border-radius: 6px; font-size:large;\" onclick=\"toggledisplay_input(".$i."); return false;\">Show/hide tonal scales</button>";
+				echo "<div id=\"showhide_input0\"  style=\"border-radius: 15px; padding:6px;\"><br />";
 				}
 			else {
 				echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains the definition of tonal scale:";
