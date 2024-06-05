@@ -1170,7 +1170,6 @@ if(isset($_POST['apply_changes_instructions'])) {
 	}
 
 $refresh_file = $temp_dir."trace_".session_id()."_".$filename."_midiport_refresh";
-echo $refresh_file."<br />";
 if(isset($_POST['savemidiport'])) {
 	save_midiressources($filename);
 	echo "<span id=\"timespan\" style=\"color:red; float:right;\">&nbsp;…&nbsp;Saved “".$filename."_midiport” file…</span>";

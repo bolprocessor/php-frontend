@@ -84,27 +84,38 @@ echo "$(document).ready(function() {
 echo "</script>\n";
 
 echo "<script>\n";
-echo "function settoggledisplay(i) {
-		var x = document.getElementById('showhide' + i);
+echo "function settoggledisplay_input(i) {
+		var x = document.getElementById('showhide_input' + i);
 		var y = document.getElementById(\"hideshow\");
 	    if(x) {
 	      x.className='hidden'; }
       if(y) {
         y.className='unhidden'; }
       }\n";
+echo "function settoggledisplay_output(i) {
+    var z = document.getElementById('showhide_output' + i);
+    if(z) {
+      z.className='hidden'; }
+      }\n";
 echo "function toggleAllDisplays(imax) {
       for (var i = 0; i <= imax; i++) {
-          settoggledisplay(i);
+          settoggledisplay_input(i);
+          settoggledisplay_output(i);
       }
     }\n";
-echo "function toggledisplay(i) {
-	    var x = document.getElementById('showhide' + i);
+echo "function toggledisplay_input(i) {
+	    var x = document.getElementById('showhide_input' + i);
       var y = document.getElementById(\"hideshow\");
 	    if(x) {
 	      x.className=(x.className=='hidden')?'unhidden':'hidden'; }
       if(y) {
         y.className=(y.className=='hidden')?'unhidden':'hidden'; }
 	  }\n";
+echo "function toggledisplay_output(i) {
+      var z = document.getElementById('showhide_output' + i);
+      if(z) {
+        z.className=(z.className=='hidden')?'unhidden':'hidden'; }
+    }\n";
 echo "function settogglesearch() {
       var z = document.getElementById(\"search\");
       if(z) {

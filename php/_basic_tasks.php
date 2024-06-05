@@ -59,7 +59,7 @@ $MIDIinputname[0] = $MIDIoutputname[0] = $MIDIoutputcomment[0] = $MIDIinputcomme
 $NumberMIDIinputs = $NumberMIDIoutputs = 1;
 if(isset($_POST['NumberMIDIinputs'])) $NumberMIDIinputs = $_POST['NumberMIDIinputs'];
 if(isset($_POST['NumberMIDIoutputs'])) $NumberMIDIoutputs = $_POST['NumberMIDIoutputs'];
-$NoteOffFilter = $NoteOnFilter = $KeyPressureFilter = $ControlTypeFilter = $ProgramTypeFilter = $ChannelPressureFilter = $PitchBendFilter = $SysExFilter = $TimeCodeFilter = $SongPosFilter = $SongSelFilter = $TuneTypeFilter = $EndSysExFilter = $ClockTypeFilter = $StartTypeFilter = $ContTypeFilter = $ActiveSenseFilter = $ResetFilter = array();
+$NoteOffFilter = $NoteOnFilter = $KeyPressureFilter = $ControlTypeFilter = $ProgramChangeFilter = $ChannelPressureFilter = $PitchBendFilter = $SystemExclusiveFilter = $TimeCodeFilter = $SongPositionFilter = $SongSelectFilter = $TuneRequestFilter = $EndSysExFilter = $TimingClockFilter = $StartFilter = $ContinueFilter = $ActiveSensingFilter = $SystemResetFilter = array();
 
 if(!file_exists($bp_application_path.$csound_resources)) {
 	mkdir($bp_application_path.$csound_resources);
@@ -2851,13 +2851,13 @@ function ok_output_location($folder) {
 
 function read_midiport($thefile) {
 	global $MIDIinput,$MIDIoutput,$MIDIinputname,$MIDIinputcomment,$MIDIoutputname,$MIDIoutputcomment; // These are tables!
-	global $MIDIinputFilter, $MIDIoutputFilter; // These are tables!
+	global $MIDIacceptFilter, $MIDIpassFilter, $MIDIoutFilter, $MIDIchannelFilter; // These are tables!
 	global $NumberMIDIinputs, $NumberMIDIoutputs;
 	$result['found'] = false;
 	if(file_exists($thefile)) {
 		$NumberMIDIinputs = $NumberMIDIoutputs = 0;
 		$file = fopen($thefile,'r');
-		$found = 0;
+		$foundin = $foundout = 0;
 		if($file) {
 			while(!feof($file)) {
 				$line = fgets($file);
@@ -2881,25 +2881,42 @@ function read_midiport($thefile) {
 						if(count($table) > 4) $MIDIoutputcomment[$i] = trim($table[4]);
 						}
 					}
-				else if(trim($table[0]) == "MIDIinputFilter") {
+				else if(trim($table[0]) == "MIDIacceptFilter") {
 					if(ctype_digit($table[1])) {
 						$i = trim($table[1]);
-						if(count($table) > 2) $MIDIinputFilter[$i] = trim($table[2]);
-						$found++;
+						if(count($table) > 2) $MIDIacceptFilter[$i] = trim($table[2]);
+						$foundin++;
 						}
 					}
-				else if(trim($table[0]) == "MIDIoutputFilter") {
+				else if(trim($table[0]) == "MIDIpassFilter") {
 					if(ctype_digit($table[1])) {
 						$i = trim($table[1]);
-						if(count($table) > 2) $MIDIoutputFilter[$i] = trim($table[2]);
-						$found++;
+						if(count($table) > 2) $MIDIpassFilter[$i] = trim($table[2]);
+						$foundin++;
+						}
+					}
+				else if(trim($table[0]) == "MIDIoutFilter") {
+					if(ctype_digit($table[1])) {
+						$i = trim($table[1]);
+						if(count($table) > 2) $MIDIoutFilter[$i] = trim($table[2]);
+						$foundout++;
+						}
+					}
+				else if(trim($table[0]) == "MIDIchannelFilter") {
+					if(ctype_digit($table[1])) {
+						$i = trim($table[1]);
+						if(count($table) > 2) $MIDIchannelFilter[$i] = trim($table[2]);
+						$foundout++;
 						}
 					}
 				}
 			fclose($file);
 			if($NumberMIDIoutputs == 0) $NumberMIDIoutputs = 1;
-	//		echo $found." => MIDIinputFilter = ".$MIDIinputFilter[0]."<br />MIDIoutputFilter = ".$MIDIoutputFilter[0]."<br />";
-			if($found > 1) for($i = 0; $i < $NumberMIDIinputs; $i++) convert_midi_filter_to_params($i);
+			if($foundin > 1) for($i = 0; $i < $NumberMIDIinputs; $i++) convert_midi_input_filter_to_params($i);
+			if($foundout > 0) for($i = 0; $i < $NumberMIDIoutputs; $i++) {
+				convert_midi_output_filter_to_params($i);
+				convert_midi_channel_filter_to_params($i);
+				}
 			$result['found'] = true;
 			}
 		}
@@ -2907,7 +2924,7 @@ function read_midiport($thefile) {
 	}
 
 function read_midiressources() {
-	global $filename, $temp_midi_ressources, $MIDIinputFilter, $MIDIoutputFilter;
+	global $filename, $temp_midi_ressources, $MIDIacceptFilter, $MIDIpassFilter;
 	global $dir_midi_resources,$MIDIinput,$MIDIoutput,$MIDIinputname,$MIDIoutputname,$MIDIinputcomment,$MIDIoutputcomment;
 	
 	// First try to read  in the "temp" folder
@@ -2924,37 +2941,73 @@ function read_midiressources() {
 	return $result;
 	}
 
-function convert_midi_filter_to_params($i) {
-	global $NoteOffFilter, $NoteOnFilter, $KeyPressureFilter, $ControlTypeFilter, $ProgramTypeFilter, $ChannelPressureFilter, $PitchBendFilter, $SysExFilter, $TimeCodeFilter, $SongPosFilter, $SongSelFilter, $TuneTypeFilter, $EndSysExFilter, $ClockTypeFilter, $StartTypeFilter, $ContTypeFilter, $ActiveSenseFilter, $ResetFilter;
-	global $MIDIinputFilter, $MIDIoutputFilter;
+function convert_midi_input_filter_to_params($i) {
+	global $NoteOffFilter_in, $NoteOnFilter_in, $KeyPressureFilter_in, $ControlChangeFilter_in, $ProgramChangeFilter_in, $ChannelPressureFilter_in, $PitchBendFilter_in, $SystemExclusiveFilter_in, $TimeCodeFilter_in, $SongPositionFilter_in, $SongSelectFilter_in, $TuneRequestFilter_in, $EndSysExFilter_in, $TimingClockFilter_in, $StartFilter_in, $ContinueFilter_in, $ActiveSensingFilter_in, $SystemResetFilter_in;
+	global $MIDIacceptFilter, $MIDIpassFilter;
 
-	if(!isset($MIDIinputFilter[$i]) || !isset($MIDIoutputFilter[$i])) return;
-	$midiinputfilter = $MIDIinputFilter[$i];
-	$midioutputfilter = $MIDIoutputFilter[$i];
-	if(strlen($midiinputfilter) != 18 OR strlen($midioutputfilter) != 18) return;
-	$midiinputfilter = $midiinputfilter | $midioutputfilter; // Any event allowed to go out should be allowed to get in
-	$MIDIinputFilter[$i] = $midiinputfilter;
-	$MIDIoutputFilter[$i] = $midioutputfilter;
+	if(!isset($MIDIacceptFilter[$i]) || !isset($MIDIpassFilter[$i])) return;
+	$midiacceptfilter = $MIDIacceptFilter[$i];
+	$midipassfilter = $MIDIpassFilter[$i];
+	if(strlen($midiacceptfilter) != 18 OR strlen($midipassfilter) != 18) return;
 
-	$NoteOffFilter[$i] = $midiinputfilter[0] + $midioutputfilter[0];
-	$NoteOnFilter[$i] = $midiinputfilter[1] + $midioutputfilter[1];
-	$KeyPressureFilter[$i] = $midiinputfilter[2] + $midioutputfilter[2];
-	$ControlTypeFilter[$i] = $midiinputfilter[3] + $midioutputfilter[3];
-	$ProgramTypeFilter[$i] = $midiinputfilter[4] + $midioutputfilter[4];
-	$ChannelPressureFilter[$i] = $midiinputfilter[5] + $midioutputfilter[5];
-	$PitchBendFilter[$i] = $midiinputfilter[6] + $midioutputfilter[6];
-	$SysExFilter[$i] = $midiinputfilter[7] + $midioutputfilter[7];
-	$TimeCodeFilter[$i] = $midiinputfilter[8] + $midioutputfilter[8];
-	$SongPosFilter[$i] = $midiinputfilter[9] + $midioutputfilter[9];
-	$SongSelFilter[$i] = $midiinputfilter[10] + $midioutputfilter[10];
-	$TuneTypeFilter[$i] = $midiinputfilter[11] + $midioutputfilter[11];
-	$EndSysExFilter[$i] = $midiinputfilter[12] + $midioutputfilter[12];
-	$ClockTypeFilter[$i] = $midiinputfilter[13] + $midioutputfilter[13];
-	$StartTypeFilter[$i] = $midiinputfilter[14] + $midioutputfilter[14];
-	$ContTypeFilter[$i] = $midiinputfilter[15] + $midioutputfilter[15];
-	$ActiveSenseFilter[$i] = $midiinputfilter[16] + $midioutputfilter[16];
-	$ResetFilter[$i] = $midiinputfilter[17] + $midioutputfilter[17];
+	$midiacceptfilter = $midiacceptfilter | $midipassfilter; // Any event allowed to go out should be allowed to get in
+	$MIDIacceptFilter[$i] = $midiacceptfilter;
+	$MIDIpassFilter[$i] = $midipassfilter;
+
+	$NoteOffFilter_in[$i] = $midiacceptfilter[0] + $midipassfilter[0];
+	$NoteOnFilter_in[$i] = $midiacceptfilter[1] + $midipassfilter[1];
+	$KeyPressureFilter_in[$i] = $midiacceptfilter[2] + $midipassfilter[2];
+	$ControlChangeFilter_in[$i] = $midiacceptfilter[3] + $midipassfilter[3];
+	$ProgramChangeFilter_in[$i] = $midiacceptfilter[4] + $midipassfilter[4];
+	$ChannelPressureFilter_in[$i] = $midiacceptfilter[5] + $midipassfilter[5];
+	$PitchBendFilter_in[$i] = $midiacceptfilter[6] + $midipassfilter[6];
+	$SystemExclusiveFilter_in[$i] = $midiacceptfilter[7] + $midipassfilter[7];
+	$TimeCodeFilter_in[$i] = $midiacceptfilter[8] + $midipassfilter[8];
+	$SongPositionFilter_in[$i] = $midiacceptfilter[9] + $midipassfilter[9];
+	$SongSelectFilter_in[$i] = $midiacceptfilter[10] + $midipassfilter[10];
+	$TuneRequestFilter_in[$i] = $midiacceptfilter[11] + $midipassfilter[11];
+	$EndSysExFilter_in[$i] = $midiacceptfilter[12] + $midipassfilter[12];
+	$TimingClockFilter_in[$i] = $midiacceptfilter[13] + $midipassfilter[13];
+	$StartFilter_in[$i] = $midiacceptfilter[14] + $midipassfilter[14];
+	$ContinueFilter_in[$i] = $midiacceptfilter[15] + $midipassfilter[15];
+	$ActiveSensingFilter_in[$i] = $midiacceptfilter[16] + $midipassfilter[16];
+	$SystemResetFilter_in[$i] = $midiacceptfilter[17] + $midipassfilter[17];
 	return;
+	}
+
+function convert_midi_output_filter_to_params($i) {
+	global $NoteOffFilter_out, $NoteOnFilter_out, $KeyPressureFilter_out, $ControlChangeFilter_out, $ProgramChangeFilter_out, $ChannelPressureFilter_out, $PitchBendFilter_out, $SystemExclusiveFilter_out, $TimeCodeFilter_out, $SongPositionFilter_out, $SongSelectFilter_out, $TuneRequestFilter_out, $EndSysExFilter_out, $TimingClockFilter_out, $StartFilter_out, $ContinueFilter_out, $ActiveSensingFilter_out, $SystemResetFilter_out;
+	global $MIDIoutFilter;
+	if(!isset($MIDIoutFilter[$i])) return;
+	$midioutfilter = $MIDIoutFilter[$i];
+	if(strlen($midioutfilter) != 18 OR strlen($midioutfilter) != 18) return;
+	$NoteOffFilter_out[$i] = $midioutfilter[0];
+	$NoteOnFilter_out[$i] = $midioutfilter[1];
+	$KeyPressureFilter_out[$i] = $midioutfilter[2];
+	$ControlChangeFilter_out[$i] = $midioutfilter[3];
+	$ProgramChangeFilter_out[$i] = $midioutfilter[4];
+	$ChannelPressureFilter_out[$i] = $midioutfilter[5];
+	$PitchBendFilter_out[$i] = $midioutfilter[6];
+	$SystemExclusiveFilter_out[$i] = $midioutfilter[7];
+	$TimeCodeFilter_out[$i] = $midioutfilter[8];
+	$SongPositionFilter_out[$i] = $midioutfilter[9];
+	$SongSelectFilter_out[$i] = $midioutfilter[10];
+	$TuneRequestFilter_out[$i] = $midioutfilter[11];
+	$EndSysExFilter_out[$i] = $midioutfilter[12];
+	$TimingClockFilter_out[$i] = $midioutfilter[13];
+	$StartFilter_out[$i] = $midioutfilter[14];
+	$ContinueFilter_out[$i] = $midioutfilter[15];
+	$ActiveSensingFilter_out[$i] = $midioutfilter[16];
+	$SystemResetFilter_out[$i] = $midioutfilter[17];
+	return;
+	}
+
+function convert_midi_channel_filter_to_params($i) {
+	global $channel_pass, $MIDIchannelFilter;
+	for($channel = 1; $channel <= 16; $channel++) {
+		$channel_pass[$i][$channel] = $MIDIchannelFilter[$i][$channel - 1];
+		}
+	return;	
 	}
 
 function get_parameter($param) {
@@ -2967,7 +3020,7 @@ function get_parameter($param) {
 
 function save_midiressources($filename) {
 	global $MIDIinput, $MIDIoutput, $MIDIinputname, $MIDIoutputname, $MIDIinputcomment, $MIDIoutputcomment; // These are tables!
-	global $dir_midi_resources, $temp_midi_ressources, $NumberMIDIinputs, $NumberMIDIoutputs;
+	global $dir_midi_resources, $temp_midi_ressources, $NumberMIDIinputs, $NumberMIDIoutputs, $MIDIchannelFilter;
 	for($i = 0; $i < $NumberMIDIinputs; $i++) {
 		if(isset($_POST["MIDIinput_".$i])) $MIDIinput[$i] = trim($_POST["MIDIinput_".$i]);
 		if(isset($_POST["MIDIinputname_".$i])) $MIDIinputname[$i] = trim($_POST["MIDIinputname_".$i]);
@@ -2977,59 +3030,102 @@ function save_midiressources($filename) {
 		if(isset($_POST["MIDIoutput_".$i])) $MIDIoutput[$i] = trim($_POST["MIDIoutput_".$i]);
 		if(isset($_POST["MIDIoutputname_".$i])) $MIDIoutputname[$i] = trim($_POST["MIDIoutputname_".$i]);
 		if(isset($_POST["MIDIoutputcomment_".$i])) $MIDIoutputcomment[$i] = trim($_POST["MIDIoutputcomment_".$i]);
+		$MIDIchannelFilter[$i] =  '';
+		for($channel = 1; $channel <= 16; $channel++) {
+			$varName = "channel_out_".$i."_".$channel;
+			$MIDIchannelFilter[$i]  .= isset($_POST[$varName]) ? '1' : '0';
+			}
+//		echo "<br />channelFilters[".$i."] = ".$MIDIchannelFilter[$i] ."<br />";
 		}
-	$inputFilters = $outputFilters = array();
+	$acceptFilters = $passFilters = array();
 	for($i = 0; $i < $NumberMIDIinputs; $i++) {
-		$NoteOffFilter = get_parameter("NoteOffFilter_".$i);
-		$NoteOnFilter = get_parameter("NoteOnFilter_".$i);
-		$KeyPressureFilter = get_parameter("KeyPressureFilter_".$i);
-		$ControlTypeFilter = get_parameter("ControlTypeFilter_".$i);
-		$ProgramTypeFilter = get_parameter("ProgramTypeFilter_".$i);
-		$ChannelPressureFilter = get_parameter("ChannelPressureFilter_".$i);
-		$PitchBendFilter = get_parameter("PitchBendFilter_".$i);
-		$SysExFilter = get_parameter("SysExFilter_".$i);
-		$TimeCodeFilter = get_parameter("TimeCodeFilter_".$i);
-		$SongPosFilter = get_parameter("SongPosFilter_".$i);
-		$SongSelFilter = get_parameter("SongSelFilter_".$i);
-		$TuneTypeFilter = get_parameter("TuneTypeFilter_".$i);
-		$EndSysExFilter = get_parameter("EndSysExFilter_".$i);
-		$ClockTypeFilter = get_parameter("ClockTypeFilter_".$i);
-		$StartTypeFilter = get_parameter("StartTypeFilter_".$i);
-		$ContTypeFilter = get_parameter("ContTypeFilter_".$i);
-		$ActiveSenseFilter = get_parameter("ActiveSenseFilter_".$i);
-		$ResetFilter = get_parameter("ResetFilter_".$i);
+		$NoteOffFilter_in = get_parameter("NoteOffFilter_in_".$i);
+		$NoteOnFilter_in = get_parameter("NoteOnFilter_in_".$i);
+		$KeyPressureFilter_in = get_parameter("KeyPressureFilter_in_".$i);
+		$ControlChangeFilter_in = get_parameter("ControlChangeFilter_in_".$i);
+		$ProgramChangeFilter_in = get_parameter("ProgramChangeFilter_in_".$i);
+		$ChannelPressureFilter_in = get_parameter("ChannelPressureFilter_in_".$i);
+		$PitchBendFilter_in = get_parameter("PitchBendFilter_in_".$i);
+		$SystemExclusiveFilter_in = get_parameter("SystemExclusiveFilter_in_".$i);
+		$TimeCodeFilter_in = get_parameter("TimeCodeFilter_in_".$i);
+		$SongPositionFilter_in = get_parameter("SongPositionFilter_in_".$i);
+		$SongSelectFilter_in = get_parameter("SongSelectFilter_in_".$i);
+		$TuneRequestFilter_in = get_parameter("TuneRequestFilter_in_".$i);
+		$EndSysExFilter_in = get_parameter("EndSysExFilter_in_".$i);
+		$TimingClockFilter_in = get_parameter("TimingClockFilter_in_".$i);
+		$StartFilter_in = get_parameter("StartFilter_in_".$i);
+		$ContinueFilter_in = get_parameter("ContinueFilter_in_".$i);
+		$ActiveSensingFilter_in = get_parameter("ActiveSensingFilter_in_".$i);
+		$SystemResetFilter_in = get_parameter("SystemResetFilter_in_".$i);
 		$sumsArray = [
-			$NoteOffFilter, $NoteOnFilter, $KeyPressureFilter, $ControlTypeFilter,
-			$ProgramTypeFilter, $ChannelPressureFilter, $PitchBendFilter, $SysExFilter,
-			$TimeCodeFilter, $SongPosFilter, $SongSelFilter, $TuneTypeFilter,
-			$EndSysExFilter, $ClockTypeFilter, $StartTypeFilter, $ContTypeFilter,
-			$ActiveSenseFilter, $ResetFilter
+			$NoteOffFilter_in, $NoteOnFilter_in, $KeyPressureFilter_in, $ControlChangeFilter_in,
+			$ProgramChangeFilter_in, $ChannelPressureFilter_in, $PitchBendFilter_in, $SystemExclusiveFilter_in,
+			$TimeCodeFilter_in, $SongPositionFilter_in, $SongSelectFilter_in, $TuneRequestFilter_in,
+			$EndSysExFilter_in, $TimingClockFilter_in, $StartFilter_in, $ContinueFilter_in,
+			$ActiveSensingFilter_in, $SystemResetFilter_in
 			];
-		$inputFilters[$i] = $outputFilters[$i] = '';
+		$acceptFilters[$i] = $passFilters[$i] = '';
 		foreach ($sumsArray as $index => $sum) {
 			if ($sum == 0) {
-				$inputFilters[$i] .= '0';
-				$outputFilters[$i] .= '0';
+				$acceptFilters[$i] .= '0';
+				$passFilters[$i] .= '0';
 			} elseif ($sum == 1) {
-				$inputFilters[$i] .= '1';  // Assume input is 1 by default
-				$outputFilters[$i] .= '0';
+				$acceptFilters[$i] .= '1';  // Assume input is 1 by default
+				$passFilters[$i] .= '0';
 			} elseif ($sum == 2) {
-				$inputFilters[$i] .= '1';
-				$outputFilters[$i] .= '1';
+				$acceptFilters[$i] .= '1';
+				$passFilters[$i] .= '1';
 				}
 			}
 		// Pad the binary strings to ensure they are 18 digits long
-		$inputFilters[$i] = str_pad($inputFilters[$i], 18, '0', STR_PAD_LEFT);
-		$outputFilters[$i] = str_pad($outputFilters[$i], 18, '0', STR_PAD_LEFT);
+		$acceptFilters[$i] = str_pad($acceptFilters[$i], 18, '0', STR_PAD_LEFT);
+		$passFilters[$i] = str_pad($passFilters[$i], 18, '0', STR_PAD_LEFT);
 		}
-	save_midiport($temp_midi_ressources."midiport",$inputFilters,$outputFilters);
-	save_midiport($dir_midi_resources.$filename."_midiport",$inputFilters,$outputFilters);
+	$outFilters = array();
+	for($i = 0; $i < $NumberMIDIoutputs; $i++) {
+		$NoteOffFilter_out = get_parameter("NoteOffFilter_out_".$i);
+		$NoteOnFilter_out = get_parameter("NoteOnFilter_out_".$i);
+		$KeyPressureFilter_out = get_parameter("KeyPressureFilter_out_".$i);
+		$ControlChangeFilter_out = get_parameter("ControlChangeFilter_out_".$i);
+		$ProgramChangeFilter_out = get_parameter("ProgramChangeFilter_out_".$i);
+		$ChannelPressureFilter_out = get_parameter("ChannelPressureFilter_out_".$i);
+		$PitchBendFilter_out = get_parameter("PitchBendFilter_out_".$i);
+		$SystemExclusiveFilter_out = get_parameter("SystemExclusiveFilter_out_".$i);
+		$TimeCodeFilter_out = get_parameter("TimeCodeFilter_out_".$i);
+		$SongPositionFilter_out = get_parameter("SongPositionFilter_out_".$i);
+		$SongSelectFilter_out = get_parameter("SongSelectFilter_out_".$i);
+		$TuneRequestFilter_out = get_parameter("TuneRequestFilter_out_".$i);
+		$EndSysExFilter_out = get_parameter("EndSysExFilter_out_".$i);
+		$TimingClockFilter_out = get_parameter("TimingClockFilter_out_".$i);
+		$StartFilter_out = get_parameter("StartFilter_out_".$i);
+		$ContinueFilter_out = get_parameter("ContinueFilter_out_".$i);
+		$ActiveSensingFilter_out = get_parameter("ActiveSensingFilter_out_".$i);
+		$SystemResetFilter_out = get_parameter("SystemResetFilter_out_".$i);
+		$sumsArray = [
+			$NoteOffFilter_out, $NoteOnFilter_out, $KeyPressureFilter_out, $ControlChangeFilter_out,
+			$ProgramChangeFilter_out, $ChannelPressureFilter_out, $PitchBendFilter_out, $SystemExclusiveFilter_out,
+			$TimeCodeFilter_out, $SongPositionFilter_out, $SongSelectFilter_out, $TuneRequestFilter_out,
+			$EndSysExFilter_out, $TimingClockFilter_out, $StartFilter_out, $ContinueFilter_out,
+			$ActiveSensingFilter_out, $SystemResetFilter_out
+			];
+		$outFilters[$i] = '';
+		foreach ($sumsArray as $index => $sum) {
+			if($sum == 0) $outFilters[$i] .= '0';
+			elseif ($sum == 1) $outFilters[$i] .= '1';  // Assume value is 1 by default
+			}
+		// Pad the binary strings to ensure they are 18 digits long
+		$outFilters[$i] = str_pad($outFilters[$i], 18, '0', STR_PAD_LEFT);
+		if($NoteOffFilter_out <> $NoteOnFilter_out)
+			echo "<p id=\"refresh\" style=\"color:red;\">👉  Warning: NoteOn and NoteOff should have the same status in the filter of MIDI output ".$MIDIoutput[$i]."</p>";
+		}
+	save_midiport($temp_midi_ressources."midiport",$acceptFilters,$passFilters,$outFilters);
+	save_midiport($dir_midi_resources.$filename."_midiport",$acceptFilters,$passFilters,$outFilters);
 	return;
 	}
 
-function save_midiport($thisfilename,$inputFilters,$outputFilters) {
+function save_midiport($thisfilename,$acceptFilters,$passFilters,$outFilters) {
 	global $MIDIinput, $MIDIoutput, $MIDIinputname, $MIDIinputcomment, $MIDIoutputname, $MIDIoutputcomment; // These are tables!
-	global $NumberMIDIinputs, $NumberMIDIoutputs;
+	global $NumberMIDIinputs, $NumberMIDIoutputs, $MIDIchannelFilter;
 	$file = fopen($thisfilename,'w');
 	if($file) {
 		for($i = 0; $i < $NumberMIDIoutputs; $i++) {
@@ -3038,6 +3134,8 @@ function save_midiport($thisfilename,$inputFilters,$outputFilters) {
 			if($MIDIoutputname[$i] == '') $MIDIoutputname[$i] = "new output";
 			if($MIDIoutputcomment[$i] == '') $MIDIoutputcomment[$i] = "void";
 			fwrite($file,"MIDIoutput\t".$i."\t".$MIDIoutput[$i]."\t".$MIDIoutputname[$i]."\t".$MIDIoutputcomment[$i]."\n");
+			if(isset($outFilters[$i])) fwrite($file,"MIDIoutFilter\t".$i."\t".$outFilters[$i]."\n");
+			if(isset($MIDIchannelFilter[$i][$i])) fwrite($file,"MIDIchannelFilter\t".$i."\t".$MIDIchannelFilter[$i]."\n");
 			}
 		for($i = 0; $i < $NumberMIDIinputs; $i++) {
 			if($MIDIinput[$i] == '' AND $MIDIinputname[$i] == '' AND $MIDIinputcomment[$i] == '') continue;
@@ -3045,8 +3143,8 @@ function save_midiport($thisfilename,$inputFilters,$outputFilters) {
 			if($MIDIinputname[$i] == '') $MIDIinputname[$i] = "new intput";
 			if($MIDIinputcomment[$i] == '') $MIDIinputcomment[$i] = "void";
 			fwrite($file,"MIDIinput\t".$i."\t".$MIDIinput[$i]."\t".$MIDIinputname[$i]."\t".$MIDIinputcomment[$i]."\n");
-			if(isset($inputFilters[$i])) fwrite($file,"MIDIinputFilter\t".$i."\t".$inputFilters[$i]."\n");
-			if(isset($outputFilters[$i])) fwrite($file,"MIDIoutputFilter\t".$i."\t".$outputFilters[$i]."\n");
+			if(isset($acceptFilters[$i])) fwrite($file,"MIDIacceptFilter\t".$i."\t".$acceptFilters[$i]."\n");
+			if(isset($passFilters[$i])) fwrite($file,"MIDIpassFilter\t".$i."\t".$passFilters[$i]."\n");
 			}
 		fclose($file);
 		return true;
@@ -3054,44 +3152,124 @@ function save_midiport($thisfilename,$inputFilters,$outputFilters) {
 	return false;
 	}
 
-function filter_form($i) {
-	global $NoteOffFilter, $NoteOnFilter, $KeyPressureFilter, $ControlTypeFilter, $ProgramTypeFilter, $ChannelPressureFilter, $PitchBendFilter, $SysExFilter, $TimeCodeFilter, $SongPosFilter, $SongSelFilter, $TuneTypeFilter, $EndSysExFilter, $ClockTypeFilter, $StartTypeFilter, $ContTypeFilter, $ActiveSenseFilter, $ResetFilter, $MIDIinput;
-	echo "<div id=\"showhide".$i."\"  style=\"background-color: Snow; width:300px;\">";
-	echo "<p style=\"margin-left:12px;\"><b>Input filter ".$MIDIinput[$i].":</b></p>";
+function filter_form_input($i) {
+	global $NoteOffFilter_in, $NoteOnFilter_in, $KeyPressureFilter_in, $ControlChangeFilter_in, $ProgramChangeFilter_in, $ChannelPressureFilter_in, $PitchBendFilter_in, $SystemExclusiveFilter_in, $TimeCodeFilter_in, $SongPositionFilter_in, $SongSelectFilter_in, $TuneRequestFilter_in, $EndSysExFilter_in, $TimingClockFilter_in, $StartFilter_in, $ContinueFilter_in, $ActiveSensingFilter_in, $SystemResetFilter_in, $MIDIinput;
+	echo "<div id=\"showhide_input".$i."\"  style=\"background-color: Snow; width:300px;\">";
+	echo "<p style=\"margin-left:12px;\"><b>Input filter ".$MIDIinput[$i]."</b></p>";
 	echo "<p style=\"margin-left:12px;\">0 = reject<br />1 = treat<br />2 = treat + pass</p>";
 	echo "<table class=\"no-border-spacing\">";
 	echo "<tr>";
 	echo "<td>";
 	echo "</td>";
 	echo "<td style=\"white-space:nowrap;\">";
-	echo "&nbsp;0&nbsp;-&nbsp;1&nbsp;-&nbsp;2";
+	echo "<b>&nbsp;0&nbsp;-&nbsp;1&nbsp;-&nbsp;2</b>";
 	echo "</td>";
 	echo "</tr>";
-	filter_buttons($i,"NoteOff");
-	filter_buttons($i,"NoteOn");
-	filter_buttons($i,"KeyPressure");
-	filter_buttons($i,"ControlType");
-	filter_buttons($i,"ProgramType");
-	filter_buttons($i,"ChannelPressure");
-	filter_buttons($i,"PitchBend");
-	filter_buttons($i,"SysEx");
-	filter_buttons($i,"TimeCode");
-	filter_buttons($i,"SongPos");
-	filter_buttons($i,"SongSel");
-	filter_buttons($i,"TuneType");
-	filter_buttons($i,"EndSysEx");
-	filter_buttons($i,"ClockType");
-	filter_buttons($i,"StartType");
-	filter_buttons($i,"ContType");
-	filter_buttons($i,"ActiveSense");
-	filter_buttons($i,"Reset");
+	filter_buttons_in($i,"NoteOff");
+	filter_buttons_in($i,"NoteOn");
+	filter_buttons_in($i,"KeyPressure");
+	filter_buttons_in($i,"ControlChange");
+	filter_buttons_in($i,"ProgramChange");
+	filter_buttons_in($i,"ChannelPressure");
+	filter_buttons_in($i,"PitchBend");
+	filter_buttons_in($i,"SystemExclusive");
+	filter_buttons_in($i,"TimeCode");
+	filter_buttons_in($i,"SongPosition");
+	filter_buttons_in($i,"SongSelect");
+	filter_buttons_in($i,"TuneRequest");
+	filter_buttons_in($i,"EndSysEx");
+	filter_buttons_in($i,"TimingClock");
+	filter_buttons_in($i,"Start");
+	filter_buttons_in($i,"Continue");
+	filter_buttons_in($i,"ActiveSensing");
+	filter_buttons_in($i,"SystemReset");
 	echo "</table>";
-	filter_explanation();
+	filter_input_explanation();
 	echo "</div>";
 	}
 
-function filter_buttons($i,$param) {
-	$tablename = $param."Filter";
+
+function filter_form_output($i) {
+	global $NoteOffFilter_out, $NoteOnFilter_out, $KeyPressureFilter_out, $ControlChangeFilter_out, $ProgramChangeFilter_out, $ChannelPressureFilter_out, $PitchBendFilter_out, $SystemExclusiveFilter_out, $TimeCodeFilter_out, $SongPositionFilter_out, $SongSelectFilter_out, $TuneRequestFilter_out, $EndSysExFilter_out, $TimingClockFilter_out, $StartFilter_out, $ContinueFilter_out, $ActiveSensingFilter_out, $SystemResetFilter_out;
+	global $url_this_page, $MIDIoutput;
+	echo "<div id=\"showhide_output".$i."\"  style=\"background-color: Snow; width:300px;\">";
+	echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savemidiport\" value=\"SAVE ports\">";
+	echo "<p style=\"margin-left:12px;\"><b>Output filter ".$MIDIoutput[$i]."</b></p>";
+	echo "<table style=\"background-color:azure;\">";
+	echo "<tr>";
+	echo "<td>";
+	echo "<table class=\"no-border-spacing\">";
+	echo "<tr>";
+	echo "<td>";
+	echo "</td>";
+	echo "<td style=\"white-space:nowrap;\">";
+	echo "<p><b>&nbsp;off&nbsp;&nbsp;on</b></p>";
+	echo "</td>";
+	echo "</tr>";
+	filter_buttons_out($i,"NoteOff");
+	filter_buttons_out($i,"NoteOn");
+	filter_buttons_out($i,"KeyPressure");
+	filter_buttons_out($i,"ControlChange");
+	filter_buttons_out($i,"ProgramChange");
+	filter_buttons_out($i,"ChannelPressure");
+	filter_buttons_out($i,"PitchBend");
+	filter_buttons_out($i,"SystemExclusive");
+	filter_buttons_out($i,"TimeCode");
+	filter_buttons_out($i,"SongPosition");
+	filter_buttons_out($i,"SongSelect");
+	filter_buttons_out($i,"TuneRequest");
+	filter_buttons_out($i,"EndSysEx");
+	filter_buttons_out($i,"TimingClock");
+	filter_buttons_out($i,"Start");
+	filter_buttons_out($i,"Continue");
+	filter_buttons_out($i,"ActiveSensing");
+	filter_buttons_out($i,"SystemReset");
+	echo "<tr><td>&nbsp;</td><td></td></tr>";
+	echo "</table>";
+	echo "</td>";
+	echo "<td style=\"white-space:nowrap;\">";
+	echo "<p>Channels</p>";
+	for($channel = 1; $channel <=  16; $channel++) {
+		filter_channel($i,$channel);
+		}
+	echo "</td>";
+	echo "</tr>";
+	echo "</table>";
+	filter_output_explanation();
+	echo "</div>";
+	}
+
+function filter_channel($i,$channel) {
+	global $channel_pass;
+	$the_post = "channel_out_".$i."_".$channel;
+	echo "<br /><input type=\"checkbox\" name=\"".$the_post."\" value=\"1\"";
+	if(!isset($channel_pass[$i][$channel]) OR $channel_pass[$i][$channel]) echo " checked";
+	echo " />";
+	echo $channel;
+	}
+
+function filter_buttons_out($i,$param) {
+	$tablename = $param."Filter_out";
+	global $$tablename;
+	if(!isset($$tablename[$i])) $$tablename[$i] = 1;
+	echo "<tr>";
+	echo "<td style=\"font-size:small;\">";
+	echo $param;
+	echo "</td>";
+	echo "<td style=\"font-size:small; white-space:nowrap;\">";
+	echo "<input onchange=\"tellsave()\" type=\"radio\" name=\"".$tablename."_".$i."\" value=\"0\"";
+	if($$tablename[$i] == "0") echo " checked";
+	echo ">";
+	echo "<input onchange=\"tellsave()\" type=\"radio\" name=\"".$tablename."_".$i."\" value=\"1\"";
+	if($$tablename[$i] == "1") echo " checked";
+	echo ">";
+	echo "</td>";
+	echo "</tr>";
+	return;
+	}
+
+function filter_buttons_in($i,$param) {
+	$tablename = $param."Filter_in";
 	global $$tablename;
 	if(!isset($$tablename[$i])) $$tablename[$i] = 1;
 	echo "<tr>";
@@ -3113,17 +3291,23 @@ function filter_buttons($i,$param) {
 	return;
 	}
 
-function filter_explanation() {
+function filter_input_explanation() {
 	global $file_format;
 	if($file_format <> "rtmidi") return;
-//	echo "<div id=\"toto\" style=\"width:300px; margin-top:48px; background-color:Snow; padding:12px; border-radius: 12px;\">";
 	echo "<p>MIDI input filters are used to process incoming events, for example from a connected piano keyboard or other MIDI devices — including another instance of the BP3.</p>
 	<ul>
 	<li>By default (option ‘0’), events are ‘rejected’ and nothing happens.</li>
 	<li>If an event is accepted (option ‘1’), it can trigger a script command declared in the score.</li>
-	<li>Accepted events can also be routed to the current MIDI output (option ‘3’).
+	<li>Accepted events can also be routed to the current MIDI output (option ‘3’).</li>
+	<li>Some settings might be changed by the console for consistency.</li>
 	</ul>";
-//	echo "</div>";
+	}
+
+function filter_output_explanation() {
+	global $file_format;
+	if($file_format <> "rtmidi") return;
+	echo "<p>The event filter specifies which MIDI events can be sent to this output.</p>";
+	echo "<p>The channel filter specifies which MIDI channels can be sent to this output.</p>";
 	}
 
 function display_midi_ports($filename) {
@@ -3151,6 +3335,9 @@ function display_midi_ports($filename) {
 			$MIDIoutputname[$NumberMIDIoutputs] = "new output";
 			$MIDIoutputcomment[$NumberMIDIoutputs] = "";
 			$NumberMIDIoutputs++;
+			for($i = 0; $i < $NumberMIDIoutputs; $i++) {
+				for($channel = 1; $channel <= 16; $channel++) $channel_pass[$i][$channel] = 1;
+				}
 			}
 		}
 	echo "<input type=\"hidden\" name=\"NumberMIDIinputs\" value=\"".$NumberMIDIinputs."\">";
@@ -3161,8 +3348,10 @@ function display_midi_ports($filename) {
 		if(!isset($MIDIoutputcomment[$i]) OR $MIDIoutputcomment[$i] == "void") $comment = '';
 		else $comment = $MIDIoutputcomment[$i];
 		echo "MIDI output&nbsp;&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutput_".$i."\" size=\"2\" value=\"".$value."\">";
-		echo "&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutputname_".$i."\" size=\"20\" value=\"".$MIDIoutputname[$i]."\">";
+		echo "&nbsp;<input type=\"text\" style=\"margin-bottom:6px;\" onchange=\"tellsave()\" name=\"MIDIoutputname_".$i."\" size=\"20\" value=\"".$MIDIoutputname[$i]."\">";
 		echo "&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutputcomment_".$i."\" size=\"20\" value=\"".$comment."\">";
+		echo "&nbsp;<button style=\"background-color:azure; border-radius: 6px;\" onclick=\"toggledisplay_output(".$i."); return false;\">FILTER</button>";
+		filter_form_output($i);
 		echo "<br />";
 		}
 	echo "<input style=\"float:right; color:DarkBlue; backgroundsave_-color:yellow;\" onclick=\"tellsave()\" type=\"submit\" name=\"create_output\" value=\"Add an output\"><br />";
@@ -3176,8 +3365,8 @@ function display_midi_ports($filename) {
 		echo "MIDI input&nbsp;&nbsp;&nbsp;&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIinput_".$i."\" size=\"2\" value=\"".$value."\">";
 		echo "&nbsp;<input type=\"text\" style=\"margin-bottom:6px;\" onchange=\"tellsave()\" name=\"MIDIinputname_".$i."\" size=\"20\" value=\"".$MIDIinputname[$i]."\">";
 		echo "&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIinputcomment_".$i."\" size=\"20\" value=\"".$comment."\">";
-		echo "&nbsp;<button style=\"background-color:azure; border-radius: 6px;\" onclick=\"toggledisplay(".$i."); return false;\">FILTER</button>";
-		filter_form($i);
+		echo "&nbsp;<button style=\"background-color:azure; border-radius: 6px;\" onclick=\"toggledisplay_input(".$i."); return false;\">FILTER</button>";
+		filter_form_input($i);
 		echo "<br />";
 		}
 	echo "<input style=\"float:right; color:DarkBlue; backgroundsave_-color:yellow;\" onclick=\"tellsave()\" type=\"submit\" name=\"create_input\" value=\"Add an input\">";

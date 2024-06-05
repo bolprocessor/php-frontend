@@ -357,8 +357,7 @@ if(isset($data_path) AND $data_path <> '') {
 		echo "</b></p>";
 		}
 	}
-if(file_exists($stopfile)) unlink($stopfile);
-if(file_exists($panicfile)) unlink($panicfile);
+@unlink($stopfile); @unlink($panicfile);
 session_abort(); // Added 2024-05-17
 $o = send_to_console($command);
 if($pid > 0) echo "<small>The pid was <font color=\"red\">".$pid."</font></small><br />";
@@ -592,7 +591,9 @@ if($no_error AND $file_format == "csound") {
 	}
 
 $handle = FALSE;
-// echo "number_and_time = ".$number_and_time."<br />";
+$terminated = FALSE;
+if(file_exists($stopfile) OR file_exists($panicfile)) $terminated = TRUE;
+if($terminated) echo "<p style=\"color:brown;\"><big>👉 The performance has been interrupted.</big></p>";
 if($n_messages > 6000) echo "<p><font color=\"red\">➡</font> Too many messages produced! (".$n_messages.")</p>";
 else {
 	if($result_file <> '') $handle = fopen($result_file,"w");
@@ -668,9 +669,7 @@ if($trace_csound <> '' AND file_exists($trace_csound)) {
 	}
 echo "</p>";
 
-if(file_exists($running_trace)) {
-	@unlink($running_trace);
-	}
+@unlink($running_trace);
 
 function check_image($link) {
 	$result = '';
