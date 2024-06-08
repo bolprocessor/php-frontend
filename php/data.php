@@ -9,7 +9,7 @@ if(isset($_GET['file'])) $file = urldecode($_GET['file']);
 else $file = '';
 if($file == '') die();
 $url_this_page = "data.php?file=".urlencode($file);
-save_settings("last_page",$url_this_page);
+save_settings("last_data_page",$url_this_page);
 $table = explode(SLASH,$file);
 $filename = end($table);
 echo "<script>
@@ -18,7 +18,7 @@ window.name = '".$filename."'
 $this_file = $bp_application_path.$file;
 $dir = str_replace($filename,'',$this_file);
 $current_directory = str_replace(SLASH.$filename,'',$file);
-save_settings("last_directory",$current_directory);
+save_settings("last_data_directory",$current_directory);
 
 if(isset($_POST['reload'])) {
 	@unlink($refresh_file);
@@ -37,7 +37,7 @@ $test_musicxml = FALSE;
 $no_chunk_real_time_midi = FALSE;
 
 echo "<h3>Data file “".$filename."”</h3>";
-save_settings("last_name",$filename); 
+save_settings("last_data_name",$filename); 
 
 $temp_folder = str_replace(' ','_',$filename)."_".session_id()."_temp";
 if(!file_exists($temp_dir.$temp_folder)) {

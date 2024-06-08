@@ -12,6 +12,13 @@ table {
 	text-align: left;
 	}
 /* CSS to style the table, rows, and cells */
+th {
+	padding: 1em;
+	border-radius: 1em;
+	background-color:gold;
+	vertical-align: top;
+	white-space: nowrap;
+	}
 .no-border-spacing {
 	border-collapse: collapse; /* Ensures there's no space between cells */		
 	}

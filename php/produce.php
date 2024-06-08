@@ -14,7 +14,7 @@ if(!file_exists($console) AND !file_exists($console_exe)) {
 	echo "<p style=\"text-align:center; width:90%;\">The console application (file “bp”) is not working, or missing, or misplaced…</p>";
 	$source = $application_path."source";
 	if(file_exists($source))
-		echo "<p style=\"text-align:center; width:90%;\">The source files of BP3 have been found. You can recompile “bp”, then try again.<br /><br /><big>👉👉👉&nbsp;&nbsp;<a href=\"".$application_path."compile.php?return=produce.php\">Run the compiler</a></big></p>";
+		echo "<p style=\"text-align:center; width:90%;\">The source files of BP3 have been found. You can recompile “bp”, then try again.<br /><br /><big>👉&nbsp;&nbsp;<a href=\"".$application_path."compile.php?return=produce.php\">Run the compiler</a></big></p>";
 	else
 		echo "<p style=\"text-align:center; width:90%;\">Source files (the “source” folder) have not been found.<br />Visit <a target=\"_blank\" href=\"https://bolprocessor.org/check-bp3/#install\">https://bolprocessor.org/check-bp3/</a> and follow instructions!</p>";
 	die();

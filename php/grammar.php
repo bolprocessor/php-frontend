@@ -6,13 +6,13 @@ set_time_limit(0);
 if(isset($_GET['file'])) $file = urldecode($_GET['file']);
 else $file = '';
 $url_this_page = "grammar.php?file=".urlencode($file);
-save_settings("last_page",$url_this_page);
+save_settings("last_grammar_page",$url_this_page);
 $table = explode(SLASH,$file);
 $here = $filename = end($table);
 $this_file = $bp_application_path.$file;
 $dir = str_replace($filename,'',$this_file);
 $current_directory = str_replace(SLASH.$filename,'',$file);
-save_settings("last_directory",$current_directory);
+save_settings("last_grammar_directory",$current_directory);
 $textarea_rows = 20;
 
 if($test) echo "grammar_file = ".$this_file."<br />";
@@ -247,7 +247,7 @@ if(!file_exists($output)) {
 echo link_to_help();
 
 echo "<h3>Grammar file “".$filename."”</h3>";
-save_settings("last_name",$filename);
+save_settings("last_grammar_name",$filename);
 
 $link = "test-image.html";
 echo "<div style=\"float:right;\"><p style=\"border:2px solid gray; background-color:azure; width:17em; padding:2px; text-align:center; border-radius: 6px;\">

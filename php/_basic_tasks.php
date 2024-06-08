@@ -153,7 +153,7 @@ if($test) {
 
 $html_help_file = "BP2_help.html";
 if(!(isset($filename)  AND $filename == "Compilation")) $help = compile_help($text_help_file,$html_help_file);
-$top_header = "// Bol Processor BP3 compatible with version BP2.9.8";
+$top_header = "// Bol Processor BP3";
 
 $KeyString = "key#";
 $Englishnote = array("C","C#","D","D#","E","F","F#","G","G#","A","A#","B","C");
@@ -2770,6 +2770,23 @@ function score_sort($a,$b) {
 	return $a['score'] < $b['score'];
 	}
 
+function hidden_directory($name) {
+	switch($name) {
+		case "midi_resources":
+		case "docs-developer":
+		case "docs-release":
+		case "icons":
+		case "pictures":
+		case "portmidi":
+		case "php":
+		case "source":
+		case "midi_resources":
+		case "temp_bolprocessor":
+			return TRUE;
+		}
+	return FALSE;
+	}
+
 function add_proper_extension($format,$filename) {
 	$filename = str_replace(".mid",'',$filename);
 	$filename = str_replace(".sco",'',$filename);
@@ -2836,14 +2853,10 @@ function set_output_folder($output_folder) {
 
 function ok_output_location($folder) {
 	$result = TRUE;
-	if($folder == "php") $result = FALSE;
-	if($folder == "source") $result = FALSE;
-	if($folder == "midi_resources") $result = FALSE;
+	if(hidden_directory($folder)) $result = FALSE;
 	if($folder == "csound_resources") $result = FALSE;
-	if($folder == "temp_bolprocessor") $result = FALSE;
 	if($folder == "trash_bolprocessor") $result = FALSE;
 	if($folder == "scripts") $result = FALSE;
-	if($folder == "docs-developer") $result = FALSE;
 	if(!$result) echo "<p><font color=\"red\">ERROR:</font> Folder “<font color=\"blue\">".$folder."</font>” cannot be used for output files.</p>";
 	return $result;
 	}
@@ -3159,7 +3172,7 @@ function save_midiport($thisfilename,$acceptFilters,$passFilters,$outFilters) {
 function filter_form_input($i) {
 	global $NoteOffFilter_in, $NoteOnFilter_in, $KeyPressureFilter_in, $ControlChangeFilter_in, $ProgramChangeFilter_in, $ChannelPressureFilter_in, $PitchBendFilter_in, $SystemExclusiveFilter_in, $TimeCodeFilter_in, $SongPositionFilter_in, $SongSelectFilter_in, $TuneRequestFilter_in, $EndSysExFilter_in, $TimingClockFilter_in, $StartFilter_in, $ContinueFilter_in, $ActiveSensingFilter_in, $SystemResetFilter_in, $MIDIinput;
 	echo "<div id=\"showhide_input".$i."\"  style=\"background-color: Snow; width:300px;\">";
-	echo "<p style=\"margin-left:12px;\"><b>Filter MIDI input ".$MIDIinput[$i]."</b></p>";
+	echo "<p style=\"margin-left:12px;\"><b>Filter for MIDI input ".$MIDIinput[$i]."</b></p>";
 	echo "<p style=\"margin-left:12px;\">0 = reject<br />1 = treat<br />2 = treat + pass</p>";
 	echo "<table class=\"no-border-spacing\">";
 	echo "<tr>";
@@ -3198,7 +3211,7 @@ function filter_form_output($i) {
 	global $url_this_page, $MIDIoutput;
 	echo "<div id=\"showhide_output".$i."\"  style=\"background-color: Snow; width:300px;\">";
 	echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savemidiport\" value=\"SAVE MIDI ports\">";
-	echo "<p style=\"margin-left:12px;\"><b>Filter MIDI output ".$MIDIoutput[$i]."</b></p>";
+	echo "<p style=\"margin-left:12px;\"><b>Filter for MIDI output ".$MIDIoutput[$i]."</b></p>";
 	echo "<table style=\"background-color:azure;\">";
 	echo "<tr>";
 	echo "<td>";

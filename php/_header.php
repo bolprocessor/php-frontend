@@ -126,6 +126,16 @@ echo "function togglesearch() {
       if(z) {
         z.className=(z.className=='hidden')?'unhidden':'hidden'; }
     }\n";
+echo "function settogglecreate() {
+      var z = document.getElementById(\"create\");
+      if(z) {
+        z.className='hidden'; }
+      }\n";
+echo "function togglecreate() {
+      var z = document.getElementById(\"create\");
+      if(z) {
+        z.className=(z.className=='hidden')?'unhidden':'hidden'; }
+    }\n";
 echo "</script>\n";
 
 echo "<script>\n";
