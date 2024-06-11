@@ -87,9 +87,9 @@ if(isset($_POST['csound_path'])) {
 	$new_csound_path = trim($_POST['csound_path']);
 	if($new_csound_path <> '') {
 		if($new_csound_path[0] <> SLASH)
-			$new_csound_path = "/".$new_csound_path;
+			$new_csound_path = SLASH.$new_csound_path;
 		if($new_csound_path[strlen($new_csound_path) - 1] <> SLASH)
-			$new_csound_path .= "/";
+			$new_csound_path .= SLASH;
 		save_settings("csound_path",$new_csound_path);
 		$csound_path = $new_csound_path;
 		}
@@ -813,7 +813,7 @@ function SaveObjectPrototypes($verbose,$dir,$filename,$temp_folder,$force) {
 	fwrite($handle,$PrototypeTickVelocity."\n");
 	$CsoundInstruments_filename = trim($_POST['CsoundInstruments_filename']);
 	if(!is_integer($pos=strpos($CsoundInstruments_filename,$csound_resources)) AND $CsoundInstruments_filename <> '')
-		$CsoundInstruments_filename = $csound_resources."/".$CsoundInstruments_filename;
+		$CsoundInstruments_filename = $csound_resources.SLASH.$CsoundInstruments_filename;
 	fwrite($handle,$CsoundInstruments_filename."\n");
 	$maxsounds = $_POST['maxsounds'];
 	fwrite($handle,$maxsounds."\n");
