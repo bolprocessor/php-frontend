@@ -7,7 +7,7 @@ require_once("_settings.php");
 $url_this_page = $this_page = "index.php";
 
 echo "<table style=\"background-color:snow;\"><tr>";
-echo "<td style=\"padding:4px; vertical-align:middle;\"><img src=\"pict/BP3-logo.png\" width=\"120px;\"/></td><td style=\"padding:4px; vertical-align:middle; white-space:nowrap;\">";
+echo "<td style=\"padding:4px; vertical-align:middle; border-radius:1em;\"><img src=\"pict/BP3-logo.png\" width=\"120px;\"/></td><td style=\"padding:4px; vertical-align:middle; white-space:nowrap; border-radius:1em;\">";
 
 $test = FALSE;
 if($path <> '') {
@@ -65,6 +65,9 @@ echo link_to_help();
 
 if($test) echo "dir = ".$dir."<br />";
 if($test) echo "url_this_page = ".$url_this_page."<br />";
+
+// $name = "-ho.trial.mohanam ";
+// echo "name = ".$name.", newname = ".new_name($name)."<br />";
 
 $new_file = '';
 if(isset($_POST['create_folder'])) {
@@ -363,7 +366,7 @@ if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension 
 	}
 
 if($folder <> '') {
-	echo "<div style=\"background-color:white; padding:1em; border-radius: 15px;\">";
+	echo "<div style=\"background-color:white; padding:1em; border-radius: 1em; width:30%; text-align:center;\">";
 	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 	if(!$delete_files AND !$rename_files AND !$move_files AND $path <> $trash_folder) {
 		echo "<input style=\"background-color:yellow;\" title=\"Delete folders or files\" type=\"submit\" name=\"delete_files\" value=\"DELETE\">";
@@ -450,17 +453,19 @@ $done = $seen = array();
 display_directory(FALSE,$dir,"directory");
 echo "<table style=\"background-color: Cornsilk;\">";
 echo "<tr>";
-if(($n1 = display_directory(TRUE,$dir,"grammar")) > 0) {
+$show_grammar = isset($last_grammar_page) AND isset($last_grammar_name) AND file_exists("..".SLASH.$last_grammar_directory.SLASH.$last_grammar_name);
+if(($n1 = display_directory(TRUE,$dir,"grammar")) > 0 OR $show_grammar) {
 	echo "<th><h3>Grammar project(s)</h3>";
-	if(isset($last_grammar_page) AND isset($last_grammar_name) AND file_exists("..".SLASH.$last_grammar_directory.SLASH.$last_grammar_name)) {
+	if($show_grammar) {
 		echo "<p style=\"background-color:snow; padding:6px; border-radius: 0.5em;\">Last visited: <a target=\"_blank\" href=\"".$last_grammar_page."\">".$last_grammar_name."</a>";
 		if(isset($last_grammar_directory) AND $folder <> $last_grammar_directory) echo "<br />in workspace</font> <a href=\"index.php?path=".$last_grammar_directory."\">".$last_grammar_directory."</a></p>";
 		}
 	echo "</th>";
 	}
-if(($n2 = display_directory(TRUE,$dir,"data")) > 0) {
+$show_alphabet = isset($last_data_page) AND isset($last_data_name) AND file_exists("..".SLASH.$last_data_directory.SLASH.$last_data_name);
+if(($n2 = display_directory(TRUE,$dir,"data")) > 0 OR $show_alphabet) {
 	echo "<th><h3>Data project(s)</h3>";
-	if(isset($last_data_page) AND isset($last_data_name) AND file_exists("..".SLASH.$last_data_directory.SLASH.$last_data_name)) {
+	if($show_alphabet) {
 		echo "<p style=\"background-color:snow; padding:6px; border-radius: 0.5em;\">Last visited: <a target=\"_blank\" href=\"".$last_data_page."\">".$last_data_name."</a>";
 		if(isset($last_data_directory) AND $folder <> $last_data_directory) echo "<br />in workspace</font> <a href=\"index.php?path=".$last_data_directory."\">".$last_data_directory."</a></p>";
 		}
@@ -544,6 +549,9 @@ function display_directory($test,$dir,$filter) {
 		if(is_integer($pos=strpos($thisfile,"License")) AND $pos == 0) continue;
 		if(is_integer($pos=stripos($thisfile,"ReadMe")) AND $pos == 0) continue; 
 		if($thisfile == "DerivedData" OR $thisfile == "resources" OR $thisfile == "scripts" OR $thisfile == "source" OR $thisfile == "temp_bolprocessor" OR $thisfile == "Makefile" OR $thisfile == "my_output" OR $thisfile == "php" OR $thisfile == "-se.startup" OR $thisfile == "LICENSE" OR $thisfile == "HowToBuild.txt" OR $thisfile == "BP3-To-Do.txt" OR $thisfile == "Bugs.txt" OR $thisfile == "ChangeLog" OR $thisfile == "Credits.txt" OR $thisfile == "HowToMakeARelease.txt" OR $thisfile == "y2k" OR $thisfile == "bp_compile_result.txt" OR $thisfile == "test.php") continue;
+		if($test) {
+			if(($new_name = new_name($thisfile)) <> $thisfile) rename($dir.SLASH.$thisfile,$dir.SLASH.$new_name);
+			}
 		if($move_files) $check_box = "<input type=\"checkbox\" name=\"move_".$i_file."\"> ";
 		else $check_box = '';
 		$this_file_moved = FALSE;

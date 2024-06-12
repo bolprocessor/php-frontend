@@ -229,6 +229,7 @@ for($i = 0; $i < 7; $i++) {
 // --------- FUNCTIONS ------------
 
 function extract_data($compact,$content) {
+	$said = FALSE;
 	$content = trim($content);
 	$content = str_replace(chr(13).chr(10),chr(10),$content);
 	$content = str_replace(chr(13),chr(10),$content);
@@ -259,6 +260,16 @@ function extract_data($compact,$content) {
 			if($i > 1 OR $line == '') $header = FALSE;
 			continue;
 			}
+		if(($new_name = new_name($line)) <> $line) {
+			$line = $new_name; // Convert old prefixes/prefixes to new ones
+	/*		if(!$said) {
+				echo "line = ".$line."<br />";
+				$said = TRUE;
+				echo "<script type='text/javascript'>";
+				echo "tellsave();";
+				echo "</script>";
+				} */
+			}
 		$table_out[] = $line;
 		if(is_integer($pos=strpos($line,"TEMPLATES:")) AND $pos == 0) {
 			$extract_data['templates'] = TRUE;
@@ -274,6 +285,10 @@ function extract_data($compact,$content) {
 			$extract_data['grammar'] = fix_file_name($line,"ho");
 		else if(is_integer($pos=strpos($line,"-ho")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
 			$extract_data['alphabet'] = fix_file_name($line,"ho");
+		else if(is_integer($pos=strpos($line,"-al")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
+			$extract_data['alphabet'] = fix_file_name($line,"al");
+		else if(is_integer($pos=strpos($line,"-so")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
+			$extract_data['objects'] = fix_file_name($line,"so");
 		else if(is_integer($pos=strpos($line,"-mi")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
 			$extract_data['objects'] = fix_file_name($line,"mi");
 		else if(is_integer($pos=strpos($line,"-cs")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
@@ -1390,12 +1405,14 @@ function type_of_file($thisfile) {
 		case '-da':
 			$type = "data"; break;
 		case '-ho':
+		case '-al':
 			$type = "alphabet"; break;
 		case '-se':
 			$type = "settings"; break;
 		case '-cs':
 			$type = "csound"; break;
 		case '-mi':
+		case '-so':
 			$type = "objects"; break;
 		case '-or':
 			$type = "orchestra"; break;
@@ -1419,9 +1436,11 @@ function type_of_file($thisfile) {
 	switch($extension) {
 		case "bpgr": $type = "grammar"; $found = TRUE; break;
 		case "bpda": $type = "data"; $found = TRUE; break;
+		case "bpal": $type = "alphabet"; $found = TRUE; break;
 		case "bpho": $type = "alphabet"; $found = TRUE; break;
 		case "bpse": $type = "settings"; $found = TRUE; break;
 		case "bpcs": $type = "csound"; $found = TRUE; break;
+		case "bpso": $type = "objects"; $found = TRUE; break;
 		case "bpmi": $type = "objects"; $found = TRUE; break;
 		case "bpor": $type = "orchestra"; $found = TRUE; break;
 		case "bpin": $type = "interaction"; $found = TRUE; break;
@@ -1481,6 +1500,7 @@ function change_occurrences_name_in_files($dir,$old_name,$new_name) {
 
 function find_dependencies($dir,$name) {
 	set_time_limit(1000);
+	$old_name = old_name($name);
 	$dependencies = array();
 	$dircontent = scandir($dir);
 	foreach($dircontent as $thisfile) {
@@ -1496,13 +1516,83 @@ function find_dependencies($dir,$name) {
 		$imax = count($table);
 		for($i = 0; $i < $imax; $i++) {
 			$line = trim(str_replace('/','',$table[$i]));
-			if($line == $name) {
+			if($line == $name OR $line == $old_name) {
 				$dependencies[] = $thisfile;
 				break;
 				}
 			}
 		}
 	return $dependencies;
+	}
+
+function old_name($name) {
+	$table = explode('.',$name);
+	$oldprefix = $oldsuffix = '';
+	switch(trim($table[0])) {
+		case "-al":
+			$oldprefix = "-ho";
+			break;
+		case "-so":
+			$oldprefix = "-mi";
+			break;
+		}
+	if($oldprefix <> '') {
+		$table[0] = $oldprefix;
+		$old_name = implode('.',$table);
+		return $old_name;
+		}
+	$n = count($table);
+	if($n > 1) {
+		switch(trim($table[$n - 1])) {
+			case "bpal":
+				$oldsuffix = "bpho";
+				break;
+			case "bpso";
+				$oldsuffix = "bpmi";
+				break;
+			}
+		if($oldsuffix <> '') {
+			$table[$n - 1] = $oldsuffix;
+			$old_name = implode('.',$table);
+			return $old_name;
+			}
+		}
+	return $name;
+	}
+
+function new_name($name) {
+	$table = explode('.',$name);
+	$newprefix = $newsuffix = '';
+	switch(trim($table[0])) {
+		case "-ho":
+			$newprefix = "-al";
+			break;
+		case "-mi":
+			$newprefix = "-so";
+			break;
+		}
+	if($newprefix <> '') {
+		$table[0] = $newprefix;
+		$new_name = implode('.',$table);
+		return $new_name;
+		}
+	$n = count($table);
+	if($n > 1) {
+		switch(trim($table[$n - 1])) {
+			case "bpho":
+				$newsuffix = "bpal";
+				break;
+			case "bpmi";
+				$newsuffix = "bpso";
+				break;
+			}
+		if($newsuffix <> '') {
+			$table[$n - 1] = $newsuffix;
+			$new_name = implode('.',$table);
+			return $new_name;
+			}
+		}
+	return $name;
 	}
 
 function MIDIparameter_argument($i,$parameter,$StartIndex,$EndIndex,$TableIndex,$param_value,$IsLogX,$IsLogY,$GEN) {

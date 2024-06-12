@@ -281,7 +281,7 @@ if(isset($_POST['compilegrammar'])) {
 		if(!file_exists($dir.$alphabet_file)) {
 			echo "<p style=\"color:red;\">WARNING: ".$dir.$alphabet_file." not found.</p>";
 			}
-		else $command .= " -ho ".$dir.$alphabet_file;
+		else $command .= " -al ".$dir.$alphabet_file; // "-al" replaced "-ho" 2024-06-12
 		}
 	if($csound_file <> '') {
 		if(!file_exists($dir_csound_resources.$csound_file)) {

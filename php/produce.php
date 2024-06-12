@@ -205,8 +205,8 @@ else {
 	if($settings_path <> '') $command .= " -se ".$thissettings;
 	if($data_path <> '') $command .= " -da ".$thisdata;
 	if($grammar_path <> '') $command .= " -gr ".$thisgrammar;
-	if($alphabet_path <> '') $command .= " -ho ".$thisalphabet;
-	if($objects_path <> '') $command .= " -mi ".$thisobject;
+	if($alphabet_path <> '') $command .= " -al ".$thisalphabet;
+	if($objects_path <> '') $command .= " -so ".$thisobject;
 
 	if($note_convention <> '') $command .= " --".$note_convention;
 	if($csound_file <> '') $command .= " -cs ".$dir_csound_resources.$csound_file;
