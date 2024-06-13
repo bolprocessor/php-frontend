@@ -365,8 +365,12 @@ if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension 
 	echo "</div>";
 	}
 
+$done = $seen = array();
+display_directory(FALSE,$dir,"directory");
+echo "<br />";
+
 if($folder <> '') {
-	echo "<div style=\"background-color:white; padding:1em; border-radius: 1em; width:30%; text-align:center;\">";
+	echo "<div style=\"background-color:Cornsilk; padding:1em; width:30%;\">";
 	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 	if(!$delete_files AND !$rename_files AND !$move_files AND $path <> $trash_folder) {
 		echo "<input style=\"background-color:yellow;\" title=\"Delete folders or files\" type=\"submit\" name=\"delete_files\" value=\"DELETE\">";
@@ -448,9 +452,6 @@ if($move_files) {
 		}
 	}
 
-$done = $seen = array();
-
-display_directory(FALSE,$dir,"directory");
 echo "<table style=\"background-color: Cornsilk;\">";
 echo "<tr>";
 $show_grammar = isset($last_grammar_page) AND isset($last_grammar_name) AND file_exists("..".SLASH.$last_grammar_directory.SLASH.$last_grammar_name);
