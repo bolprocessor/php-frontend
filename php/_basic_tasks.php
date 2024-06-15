@@ -2891,6 +2891,28 @@ function add_proper_extension($format,$filename) {
 	return $output_file;
 	}
 
+function emptydirectory($dir) {
+	// This will delete the content, not the directory itself
+	if(!is_dir($dir)) return false;
+	deleteDirectory($dir,0);
+	return true;
+	}
+
+function deleteDirectory($dir,$level) {
+	$items = new DirectoryIterator($dir);
+	foreach($items as $item) {
+		// Skip the . and .. directories
+		if ($item->isDot()) continue;
+		if ($item->isDir()) 
+			deleteDirectory($item->getPathname(),$level + 1);
+		else 
+			unlink($item->getPathname());
+		}
+	unset($items);
+	if($level > 0) rmdir($dir);
+	return;
+	}
+
 function find_replace_form() {
 	global $url_this_page;
 	echo "<div id=\"search\">";
@@ -2935,19 +2957,22 @@ function set_output_folder($output_folder) {
 		$output_folder = str_replace('+','_',$output_folder);
 		$output_folder = trim(str_replace(SLASH,' ',$output_folder));
 		$output_folder = str_replace(' ',SLASH,$output_folder);
-		if(!ok_output_location($output_folder)) $output_folder = "my_output";
+		if(!ok_output_location($output_folder,TRUE)) $output_folder = "my_output";
 		save_settings("output_folder",$output_folder);
 		}
 	return $output_folder;
 	}
 
-function ok_output_location($folder) {
+function ok_output_location($folder,$talk) {
 	$result = TRUE;
 	if(hidden_directory($folder)) $result = FALSE;
 	if($folder == "csound_resources") $result = FALSE;
+	if($folder == "midi_resources") $result = FALSE;
+	if($folder == "resources") $result = FALSE;
 	if($folder == "trash_bolprocessor") $result = FALSE;
 	if($folder == "scripts") $result = FALSE;
-	if(!$result) echo "<p><font color=\"red\">ERROR:</font> Folder “<font color=\"blue\">".$folder."</font>” cannot be used for output files.</p>";
+	if(is_integer($pos=strpos($folder,"BP2-")) AND $pos == 0) $result = FALSE;
+	if(!$result AND $talk) echo "<p><font color=\"red\">ERROR:</font> Folder “<font color=\"blue\">".$folder."</font>” cannot be used for output files.</p>";
 	return $result;
 	}
 

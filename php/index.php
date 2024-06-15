@@ -270,10 +270,16 @@ echo "window.onload = function() {
 	};\n";
 echo "</script>\n";
 
+if($path == $trash_folder AND isset($_POST['empty_trash'])) {
+//	echo $bp_application_path.$trash_folder."<br />";
+	if(emptydirectory($bp_application_path.$trash_folder)) echo "<p id=\"refresh\"><font color=\"red\">Trash is empty!</font></p>";
+	}
+
 if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension <> "temp" AND !$delete_files AND !$rename_files AND !$move_files) {
 	echo "<div style=\"float:right; background-color:white; padding:6px; border-radius: 15px;\">";
 	check_csound();
-	if($path <> $csound_resources AND $path <> '') {
+	if($path <> $csound_resources) {
+//	if($path <> $csound_resources AND $path <> '') {
 		echo "<button style=\"float:right; background-color:azure; border-radius: 6px; font-size:large;\" onclick=\"togglecreate(); return false;\">CREATE FILES AND  FOLDERS</button>";
 		echo "<div id=\"create\"  style=\"padding-top:36px;\">";
 		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
@@ -344,7 +350,8 @@ if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension 
 		echo "</form>";
 		echo "</div>";
 		}
-	else if($path <> '') {
+//	else if($path <> '') {
+	else {
 		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		echo "<p style=\"text-align:left;\">";
 		echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"create_csound\" value=\"CREATE NEW CSOUND RESOURCE FILE\"><br />named:&nbsp";
@@ -365,27 +372,6 @@ if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension 
 	echo "</div>";
 	}
 
-$done = $seen = array();
-display_directory(FALSE,$dir,"directory");
-echo "<br />";
-
-if($folder <> '') {
-	echo "<div style=\"background-color:Cornsilk; padding:1em; width:30%;\">";
-	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-	if(!$delete_files AND !$rename_files AND !$move_files AND $path <> $trash_folder) {
-		echo "<input style=\"background-color:yellow;\" title=\"Delete folders or files\" type=\"submit\" name=\"delete_files\" value=\"DELETE\">";
-		}
-	if(!$rename_files AND !$delete_files AND !$move_files AND $path <> $trash_folder) {
-		echo "&nbsp;<input style=\"background-color:yellow;\" title=\"Rename folders or files\" type=\"submit\" name=\"rename_files\" value=\"RENAME OR COPY\">";
-		}
-	if(!$rename_files AND !$delete_files AND !$move_files AND $path <> $trash_folder) {
-		echo "&nbsp;<input style=\"background-color:yellow;\" title=\"Move folders or files\" type=\"submit\" name=\"move_files\" value=\"MOVE\">";
-		}
-	if(!$show_dependencies AND !$delete_files AND !$move_files AND $path <> $trash_folder) echo "<br /><br /><input style=\"background-color:azure;\" title=\"Show dependencies of files (links to other files)\" type=\"submit\" name=\"show_dependencies\" value=\"SHOW DEPENDENCIES\"> (links between files)";
-	else if($show_dependencies) echo "<br /><br /><input style=\"background-color:azure;\" type=\"submit\" value=\"HIDE DEPENDENCIES\">";
-	echo "</form></div>";
-	}
-
 if(isset($_POST['delete_checked_files'])) {
 	$delete_files = FALSE;
 	$delete_checked_files = TRUE;
@@ -394,7 +380,7 @@ else $delete_checked_files = FALSE;
 if(isset($_POST['rename_checked_files'])) {
 	$rename_files = FALSE;
 	$rename_checked_files = TRUE;
-	echo "<p>Renamed checked files</p>";
+	echo "<p id=\"refresh\"><font color=\"red\">Renamed or copied checked files</font></p>";
 	}
 else $rename_checked_files = FALSE;
 if(isset($_POST['move_checked_files'])) {
@@ -402,18 +388,9 @@ if(isset($_POST['move_checked_files'])) {
 	$move_checked_files = TRUE;
 	}
 else $move_checked_files = FALSE;
-	
-if($delete_files OR $delete_checked_files OR $rename_files OR $move_files OR $move_checked_files)
-	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-if($delete_files) {
-	echo "<p style=\"margin-left:6px;\"><font color=\"red\"><big>↓</big></font>&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"delete_checked_files\" value=\"DELETE CHECKED FILES/FOLDERS\"> <font color=\"red\">➡</font> can be reversed <input style=\"background-color:azure;\" type=\"submit\" name=\"cancel\" value=\"CANCEL\"></p>";
-	}
-if($rename_files) {
-	echo "<p style=\"margin-left:6px;\"><font color=\"red\"><big>↓</big></font>&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"rename_checked_files\" value=\"RENAME OR COPY CHECKED FILES/FOLDERS\">&nbsp;&nbsp;<input style=\"background-color:azure;\" type=\"submit\" name=\"cancel\" value=\"CANCEL\"></p>";
-	}
-if($move_files) {
-	echo "<p style=\"margin-left:6px;\"><font color=\"red\"><big>↓</big></font>&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"move_checked_files\" value=\"MOVE CHECKED FILES/FOLDERS\">&nbsp;&nbsp;<input style=\"background-color:azure;\" type=\"submit\" name=\"cancel\" value=\"CANCEL\"></p>";
-	}
+
+echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+$done = $seen = array();
 
 $dest_folder = '';
 if(isset($_POST['move_checked_files'])) {
@@ -452,95 +429,127 @@ if($move_files) {
 		}
 	}
 
+echo "<div style=\"background-color:Cornsilk; padding:1em; width:30%;\">";
+if(!$delete_files AND !$rename_files AND !$move_files AND $path <> $trash_folder) {
+	echo "<input style=\"background-color:yellow;\" title=\"Delete folders or files\" type=\"submit\" name=\"delete_files\" value=\"DELETE\">";
+	}
+if(!$rename_files AND !$delete_files AND !$move_files) {
+	echo "&nbsp;<input style=\"background-color:yellow;\" title=\"Rename folders or files\" type=\"submit\" name=\"rename_files\" value=\"RENAME OR COPY\">";
+	}
+if(!$rename_files AND !$delete_files AND !$move_files) {
+	echo "&nbsp;<input style=\"background-color:yellow;\" title=\"Move folders or files\" type=\"submit\" name=\"move_files\" value=\"MOVE\">";
+	}
+if(!$rename_files AND !$delete_files AND !$move_files AND $path == $trash_folder) {
+	echo "&nbsp;<input style=\"background-color:red; color:white;\" title=\"Empty trash\" type=\"submit\" name=\"empty_trash\" value=\"EMPTY THIS TRASH\"> 👉 can't be reversed!";
+	}
+if(!$show_dependencies AND !$delete_files AND !$move_files AND $path <> $trash_folder) echo "<br /><br /><input style=\"background-color:azure;\" title=\"Show dependencies of files (links to other files)\" type=\"submit\" name=\"show_dependencies\" value=\"SHOW DEPENDENCIES\"> (links between files)";
+else if($show_dependencies) echo "<br /><br /><input style=\"background-color:azure;\" type=\"submit\" value=\"HIDE DEPENDENCIES\">";
+echo "</div>";
+
+if($delete_files OR $delete_checked_files OR $rename_files OR $move_files OR $move_checked_files) {
+	if($delete_files) {
+		echo "<p style=\"margin-left:6px;\"><font color=\"red\"><big>↓</big></font>&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"delete_checked_files\" value=\"DELETE CHECKED FILES/FOLDERS\"> <font color=\"red\">➡</font> can be reversed <input style=\"background-color:azure;\" type=\"submit\" name=\"cancel\" value=\"CANCEL\"></p>";
+		}
+	if($rename_files) {
+		echo "<p style=\"margin-left:6px;\"><font color=\"red\"><big>↓</big></font>&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"rename_checked_files\" value=\"RENAME OR COPY CHECKED FILES/FOLDERS\">&nbsp;&nbsp;<input style=\"background-color:azure;\" type=\"submit\" name=\"cancel\" value=\"CANCEL\"></p>";
+		}
+	if($move_files) {
+		echo "<p style=\"margin-left:6px;\"><font color=\"red\"><big>↓</big></font>&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"move_checked_files\" value=\"MOVE CHECKED FILES/FOLDERS\">&nbsp;&nbsp;<input style=\"background-
+		color:azure;\" type=\"submit\" name=\"cancel\" value=\"CANCEL\"></p>";
+		}
+	}
+
+display_directory(FALSE,$dir,"directory");
+if($path <> $trash_folder) echo "▶︎ <a target=\"_blank\" href=\"index.php?path=".$trash_folder."\">TRASH FOLDER</a><br />";
+echo "<br />";
+
 echo "<table style=\"background-color: Cornsilk;\">";
 echo "<tr>";
 $show_grammar = isset($last_grammar_page) AND isset($last_grammar_name) AND file_exists("..".SLASH.$last_grammar_directory.SLASH.$last_grammar_name);
+echo "<th>";
 if(($n1 = display_directory(TRUE,$dir,"grammar")) > 0 OR $show_grammar) {
-	echo "<th><h3>Grammar project(s)</h3>";
+	echo "<h3>Grammar project(s)</h3>";
 	if($show_grammar) {
 		echo "<p style=\"background-color:snow; padding:6px; border-radius: 0.5em;\">Last visited: <a target=\"_blank\" href=\"".$last_grammar_page."\">".$last_grammar_name."</a>";
 		if(isset($last_grammar_directory) AND $folder <> $last_grammar_directory) echo "<br />in workspace</font> <a href=\"index.php?path=".$last_grammar_directory."\">".$last_grammar_directory."</a></p>";
 		}
-	echo "</th>";
 	}
+echo "</th>";
 $show_alphabet = isset($last_data_page) AND isset($last_data_name) AND file_exists("..".SLASH.$last_data_directory.SLASH.$last_data_name);
+echo "<th>";
 if(($n2 = display_directory(TRUE,$dir,"data")) > 0 OR $show_alphabet) {
-	echo "<th><h3>Data project(s)</h3>";
+	echo "<h3>Data project(s)</h3>";
 	if($show_alphabet) {
 		echo "<p style=\"background-color:snow; padding:6px; border-radius: 0.5em;\">Last visited: <a target=\"_blank\" href=\"".$last_data_page."\">".$last_data_name."</a>";
 		if(isset($last_data_directory) AND $folder <> $last_data_directory) echo "<br />in workspace</font> <a href=\"index.php?path=".$last_data_directory."\">".$last_data_directory."</a></p>";
 		}
-	echo "</th>";
 	}
+echo "</th>";
 if(($n3 = display_directory(TRUE,$dir,"script")) > 0) echo "<th><h3>Script project(s)</h3></th>";
 echo"</tr>";
 echo "<tr>";
-if($n1 > 0) {
-	echo "<td>";
-	display_directory(FALSE,$dir,"grammar");
-	echo "</td>";
-	}
-if($n2 > 0) {
-	echo "<td>";
-	display_directory(FALSE,$dir,"data");
-	echo "</td>";
-	}
-if($n3 > 0) {
-	echo "<td>";
-	display_directory(FALSE,$dir,"script");
-	echo "</td>";
-	}
+echo "<td>";
+if($n1 > 0) display_directory(FALSE,$dir,"grammar");
+echo "</td>";
+echo "<td>";
+if($n2 > 0) display_directory(FALSE,$dir,"data");
+echo "</td>";
+echo "<td>";
+if($n3 > 0) display_directory(FALSE,$dir,"script");
+echo "</td>";
 echo"</tr>";
 echo "<tr>";
-if(($n1 = display_directory(TRUE,$dir,"timebase")) > 0) echo "<th><h3>Time base(s)</h3></th>";
-if(($n2 = display_directory(TRUE,$dir,"objects")) > 0) echo "<th><h3>Sound objects</h3></th>";
-if(($n3 = display_directory(TRUE,$dir,"glossary")) > 0) echo "<th><h3>Glossaries</h3></th>";
+echo "<th>";
+if(($n1 = display_directory(TRUE,$dir,"timebase")) > 0) echo "<h3>Time base(s)</h3>";
+echo "</th>";
+echo "<th>";
+if(($n2 = display_directory(TRUE,$dir,"objects")) > 0) echo "<h3>Sound objects</h3>";
+echo "</th>";
+echo "<th>";
+if(($n3 = display_directory(TRUE,$dir,"glossary")) > 0) echo "<h3>Glossaries</h3>";
+echo "</th>";
 echo"</tr>";
 echo "<tr>";
-if($n1 > 0) {
-	echo "<td>";
-	display_directory(FALSE,$dir,"timebase");
-	echo "</td>";
-	}
-if($n2 > 0) {
-	echo "<td>";
-	display_directory(FALSE,$dir,"objects");
-	echo "</td>";
-	}
-if($n3 > 0) {
-	echo "<td>";
-	display_directory(FALSE,$dir,"glossary");
-	echo "</td>";
-	}
+echo "<td>";
+if($n1 > 0) display_directory(FALSE,$dir,"timebase");
+echo "</td>";
+echo "<td>";
+if($n2 > 0) display_directory(FALSE,$dir,"objects");
+echo "</td>";
+echo "<td>";
+if($n3 > 0) display_directory(FALSE,$dir,"glossary");
+echo "</td>";
 echo"</tr>";
 echo "<tr>";
-if(($n1 = display_directory(TRUE,$dir,"settings")) > 0) echo "<th><h3>Settings</h3></th>";
-if(($n2 = display_directory(TRUE,$dir,"alphabet")) > 0) echo "<th><h3>Alphabet(s)</h3></th>";
-if(($n3 = display_directory(TRUE,$dir,'')) > 0 AND $path <> '' AND !is_integer(strpos($path,"csound_resources"))) echo "<th><h3>More</h3></th>";
+echo "<th>";
+if(($n1 = display_directory(TRUE,$dir,"settings")) > 0) echo "<h3>Settings</h3>";
+echo "</th>";
+echo "<th>";
+if(($n2 = display_directory(TRUE,$dir,"alphabet")) > 0) echo "<h3>Alphabet(s)</h3>";
+echo "</th>";
+echo "<th>";
+if(($n3 = display_directory(TRUE,$dir,'')) > 0 AND $path <> '' AND !is_integer(strpos($path,"csound_resources"))) echo "<h3>More</h3>";
+echo "</th>";
 echo "</tr>";
 echo "<tr>";
-if($n1 > 0) {
-	echo "<td>";
-	display_directory(FALSE,$dir,"settings");
-	echo "</td>";
-	}
-if($n2 > 0) {
-	echo "<td>";
-	display_directory(FALSE,$dir,"alphabet");
-	echo "</td>";
-	}
-if($n3 > 0) {
-	echo "<td>";
-	display_directory(FALSE,$dir,'');
-	echo "</td>";
-	}
+echo "<td>";
+if($n1 > 0) display_directory(FALSE,$dir,"settings");
+echo "</td>";
+echo "<td>";
+if($n2 > 0) display_directory(FALSE,$dir,"alphabet");
+echo "</td>";
+echo "<td>";
+if($n3 > 0) display_directory(FALSE,$dir,'');
+echo "</td>";
 echo"</tr>";
 echo "</table>";
-if($delete_files OR $delete_checked_files OR $rename_files OR $move_files OR $move_checked_files)
-	echo "</form>";
+// if($delete_files OR $delete_checked_files OR $rename_files OR $move_files OR $move_checked_files)
+echo "</form>";
 
 function display_directory($test,$dir,$filter) {
-	global $path,$move_files,$move_checked_files,$new_file,$csound_resources,$delete_checked_files,$rename_checked_files,$delete_files,$rename_files,$show_dependencies,$trash_folder,$this_page,$dir_trash_folder,$bp_application_path,$dest_folder,$done,$seen,$dir_csound_resources;
+	global $path,$move_files,$move_checked_files,$new_file,$csound_resources,$delete_checked_files,$rename_checked_files,$delete_files,$rename_files,$show_dependencies,$trash_folder,$this_page,$url_this_page,$dir_trash_folder,$bp_application_path,$dest_folder,$done,$seen,$dir_csound_resources;
+
+//	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 	$dircontent = scandir($dir);
 	$i_file = $files_shown = 0;
 	foreach($dircontent as $thisfile) { 
@@ -560,8 +569,11 @@ function display_directory($test,$dir,$filter) {
 			unset($_POST['move_'.$i_file]);
 			$source_file = $bp_application_path.$path.SLASH.$thisfile;
 			$destination_file = $bp_application_path.$dest_folder.SLASH.$thisfile;
-			if(file_exists($destination_file))
-				echo "<p><font color=\"red\">➡ There is already</font> a file or folder named ‘<font color=\"blue\">".$thisfile."</font>’ in ‘<font color=\"blue\">".$dest_folder."</font>’</p>";
+			if(file_exists($destination_file)) {
+				if($dest_folder <> '') $the_dest = "‘<font color=\"blue\">".$dest_folder."</font>’";
+				else $the_dest = "the root folder";
+				echo "<p><font color=\"red\">➡ There is already</font> a file or folder named ‘<font color=\"blue\">".$thisfile."</font>’ in ".$the_dest."</p>";
+				}
 			else {
 				if(is_dir($dir.SLASH.$thisfile)) {
 					if(is_integer($pos=strpos($destination_file,$source_file)))
@@ -599,7 +611,10 @@ function display_directory($test,$dir,$filter) {
 		if(!$test) $done[$thisfile] = TRUE;
 		if($test AND isset($seen[$thisfile])) continue;
 		if($test AND ($filter == '' OR $filter == $type)) $seen[$thisfile] = TRUE;
+	
+		if(!ok_output_location($thisfile,FALSE)) continue;
 		if(!$test) echo $check_box;
+
 		if(!$test AND $path <> $csound_resources AND $path <> $trash_folder AND ($type == "csound" OR $type == "csorchestra")) {
 			echo "Moved ‘<font color=\"blue\">".$dir.SLASH.$thisfile."</font>’ to ‘<font color=\"blue\">".$dir_csound_resources.$thisfile."</font>’<br />";
 			if(file_exists($dir_csound_resources.$thisfile)) @unlink($dir.SLASH.$thisfile);
@@ -666,6 +681,9 @@ function display_directory($test,$dir,$filter) {
 				echo "▶︎ ";
 				}
 			else if($thisfile == "bp") continue;
+
+	//		if(!$test) echo $check_box;
+
 			if(!$test AND $delete_files) echo "<input type=\"checkbox\" name=\"delete_".$i_file."\"> ";
 			if($type <> '') {
 				$files_shown++;
@@ -710,10 +728,13 @@ function display_directory($test,$dir,$filter) {
 			}
 		}
 	if($files_shown == 0) return $files_shown;
+	if(!$test AND $move_files)
+		echo "<p style=\"margin-left:6px;\"><font color=\"red\"><big>↓</big></font>&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"move_checked_files\" value=\"MOVE CHECKED FILES/FOLDERS\">&nbsp;&nbsp;<input style=\"background-
+		color:azure;\" type=\"submit\" name=\"cancel\" value=\"CANCEL\"></p>";
 	if(!$test AND $delete_files)
-		echo "<p style=\"margin-left:6px;\"><font color=\"red\"><big>↑</big>&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"delete_checked_files\" value=\"DELETE CHECKED FILES/FOLDERS\"> <font color=\"red\">➡</font> can be reversed <input style=\"background-color:azure;\" type=\"submit\" name=\"cancel\" value=\"CANCEL\"></p>";
+		echo "<p style=\"margin-left:6px;\"><font color=\"red\"><big>↑</big></font>&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"delete_checked_files\" value=\"DELETE CHECKED FILES/FOLDERS\"> <font color=\"red\">➡</font> can be reversed <input style=\"background-color:azure;\" type=\"submit\" name=\"cancel\" value=\"CANCEL\"></p>";
 	if(!$test AND $rename_files)
-		echo "<p style=\"margin-left:6px;\"><font color=\"red\"><big>↑</big>&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"rename_checked_files\" value=\"RENAME OR COPY CHECKED FILES/FOLDERS\">&nbsp;&nbsp;<input style=\"background-color:azure;\" type=\"submit\" name=\"cancel\" value=\"CANCEL\"></p>";
+		echo "<p style=\"margin-left:6px;\"><font color=\"red\"><big>↑</big></font>&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"rename_checked_files\" value=\"RENAME OR COPY CHECKED FILES/FOLDERS\">&nbsp;&nbsp;<input style=\"background-color:azure;\" type=\"submit\" name=\"cancel\" value=\"CANCEL\"></p>";
 	return $files_shown;
 	}
 
@@ -721,14 +742,15 @@ function folder_list($dir,$list,$path) {
 	global $bp_application_path;
 	$dircontent = scandir($dir);
 	foreach($dircontent as $thisfile) {
-		if($thisfile == '.' OR $thisfile == ".." OR $thisfile == ".DS_Store") continue;
+		if($thisfile[0] == '.') continue;
 		if(!is_dir($dir.$thisfile)) continue;
+		$new_path = $path.SLASH.$thisfile;
 		if($dir == $bp_application_path) {
-			if($thisfile <> "ctests" AND $thisfile <> "data") continue;
+			if(!ok_output_location($thisfile,FALSE)) continue;
+			$list[] = $new_path = $thisfile;
 			}
-		if($path == '') $list[] = $nextpath = $thisfile;
-		else $list[] = $nextpath = $path.SLASH.$thisfile;
-		$list = folder_list($dir.$thisfile.SLASH,$list,$nextpath);
+		else $list[] = $path.SLASH.$thisfile;
+		$list = folder_list($dir.$thisfile.SLASH,$list,$new_path);
 		}
 	return $list;
 	}
