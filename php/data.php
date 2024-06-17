@@ -1172,12 +1172,12 @@ if(isset($_POST['apply_changes_instructions'])) {
 $refresh_file = $temp_dir."trace_".session_id()."_".$filename."_midiport_refresh";
 if(isset($_POST['savemidiport'])) {
 	save_midiressources($filename);
-	echo "<span id=\"timespan\" style=\"color:red; float:right;\">&nbsp;…&nbsp;Saved “".$filename."_midiport” file…</span>";
+	echo "<span id=\"timespan\" style=\"color:red; float:right; background-color:white;\">&nbsp;…&nbsp;Saved “".$filename."_midiport” file…</span>";
 	@unlink($refresh_file);
 	}
 
 if($need_to_save OR isset($_POST['savethisfile'])) {
-	echo "<p id=\"timespan\" style=\"color:red; float:right;\">Saved ‘".$filename."’file…</p>";
+	echo "<p id=\"timespan\" style=\"color:red; float:right; background-color:white;\">Saved ‘".$filename."’file…</p>";
 	if(isset($_POST['thistext'])) $content = $_POST['thistext'];
 	$file_format = $default_output_format;
 	if(isset($data_file_format[$filename])) $file_format = $data_file_format[$filename];

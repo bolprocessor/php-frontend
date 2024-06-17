@@ -183,12 +183,12 @@ if(isset($_POST['apply_changes_instructions'])) {
 $refresh_file = $temp_dir."trace_".session_id()."_".$filename."_midiport_refresh";
 if(isset($_POST['savemidiport'])) {
 	save_midiressources($filename);
-	echo "<span id=\"timespan\" style=\"color:red; float:right;\">&nbsp;…&nbsp;Saved “".$filename."_midiport” file…</span>";
+	echo "<span id=\"timespan\" style=\"color:red; float:right; background-color:white;\">&nbsp;…&nbsp;Saved “".$filename."_midiport” file…</span>";
 	@unlink($refresh_file);
 	}
 
 if($need_to_save OR isset($_POST['savethisfile']) OR isset($_POST['compilegrammar'])) {
-	if(isset($_POST['savethisfile'])) echo "<span id=\"timespan\" style=\"color:red; float:right;\">&nbsp;…&nbsp;Saved “".$filename."” file…</span>";
+	if(isset($_POST['savethisfile'])) echo "<span id=\"timespan\" style=\"color:red; float:right; background-color:white;\">&nbsp;…&nbsp;Saved “".$filename."” file…</span>";
 	$content = $_POST['thistext'];
 	if(isset($_POST['alphabet_file'])) $alphabet_file = $_POST['alphabet_file'];
 	else $alphabet_file = '';

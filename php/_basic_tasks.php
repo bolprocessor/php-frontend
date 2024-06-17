@@ -2964,6 +2964,7 @@ function set_output_folder($output_folder) {
 	}
 
 function ok_output_location($folder,$talk) {
+	global $output_folder;
 	$result = TRUE;
 	if(hidden_directory($folder)) $result = FALSE;
 	if($folder == "csound_resources") $result = FALSE;
@@ -2972,6 +2973,7 @@ function ok_output_location($folder,$talk) {
 	if($folder == "trash_bolprocessor") $result = FALSE;
 	if($folder == "scripts") $result = FALSE;
 	if(is_integer($pos=strpos($folder,"BP2-")) AND $pos == 0) $result = FALSE;
+	if($folder == $output_folder AND !$talk) $result = FALSE;
 	if(!$result AND $talk) echo "<p><font color=\"red\">ERROR:</font> Folder “<font color=\"blue\">".$folder."</font>” cannot be used for output files.</p>";
 	return $result;
 	}
