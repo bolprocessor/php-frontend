@@ -9,19 +9,19 @@ Pclock	Pclock/Qclock is the period of metronome (seconds)	1
 Qclock		1
 Jbutt (28 radio button settings)		0
 Non-stop improvize		1	1
-Cyclic play		1	1
-Use each substitution		1	1
-Produce all items		1	1
+Cyclic play	(not implemented)	1	1
+Play each substitution		1	1
+Produce all items	(not implemented)	1	1
 Display production		1	1
-Step-by-step produce		1	1
-Step subrammars		1	1
+Step-by-step produce	(not implemented)	1	1
+Step subrammars	(not implemented)	1	1
 Trace production		1	1
-Choose candidate rule		1	1
-Display items		1	1
-Show graphics		1	1
+Choose candidate rule	(not implemented)	1	1
+Display items	(not implemented)	1	1
+Show graphics	ObjectGraph OR PianoRoll, see below	1	1
 Allow randomize		1	1
 Time setting display		1	1
-Time setting step		1	1
+Time setting step	(not implemented)	1	1
 Time setting trace		1	1
 Csound trace		1	1
 Use MIDI in/out		0	1
@@ -29,8 +29,8 @@ Reset Notes	Send AllNotesOff and pedals off at the end of item	1	1
 Compute while playing		1	1
 Trace MIDI interactions		1	1
 Reset rule weights		1	1
-Reset rule flags		1	1
-Reset controllers		1	1
+Reset rule flags	/this is a flag/	1	1
+Reset controllers	volume, panoramic, pressure, pitchbend, modulation	1	1
 Ignore constraints		1	1
 Write MIDI files		0	1
 Show messages		0	1
@@ -43,7 +43,7 @@ Default buffer size	symbols	1
 Use color in graphics		0	1
 Use buffer limit		0	1
 Max computation time	seconds	1		Time assigned for console's work
-Seed for randomization	(positive integer or 0 for no seed)	1
+Seed for randomization	Positive integer, or 0 if cards need to be shuffled	1
 Use keyboard tokens		0	1
 Note convention	0 = English: C, D, E...<br />1 = Italian/Spanish/French: do, re, mi...<br />2 = Indian: sa, re, ga...<br />3 = Keys<br />4 = Only from imported scales(s) with Csound	1
 StartFromOne		0	1
@@ -62,7 +62,7 @@ ProgNrFrom		0
 Fade-out time	seconds (end of MIDI files and Csound scores)	1
 C4 (middle C) key number	(0..127) usually 60	1
 A4 frequency (diapason)	Hz (usually 440)	1
-Strike again NoteOn's	Keep selected unless you know why!	1	1
+Strike again NoteOn's	Keep checked unless you know why!	1	1
 Default volume	(1..127)	1
 Volume controller	(0..127) usually 7	1
 Default velocity	(1..127)	1
