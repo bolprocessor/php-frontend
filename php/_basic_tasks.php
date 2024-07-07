@@ -2221,20 +2221,28 @@ else echo "<p><font color=\"red\">File ‘_settings.php’ could nor be opened!<
  	}
 
 function display_conssole_state() {
-	global $bp_application_path;
+	global $bp_application_path, $absolute_application_path, $panicfile, $filename, $url_this_page;
 	 echo "<div style=\"display: flex; align-items: center; float: right; background-color: white; padding: 6px; border-radius: 6px;\">";
-	 echo "<img src=\"pict/BP3-logo.png\" style=\"width: 40px;\"/>";  // Corrected CSS for width
+	 echo "<img src=\"pict/BP3-logo.png\" style=\"width: 100px;\"/>";  // Corrected CSS for width
 	 echo "<span style=\"margin-left: 6px;\">";
-	 if(check_console()) echo "Bol Processor is installed and responsive&nbsp;😀";
+	 $output = check_console();
+	 if($output <> '') echo "Bol Processor is installed and responsive&nbsp;😀<br />Version ".$output;
 	 else {
 		echo "Bol Processor is not yet installed or not responsive&nbsp;😣<br />";
-		$source = $bp_application_path."source";
-		if(file_exists($source))
-			echo "The source files of BP3 have been found. You can recompile “bp”, then try again.<br />👉&nbsp;&nbsp;<a target=\"_blank\" href=\"".$bp_application_path."compile.php?return=produce.php\">Run the compiler</a>";
+		$source = $bp_application_path."source/BP3";
+		if(file_exists($source)) {
+			$link = "../compile.php";
+			echo "The source files of BP3 have been found. You can (re)compile “bp”.<br />";
+			if(!check_gcc()) if(windows_system()) echo "👉&nbsp;&nbsp;However, ‘gcc’ is not responding.<br />You first need to <a target=\"_blank\" href=\"https://bolprocessor.org/install-mingw/\">install and set up MinGW</a>.";
+				else echo "👉&nbsp;&nbsp;However, ‘gcc’ is not responding. You need to install<br />the <a target=\"_blank\" href=\"https://www.cnet.com/tech/computing/install-command-line-developer-tools-in-os-x/\">command line developer tools</a> or <a target=\"_blanl\" href=\"https://developer.apple.com/support/xcode/\">Xcode</a>.";
+			else echo "👉&nbsp;&nbsp;<a onclick=\"window.open('".$link."','trace','width=800,height=800'); return false;\"  href=\"".$link."\">Click to run the compiler</a>, then <a href=\"".$url_this_page."\">reload this page</a>.";
+			}
 		else
 			echo "Source files (the “source” folder) have not been found.<br />Visit <a target=\"_blank\" href=\"https://bolprocessor.org/check-bp3/#install\">https://bolprocessor.org/check-bp3/</a> and follow instructions!";
 	 	}
-	echo "</span>";
+	 $panicfile = str_replace(SLASH,'/',$panicfile);
+	 if(isset($filename)  AND $filename <> "Compilation" AND $filename <> "Produce") echo "<div style=\"text-align:right;\"><button type=\"button\" class=\"bouton\" onclick=\"createFile('".$panicfile."');\">PANIC!</button></div>\n";
+	 echo "</span>";
 	 echo "</div>";
 	 return;
 	}
@@ -2242,24 +2250,38 @@ function display_conssole_state() {
 function check_console() {
 	global $bp_application_path, $console;
 	$command = $bp_application_path.$console." --short-version";
-	$return_var = send_to_console($command);
-	return(count($return_var));
+	if(windows_system()) $command = windows_command($command);
+	exec($command,$table,$status);
+	if($status == 0) $output = $table[0];
+	else $output = '';
+	return($output);
+	}
+
+function check_gcc() {
+	global $bp_application_path;
+	$command = "gcc --version";
+	if(windows_system()) $command = windows_command($command);
+	exec($command,$table,$status);
+	if($status == 0) return TRUE;
+	else return FALSE;
+/*	$output = $table[0];
+//	else $output = '';
+	echo $output."<br />";
+	if(is_integer($pos=strpos($output,"gcc ") AND $pos == 9)) return TRUE;
+	else return FALSE; */
 	}
 
 function check_csound() {
     global $csound_path, $csound_resources, $path, $url_this_page, $file_format,$csound_name,$programFiles;
-	$return_var = 1;
 	$this_file = "csound_version.txt";
     @unlink($this_file);
 	$command = "\"".$programFiles.SLASH.$csound_path.SLASH.$csound_name."\" --version 2>csound_version.txt";
 	if(file_exists($programFiles.SLASH.$csound_path.SLASH.$csound_name)) {
    // echo "com = ".$command."<br />";
-        $return_var = send_to_console($command);
+        send_to_console($command);
 		}
     if(!file_exists($this_file)) {
-//	if($return_var <> 0) {
 		echo "&nbsp;&nbsp;&nbsp;<small><font color=\"red\">".$csound_path.SLASH.$csound_name."</font></small>";
-	//	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		if(isset($file_format)) echo "<input type=\"hidden\" name=\"file_format\" value=\"".$file_format."\">";
 		echo "<p><img src=\"pict/logo_csound.jpg\" width=\"90px;\" style=\"vertical-align:middle;\" />&nbsp;is not installed<br />or its path (<font color= \"blue\">".$csound_path."</font>) is incorrect<br /><br />";
 		echo "Name: <font color=\"green\">path_to_csound/ </font><input type=\"text\" name=\"csound_name\" size=\"12\" style=\"background-color:CornSilk;\" value=\"".$csound_name."\"><br />";

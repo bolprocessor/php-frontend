@@ -47,9 +47,18 @@ else {
 		}
 	if(!$no_error OR !file_exists($dir.$console)) {
 		echo "<p>The console application (file “bp”) is not working or missing or misplaced…</p>";
-		$source = $dir."source";
-		if(file_exists($source))
-			echo "<p>Source files have been found. You can try to recompile “bp”, then return to this page.<br /><br />➡ <a href=\"".$dir."compile.php\">Run the compiler</a> (this works at least in MacOS)</p>";
+		$source = $dir."source/BP3";
+		if(file_exists($source)) {
+			$link = $dir."compile.php";
+            $link = str_replace(SLASH,'/',$link);
+			echo "The source files of BP3 have been found. You can (re)compile “bp”.<br />";
+			if(!check_gcc()) if(windows_system()) echo "<p>👉&nbsp;&nbsp;However, ‘gcc’ is not responding. You first need to <a target=\"_blank\" href=\"https://bolprocessor.org/install-mingw/\">install and set up MinGW</a>.</p>";
+				else echo "<p>👉&nbsp;&nbsp;However, ‘gcc’ is not responding. You need to install the <a target=\"_blank\" href=\"https://www.cnet.com/tech/computing/install-command-line-developer-tools-in-os-x/\">command line developer tools</a> or <a target=\"_blanl\" href=\"https://developer.apple.com/support/xcode/\">Xcode</a>.</p>";
+			else echo "<p>👉&nbsp;&nbsp;<a onclick=\"window.open('".$link."','trace','width=800,height=800'); return false;\"  href=\"".$link."\">Click to run the compiler</a>, then <a href=\"".$url_this_page."\">reload this page</a>.</p>";
+
+
+	/* 		echo "<p>Source files have been found. You can try to recompile “bp”, then <a href=\"".$url_this_page."\">reload this page</a>.<br /><br />➡ <a onclick=\"window.open('".$link."','trace','width=800,height=800'); return false;\" href=\"".$link."\">Run the compiler</a> (this works at least in MacOS)</p>"; */
+			}
 		else
 			echo "<p>Source files (the “source” folder) have not been found.<br />Visit <a target=\"_blank\" href=\"https://bolprocessor.org/check-bp3/#install\">https://bolprocessor.org/check-bp3/</a> and follow instructions!</p>";
 		die();
