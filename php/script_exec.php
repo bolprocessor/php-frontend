@@ -31,8 +31,8 @@ echo "</html>";
 function run_script($dir,$file,$script_variables,$note_convention,$grammar,$output_format) {
 	global $temp_dir,$bp_application_path,$top_header;
 	// echo "script_variables = ".$script_variables."<br />"; 
-	require($script_variables);
-	require("_settings.php");
+	require_once($script_variables);
+	require_once("_settings.php");
 	$temp_folder = urldecode($_GET['temp_folder']);
 	$content = @file_get_contents($dir.$file,TRUE);
 	$extract_data = extract_data(TRUE,$content);
@@ -67,7 +67,7 @@ function run_script($dir,$file,$script_variables,$note_convention,$grammar,$outp
 			$line = trim(str_replace($instruction." ",'',$line));
 			$recoded_line = recode_tags($line);
 			echo "Play ".$recoded_line;
-			$data = $temp_dir."temp_".session_id()."outdata.bpda";
+			$data = $temp_dir."temp_".my_session_id()."outdata.bpda";
 			$handle = fopen($data,"w");
 			$file_header = $top_header."\n// Data saved as \"outdata.bpda\". Date: ".gmdate('Y-m-d H:i:s');
 			fwrite($handle,$file_header."\n");
@@ -77,6 +77,7 @@ function run_script($dir,$file,$script_variables,$note_convention,$grammar,$outp
 			$command .= " -da ".$data;
 			if($note_convention <> '') $command .= " --".strtolower($note_convention);
 			$command .= " -d --rtmidi ";
+			$command .= " --rtmidi ";
 			echo "<p style=\"color:red;\">".$command."</p>";
 			$o = send_to_console($command);
 			$n_messages = count($o);
@@ -133,7 +134,7 @@ function run_script($dir,$file,$script_variables,$note_convention,$grammar,$outp
 			$command = $bp_application_path."bp produce";
 			$command .= " -gr ".$grammar;
 			if($note_convention <> '') $command .= " --".strtolower($note_convention);
-			$command .= " -d";
+		//	$command .= " -d";
 			if($output_format == "csound")
 				$command .= " --csoundout ".$output_file;
 			else $command .= " --rtmidi ";

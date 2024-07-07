@@ -39,7 +39,7 @@ save_settings("last_name",$filename);
 
 if($test) echo "dir = ".$dir."<br />";
 
-$temp_folder = str_replace(' ','_',$filename)."_".session_id()."_temp";
+$temp_folder = str_replace(' ','_',$filename)."_".my_session_id()."_temp";
 if(!file_exists($temp_dir.$temp_folder)) {
 	mkdir($temp_dir.$temp_folder);
 	}

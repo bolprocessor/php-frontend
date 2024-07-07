@@ -1,6 +1,5 @@
 <?php
 require_once("_basic_tasks.php");
-require_once("_settings.php");
 $url_this_page = "preview_musicxml.php";
 if(isset($_GET['title'])) $this_title = urldecode($_GET['title']);
 else $this_title = "MusicXML file";

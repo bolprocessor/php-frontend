@@ -495,7 +495,8 @@ if(isset($_POST['createcsound'])) {
 			$command .= " -ho ".$alphabet;
 			$command .= " -mi \"".$prototypes_file."\"";
 			if($CsoundInstruments_file <> '') $command .= " -cs \"".$CsoundInstruments_file."\"";
-			$command .= " -d --csoundout ".$csound_file;
+		//	$command .= " -d --csoundout ".$csound_file;
+			$command .= " --csoundout ".$csound_file;
 			// $command .= " --traceout ".$tracefile;
 			$message_create_sound = "<p id=\"timespan\"><font color=\"red\">➡ </font>MIDI codes to Csound conversion…<p>";
 			$message_create_sound .= "<p style=\"color:red;\"><small>".$command."</small></p>";
@@ -545,7 +546,8 @@ if(isset($_POST['playexpression'])) {
 		$command .= " -ho ".$alphabet;
 		$command .= " -mi \"".$prototypes_file."\"";
 		// if($CsoundInstruments_file <> '') $command .= " -cs \"".$CsoundInstruments_file."\"";
-		$command .= " -d --rtmidi ";
+	//	$command .= " -d --rtmidi ";
+		$command .= " --rtmidi ";
 		// $command .= " --traceout ".$tracefile;
 		echo "<p style=\"color:red;\"><small>".$command."</small></p>";
 		$no_error = FALSE;

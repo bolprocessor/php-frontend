@@ -20,7 +20,7 @@ require_once("_header.php");
 echo "<p>Current directory = ".$dir."</p>";
 echo link_to_help();
 
-$temp_folder = str_replace(' ','_',$filename)."_".session_id()."_temp";
+$temp_folder = str_replace(' ','_',$filename)."_".my_session_id()."_temp";
 if(!file_exists($temp_dir.$temp_folder)) {
 	mkdir($temp_dir.$temp_folder);
 	}

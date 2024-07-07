@@ -12,7 +12,7 @@ $dir = str_replace($filename,'',$this_file);
 $current_directory = str_replace(SLASH.$filename,'',$file);
 
 require_once("_header.php");
-echo "<p>Current directory = <a href=\"index.php?path=".urlencode($current_directory)."\">".$dir."</a></p>";
+// echo "<p>Current directory = <a href=\"index.php?path=".urlencode($current_directory)."\">".$dir."</a></p>";
 echo link_to_help();
 
 echo "<h3>Settings file “".$filename."”</h3>";

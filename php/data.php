@@ -1,6 +1,5 @@
 <?php
 require_once("_basic_tasks.php");
-require_once("_settings.php");
 require_once("_musicxml.php");
 require_once("_tonal_analysis.php");
 set_time_limit(0);
@@ -21,12 +20,15 @@ $current_directory = str_replace(SLASH.$filename,'',$file);
 save_settings("last_data_directory",$current_directory);
 
 if(isset($_POST['reload'])) {
+    $refresh_file = $temp_dir."trace_".my_session_id()."_".$filename."_midiport_refresh";
 	@unlink($refresh_file);
     header("Location: ".$url_this_page);
     exit();	
 	}
 
 require_once("_header.php");
+
+display_conssole_state();
 
 $url = "index.php?path=".urlencode($current_directory);
 echo "<p>Workspace = <input style=\"background-color:azure;\" name=\"workspace\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$url."','_self');\" value=\"".$current_directory."\">";
@@ -39,7 +41,7 @@ $no_chunk_real_time_midi = FALSE;
 echo "<h3>Data file “".$filename."”</h3>";
 save_settings("last_data_name",$filename); 
 
-$temp_folder = str_replace(' ','_',$filename)."_".session_id()."_temp";
+$temp_folder = str_replace(' ','_',$filename)."_".my_session_id()."_temp";
 if(!file_exists($temp_dir.$temp_folder)) {
 	mkdir($temp_dir.$temp_folder);
 	}
@@ -47,7 +49,7 @@ $music_xml_file = $temp_dir.$temp_folder.SLASH."temp.musicxml";
 $more_data = ''; $dynamic_control = array();
 $link_edit = "data.php";
 
-$temp_midi_ressources = $temp_dir."trace_".session_id()."_".$filename."_";
+$temp_midi_ressources = $temp_dir."trace_".my_session_id()."_".$filename."_";
 
 $objects_file = $csound_file = $alphabet_file = $grammar_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = $csound_default_orchestra = '';
 
@@ -1169,7 +1171,7 @@ if(isset($_POST['apply_changes_instructions'])) {
 	$need_to_save = TRUE;
 	}
 
-$refresh_file = $temp_dir."trace_".session_id()."_".$filename."_midiport_refresh";
+$refresh_file = $temp_dir."trace_".my_session_id()."_".$filename."_midiport_refresh";
 if(isset($_POST['savemidiport'])) {
 	save_midiressources($filename);
 	echo "<span id=\"timespan\" style=\"color:red; float:right; background-color:white;\">&nbsp;…&nbsp;Saved “".$filename."_midiport” file…</span>";
@@ -1311,7 +1313,15 @@ else echo "• Note convention is <font color=\"red\">‘English’</font> by de
 if($settings_file <> '' AND file_exists($dir.$settings_file)) echo "<input style=\"background-color:yellow;float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_settings."','".$settings_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$settings_file."’\">";
 echo "</div>";
 
-if(!isset($output_folder) OR $output_folder == '') $output_folder = "my_output";
+if(!isset($output_folder) OR $output_folder == '')
+    $output_folder = "my_output";
+$output = $bp_application_path.SLASH.$output_folder;
+do $output = str_replace(SLASH.SLASH,SLASH,$output,$count);
+while($count > 0);
+if(!file_exists($output)) {
+    echo "<p><font color=\"red\">Created folder:</font><font color=\"blue\"> ".$output."</font><br />";
+    mkdir($output);
+    }
 $default_output_name = str_replace("-da.",'',$filename);
 $default_output_name = str_replace(".bpda",'',$default_output_name);
 $file_format = $default_output_format;
@@ -1392,11 +1402,11 @@ if($csound_file <> '') {
 	}
 else echo "<br />";
 
-echo "<div style=\"float:right; background-color:white; padding-right:6px; padding-left:6px;\">";
+echo "<div style=\"float:right; background-color:white; padding-right:6px; padding-left:6px; border-radius: 12px;\">";
 $csound_is_responsive = check_csound();
 echo "</div>";
 echo "<table id=\"topedit\" style=\"background-color:white; border-radius: 15px; border: 1px solid black;\" cellpadding=\"8px;\"><tr style=\"\">";
-echo "<td>";
+echo "<td style=\"white-space:nowrap;\">";
 if($file_format <> "rtmidi") {
 	for($i = 0; $i < $NumberMIDIoutputs; $i++) {
 		echo "<input type=\"hidden\" name=\"MIDIoutput_".$i."\" value=\"".$MIDIoutput[$i]."\">";

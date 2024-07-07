@@ -204,5 +204,7 @@ function is_connected() {
   else return FALSE;
   }
 
-if(isset($filename)  AND $filename <> "Compilation" AND $filename <> "Produce") echo "<div style=\"float:right; \"><button type=\"button\" class=\"bouton\" onclick=\"createFile('".$panicfile."');\">PANIC!</button></div>\n";
+// echo "panicfile = ".$panicfile."<br />";
+$panicfile = str_replace(SLASH,'/',$panicfile);
+if(isset($filename)  AND $filename <> "Compilation" AND $filename <> "Produce") echo "<div style=\"float:right; margin-left=2em;\"><button type=\"button\" class=\"bouton\" onclick=\"createFile('".$panicfile."');\">PANIC!</button></div>\n";
 ?>

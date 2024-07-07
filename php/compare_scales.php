@@ -21,7 +21,7 @@ echo "</small></p>";
 echo link_to_help();
 
 echo "<h3>Comparison of scales selected in Csound resource file “".$filename."”</h3>";
-$temp_folder = str_replace(' ','_',$filename)."_".session_id()."_temp";
+$temp_folder = str_replace(' ','_',$filename)."_".my_session_id()."_temp";
 $dir_scales = $temp_dir.$temp_folder.SLASH."scales".SLASH;
 
 $dircontent = scandir($dir_scales);

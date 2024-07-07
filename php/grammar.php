@@ -1,6 +1,5 @@
 <?php
 require_once("_basic_tasks.php");
-require_once("_settings.php");
 set_time_limit(0);
 
 if(isset($_GET['file'])) $file = urldecode($_GET['file']);
@@ -17,9 +16,7 @@ $textarea_rows = 20;
 
 if($test) echo "grammar_file = ".$this_file."<br />";
 
-if(!isset($output_folder) OR $output_folder == '') $output_folder = "my_output";
-
-$temp_folder = str_replace(' ','_',$filename)."_".session_id()."_temp";
+$temp_folder = str_replace(' ','_',$filename)."_".my_session_id()."_temp";
 if(!file_exists($temp_dir.$temp_folder)) {
 	mkdir($temp_dir.$temp_folder);
 	}
@@ -52,12 +49,13 @@ if(isset($_POST['reload'])) {
 	}
 
 require_once("_header.php");
+display_conssole_state();
 
-$temp_midi_ressources = $temp_dir."trace_".session_id()."_".$filename."_";
+$temp_midi_ressources = $temp_dir."trace_".my_session_id()."_".$filename."_";
 
 $url = "index.php?path=".urlencode($current_directory);
 echo "<p>Workspace = <input style=\"background-color:azure;\" name=\"workspace\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$url."','_self');\" value=\"".$current_directory."\">";
-// echo "&nbsp;&nbsp;session_id = ".session_id();
+// echo "&nbsp;&nbsp;session_id = ".my_session_id();
 
 $hide = $need_to_save = FALSE;
 
@@ -180,7 +178,7 @@ if(isset($_POST['apply_changes_instructions'])) {
 	$need_to_save = TRUE;
 	}
 
-$refresh_file = $temp_dir."trace_".session_id()."_".$filename."_midiport_refresh";
+$refresh_file = $temp_dir."trace_".my_session_id()."_".$filename."_midiport_refresh";
 if(isset($_POST['savemidiport'])) {
 	save_midiressources($filename);
 	echo "<span id=\"timespan\" style=\"color:red; float:right; background-color:white;\">&nbsp;…&nbsp;Saved “".$filename."_midiport” file…</span>";
@@ -249,11 +247,13 @@ echo link_to_help();
 echo "<h3>Grammar file “".$filename."”</h3>";
 save_settings("last_grammar_name",$filename);
 
+/*
 $link = "test-image.html";
 echo "<div style=\"float:right;\"><p style=\"border:2px solid gray; background-color:azure; width:17em; padding:2px; text-align:center; border-radius: 6px;\">
 <a onmouseover=\"popupWindow = window.open('".$link."','CANVAS_test','width=500,height=500,left=200'); return false;\"
    onmouseout=\"popupWindow.close();\"
    href=\"".$link."\">Test image to verify that your<br />environment supports CANVAS</a><br />(You may need to authorize pop-ups)</p></div>";
+*/
 
 if(isset($_POST['compilegrammar'])) {
 	if(isset($_POST['alphabet_file'])) $alphabet_file = $_POST['alphabet_file'];
@@ -289,26 +289,30 @@ if(isset($_POST['compilegrammar'])) {
 			}
 		else $command .= " -cs ".$dir_csound_resources.$csound_file;
 		}
-	$tracefile = $temp_dir."trace_".session_id()."_".$filename.".txt";
+	$tracefile = $temp_dir."trace_".my_session_id()."_".$filename.".txt";
 	$command .= " --traceout ".$tracefile;
 	echo "<p style=\"color:red;\" id=\"timespan\"><small>".$command."</small></p>";
-	$no_error = FALSE;
+//	$no_error = FALSE;
 	$o = send_to_console($command);
-	$n_messages = count($o);
+/*	$n_messages = count($o);
 	if($n_messages > 0) {
 		for($i=0; $i < $n_messages; $i++) {
 			$mssg = $o[$i];
 			$mssg = clean_up_encoding(FALSE,TRUE,$mssg);
 			if(is_integer($pos=strpos($mssg,"Errors: 0")) AND $pos == 0) $no_error = TRUE;
 			}
+		} */
+//	if(!$no_error) {
+	$trace_link = '';
+	if(file_exists($dir.$tracefile)) {
+		$trace_content = file_get_contents($dir.$tracefile);
+		if($trace_content !== false && strlen($trace_content) > 10)
+			$trace_link = clean_up_file_to_html($dir.$tracefile);
 		}
-	if(!$no_error) {
-		if(file_exists($dir.$tracefile)) $trace_link = clean_up_file_to_html($dir.$tracefile);
-		else $trace_link = '';
-		if($trace_link == '') echo "<p><big>👉 <font color=\"red\">Errors found, but no trace file has been created.</font></big></p>";
-		else echo "<p><big>👉 <font color=\"red\">Errors found! Open the </font> <a onclick=\"window.open('".$trace_link."','trace','width=800,height=800'); return false;\" href=\"".$trace_link."\">trace file</a>!</big></p>";
-		}
+	if($trace_link <> '') echo "<p><big>👉 <font color=\"red\">Errors found! Open the </font> <a onclick=\"window.open('".$trace_link."','trace','width=800,height=800'); return false;\" href=\"".$trace_link."\">trace file</a>!</big></p>";
+	//	}
 	else echo "<p><font color=\"red\">➡</font> <font color=\"blue\">No error.</font></p>";
+	@unlink($dir.$tracefile);
 	// Now reformat the grammar
 	reformat_grammar(FALSE,$this_file);
 	}
@@ -320,7 +324,7 @@ else {
 	echo "<input type=\"hidden\" name=\"file_format\" value=\"".$file_format."\">";
 	echo "<input type=\"hidden\" name=\"random_seed\" value=\"".$random_seed."\">";
 	echo "Location of output files: <font color=\"blue\">".$bp_application_path."</font>";
-	echo "<input type=\"text\" name=\"output_folder\" size=\"25\" value=\"".$output_folder."\">";
+	echo "<input type=\"text\" name=\"output_folder\" size=\"15\" value=\"".$output_folder."\">";
 	echo "&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" name=\"change_output_folder\" value=\"SAVE THIS LOCATION\"><br />➡ global setting for all projects in this session<br /><i>Folder will be created if necessary…</i>";
 	echo "</form>";
 	}
@@ -391,13 +395,13 @@ if($test) echo "url_this_page = ".$url_this_page."<br />";
 
 $csound_is_responsive = FALSE;
 if($file_format == "csound") {
-	echo "<div style=\"float:right; background-color:white; padding:6px;\">";
+	echo "<div style=\"float:right; background-color:white; padding:6px; border-radius: 12px;\">";
 	$csound_is_responsive = check_csound();
 	echo "</div>";
 	}
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 echo "<table cellpadding=\"8px;\" style=\"background-color:white; border-radius: 15px; border: 1px solid black;\"><tr style=\"\">";
-echo "<td>";
+echo "<td style=\"white-space:nowrap;\">";
 if($file_format <> "rtmidi") {
 	for($i = 0; $i < $NumberMIDIoutputs; $i++) {
 		echo "<input type=\"hidden\" name=\"MIDIoutput_".$i."\" value=\"".$MIDIoutput[$i]."\">";

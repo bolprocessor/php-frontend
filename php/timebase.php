@@ -17,7 +17,7 @@ require_once("_header.php");
 echo "<p>Workspace = <a href=\"index.php?path=".urlencode($current_directory)."\">".$current_directory."</a></p>";
 echo link_to_help();
 
-$temp_folder = str_replace(' ','_',$filename)."_".session_id()."_temp";
+$temp_folder = str_replace(' ','_',$filename)."_".my_session_id()."_temp";
 // echo "temp_folder = ".$temp_folder."<br />";
 if(!file_exists($temp_dir.$temp_folder)) {
 	mkdir($temp_dir.$temp_folder);

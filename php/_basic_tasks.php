@@ -3,6 +3,8 @@ session_start();
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
+ini_set('output_buffering', 'off');
+ini_set('zlib.output_compression', 0);
 require('midi.class.php');
 // Source: https://github.com/robbie-cao/midi-class-php
 
@@ -10,7 +12,7 @@ define('MAXFILESIZE',50000000);
 define('SLASH',DIRECTORY_SEPARATOR);
 define('STRIATED',1);
 define('SMOOTH',0);
-ini_set("auto_detect_line_endings",true);
+// ini_set("auto_detect_line_endings",true);
 
 $which_system = '';
 // Compilation options:
@@ -21,9 +23,39 @@ $which_system = '';
 $test = FALSE;
 // $test = TRUE;
 
+require_once("_settings.php");
 $bp_application_path = "..".SLASH;
-if(!isset($csound_path) OR $csound_path == '') $csound_path = "/usr/local/bin/";
-if(!isset($csound_name) OR $csound_name == '') $csound_name = "csound";
+$url_this_page = "_basic_tasks.php";
+$absolute_application_path = str_replace("php".SLASH.$url_this_page,'',realpath(__FILE__));
+
+if(isset($_POST['csound_path_change'])) {
+	$csound_path = trim($_POST['csound_path']);
+	save_settings("csound_path",$csound_path);
+	$csound_name = trim($_POST['csound_name']);
+	if($csound_name <> '') {
+		save_settings("csound_name",$csound_name);
+		}
+	}
+if(windows_system()) {
+    $console = "bp.exe";
+    if(!isset($csound_name) OR $csound_name == '') $csound_name = "csound.exe";
+    $programFiles = getenv("ProgramFiles");
+    if(!isset($csound_path) OR $csound_path == '') {
+        if(file_exists($programFiles."\\Csound6_x64\\bin\\csound.exe")) {
+            $csound_path = "Csound6_x64\\bin";
+            $csound_name = "csound.exe";
+            }
+        else $csound_path = "";
+        }
+    }
+else {
+    $console = "bp";
+    if(!isset($csound_name) OR $csound_name == '') $csound_name = "csound";
+    if(!isset($csound_path)) $csound_path = SLASH."usr".SLASH."local".SLASH."bin";
+    }
+save_settings("csound_name",$csound_name);
+save_settings("csound_path",$csound_path);
+
 if(!isset($csound_resources) OR $csound_resources == '') $csound_resources = "csound_resources";
 save_settings("csound_resources",$csound_resources);
 if(!isset($midi_resources) OR $midi_resources == '') $midi_resources = "midi_resources";
@@ -32,6 +64,8 @@ if(!isset($trash_folder) OR $trash_folder == '') $trash_folder = "trash_bolproce
 save_settings("trash_folder",$trash_folder);
 $max_sleep_time_after_bp_command = 240; // seconds. Maximum time waiting for the 'done.txt' file
 $default_output_format = "midi";
+
+if(!isset($output_folder) OR $output_folder == '') $output_folder = "my_output";
 
 $maxchunk_size = 400; // Max number of measures contained in a chunk
 $minchunk_size = 10; // Min number of measures contained in a chunk
@@ -83,22 +117,6 @@ if(!file_exists($bp_application_path.$trash_folder)) {
 	}
 $dir_trash_folder = $bp_application_path.$trash_folder.SLASH;
 
-if(isset($_POST['csound_path'])) {
-	$new_csound_path = trim($_POST['csound_path']);
-	if($new_csound_path <> '') {
-		if($new_csound_path[0] <> SLASH)
-			$new_csound_path = SLASH.$new_csound_path;
-		if($new_csound_path[strlen($new_csound_path) - 1] <> SLASH)
-			$new_csound_path .= SLASH;
-		save_settings("csound_path",$new_csound_path);
-		$csound_path = $new_csound_path;
-		}
-	$new_csound_name = trim($_POST['csound_name']);
-	if($new_csound_name <> '') {
-		save_settings("csound_name",$new_csound_name);
-		}
-	}
-
 // Delete old temp directories and trace files
 $dircontent = scandir($temp_dir);
 $now = time();
@@ -114,7 +132,7 @@ foreach($dircontent as $thisfile) {
 		if($extension == "temp" AND count($table) > 2) {
 			$id = $table[count($table) - 2];
 			if($old) {
-				if($id <> session_id()) {
+				if($id <> my_session_id()) {
 					my_rmdir($temp_dir.$thisfile);
 					continue;
 					}
@@ -128,7 +146,7 @@ foreach($dircontent as $thisfile) {
 		$prefix = $table[0];
 		if($prefix == "trace" OR $prefix == "temp") {
 			$id = $table[1];
-			if(($extension == "txt" OR $extension == "html" OR $extension == "bpda") AND $id <> session_id()) {
+			if(($extension == "txt" OR $extension == "html" OR $extension == "bpda") AND $id <> my_session_id()) {
 				unlink($temp_dir.$thisfile);
 				continue;
 				}
@@ -152,7 +170,7 @@ if($test) {
 	}
 
 $html_help_file = "BP2_help.html";
-if(!(isset($filename)  AND $filename == "Compilation")) $help = compile_help($text_help_file,$html_help_file);
+$help = compile_help($text_help_file,$html_help_file);
 $top_header = "// Bol Processor BP3";
 
 $KeyString = "key#";
@@ -463,11 +481,13 @@ function try_create_new_file($file,$filename) {
 	}
 
 function compile_help($text_help_file,$html_help_file) {
+	global $filename;
 //	echo "text_help_file = ".$text_help_file."<br />";
 //	echo "html_help_file = ".$html_help_file."<br />";
 	$help = array();
 	$help[0] = '';
 	$no_entry = array("ON","OFF","vel");
+    if(isset( $filename) AND $filename == "Compilation") return '';
 	if(!file_exists($text_help_file)) {
 		echo "<p style=\"color:MediumTurquoise;\">Warning: “BP2_help.html” has not yet been reconstructed.</p>";
 		return '';
@@ -685,7 +705,6 @@ function clean_up_file_to_html($file) {
 		return '';
 		}
 	$file_html = str_replace(".txt",".html",$file);
-	$file_html = str_replace(".bpda",".html",$file_html);
 	$text = @file_get_contents($file,TRUE);
 	$text = str_replace(chr(13).chr(10),chr(10),$text);
 	$text = str_replace(chr(13),chr(10),$text);
@@ -1964,17 +1983,19 @@ function windows_system() {
 	}
 	
 function send_to_console($command) {
-	global $test,$pid,$bp_application_path;
+	global $test,$pid,$bp_application_path,$console;
 	$table = null;
 //	$command .= " > /dev/null 2>&1"; // This makes it possible to get the pid.
 	if(windows_system()) {
 		$command = windows_command($command);
-		echo "<small>Windows: exec = <font color=\"red\">".$command."</font></small><br />";
+//		echo "<small>Windows: exec = <font color=\"red\">".str_replace('^','',$command)."</font></small><br />";
 		}
 	exec($command,$table);
-//	$command = "pgrep -f ".$bp_application_path."bp";
-	$command = "pgrep -f ".$command;
-	$pid = exec($command);
+    $pid = 0;
+    if(!windows_system()) {
+        $command = "pgrep -f ".$bp_application_path.$console;
+        $pid = exec($command);
+        }
 	$_SESSION['pid'] = $pid;
 //	system($command,$o);
 //	passthru($command,$o);
@@ -1982,8 +2003,11 @@ function send_to_console($command) {
 	}
 
 function windows_command($command) {
-	$command = str_replace("..".SLASH."bp ","bp ",$command);
-	$command = str_replace("..".SLASH,dirname(getcwd()).SLASH,$command);
+    global $console, $absolute_application_path;
+  //  echo "cmd1 = ".$command."<br />";
+	$command = str_replace("..".SLASH,$absolute_application_path,$command);
+	$command = str_replace("../",$absolute_application_path,$command);
+ //   echo "cmd2 = ".$command."<br />";
 	$command = "cmd /c ".$command;
 	$command = escapeshellcmd($command);
 	$command = preg_replace("'(?<!^) '","^ ",$command);
@@ -2195,30 +2219,58 @@ else echo "<p><font color=\"red\">File ‘_settings.php’ could nor be opened!<
  		}
  	return;
  	}
- 
+
+function display_conssole_state() {
+	global $bp_application_path;
+	 echo "<div style=\"display: flex; align-items: center; float: right; background-color: white; padding: 6px; border-radius: 6px;\">";
+	 echo "<img src=\"pict/BP3-logo.png\" style=\"width: 40px;\"/>";  // Corrected CSS for width
+	 echo "<span style=\"margin-left: 6px;\">";
+	 if(check_console()) echo "Bol Processor is installed and responsive&nbsp;😀";
+	 else {
+		echo "Bol Processor is not yet installed or not responsive&nbsp;😣<br />";
+		$source = $bp_application_path."source";
+		if(file_exists($source))
+			echo "The source files of BP3 have been found. You can recompile “bp”, then try again.<br />👉&nbsp;&nbsp;<a target=\"_blank\" href=\"".$bp_application_path."compile.php?return=produce.php\">Run the compiler</a>";
+		else
+			echo "Source files (the “source” folder) have not been found.<br />Visit <a target=\"_blank\" href=\"https://bolprocessor.org/check-bp3/#install\">https://bolprocessor.org/check-bp3/</a> and follow instructions!";
+	 	}
+	echo "</span>";
+	 echo "</div>";
+	 return;
+	}
+
+function check_console() {
+	global $bp_application_path, $console;
+	$command = $bp_application_path.$console." --short-version";
+	$return_var = send_to_console($command);
+	return(count($return_var));
+	}
+
 function check_csound() {
-	global $csound_path, $csound_resources, $path, $url_this_page, $file_format,$csound_name;
+    global $csound_path, $csound_resources, $path, $url_this_page, $file_format,$csound_name,$programFiles;
 	$return_var = 1;
-	$command = $csound_path.$csound_name." --version 2>csound_version.txt";
-	if(file_exists($csound_path.$csound_name)) {
-		exec($command,$result_csound,$return_var);
+	$this_file = "csound_version.txt";
+    @unlink($this_file);
+	$command = "\"".$programFiles.SLASH.$csound_path.SLASH.$csound_name."\" --version 2>csound_version.txt";
+	if(file_exists($programFiles.SLASH.$csound_path.SLASH.$csound_name)) {
+   // echo "com = ".$command."<br />";
+        $return_var = send_to_console($command);
 		}
-	if($return_var <> 0) {
-		echo "&nbsp;&nbsp;&nbsp;<small><font color=\"red\">".$csound_path.$csound_name."</font></small>";
-		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+    if(!file_exists($this_file)) {
+//	if($return_var <> 0) {
+		echo "&nbsp;&nbsp;&nbsp;<small><font color=\"red\">".$csound_path.SLASH.$csound_name."</font></small>";
+	//	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		if(isset($file_format)) echo "<input type=\"hidden\" name=\"file_format\" value=\"".$file_format."\">";
-		echo "<p><img src=\"pict/logo_csound.jpg\" width=\"90px;\" style=\"vertical-align:middle;\" />&nbsp;is not installed or its path (<font color= \"blue\">".$csound_path."</font>) is incorrect.<br/>";
-		echo "Try this path to Csound: <input type=\"text\" name=\"csound_path\" size=\"20\" style=\"background-color:CornSilk;text-align:right;\" value=\"".$csound_path."\"><font color=\"green\"> csound_name</font><br />";
-		echo "Name of the Csound application: <font color=\"green\">/path_to_csound/ </font><input type=\"text\" name=\"csound_name\" size=\"10\" style=\"background-color:CornSilk;\" value=\"".$csound_name."\">";
-		echo "&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" value=\"TRY\">";
+		echo "<p><img src=\"pict/logo_csound.jpg\" width=\"90px;\" style=\"vertical-align:middle;\" />&nbsp;is not installed<br />or its path (<font color= \"blue\">".$csound_path."</font>) is incorrect<br /><br />";
+		echo "Name: <font color=\"green\">path_to_csound/ </font><input type=\"text\" name=\"csound_name\" size=\"12\" style=\"background-color:CornSilk;\" value=\"".$csound_name."\"><br />";
+		echo "Path: <input type=\"text\" name=\"csound_path\" size=\"20\" style=\"background-color:CornSilk;text-align:right;\" value=\"".$csound_path."\"><font color=\"green\">".SLASH.$csound_name."</font>";
+		echo "&nbsp;<input style=\"background-color:yellow;\" type=\"submit\"  name=\"csound_path_change\" value=\"TRY\">";
 		echo "<br />";
-		echo "<br /><font color=\"red\">➡</font>&nbsp;<a target=\"_blank\" href=\"https://csound.com/download.html\">Follow this link</a> to install Csound and convert scores to sound files.</p>";
-		echo "</form><p>";
-		$result = FALSE;
+		echo "<br /><font color=\"red\">➡</font>&nbsp;<a target=\"_blank\" href=\"https://csound.com/download.html\">Follow this link</a> to install Csound<br />";
+	    $result = FALSE;
 		}
 	else {
 		$version = '';
-		$this_file = "csound_version.txt";
 		if(file_exists($this_file)) {
 			$content = @file_get_contents($this_file,TRUE);
 			$table = explode(chr(10),$content);
@@ -3482,23 +3534,23 @@ function display_midi_ports($filename) {
 		if(!isset($MIDIoutputcomment[$i]) OR $MIDIoutputcomment[$i] == "void") $comment = '';
 		else $comment = $MIDIoutputcomment[$i];
 		echo "MIDI output&nbsp;&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutput_".$i."\" size=\"2\" value=\"".$value."\">";
-		echo "&nbsp;<input type=\"text\" style=\"margin-bottom:6px;\" onchange=\"tellsave()\" name=\"MIDIoutputname_".$i."\" size=\"20\" value=\"".$MIDIoutputname[$i]."\">";
-		echo "&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutputcomment_".$i."\" size=\"20\" value=\"".$comment."\">";
+		echo "&nbsp;<input type=\"text\" style=\"margin-bottom:6px;\" onchange=\"tellsave()\" name=\"MIDIoutputname_".$i."\" size=\"15\" value=\"".$MIDIoutputname[$i]."\">";
+		echo "&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutputcomment_".$i."\" size=\"15\" value=\"".$comment."\">";
 		echo "&nbsp;<button style=\"background-color:azure; border-radius: 6px;\" onclick=\"toggledisplay_output(".$i."); return false;\">FILTER</button>";
 		filter_form_output($i);
 		echo "<br />";
 		}
 	echo "<input style=\"float:right; color:DarkBlue; backgroundsave_-color:yellow;\" onclick=\"tellsave()\" type=\"submit\" name=\"create_output\" value=\"Add an output\"><br />";
 	echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savemidiport\" value=\"SAVE MIDI ports\">";
-	echo " 👉 Delete names if changing numbers<br /><br />";
+	echo str_replace(' ',"&nbsp;"," 👉 Delete name if changing number")."<br /><br />";
 	for($i = 0; $i < $NumberMIDIinputs; $i++) {
 		if($MIDIinput[$i] == -1) $value = '';
 		else $value = $MIDIinput[$i];
 		if(!isset($MIDIinputcomment[$i]) OR $MIDIinputcomment[$i] == "void") $comment = '';
 		else $comment = $MIDIinputcomment[$i];
 		echo "MIDI input&nbsp;&nbsp;&nbsp;&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIinput_".$i."\" size=\"2\" value=\"".$value."\">";
-		echo "&nbsp;<input type=\"text\" style=\"margin-bottom:6px;\" onchange=\"tellsave()\" name=\"MIDIinputname_".$i."\" size=\"20\" value=\"".$MIDIinputname[$i]."\">";
-		echo "&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIinputcomment_".$i."\" size=\"20\" value=\"".$comment."\">";
+		echo "&nbsp;<input type=\"text\" style=\"margin-bottom:6px;\" onchange=\"tellsave()\" name=\"MIDIinputname_".$i."\" size=\"15\" value=\"".$MIDIinputname[$i]."\">";
+		echo "&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIinputcomment_".$i."\" size=\"15\" value=\"".$comment."\">";
 		echo "&nbsp;<button style=\"background-color:azure; border-radius: 6px;\" onclick=\"toggledisplay_input(".$i."); return false;\">FILTER</button>";
 		filter_form_input($i);
 		echo "<br />";
@@ -3506,4 +3558,15 @@ function display_midi_ports($filename) {
 	echo "<input style=\"float:right; color:DarkBlue; backgroundsave_-color:yellow;\" onclick=\"tellsave()\" type=\"submit\" name=\"create_input\" value=\"Add an input\">";
 	return;
 	}
+
+function my_session_id() {
+    $originalSessionId = session_id();
+    if(empty($originalSessionId)) {
+        session_start();
+        $originalSessionId = session_id();
+        }
+    $hashedSessionId = md5($originalSessionId);
+    $shortSessionId = substr($hashedSessionId,0,10);
+    return $shortSessionId;
+    }
 ?>
