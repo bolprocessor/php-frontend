@@ -1,1 +1,1 @@
-This is the most recent version of the PHP interface for Bol Processor BP3.<br />The C code of the console is at: https://github.com/bolprocessor/bolprocessor/tree/graphics-for-BP3<br />Read details on the website: https://bp3.tech
+This is the most recent version of the PHP interface for Bol Processor BP3.<br />The C code of the console is at: https://github.com/bolprocessor/bolprocessor/tree/graphics-for-BP3<br />Read details on the website: https://bp3.tech<br />Join the project: https://sourceforge.net/projects/bolprocessor/lists/bolprocessor-devel
