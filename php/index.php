@@ -6,7 +6,7 @@ require_once("_header.php");
 $url_this_page = $this_page = "index.php";
 
 echo "<table style=\"background-color:snow;\"><tr>";
-echo "<td style=\"padding:4px; vertical-align:middle; border-radius:1em;\"><img src=\"pict/BP3-logo.png\" width=\"120px;\"/></td><td style=\"padding:4px; vertical-align:middle; white-space:nowrap; border-radius:1em;\">";
+echo "<td style=\"padding:1em; vertical-align:middle; border-radius:1em;\"><img src=\"pict/BP3-logo.png\" width=\"120px;\"/></td><td style=\"padding:1em; vertical-align:middle; white-space:nowrap; border-radius:1em;\">";
 
 $test = FALSE;
 if($path <> '') {
@@ -30,8 +30,8 @@ if($path <> '') {
 else {
 	echo "<h2 style=\"text-align:center;\">Welcome to Bol Processor ‘BP3’</h2>";
 	echo "</td>";
-	echo "<td style=\"padding-left:2em; vertical-align:middle;\">";
-	echo "<p><i>This is an evaluation version of the interface<br />running the ‘bp’ multi-platform console.</i></p>";
+	echo "<td style=\"padding:1em; vertical-align:middle;\">";
+	echo "<p>This is a PHP interface running<br />the ‘<font color=\"blue\"><b>".$console."</b></font>’ multi-platform console.</p>";
 	echo "</td>";
 	echo "</tr></table>";
 	$dir = $bp_application_path;
@@ -46,21 +46,19 @@ else {
 			}
 		}
 	if(!$no_error OR !file_exists($dir.$console)) {
-		echo "<p>The console application (file “bp”) is not working or missing or misplaced…</p>";
-		$source = $dir."source/BP3";
-		if(file_exists($source)) {
+		echo "<div style=\"background-color: white; padding: 1em; border-radius: 6px;\">";
+		echo "<p><font color=\"red\">The console application </font>(file “<font color=\"blue\">".$console."</font>”)<font color=\"red\"> is not working or misplaced…</font></p>";
+		if(check_installation()) {
 			$link = $dir."compile.php";
             $link = str_replace(SLASH,'/',$link);
-			echo "The source files of BP3 have been found. You can (re)compile “bp”.<br />";
+			echo "Source files of BP3 have been found. You can (re)compile the console.<br />";
 			if(!check_gcc()) if(windows_system()) echo "<p>👉&nbsp;&nbsp;However, ‘gcc’ is not responding. You first need to <a target=\"_blank\" href=\"https://bolprocessor.org/install-mingw/\">install and set up MinGW</a>.</p>";
 				else echo "<p>👉&nbsp;&nbsp;However, ‘gcc’ is not responding. You need to install the <a target=\"_blank\" href=\"https://www.cnet.com/tech/computing/install-command-line-developer-tools-in-os-x/\">command line developer tools</a> or <a target=\"_blanl\" href=\"https://developer.apple.com/support/xcode/\">Xcode</a>.</p>";
 			else echo "<p>👉&nbsp;&nbsp;<a onclick=\"window.open('".$link."','trace','width=800,height=800'); return false;\"  href=\"".$link."\">Click to run the compiler</a>, then <a href=\"".$url_this_page."\">reload this page</a>.</p>";
-
-
-	/* 		echo "<p>Source files have been found. You can try to recompile “bp”, then <a href=\"".$url_this_page."\">reload this page</a>.<br /><br />➡ <a onclick=\"window.open('".$link."','trace','width=800,height=800'); return false;\" href=\"".$link."\">Run the compiler</a> (this works at least in MacOS)</p>"; */
 			}
 		else
-			echo "<p>Source files (the “source” folder) have not been found.<br />Visit <a target=\"_blank\" href=\"https://bolprocessor.org/check-bp3/#install\">https://bolprocessor.org/check-bp3/</a> and follow instructions!</p>";
+			echo "Files are missing or misplaced.<br /><br />👉  Visit <a target=\"_blank\" href=\"https://bolprocessor.org/check-bp3/#install\">https://bolprocessor.org/check-bp3/</a> and follow instructions!<br />";
+		echo "</div>";
 		die();
 		}
 	}

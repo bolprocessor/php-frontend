@@ -146,11 +146,15 @@ echo "}</script>\n";
 echo "<script>\n";
 echo "function checksaved() {\n";
 echo "if(localStorage.getItem('data') == 'dirty') {\n";
-echo "alert('Thsi project needs to be saved');\n";
+echo "alert('This project needs to be saved');\n";
 // echo "disableButton();\n";
 /* echo "var x = document.getElementById(\"hideifnotsaved\");\n
 	    if(x) {
 	      x.className='hidden'; }\n"; */
+echo "var button = document.getElementById('here');\n
+    if (button) {
+    button.focus();
+    }";
 echo "return false; }\n";
 echo "else return true;\n";
 echo "}</script>\n";

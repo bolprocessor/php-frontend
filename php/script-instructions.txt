@@ -10,7 +10,7 @@ Produce items	1
 Non-stop improvize	1	ON/OFF
 New project	0
 Set directory	0	«long»
-Load project	1	«filename»
+Load grammar	1	«filename»
 Compute while play	2	ON/OFF
 Analyze selection in window	0	«windowname»
 Reset random sequence	1
@@ -77,6 +77,7 @@ Set output MIDI file	2	 «filename»
 Set random seed	2	 «unsigned»
 Set selection	0	 start/end «long»
 Set Vref	0	«int»
+Settings	1	«filename»
 Smooth time	2
 Striated time	2
 Start string	0

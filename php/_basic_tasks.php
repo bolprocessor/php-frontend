@@ -1884,7 +1884,7 @@ function get_instruction($line) {
 	$instruction =  preg_replace("/Hide\swindow\s?.*$/u","Hide window",$instruction);
 	$instruction =  preg_replace("/Ignore\sconstraints\s?.*$/u","Ignore constraints",$instruction);
 	$instruction =  preg_replace("/Load\ssettings\s?.*$/u","Load settings",$instruction);
-	$instruction =  preg_replace("/Load\sproject\s?.*$/u","Load project",$instruction);
+	$instruction =  preg_replace("/Load\sgrammar\s?.*$/u","Load grammar",$instruction);
 	$instruction =  preg_replace("/Maximum\sproduction\stime\s?.*$/u","Maximum production time",$instruction);
 	$instruction =  preg_replace("/MIDI\sfile\s?.*$/u","MIDI file",$instruction);
 	$instruction =  preg_replace("/MIDI\ssound\s?.*$/u","MIDI sound",$instruction);
@@ -2229,22 +2229,38 @@ function display_conssole_state() {
 	 if($output <> '') echo "Bol Processor is installed and responsive&nbsp;😀<br />Version ".$output;
 	 else {
 		echo "Bol Processor is not yet installed or not responsive&nbsp;😣<br />";
-		$source = $bp_application_path."source/BP3";
-		if(file_exists($source)) {
+		if(check_installation()) {
 			$link = "../compile.php";
-			echo "The source files of BP3 have been found. You can (re)compile “bp”.<br />";
+			echo "Source files of BP3 have been found. You can (re)compile it.<br />";
 			if(!check_gcc()) if(windows_system()) echo "👉&nbsp;&nbsp;However, ‘gcc’ is not responding.<br />You first need to <a target=\"_blank\" href=\"https://bolprocessor.org/install-mingw/\">install and set up MinGW</a>.";
 				else echo "👉&nbsp;&nbsp;However, ‘gcc’ is not responding. You need to install<br />the <a target=\"_blank\" href=\"https://www.cnet.com/tech/computing/install-command-line-developer-tools-in-os-x/\">command line developer tools</a> or <a target=\"_blanl\" href=\"https://developer.apple.com/support/xcode/\">Xcode</a>.";
 			else echo "👉&nbsp;&nbsp;<a onclick=\"window.open('".$link."','trace','width=800,height=800'); return false;\"  href=\"".$link."\">Click to run the compiler</a>, then <a href=\"".$url_this_page."\">reload this page</a>.";
 			}
 		else
-			echo "Source files (the “source” folder) have not been found.<br />Visit <a target=\"_blank\" href=\"https://bolprocessor.org/check-bp3/#install\">https://bolprocessor.org/check-bp3/</a> and follow instructions!";
+			echo "Some files are missing or misplaced.<br />👉&nbsp;&nbsp;Visit <a target=\"_blank\" href=\"https://bolprocessor.org/check-bp3/#install\">https://bolprocessor.org/check-bp3/</a><br />and follow instructions!";
 	 	}
 	 $panicfile = str_replace(SLASH,'/',$panicfile);
 	 if(isset($filename)  AND $filename <> "Compilation" AND $filename <> "Produce") echo "<div style=\"text-align:right;\"><button type=\"button\" class=\"bouton\" onclick=\"createFile('".$panicfile."');\">PANIC!</button></div>\n";
 	 echo "</span>";
 	 echo "</div>";
 	 return;
+	}
+
+function check_installation() {
+	global $bp_application_path;
+	$source = $bp_application_path."source/BP3/ConsoleMain.c";
+	if(!file_exists(file_link($source))) return FALSE;
+	$make = $bp_application_path."makefile";
+	if(!file_exists(file_link($make))) {
+		echo "No ‘makefile’?<br />";
+		return FALSE;
+		}
+	return TRUE;
+	}
+
+function file_link($link) {
+	if(windows_system()) $link = str_replace('/',SLASH,$link);
+	return $link;
 	}
 
 function check_console() {
@@ -3590,5 +3606,36 @@ function my_session_id() {
     $hashedSessionId = md5($originalSessionId);
     $shortSessionId = substr($hashedSessionId,0,10);
     return $shortSessionId;
+    }
+
+function create_variables($script_variables) {
+    $h_variables = fopen($script_variables,'w');
+    fwrite($h_variables,"<?php\n");
+    $script_status = $script_more = array();
+    $content = @file_get_contents("script-instructions.txt",TRUE);
+    if($content) {
+        $table = explode(chr(10),$content);
+        $imax = count($table);
+        for($i = 0; $i < $imax; $i++) {
+            $line = trim($table[$i]);
+            if($line == '') continue;
+            $table2 = explode(chr(9),$line);
+            $instruction = $table2[0];
+            $status = $table2[1];
+            if(isset($table2[2])) $more = $table2[2];
+            else $more = '';
+            $script_status[$instruction] = $status;
+            store($h_variables,"script_status[\"".$instruction."\"]",$status);
+            $script_more[$instruction] = $more;
+            store($h_variables,"script_more[\"".$instruction."\"]",$more);
+            }
+        ksort($script_status);
+        ksort($script_more);
+        }
+    $line = "§>\n";
+    $line = str_replace('§','?',$line);
+    fwrite($h_variables,$line);
+    fclose($h_variables);
+    return;
     }
 ?>

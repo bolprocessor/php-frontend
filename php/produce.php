@@ -376,13 +376,13 @@ if(isset($data_path) AND $data_path <> '') {
 		}
 	}
 @unlink($stopfile); @unlink($panicfile);
-session_abort(); // Added 2024-05-17
+session_abort();
 $o = send_to_console($command);
 if($pid > 0) echo "<small>The pid was <font color=\"red\">".$pid."</font></small><br />";
 echo "<hr>";
-sleep(1);
+// sleep(1);
 session_reset();
-sleep(1);
+// sleep(1);
 $n_messages = count($o);
 $no_error = FALSE;
 for($i = 0; $i < $n_messages; $i++) {
