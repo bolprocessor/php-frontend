@@ -90,11 +90,13 @@ imagefilltoborder($im,$x_center + $radius + 4,$y_center,$black,$papayawhip);
 // Draw intervals highlighted by tonal analysis
 if($no_intervals) $color_hilite = $gold;
 else $color_hilite = $gold;
-if(isset($hilitewidth) AND !$no_hilite) foreach($hilitewidth as $i_match => $thiswidth) {
-	if(!isset($hilitej[$i_match]) OR !isset($hilitek[$i_match])) continue;
-	$j = $hilitej[$i_match];
-	$k = $hilitek[$i_match];
-	connect($im,$j,$k,$radius - 1,$color_hilite,$thiswidth);
+if(isset($hilitewidth) AND !$no_hilite) {
+	foreach($hilitewidth as $i_match => $thiswidth) {
+		if(!isset($hilitej[$i_match]) OR !isset($hilitek[$i_match])) continue;
+		$j = $hilitej[$i_match];
+		$k = $hilitek[$i_match];
+		connect($im,$j,$k,$radius - 1,$color_hilite,$thiswidth);
+		}
 	}
 
 if(!$no_intervals) {

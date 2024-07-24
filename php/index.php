@@ -5,6 +5,8 @@ else $filename = "Bol Processor";
 require_once("_header.php");
 $url_this_page = $this_page = "index.php";
 
+display_console_state();
+
 echo "<table style=\"background-color:snow;\"><tr>";
 echo "<td style=\"padding:1em; vertical-align:middle; border-radius:1em;\"><img src=\"pict/BP3-logo.png\" width=\"120px;\"/></td><td style=\"padding:1em; vertical-align:middle; white-space:nowrap; border-radius:1em;\">";
 
@@ -35,32 +37,6 @@ else {
 	echo "</td>";
 	echo "</tr></table>";
 	$dir = $bp_application_path;
-	$command = $dir.$console." --help";
-	$o = send_to_console($command);
-	$n_messages = count($o);
-	$no_error = FALSE;
-	for($i = 0; $i < $n_messages; $i++) {
-		$mssg = $o[$i];
-		if(is_integer($pos=strpos($mssg,"Bol Processor")) AND $pos == 0) {
-			$no_error = TRUE; break;
-			}
-		}
-	if(!$no_error OR !file_exists($dir.$console)) {
-		echo "<div style=\"background-color: white; padding: 1em; border-radius: 6px;\">";
-		echo "<p><font color=\"red\">The console application </font>(file “<font color=\"blue\">".$console."</font>”)<font color=\"red\"> is not working or misplaced…</font></p>";
-		if(check_installation()) {
-			$link = $dir."compile.php";
-            $link = str_replace(SLASH,'/',$link);
-			echo "Source files of BP3 have been found. You can (re)compile the console.<br />";
-			if(!check_gcc()) if(windows_system()) echo "<p>👉&nbsp;&nbsp;However, ‘gcc’ is not responding. You first need to <a target=\"_blank\" href=\"https://bolprocessor.org/install-mingw/\">install and set up MinGW</a>.</p>";
-				else echo "<p>👉&nbsp;&nbsp;However, ‘gcc’ is not responding. You need to install the <a target=\"_blank\" href=\"https://www.cnet.com/tech/computing/install-command-line-developer-tools-in-os-x/\">command line developer tools</a> or <a target=\"_blanl\" href=\"https://developer.apple.com/support/xcode/\">Xcode</a>.</p>";
-			else echo "<p>👉&nbsp;&nbsp;<a onclick=\"window.open('".$link."','trace','width=800,height=800'); return false;\"  href=\"".$link."\">Click to run the compiler</a>, then <a href=\"".$url_this_page."\">reload this page</a>.</p>";
-			}
-		else
-			echo "Files are missing or misplaced.<br /><br />👉  Visit <a target=\"_blank\" href=\"https://bolprocessor.org/check-bp3/#install\">https://bolprocessor.org/check-bp3/</a> and follow instructions!<br />";
-		echo "</div>";
-		die();
-		}
 	}
 
 $folder = str_replace($bp_application_path,'',$dir);
@@ -86,6 +62,7 @@ if(isset($_POST['create_folder'])) {
 			}
 		else {
 			mkdir($dir.SLASH.$foldername);
+			chmod($dir.SLASH.$foldername,0777);
 			$new_file = $foldername;
 			}
 		}

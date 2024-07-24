@@ -14,12 +14,6 @@ define('STRIATED',1);
 define('SMOOTH',0);
 // ini_set("auto_detect_line_endings",true);
 
-$which_system = '';
-// Compilation options:
-// which_system = 'Linux';
-// which_system = 'Windows 10';
-// which_system = 'Mac OS X';
-
 $test = FALSE;
 // $test = TRUE;
 
@@ -49,9 +43,14 @@ if(windows_system()) {
         }
     }
 else {
-    $console = "bp";
-    if(!isset($csound_name) OR $csound_name == '') $csound_name = "csound";
-    if(!isset($csound_path)) $csound_path = SLASH."usr".SLASH."local".SLASH."bin";
+	if(linux_system()) {
+		$console = "bp3";
+		}
+	else { // MacOS
+		$console = "bp";
+		if(!isset($csound_name) OR $csound_name == '') $csound_name = "csound";
+		if(!isset($csound_path)) $csound_path = SLASH."usr".SLASH."local".SLASH."bin";
+		}
     }
 save_settings("csound_name",$csound_name);
 save_settings("csound_path",$csound_path);
@@ -79,7 +78,12 @@ $number_midi_parameters_csound_instrument = 6; // Never change this!
 $permissions = 0777;
 $oldmask = umask(0);
 $temp_dir = $bp_application_path."temp_bolprocessor";
-if(!file_exists($temp_dir)) mkdir($temp_dir,$permissions,true);
+if(!file_exists($temp_dir)) {
+	if (!mkdir($temp_dir, $permissions, true))
+        error_log("Failed to create directory '{$temp_dir}' with error: " . error_get_last()['message']);
+	else
+        chmod($temp_dir, $permissions); // Double-check permissions
+	}
 $temp_dir .= SLASH;
 if(!file_exists($temp_dir."messages")) mkdir($temp_dir."messages",$permissions,true);
 umask($oldmask);
@@ -1929,8 +1933,6 @@ function get_instruction($line) {
 	}
 
 function getOS() {
-	global $which_system;
-	if($which_system <> '') return $which_system;
     $user_agent = $_SERVER['HTTP_USER_AGENT'];
     $os_platform  = "Unknown OS Platform";
     $os_array     = array(
@@ -1975,8 +1977,6 @@ function mac_system() {
 	}
 
 function windows_system() {
-	global $which_system;
-	if($which_system == "Windows") return TRUE;
 	$os_platform = getOS();
 	if(PHP_OS == "WINNT" OR is_integer(strpos($os_platform,"Windows"))) return TRUE;
 	return FALSE;
@@ -1984,20 +1984,27 @@ function windows_system() {
 	
 function send_to_console($command) {
 	global $test,$pid,$bp_application_path,$console;
-	$table = null;
+	$table = array();
 //	$command .= " > /dev/null 2>&1"; // This makes it possible to get the pid.
+//	$command .= " 2>&1"; // Redirect stderr to stdout to capture all output
 	if(windows_system()) {
 		$command = windows_command($command);
 //		echo "<small>Windows: exec = <font color=\"red\">".str_replace('^','',$command)."</font></small><br />";
 		}
-	exec($command,$table);
+//	echo "command = ".$command."<br />";
+	exec($command,$table,$return_var);
+	echo "Return status: ".$return_var."\n";
     $pid = 0;
-    if(!windows_system()) {
+ /*   if(!windows_system()) {
         $command = "pgrep -f ".$bp_application_path.$console;
         $pid = exec($command);
-        }
+        } */
 	$_SESSION['pid'] = $pid;
-//	system($command,$o);
+/*	$reply = shell_exec($command);
+	echo $reply;
+	return $table; */
+	// system($command,$o);
+	// return $o;
 //	passthru($command,$o);
 	return $table;
 	}
@@ -2220,17 +2227,21 @@ else echo "<p><font color=\"red\">File ‘_settings.php’ could nor be opened!<
  	return;
  	}
 
-function display_conssole_state() {
+function display_console_state() {
 	global $bp_application_path, $absolute_application_path, $panicfile, $filename, $url_this_page;
 	 echo "<div style=\"display: flex; align-items: center; float: right; background-color: white; padding: 6px; border-radius: 6px;\">";
 	 echo "<img src=\"pict/BP3-logo.png\" style=\"width: 100px;\"/>";  // Corrected CSS for width
 	 echo "<span style=\"margin-left: 6px;\">";
 	 $output = check_console();
-	 if($output <> '') echo "Bol Processor is installed and responsive&nbsp;😀<br />Version ".$output;
+	 if($output <> '') {
+		echo "Bol Processor is installed and responsive&nbsp;😀<br />Version ".$output;
+		$panicfile = str_replace(SLASH,'/',$panicfile);
+		if(isset($filename) AND $filename <> "Compilation" AND $filename <> "Produce" AND  $filename <> "Bol Processor") echo "<div style=\"text-align:right;\"><button type=\"button\" class=\"bouton\" onclick=\"createFile('".$panicfile."');\">PANIC!</button></div>\n";
+		}
 	 else {
 		echo "Bol Processor is not yet installed or not responsive&nbsp;😣<br />";
 		if(check_installation()) {
-			$link = "../compile.php";
+			$link = "compile.php";
 			echo "Source files of BP3 have been found. You can (re)compile it.<br />";
 			if(!check_gcc()) if(windows_system()) echo "👉&nbsp;&nbsp;However, ‘gcc’ is not responding.<br />You first need to <a target=\"_blank\" href=\"https://bolprocessor.org/install-mingw/\">install and set up MinGW</a>.";
 				else echo "👉&nbsp;&nbsp;However, ‘gcc’ is not responding. You need to install<br />the <a target=\"_blank\" href=\"https://www.cnet.com/tech/computing/install-command-line-developer-tools-in-os-x/\">command line developer tools</a> or <a target=\"_blanl\" href=\"https://developer.apple.com/support/xcode/\">Xcode</a>.";
@@ -2239,8 +2250,6 @@ function display_conssole_state() {
 		else
 			echo "Some files are missing or misplaced.<br />👉&nbsp;&nbsp;Visit <a target=\"_blank\" href=\"https://bolprocessor.org/check-bp3/#install\">https://bolprocessor.org/check-bp3/</a><br />and follow instructions!";
 	 	}
-	 $panicfile = str_replace(SLASH,'/',$panicfile);
-	 if(isset($filename)  AND $filename <> "Compilation" AND $filename <> "Produce") echo "<div style=\"text-align:right;\"><button type=\"button\" class=\"bouton\" onclick=\"createFile('".$panicfile."');\">PANIC!</button></div>\n";
 	 echo "</span>";
 	 echo "</div>";
 	 return;
@@ -2250,7 +2259,7 @@ function check_installation() {
 	global $bp_application_path;
 	$source = $bp_application_path."source/BP3/ConsoleMain.c";
 	if(!file_exists(file_link($source))) return FALSE;
-	$make = $bp_application_path."makefile";
+	$make = $bp_application_path."Makefile"; // case-sensitive in Linux!
 	if(!file_exists(file_link($make))) {
 		echo "No ‘makefile’?<br />";
 		return FALSE;
@@ -2942,12 +2951,16 @@ function get_legato($c,$line,$pos) {
 	else return -1;
 	}
 
-function date_sort($a,$b) {
-	return $a['start'] > $b['start'];
+function date_sort($a, $b) {
+	if ($a['start'] == $b['start'])
+		return 0; // They are equal
+	return ($a['start'] < $b['start']) ? -1 : 1;
 	}
-
-function score_sort($a,$b) {
-	return $a['score'] < $b['score'];
+	
+function score_sort($a, $b) {
+	if ($a['score'] == $b['score'])
+		return 0; // They are equal
+	return ($a['score'] < $b['score']) ? -1 : 1;
 	}
 
 function hidden_directory($name) {
@@ -3339,8 +3352,8 @@ function save_midiressources($filename) {
 			echo "<p id=\"refresh\" style=\"color:red;\">👉  Warning: NoteOn and NoteOff should have the same status in the filter of MIDI output ".$MIDIoutput[$i]."</p>";
 		if($SystemExclusiveFilter_out <> $EndSysExFilter_out)
 			echo "<p id=\"refresh\" style=\"color:red;\">👉  Warning: SystemExclusive and EndSysEx should have the same status in the filter of MIDI output ".$MIDIoutput[$i]."</p>";
-			if($StartFilter_out <> $ContinueFilter_out)
-				echo "<p id=\"refresh\" style=\"color:red;\">👉  Warning: Start and Continue should have the same status in the filter of MIDI output ".$MIDIoutput[$i]."</p>";
+	/*		if($StartFilter_out <> $ContinueFilter_out)
+				echo "<p id=\"refresh\" style=\"color:red;\">👉  Warning: Start and Continue should have the same status in the filter of MIDI output ".$MIDIoutput[$i]."</p>"; */
 		}
 	save_midiport($temp_midi_ressources."midiport",$acceptFilters,$passFilters,$outFilters);
 	save_midiport($dir_midi_resources.$filename."_midiport",$acceptFilters,$passFilters,$outFilters);
@@ -3371,6 +3384,7 @@ function save_midiport($thisfilename,$acceptFilters,$passFilters,$outFilters) {
 			if(isset($passFilters[$i])) fwrite($file,"MIDIpassFilter\t".$i."\t".$passFilters[$i]."\n");
 			}
 		fclose($file);
+		chmod($thisfilename,0777);
 		return true;
 		}
 	return false;
@@ -3518,10 +3532,10 @@ function filter_buttons_in($i,$param) {
 function filter_input_explanation() {
 	global $file_format;
 	if($file_format <> "rtmidi") return;
-	echo "<p>MIDI input filters are used to process incoming events, for example from a connected piano keyboard or other MIDI devices — including another instance of the BP3.</p>
+	echo "<p>MIDI input filters are used to process incoming events, for example from a connected<br />piano keyboard or other MIDI devices — including another instance of the BP3.</p>
 	<ul>
 	<li>By default (option ‘0’), events are ‘rejected’ and nothing happens.</li>
-	<li>If an event is accepted (option ‘1’), it can trigger a script command declared in the score.</li>
+	<li>If an event is accepted (option ‘1’), it can trigger a script command<br />declared in the score.</li>
 	<li>Accepted events can also be routed to the current MIDI output (option ‘3’).</li>
 	<li>Some settings might be changed by the console for consistency.</li>
 	</ul>";
@@ -3566,14 +3580,18 @@ function display_midi_ports($filename) {
 		}
 	echo "<input type=\"hidden\" name=\"NumberMIDIinputs\" value=\"".$NumberMIDIinputs."\">";
 	echo "<input type=\"hidden\" name=\"NumberMIDIoutputs\" value=\"".$NumberMIDIoutputs."\">";
+	$text_over_number = "Port number";
+	if(linux_system()) $text_over_number = "Client number";
+	$text_over_name = "Name of device";
+	$text_over_comment = "Your comment";
 	for($i = 0; $i < $NumberMIDIoutputs; $i++) {
 		if($MIDIoutput[$i] == -1) $value = '';
 		else $value = $MIDIoutput[$i];
 		if(!isset($MIDIoutputcomment[$i]) OR $MIDIoutputcomment[$i] == "void") $comment = '';
 		else $comment = $MIDIoutputcomment[$i];
-		echo "MIDI output&nbsp;&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutput_".$i."\" size=\"2\" value=\"".$value."\">";
-		echo "&nbsp;<input type=\"text\" style=\"margin-bottom:6px;\" onchange=\"tellsave()\" name=\"MIDIoutputname_".$i."\" size=\"15\" value=\"".$MIDIoutputname[$i]."\">";
-		echo "&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIoutputcomment_".$i."\" size=\"15\" value=\"".$comment."\">";
+		echo "MIDI output&nbsp;&nbsp;<input type=\"text\" title=\"".$text_over_number."\" onchange=\"tellsave()\" name=\"MIDIoutput_".$i."\" size=\"2\" value=\"".$value."\">";
+		echo "&nbsp;<input type=\"text\" title=\"".$text_over_name."\" style=\"margin-bottom:6px;\" onchange=\"tellsave()\" name=\"MIDIoutputname_".$i."\" size=\"15\" value=\"".$MIDIoutputname[$i]."\">";
+		echo "&nbsp;<input type=\"text\" title=\"".$text_over_comment."\" name=\"MIDIoutputcomment_".$i."\" size=\"15\" value=\"".$comment."\">";
 		echo "&nbsp;<button style=\"background-color:azure; border-radius: 6px;\" onclick=\"toggledisplay_output(".$i."); return false;\">FILTER</button>";
 		filter_form_output($i);
 		echo "<br />";
@@ -3586,9 +3604,9 @@ function display_midi_ports($filename) {
 		else $value = $MIDIinput[$i];
 		if(!isset($MIDIinputcomment[$i]) OR $MIDIinputcomment[$i] == "void") $comment = '';
 		else $comment = $MIDIinputcomment[$i];
-		echo "MIDI input&nbsp;&nbsp;&nbsp;&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIinput_".$i."\" size=\"2\" value=\"".$value."\">";
-		echo "&nbsp;<input type=\"text\" style=\"margin-bottom:6px;\" onchange=\"tellsave()\" name=\"MIDIinputname_".$i."\" size=\"15\" value=\"".$MIDIinputname[$i]."\">";
-		echo "&nbsp;<input type=\"text\" onchange=\"tellsave()\" name=\"MIDIinputcomment_".$i."\" size=\"15\" value=\"".$comment."\">";
+		echo "MIDI input&nbsp;&nbsp;&nbsp;&nbsp;<input type=\"text\" title=\"".$text_over_number."\" onchange=\"tellsave()\" name=\"MIDIinput_".$i."\" size=\"2\" value=\"".$value."\">";
+		echo "&nbsp;<input type=\"text\" title=\"".$text_over_name."\" style=\"margin-bottom:6px;\" onchange=\"tellsave()\" name=\"MIDIinputname_".$i."\" size=\"15\" value=\"".$MIDIinputname[$i]."\">";
+		echo "&nbsp;<input type=\"text\" title=\"".$text_over_comment."\" name=\"MIDIinputcomment_".$i."\" size=\"15\" value=\"".$comment."\">";
 		echo "&nbsp;<button style=\"background-color:azure; border-radius: 6px;\" onclick=\"toggledisplay_input(".$i."); return false;\">FILTER</button>";
 		filter_form_input($i);
 		echo "<br />";
@@ -3638,4 +3656,5 @@ function create_variables($script_variables) {
     fclose($h_variables);
     return;
     }
+
 ?>

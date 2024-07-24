@@ -49,7 +49,7 @@ if(isset($_POST['reload'])) {
 	}
 
 require_once("_header.php");
-display_conssole_state();
+display_console_state();
 
 $temp_midi_ressources = $temp_dir."trace_".my_session_id()."_".$filename."_";
 
@@ -58,6 +58,7 @@ echo "<p>Workspace = <input style=\"background-color:azure;\" name=\"workspace\"
 // echo "&nbsp;&nbsp;session_id = ".my_session_id();
 
 $hide = $need_to_save = FALSE;
+$no_save_midiresources = FALSE;
 
 if(isset($_POST['use_convention'])) {
 	$content = @file_get_contents($this_file,TRUE);
@@ -70,22 +71,28 @@ if(isset($_POST['use_convention'])) {
 	$content = @file_get_contents($this_file,TRUE);
 	$extract_data = extract_data(TRUE,$content);
 	$newcontent = $extract_data['content'];
+	mb_internal_encoding("UTF-8");  // Set internal character encoding to UTF-8
+	$newcontent = mb_ereg_replace("\n","<br>", $newcontent);
 	for($i = 0; $i < 12; $i++) {
 		$new_note = $_POST['new_note_'.$i];
 		for($octave = 15; $octave >= 0; $octave--) {
 			$new_octave = $octave + $change_octave;
 			if($new_octave < 0) $new_octave = "00";
-			if($new_convention <> 0) $newcontent = str_replace($Englishnote[$i].$octave,$new_note."@".$new_octave,$newcontent);
-			if($new_convention <> 0) $newcontent = str_replace($AltEnglishnote[$i].$octave,$new_note."@".$new_octave,$newcontent);
-			if($new_convention <> 1) $newcontent = str_replace($Frenchnote[$i].$octave,$new_note."@".$new_octave,$newcontent);
-			if($new_convention <> 1) $newcontent = str_replace($AltFrenchnote[$i].$octave,$new_note."@".$new_octave,$newcontent);
-			if($new_convention <> 2) $newcontent = str_replace($Indiannote[$i].$octave,$new_note."@".$new_octave,$newcontent);
-			if($new_convention <> 2) $newcontent = str_replace($AltIndiannote[$i].$octave,$new_note."@".$new_octave,$newcontent);
+			if($new_convention <> 0) $newcontent = mb_ereg_replace($Englishnote[$i].$octave,$new_note."@".$new_octave,$newcontent);
+			if($new_convention <> 0) $newcontent = mb_ereg_replace($AltEnglishnote[$i].$octave,$new_note."@".$new_octave,$newcontent);
+			if($new_convention <> 1) $newcontent = mb_ereg_replace($Frenchnote[$i].$octave,$new_note."@".$new_octave,$newcontent);
+			if($new_convention <> 1) $newcontent = mb_ereg_replace($AltFrenchnote[$i].$octave,$new_note."@".$new_octave,$newcontent);
+			if($new_convention <> 2) $newcontent = mb_ereg_replace($Indiannote[$i].$octave,$new_note."@".$new_octave,$newcontent);
+			if($new_convention <> 2) $newcontent = mb_ereg_replace($AltIndiannote[$i].$octave,$new_note."@".$new_octave,$newcontent);
 			}
 		}
-	$_POST['thistext'] = str_replace("@",'',$newcontent);
-	// This '@' is required to avoid confusion between "re" in Indian and Italian/French conventions
+	$newcontent = mb_ereg_replace("<br>","\n",$newcontent);
+	$newcontent = mb_ereg_replace("@",'',$newcontent);
+	// This '@' is required to avoid confusion between "re" in Indian and Italian/Spanish/French conventions
+	$_POST['thistext'] = $newcontent;
+	$no_save_midiresources = TRUE;
 	$need_to_save = TRUE;
+	echo "<div style=\"background-color:white; padding: 1em; border-radius: 6px;\"><p>👉 Current note convention for this grammar should now be <font color=\"red\">‘".ucfirst(note_convention(intval($new_convention)))."’</font>. You need to change it in the settings file.</p></div>";
 	}
 
 if(isset($_POST['delete_chan'])) {
@@ -94,6 +101,7 @@ if(isset($_POST['delete_chan'])) {
 	$newcontent = $extract_data['content'];
 	$newcontent = preg_replace("/_chan\([^\)]+\)/u",'',$newcontent);
 	$_POST['thistext'] = $newcontent;
+	$no_save_midiresources = TRUE;
 	$need_to_save = TRUE;
 	}
 
@@ -103,6 +111,7 @@ if(isset($_POST['delete_ins'])) {
 	$newcontent = $extract_data['content'];
 	$newcontent = preg_replace("/_ins\([^\)]+\)/u",'',$newcontent);
 	$_POST['thistext'] = $newcontent;
+	$no_save_midiresources = TRUE;
 	$need_to_save = TRUE;
 	}
 
@@ -112,6 +121,7 @@ if(isset($_POST['delete_tempo'])) {
 	$newcontent = $extract_data['content'];
 	$newcontent = preg_replace("/_tempo\([^\)]+\)/u",'',$newcontent);
 	$_POST['thistext'] = $newcontent;
+	$no_save_midiresources = TRUE;
 	$need_to_save = TRUE;
 	}
 	
@@ -121,6 +131,7 @@ if(isset($_POST['delete_volume'])) {
 	$newcontent = $extract_data['content'];
 	$newcontent = preg_replace("/_volume\([^\)]+\)/u",'',$newcontent);
 	$_POST['thistext'] = $newcontent;
+	$no_save_midiresources = TRUE;
 	$need_to_save = TRUE;
 	}
 	
@@ -175,6 +186,7 @@ if(isset($_POST['apply_changes_instructions'])) {
 			}
 		}
 	$_POST['thistext'] = str_replace("@",'',$newcontent);
+	$no_save_midiresources = TRUE;
 	$need_to_save = TRUE;
 	}
 
@@ -196,7 +208,7 @@ if($need_to_save OR isset($_POST['savethisfile']) OR isset($_POST['compilegramma
 	$content = recode_entities($content);
 	$content = preg_replace("/ +/u",' ',$content);
 	save($this_file,$filename,$top_header,$content);
-	if($file_format == "rtmidi") {
+	if($file_format == "rtmidi" AND !$no_save_midiresources) {
 		if(file_exists($refresh_file)) {
 			read_midiressources($filename);
 			@unlink($refresh_file);
@@ -239,9 +251,11 @@ do $output = str_replace(SLASH.SLASH,SLASH,$output,$count);
 while($count > 0);
 if(!file_exists($output)) {
 	echo "<p><font color=\"red\">Created folder:</font><font color=\"blue\"> ".$output."</font><br />";
-	mkdir($output);
+	if (!mkdir($output,0777, true))
+		error_log("Failed to create directory '{$temp_dir}' with error: " . error_get_last()['message']);
+	else
+		chmod($output,0777); // Double-check permissions
 	}
-
 echo link_to_help();
 
 echo "<h3>Grammar file “".$filename."”</h3>";
@@ -392,13 +406,12 @@ if($settings_file <> '' AND file_exists($dir.$settings_file)) {
 	}
 
 if($test) echo "url_this_page = ".$url_this_page."<br />";
-
 $csound_is_responsive = FALSE;
-if($file_format == "csound") {
+// if($file_format == "csound") {
 	echo "<div style=\"float:right; background-color:white; padding:6px; border-radius: 12px;\">";
 	$csound_is_responsive = check_csound();
 	echo "</div>";
-	}
+//	}
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 echo "<table cellpadding=\"8px;\" style=\"background-color:white; border-radius: 15px; border: 1px solid black;\"><tr style=\"\">";
 echo "<td style=\"white-space:nowrap;\">";
@@ -953,18 +966,20 @@ if(isset($_POST['manage_instructions'])) {
 	$hide = TRUE;
 	}
 if(!$hide) {
-	if($note_convention <> '')
-		echo "<p>Current note convention for this grammar is <font color=\"red\">‘".ucfirst(note_convention(intval($note_convention)))."’</font> as per <font color=\"blue\">‘".$settings_file."’</font></p>";
 	echo "<table style=\"background-color:white;\">";
 	echo "<tr>";
-	echo "<td style=\"vertical-align:middle; white-space:nowrap;\"><input style=\"background-color:Aquamarine;\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) {this.form.target='_self';return true;} else return false;\" name=\"change_convention\" formaction=\"".$url_this_page."#topchanges\" value=\"APPLY NOTE CONVENTION to this data\"> ➡</td>";
+	echo "<td style=\"vertical-align:middle; white-space:nowrap;\">";
+	echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) {this.form.target='_self';return true;} else return false;\" name=\"change_convention\" formaction=\"".$url_this_page."#topchanges\" value=\"APPLY NOTE CONVENTION to this data\"> ➡</td>";
 	echo "<td style=\"vertical-align:middle; white-space:nowrap;\">";
 	echo "<input type=\"radio\" name=\"new_convention\" value=\"0\">English<br />";
 	echo "<input type=\"radio\" name=\"new_convention\" value=\"1\">Italian/Spanish/French<br />";
 	echo "<input type=\"radio\" name=\"new_convention\" value=\"2\">Indian<br />";
 	echo "</td>";
-	echo "</tr>";
-	echo "</table>";
+	echo "</tr><tr><td colspan=2>";
+	if($note_convention <> '') {
+		echo "<p>Current note convention for this grammar is:<br /><font color=\"red\">‘".ucfirst(note_convention(intval($note_convention)))."’</font> as per <font color=\"blue\">‘".$settings_file."’</font><br />You will need to change it after applying a different convention.</p>";
+		}
+	echo "</td></tr></table>";
 	echo "<hr>";
 	$found_chan = substr_count($content,"_chan(");
 	$found_ins = substr_count($content,"_ins(");
@@ -986,13 +1001,14 @@ echo "</body>";
 echo "</html>";
 
 function save($this_file,$filename,$top_header,$save_content) {
-	$handle = fopen($this_file, "w");
+	$handle = @fopen($this_file, "w");
 	if($handle) {
 		$file_header = $top_header . "\n// Grammar saved as \"" . $filename . "\". Date: " . gmdate('Y-m-d H:i:s');
 		fwrite($handle, $file_header . "\n");
 		fwrite($handle, $save_content);
 		fclose($handle);
 		}
+	else echo "<div style=\"background-color:white; padding: 1em; border-radius: 6px;\"><p>👉 <font color=\"red\"><b>WARNING</b>: Some files have been imported and cannot be modified.</font></p><p><b>Linux user?</b> Open your terminal and type: <font color=\"blue\">sudo /opt/lampp/htdocs/bolprocessor/change_permissions.sh</font><br />(Your password will be required...)</p></div>";
 	return;
 	}
 ?>

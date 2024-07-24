@@ -1077,7 +1077,7 @@ function list_events($slice,$poly,$max_poly,$level_init,$i_token_init,$p_tempo,$
 			if($token == $Indiannote[$grade]) break;
 			if($token == $AltIndiannote[$grade]) break;
 			}
-		if($token <> '-' AND ($octave == 0 OR $grade > 11)) {
+		if($token <> '-' AND ($octave == 0 OR $grade > 11) AND $tokens[$i_token] <> '0') {
 			$result['error'] = "Unknown token: ".$tokens[$i_token];
 			return $result;
 			}
@@ -1251,7 +1251,10 @@ function show_relations_on_image($i_item,$matching_list,$mode,$direction,$scalen
 	$clean_name_of_file = str_replace(SLASH,"_",$clean_name_of_file);
 	$save_codes_dir = $temp_dir.$temp_folder.SLASH.$clean_name_of_file."_codes_".$mode."_".$i_item.SLASH;
 	$thick_max = 8; $thick = array();
-	if(!is_dir($save_codes_dir)) mkdir($save_codes_dir);
+	if(!is_dir($save_codes_dir)) {
+		mkdir($save_codes_dir);
+		chmod($save_codes_dir,0777);
+		}
 	if($mode == "harmonic") {
 		$direction = "both";
 		$matching_notes[$direction] = $matching_list[$i_item][$mode][$direction];
@@ -1510,6 +1513,7 @@ function show_relations_on_image($i_item,$matching_list,$mode,$direction,$scalen
 			for($i_match = 0; $i_match < count($matching_notes[$direction]); $i_match++) {
 				$w = $thick[$mode][$direction][$i_match];
 				if($w < 1) continue;
+				if($w > 10) $w = 10;
 				$j = $position[$direction][$i_match][0];
 				$k = $position[$direction][$i_match][1];
 				$content .= "§hilitej[".$h."] = \"".$j."\";\n";
@@ -1523,6 +1527,7 @@ function show_relations_on_image($i_item,$matching_list,$mode,$direction,$scalen
 			for($i_match = 0; $i_match < count($matching_notes[$direction]); $i_match++) {
 				$w = $thick[$mode][$direction][$i_match];
 				if($w < 1) continue;
+				if($w > 10) $w = 10;
 				$j = $position[$direction][$i_match][0];
 				$k = $position[$direction][$i_match][1];
 				$content .= "§hilitej[".$h."] = \"".$j."\";\n";
@@ -1534,6 +1539,7 @@ function show_relations_on_image($i_item,$matching_list,$mode,$direction,$scalen
 			for($i_match = 0; $i_match < count($matching_notes[$direction]); $i_match++) {
 				$w = $thick[$mode][$direction][$i_match];
 				if($w < 1) continue;
+				if($w > 10) $w = 10;
 				$j = $position[$direction][$i_match][0];
 				$k = $position[$direction][$i_match][1];
 				$content .= "§hilitej[".$h."] = \"".$j."\";\n";

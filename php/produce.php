@@ -11,7 +11,7 @@ if(!file_exists($bp_application_path.$console)) {
 	echo "<p style=\"text-align:center; width:90%;\">The console application (file “bp”) is not working, or missing, or misplaced…</p>";
 	$source = $application_path."source";
 	if(file_exists($source))
-		echo "<p style=\"text-align:center; width:90%;\">The source files of BP3 have been found. You can recompile “bp”, then try again.<br /><br /><big>👉&nbsp;&nbsp;<a href=\"".$application_path."compile.php?return=produce.php\">Run the compiler</a></big></p>";
+		echo "<p style=\"text-align:center; width:90%;\">The source files of BP3 have been found. You can recompile “bp”, then try again.<br /><br /><big>👉&nbsp;&nbsp;<a href=\"".$application_path."php/compile.php?return=produce.php\">Run the compiler</a></big></p>";
 	else
 		echo "<p style=\"text-align:center; width:90%;\">Source files (the “source” folder) have not been found.<br />Visit <a target=\"_blank\" href=\"https://bolprocessor.org/check-bp3/#install\">https://bolprocessor.org/check-bp3/</a> and follow instructions!</p>";
 	die();
@@ -151,6 +151,14 @@ else {
     $trace_link = str_replace(SLASH,'/',$trace_link);
  //   $tracefile = str_replace(SLASH,'/',$tracefile);
 //	echo "<p>Trace file = ".$tracefile."</p>";
+
+	$midiport = str_replace(".txt","_midiport",$tracefile);
+//	echo "<p>midiport file = ".$midiport."</p>";
+	if($file_format == "rtmidi" AND !file_exists($midiport)) {
+		echo "<p style=\"text-align:center;\">You first need to save the project or MIDI ports</p>";
+		echo "<p style=\"text-align:center;\">👉 Close this window!</p>";
+		die();
+		}
 
 	$midifile = $project_name.".mid";
 	if(file_exists($midifile)) {
@@ -377,8 +385,9 @@ if(isset($data_path) AND $data_path <> '') {
 	}
 @unlink($stopfile); @unlink($panicfile);
 session_abort();
+// $command = "ASAN_OPTIONS=detect_leaks=0 ".$command; // This is for debugging
 $o = send_to_console($command);
-if($pid > 0) echo "<small>The pid was <font color=\"red\">".$pid."</font></small><br />";
+// if($pid > 0) echo "<small>The pid was <font color=\"red\">".$pid."</font></small><br />";
 echo "<hr>";
 // sleep(1);
 session_reset();
