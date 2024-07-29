@@ -2069,6 +2069,7 @@ function create_chunks($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxc
 	}
 
 function save($this_file,$filename,$top_header,$save_content) {
+	global $url_this_page;
 	$handle = @fopen($this_file, "w");
 	if($handle) {
 		$file_header = $top_header . "\n// Data saved as \"" . $filename . "\". Date: " . gmdate('Y-m-d H:i:s');
@@ -2076,7 +2077,13 @@ function save($this_file,$filename,$top_header,$save_content) {
 		fwrite($handle, $save_content);
 		fclose($handle);
 		}
-	else echo "<div style=\"background-color:white; padding: 1em; border-radius: 6px;\"><p>👉 <font color=\"red\"><b>WARNING</b>: Some files have been imported and cannot be modified.</font></p><p><b>Linux user?</b> Open your terminal and type: <font color=\"blue\">sudo /opt/lampp/htdocs/bolprocessor/change_permissions.sh</font><br />(Your password will be required...)</p></div>";
+	else {
+		echo "<div style=\"background-color:white; padding: 1em; border-radius: 6px;\"><p>👉 <font color=\"red\"><b>WARNING</b>: Some files have been imported and cannot be modified.</font></p><p><b>Linux user?</b> Open your terminal and type: <font color=\"blue\">sudo /opt/lampp/htdocs/bolprocessor/change_permissions.sh</font><br />(Your password will be required...)</p>";
+	/*	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+		echo "<input style=\"background-color:azure; float:left;\" type=\"submit\" formaction=\"".$url_this_page."\" onclick=\"window.close();\" title=\"\" name=\"change_permissions\" value=\"CHANGE PERMISSIONS\">";
+		echo "</form>"; */
+		echo "</div>"; 
+		}
 	return;
 	}
 

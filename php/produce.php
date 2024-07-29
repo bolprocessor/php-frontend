@@ -26,9 +26,9 @@ if(isset($_POST['ignore'])) {
 			echo "<p>Now you can run this project.</p>";
 			}
 		}
-	echo "<p>Close this window!</p>";
-	echo "<p>➡ You can click PANIC to stop concurrent processes…</p>";
-	die;
+	echo "<p style=\"text-align:center; width:90%;\"><big>👉&nbsp;&nbsp;<a href=\"\" onclick=\"window.close();\">Close this page</a></big></p><p>You can also click PANIC to stop concurrent processes…</p>";
+	echo "</div>";
+	die();
 	}
 
 if(isset($_GET['startup'])) $startup = $_GET['startup'];
@@ -38,6 +38,8 @@ if(isset($_GET['instruction'])) $instruction = $_GET['instruction'];
 else $instruction = '';
 if($instruction == '') {
 	echo "ERROR: No instruction has been sent";
+	echo "<p style=\"text-align:center; width:90%;\"><big>👉&nbsp;&nbsp;<a href=\"\" onclick=\"window.close();\">Close this page</a></big></p>";
+echo "</div>";
 	die();
 	}
 
@@ -65,6 +67,8 @@ else {
 	else $data_path = '';
 	if($grammar_path == '' AND $data_path == '') {
 		echo "Link to data and/or grammar is missing";
+		echo "<p style=\"text-align:center; width:90%;\"><big>👉&nbsp;&nbsp;<a href=\"\" onclick=\"window.close();\">Close this page</a></big></p>";
+echo "</div>";
 		die();
 		}
 	if($instruction == "create_grammar") {
@@ -155,8 +159,9 @@ else {
 	$midiport = str_replace(".txt","_midiport",$tracefile);
 //	echo "<p>midiport file = ".$midiport."</p>";
 	if($file_format == "rtmidi" AND !file_exists($midiport)) {
-		echo "<p style=\"text-align:center;\">You first need to save the project or MIDI ports</p>";
-		echo "<p style=\"text-align:center;\">👉 Close this window!</p>";
+		echo "<p style=\"text-align:center;\"><big>You first need to save the project or MIDI ports</big></p>";
+		echo "<p style=\"text-align:center; width:90%;\"><big>👉&nbsp;&nbsp;<a href=\"\" onclick=\"window.close();\">Close this page</a></big></p>";
+		echo "</div>";
 		die();
 		}
 

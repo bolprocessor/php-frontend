@@ -22,6 +22,21 @@ $bp_application_path = "..".SLASH;
 $url_this_page = "_basic_tasks.php";
 $absolute_application_path = str_replace("php".SLASH.$url_this_page,'',realpath(__FILE__));
 
+/* if(!windows_system() AND isset($_POST['change_permissions'])) {
+	echo "<p>👉 Changed permissions on folder “bolprocessor”. Now you can save this file.</p>";
+	session_abort();
+	$command = "sudo ./change_permissions.sh";
+	$o = send_to_console($command);
+	session_reset();
+	$n_messages = count($o);
+	$no_error = FALSE;
+	for($i=0; $i < $n_messages; $i++) {
+		$mssg = $o[$i];
+		$mssg = clean_up_encoding(FALSE,TRUE,$mssg);
+		echo $mssg."<br />";
+		}
+	} */
+
 if(isset($_POST['csound_path_change'])) {
 	$csound_path = trim($_POST['csound_path']);
 	save_settings("csound_path",$csound_path);
