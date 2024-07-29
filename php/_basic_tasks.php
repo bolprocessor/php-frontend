@@ -22,21 +22,6 @@ $bp_application_path = "..".SLASH;
 $url_this_page = "_basic_tasks.php";
 $absolute_application_path = str_replace("php".SLASH.$url_this_page,'',realpath(__FILE__));
 
-/* if(!windows_system() AND isset($_POST['change_permissions'])) {
-	echo "<p>👉 Changed permissions on folder “bolprocessor”. Now you can save this file.</p>";
-	session_abort();
-	$command = "sudo ./change_permissions.sh";
-	$o = send_to_console($command);
-	session_reset();
-	$n_messages = count($o);
-	$no_error = FALSE;
-	for($i=0; $i < $n_messages; $i++) {
-		$mssg = $o[$i];
-		$mssg = clean_up_encoding(FALSE,TRUE,$mssg);
-		echo $mssg."<br />";
-		}
-	} */
-
 if(isset($_POST['csound_path_change'])) {
 	$csound_path = trim($_POST['csound_path']);
 	save_settings("csound_path",$csound_path);
@@ -128,11 +113,13 @@ $dir_midi_resources = $bp_application_path.$midi_resources.SLASH;
 
 if(!file_exists($bp_application_path.$csound_resources.SLASH."scale_images")) {
 	mkdir($bp_application_path.$csound_resources.SLASH."scale_images");
+    chmod($bp_application_path.$csound_resources.SLASH."scale_images",$permissions);
 	}
 $dir_scale_images = $bp_application_path.$csound_resources.SLASH."scale_images".SLASH;
 
 if(!file_exists($bp_application_path.$trash_folder)) {
 	mkdir($bp_application_path.$trash_folder);
+    chmod($bp_application_path.$trash_folder,$permissions);
 	}
 $dir_trash_folder = $bp_application_path.$trash_folder.SLASH;
 
@@ -165,7 +152,9 @@ foreach($dircontent as $thisfile) {
 		$prefix = $table[0];
 		if($prefix == "trace" OR $prefix == "temp") {
 			$id = $table[1];
-			if(($extension == "txt" OR $extension == "html" OR $extension == "bpda") AND $id <> my_session_id()) {
+	//		echo $thisfile." id = ".$id." session = ".my_session_id()."<br />";
+			if($id <> my_session_id()) {
+	//		if(($extension == "txt" OR $extension == "html" OR $extension == "bpda") AND $id <> my_session_id()) {
 				unlink($temp_dir.$thisfile);
 				continue;
 				}
