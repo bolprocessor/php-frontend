@@ -5,14 +5,14 @@ require_once("_basic_tasks.php");
 $user_os = getOS();
 echo "<p style=\"text-align:center; width:90%;\">System = ".$user_os."</p>";
 if(!file_exists("../source")) {
-/*	echo "<p>The ‘source’ folder is missing or misplaced. Follow instructions on page <a target=\"_blank\" href=\"https://bolprocessor.org/check-bp3/#install\">https://bolprocessor.org/check-bp3/</a> and check your installation!</p>"; */
 	echo "<p>The ‘source’ folder is missing or misplaced. Follow instructions on page bolprocessor.org/check-bp3/ and check your installation!</p>";
 	echo "<p><a href=\"index.php\">Return to Bol Processor home page</a></p>";
 	die(); 
 	}
-if(file_exists("../bp")) unlink("../bp");
+echo "<p style=\"text-align:center; width:90%;\">Don't close this page!</p>";
+if(file_exists("../".$console)) @unlink("../".$console);
 $this_file = "bp_compile_result.txt";
-if(file_exists($this_file)) unlink($this_file);
+if(file_exists($this_file)) @unlink($this_file);
 $command_show = $command = "make clean && make 2>bp_compile_result.txt";
 if(windows_system()) {
 	$command = "mingw32-make clean && mingw32-make 2>bp_compile_result.txt";
@@ -27,7 +27,6 @@ require_once("_header.php");
 echo str_repeat(' ', 1024);  // send extra spaces to fill browser buffer
 ob_flush();
 flush();
-// session_abort();
 sleep(1);
 chdir('..');
 $last_line = exec($command,$output,$return_var);
@@ -39,7 +38,7 @@ if($return_var <> 0) {
 	if(file_exists($this_file)) {
 		$content = trim(@file_get_contents($this_file,TRUE));
 		echo "<p style=\"color:red; text-align:center; width:90%;\"><big>Compilation Errors:</big></p>";
-		echo "<pre style=\"color:red; text-align:left; width:90%; margin:auto;\">". htmlspecialchars($content) ."</pre>";
+		echo "<pre style=\"color:red; text-align:left; width:90%; margin:auto;\">".htmlspecialchars($content)."</pre>";
 		}
 	}
 else {

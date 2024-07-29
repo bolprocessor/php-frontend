@@ -45,6 +45,13 @@ if(windows_system()) {
 else {
 	if(linux_system()) {
 		$console = "bp3";
+		if(!isset($csound_name) OR $csound_name == '') $csound_name = "csound";
+		if(!isset($csound_path) OR $csound_path == '') {
+			if(file_exists("/usr/bin/csound")) {
+				$csound_path = SLASH."usr".SLASH."bin";
+				}
+			else $csound_path = "";
+			}
 		}
 	else { // MacOS
 		$console = "bp";
