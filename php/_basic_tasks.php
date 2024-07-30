@@ -2004,7 +2004,7 @@ function send_to_console($command) {
 		}
 //	echo "command = ".$command."<br />";
 	exec($command,$table,$return_var);
-	echo "Return status: ".$return_var."\n";
+//	echo "Return status: ".$return_var."\n";
     $pid = 0;
  /*   if(!windows_system()) {
         $command = "pgrep -f ".$bp_application_path.$console;
@@ -2245,12 +2245,12 @@ function display_console_state() {
 	 echo "<span style=\"margin-left: 6px;\">";
 	 $output = check_console();
 	 if($output <> '') {
-		echo "Bol Processor is installed and responsive&nbsp;😀<br />Version ".$output;
+		echo "Bol Processor is installed and responding&nbsp;😀<br />Version ".$output;
 		$panicfile = str_replace(SLASH,'/',$panicfile);
 		if(isset($filename) AND $filename <> "Compilation" AND $filename <> "Produce" AND  $filename <> "Bol Processor") echo "<div style=\"text-align:right;\"><button type=\"button\" class=\"bouton\" onclick=\"createFile('".$panicfile."');\">PANIC!</button></div>\n";
 		}
 	 else {
-		echo "Bol Processor is not yet installed or not responsive&nbsp;😣<br />";
+		echo "Bol Processor is not yet installed or not responding&nbsp;😣<br />";
 		if(check_installation()) {
 			$link = "compile.php";
 			echo "Source files of BP3 have been found. You can (re)compile it.<br />";
@@ -2300,11 +2300,6 @@ function check_gcc() {
 	exec($command,$table,$status);
 	if($status == 0) return TRUE;
 	else return FALSE;
-/*	$output = $table[0];
-//	else $output = '';
-	echo $output."<br />";
-	if(is_integer($pos=strpos($output,"gcc ") AND $pos == 9)) return TRUE;
-	else return FALSE; */
 	}
 
 function check_csound() {
@@ -2313,7 +2308,6 @@ function check_csound() {
     @unlink($this_file);
 	$command = "\"".$programFiles.SLASH.$csound_path.SLASH.$csound_name."\" --version 2>csound_version.txt";
 	if(file_exists($programFiles.SLASH.$csound_path.SLASH.$csound_name)) {
-   // echo "com = ".$command."<br />";
         send_to_console($command);
 		}
     if(!file_exists($this_file)) {
@@ -2324,7 +2318,12 @@ function check_csound() {
 		echo "Path: <input type=\"text\" name=\"csound_path\" size=\"20\" style=\"background-color:CornSilk;text-align:right;\" value=\"".$csound_path."\"><font color=\"green\">".SLASH.$csound_name."</font>";
 		echo "&nbsp;<input style=\"background-color:yellow;\" type=\"submit\"  name=\"csound_path_change\" value=\"TRY\">";
 		echo "<br />";
-		echo "<br /><font color=\"red\">➡</font>&nbsp;<a target=\"_blank\" href=\"https://csound.com/download.html\">Follow this link</a> to install Csound<br />";
+		if(linux_system()) {
+			echo "<br /><font color=\"red\">➡</font>&nbsp;Read instructions in the <a target=\"_blank\" href=\"https://bolprocessor.org/misc/linux-scripts.zip\">script folder</a> to install Csound<br />";
+			}
+		else {
+			echo "<br /><font color=\"red\">➡</font>&nbsp;<a target=\"_blank\" href=\"https://csound.com/download.html\">Follow this link</a> to install Csound<br />";
+			}
 	    $result = FALSE;
 		}
 	else {
@@ -2340,7 +2339,7 @@ function check_csound() {
 				break;
 				}
 			}
-		echo "<p style=\"vertical-align:middle;\"><img src=\"pict/logo_csound.jpg\" width=\"90px;\" style=\"vertical-align:middle;\" />".$version."is installed and responsive.<br />";
+		echo "<p style=\"vertical-align:middle;\"><img src=\"pict/logo_csound.jpg\" width=\"90px;\" style=\"vertical-align:middle;\" />".$version."is installed and responding<br />";
 		$result = TRUE;
 		}
 	if($path <> $csound_resources) echo "<font color=\"red\">➡</font>&nbsp;<a target=\"_blank\" href=\"index.php?path=csound_resources\">Visit Csound resource folder</a>";

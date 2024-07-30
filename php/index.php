@@ -8,11 +8,12 @@ $url_this_page = $this_page = "index.php";
 display_console_state();
 
 echo "<table style=\"background-color:snow;\"><tr>";
-echo "<td style=\"padding:1em; vertical-align:middle; border-radius:1em;\"><img src=\"pict/BP3-logo.png\" width=\"120px;\"/></td><td style=\"padding:1em; vertical-align:middle; white-space:nowrap; border-radius:1em;\">";
+// echo "<td style=\"padding:1em; vertical-align:middle; border-radius:1em;\"><img src=\"pict/BP3-logo.png\" width=\"120px;\"/></td>";
+echo "<td style=\"padding:1em; vertical-align:middle; white-space:nowrap; border-radius:1em;\">";
 
 $test = FALSE;
 if($path <> '') {
-	echo "<h2 style=\"text-align:center;\">Bol Processor ‘BP3’</h2>";
+	echo "<h2>Bol Processor ‘BP3’</h2>";
 	$url_this_page .= "?path=".urlencode($path);
 	$dir = $bp_application_path.$path;
 	if($test) echo "path = ".$path."<br />";
@@ -27,12 +28,12 @@ if($path <> '') {
 	if($upper_dir == '') $upper_link = $this_page;
 	else $upper_link = $this_page."?path=".urlencode($upper_dir);
 	if($test) echo "link = ".$upper_link."<br />";
-	echo "</tr></table>";
+	echo "</td></tr></table>";
 	}
 else {
-	echo "<h2 style=\"text-align:center;\">Welcome to Bol Processor ‘BP3’</h2>";
+	echo "<h2>Welcome to Bol Processor ‘BP3’</h2>";
 	echo "</td>";
-	echo "<td style=\"padding:1em; vertical-align:middle;\">";
+	echo "<td style=\"padding:1em; vertical-align:middle; border-radius:1em;\">";
 	echo "<p>This is a PHP interface running<br />the ‘<font color=\"blue\"><b>".$console."</b></font>’ multi-platform console.</p>";
 	echo "</td>";
 	echo "</tr></table>";
@@ -235,15 +236,15 @@ if($folder <> '')
 $table = explode('_',$folder);
 $extension = end($table);
 
-$link_list = "file_list.php?dir=".$dir;
-echo " <input style=\"float:right; color:DarkBlue; background-color:Azure;\" onclick=\"window.open('".$link_list."','listfiles','width=300,height=600,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"copy list of files\">";
-
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 echo "<p style=\"text-align:left;\">";
-echo "<input style=\"background-color:azure;\" type=\"submit\" name=\"\" value=\"RELOAD THIS PAGE\">";
+if($path <> '') echo "<input style=\"background-color:azure;\" type=\"submit\" name=\"\" value=\"RELOAD THIS PAGE\">";
 if($folder <> '') echo "&nbsp;&nbsp;<big><font color=\"red\">↑</font>&nbsp;<a href=\"".$upper_link."\">UPPER FOLDER</a>&nbsp;<font color=\"red\">↑</font></big>";
 echo "</p>";
 echo "</form>";
+
+$link_list = "file_list.php?dir=".$dir;
+if($path <> '') echo "<p><input style=\"color:DarkBlue; background-color:Azure;\" onclick=\"window.open('".$link_list."','listfiles','width=300,height=600,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"COPY list of files\"></p>";
 
 echo "<script>\n";
 echo "window.onload = function() {
@@ -412,7 +413,7 @@ if($move_files) {
 		}
 	}
 
-if(!is_integer(strpos($path,"csound_resources"))) {
+if($path <> '' AND !is_integer(strpos($path,"csound_resources"))) {
 	echo "<div style=\"background-color:Cornsilk; padding-left:1em;  padding-right:1em; width:30%;\">";
 	if(!$delete_files AND !$rename_files AND !$move_files AND $path <> $trash_folder) {
 		echo "<input style=\"background-color:yellow; margin-top:1em;\" title=\"Delete folders or files\" type=\"submit\" name=\"delete_files\" value=\"DELETE\">";
@@ -426,7 +427,7 @@ if(!is_integer(strpos($path,"csound_resources"))) {
 	if(!$rename_files AND !$delete_files AND !$move_files AND $path == $trash_folder) {
 		echo "<br /><br /><input style=\"background-color:red; color:white;\" title=\"Empty trash\" type=\"submit\" name=\"empty_trash\" value=\"EMPTY THIS TRASH\"> 👉 can't be reversed!<br /><br />";
 		}
-	if(!$show_dependencies AND !$delete_files AND !$move_files AND $path <> $trash_folder) echo "<br /><br /><input style=\"background-color:azure;\" title=\"Show dependencies of files (links to other files)\" type=\"submit\" name=\"show_dependencies\" value=\"SHOW DEPENDENCIES\"> (links between files)<br /><br />";
+	if(!$show_dependencies AND !$delete_files AND !$move_files AND $path <> $trash_folder) echo "<br /><input style=\"background-color:azure;\" title=\"Show dependencies of files (links to other files)\" type=\"submit\" name=\"show_dependencies\" value=\"SHOW DEPENDENCIES\"> (links between files)<br /><br />";
 	else if($show_dependencies) echo "<br /><br /><input style=\"background-color:azure;\" type=\"submit\" value=\"HIDE DEPENDENCIES\"><br /><br />";
 	echo "</div>";
 	}
@@ -549,7 +550,8 @@ function display_directory($test,$dir,$filter) {
 		if($thisfile[0] == '.' OR $thisfile[0] == '_') continue;
 		if(is_integer($pos=strpos($thisfile,"BP2")) AND $pos == 0) continue;
 		if(is_integer($pos=strpos($thisfile,"License")) AND $pos == 0) continue;
-		if(is_integer($pos=stripos($thisfile,"ReadMe")) AND $pos == 0) continue; 
+		if(is_integer($pos=stripos($thisfile,"ReadMe")) AND $pos == 0) continue;
+		if(is_integer($pos=stripos($thisfile,"linux-scripts")) AND $pos == 0) continue; 
 		if($thisfile == "DerivedData" OR $thisfile == "resources" OR $thisfile == "scripts" OR $thisfile == "source" OR $thisfile == "temp_bolprocessor" OR $thisfile == "Makefile" OR $thisfile == "my_output" OR $thisfile == "php" OR $thisfile == "-se.startup" OR $thisfile == "LICENSE" OR $thisfile == "HowToBuild.txt" OR $thisfile == "BP3-To-Do.txt" OR $thisfile == "Bugs.txt" OR $thisfile == "ChangeLog" OR $thisfile == "Credits.txt" OR $thisfile == "HowToMakeARelease.txt" OR $thisfile == "y2k" OR $thisfile == "bp_compile_result.txt" OR $thisfile == "test.php") continue;
 		if($test) {
 			if(($new_name = new_name($thisfile)) <> $thisfile) rename($dir.SLASH.$thisfile,$dir.SLASH.$new_name);
