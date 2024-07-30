@@ -2239,13 +2239,13 @@ else echo "<p><font color=\"red\">File ‘_settings.php’ could nor be opened!<
  	}
 
 function display_console_state() {
-	global $bp_application_path, $absolute_application_path, $panicfile, $filename, $url_this_page;
+	global $bp_application_path, $absolute_application_path, $panicfile, $filename, $url_this_page, $console;
 	 echo "<div style=\"display: flex; align-items: center; float: right; background-color: white; padding: 6px; border-radius: 6px;\">";
 	 echo "<img src=\"pict/BP3-logo.png\" style=\"width: 100px;\"/>";  // Corrected CSS for width
 	 echo "<span style=\"margin-left: 6px;\">";
 	 $output = check_console();
 	 if($output <> '') {
-		echo "Bol Processor is installed and responding&nbsp;😀<br />Version ".$output;
+		echo "The ‘<font color=\"blue\"><b>".$console."</b></font>’ console is installed and responding<br />Version ".$output;
 		$panicfile = str_replace(SLASH,'/',$panicfile);
 		if(isset($filename) AND $filename <> "Compilation" AND $filename <> "Produce" AND  $filename <> "Bol Processor") echo "<div style=\"text-align:right;\"><button type=\"button\" class=\"bouton\" onclick=\"createFile('".$panicfile."');\">PANIC!</button></div>\n";
 		}

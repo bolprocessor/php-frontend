@@ -8,8 +8,7 @@ $url_this_page = $this_page = "index.php";
 display_console_state();
 
 echo "<table style=\"background-color:snow;\"><tr>";
-// echo "<td style=\"padding:1em; vertical-align:middle; border-radius:1em;\"><img src=\"pict/BP3-logo.png\" width=\"120px;\"/></td>";
-echo "<td style=\"padding:1em; vertical-align:middle; white-space:nowrap; border-radius:1em;\">";
+echo "<td style=\"padding:1em; vertical-align:middle; text-align:center; white-space:nowrap; border-radius:1em;\">";
 
 $test = FALSE;
 if($path <> '') {
@@ -32,11 +31,13 @@ if($path <> '') {
 	}
 else {
 	echo "<h2>Welcome to Bol Processor ‘BP3’</h2>";
+	echo "<img src=\"pict/rings.jpg\" width=\"100px;\"/>";
 	echo "</td>";
 	echo "<td style=\"padding:1em; vertical-align:middle; border-radius:1em;\">";
-	echo "<p>This is a PHP interface running<br />the ‘<font color=\"blue\"><b>".$console."</b></font>’ multi-platform console.</p>";
+	echo "<p style=\"text-align:center;\">This interface is running<br />the multi-platform console<br /><br /><i>‘Olympic’ version</i><br />Summer 2024<br /><a target=\"_blank\" href=\"https://bp3.tech\">https://bp3.tech</a></p>";
 	echo "</td>";
-	echo "</tr></table>";
+	echo "</tr>";
+	echo "</table>";
 	$dir = $bp_application_path;
 	}
 
