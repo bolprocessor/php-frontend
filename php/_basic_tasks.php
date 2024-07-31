@@ -2245,7 +2245,7 @@ function display_console_state() {
 	 echo "<span style=\"margin-left: 6px;\">";
 	 $output = check_console();
 	 if($output <> '') {
-		echo "The ‘<font color=\"blue\"><b>".$console."</b></font>’ console is installed and responding<br />Version ".$output;
+		echo "Bol Processor ‘<font color=\"blue\"><b>".$console."</b></font>’ console is responding<br />Version ".$output;
 		$panicfile = str_replace(SLASH,'/',$panicfile);
 		if(isset($filename) AND $filename <> "Compilation" AND $filename <> "Produce" AND  $filename <> "Bol Processor") echo "<div style=\"text-align:right;\"><button type=\"button\" class=\"bouton\" onclick=\"createFile('".$panicfile."');\">PANIC!</button></div>\n";
 		}
@@ -2339,7 +2339,7 @@ function check_csound() {
 				break;
 				}
 			}
-		echo "<p style=\"vertical-align:middle;\"><img src=\"pict/logo_csound.jpg\" width=\"90px;\" style=\"vertical-align:middle;\" />".$version."is installed and responding<br />";
+		echo "<p style=\"vertical-align:middle;\"><img src=\"pict/logo_csound.jpg\" width=\"90px;\" style=\"vertical-align:middle;\" />".$version."is responding<br />";
 		$result = TRUE;
 		}
 	if($path <> $csound_resources) echo "<font color=\"red\">➡</font>&nbsp;<a target=\"_blank\" href=\"index.php?path=csound_resources\">Visit Csound resource folder</a>";
