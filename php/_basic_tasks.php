@@ -17,6 +17,19 @@ define('SMOOTH',0);
 $test = FALSE;
 // $test = TRUE;
 
+$permissions = 0777;
+
+$file_path = '_settings.php';
+if (!file_exists($file_path)) {
+    // Create the file and write the PHP tags
+    $file_content = "<?php\n\n?>";
+    // Write the content to the file
+    if (file_put_contents($file_path, $file_content) == false) {
+         echo "Failed to create the file '_settings.php'."; die();
+        }
+    else chmod($file_path,$permissions);
+    }
+
 require_once("_settings.php");
 $bp_application_path = "..".SLASH;
 $url_this_page = "_basic_tasks.php";
@@ -30,19 +43,24 @@ if(isset($_POST['csound_path_change'])) {
 		save_settings("csound_name",$csound_name);
 		}
 	}
+
 if(windows_system()) {
     $console = "bp.exe";
-    if(!isset($csound_name) OR $csound_name == '') $csound_name = "csound.exe";
-    $programFiles = getenv("ProgramFiles");
-    if(!isset($csound_path) OR $csound_path == '') {
+    if (!isset($csound_name) || $csound_name == '') $csound_name = "csound.exe";
+  //  $programFiles = getenv("ProgramFiles"); This is only valid in English!
+    $programFiles = findCsoundPath($csound_name);
+    $programFiles = str_replace("\Csound6_x64\bin",'',$programFiles);
+ //   echo "programFiles = ".$programFiles."<br />";
+    if (!isset($csound_path) || $csound_path == '') {
         if(file_exists($programFiles."\\Csound6_x64\\bin\\csound.exe")) {
-            $csound_path = "Csound6_x64\\bin";
+            $csound_path = "\\Csound6_x64\\bin";
             $csound_name = "csound.exe";
             }
         else $csound_path = "";
         }
     }
 else {
+    $programFiles = '';
 	if(linux_system()) {
 		$console = "bp3";
 		if(!isset($csound_name) OR $csound_name == '') $csound_name = "csound";
@@ -59,7 +77,7 @@ else {
 		if(!isset($csound_path)) $csound_path = SLASH."usr".SLASH."local".SLASH."bin";
 		}
     }
-save_settings("csound_name",$csound_name);
+if($csound_name <> '') save_settings("csound_name",$csound_name);
 save_settings("csound_path",$csound_path);
 
 if(!isset($csound_resources) OR $csound_resources == '') $csound_resources = "csound_resources";
@@ -82,7 +100,6 @@ $max_term_in_fraction = 32768; // Used to simplify fractions when importing Musi
 $number_fields_csound_instrument = 67; // Never change this!
 $number_midi_parameters_csound_instrument = 6; // Never change this!
 
-$permissions = 0777;
 $oldmask = umask(0);
 $temp_dir = $bp_application_path."temp_bolprocessor";
 if(!file_exists($temp_dir)) {
@@ -260,6 +277,29 @@ for($i = 0; $i < 7; $i++) {
 	}
 
 // --------- FUNCTIONS ------------
+
+/* function findExecutable($exeName) {
+    $paths = explode(PATH_SEPARATOR, getenv('PATH'));
+    foreach ($paths as $path) {
+        $fullPath = $path.DIRECTORY_SEPARATOR;
+        if (file_exists($fullPath.$exeName) && is_executable($fullPath.$exeName)) {
+            return rtrim($fullPath, '/\\');
+			}
+		}
+	return false;
+	} */
+
+function findCsoundPath($exeName) {
+    $paths = explode(PATH_SEPARATOR, getenv('PATH'));
+    foreach ($paths as $path) {
+        $fullPath = $path.DIRECTORY_SEPARATOR;
+        if (file_exists($fullPath.$exeName) && is_executable($fullPath.$exeName)) {
+            return rtrim($path, '/\\');
+			}
+		}
+	return false;
+    }
+	
 
 function extract_data($compact,$content) {
 	$said = FALSE;
@@ -2303,7 +2343,7 @@ function check_gcc() {
 	}
 
 function check_csound() {
-    global $csound_path, $csound_resources, $path, $url_this_page, $file_format,$csound_name,$programFiles;
+    global $csound_path,$csound_name, $csound_resources, $path, $url_this_page, $file_format,$programFiles;
 	$this_file = "csound_version.txt";
     @unlink($this_file);
 	$command = "\"".$programFiles.SLASH.$csound_path.SLASH.$csound_name."\" --version 2>csound_version.txt";
@@ -2314,8 +2354,8 @@ function check_csound() {
 		echo "&nbsp;&nbsp;&nbsp;<small><font color=\"red\">".$csound_path.SLASH.$csound_name."</font></small>";
 		if(isset($file_format)) echo "<input type=\"hidden\" name=\"file_format\" value=\"".$file_format."\">";
 		echo "<p><img src=\"pict/logo_csound.jpg\" width=\"90px;\" style=\"vertical-align:middle;\" />&nbsp;is not installed<br />or its path (<font color= \"blue\">".$csound_path."</font>) is incorrect<br /><br />";
-		echo "Name: <font color=\"green\">path_to_csound/ </font><input type=\"text\" name=\"csound_name\" size=\"12\" style=\"background-color:CornSilk;\" value=\"".$csound_name."\"><br />";
-		echo "Path: <input type=\"text\" name=\"csound_path\" size=\"20\" style=\"background-color:CornSilk;text-align:right;\" value=\"".$csound_path."\"><font color=\"green\">".SLASH.$csound_name."</font>";
+		echo "Name: <font color=\"green\">path_to_csound".SLASH." </font><input type=\"text\" name=\"csound_name\" size=\"14\" style=\"background-color:CornSilk;\" value=\"".$csound_name."\"><br />";
+		echo "Path: <input type=\"text\" name=\"csound_path\" size=\"30\" style=\"background-color:CornSilk;text-align:right;\" value=\"".$csound_path."\"><font color=\"green\">".SLASH.$csound_name."</font>";
 		echo "&nbsp;<input style=\"background-color:yellow;\" type=\"submit\"  name=\"csound_path_change\" value=\"TRY\">";
 		echo "<br />";
 		if(linux_system()) {
