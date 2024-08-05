@@ -348,13 +348,14 @@ if($test) echo "grammar_file = ".$this_file."<br />";
 $content = @file_get_contents($this_file,TRUE);
 if($content === FALSE) ask_create_new_file($url_this_page,$filename);
 $metronome = 0;
-$nature_of_time = $objects_file = $csound_file = $alphabet_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = '';
+$nature_of_time = $objects_file = $csound_file = $tuning_file = $alphabet_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = '';
 $extract_data = extract_data(TRUE,$content);
 echo "<p style=\"color:blue;\">".$extract_data['headers']."</p>";
 $content = $extract_data['content'];
 $alphabet_file = $extract_data['alphabet'];
 $objects_file = $extract_data['objects'];
 $csound_file = $extract_data['csound'];
+$tuning_file = $extract_data['tuning'];
 $settings_file = $extract_data['settings'];
 $orchestra_file = $extract_data['orchestra'];
 $interaction_file = $extract_data['interaction'];
@@ -406,12 +407,12 @@ if($settings_file <> '' AND file_exists($dir.$settings_file)) {
 	}
 
 if($test) echo "url_this_page = ".$url_this_page."<br />";
+
 $csound_is_responsive = FALSE;
-// if($file_format == "csound") {
-	echo "<div style=\"float:right; background-color:white; padding:6px; border-radius: 12px;\">";
-	$csound_is_responsive = check_csound();
-	echo "</div>";
-//	}
+echo "<div style=\"float:right; background-color:white; padding:6px; border-radius: 12px;\">";
+link_to_tunings();
+$csound_is_responsive = check_csound();
+echo "</div>";
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 echo "<table cellpadding=\"8px;\" style=\"background-color:white; border-radius: 15px; border: 1px solid black;\"><tr style=\"\">";
 echo "<td style=\"white-space:nowrap;\">";
@@ -762,7 +763,7 @@ $display_command_title = "DisplayCommand".$filename;
 echo "&nbsp;<input style=\"color:DarkBlue; background-color:Azure; font-size:large;\" onclick=\"window.open('".$link_test."','".$display_command_title."','width=1000,height=200,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Display command line\">";
 echo "</div>";
 echo "</form>";
-display_more_buttons(FALSE,$content,$url_this_page,$dir,'',$objects_file,$csound_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
+display_more_buttons(FALSE,$content,$url_this_page,$dir,'',$objects_file,$csound_file,$tuning_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
 
 $variable = array();
 for($i = 0; $i < $imax; $i++) {

@@ -180,7 +180,7 @@ if(strlen(trim($content)) == 0) {
 	$template = "prototypes_template";
 	$content = @file_get_contents($template,TRUE);
 	}
-$objects_file = $grammar_file = $csound_file = $alphabet_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = '';
+$objects_file = $grammar_file = $csound_file = $tuning_file = $alphabet_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = '';
 $extract_data = extract_data(TRUE,$content);
 echo "<p style=\"color:blue;\">".$extract_data['headers']."</p>";
 $content = $extract_data['content'];
@@ -318,7 +318,7 @@ if($handle_object) fclose($handle_object);
 echo "<p style=\"color:blue;\">".$comment_on_file."</p>";
 echo "<p style=\"text-align:left;\">";
 echo "<input style=\"background-color:yellow; font-size:large;\" type=\"submit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’ INCLUDING ALL CHANGES TO PROTOTYPES\"><br />";
-echo "<font color=\"red\">➡</font> Changes in prototypes are <font color=\"red\">autosaved</font> if changes occurred every 30 seconds. Keep this page open as long as you are editing sound-object prototypes!</p>";
+echo "<font color=\"red\">➡</font> Changes in prototypes are <font color=\"red\">autosaved</font> every 30 seconds if changes occurred. Keep this page open as long as you are editing sound-object prototypes!</p>";
 if($autosave) echo "<script type=\"text/javascript\" src=\"autosaveObjects.js\"></script>";
 echo "<p><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" name=\"create_object\" value=\"CREATE A NEW OBJECT\"> named <input type=\"text\" name=\"new_object\" size=\"10\" value=\"\"></p>";
 if($deleted_objects <> '') echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"restore\" value=\"RESTORE ALL DELETED OBJECTS\"> = <font color=\"blue\"><big>".$deleted_objects."</big></font></p>";

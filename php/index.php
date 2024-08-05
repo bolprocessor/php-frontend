@@ -258,12 +258,12 @@ if($path == $trash_folder AND isset($_POST['empty_trash'])) {
 	if(emptydirectory($bp_application_path.$trash_folder)) echo "<p id=\"refresh\"><font color=\"red\">Trash is empty!</font></p>";
 	}
 
-if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension <> "temp" AND !$delete_files AND !$rename_files AND !$move_files) {
+if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $path <> $tuning_resources AND $extension <> "temp" AND !$delete_files AND !$rename_files AND !$move_files) {
 	echo "<div style=\"float:right; background-color:white; padding:6px; border-radius: 15px;\">";
+	link_to_tunings();
 	check_csound();
 	if($path <> $csound_resources) {
-//	if($path <> $csound_resources AND $path <> '') {
-		echo "<button style=\"float:right; background-color:azure; border-radius: 6px; font-size:large;\" onclick=\"togglecreate(); return false;\">CREATE FILES AND  FOLDERS</button>";
+		echo "<button style=\"float:right; background-color:azure; border-radius: 6px; font-size:large;\" onclick=\"togglecreate(); return false;\">CREATE FILES AND FOLDERS</button>";
 		echo "<div id=\"create\"  style=\"padding-top:36px;\">";
 		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		echo "<p style=\"text-align:left;\">";
@@ -414,7 +414,7 @@ if($move_files) {
 		}
 	}
 
-if($path <> '' AND !is_integer(strpos($path,"csound_resources"))) {
+if($path <> '' AND !is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"tuning_resources"))) {
 	echo "<div style=\"background-color:Cornsilk; padding-left:1em;  padding-right:1em; width:30%;\">";
 	if(!$delete_files AND !$rename_files AND !$move_files AND $path <> $trash_folder) {
 		echo "<input style=\"background-color:yellow; margin-top:1em;\" title=\"Delete folders or files\" type=\"submit\" name=\"delete_files\" value=\"DELETE\">";
@@ -440,7 +440,7 @@ echo "<br />";
 echo "<table style=\"background-color: Cornsilk;\">";
 $show_grammar = isset($last_grammar_page) AND isset($last_grammar_name) AND file_exists("..".SLASH.$last_grammar_directory.SLASH.$last_grammar_name);
 $show_alphabet = isset($last_data_page) AND isset($last_data_name) AND file_exists("..".SLASH.$last_data_directory.SLASH.$last_data_name);
-if(!is_integer(strpos($path,"csound_resources"))) {
+if(!is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"tuning_resources"))) {
 	if($path <> '' OR $show_grammar OR $show_alphabet) {
 		echo "<tr>";
 		echo "<th>";
@@ -524,7 +524,7 @@ if(!is_integer(strpos($path,"csound_resources"))) {
 if($path <> '') {
 	$n3 = display_directory(TRUE,$dir,'');
 	echo "<tr>";
-	if(!is_integer(strpos($path,"csound_resources"))) {
+	if(!is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"tuning_resources"))) {
 		echo "<td>";
 		if($n1 > 0) display_directory(FALSE,$dir,"settings");
 		echo "</td>";
@@ -541,7 +541,7 @@ echo "</table>";
 echo "</form>";
 
 function display_directory($test,$dir,$filter) {
-	global $path,$move_files,$move_checked_files,$new_file,$csound_resources,$delete_checked_files,$rename_checked_files,$delete_files,$rename_files,$show_dependencies,$trash_folder,$this_page,$url_this_page,$dir_trash_folder,$bp_application_path,$dest_folder,$done,$seen,$dir_csound_resources;
+	global $path,$move_files,$move_checked_files,$new_file,$csound_resources,$tuning_resources,$delete_checked_files,$rename_checked_files,$delete_files,$rename_files,$show_dependencies,$trash_folder,$this_page,$url_this_page,$dir_trash_folder,$bp_application_path,$dest_folder,$done,$seen,$dir_csound_resources,$dir_tuning_resources;
 
 //	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 	$dircontent = scandir($dir);
@@ -619,107 +619,114 @@ function display_directory($test,$dir,$filter) {
 			else rename($dir.SLASH.$thisfile,$dir_csound_resources.$thisfile);
 			}
 		else {
-			$renamed = FALSE;
-			if(!$test AND $delete_checked_files AND isset($_POST['delete_'.$i_file])) {
-				echo "<p><font color=\"red\">➡</font> Deleted ‘<font color=\"blue\">".$thisfile."</font>’ (moved to <a target=\"_blank\" href=\"index.php?path=".$trash_folder."\">trash folder</a>)</p>";
-				rename($dir.SLASH.$thisfile,$dir_trash_folder.$thisfile);
-				delete_settings($thisfile);
-				continue;
+			if(!$test AND $path <> $tuning_resources AND $path <> $trash_folder AND $type == "tuning") {
+				echo "Moved ‘<font color=\"blue\">".$dir.SLASH.$thisfile."</font>’ to ‘<font color=\"blue\">".$dir_tuning_resources.$thisfile."</font>’<br />";
+				if(file_exists($dir_tuning_resources.$thisfile)) @unlink($dir.SLASH.$thisfile);
+				else rename($dir.SLASH.$thisfile,$dir_tuning_resources.$thisfile);
 				}
-			$new_name = '';
-			if(!$test AND $rename_checked_files AND $type <> '' AND isset($_POST['new_name_'.$i_file]) AND trim($_POST['new_name_'.$i_file]) <> '') {
-				$new_name = trim($_POST['new_name_'.$i_file]);
-				$make_copy = isset($_POST['copy_'.$i_file]);
-				$new_name = fix_new_name($new_name);
-				if($new_name <> '') {
-					if($type <> "directory") {
-						$table2 = explode(".",$new_name);
-						$new_prefix = $table2[0];
-						if(strlen($new_prefix) <> 3 OR !is_integer($pos=strpos($new_prefix,"-")) OR $pos <> 0)
-						$new_prefix = '';
-						$new_extension = end($table2);
-						if($new_prefix.".".$new_extension == $new_name) $new_extension = '';
-						if($extension <> '')
-							$short_type = str_replace("bp",'',$extension);
-						if($prefix <> '')
-							$short_type = str_replace("-",'',$prefix);
-						if($new_extension <> '')
-							$new_short_type = str_replace("bp",'',$new_extension);
-						if($new_prefix <> '')
-							$new_short_type = str_replace("-",'',$new_prefix);
-						if($new_extension <> '' AND $new_short_type == $short_type)
-							$name_mode = "extension";
-						if($new_prefix <> '' AND $new_short_type == $short_type)
-							$name_mode = "prefix";
-						$new_name = good_name($short_type,$new_name,$name_mode);
-						}
-					$old_name = $thisfile;
-					if(file_exists($dir.SLASH.$new_name)) {
-						echo "<font color=\"red\">➡</font> Can't rename to existing ‘".$new_name."’: ";
-						}
-					else {
-						if($make_copy) {
-							if($type <> "directory") copy($dir.SLASH.$old_name,$dir.SLASH.$new_name);
-							else rcopy($dir.SLASH.$old_name,$dir.SLASH.$new_name);
-							$link = $type.".php?file=".urlencode($path.SLASH.$new_name);
-							echo "‘<font color=\"green\">".$old_name."</font>’ <font color=\"red\">➡</font> copied to <a target=\"_blank\" href=\"".$link."\">".$new_name."</a><br />";
+			else {
+				$renamed = FALSE;
+				if(!$test AND $delete_checked_files AND isset($_POST['delete_'.$i_file])) {
+					echo "<p><font color=\"red\">➡</font> Deleted ‘<font color=\"blue\">".$thisfile."</font>’ (moved to <a target=\"_blank\" href=\"index.php?path=".$trash_folder."\">trash folder</a>)</p>";
+					rename($dir.SLASH.$thisfile,$dir_trash_folder.$thisfile);
+					delete_settings($thisfile);
+					continue;
+					}
+				$new_name = '';
+				if(!$test AND $rename_checked_files AND $type <> '' AND isset($_POST['new_name_'.$i_file]) AND trim($_POST['new_name_'.$i_file]) <> '') {
+					$new_name = trim($_POST['new_name_'.$i_file]);
+					$make_copy = isset($_POST['copy_'.$i_file]);
+					$new_name = fix_new_name($new_name);
+					if($new_name <> '') {
+						if($type <> "directory") {
+							$table2 = explode(".",$new_name);
+							$new_prefix = $table2[0];
+							if(strlen($new_prefix) <> 3 OR !is_integer($pos=strpos($new_prefix,"-")) OR $pos <> 0)
+							$new_prefix = '';
+							$new_extension = end($table2);
+							if($new_prefix.".".$new_extension == $new_name) $new_extension = '';
+							if($extension <> '')
+								$short_type = str_replace("bp",'',$extension);
+							if($prefix <> '')
+								$short_type = str_replace("-",'',$prefix);
+							if($new_extension <> '')
+								$new_short_type = str_replace("bp",'',$new_extension);
+							if($new_prefix <> '')
+								$new_short_type = str_replace("-",'',$new_prefix);
+							if($new_extension <> '' AND $new_short_type == $short_type)
+								$name_mode = "extension";
+							if($new_prefix <> '' AND $new_short_type == $short_type)
+								$name_mode = "prefix";
+							$new_name = good_name($short_type,$new_name,$name_mode);
+							}
+						$old_name = $thisfile;
+						if(file_exists($dir.SLASH.$new_name)) {
+							echo "<font color=\"red\">➡</font> Can't rename to existing ‘".$new_name."’: ";
 							}
 						else {
-							rename($dir.SLASH.$old_name,$dir.SLASH.$new_name);
-							if($type <> "directory") change_occurrences_name_in_files($dir,$old_name,$new_name);
-							$thisfile = $new_name;
-							$renamed = TRUE;
+							if($make_copy) {
+								if($type <> "directory") copy($dir.SLASH.$old_name,$dir.SLASH.$new_name);
+								else rcopy($dir.SLASH.$old_name,$dir.SLASH.$new_name);
+								$link = $type.".php?file=".urlencode($path.SLASH.$new_name);
+								echo "‘<font color=\"green\">".$old_name."</font>’ <font color=\"red\">➡</font> copied to <a target=\"_blank\" href=\"".$link."\">".$new_name."</a><br />";
+								}
+							else {
+								rename($dir.SLASH.$old_name,$dir.SLASH.$new_name);
+								if($type <> "directory") change_occurrences_name_in_files($dir,$old_name,$new_name);
+								$thisfile = $new_name;
+								$renamed = TRUE;
+								}
 							}
 						}
 					}
-				}
-			$this_is_directory = is_dir($dir.SLASH.$thisfile);
-			if(!$test AND $this_is_directory) {
-				if(hidden_directory($thisfile)) continue;
-				echo "▶︎ ";
-				}
-			else if($thisfile == "bp") continue;
+				$this_is_directory = is_dir($dir.SLASH.$thisfile);
+				if(!$test AND $this_is_directory) {
+					if(hidden_directory($thisfile)) continue;
+					echo "▶︎ ";
+					}
+				else if($thisfile == "bp") continue;
 
-	//		if(!$test) echo $check_box;
+		//		if(!$test) echo $check_box;
 
-			if(!$test AND $delete_files) echo "<input type=\"checkbox\" name=\"delete_".$i_file."\"> ";
-			if($type <> '') {
-				$files_shown++;
-				}
-			if(!$test AND $type <> '' AND !$this_file_moved) {
-				if($this_is_directory) {
-					$table = explode('_',$thisfile);
-					$extension = end($table);
-					if($path == '') $link = $this_page."?path=".urlencode($thisfile);
-					else $link = $this_page."?path=".urlencode($path.SLASH.$thisfile);
-					if($extension == "temp") $link = '';
-					$this_is_directory = TRUE;
+				if(!$test AND $delete_files) echo "<input type=\"checkbox\" name=\"delete_".$i_file."\"> ";
+				if($type <> '') {
+					$files_shown++;
 					}
-				else $link = $type.".php?file=".urlencode($path.SLASH.$thisfile);
-				if($link <> '') {
-					if($this_is_directory) echo "<a href=\"".$link."\">";
-					else echo "<a target=\"_blank\" href=\"".$link."\">";
-					}
-				if($this_is_directory) echo "<b>";
-				echo $thisfile;
-				if($link <> '') echo "</a>";
-				if($this_is_directory) echo "</b>";
-				echo "&nbsp;";
-				if($renamed) echo "(<font color=\"red\">renamed</font>)&nbsp;";
-				if($rename_files) {
-					echo "&nbsp;➡&nbsp;&nbsp;<input type=\"text\" style=\"border:2px; solid #dadada; border-bottom-style: groove; text-align:left;\" name=\"new_name_".$i_file."\" size=\"30\" value=\"\">";
-					echo "<input type=\"checkbox\" name=\"copy_".$i_file."\">&nbsp;➡&nbsp;make a copy";
-					}
-				else if(!$this_is_directory) {
-					$time_saved = filemtime($dir.SLASH.$thisfile);
-					echo "&nbsp;<small>&nbsp;".gmdate('Y-m-d H\hi',$time_saved)."</small>";
-					}
-				echo "<br />";
-				if($show_dependencies) {
-					$dependencies = find_dependencies($dir,$thisfile);
-					if(count($dependencies) > 0) {
-						for($i = 0; $i < count($dependencies); $i++)
-							echo "<small>&nbsp;&nbsp;▷&nbsp;".$dependencies[$i]."</small><br />";
+				if(!$test AND $type <> '' AND !$this_file_moved) {
+					if($this_is_directory) {
+						$table = explode('_',$thisfile);
+						$extension = end($table);
+						if($path == '') $link = $this_page."?path=".urlencode($thisfile);
+						else $link = $this_page."?path=".urlencode($path.SLASH.$thisfile);
+						if($extension == "temp") $link = '';
+						$this_is_directory = TRUE;
+						}
+					else $link = $type.".php?file=".urlencode($path.SLASH.$thisfile);
+					if($link <> '') {
+						if($this_is_directory) echo "<a href=\"".$link."\">";
+						else echo "<a target=\"_blank\" href=\"".$link."\">";
+						}
+					if($this_is_directory) echo "<b>";
+					echo $thisfile;
+					if($link <> '') echo "</a>";
+					if($this_is_directory) echo "</b>";
+					echo "&nbsp;";
+					if($renamed) echo "(<font color=\"red\">renamed</font>)&nbsp;";
+					if($rename_files) {
+						echo "&nbsp;➡&nbsp;&nbsp;<input type=\"text\" style=\"border:2px; solid #dadada; border-bottom-style: groove; text-align:left;\" name=\"new_name_".$i_file."\" size=\"30\" value=\"\">";
+						echo "<input type=\"checkbox\" name=\"copy_".$i_file."\">&nbsp;➡&nbsp;make a copy";
+						}
+					else if(!$this_is_directory) {
+						$time_saved = filemtime($dir.SLASH.$thisfile);
+						echo "&nbsp;<small>&nbsp;".gmdate('Y-m-d H\hi',$time_saved)."</small>";
+						}
+					echo "<br />";
+					if($show_dependencies) {
+						$dependencies = find_dependencies($dir,$thisfile);
+						if(count($dependencies) > 0) {
+							for($i = 0; $i < count($dependencies); $i++)
+								echo "<small>&nbsp;&nbsp;▷&nbsp;".$dependencies[$i]."</small><br />";
+							}
 						}
 					}
 				}

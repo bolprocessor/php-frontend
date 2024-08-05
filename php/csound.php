@@ -74,7 +74,7 @@ if(isset($_POST['create_scale'])) {
 			fwrite($handle,$any_fractions."\n");
 			$any_scale = "f2 0 128 -51 12 2 261.63 60 1 1.059 1.122 1.189 1.26 1.335 1.414 1.498 1.587 1.682 1.782 1.888 2";
 			fwrite($handle,$any_scale."\n");
-			$any_comment = "<html>This is an equal-tempered scale for BP3 + Csound.<br />Created ".date('Y-m-d H:i:s')."<br /></html>";
+			$any_comment = "<html>This is an equal-tempered scale for BP3.<br />Created ".date('Y-m-d H:i:s')."<br /></html>";
 			fwrite($handle,$any_comment."\n");
 			fclose($handle);
 			$need_to_save = TRUE;
@@ -407,7 +407,7 @@ echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/fo
 echo "<p style=\"text-align:left;\"><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"savealldata\" onclick=\"this.form.target='_self';return true;\" value=\"SAVE ‘".$filename."’\"></p>";
 
 if($autosave) {
-	echo "<p><font color=\"red\">➡</font> All data is <font color=\"red\">autosaved</font> if changes occurred every 30 seconds. Keep this page open as long as you are editing instruments or scales!</p>";
+	echo "<p><font color=\"red\">➡</font> All data is <font color=\"red\">autosaved</font> every 30 seconds if changes occurred.<br />Keep this page open as long as you are editing instruments or scales!</p>";
 	echo "<script type=\"text/javascript\" src=\"autosaveInstruments.js\"></script>";
 	}
 
@@ -1199,10 +1199,14 @@ if($max_scales > 0) {
 	$table_names = $p_interval = $q_interval = $cent_position = $ratio_interval = array();
 	for($i_scale = 1, $k_image = 0; $i_scale <= $max_scales; $i_scale++) {
 		$link_edit = "scale.php";
-		echo "<li><font color=\"MediumTurquoise\"><b>".$scale_name[$i_scale]."</b></font> ";
+		echo "<li id=\"".$i_scale."\"><font color=\"MediumTurquoise\"><b>".$scale_name[$i_scale]."</b></font> ";
 		echo "➡ <input type=\"submit\" style=\"background-color:Aquamarine;\" name=\"edit_scale\" formaction=\"".$link_edit."?scalefilename=".urlencode($scale_name[$i_scale])."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT\">";
 		echo "&nbsp;<input type=\"submit\" style=\"background-color:yellow;\" name=\"delete_scale_".$i_scale."\" formaction=\"".$url_this_page."&scalefilename=".urlencode($scale_name[$i_scale])."\" onclick=\"this.form.target='_self';return true;\" value=\"DELETE scale (can be reversed)\">";
-		echo "&nbsp;<input type=\"submit\" style=\"background-color:yellow;\" name=\"copy_scale_".$i_scale."\" formaction=\"".$url_this_page."&scalefilename=".urlencode($scale_name[$i_scale])."\" onclick=\"this.form.target='_self';return true;\" value=\"COPY/DUPLICATE scale\">";
+		echo "&nbsp;<input type=\"submit\" style=\"background-color:yellow;\" name=\"copy_scale_".$i_scale."\" formaction=\"".$url_this_page."&scalefilename=".urlencode($scale_name[$i_scale])."\" onclick=\"this.form.target='_self';return true;\" value=\"COPY/DUPLICATE scale\">"; // $$$$
+		$scala_file = $dir_scales.$scale_name[$i_scale].".scl";
+//		echo $scala_file."<br />";
+		echo "&nbsp;<input type=\"submit\" style=\"background-color:azure;\" name=\"export_scale_".$i_scale."\" formaction=\"".$url_this_page."&scalefilename=".urlencode($scale_name[$i_scale])."#".$i_scale."\" onclick=\"this.form.target='_self';return true;\" value=\"Create SCALA file\">";
+		if(file_exists($scala_file) OR isset($_POST['export_scale_'.$i_scale])) echo "<span style=\"background-color:azure; padding-right:1em;\">—> <a href=\"".$scala_file."\" download=\"".$scale_name[$i_scale].".scl\">Download</a></span>";
 		$clean_name_of_file = str_replace("#","_",$scale_name[$i_scale]);
 		$clean_name_of_file = str_replace("/","_",$clean_name_of_file);
 		$dir_image = $dir_scale_images.$clean_name_of_file.".png";
@@ -1212,7 +1216,6 @@ if($max_scales > 0) {
 			}
 		echo "<br /><small><font color=\"blue\">".$scale_table[$i_scale]."</font></small>";
 		if(isset($scale_fraction[$i_scale])) {
-		//	echo "<br />&nbsp;&nbsp;&nbsp;";
 			$fraction_string = str_replace('[','',str_replace(']','',$scale_fraction[$i_scale]));
 			$fraction_string = preg_replace("/\s+/u",' ',$fraction_string);
 			$table_fraction = explode(' ',$fraction_string);
@@ -1234,6 +1237,8 @@ if($max_scales > 0) {
 				$p_interval[$i_scale][$k] = $q_interval[$i_scale][$k] = 0;
 				$p = intval($table_fraction[$i_fraction]);
 				$q = intval($table_fraction[$i_fraction + 1]);
+				$p_position[$i_scale][$k] = $p;
+				$q_position[$i_scale][$k] = $q;
 				if(($p * $q) > 0) {
 				//	echo $p."/".$q." ";
 					if($i_fraction  == 0)
@@ -1441,7 +1446,6 @@ if($max_scales > 0) {
 					$k++;
 					}
 				}
-		//	for($j_scale = ($i_scale + 1); $j_scale <= $max_scales; $j_scale++) {
 			for($j_scale = 1; $j_scale <= $max_scales; $j_scale++) {
 				if($i_scale == $j_scale) continue;
 				$kmaxj = count($p_interval[$i_scale]);
@@ -1568,6 +1572,49 @@ if($number_instruments > 0) {
 	}
 echo "</td>";
 echo "</tr></table>";
+
+// $$$$
+for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
+	if(isset($scale_fraction[$i_scale]) AND isset($table_names[$i_scale])) {
+		if(isset($_POST['export_scale_'.$i_scale])) {
+	//		echo "<font color=\"blue\">".$scale_name[$i_scale]."</font>";
+			$olddir = getcwd();
+			chdir($dir_scales);
+			$file = $scale_name[$i_scale].".scl";
+			$text = "! ".$file."\n";
+			$text .= "! Scala file, ref. https://www.huygens-fokker.org/scala/scl_format.html\n";
+			if(isset($scale_comment[$i_scale])) {
+				$this_comment = html_to_text($scale_comment[$i_scale],'txt');
+				$this_comment = substr($this_comment, 0, strpos($this_comment, "<br />"));
+				$this_comment = str_replace("-cs.","-tu.",$this_comment);
+				$text .= $this_comment."\n";
+				}
+			else $text .= "This scale is called '".$scale_name[$i_scale]."'\n";
+			$text .= "! Created by the Bol Processor\n";
+			$kmaxi = count($p_interval[$i_scale]);
+			$text .= $kmaxi."\n";
+			for($i_fraction = $k = 0; $k < $kmaxi; $i_fraction += 2) {
+				if($table_names[$i_scale][$i_fraction / 2] == "•") continue;
+				if(($p_interval[$i_scale][$k] * $q_interval[$i_scale][$k]) > 0) {
+					$text .= $p_position[$i_scale][$k]."/".$q_position[$i_scale][$k]." ".$note_name[$i_scale][$k + 1]."\n";
+					$k++;
+					}
+				else {
+					$cents = round(1200 * log($ratio[$i_scale][$k]) / log(2));
+					$text .= $cents." cents ".$note_name[$i_scale][$k + 1]."\n";
+					$k++;
+					}
+				}
+			$handle = fopen($file,"w");
+			if($handle) {
+				fwrite($handle,$text);
+				fclose($handle);
+				}
+			chdir($olddir);
+			break;
+			}
+		}
+	}
 
 if($verbose) {
 	echo "<hr>";
