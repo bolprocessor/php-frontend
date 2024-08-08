@@ -4,6 +4,7 @@ $url_this_page = "produce.php";
 if(isset($_GET['title'])) $this_title = urldecode($_GET['title']);
 else $this_title = '';
 require_once("_header.php");
+echo "<script type='text/javascript' src='https://www.midijs.net/lib/midi.js'></script>";
 set_time_limit(0);
 
 $application_path = $bp_application_path;
@@ -106,7 +107,6 @@ echo "</div>";
 		echo "document.body.innerHTML = sometext";
 		echo "</script>";
 		}
-	
 	$grammar_name = '';
 	$data_name = '';
 	if($grammar_path <> '') {
@@ -484,10 +484,16 @@ if($file_format == "midi") {
 //	echo "<p>output = ".$output."</p>";
 	if(file_exists($midi_file_link) AND filesize($midi_file_link) > 59) {
 //		echo "midi_file_link = ".$midi_file_link."<br />";
-        $midi_file_link_url = str_replace(SLASH,'/',$midi_file_link);
-		echo "<p class=\"shadow\" style=\"width:25em;\"><a href=\"#midi\" onClick=\"MIDIjs.play('".$midi_file_link_url."');\"><img src=\"pict/loudspeaker.png\" width=\"70px;\" style=\"vertical-align:middle;\" />Play MIDI file</a>";
-		echo " (<a href=\"#midi\" onClick=\"MIDIjs.stop();\">Stop playing</a>)";
-		echo "&nbsp;or <a href=\"".$midi_file_link."\" download>download it</a></p>";
+		if(!is_connected() AND $file_format == "midi") {
+			echo "<p style=\"color:red;\">➡ Cannot find the MIDI file player “midijs.net”… Are you connected to Internet?</p>";
+			echo "<p><a href=\"".$midi_file_link."\" download>Download the MIDI file</a></p>";
+			}
+		else {
+			$midi_file_link_url = str_replace(SLASH,'/',$midi_file_link);
+			echo "<p class=\"shadow\" style=\"width:25em;\"><a href=\"#midi\" onClick=\"MIDIjs.play('".$midi_file_link_url."');\"><img src=\"pict/loudspeaker.png\" width=\"70px;\" style=\"vertical-align:middle;\" />Play MIDI file</a>";
+			echo " (<a href=\"#midi\" onClick=\"MIDIjs.stop();\">Stop playing</a>)";
+			echo "&nbsp;or <a href=\"".$midi_file_link."\" download>download it</a></p>";
+			}
 		}
 	}
 
@@ -746,4 +752,5 @@ function check_image($link) {
 		}
 	return $result;
 	}
+
 ?>

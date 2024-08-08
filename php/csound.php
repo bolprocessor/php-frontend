@@ -1205,7 +1205,7 @@ if($max_scales > 0) {
 		echo "&nbsp;<input type=\"submit\" style=\"background-color:yellow;\" name=\"copy_scale_".$i_scale."\" formaction=\"".$url_this_page."&scalefilename=".urlencode($scale_name[$i_scale])."\" onclick=\"this.form.target='_self';return true;\" value=\"COPY/DUPLICATE scale\">"; // $$$$
 		$scala_file = $dir_scales.$scale_name[$i_scale].".scl";
 //		echo $scala_file."<br />";
-		echo "&nbsp;<input type=\"submit\" style=\"background-color:azure;\" name=\"export_scale_".$i_scale."\" formaction=\"".$url_this_page."&scalefilename=".urlencode($scale_name[$i_scale])."#".$i_scale."\" onclick=\"this.form.target='_self';return true;\" value=\"Create SCALA file\">";
+		echo "&nbsp;<input type=\"submit\" style=\"background-color:azure;\" name=\"export_scale_".$i_scale."\" formaction=\"".$url_this_page."&scalefilename=".urlencode($scale_name[$i_scale])."#".$i_scale."\" onclick=\"this.form.target='_self';return true;\" value=\"Export to SCALA\">";
 		if(file_exists($scala_file) OR isset($_POST['export_scale_'.$i_scale])) echo "<span style=\"background-color:azure; padding-right:1em;\">—> <a href=\"".$scala_file."\" download=\"".$scale_name[$i_scale].".scl\">Download</a></span>";
 		$clean_name_of_file = str_replace("#","_",$scale_name[$i_scale]);
 		$clean_name_of_file = str_replace("/","_",$clean_name_of_file);
@@ -1586,7 +1586,7 @@ for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
 			if(isset($scale_comment[$i_scale])) {
 				$this_comment = html_to_text($scale_comment[$i_scale],'txt');
 				$this_comment = substr($this_comment, 0, strpos($this_comment, "<br />"));
-				$this_comment = str_replace("-cs.","-tu.",$this_comment);
+				$this_comment = str_replace("-cs.","-to.",$this_comment);
 				$text .= $this_comment."\n";
 				}
 			else $text .= "This scale is called '".$scale_name[$i_scale]."'\n";

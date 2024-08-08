@@ -82,8 +82,8 @@ save_settings("csound_path",$csound_path);
 
 if(!isset($csound_resources) OR $csound_resources == '') $csound_resources = "csound_resources";
 save_settings("csound_resources",$csound_resources);
-if(!isset($tuning_resources) OR $tuning_resources == '') $tuning_resources = "tuning_resources";
-save_settings("tuning_resources",$tuning_resources);
+if(!isset($tonality_resources) OR $tonality_resources == '') $tonality_resources = "tonality_resources";
+save_settings("tonality_resources",$tonality_resources);
 if(!isset($midi_resources) OR $midi_resources == '') $midi_resources = "midi_resources";
 save_settings("midi_resources",$midi_resources);
 if(!isset($trash_folder) OR $trash_folder == '') $trash_folder = "trash_bolprocessor";
@@ -131,11 +131,11 @@ if(!file_exists($bp_application_path.$csound_resources)) {
 	}
 $dir_csound_resources = $bp_application_path.$csound_resources.SLASH;
 
-if(!file_exists($bp_application_path.$tuning_resources)) {
-	mkdir($bp_application_path.$tuning_resources);
-	chmod($bp_application_path.$tuning_resources,$permissions);
+if(!file_exists($bp_application_path.$tonality_resources)) {
+	mkdir($bp_application_path.$tonality_resources);
+	chmod($bp_application_path.$tonality_resources,$permissions);
 	}
-$dir_tuning_resources = $bp_application_path.$tuning_resources.SLASH;
+$dir_tonality_resources = $bp_application_path.$tonality_resources.SLASH;
 
 if(!file_exists($bp_application_path.$midi_resources)) {
 	mkdir($bp_application_path.$midi_resources);
@@ -143,11 +143,11 @@ if(!file_exists($bp_application_path.$midi_resources)) {
 	}
 $dir_midi_resources = $bp_application_path.$midi_resources.SLASH;
 
-if(!file_exists($bp_application_path.$tuning_resources.SLASH."scale_images")) {
-	mkdir($bp_application_path.$tuning_resources.SLASH."scale_images");
-    chmod($bp_application_path.$tuning_resources.SLASH."scale_images",$permissions);
+if(!file_exists($bp_application_path.$tonality_resources.SLASH."scale_images")) {
+	mkdir($bp_application_path.$tonality_resources.SLASH."scale_images");
+    chmod($bp_application_path.$tonality_resources.SLASH."scale_images",$permissions);
 	}
-$dir_scale_images = $bp_application_path.$tuning_resources.SLASH."scale_images".SLASH;
+$dir_scale_images = $bp_application_path.$tonality_resources.SLASH."scale_images".SLASH;
 
 if(!file_exists($bp_application_path.$trash_folder)) {
 	mkdir($bp_application_path.$trash_folder);
@@ -324,7 +324,7 @@ function extract_data($compact,$content) {
 	$table = explode(chr(10),$content);
 	$table_out = $extract_data = array();
 	$start = $header = TRUE;
-	$extract_data['grammar'] = $extract_data['metronome'] = $extract_data['time_structure'] = $extract_data['headers'] = $extract_data['alphabet'] = $extract_data['objects'] = $extract_data['csound'] = $extract_data['tuning'] = $extract_data['settings'] = $extract_data['data'] = $extract_data['orchestra'] = $extract_data['timebase'] = $extract_data['interaction'] = $extract_data['midisetup'] = $extract_data['timebase'] = $extract_data['keyboard'] = $extract_data['glossary'] = $extract_data['cstables'] = '';
+	$extract_data['grammar'] = $extract_data['metronome'] = $extract_data['time_structure'] = $extract_data['headers'] = $extract_data['alphabet'] = $extract_data['objects'] = $extract_data['csound'] = $extract_data['tonality'] = $extract_data['settings'] = $extract_data['data'] = $extract_data['orchestra'] = $extract_data['timebase'] = $extract_data['interaction'] = $extract_data['midisetup'] = $extract_data['timebase'] = $extract_data['keyboard'] = $extract_data['glossary'] = $extract_data['cstables'] = '';
 	$extract_data['templates'] = FALSE;
 	for($i = 0; $i < count($table); $i++) {
 		$line = trim($table[$i]);
@@ -374,8 +374,8 @@ function extract_data($compact,$content) {
 			$extract_data['objects'] = fix_file_name($line,"mi");
 		else if(is_integer($pos=strpos($line,"-cs")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
 			$extract_data['csound'] = fix_file_name($line,"cs");
-		else if(is_integer($pos=strpos($line,"-tu")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
-			$extract_data['tuning'] = fix_file_name($line,"tu");
+		else if(is_integer($pos=strpos($line,"-to")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
+			$extract_data['tonality'] = fix_file_name($line,"to");
 		else if(is_integer($pos=strpos($line,"-se")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
 			$extract_data['settings'] = fix_file_name($line,"se");
 		else if(is_integer($pos=strpos($line,"-da")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
@@ -424,8 +424,8 @@ function window_name($text) {
 	return $text;
 	}
 	
-function display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,$objects_file,$csound_file,$tuning_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file) {
-	global $bp_application_path, $csound_resources, $tuning_resources, $output_file, $file_format, $test;
+function display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,$objects_file,$csound_file,$tonality_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file) {
+	global $bp_application_path, $csound_resources, $tonality_resources, $output_file, $file_format, $test;
 	$page_type = str_replace(".php",'',$url_this_page);
 	$page_type = preg_replace("/\.php.*/u",'',$url_this_page);
 	
@@ -477,10 +477,10 @@ function display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,
 		echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$csound_file."’\">&nbsp;";
 		echo "</td></form>";
 		}
-	if($tuning_file <> '') {
-		$url_this_page = "csound.php?file=".urlencode($tuning_resources.SLASH.$tuning_file);
+	if($tonality_file <> '') {
+		$url_this_page = "csound.php?file=".urlencode($tonality_resources.SLASH.$tonality_file);
 		echo "<td><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-		echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$tuning_file."’\">&nbsp;";
+		echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$tonality_file."’\">&nbsp;";
 		echo "</td></form>";
 		}
 	if($settings_file <> '') {
@@ -1516,8 +1516,8 @@ function type_of_file($thisfile) {
 			$type = "keyboard"; break;
 		case '-gl':
 			$type = "glossary"; break;
-		case '-tu':
-			$type = "tning"; break;
+		case '-to':
+			$type = "tonality"; break;
 		case '-sc':
 		case '+sc':
 			$type = "script"; break;
@@ -1540,12 +1540,14 @@ function type_of_file($thisfile) {
 		case "bptb": $type = "timebase"; $found = TRUE; break;
 		case "bpkb": $type = "keyboard"; $found = TRUE; break;
 		case "bpgl": $type = "glossary"; $found = TRUE; break;
-		case "bptu": $type = "tuning"; $found = TRUE; break;
+		case "bptu": $type = "tonality"; $found = TRUE; break;
 		case "bpsc": $type = "script"; $found = TRUE; break;
+		case "bpto": $type = "tonality"; $found = TRUE; break;
 		case "orc": $type = "csorchestra"; $found = TRUE; break;
 		case "sco": $type = "csorchestra"; $found = TRUE; break;
 		case "aiff": $type = "csorchestra"; $found = TRUE; break;
 		case "wav": $type = "csorchestra"; $found = TRUE; break;
+		case "png": $type = "image"; $found = TRUE; break;
 		}
 	if($found) $name_mode = "extension";
 	else $name_mode = "prefix";
@@ -2361,8 +2363,8 @@ function check_gcc() {
 	else return FALSE;
 	}
 
-function link_to_tunings() {
-	echo "<p><font color=\"red\">➡</font>&nbsp;<a target=\"_blank\" href=\"index.php?path=tuning_resources\">Visit ‘tunings’ resource folder</a></p>";
+function link_to_tonality() {
+	echo "<p><font color=\"red\">➡</font>&nbsp;<a target=\"_blank\" href=\"index.php?path=tonality_resources\">TONALITY resource folder</a></p>";
 	}
 
 function check_csound() {
@@ -2405,9 +2407,18 @@ function check_csound() {
 		echo "<p style=\"vertical-align:middle;\"><img src=\"pict/logo_csound.jpg\" width=\"90px;\" style=\"vertical-align:middle;\" />".$version."is responding<br />";
 		$result = TRUE;
 		}
-	if($path <> $csound_resources) echo "<font color=\"red\">➡</font>&nbsp;<a target=\"_blank\" href=\"index.php?path=csound_resources\">Visit Csound resource folder</a>";
+	if($path <> $csound_resources) echo "<font color=\"red\">➡</font>&nbsp;<a target=\"_blank\" href=\"index.php?path=csound_resources\">CSOUND resource folder</a>";
 	echo "</p>";
 	return $result;
+	}
+
+function is_connected() {
+	$connected = @fsockopen("www.midijs.net",80);
+	if($connected) {
+	fclose($connected);
+	return TRUE;
+	}
+	else return FALSE;
 	}
 
 function relocate_function_table($dir,$line) {
@@ -3047,7 +3058,7 @@ function hidden_directory($name) {
 		case "php":
 		case "source":
 		case "midi_resources":
-		case "tuning_resources":
+		case "tonality_resources":
 		case "temp_bolprocessor":
 			return TRUE;
 		}

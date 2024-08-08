@@ -981,47 +981,6 @@ echo "</h3>";
 
 echo "<p>➡ <a target=\"_blank\" href=\"https://bolprocessor.org/microtonality/\">Read the documentation on microtonality</a></p>";
 
-echo "<table style=\"background-color:cornsilk;\">";
-echo "<tr>";
-echo "<td style=\"white-space:nowrap; padding:6px; vertical-align:middle;\"><font color=\"blue\">numgrades</font> = <input type=\"text\" name=\"numgrades\" size=\"5\" value=\"".$numgrades_fullscale."\"></td>";
-echo "<td rowspan=\"2\" style=\"white-space:nowrap; padding:6px; vertical-align:middle;\">";
-echo "<table style=\"background-color:white;\">";
-echo "<tr>";
-echo "<td colspan=\"".$numgrades_with_labels."\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"modifynames\" onclick=\"this.form.target='_self';return true;\" formaction=\"scale.php?scalefilename=".urlencode($filename)."\" value=\"SAVE NEW NAMES\">&nbsp;Modify the names of these notes:</td>";
-echo "</tr>";
-echo "<tr>";
-for($j = $j_col = 0; $j < $numgrades_fullscale; $j++) {
-	if($name[$j] == '') continue;
-	if($j_col >= 12) {
-		$j_col = 0;
-		echo "</tr><tr>";
-		}
-	$j_col++;
-	echo "<td style=\"text-align:center;\">";
-	if($key[$j] > 0) echo "<font color=\"MediumTurquoise\"><b>".$key[$j]."</b></font><br />";
-	$the_width = strlen($name[$j]);
-	if($the_width < 5) $the_width = 5;
-	echo "<input style=\"text-align:center;\" type=\"text\" name=\"new_name_".$j."\" size=\"".$the_width."\" value=\"".$name[$j]."\">";
-	echo "</td>";
-	}
-echo "</tr>"; 
-echo "</table>";
-echo "</td>";
-echo "</tr><tr>";
-echo "<td style=\"white-space:nowrap; padding:6px; vertical-align:middle;\"><font color=\"blue\">interval</font> = <input type=\"text\" name=\"interval\" size=\"6\" value=\"".$interval."\">";
-$cents = round(cents($interval),1);
-echo " or <input type=\"text\" name=\"interval_cents\" size=\"6\" value=\"".$cents."\"> cents (typically 1200)";
-store($h_image,"interval_cents",$cents);
-echo "</td>";
-echo "</tr><tr>";
-echo "<td style=\"white-space:nowrap; padding:6px; vertical-align:middle;\"><font color=\"blue\">basekey</font> = <input type=\"text\" name=\"basekey\" size=\"5\" value=\"".$basekey."\">";
-echo "&nbsp;&nbsp;<font color=\"blue\">baseoctave</font> = <input type=\"text\" name=\"baseoctave\" size=\"5\" value=\"".$baseoctave."\"></td>";
-echo "<td style=\"padding:6px; vertical-align:middle;\"><font color=\"blue\">basefreq</font> = <input type=\"text\" name=\"basefreq\" size=\"7\" value=\"".$basefreq."\"> Hz.<br />This is the frequency for fraction 1/1, assuming a 440 Hz diapason.";
-if($ratio[0] <> 1 AND $name[0] <> '') echo "<br />Here, the frequency of <font color=\"blue\">‘".$name[0]."’</font> would be <font color=\"red\">".round(($basefreq * $ratio[0]),2)."</font> Hz if it is the <i>block key</i>.";
-echo "</td>";
-echo "</tr></table>";
-
-echo "<p><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"savethisfile\" onclick=\"this.form.target='_self';return true;\" formaction=\"scale.php?scalefilename=".urlencode($filename)."\" value=\"SAVE “".$filename."”\"></p>";
 
 if(isset($_POST['p_comma']) AND isset($_POST['q_comma'])) {
 	$p_comma = $_POST['p_comma'];
@@ -1032,16 +991,6 @@ else if(isset($_POST['syntonic_comma'])) $syntonic_comma = $_POST['syntonic_comm
 if(round($syntonic_comma,3) == 21.506 AND ($p_comma * $q_comma) == 0) {
 	$p_comma = 81; $q_comma = 80;
 	}
-
-store($h_image,"syntonic_comma",$syntonic_comma);
-store($h_image,"p_comma",$p_comma);
-store($h_image,"q_comma",$q_comma);
-	
-for($i = 0; $i <= $numgrades_fullscale; $i++) {
-	if(!isset($series[$i])) $series[$i] = '';
-	$series[$i] = update_series($p[$i],$q[$i],$series[$i]);
-	}
-
 echo "<div id=\"topcomma\"></div>";
 if(isset($_POST['change_comma']) AND isset($_POST['list_sensitive_notes']) AND $_POST['list_sensitive_notes'] <> '') {
 	if(isset($_POST['new_p_comma']) AND isset($_POST['new_q_comma']) AND $_POST['new_p_comma'] > 0  AND $_POST['new_q_comma'] > 0) {
@@ -1064,19 +1013,19 @@ if(isset($_POST['change_comma']) AND isset($_POST['list_sensitive_notes']) AND $
 	if($list_sensitive_notes <> '') {
 		$table_sensitive_notes = explode(' ',$list_sensitive_notes);
 		echo "<p>Sensitive notes: ";
-		for($i = 0; $i < count($table_sensitive_notes); $i++) echo "<font color=\"blue\">".$name[$table_sensitive_notes[$i]]."</font> ";
+		for($i = 0; $i < count($table_sensitive_notes); $i++) if(isset($name[$table_sensitive_notes[$i]])) echo "<font color=\"blue\">".$name[$table_sensitive_notes[$i]]."</font> ";
 		echo "<br />";
 		}
 	if($list_wolffifth_notes <> '') {
 		$table_wolffifth_notes = explode(' ',$list_wolffifth_notes);
 		echo "Wolffifth notes: ";
-		for($i = 0; $i < count($table_sensitive_notes); $i++) echo "<font color=\"blue\">".$name[$table_wolffifth_notes[$i]]."</font> ";
+		for($i = 0; $i < count($table_wolffifth_notes); $i++) if(isset($name[$table_wolffifth_notes[$i]])) echo "<font color=\"blue\">".$name[$table_wolffifth_notes[$i]]."</font> ";
 		echo "</p>"; 
 		}
 	if($list_wolffourth_notes <> '') {
 		$table_wolffourth_notes = explode(' ',$list_wolffourth_notes);
 		echo "Wolffourth notes: ";
-		for($i = 0; $i < count($table_sensitive_notes); $i++) echo "<font color=\"blue\">".$name[$table_wolffourth_notes[$i]]."</font> ";
+		for($i = 0; $i < count($table_wolffourth_notes); $i++) if(isset($name[$table_wolffourth_notes[$i]])) echo "<font color=\"blue\">".$name[$table_wolffourth_notes[$i]]."</font> ";
 		echo "</p>"; 
 		}
 	if($new_comma < 0 OR $new_comma > 56.8) echo "<p>➡ Cannot set syntonic comma to: <font color=\"red\">".$new_comma."</font> cents because it should stay in range 0 ... 56.8 cents</p>";
@@ -1125,6 +1074,146 @@ if(isset($_POST['change_comma']) AND isset($_POST['list_sensitive_notes']) AND $
 			}
 		}
 	}
+
+echo "<table style=\"background-color:cornsilk;\">";
+echo "<tr>";
+echo "<td style=\"white-space:nowrap; padding:6px; vertical-align:middle;\"><font color=\"blue\">numgrades</font> = <input type=\"text\" name=\"numgrades\" size=\"5\" value=\"".$numgrades_fullscale."\"> (typically 12)</td>";
+echo "<td rowspan=\"2\" style=\"white-space:nowrap; padding:6px; vertical-align:middle;\">";
+echo "<table style=\"background-color:white;\">";
+echo "<tr>";
+echo "<td colspan=\"".$numgrades_with_labels."\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"modifynames\" onclick=\"this.form.target='_self';return true;\" formaction=\"scale.php?scalefilename=".urlencode($filename)."\" value=\"SAVE NEW NAMES\">&nbsp;Modify the names of these notes:</td>";
+echo "</tr>";
+echo "<tr>";
+for($j = $j_col = 0; $j < $numgrades_fullscale; $j++) {
+	if($name[$j] == '') continue;
+	if($j_col >= 12) {
+		$j_col = 0;
+		echo "</tr><tr>";
+		}
+	$j_col++;
+	echo "<td style=\"text-align:center;\">";
+	if($key[$j] > 0) echo "<font color=\"MediumTurquoise\"><b>".$key[$j]."</b></font><br />";
+	$the_width = strlen($name[$j]);
+	if($the_width < 5) $the_width = 5;
+	echo "<input style=\"text-align:center;\" type=\"text\" name=\"new_name_".$j."\" size=\"".$the_width."\" value=\"".$name[$j]."\">";
+	echo "</td>";
+	}
+echo "</tr>"; 
+echo "</table>";
+echo "</td>";
+echo "</tr><tr>";
+echo "<td style=\"white-space:nowrap; padding:6px; vertical-align:middle;\"><font color=\"blue\">interval</font> = <input type=\"text\" name=\"interval\" size=\"6\" value=\"".$interval."\">";
+$cents = round(cents($interval),1);
+echo " or <input type=\"text\" name=\"interval_cents\" size=\"6\" value=\"".$cents."\"> cents (typically 1200)<br />";
+store($h_image,"interval_cents",$cents);
+store($h_image,"syntonic_comma",$syntonic_comma);
+store($h_image,"p_comma",$p_comma);
+store($h_image,"q_comma",$q_comma);
+echo "<p><b>Syntonic comma = <font color=\"red\">".round($syntonic_comma,1)."c</font></b>";
+	if(($p_comma * $q_comma) > 0) echo "<b> = <font color=\"red\">".$p_comma."/".$q_comma."</font></b>";
+	echo "<br /><input style=\"background-color:aquamarine;\" type=\"submit\" name=\"change_comma\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#topcomma\" value=\"CHANGE COMMA VALUE TO:\">&nbsp;ratio&nbsp;<input type=\"text\" name=\"new_p_comma\" size=\"3\" value=\"\"> / <input type=\"text\" name=\"new_q_comma\" size=\"3\" value=\"\">&nbsp;&nbsp;or&nbsp;<input type=\"text\" name=\"new_comma\" size=\"6\" value=\"\"> cents";
+	echo "</p>";
+echo "</td>";
+echo "</tr>";
+echo "<tr>";
+echo "<td style=\"white-space:nowrap; padding:6px; vertical-align:middle;\"><font color=\"blue\">basekey</font> = <input type=\"text\" name=\"basekey\" size=\"5\" value=\"".$basekey."\">";
+echo "&nbsp;&nbsp;<font color=\"blue\">baseoctave</font> = <input type=\"text\" name=\"baseoctave\" size=\"5\" value=\"".$baseoctave."\"></td>";
+echo "<td style=\"padding:6px; vertical-align:middle;\"><font color=\"blue\">basefreq</font> = <input type=\"text\" name=\"basefreq\" size=\"7\" value=\"".$basefreq."\">&nbsp;Hz<br />This is the frequency for fraction 1/1, assuming a 440 Hz diapason.";
+if($ratio[0] <> 1 AND $name[0] <> '') echo "<br />Here, the frequency of <font color=\"blue\">‘".$name[0]."’</font> would be <font color=\"red\">".round(($basefreq * $ratio[0]),2)."</font> Hz if it is the <i>block key</i>.";
+echo "</td>";
+echo "</tr></table>";
+
+echo "<p><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"savethisfile\" onclick=\"this.form.target='_self';return true;\" formaction=\"scale.php?scalefilename=".urlencode($filename)."\" value=\"SAVE “".$filename."”\"></p>";
+
+	
+for($i = 0; $i <= $numgrades_fullscale; $i++) {
+	if(!isset($series[$i])) $series[$i] = '';
+	$series[$i] = update_series($p[$i],$q[$i],$series[$i]);
+	}
+
+/* echo "<div id=\"topcomma\"></div>";
+if(isset($_POST['change_comma']) AND isset($_POST['list_sensitive_notes']) AND $_POST['list_sensitive_notes'] <> '') {
+	if(isset($_POST['new_p_comma']) AND isset($_POST['new_q_comma']) AND $_POST['new_p_comma'] > 0  AND $_POST['new_q_comma'] > 0) {
+		$new_p_comma = $_POST['new_p_comma'];
+		$new_q_comma = $_POST['new_q_comma'];
+		$gcd = gcd($new_p_comma,$new_q_comma);
+		$new_p_comma = $new_p_comma / $gcd;
+		$new_q_comma = $new_q_comma / $gcd;
+		$new_comma = cents($new_p_comma/$new_q_comma);
+		}
+	else if(isset($_POST['new_comma']) AND is_numeric($_POST['new_comma'])) {
+		$new_comma = trim($_POST['new_comma']);
+		$new_p_comma = $new_q_comma = 0;
+		}
+	else $new_comma = $syntonic_comma;
+	
+	$list_sensitive_notes = $_POST['list_sensitive_notes'];
+	$list_wolffifth_notes = $_POST['list_wolffifth_notes'];
+	$list_wolffourth_notes = $_POST['list_wolffourth_notes'];
+	if($list_sensitive_notes <> '') {
+		$table_sensitive_notes = explode(' ',$list_sensitive_notes);
+		echo "<p>Sensitive notes: ";
+		for($i = 0; $i < count($table_sensitive_notes); $i++) if(isset($name[$table_sensitive_notes[$i]])) echo "<font color=\"blue\">".$name[$table_sensitive_notes[$i]]."</font> ";
+		echo "<br />";
+		}
+	if($list_wolffifth_notes <> '') {
+		$table_wolffifth_notes = explode(' ',$list_wolffifth_notes);
+		echo "Wolffifth notes: ";
+		for($i = 0; $i < count($table_wolffifth_notes); $i++) if(isset($name[$table_wolffifth_notes[$i]])) echo "<font color=\"blue\">".$name[$table_wolffifth_notes[$i]]."</font> ";
+		echo "</p>"; 
+		}
+	if($list_wolffourth_notes <> '') {
+		$table_wolffourth_notes = explode(' ',$list_wolffourth_notes);
+		echo "Wolffourth notes: ";
+		for($i = 0; $i < count($table_wolffourth_notes); $i++) if(isset($name[$table_wolffourth_notes[$i]])) echo "<font color=\"blue\">".$name[$table_wolffourth_notes[$i]]."</font> ";
+		echo "</p>"; 
+		}
+	if($new_comma < 0 OR $new_comma > 56.8) echo "<p>➡ Cannot set syntonic comma to: <font color=\"red\">".$new_comma."</font> cents because it should stay in range 0 ... 56.8 cents</p>";
+	else {
+		if(round($new_comma,1) <> round($syntonic_comma,1)) {
+			if($new_comma < $syntonic_comma) $change_str = "lowering";
+			else $change_str = "raising";
+			if(($new_q_comma * $new_p_comma * $q_comma * $p_comma) > 0)
+				$comma_ratio = $new_p_comma * $q_comma / $new_q_comma / $p_comma;
+			else $comma_ratio = exp(($new_comma - $syntonic_comma) / 1200 * log(2));
+			$changed_ratio = array();
+			if($list_wolffifth_notes <> '') {
+				echo "<p>➡ Changed value of comma to: <b><font color=\"red\">".round($new_comma,1)."</font></b> cents by ".$change_str." notes (ratio ".round($comma_ratio,4)."):<br />";
+				for($i = 0; $i < count($table_wolffifth_notes); $i++) {
+					$wolffifth_note = $table_wolffifth_notes[$i];
+					change_ratio_in_harmonic_cycle_of_fifths($wolffifth_note,$comma_ratio,$numgrades_fullscale);
+					}
+				echo "</p>";
+				}
+				
+			if($change_str == "lowering") $change_str = "raising";
+			else $change_str = "lowering";
+			$comma_ratio = 1./ $comma_ratio;
+			if($list_sensitive_notes <> '') {
+				if($list_wolffifth_notes == '')
+					echo "<p>➡ Changed value of comma to: <b><font color=\"red\">".round($new_comma,1)."</font></b> cents by ".$change_str." notes (ratio ".round($comma_ratio,4)."):<br />";
+				else echo "<p>and ".$change_str." notes (ratio ".round($comma_ratio,4)."):<br />";
+				for($i = 0; $i < count($table_sensitive_notes); $i++) {
+					$sensitive_note = $table_sensitive_notes[$i];
+					change_ratio_in_harmonic_cycle_of_fifths($sensitive_note,$comma_ratio,$numgrades_fullscale);
+					}
+				echo "</p>";
+				}
+			if(($new_p_comma * $new_q_comma) > 0) {
+				$p_comma = $new_p_comma;
+				$q_comma = $new_q_comma;
+				$syntonic_comma = cents($p_comma/$q_comma);
+				}
+			else {
+				$p_comma = $q_comma = 0;
+				$syntonic_comma = $new_comma;
+				}
+			store($h_image,"syntonic_comma",$syntonic_comma);
+			store($h_image,"p_comma",$p_comma);
+			store($h_image,"q_comma",$q_comma);
+			}
+		}
+	} */
 
 echo "<h2 id=\"toptable\">Ratios and names of tonal scale <font color=\"blue\">“".$scale_name."”</font></h2>";
 
@@ -2380,10 +2469,10 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 	echo "</td></tr>";
 	echo "</table>";
 	
-	echo "<p><b>Syntonic comma = <font color=\"red\">".round($syntonic_comma,1)."c</font></b>";
+	/* echo "<p><b>Syntonic comma = <font color=\"red\">".round($syntonic_comma,1)."c</font></b>";
 	if(($p_comma * $q_comma) > 0) echo "<b> = <font color=\"red\">".$p_comma."/".$q_comma."</font></b>";
 	echo "<br /><input style=\"background-color:aquamarine;\" type=\"submit\" name=\"change_comma\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#topcomma\" value=\"CHANGE COMMA VALUE TO:\">&nbsp;ratio&nbsp;<input type=\"text\" name=\"new_p_comma\" size=\"3\" value=\"\"> / <input type=\"text\" name=\"new_q_comma\" size=\"3\" value=\"\">&nbsp;&nbsp;or&nbsp;<input type=\"text\" name=\"new_comma\" size=\"6\" value=\"\"> cents";
-	echo "</p>";
+	echo "</p>"; */
 		
 //	Cycles of perfect fifths
 	$max_length = $j_max_length = 0;

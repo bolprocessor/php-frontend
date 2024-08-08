@@ -24,9 +24,7 @@ echo "function copyToClipboard(text) {
  }\n";
 echo "</script>\n";
 
-if(!is_connected()) echo "<p style=\"color:red;\">➡ Cannot find “midijs.net”… Are you connected to Internet?</p>";
-
-echo "<script type='text/javascript' src='https://www.midijs.net/lib/midi.js'></script>";
+// echo "<script type='text/javascript' src='https://www.midijs.net/lib/midi.js'></script>";
 echo "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js\"></script>\n";
 
 echo "<script>\n";
@@ -193,14 +191,4 @@ echo "}
 
 echo "</head>";
 echo "<body>\n";
-
-
-function is_connected() {
-  $connected = @fsockopen("www.midijs.net",80);
-  if($connected) {
-    fclose($connected);
-    return TRUE;
-    }
-  else return FALSE;
-  }
 ?>

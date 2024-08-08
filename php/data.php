@@ -51,7 +51,7 @@ $link_edit = "data.php";
 
 $temp_midi_ressources = $temp_dir."trace_".my_session_id()."_".$filename."_";
 
-$objects_file = $csound_file = $tuning_file = $alphabet_file = $grammar_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = $csound_default_orchestra = '';
+$objects_file = $csound_file = $tonality_file = $alphabet_file = $grammar_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = $csound_default_orchestra = '';
 
 if(isset($_POST['alphabet_file'])) $alphabet_file = $_POST['alphabet_file'];
 if(isset($_POST['grammar_file'])) $grammar_file = $_POST['grammar_file'];
@@ -1221,14 +1221,14 @@ $content = @file_get_contents($this_file,TRUE);
 if($content === FALSE) ask_create_new_file($url_this_page,$filename);
 
 $metronome = 0;
-$nature_of_time = $time_structure = $objects_file = $csound_file = $tuning_file = $tuning_file = $alphabet_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = '';
+$nature_of_time = $time_structure = $objects_file = $csound_file = $tonality_file = $tonality_file = $alphabet_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = '';
 $extract_data = extract_data(TRUE,$content);
 echo "<p style=\"color:blue;\">".$extract_data['headers']."</p>";
 $content = $extract_data['content'];
 $alphabet_file = $extract_data['alphabet'];
 $objects_file = $extract_data['objects'];
 $csound_file = $extract_data['csound'];
-$tuning_file = $extract_data['tuning'];
+$tonality_file = $extract_data['tonality'];
 $settings_file = $extract_data['settings'];
 $orchestra_file = $extract_data['orchestra'];
 $interaction_file = $extract_data['interaction'];
@@ -1359,6 +1359,10 @@ if(isset($_POST['output_file'])) {
 $output_file = add_proper_extension($file_format,$output_file);
 // echo "<p>output_file = ".$output_file."</p>";
 
+if(!is_connected() AND $file_format == "midi") {
+	echo "<p style=\"color:red;\">➡ Cannot find the MIDI file player “midijs.net”… Are you connected to Internet?</p>";
+	}
+
 $project_name = preg_replace("/\.[a-z]+$/u",'',$output_file);
 $result_file = $bp_application_path.$output_folder.SLASH.$project_name."-result.html";
 
@@ -1426,7 +1430,7 @@ if($csound_file <> '') {
 else echo "<br />";
 
 echo "<div style=\"float:right; background-color:white; padding-right:6px; padding-left:6px; border-radius: 12px;\">";
-link_to_tunings();
+link_to_tonality();
 $csound_is_responsive = check_csound();
 echo "</div>";
 echo "<table id=\"topedit\" style=\"background-color:white; border-radius: 15px; border: 1px solid black;\" cellpadding=\"8px;\"><tr style=\"\">";
@@ -1537,7 +1541,7 @@ echo "<div style=\"float:right;\"><input style=\"background-color:yellow; font-s
 
 echo "</form>";
 
-display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,$objects_file,$csound_file,$tuning_file,$tuning_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
+display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,$objects_file,$csound_file,$tonality_file,$tonality_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
 
 $hide = FALSE;
 
