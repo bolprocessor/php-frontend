@@ -17,6 +17,21 @@ else {
 	}
 $this_title = $filename;
 $url_this_page = "scale.php?".$_SERVER["QUERY_STRING"];
+
+if(isset($_POST['download_scala'])) {
+	$file = $dir_scales.$filename.".scl";
+	$content = @file_get_contents($file,TRUE);
+    header('Content-Description: File Transfer');
+    header('Content-Type: text/plain');
+    header('Content-Disposition: attachment; filename="' . basename($file) . '"');
+    header('Expires: 0');
+    header('Cache-Control: must-revalidate');
+    header('Pragma: public');
+    header('Content-Length: ' . strlen($content));
+    echo $content;
+    return;
+	}
+
 require_once("_header.php");
 
 $csound_source = $_POST['csound_source'];
@@ -61,6 +76,7 @@ $clean_name_of_file = str_replace("/","_",$clean_name_of_file);
 $handle = fopen($dir_scale_images.$clean_name_of_file."-source.txt","w");
 fwrite($handle,$csound_source."\n");
 fclose($handle);
+
 
 if(isset($_POST['scale_comment'])) $scale_comment = $_POST['scale_comment'];
 else $scale_comment = '';
@@ -865,7 +881,7 @@ $image_height = 820;
 echo "<div class=\"shadow\" style=\"border:2px solid gray; background-color:azure; width:20em;  padding:8px; text-align:center; border-radius: 6px;\">IMAGE:<br /><a onclick=\"window.open('".$link."','".$image_name."','width=1000,height=".$image_height.",left=100'); return false;\" href=\"".$link."\">full</a> - <a onclick=\"window.open('".$link_no_marks."','".$image_name."','width=1000,height=".$image_height.",left=100'); return false;\" href=\"".$link_no_marks."\">no marks</a> - <a onclick=\"window.open('".$link_no_cents."','".$image_name."','width=1000,height=".$image_height.",left=100'); return false;\" href=\"".$link_no_cents."\">no cents</a> - <a onclick=\"window.open('".$link_no_intervals."','".$image_name."','width=1000,height=".$image_height.",left=100'); return false;\" href=\"".$link_no_intervals."\">no intervals</a></div>";
 
 echo "</div>";
-echo "<p>➡ <a target=\"_blank\" href=\"https://www.csounds.com/manual/html/GEN51.html\">Read the Csound documentation</a></p>";
+echo "<p>👉 <a target=\"_blank\" href=\"https://www.csounds.com/manual/html/GEN51.html\">Read the Csound documentation</a></p>";
 $numgrades_fullscale = $table2[4];
 $interval = $table2[5];
 $basefreq = $table2[6];
@@ -979,8 +995,9 @@ echo "<input type=\"text\" style=\"font-size:large;\" name=\"scale_name\" size=\
 if(is_integer(strpos($scale_name,' '))) echo " <font color=\"red\">➡</font> avoiding spaces is prefered";
 echo "</h3>";
 
-echo "<p>➡ <a target=\"_blank\" href=\"https://bolprocessor.org/microtonality/\">Read the documentation on microtonality</a></p>";
+echo "<p>👉 <a target=\"_blank\" href=\"https://bolprocessor.org/microtonality/\">Read the documentation on microtonality</a></p>";
 
+echo "<input style=\"background-color:azure; font-size:large;\" type=\"submit\" formaction=\"".$url_this_page."\" title=\"Export this tuning in the SCALA format\" name=\"download_scala\" value=\"Download SCALA file\"> (<a target=\"_blank\" href=\"https://www.huygens-fokker.org/scala/scl_format.html\">read documentation</a>)";
 
 if(isset($_POST['p_comma']) AND isset($_POST['q_comma'])) {
 	$p_comma = $_POST['p_comma'];
@@ -1078,7 +1095,7 @@ if(isset($_POST['change_comma']) AND isset($_POST['list_sensitive_notes']) AND $
 echo "<table style=\"background-color:cornsilk;\">";
 echo "<tr>";
 echo "<td style=\"white-space:nowrap; padding:6px; vertical-align:middle;\"><font color=\"blue\">numgrades</font> = <input type=\"text\" name=\"numgrades\" size=\"5\" value=\"".$numgrades_fullscale."\"> (typically 12)</td>";
-echo "<td rowspan=\"2\" style=\"white-space:nowrap; padding:6px; vertical-align:middle;\">";
+echo "<td rowspan=\"3\" style=\"white-space:nowrap; padding:6px; vertical-align:middle;\">";
 echo "<table style=\"background-color:white;\">";
 echo "<tr>";
 echo "<td colspan=\"".$numgrades_with_labels."\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"modifynames\" onclick=\"this.form.target='_self';return true;\" formaction=\"scale.php?scalefilename=".urlencode($filename)."\" value=\"SAVE NEW NAMES\">&nbsp;Modify the names of these notes:</td>";
@@ -1109,9 +1126,11 @@ store($h_image,"interval_cents",$cents);
 store($h_image,"syntonic_comma",$syntonic_comma);
 store($h_image,"p_comma",$p_comma);
 store($h_image,"q_comma",$q_comma);
-echo "<p><b>Syntonic comma = <font color=\"red\">".round($syntonic_comma,1)."c</font></b>";
-	if(($p_comma * $q_comma) > 0) echo "<b> = <font color=\"red\">".$p_comma."/".$q_comma."</font></b>";
-	echo "<br /><input style=\"background-color:aquamarine;\" type=\"submit\" name=\"change_comma\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#topcomma\" value=\"CHANGE COMMA VALUE TO:\">&nbsp;ratio&nbsp;<input type=\"text\" name=\"new_p_comma\" size=\"3\" value=\"\"> / <input type=\"text\" name=\"new_q_comma\" size=\"3\" value=\"\">&nbsp;&nbsp;or&nbsp;<input type=\"text\" name=\"new_comma\" size=\"6\" value=\"\"> cents";
+echo "</tr><tr>";
+echo "<td style=\"white-space:nowrap; padding:6px; vertical-align:middle;\">";
+echo "<p><font color=\"blue\">syntonic comma</font> = <font color=\"red\">".round($syntonic_comma,1)."</font> cents";
+	if(($p_comma * $q_comma) > 0) echo " = ratio <font color=\"red\">".$p_comma."/".$q_comma."</font>";
+	echo "</p><p><input style=\"background-color:aquamarine;\" type=\"submit\" name=\"change_comma\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#topcomma\" value=\"CHANGE COMMA VALUE TO:\">&nbsp;ratio&nbsp;<input type=\"text\" name=\"new_p_comma\" size=\"3\" value=\"\"> / <input type=\"text\" name=\"new_q_comma\" size=\"3\" value=\"\">&nbsp;&nbsp;or&nbsp;<input type=\"text\" name=\"new_comma\" size=\"6\" value=\"\"> cents";
 	echo "</p>";
 echo "</td>";
 echo "</tr>";
@@ -2557,6 +2576,40 @@ $line = "§>\n";
 $line = str_replace('§','?',$line);
 fwrite($h_image,$line);
 fclose($h_image);
+
+// Export SCALA
+$olddir = getcwd();
+chdir($dir_scales);
+$file = $scale_name.".scl";
+$text = "! ".$file."\n";
+$text .= "! Scala file, ref. https://www.huygens-fokker.org/scala/scl_format.html\n";
+if(isset($scale_comment)) {
+	$this_comment = html_to_text($scale_comment,'txt');
+	$this_comment = substr($this_comment, 0, strpos($this_comment, "<br />"));
+	$this_comment = str_replace("-cs.","-to.",$this_comment);
+	$text .= $this_comment."\n";
+	}
+else $text .= "This scale is called '".$scale_name."'\n";
+$text .= "! Created by the Bol Processor\n";
+$kmaxi = $numgrades_fullscale;
+$text .= $kmaxi."\n";
+for($k = 1; $k <= $kmaxi; $k++) {
+	if($name[$k] == "•") continue;
+	if(($p[$k] * $q[$k]) > 0) {
+		$text .= $p[$k]."/".$q[$k]." ".$name[$k]."\n";
+		}
+	else {
+		$cents = round(1200 * log($ratio[$k]) / log(2));
+		$text .= $cents." cents ".$name[$k]."\n";
+		}
+	}
+$handle = fopen($file,"w");
+if($handle) {
+	fwrite($handle,$text);
+	fclose($handle);
+	}
+chdir($olddir);
+
 echo "</body>";
 echo "</html>";
 

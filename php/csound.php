@@ -1577,7 +1577,6 @@ echo "</tr></table>";
 for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
 	if(isset($scale_fraction[$i_scale]) AND isset($table_names[$i_scale])) {
 		if(isset($_POST['export_scale_'.$i_scale])) {
-	//		echo "<font color=\"blue\">".$scale_name[$i_scale]."</font>";
 			$olddir = getcwd();
 			chdir($dir_scales);
 			$file = $scale_name[$i_scale].".scl";
