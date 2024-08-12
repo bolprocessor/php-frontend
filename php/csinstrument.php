@@ -345,7 +345,7 @@ for($ii = 0; $ii < 6; $ii++) {
 	if($verbose) echo "Instrument Panoramic[".$ii."] = ".$InstrumentPanoramic[$ii]."<br />";
 	}
 
-echo "<p style=\"text-align:left;\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"saveinstrument\" value=\"SAVE THIS INSTRUMENT\"></p>";
+echo "<p style=\"text-align:left;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" name=\"saveinstrument\" value=\"SAVE THIS INSTRUMENT\"></p>";
 $comment = recode_tags($table[1]);
 echo "<p>Comment: <input type=\"text\" name=\"comment\" size=\"90\" value=\"".$comment."\"></p>";
 echo "<table style=\"background-color: white;\">";

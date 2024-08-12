@@ -802,7 +802,7 @@ for($i = $i + 1; $i < $imax_file; $i++) {
 	if(abs(intval($p3)) == 51) {
 		if($done_table) {
 			$i_scale++;
-			echo "➡ Creating scale_".$i_scale."<br />";
+		//	echo "➡ Creating scale_".$i_scale."<br />";
 			$scale_name[$i_scale] = "scale_".$i_scale;
 			}
 		$clean_name_of_file = str_replace("#","_",$scale_name[$i_scale]);
@@ -850,9 +850,9 @@ if(is_integer(strpos($tonality_filename,"-to.")) OR is_integer(strpos($tonality_
 	echo "<input style=\"background-color:yellow;\" type=\"submit\" formaction=\"".$url_tonality."\" target=\"_blank\" name=\"opentonality\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$tonality_filename."’\">&nbsp;";
 	}
 $max_scales = $i_scale; // Beware that we count scales from 1 because 0 is the default equal-tempered scale
-if($max_scales > 0) echo "<p><font color=\"red\">➡</font> This old version of Csound instruments file contained ".$max_scales." scale definitions. These will be deleted and transfered to a tonality file</p>";
 	
-if($max_scales > 0) {
+if($max_scales > 1) {
+	echo "<p><font color=\"red\">➡</font> This old version of Csound instruments file contained ".$max_scales." scale definitions. These will be deleted and transfered to a tonality file</p>";
 	// This is an old version of "-cs" file still containing scale definitions
 	$dir_tonality = $dir_tonality_resources;
 	// Save scale definitions to a "-to" file
@@ -945,7 +945,7 @@ if($number_instruments > 0) {
 			$arg = "whichCsoundInstrument_".$ch;
 			echo "<input type=\"hidden\" name=\"".$arg."\" value=\"".$whichCsoundInstrument[$ch]."\">";
 			}
-		echo "<input style=\"background-color:yellow; \" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"delete_instrument\" value=\"DELETE\">";
+		echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"delete_instrument\" value=\"DELETE\">";
 		echo "</td>";
 		echo "<td style=\"text-align:right; padding:5px; vertical-align:middle;\">";
 		echo "<input style=\"background-color:azure;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"duplicate_instrument\" value=\"DUPLICATE AS\">: <input type=\"text\" name=\"copy_instrument\" size=\"15\" value=\"\">";
