@@ -827,7 +827,7 @@ echo "<input  type=\"submit\" onclick=\"clearsave();\" name=\"saveexpression\" s
 if(!file_exists($data_expression)) echo " disabled style=\"background-color:azure; box-shadow: none;\"";
 else echo " style=\"color:DarkBlue; background-color:Aquamarine;\"";
 echo ">";
-echo "<hr id=\"topchanges\">";
+echo "<span id=\"topchanges\"></span>";
 
 if(isset($_POST['change_convention']) AND isset($_POST['new_convention'])) {
 	$new_convention = $_POST['new_convention'];
@@ -937,7 +937,7 @@ if(isset($_POST['manage_instructions'])) {
 	$hide = TRUE;
 	}
 if(!$hide) {
-	echo "<table style=\"background-color:white;\">";
+	echo "<table style=\"background-color:white; border-radius: 15px;\">";
 	echo "<tr>";
 	echo "<td style=\"vertical-align:middle; white-space:nowrap;\">";
 	echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) {this.form.target='_self';return true;} else return false;\" name=\"change_convention\" formaction=\"".$url_this_page."#topchanges\" value=\"APPLY NOTE CONVENTION to this data\"> ➡</td>";

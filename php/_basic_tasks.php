@@ -2424,6 +2424,7 @@ function check_gcc() {
 
 function link_to_tonality() {
 	echo "<p><font color=\"red\">➡</font>&nbsp;<a target=\"_blank\" href=\"index.php?path=tonality_resources\">TONALITY resource folder</a></p>";
+	echo "<hr style=\"border: 8px solid GhostWhite;\">";
 	}
 
 function check_csound() {
@@ -2611,14 +2612,16 @@ function show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,
 	if($csound_file <> '') {
 		$tonality_file_in_csound = get_tonality_file($dir_csound_resources.$csound_file);
 		if($tonality_file_in_csound <> '' AND $tonality_file_in_csound <> $tonality_file) {
+			echo "<p></p><div style=\"background-color:cornsilk; padding:1em; width:500px; box-shadow: 3px 3px 5px 6px gold; border-radius: 15px;\">";
 			if($tonality_file == '') {
 				$content = add_instruction($tonality_file_in_csound,$content);
 				$tonality_file = $tonality_file_in_csound;
-				echo "<p>👉 File <font color=\"blue\">‘".$csound_file."’</font> indicates that tonality file <font color=\"blue\">‘".$tonality_file_in_csound."’</font> should be associated.<br />➡ This indication has been added to the project. <font color=\"red\">You need to</font> <input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" name=\"savethisfile\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".$filename."’\"></p>";
+				echo "👉&nbsp;&nbsp;File <font color=\"blue\">‘".$csound_file."’</font> indicates that tonality file <font color=\"blue\">‘".$tonality_file_in_csound."’</font><br />should be associated. This indication has been added to the project.<br /><font color=\"red\">You need to</font> <input style=\"background-color:yellow; font-size:large;\" type=\"submit\" onclick=\"clearsave();\" name=\"savethisfile\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".$filename."’\">";
 				}
 			else {
-				echo "<p>👉 <font color=\"red\">WARNING:</font> File <font color=\"blue\">‘".$csound_file."’</font> indicates that tonality file <font color=\"blue\">‘".$tonality_file_in_csound."’</font> should be associated.<br />This project selects <font color=\"blue\">‘".$tonality_file."’</font> instead, <font color=\"red\">which we will use.</font><br />➡ Your can edit <font color=\"blue\">‘".$csound_file."’</font> to solve the inconsistency.</p>";
+				echo "👉&nbsp;&nbsp;<font color=\"red\">WARNING:</font> File <font color=\"blue\">‘".$csound_file."’</font> indicates that tonality file<br /><font color=\"blue\">‘".$tonality_file_in_csound."’</font> should be associated.<br />This project selects <font color=\"blue\">‘".$tonality_file."’</font> instead, <font color=\"red\">which we will use.</font><br />Your can edit <font color=\"blue\">‘".$csound_file."’</font> to solve the inconsistency.";
 				}
+			echo "</div>";
 			}
 		}
 	if($tonality_file <> '') {
