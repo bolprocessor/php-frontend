@@ -745,6 +745,7 @@ for($i = $i + 1; $i < $imax_file; $i++) {
 		$scale_name[$i_scale] = str_replace('"','',$line);
 		$clean_name_of_file = str_replace("#","_",$scale_name[$i_scale]);
 		$clean_name_of_file = str_replace("/","_",$clean_name_of_file);
+		$clean_name_of_file = str_replace(SLASH,"_",$clean_name_of_file);
 		$table_name = $dir_scales.$clean_name_of_file.".txt";
 		if(!file_exists($table_name)) {
 			$handle = fopen($table_name,"w");
@@ -801,7 +802,7 @@ for($i = $i + 1; $i < $imax_file; $i++) {
 	if(abs(intval($p3)) == 51) {
 		if($done_table) {
 			$i_scale++;
-		//	echo "2) i_scale = ".$i_scale."<br />";
+			echo "➡ Creating scale_".$i_scale."<br />";
 			$scale_name[$i_scale] = "scale_".$i_scale;
 			}
 		$clean_name_of_file = str_replace("#","_",$scale_name[$i_scale]);
@@ -837,7 +838,6 @@ for($i = $i + 1; $i < $imax_file; $i++) {
 echo "</textarea><br />";
 
 echo "<h2>Associated tonality file</h2>";
-// echo "<input type=\"hidden\" name=\"tonality\" value=\"".str_replace(' ','_',trim($tonality_filename))."\">";  // For autosave
 echo "<input type=\"hidden\" name=\"tonality\" value=\"".$tonality_filename."\">";  // For autosave
 echo "<textarea name=\"tonality_filename\" rows=\"1\" style=\"width:400px;\">";
 echo $tonality_filename;
@@ -849,8 +849,8 @@ if(is_integer(strpos($tonality_filename,"-to.")) OR is_integer(strpos($tonality_
 	$url_tonality = "tonality.php?file=".urlencode($tonality_resources.SLASH.$tonality_filename);
 	echo "<input style=\"background-color:yellow;\" type=\"submit\" formaction=\"".$url_tonality."\" target=\"_blank\" name=\"opentonality\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$tonality_filename."’\">&nbsp;";
 	}
-
 $max_scales = $i_scale; // Beware that we count scales from 1 because 0 is the default equal-tempered scale
+if($max_scales > 0) echo "<p><font color=\"red\">➡</font> This old version of Csound instruments file contained ".$max_scales." scale definitions. These will be deleted and transfered to a tonality file</p>";
 	
 if($max_scales > 0) {
 	// This is an old version of "-cs" file still containing scale definitions
