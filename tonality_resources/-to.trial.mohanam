@@ -1,0 +1,13 @@
+// Bol Processor BP3
+// Tonality resource file saved as "-to.trial.mohanam". Date: 2024-08-12 08:56:17
+_begin tables
+"just intonation"
+/sa sa# re re# ga ma ma# pa pa# dha dha# ni sa/
+c21.506289596715 81 80c
+k0 1 2 3 4 5 6 7 8 9 10 11 12k
+[1 1 16 15 9 8 6 5 5 4 4 3 64 45 3 2 8 5 5 3 16 9 15 8 2 1]
+sp h p h h p h p h h p h ps
+|4|
+f2 0 128 -51 12 2 261.63 60 1 1.067 1.125 1.2 1.25 1.333 1.422 1.5 1.6 1.667 1.778 1.875 2
+<html>A traditional scale constructed with simple integer ratios<br /></html>
+_end tables

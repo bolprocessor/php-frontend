@@ -276,6 +276,8 @@ if(isset($_POST['compilegrammar'])) {
 	else $settings_file = '';
 	if(isset($_POST['csound_file'])) $csound_file = $_POST['csound_file'];
 	else $csound_file = '';
+	if(isset($_POST['tonality_file'])) $tonality_file = $_POST['tonality_file'];
+	else $tonality_file = '';
 	$application_path = $bp_application_path;
 	$command = $application_path."bp compile";
 	$thistext = $dir.$filename;
@@ -302,6 +304,13 @@ if(isset($_POST['compilegrammar'])) {
 			echo "<p style=\"color:red;\">WARNING: ".$dir_csound_resources.$csound_file." not found.</p>";
 			}
 		else $command .= " -cs ".$dir_csound_resources.$csound_file;
+		}
+	if($tonality_file <> '') {
+		if(!file_exists($dir_tonality_resources.$tonality_file)) {
+			$error_mssg .= "<font color=\"red\">WARNING: ".$dir_tonality_resources.$tonality_file." not found.</font><br />";
+			$error = TRUE;
+			}
+		else $command .= " -to ".$dir_tonality_resources.$tonality_file;
 		}
 	$tracefile = $temp_dir."trace_".my_session_id()."_".$filename.".txt";
 	$command .= " --traceout ".$tracefile;
@@ -461,6 +470,7 @@ echo "</td>";
 echo "<td id=\"hideshow\" style=\"text-align:right; vertical-align:middle;\" rowspan=\"2\">";
 echo "<input type=\"hidden\" name=\"settings_file\" value=\"".$settings_file."\">";
 echo "<input type=\"hidden\" name=\"csound_file\" value=\"".$csound_file."\">";
+echo "<input type=\"hidden\" name=\"tonality_file\" value=\"".$tonality_file."\">";
 echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"><br /><br />";
 
 $error = FALSE;
@@ -506,6 +516,13 @@ if($csound_file <> '') {
 		$error = TRUE;
 		}
 	else $link_produce .= "&csound_file=".urlencode($csound_file);
+	}
+if($tonality_file <> '') {
+	if(!file_exists($dir_tonality_resources.$tonality_file)) {
+		$error_mssg .= "<font color=\"red\">WARNING: ".$dir_tonality_resources.$tonality_file." not found.</font><br />";
+		$error = TRUE;
+		}
+	else $link_produce .= "&tonality_file=".urlencode($tonality_file);
 	}
 
 if($csound_orchestra == '') $csound_orchestra = $csound_default_orchestra;
@@ -662,55 +679,8 @@ if($file_format == "csound") {
 	echo "<br />";
 	}
 echo "</div>";
-if($csound_file <> '') {
-	if($file_format == "csound") {
-		$list_of_tonal_scales = list_of_tonal_scales($dir_csound_resources.$csound_file);
-		if(($max_scales = count($list_of_tonal_scales)) > 0) {
-			if($max_scales > 1)  {
-				$i = 0;
-				echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains definitions of tonal scales&nbsp;<font color=\"red\">➡</font>&nbsp;<button style=\"background-color:aquamarine; border-radius: 6px; font-size:large;\" onclick=\"toggledisplay_input(".$i."); return false;\">Show/hide tonal scales</button>";
-				echo "<div id=\"showhide_input0\"  style=\"border-radius: 15px; padding:6px;\"><br />";
-				}
-			else {
-				echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains the definition of tonal scale:";
-				echo "<div>";
-				}
-			echo "<ul style=\"margin-top:0px; margin-bottom:0px\">";
-			for($i_scale = 1; $i_scale <= $max_scales; $i_scale++)
-				echo "<li>".$list_of_tonal_scales[$i_scale - 1]."</li>";
-			if($max_scales > 1) echo "</ul><br />These scales may be called in “_scale(name of scale, blockkey)” instructions (with blockey = 0 by default)";
-			else echo "</ul>This scale may be called in a “_scale(name of scale, blockkey)” instruction (with blockey = 0 by default)<br />➡ Use “_scale(0,0)” to force equal-tempered";
-			echo "</div>";
-			echo "</p>";
-			}
-		$list_of_instruments = list_of_instruments($dir_csound_resources.$csound_file);
-		$list = $list_of_instruments['list'];
-		$list_index = $list_of_instruments['index'];
-		if(($max_instr = count($list)) > 0) {
-			if($max_scales > 0) echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> also contains definitions of instrument(s):";
-			else echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains definitions of instrument(s):";
-			echo "<ol style=\"margin-top:0px; margin-bottom:0px\">";
-			for($i_instr = 0; $i_instr < $max_instr; $i_instr++) {
-				echo "<li><b>_ins(</b><font color=\"MediumTurquoise\">".$list[$i_instr]."</font><b>)</b>";
-				echo " = <b>_ins(".$list_index[$i_instr].")</b>";
-				$param_list = $list_of_instruments['param'][$i_instr];
-				if(count($param_list) > 0) {
-					echo " ➡ parameter(s) ";
-					for($i_param = 0; $i_param < count($param_list); $i_param++) {
-						echo " “<font color=\"MediumTurquoise\">".$param_list[$i_param]."</font>”";
-						}
-					}
-				echo "</li>";
-				}
-			echo "</ol>";
-			echo "</p>";
-			}
-		}
-	else  {
-		echo "<p>Csound resources have been loaded but cannot be used because the output format is not “CSOUND”.<br />";
-		echo "➡ Instructions “_scale()” and “_ins()” will be ignored</p>";
-		}
-	}
+
+$content = show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,$filename,$file_format);
 	
 echo "<input type=\"hidden\" name=\"produce_all_items\" value=\"".$produce_all_items."\">";
 echo "<input type=\"hidden\" name=\"show_production\" value=\"".$show_production."\">";

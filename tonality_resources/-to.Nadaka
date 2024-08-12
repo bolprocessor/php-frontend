@@ -1,0 +1,13 @@
+// Bol Processor BP3
+// Tonality resource file saved as "-to.Nadaka". Date: 2024-08-10 16:45:54
+_begin tables
+"just intonation"
+c21.506289596715 81 80c
+/sa sa# re re# ga ma ma# pa pa# dha dha# ni sa/
+k0 1 2 3 4 5 6 7 8 9 10 11 12k
+sp h p h h p h p h h p h ps
+[1 1 16 15 9 8 6 5 5 4 4 3 64 45 3 2 8 5 5 3 16 9 15 8 2 1]
+|4|
+f2 0 128 -51 12 2 261.63 60 1 1.067 1.125 1.2 1.25 1.333 1.422 1.5 1.6 1.667 1.778 1.875 2
+<html>A traditional scale constructed with 'simple' integer ratios<br /></html>
+_end tables

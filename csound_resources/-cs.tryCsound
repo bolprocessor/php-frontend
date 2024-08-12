@@ -1,5 +1,5 @@
-// Bol Processor BP3 compatible with version BP2.9.8
-// Csound resource file saved as "-cs.tryCsound". Date: 2021-01-26 22:20:55
+// Bol Processor BP3
+// Csound resource file saved as "-cs.tryCsound". Date: 2024-08-12 08:56:26
 16
 2
 3
@@ -331,3 +331,4 @@ _begin tables
 f1 0 256 10 1
 f2 0 256 10 1 0.5 0.3 0.4
 _end tables
+No associated tonality file

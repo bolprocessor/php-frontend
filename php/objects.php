@@ -389,6 +389,6 @@ if($iobj >= 0) {
 	fclose($handle);
 	}
 
-display_more_buttons(FALSE,$content,$url_this_page,$dir,$grammar_file,'',$csound_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
+display_more_buttons(FALSE,$content,$url_this_page,$dir,$grammar_file,'',$csound_file,$tonality_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
 
 ?>

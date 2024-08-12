@@ -478,7 +478,7 @@ function display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,
 		echo "</td></form>";
 		}
 	if($tonality_file <> '') {
-		$url_this_page = "csound.php?file=".urlencode($tonality_resources.SLASH.$tonality_file);
+		$url_this_page = "tonality.php?file=".urlencode($tonality_resources.SLASH.$tonality_file);
 		echo "<td><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$tonality_file."’\">&nbsp;";
 		echo "</td></form>";
@@ -1002,7 +1002,8 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder,$force) {
 	if(file_exists($file_lock2)) return "locked";
 	$file_lock = $filename."_lock";
 	$folder_scales = $temp_dir.$temp_folder.SLASH."scales";
-	$file_changed = $folder_scales.SLASH."_changed";
+	$file_changed = $temp_dir.$temp_folder.SLASH."_changed";
+	if($verbose) echo "file_changed = ".$file_changed."<br />";
 	if(!$force AND !file_exists($file_changed)) return "skipped";
 	@unlink($file_changed);
 	$time_start = time();
@@ -1096,8 +1097,9 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder,$force) {
 		if($line == '') continue;
 		fwrite($handle,$line."\n");
 		}
-//	$folder_scales = $temp_dir.$temp_folder.SLASH."scales";
-	$dir_scale = scandir($folder_scales);
+
+// 2024-08-10 We no longer store scales here as they are stored in '-to' files
+/*	$dir_scale = scandir($folder_scales); 
 	foreach($dir_scale as $this_scale) {
 		if($this_scale == '.' OR $this_scale == ".." OR $this_scale == ".DS_Store") continue;
 		$table = explode(".",$this_scale);
@@ -1109,8 +1111,11 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder,$force) {
 			$line = trim($table[$i]);
 			if($line <> '') fwrite($handle,$line."\n");
 			}
-		}
+		} */
+
 	fwrite($handle,"_end tables\n");
+	$tonality_filename = $_POST['tonality_filename'];
+	fwrite($handle,$tonality_filename."\n");
 	fclose($handle);
 	unlink($dir.$file_lock);
 	return $warn_not_empty;
@@ -1172,6 +1177,60 @@ function reformat_grammar($verbose,$this_file) {
 	fwrite($handle,$new_content);
 	fclose($handle);
 	return;
+	}
+
+function SaveTonality($verbose,$dir,$filename,$temp_folder,$force) {  // $$$$
+	global $top_header, $test, $temp_dir;
+	$verbose = FALSE;
+	if($verbose) echo "<br />dir = ".$dir."<br />";
+	if($verbose) echo "filename = ".$filename."<br />";
+	if($verbose) echo "temp_folder = ".$temp_folder."<br />";
+	$file_lock3 = $dir.$filename."_lock3";
+//	if($verbose) echo "<br />file_lock3 = ".$file_lock3."<br />";
+	if(file_exists($file_lock3)) return "locked";
+	$file_lock = $filename."_lock";
+	$folder_scales = $temp_dir.$temp_folder.SLASH."scales";
+//	echo "temp_folder = ".$temp_folder."<br />";
+//	echo "folder_scales = ".$folder_scales."<br />";
+	$file_changed = $folder_scales.SLASH."_changed";
+	if($verbose) echo "file_changed = ".$file_changed."<br />";
+	if(!$force AND !file_exists($file_changed)) return "skipped";
+	@unlink($file_changed);
+	$time_start = time();
+	$time_end = $time_start + 3;
+	while(TRUE) {
+		if(!file_exists($file_lock)) break;
+		if(time() > $time_end) unlink($file_lock);
+		sleep(1);
+		}
+	$handle = fopen($dir.$file_lock,"w");
+	fwrite($handle,"lock\n");
+	fclose($handle);
+	@unlink($dir.$filename);
+	$handle = fopen($dir.$filename,"w");
+	$file_header = $top_header."\n// Tonality resource file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
+	fwrite($handle,$file_header."\n");
+	if(isset($_POST['begin_tables'])) $begin_tables = $_POST['begin_tables'];
+	else $begin_tables = "_begin tables";
+	fwrite($handle,$begin_tables."\n");
+	if($verbose) echo "<br />".$begin_tables."<br />";
+	$dir_scale = scandir($folder_scales);
+	foreach($dir_scale as $this_scale) {
+		if($this_scale == '.' OR $this_scale == ".." OR $this_scale == ".DS_Store") continue;
+		$table = explode(".",$this_scale);
+		$extension = end($table);
+		if($extension <> "txt") continue;
+		$content_scale = file_get_contents($folder_scales.SLASH.$this_scale,TRUE);
+		$table = explode(chr(10),$content_scale);
+		for($i = 0; $i < count($table); $i++) {
+			$line = trim($table[$i]);
+			if($line <> '') fwrite($handle,$line."\n");
+			}
+		}
+	fwrite($handle,"_end tables\n");
+	fclose($handle);
+	unlink($dir.$file_lock);
+	return "saved";
 	}
 
 function clean_folder_name($name) {
@@ -1544,9 +1603,9 @@ function type_of_file($thisfile) {
 		case "bpsc": $type = "script"; $found = TRUE; break;
 		case "bpto": $type = "tonality"; $found = TRUE; break;
 		case "orc": $type = "csorchestra"; $found = TRUE; break;
-		case "sco": $type = "csorchestra"; $found = TRUE; break;
+	/*	case "sco": $type = "csorchestra"; $found = TRUE; break;
 		case "aiff": $type = "csorchestra"; $found = TRUE; break;
-		case "wav": $type = "csorchestra"; $found = TRUE; break;
+		case "wav": $type = "csorchestra"; $found = TRUE; break; */
 		case "png": $type = "image"; $found = TRUE; break;
 		}
 	if($found) $name_mode = "extension";
@@ -2473,11 +2532,156 @@ function popup_link($image_name,$text,$image_width,$image_height,$left_margin,$l
 	return $popup_link;
 	}
 
-function list_of_tonal_scales($csound_orchestra_file) {
+function add_instruction($instruction,$content) {
+	// Add an instruction to a grammar or data
+	$instruction = trim($instruction);
+	$table = explode(chr(10),$content);
+	$imax = count($table);
+	for($i = 0; $i < $imax; $i++) {
+		$line = trim($table[$i]);
+		if($line == $instruction) return $content;
+		}
+	$new_table = array();
+	$done = FALSE;
+	for($i = 0; $i < $imax; $i++) {
+		$line = trim($table[$i]);
+		$new_table[] = $line;
+		if($line == '') continue;
+		if((!is_integer($pos=strpos($line,"//")) OR $pos > 0) AND !$done) {
+			$new_table[] = $instruction;
+			$done = TRUE;
+			}
+		}
+	$content = implode(chr(10),$new_table);
+	return $content;
+	}
+
+function get_tonality_file($csound_instruments_file) {
+	$tonality_filename = '';
+	if(!file_exists($csound_instruments_file)) return $tonality_filename;
+	$content = @file_get_contents($csound_instruments_file,TRUE);
+	$table = explode(chr(10),$content);
+	$imax = count($table);
+	for($i = 0; $i < $imax; $i++) {
+		$line = trim($table[$i]);
+		if($line <> "_end tables") continue;
+		if($i < ($imax - 1)) {
+			$line = trim($table[$i + 1]);
+			if((is_integer($pos=strpos($line,"-to.")) AND $pos == 0) OR (is_integer(strpos($line,".bpto"))))
+				$tonality_filename = $line;
+			else $tonality_filename = '';
+			}
+		else $tonality_filename = '';
+
+		}
+	return $tonality_filename;
+	}
+
+function get_csound_file($objects_file) {
+	$csound_file = '';
+	if(!file_exists($objects_file)) return $csound_file;
+	$content = @file_get_contents($objects_file,TRUE);
+	$table = explode(chr(10),$content);
+	$imax = count($table);
+	for($i = 0; $i < $imax; $i++) {
+		$line = trim($table[$i]);
+		if((is_integer(strpos($line,"-cs."))) OR (is_integer(strpos($line,".bpto")))) {
+			$csound_file= $line; break;
+			}
+		}
+	return $csound_file;
+	}
+
+function show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,$filename,$file_format) {
+	global $dir_csound_resources,$dir_tonality_resources,$csound_file,$tonality_file;
+	if($objects_file <> '') {
+		$new_csound_file = get_csound_file($dir.$objects_file);
+		$new_csound_file = str_replace("csound_resources/",'',$new_csound_file);
+		if($new_csound_file <> '' AND $new_csound_file <> $csound_file) {
+			if($csound_file == '') {
+				$content = add_instruction($new_csound_file,$content);
+				$csound_file = $new_csound_file;
+				echo "<p>👉 Found mention of <font color=\"blue\">‘".$csound_file."’</font> in sound-object file  <font color=\"blue\">‘".$objects_file."’</font>.<br />➡ This indication has been added to the project. <font color=\"red\">You need to</font> <input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" name=\"savethisfile\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".$filename."’\"></p>";
+				}
+			else {
+				echo "<p>👉 <font color=\"red\">WARNING:</font> File <font color=\"blue\">‘".$objects_file."’</font> indicates that the Csound insstruments file <font color=\"blue\">‘".$new_csound_file."’</font> should be associated.<br />This project selects <font color=\"blue\">‘".$csound_file."’</font> instead, <font color=\"red\">which we will use.</font><br />➡ Your can edit <font color=\"blue\">‘".$objects_file."’</font> to solve the inconsistency.</p>";
+				}
+			}
+		}
+	if($csound_file <> '') {
+		$tonality_file_in_csound = get_tonality_file($dir_csound_resources.$csound_file);
+		if($tonality_file_in_csound <> '' AND $tonality_file_in_csound <> $tonality_file) {
+			if($tonality_file == '') {
+				$content = add_instruction($tonality_file_in_csound,$content);
+				$tonality_file = $tonality_file_in_csound;
+				echo "<p>👉 File <font color=\"blue\">‘".$csound_file."’</font> indicates that tonality file <font color=\"blue\">‘".$tonality_file_in_csound."’</font> should be associated.<br />➡ This indication has been added to the project. <font color=\"red\">You need to</font> <input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" name=\"savethisfile\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".$filename."’\"></p>";
+				}
+			else {
+				echo "<p>👉 <font color=\"red\">WARNING:</font> File <font color=\"blue\">‘".$csound_file."’</font> indicates that tonality file <font color=\"blue\">‘".$tonality_file_in_csound."’</font> should be associated.<br />This project selects <font color=\"blue\">‘".$tonality_file."’</font> instead, <font color=\"red\">which we will use.</font><br />➡ Your can edit <font color=\"blue\">‘".$csound_file."’</font> to solve the inconsistency.</p>";
+				}
+			}
+		}
+	if($tonality_file <> '') {
+		$list_of_tonal_scales = list_of_tonal_scales($dir_tonality_resources.$tonality_file);
+		if(($max_scales = count($list_of_tonal_scales)) > 0) {
+			if($max_scales > 1)  {
+				$i = 0;
+				echo "<p style=\"margin-bottom:0px;\">Tonality resource file <font color=\"blue\">‘".$tonality_file."’</font> contains definitions of tonal scales&nbsp;<font color=\"red\">➡</font>&nbsp;<button style=\"background-color:aquamarine; border-radius: 6px; font-size:large;\" onclick=\"toggledisplay_input(".$i."); return false;\">Show/hide tonal scales</button>";
+				echo "<div id=\"showhide_input0\"  style=\"border-radius: 15px; padding:6px;\"><br />";
+				}
+			else {
+				echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains the definition of tonal scale:";
+				echo "<div>";
+				}
+			echo "<ul style=\"margin-top:0px; margin-bottom:0px\">";
+			for($i_scale = 1; $i_scale <= $max_scales; $i_scale++)
+				echo "<li>".$list_of_tonal_scales[$i_scale - 1]."</li>";
+			if($max_scales > 1) echo "</ul><br />These scales may be called in “_scale(name of scale, blockkey)” instructions (with blockey = 0 by default)";
+			else echo "</ul>This scale may be called in a “_scale(name of scale, blockkey)” instruction (with blockey = 0 by default)<br />➡ Use “_scale(0,0)” to force equal-tempered";
+			echo "</div>";
+			echo "</p>";
+			}
+		}
+	else if($csound_file <> '') {
+		echo "<p>Csound instruments have been loaded but scales cannot be used because no tonality file ‘-to’ has been found.<br />";
+		echo "➡ Instruction “_scale()” will be ignored</p>";
+		}
+	if($csound_file == '' AND $file_format == "csound") {
+		echo "<p>Csound instruments have not been loaded (no ‘-cs’ file) although the file format is CSOUND.<br />";
+		echo "➡ Instruction “_ins()” will be ignored</p>";
+		}
+	if($csound_file <> '') {
+		$list_of_instruments = list_of_instruments($dir_csound_resources.$csound_file);
+		$list = $list_of_instruments['list'];
+		$list_index = $list_of_instruments['index'];
+		if(($max_instr = count($list)) > 0) {
+			echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains definitions of instrument(s):";
+			echo "<ol style=\"margin-top:0px; margin-bottom:0px\">";
+			for($i_instr = 0; $i_instr < $max_instr; $i_instr++) {
+				echo "<li><b>_ins(</b><font color=\"MediumTurquoise\">".$list[$i_instr]."</font><b>)</b>";
+				echo " = <b>_ins(".$list_index[$i_instr].")</b>";
+				$param_list = $list_of_instruments['param'][$i_instr];
+				if(count($param_list) > 0) {
+					echo " ➡ parameter(s) ";
+					for($i_param = 0; $i_param < count($param_list); $i_param++) {
+						echo " “<font color=\"MediumTurquoise\">".$param_list[$i_param]."</font>”";
+						}
+					}
+				echo "</li>";
+				}
+			echo "</ol>";
+			echo "</p>";
+			}
+		else echo "<p>Csound resource file <font color=\"blue\">‘".$csound_file."’</font> does not contain definitions of instrument(s)</p>";
+		}
+	return $content;
+	}
+
+function list_of_tonal_scales($tonality_file) {
 	global $dir_scale_images;
 	$list = array();
-	if(!file_exists($csound_orchestra_file)) return $list;
-	$content = @file_get_contents($csound_orchestra_file,TRUE);
+	if(!file_exists($tonality_file)) return $list;
+	$content = @file_get_contents($tonality_file,TRUE);
 	$table = explode(chr(10),$content);
 	$imax = count($table);
 	$found = FALSE;
@@ -2489,10 +2693,10 @@ function list_of_tonal_scales($csound_orchestra_file) {
 		if($found) {
 			if($line[0] == "\"") {
 				$name_of_file = str_replace('"','',$line);
-				$list[++$j] = "<font color=\"MediumTurquoise\">".$name_of_file;
+				$list[++$j] = "<font color=\"MediumTurquoise\">".$name_of_file."</font>";
 				}
 			if($line[0] == "/")
-				$list[$j] .= "</font> = <font color=\"darkmagenta\"><b>".str_replace("/",'',$line)."</b></font>";
+				$list[$j] .= " = <font color=\"darkmagenta\"><b>".str_replace("/",'',$line)."</b></font>";
 			if($line[0] == "|") {
 				$list[$j] .= " <font color=\"black\">baseoctave = ".str_replace("|",'',$line)."</font>";
 				$clean_name_of_file = str_replace("#","_",$name_of_file);
@@ -2514,16 +2718,18 @@ function list_of_tonal_scales($csound_orchestra_file) {
 	return $list;
 	}
 
-function list_of_instruments($csound_orchestra_file) {
+function list_of_instruments($csound_instruments_file) {
 	global $number_fields_csound_instrument, $number_midi_parameters_csound_instrument;
 	$list_of_instruments['list'] = $list_of_instruments['index'] = $list_of_instruments['param'] = array();
-	if(!file_exists($csound_orchestra_file)) return $list_of_instruments;
-	$content = @file_get_contents($csound_orchestra_file,TRUE);
+//	echo "csound_instruments_file = ".$csound_instruments_file."<br />";
+	if(!file_exists($csound_instruments_file)) return $list_of_instruments;
+	$content = @file_get_contents($csound_instruments_file,TRUE);
 	$extract_data = extract_data(FALSE,$content);
 	$content = $extract_data['content'];
 	$content_no_br = str_replace("<br>",chr(10),$content);
 	$table = explode(chr(10),$content_no_br);
 	$imax_file = count($table);
+//	echo "imax_file = ".$imax_file."<br />";
 	$number_channels = $table[0];
 	$i = $number_channels;
 	$CsoundOrchestraName = preg_replace("/<\/?html>/u",'',$table[++$i]);
@@ -3058,7 +3264,7 @@ function hidden_directory($name) {
 		case "php":
 		case "source":
 		case "midi_resources":
-		case "tonality_resources":
+//		case "tonality_resources":
 		case "temp_bolprocessor":
 			return TRUE;
 		}
@@ -3741,5 +3947,25 @@ function create_variables($script_variables) {
     fclose($h_variables);
     return;
     }
+
+function copyDirectory($src,$dst) {
+    if (!is_dir($src)) return false;
+    // Create the destination directory if it doesn't exist
+    if (!is_dir($dst)) mkdir($dst, 0777, true);
+    $dir = opendir($src);
+    while (false !== ($file = readdir($dir))) {
+        if ($file != '.' && $file != '..') {
+            $srcFilePath = $src . DIRECTORY_SEPARATOR . $file;
+            $dstFilePath = $dst . DIRECTORY_SEPARATOR . $file;
+            if (is_dir($srcFilePath))
+                copyDirectory($srcFilePath, $dstFilePath);
+            else copy($srcFilePath, $dstFilePath);
+			}
+		}
+
+    // Close the directory
+    closedir($dir);
+    return true;
+	}
 
 ?>

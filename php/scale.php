@@ -6,13 +6,13 @@ require_once("_basic_tasks.php");
 if(isset($_GET['scalefilename']))
 	$filename = urldecode($_GET['scalefilename']);
 else {
-	echo "Scale name is not known. Call it from the ‘-cs’ file!";
+	echo "Scale name is not known. Call it from the ‘-to’ file!";
 	die();
 	}
 if(isset($_POST['dir_scales']))
 	$dir_scales = $_POST['dir_scales'];
 else {
-	echo "=> Csound resource file is not known. First open the ‘-cs’ file containing ‘".$filename."’<br />=> You will find a link to it in the <a href=\"index.php?path=csound_resources\">csound_resources folder</a>";
+	echo "=> Tonal resource file is not known. First open the ‘-to’ file containing ‘".$filename."’<br />=> You will find a link to it in the <a href=\"index.php?path=tonality_resources\">tonality_resources folder</a>";
 	die();
 	}
 $this_title = $filename;
@@ -34,7 +34,12 @@ if(isset($_POST['download_scala'])) {
 
 require_once("_header.php");
 
-$csound_source = $_POST['csound_source'];
+if(isset($_POST['csound_source'])) $tonality_source = $_POST['csound_source'];
+else if(isset($_POST['tonality_source'])) $tonality_source = $_POST['tonality_source'];
+else {
+	echo "‘tonality_source’ is not known. It should be set in the ‘-to’ file.";
+	die();
+	}
 // echo $dir_scales." @@@<br />";
 
 $clean_filename = str_replace("#","_",$filename);
@@ -42,7 +47,7 @@ $clean_filename = str_replace("/","_",$clean_filename);
 $file_link = $dir_scales.$clean_filename.".txt";
 if(!file_exists($file_link)) {
 	echo "File may have been mistakenly deleted: ".$file_link;
-	echo "<br />Return to the ‘-cs’ file to restore it!"; die();
+	echo "<br />Return to the ‘-to’ page to restore it!"; die();
 	}
 
 $save_codes_dir = $dir_scales.$clean_filename."_codes";
@@ -74,7 +79,7 @@ $done = TRUE;
 $clean_name_of_file = str_replace("#","_",$filename);
 $clean_name_of_file = str_replace("/","_",$clean_name_of_file);
 $handle = fopen($dir_scale_images.$clean_name_of_file."-source.txt","w");
-fwrite($handle,$csound_source."\n");
+fwrite($handle,$tonality_source."\n");
 fclose($handle);
 
 
@@ -729,7 +734,7 @@ if(isset($_POST['interpolate'])) {
 
 $message = '';
 if(isset($_POST['savethisfile']) OR isset($_POST['fixkeynumbers']) OR isset($_POST['interpolate']) OR isset($_POST['modifynote']) OR isset($_POST['alignscale'])  OR isset($_POST['adjustscale']) OR isset($_POST['create_meantone']) OR isset($_POST['equalize']) OR isset($_POST['add_fifths_up']) OR isset($_POST['add_fifths_down']) OR isset($_POST['modifynames']) OR isset($_POST['use_convention']) OR isset($_POST['resetbase'])) {
-	$message = "&nbsp;<span id=\"timespan\"><font color=\"red\">... Saving this scale ...</font></span>";
+	$message = "<br /><span id=\"timespan\"><font color=\"red\">... Saving this scale ...</font></span>";
 	if(isset($_POST['syntonic_comma'])) $syntonic_comma = $_POST['syntonic_comma'];
 	if(isset($_POST['p_comma']) AND isset($_POST['q_comma'])) {
 		$p_comma = $_POST['p_comma'];
@@ -846,9 +851,9 @@ for($i = 0; $i < $imax; $i++) {
 	}
 echo "Csound function table: <font color=\"blue\">".$scale_table."</font>";
 if($message <> '') echo $message;
-echo "<div style=\"float:right; margin-top:1em; background-color:white; padding:1em; border-radius:5%;\"><h1>Scale “".$filename."”</h1><h3>This version is stored in <font color=\"blue\">‘".$csound_source."’</font></h3>";
+echo "<div style=\"float:right; margin-top:1em; background-color:white; padding:1em; border-radius:5%;\"><h1>Scale “".$filename."”</h1><h3>This version is stored in <font color=\"blue\">‘".$tonality_source."’</font></h3>";
 
-$link = "scale_image.php?save_codes_dir=".urlencode($save_codes_dir)."&dir_scale_images=".urlencode($dir_scale_images)."&csound_source=".urlencode($csound_source);
+$link = "scale_image.php?save_codes_dir=".urlencode($save_codes_dir)."&dir_scale_images=".urlencode($dir_scale_images)."&tonality_source=".urlencode($tonality_source);
 $link_no_marks = $link."&no_marks=1";
 $link_no_cents = $link."&no_cents=1";
 $link_no_intervals = $link_no_marks."&no_intervals=1";
@@ -881,7 +886,13 @@ $image_height = 820;
 echo "<div class=\"shadow\" style=\"border:2px solid gray; background-color:azure; width:20em;  padding:8px; text-align:center; border-radius: 6px;\">IMAGE:<br /><a onclick=\"window.open('".$link."','".$image_name."','width=1000,height=".$image_height.",left=100'); return false;\" href=\"".$link."\">full</a> - <a onclick=\"window.open('".$link_no_marks."','".$image_name."','width=1000,height=".$image_height.",left=100'); return false;\" href=\"".$link_no_marks."\">no marks</a> - <a onclick=\"window.open('".$link_no_cents."','".$image_name."','width=1000,height=".$image_height.",left=100'); return false;\" href=\"".$link_no_cents."\">no cents</a> - <a onclick=\"window.open('".$link_no_intervals."','".$image_name."','width=1000,height=".$image_height.",left=100'); return false;\" href=\"".$link_no_intervals."\">no intervals</a></div>";
 
 echo "</div>";
-echo "<p>👉 <a target=\"_blank\" href=\"https://www.csounds.com/manual/html/GEN51.html\">Read the Csound documentation</a></p>";
+
+echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+if(isset($_POST['csound_source'])) {
+	echo "<p>👉 <a target=\"_blank\" href=\"https://www.csounds.com/manual/html/GEN51.html\">Read the Csound documentation</a></p>";
+	$csound_source = $_POST['csound_source'];
+	echo "<input type=\"hidden\" name=\"csound_source\" value=\"".$csound_source."\">";
+	}
 $numgrades_fullscale = $table2[4];
 $interval = $table2[5];
 $basefreq = $table2[6];
@@ -984,9 +995,8 @@ for($j = $numgrades_with_labels = 0; $j < $numgrades_fullscale; $j++) {
 	$numgrades_with_labels++;
 	}
 	
-echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 echo "<input type=\"hidden\" name=\"dir_scales\" value=\"".$dir_scales."\">";
-echo "<input type=\"hidden\" name=\"csound_source\" value=\"".$csound_source."\">";
+echo "<input type=\"hidden\" name=\"tonality_source\" value=\"".$tonality_source."\">";
 
 echo "<h3>Name of this tonal scale: ";
 $the_width = strlen($scale_name) + 2;
@@ -1098,18 +1108,18 @@ echo "<td style=\"white-space:nowrap; padding:6px; vertical-align:middle;\"><fon
 echo "<td rowspan=\"3\" style=\"white-space:nowrap; padding:6px; vertical-align:middle;\">";
 echo "<table style=\"background-color:white;\">";
 echo "<tr>";
-echo "<td colspan=\"".$numgrades_with_labels."\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"modifynames\" onclick=\"this.form.target='_self';return true;\" formaction=\"scale.php?scalefilename=".urlencode($filename)."\" value=\"SAVE NEW NAMES\">&nbsp;Modify the names of these notes:</td>";
+echo "<td colspan=\"".$numgrades_fullscale."\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"modifynames\" onclick=\"this.form.target='_self';return true;\" formaction=\"scale.php?scalefilename=".urlencode($filename)."\" value=\"SAVE NEW NAMES\">&nbsp;Modify the names of these notes:</td>";
 echo "</tr>";
 echo "<tr>";
 for($j = $j_col = 0; $j < $numgrades_fullscale; $j++) {
-	if($name[$j] == '') continue;
+//	if($name[$j] == '') continue;
 	if($j_col >= 12) {
 		$j_col = 0;
 		echo "</tr><tr>";
 		}
 	$j_col++;
 	echo "<td style=\"text-align:center;\">";
-	if($key[$j] > 0) echo "<font color=\"MediumTurquoise\"><b>".$key[$j]."</b></font><br />";
+	if($key[$j] > 0)  echo "<font color=\"MediumTurquoise\"><b>".$key[$j]."</b></font><br />";
 	$the_width = strlen($name[$j]);
 	if($the_width < 5) $the_width = 5;
 	echo "<input style=\"text-align:center;\" type=\"text\" name=\"new_name_".$j."\" size=\"".$the_width."\" value=\"".$name[$j]."\">";
@@ -1802,9 +1812,9 @@ if($done AND $numgrades_with_labels > 2 AND !$warned_ratios) {
 						}
 					fwrite($handle,$the_scale."\n");
 					if($full_scale)
-						$some_comment = "<html>This is a derivation of scale \"".$filename."\" (".$numgrades_fullscale." grades) in ‘".$csound_source."’";
+						$some_comment = "<html>This is a derivation of scale \"".$filename."\" (".$numgrades_fullscale." grades) in ‘".$tonality_source."’";
 					else
-						$some_comment = "<html>This is a reduction to ".$numgrades." grades of scale \"".$filename."\" (".$numgrades_fullscale." grades) in ‘".$csound_source."’";
+						$some_comment = "<html>This is a reduction to ".$numgrades." grades of scale \"".$filename."\" (".$numgrades_fullscale." grades) in ‘".$tonality_source."’";
 					if($new_scale_mode == "major")
 						$some_comment .= " in major tonality";
 					else if($new_scale_mode == "minor")
@@ -2569,7 +2579,7 @@ echo "<input type=\"hidden\" name=\"q_comma\" value=\"".$q_comma."\">";
 		
 $text = html_to_text($scale_comment,"textarea");
 echo "<h3>Comment:</h3>";
-echo "<textarea name=\"scale_comment\" rows=\"10\" style=\"width:1000px;\">".$text."</textarea>";
+echo "<textarea name=\"scale_comment\" maxlength=\"2590\" rows=\"10\" style=\"width:1000px;\">".$text."</textarea>";
 echo "<p><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" formaction=\"scale.php?scalefilename=".urlencode($filename)."#toptable\" onclick=\"this.form.target='_self';return true;\" name=\"savethisfile\" value=\"SAVE “".$filename."”\"></p>";
 echo "</form>";
 $line = "§>\n";

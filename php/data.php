@@ -1366,68 +1366,7 @@ if(!is_connected() AND $file_format == "midi") {
 $project_name = preg_replace("/\.[a-z]+$/u",'',$output_file);
 $result_file = $bp_application_path.$output_folder.SLASH.$project_name."-result.html";
 
-if($csound_file <> '') {
-	$found_orchestra_in_instruments = FALSE;
-	if(file_exists($dir.$csound_file))
-		rename($dir.$csound_file,$dir_csound_resources.$csound_file);
-	$csound_orchestra = get_orchestra_filename($dir_csound_resources.$csound_file);
-	if($csound_orchestra <> '') $found_orchestra_in_instruments = TRUE;
-	else $csound_orchestra = $csound_default_orchestra;
-	if($csound_orchestra <> '' AND file_exists($dir.$csound_orchestra)) {
-		rename($dir.$csound_orchestra,$dir_csound_resources.$csound_orchestra);
-		sleep(1);
-		}
-	check_function_tables($dir,$csound_file);
-	if($file_format == "csound") {
-		$list_of_tonal_scales = list_of_tonal_scales($dir_csound_resources.$csound_file);
-		if(($max_scales = count($list_of_tonal_scales)) > 0) {
-			if($max_scales > 1) {
-				$i = 0;
-				echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains definitions of tonal scales";
-				echo "&nbsp;<font color=\"red\">➡</font>&nbsp;<button style=\"background-color:aquamarine; border-radius: 6px; font-size:large;\" onclick=\"toggledisplay_input(".$i."); return false;\">Show/hide tonal scales</button>";
-				echo "<div id=\"showhide_input0\" style=\"border-radius: 15px; padding:6px;\"><br />";
-				}
-			else {
-				echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains the definition of tonal scale:";
-				echo "<div>";
-				}
-			echo "<ul style=\"margin-top:0px; margin-bottom:0px\">";
-			for($i_scale = 1; $i_scale <= $max_scales; $i_scale++)
-				echo "<li>".$list_of_tonal_scales[$i_scale - 1]."</li>";
-			if($max_scales > 1) echo "</ul><br />These scales may be called in “_scale(name of scale, blockkey)” instructions (with blockey = 0 by default)";
-			else echo "</ul><br />This scale may be called in a “_scale(name of scale, blockkey)” instruction (with blockey = 0 by default)<br />➡ Use “_scale(0,0)” to force equal-tempered";
-			echo "</div>";
-			echo "</p>";
-			}
-		$list_of_instruments = list_of_instruments($dir_csound_resources.$csound_file);
-		$list = $list_of_instruments['list'];
-		$list_index = $list_of_instruments['index'];
-		if(($max_instr = count($list)) > 0) {
-			if($max_scales > 0) echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> also contains definitions of instrument(s):";
-			else echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains definitions of instrument(s):";
-			echo "<ul style=\"margin-top:0px; margin-bottom:0px\">";
-			for($i_instr = 0; $i_instr < $max_instr; $i_instr++) {
-				echo "<li><b>_ins(</b><font color=\"MediumTurquoise\">".$list[$i_instr]."</font><b>)</b>";
-				echo " = <b>_ins(".$list_index[$i_instr].")</b>";
-				$param_list = $list_of_instruments['param'][$i_instr];
-				if(count($param_list) > 0) {
-					echo " ➡ parameter(s) ";
-					for($i_param = 0; $i_param < count($param_list); $i_param++) {
-						echo " “<font color=\"MediumTurquoise\">".$param_list[$i_param]."</font>”";
-						}
-					}
-				echo "</li>";
-				}
-			echo "</ul>";
-			echo "</p>";
-			}
-		}
-	else {
-		echo "<p>Csound resources have been loaded but cannot be used because the output format is not “CSOUND”.<br />";
-		echo "➡ Instructions “_scale()” and “_ins()” will be ignored</p>";
-		}
-	}
-else echo "<br />";
+$content = show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,$filename,$file_format);
 
 echo "<div style=\"float:right; background-color:white; padding-right:6px; padding-left:6px; border-radius: 12px;\">";
 link_to_tonality();
@@ -1478,35 +1417,35 @@ echo "</table>";
 $link_options = '';
 if($grammar_file <> '') {
 	if(!file_exists($dir.$grammar_file)) {
-		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING:</font> <font color=\"blue\">".$grammar_file."</font> not yet created<br />";
+		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING:</font> <font color=\"blue\">".$grammar_file."</font> not found<br />";
 		$error = TRUE;
 		}
 	else $link_options .= "&grammar=".urlencode($dir.$grammar_file);
 	}
 if($alphabet_file <> '') {
 	if(!file_exists($dir.$alphabet_file)) {
-		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING:</font> <font color=\"blue\">".$alphabet_file."</font> not yet created<br />";
+		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING:</font> <font color=\"blue\">".$alphabet_file."</font> not found<br />";
 		$error = TRUE;
 		}
 	else $link_options .= "&alphabet=".urlencode($dir.$alphabet_file);
 	}
 if($settings_file <> '') {
 	if(!file_exists($dir.$settings_file)) {
-		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING:</font> <font color=\"blue\">".$settings_file."</font> not yet created<br />";
+		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING:</font> <font color=\"blue\">".$settings_file."</font> not found<br />";
 		$error = TRUE;
 		}
 	else $link_options .= "&settings=".urlencode($dir.$settings_file);
 	}
 if($objects_file <> '') {
 	if(!file_exists($dir.$objects_file)) {
-		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING:</font> <font color=\"blue\">".$objects_file."</font> not yet created<br />";
+		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING:</font> <font color=\"blue\">".$objects_file."</font> not found<br />";
 		$error = TRUE;
 		}
 	else $link_options .= "&objects=".urlencode($dir.$objects_file);
 	}
 if($csound_file <> '') {
 	if(!file_exists($dir_csound_resources.$csound_file)) {
-		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING:</font> <font color=\"blue\">".$csound_file."</font> not yet created<br />";
+		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING:</font> <font color=\"blue\">".$csound_file."</font> not found<br />";
 		$error = TRUE;
 		}
 	else {
@@ -1514,6 +1453,16 @@ if($csound_file <> '') {
 		if($file_format == "csound" AND file_exists($dir_csound_resources.$csound_orchestra)) $link_options .= "&csound_orchestra=".urlencode($csound_orchestra);
 		}
 	}
+if($tonality_file <> '') {
+	if(!file_exists($dir_tonality_resources.$tonality_file)) {
+		$error_mssg .= "<font color=\"red\">WARNING: ".$dir_tonality_resources.$tonality_file." not found.</font><br />";
+		$error = TRUE;
+		}
+	else {
+		$link_options .= "&tonality_file=".urlencode($tonality_file);
+		}
+	}
+
 $link_options .= "&here=".urlencode($dir.$filename);
 
 if($error_mssg <> '') {

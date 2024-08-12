@@ -15,6 +15,7 @@ function getData2() {
 	var number_instruments = document.getElementsByName('number_instruments')[0].value;
 	var begin_tables = document.getElementsByName('begin_tables')[0].value;
 	var cstables = document.getElementsByName('the_tables')[0].value;
+	var tonality_filename = document.getElementsByName('tonality')[0].value;
 	fd.append('temp_folder',temp_folder);
 	fd.append('dir',dir);
 	fd.append('filename',filename);
@@ -27,6 +28,7 @@ function getData2() {
 	fd.append('number_instruments',number_instruments);
 	fd.append('begin_tables',begin_tables);
 	fd.append('cstables',cstables);
+	fd.append('tonality_filename',tonality_filename);
 	return fd;
 	}
 

@@ -446,7 +446,8 @@ if($move_files) {
 		}
 	}
 
-if($path <> '' AND !is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"tonality_resources"))) {
+// if($path <> '' AND !is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"tonality_resources"))) {
+if($path <> '') {
 	echo "<div style=\"background-color:Cornsilk; padding-left:1em;  padding-right:1em; width:30%;\">";
 	if(!$delete_files AND !$rename_files AND !$move_files AND $path <> $trash_folder) {
 		echo "<input style=\"background-color:yellow; margin-top:1em;\" title=\"Delete folders or files\" type=\"submit\" name=\"delete_files\" value=\"DELETE\">";
@@ -458,15 +459,15 @@ if($path <> '' AND !is_integer(strpos($path,"csound_resources")) AND !is_integer
 		echo "&nbsp;<input style=\"background-color:yellow; margin-top:1em;\" title=\"Move folders or files\" type=\"submit\" name=\"move_files\" value=\"MOVE\">";
 		}
 	if(!$rename_files AND !$delete_files AND !$move_files AND $path == $trash_folder) {
-		echo "<br /><br /><input style=\"background-color:red; color:white;\" title=\"Empty trash\" type=\"submit\" name=\"empty_trash\" value=\"EMPTY THIS TRASH\"> 👉 can't be reversed!<br /><br />";
+		echo "<br /><br />🗑&nbsp;<input style=\"background-color:red; color:white;\" title=\"Empty trash\" type=\"submit\" name=\"empty_trash\" value=\"EMPTY THIS TRASH\"> 👉 can't be reversed!<br /><br />";
 		}
-	if(!$show_dependencies AND !$delete_files AND !$move_files AND $path <> $trash_folder) echo "<br /><input style=\"background-color:azure;\" title=\"Show dependencies of files (links to other files)\" type=\"submit\" name=\"show_dependencies\" value=\"SHOW DEPENDENCIES\"> (links between files)<br /><br />";
+	if(!$show_dependencies AND !$delete_files AND !$move_files AND $path <> $trash_folder AND !is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"tonality_resources"))) echo "<br /><input style=\"background-color:azure;\" title=\"Show dependencies of files (links to other files)\" type=\"submit\" name=\"show_dependencies\" value=\"SHOW DEPENDENCIES\"> (links between files)<br /><br />";
 	else if($show_dependencies) echo "<br /><br /><input style=\"background-color:azure;\" type=\"submit\" value=\"HIDE DEPENDENCIES\"><br /><br />";
 	echo "</div>";
 	}
 
 display_directory(FALSE,$dir,"directory");
-if($path <> $trash_folder) echo "▶︎ <a target=\"_blank\" href=\"index.php?path=".$trash_folder."\">TRASH FOLDER</a><br />";
+if($path <> $trash_folder) echo "▶︎ 🗑 <a target=\"_blank\" href=\"index.php?path=".$trash_folder."\">TRASH</a><br />";
 echo "<br />";
 
 echo "<table style=\"background-color: Cornsilk;\">";
@@ -727,8 +728,8 @@ function display_directory($test,$dir,$filter) {
 				else if($thisfile == "bp" OR $thisfile == "bp.exe" OR $thisfile == "bp3") continue;
 
 		//		if(!$test) echo $check_box;
-
-				if(!$test AND $delete_files) echo "<input type=\"checkbox\" name=\"delete_".$i_file."\"> ";
+				
+				if(!$test AND $delete_files AND !do_not_delete($thisfile)) echo "<input type=\"checkbox\" name=\"delete_".$i_file."\"> ";
 				if($type <> '') {
 					$files_shown++;
 					}
@@ -792,6 +793,7 @@ function folder_list($dir,$list,$path) {
 		if(!is_dir($dir.$thisfile)) continue;
 		$new_path = $path.SLASH.$thisfile;
 		if($dir == $bp_application_path) {
+		//	echo $thisfile." ?<br />";
 			if(!ok_output_location($thisfile,FALSE)) continue;
 			$new_path = $thisfile;
 			}
@@ -799,5 +801,10 @@ function folder_list($dir,$list,$path) {
 		$list = folder_list($dir.$thisfile.SLASH,$list,$new_path);
 		}
 	return $list;
+	}
+
+function do_not_delete($thisfile) {
+	if($thisfile == "scale_images") return TRUE;
+	return FALSE;
 	}
 ?>

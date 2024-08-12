@@ -48,6 +48,8 @@ if(isset($_GET['here'])) $here = urldecode($_GET['here']);
 else $here = '???';
 if(isset($_GET['csound_file'])) $csound_file = $_GET['csound_file'];
 else $csound_file = '';
+if(isset($_GET['tonality_file'])) $tonality_file = $_GET['tonality_file'];
+else $tonality_file = '';
 if(isset($_GET['item'])) $item = $_GET['item'];
 else $item = 0;
 
@@ -230,6 +232,7 @@ echo "</div>";
 
 	if($note_convention <> '') $command .= " --".$note_convention;
 	if($csound_file <> '') $command .= " -cs ".$dir_csound_resources.$csound_file;
+	if($tonality_file <> '') $command .= " -to ".$dir_tonality_resources.$tonality_file;
 	
 	if($startup <> '') $command .= " --start ".$startup;
 	if($instruction == "produce" OR $instruction == "produce-all" OR $instruction == "play" OR $instruction == "play-all" OR $instruction == "expand") {
