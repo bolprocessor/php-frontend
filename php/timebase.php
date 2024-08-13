@@ -14,6 +14,7 @@ $current_directory = str_replace(SLASH.$filename,'',$file);
 save_settings("last_directory",$current_directory);
 
 require_once("_header.php");
+echo "<script type='text/javascript' src='https://www.midijs.net/lib/midi.js'></script>";
 echo "<p>Workspace = <a href=\"index.php?path=".urlencode($current_directory)."\">".$current_directory."</a></p>";
 echo link_to_help();
 

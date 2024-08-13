@@ -294,9 +294,10 @@ if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension 
 		echo "</p>";
 		echo "</form>";
 		}
-	if($path <> $csound_resources) {
-		echo "<button style=\"float:right; background-color:azure; border-radius: 6px; font-size:large;\" onclick=\"togglecreate(); return false;\">CREATE FILES AND FOLDERS</button>";
-		echo "<div id=\"create\"  style=\"padding-top:36px;\">";
+	if($path <> $csound_resources AND $path <> $tonality_resources) {
+		echo "<hr style=\"border: 8px solid GhostWhite;\">";
+		echo "<button style=\"background-color:azure; border-radius: 6px; font-size:large;\" onclick=\"togglecreate(); return false;\">CREATE FILES AND FOLDERS</button>";
+		echo "<div id=\"create\"  style=\"padding-top:6px;\">";
 		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		echo "<p style=\"text-align:left;\">";
 		echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"create_folder\" value=\"CREATE NEW FOLDER IN THIS WORKSPACE\"><br />named:&nbsp;";
@@ -338,7 +339,7 @@ if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension 
 			echo "<p style=\"text-align:left;\">";
 			echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"create_prototypes\" value=\"CREATE NEW SOUND-OBJECT PROTOTYPE FILE\"><br />named:&nbsp;";
 			echo "<input type=\"text\" name=\"filename\" size=\"20\" style=\"background-color:CornSilk;\" value=\"\">";
-			$type = "mi";
+			$type = "so";
 			echo "<br /><input type=\"radio\" name=\"name_mode\" value=\"prefix\" checked>with prefix ‘-".$type."’";
 			echo "<br /><input type=\"radio\" name=\"name_mode\" value=\"extension\">with extension ‘bp".$type."’";
 			echo "<input type=\"hidden\" name=\"type\" value=\"".$type."\">";
@@ -367,8 +368,7 @@ if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension 
 			}
 		echo "</div>";
 		}
-//	else if($path <> '') {
-	else {
+	else if($path <> $tonality_resources) {
 		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		echo "<p style=\"text-align:left;\">";
 		echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"create_csound\" value=\"CREATE NEW CSOUND RESOURCE FILE\"><br />named:&nbsp";
@@ -628,7 +628,6 @@ function display_directory($test,$dir,$filter) {
 					}
 				}
 			}
-		if(!$test AND $new_file == $thisfile AND $filter <> "directory") echo "<font color=\"red\">➡</font> ";
 		$table = explode("_",$thisfile);
 		$prefix = $table[0];
 		if($prefix == "trace") continue;
@@ -652,6 +651,7 @@ function display_directory($test,$dir,$filter) {
 		if($test AND ($filter == '' OR $filter == $type)) $seen[$thisfile] = TRUE;
 	
 		if(!ok_output_location($thisfile,FALSE)) continue;
+		if(!$test AND $new_file == $thisfile AND $filter <> "directory") echo "<font color=\"red\">➡</font> ";
 		if(!$test) echo $check_box;
 
 		if(!$test AND $path <> $csound_resources AND $path <> $trash_folder AND ($type == "csound" OR $type == "csorchestra")) {

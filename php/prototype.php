@@ -17,6 +17,7 @@ else {
 	}
 $this_title = $expression = $object_name;
 require_once("_header.php");
+echo "<script type='text/javascript' src='https://www.midijs.net/lib/midi.js'></script>";
 
 $object_foldername = clean_folder_name($object_name);
 
