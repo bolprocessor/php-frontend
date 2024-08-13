@@ -965,7 +965,7 @@ if(!$hide) {
 echo "</form>";
 echo "<script>\n";
 echo "window.onload = function() {
-    toggleAllDisplays($NumberMIDIinputs); settogglesearch();
+    toggleAllDisplays($NumberMIDIinputs); settogglesearch(); settogglescales();
 	};\n";
 echo "</script>\n";
 echo "</body>";

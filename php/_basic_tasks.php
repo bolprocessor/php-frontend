@@ -2599,20 +2599,22 @@ function show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,
 		$new_csound_file = get_csound_file($dir.$objects_file);
 		$new_csound_file = str_replace("csound_resources/",'',$new_csound_file);
 		if($new_csound_file <> '' AND $new_csound_file <> $csound_file) {
+			echo "<p></p><div style=\"background-color:cornsilk; padding:1em; width:500px; box-shadow: 3px 3px 5px 6px gold; border-radius: 6px;\">";
 			if($csound_file == '') {
 				$content = add_instruction($new_csound_file,$content);
 				$csound_file = $new_csound_file;
-				echo "<p>👉 Found mention of <font color=\"blue\">‘".$csound_file."’</font> in sound-object file  <font color=\"blue\">‘".$objects_file."’</font>.<br />➡ This indication has been added to the project. <font color=\"red\">You need to</font> <input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" name=\"savethisfile\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".$filename."’\"></p>";
+				echo "👉&nbsp;&nbsp;Found mention of <font color=\"blue\">‘".$csound_file."’</font> in sound-object file  <br /><font color=\"blue\">‘".$objects_file."’</font>. This indication has been added to the project.<br /><font color=\"red\">You need to</font> <input style=\"background-color:yellow; font-size:large;\" type=\"submit\" onclick=\"clearsave();\" name=\"savethisfile\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".$filename."’\">";
 				}
 			else {
-				echo "<p>👉 <font color=\"red\">WARNING:</font> File <font color=\"blue\">‘".$objects_file."’</font> indicates that the Csound insstruments file <font color=\"blue\">‘".$new_csound_file."’</font> should be associated.<br />This project selects <font color=\"blue\">‘".$csound_file."’</font> instead, <font color=\"red\">which we will use.</font><br />➡ Your can edit <font color=\"blue\">‘".$objects_file."’</font> to solve the inconsistency.</p>";
+				echo "👉&nbsp;&nbsp;<font color=\"red\">WARNING:</font> File <font color=\"blue\">‘".$objects_file."’</font> indicates that the Csound instruments file <font color=\"blue\">‘".$new_csound_file."’</font> should be associated.<br />This project selects <font color=\"blue\">‘".$csound_file."’</font> instead, <font color=\"red\">which we will use.</font><br />➡ Your can edit <font color=\"blue\">‘".$objects_file."’</font> to solve the inconsistency.";
 				}
+			echo "</div>";
 			}
 		}
 	if($csound_file <> '') {
 		$tonality_file_in_csound = get_tonality_file($dir_csound_resources.$csound_file);
 		if($tonality_file_in_csound <> '' AND $tonality_file_in_csound <> $tonality_file) {
-			echo "<p></p><div style=\"background-color:cornsilk; padding:1em; width:500px; box-shadow: 3px 3px 5px 6px gold; border-radius: 15px;\">";
+			echo "<p></p><div style=\"background-color:cornsilk; padding:1em; width:500px; box-shadow: 3px 3px 5px 6px gold; border-radius: 6px;\">";
 			if($tonality_file == '') {
 				$content = add_instruction($tonality_file_in_csound,$content);
 				$tonality_file = $tonality_file_in_csound;
@@ -2629,8 +2631,8 @@ function show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,
 		if(($max_scales = count($list_of_tonal_scales)) > 0) {
 			if($max_scales > 1)  {
 				$i = 0;
-				echo "<p style=\"margin-bottom:0px;\">Tonality resource file <font color=\"blue\">‘".$tonality_file."’</font> contains definitions of tonal scales&nbsp;<font color=\"red\">➡</font>&nbsp;<button style=\"background-color:aquamarine; border-radius: 6px; font-size:large;\" onclick=\"toggledisplay_input(".$i."); return false;\">Show/hide tonal scales</button>";
-				echo "<div id=\"showhide_input0\"  style=\"border-radius: 15px; padding:6px;\"><br />";
+				echo "<p style=\"margin-bottom:0px;\">Tonality resource file <font color=\"blue\">‘".$tonality_file."’</font> contains definitions of tonal scales&nbsp;<font color=\"red\">➡</font>&nbsp;<button style=\"background-color:aquamarine; border-radius: 6px; font-size:large;\" onclick=\"togglescales(); return false;\">Show/hide tonal scales</button>";
+				echo "<div id=\"scales\"  style=\"border-radius: 15px; padding:6px;\"><br />";
 				}
 			else {
 				echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains the definition of tonal scale:";
@@ -2675,7 +2677,7 @@ function show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,
 			echo "</ol>";
 			echo "</p>";
 			}
-		else echo "<p>Csound resource file <font color=\"blue\">‘".$csound_file."’</font> does not contain definitions of instrument(s)</p>";
+		else if($file_format == "csound") echo "<p>Csound resource file <font color=\"blue\">‘".$csound_file."’</font> does not contain definitions of instrument(s). The default instrument <font color=\"blue\">‘0-default.orc’</font> will be used.</p>";
 		}
 	return $content;
 	}

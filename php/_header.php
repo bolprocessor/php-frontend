@@ -124,6 +124,19 @@ echo "function togglesearch() {
       if(z) {
         z.className=(z.className=='hidden')?'unhidden':'hidden'; }
     }\n";
+
+
+echo "function settogglescales() {
+      var z = document.getElementById(\"scales\");
+      if(z) {
+        z.className='hidden'; }
+      }\n";
+echo "function togglescales() {
+      var z = document.getElementById(\"scales\");
+      if(z) {
+        z.className=(z.className=='hidden')?'unhidden':'hidden'; }
+    }\n";
+
 echo "function settogglecreate() {
       var z = document.getElementById(\"create\");
       if(z) {

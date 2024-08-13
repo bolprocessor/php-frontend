@@ -1844,7 +1844,7 @@ echo "</tr>";
 echo "</table>";
 echo "<script>\n";
 echo "window.onload = function() {
-    toggleAllDisplays($NumberMIDIinputs); settogglesearch();
+    toggleAllDisplays($NumberMIDIinputs); settogglesearch(); settogglescales();
 	};\n";
 echo "</script>\n";
 /* echo "<pre>";  // Preformatted tag to display output neatly
