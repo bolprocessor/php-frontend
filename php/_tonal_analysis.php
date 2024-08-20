@@ -9,9 +9,9 @@ $wolf_fourth = round(cents(320/243));
 
 // Read documentation: https://bolprocessor.org/tonal-analysis/
 
-function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_folder,$note_convention) {
-	global $max_term_in_fraction,$dir_scale_images,$csound_resources,$current_directory,$dir,$filename;
-	global $p_tonal_default_up,$q_tonal_default_up,$p_tonal_default_down,$q_tonal_default_down,$p_tonal_default_harmonic,$q_tonal_default_harmonic,$weight_tonal_default_up,$weight_tonal_default_down,$weight_tonal_default_harmonic,$width_tonal_default_up,$width_tonal_default_down,$width_tonal_default_harmonic,$weight_tonal_melodic_up,$weight_tonal_melodic_down,$weight_tonal_harmonic,$max_distance_tonal,$ratio_melodic_tonal,$min_duration_tonal,$max_gap_tonal,$compare_scales_tonal;
+function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_folder,$note_convention) {
+	global $max_term_in_fraction,$dir_scale_images,$current_directory,$dir,$filename;
+	global $p_tonal_default_up,$q_tonal_default_up,$p_tonal_default_down,$q_tonal_default_down,$p_tonal_default_harmonic,$q_tonal_default_harmonic,$weight_tonal_default_up,$weight_tonal_default_down,$weight_tonal_default_harmonic,$width_tonal_default_up,$width_tonal_default_down,$width_tonal_default_harmonic,$weight_tonal_melodic_up,$weight_tonal_melodic_down,$weight_tonal_harmonic,$max_distance_tonal,$ratio_melodic_tonal,$min_duration_tonal,$max_gap_tonal,$compare_scales_tonal,$tonality_resources;
 	global $Englishnote,$Frenchnote,$Indiannote;
 	set_time_limit(50000);
 	$test_tonal = FALSE;
@@ -214,7 +214,7 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 	echo ">";
 	echo "</td></tr>";
 	echo "<tr><td colspan=\"6\" style=\"white-space:nowrap; padding:4px;\">";
-	if($csound_file <> '') {
+	if($tonality_file <> '') {
 		if(isset($_POST['compare_scales'])) $compare_scales = $_POST['compare_scales'];
 		else if(isset($compare_scales_tonal[$current_directory])) $compare_scales = $compare_scales_tonal[$current_directory];
 		else $compare_scales = 0;
@@ -223,10 +223,10 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 		echo "> Analyze item(s) with their specified tonal scales<br />";
 		echo "<input type=\"radio\" name=\"compare_scales\" value=\"1\"";
 		if($compare_scales) echo " checked";
-		echo "> Evaluate adequacy of all tuning schemes defined in ‘<a target=\"_blank\" href=\"csound.php?file=".urlencode($csound_resources.SLASH.$csound_file)."\">".$csound_file."</a>’ in terms of consonance</p>";
+		echo "> Evaluate adequacy of all tuning schemes defined in ‘<a target=\"_blank\" href=\"tonality.php?file=".urlencode($tonality_resources.SLASH.$tonality_file)."\">".$tonality_file."</a>’ in terms of consonance</p>";
 		}
 	else {
-		echo "<font color=\"red\">➡</font> You could also compare scales after declaring a ‘-cs’ resource file on top of data and open the file in the <a target=\"_blank\" href=\"csound.php?file=".urlencode($csound_resources.SLASH.$csound_file)."\">Csound resource folder</a>";
+		echo "<font color=\"red\">➡</font> You could also compare scales after declaring a ‘-to’ resource file on top of data and open the file in the <a target=\"_blank\" href=\"tonality.php?file=".urlencode($tonality_resources.SLASH.$tonality_file)."\"> tonality resource folder</a>";
 		$compare_scales = 0;
 		}
 	echo "</td></tr>";
@@ -387,7 +387,7 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 			if($first_line2 <> '') {
 				echo "<p style=\"\"><font color=\"blue\">".$first_line2."</font></p>";
 				}
-			if($tonal_scale <> '' AND !$compare_scales) echo "<p>Checking against tonal scale ‘<font color=\"blue\">".$tonal_scale."</font>’ defined in the <a target=\"_blank\" href=\"index.php?path=csound_resources\">Csound resource</a> folder</p>";
+			if($tonal_scale <> '' AND !$compare_scales) echo "<p>Checking against tonal scale ‘<font color=\"blue\">".$tonal_scale."</font>’ defined in the <a target=\"_blank\" href=\"index.php?path=tonality_resources\"> tonality resource</a> folder</p>";
 			$tie_mssg = $segment['tie_mssg'];
 			$data_chunked = $segment['data_chunked']; 
 			$content_slice = @file_get_contents($data_chunked,TRUE);
@@ -518,8 +518,8 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 				$dircontent = scandir($temp_dir);
 				foreach($dircontent as $resource_file) {
 					if(!is_dir($temp_dir.$resource_file)) continue;
-					if(!is_integer($pos=strpos($resource_file,$csound_file)) OR $pos > 0) continue;
-					if(is_integer($pos=strpos($resource_file,"-cs")) AND $pos == 0) {
+					if(!is_integer($pos=strpos($resource_file,$tonality_file)) OR $pos > 0) continue;
+					if(is_integer($pos=strpos($resource_file,"-to")) AND $pos == 0) {
 						$table_name = explode('_',$resource_file);
 						$resource_name = $table_name[0];
 						if(isset($resource_file_known[$resource_name])) continue;
@@ -615,7 +615,7 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 								echo "<tr><td colspan=\"3\" style=\"background-color:Gold;\"><div class=\"shadow\" style=\"background-color:azure;padding:6px; border-radius: 6px;\"><i>Numbers are proportional to durations<br />of intervals matching the scale</i></div></td><th>&nbsp;Melodic score (up)&nbsp;</th><th>&nbsp;Melodic score (down)&nbsp;</th><th>&nbsp;Harmonic score&nbsp;</th><th></th></tr>";
 								echo "<th></th><th>Select</th><th style=\"text-align:right;\">weight:&nbsp;</th><td>".$weight_melodic_up."</td><td>".$weight_melodic_down."</td><td>".$weight_harmonic."</td><th>Weighted total</th></tr>";
 								}
-							else echo "<tr><th></th><th>Select then</th><th><input style=\"background-color:yellow;\" type=\"submit\" formaction=\"".$url_this_page."#tonalanalysis\" title=\"Analyze tonal intervals\" name=\"analyze_tonal\" value=\"ANALYZE AGAIN\"></th><th>&nbsp;Melodic score (up)&nbsp;</th><th>&nbsp;Melodic score (down)&nbsp;</th><th>&nbsp;Harmonic score&nbsp;</th><th>Score</th></tr>";
+							else echo "<tr>Rank<th></th><th>Select then</th><th><input style=\"background-color:yellow;\" type=\"submit\" formaction=\"".$url_this_page."#tonalanalysis\" title=\"Analyze tonal intervals\" name=\"analyze_tonal\" value=\"ANALYZE AGAIN\"></th><th>&nbsp;Melodic score (up)&nbsp;</th><th>&nbsp;Melodic score (down)&nbsp;</th><th>&nbsp;Harmonic score&nbsp;</th><th>Score</th></tr>";
 							$found_declared_scale = FALSE;
 							$display_ok = TRUE; $max_total = 0;
 							foreach($total_score as $scale => $total) {
@@ -628,7 +628,7 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 								if($max_total == 0) $max_total = $total;
 								if($display_ok) {
 									echo "<tr>";
-									if($same_rank) echo "<td style=\"background-color:Gold; text-align:left;\">".$i_rank."</td>";
+									if($same_rank) echo "<td style=\"background-color:Gold; text-align:left;\">(".$i_rank.")</td>";
 									else echo "<th>".$i_rank."</th>";
 									echo "<td style=\"white-space:nowrap;\">";
 									}
@@ -681,7 +681,7 @@ function tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_fol
 					}
 				if(!$found_scale /* AND $image_shown */) {
 					echo "<p style=\"text-align:center;\"><font color=\"red\"><big>No definition of tonal scale was found.</big></font><br /><br />";
-					echo "You need to open the ‘<a target=\"_blank\" href=\"csound.php?file=".urlencode($csound_resources.SLASH.$csound_file)."\">".$csound_file."</a>’ resource file to use its tonal scale definitions.</p>";
+					echo "You need to open the ‘<a target=\"_blank\" href=\"tonality.php?file=".urlencode($tonality_resources.SLASH.$tonality_file)."\">".$tonality_file."</a>’ resource file to use its tonal scale definitions.</p>";
 					break;
 					}
 				}
@@ -1324,7 +1324,7 @@ function show_relations_on_image($i_item,$matching_list,$mode,$direction,$scalen
 		$dircontent = scandir($temp_dir);
 		foreach($dircontent as $resource_file) {
 			if(!is_dir($temp_dir.$resource_file)) continue;
-			if(is_integer($pos=strpos($resource_file,"-cs")) AND $pos == 0) {
+			if(is_integer($pos=strpos($resource_file,"-to")) AND $pos == 0) {
 				$scale_textfile = $temp_dir.$resource_file.SLASH."scales".SLASH.$clean_name_of_file.".txt";
 				if(file_exists($scale_textfile)) {
 					$found = TRUE;
@@ -1335,7 +1335,7 @@ function show_relations_on_image($i_item,$matching_list,$mode,$direction,$scalen
 		if(!$found) {
 			if($mode == "harmonic") {
 				echo "<p style=\"text-align:center;\"><font color=\"red\">Definition of tonal scale</font> ‘<font color=\"blue\">".$scalename."</font>’ <font color=\"red\">was not found.</font><br />";
-				echo "You need to open a <a target=\"_blank\" href=\"index.php?path=csound_resources\">Csound resource</a> containing a scale with exactly the same name.<br />Then click “ANALYZE AGAIN”</p><br />";
+				echo "You need to open a <a target=\"_blank\" href=\"index.php?path=tonality_resources\">Csound resource</a> containing a scale with exactly the same name.<br />Then click “ANALYZE AGAIN”</p><br />";
 				}
 			$resource_file = '';
 			}
@@ -1553,7 +1553,7 @@ function show_relations_on_image($i_item,$matching_list,$mode,$direction,$scalen
 		$image_name_reduced = $image_name."_reduced";
 		$image_name_only = $image_name."_only";
 		$link = "scale_image.php?save_codes_dir=".urlencode($save_codes_dir)."&dir_scale_images=".urlencode($save_codes_dir);
-		$link_full = $link."&csound_source=".urlencode('item #'.$i_item.' ('.$mode.')');
+		$link_full = $link."&tonality_source=".urlencode('item #'.$i_item.' ('.$mode.')');
 		$link_reduced = $link_full."&no_marks=1&no_intervals=1&no_cents=1";
 		$link_only = $link."&no_hilite=1";
 		if($mode == "harmonic") {

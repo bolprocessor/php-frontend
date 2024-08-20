@@ -57,6 +57,7 @@ if(isset($_POST['alphabet_file'])) $alphabet_file = $_POST['alphabet_file'];
 if(isset($_POST['grammar_file'])) $grammar_file = $_POST['grammar_file'];
 if(isset($_POST['settings_file'])) $settings_file = $_POST['settings_file'];
 if(isset($_POST['csound_file'])) $csound_file = $_POST['csound_file'];
+if(isset($_POST['tonality_file'])) $tonality_file = $_POST['tonality_file'];
 if(isset($_POST['objects_file'])) $objects_file = $_POST['objects_file'];
 
 if(isset($_POST['new_convention']))
@@ -109,9 +110,9 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$declarations .= $settings_file."\n";
 			$content = str_replace($settings_file,'',$content);
 			}
-		if($csound_file <> '') {
-			$declarations .= $csound_file."\n";
-			$content = str_replace($csound_file,'',$content);
+		if($tonality_file <> '') {
+			$declarations .= $tonality_file."\n";
+			$content = str_replace($tonality_file,'',$content);
 			}
 		if($objects_file <> '') {
 			$declarations .= $objects_file."\n";
@@ -1256,6 +1257,7 @@ if($csound_file <> '') {
 else $csound_orchestra = '';
 echo "<input type=\"hidden\" name=\"settings_file\" value=\"".$settings_file."\">";
 echo "<input type=\"hidden\" name=\"csound_file\" value=\"".$csound_file."\">";
+echo "<input type=\"hidden\" name=\"tonality_file\" value=\"".$tonality_file."\">";
 echo "<input type=\"hidden\" name=\"alphabet_file\" value=\"".$alphabet_file."\">";
 echo "<input type=\"hidden\" name=\"grammar_file\" value=\"".$grammar_file."\">";
 echo "<input type=\"hidden\" name=\"objects_file\" value=\"".$objects_file."\">";
@@ -1661,7 +1663,7 @@ if(!$hide) {
 		$new_settings_file = str_replace("-da.",'',$filename);
 		$new_settings_file = str_replace(".bpda",'',$new_settings_file);
 		$new_settings_file = "-se.".$new_settings_file;
-		echo "<p style=\"background-color:white;\"><font color=\"red\">➡</font> <input style=\"background-color:yellow; font-size:large;\" onclick=\"window.open('settings_list.php?dir=".urlencode($dir)."&thispage=".urlencode($url_this_page)."','settingsfiles','width=400,height=400,left=100'); return false;\" type=\"submit\" title=\"Display settings files\" value=\"CHOOSE\"> a settings file or <input style=\"background-color:yellow; font-size:large;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"create_settings_file\" formaction=\"".$url_this_page."\" value=\"CREATE\"> a new file named <input type=\"text\" name=\"new_settings_file\" size=\"25\" value=\"".$new_settings_file."\"></p>";
+		echo "<p>&nbsp;</p><p style=\"background-color:white;\"><font color=\"red\">➡</font> <input style=\"background-color:yellow; font-size:large;\" onclick=\"window.open('settings_list.php?dir=".urlencode($dir)."&thispage=".urlencode($url_this_page)."','settingsfiles','width=400,height=400,left=100'); return false;\" type=\"submit\" title=\"Display settings files\" value=\"CHOOSE\"> a settings file or <input style=\"background-color:yellow; font-size:large;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"create_settings_file\" formaction=\"".$url_this_page."\" value=\"CREATE\"> a new file named <input type=\"text\" name=\"new_settings_file\" size=\"25\" value=\"".$new_settings_file."\"></p>";
 		}
 	else 
 		echo "<p><input style=\"background-color:yellow;\" onclick=\"window.open('settings_list.php?dir=".urlencode($dir)."&thispage=".urlencode($url_this_page)."','settingsfiles','width=400,height=400,left=100'); return false;\" type=\"submit\" title=\"Display settings files\" value=\"CHOOSE\"> a different settings file</p>";
@@ -1734,7 +1736,7 @@ if($imax > 0 AND (substr_count($content,'{') > 0 OR substr_count($content,"-da."
 	$tonal_analysis_possible = !($note_convention > 2);
 	if(!$tonal_analysis_possible) echo "<p><font color=\"red\">➡ Tonal analysis is only possible with names of notes in English, Italian/Spanish/French or Indian conventions.</font></p>";
 	if(isset($_POST['analyze_tonal']) OR isset($_POST['save_tonal_settings']) OR isset($_POST['reset_tonal_settings'])) {
-		tonal_analysis($content,$url_this_page,$csound_file,$temp_dir,$temp_folder,$note_convention);
+		tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_folder,$note_convention);
 		}
 	else {
 		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
@@ -1742,7 +1744,7 @@ if($imax > 0 AND (substr_count($content,'{') > 0 OR substr_count($content,"-da."
 		if(!$tonal_analysis_possible) echo " disabled";
 		echo ">";
 		echo "Melodic and harmonic tonal intervals of (all) item(s)<br /><i>ignoring channels, instruments, periods, sound-objects and random performance controls.</i></p>";
-		if($csound_file <> '') echo "<div style=\"background-color:white; padding:6px;\"><font color=\"red\">➡</font> It may be necessary to <a target=\"_blank\" href=\"csound.php?file=".urlencode($csound_resources.SLASH.$csound_file)."\">open</a> the ‘<font color=\"blue\">".$csound_file."</font>’ Csound resource file, allowing access to its tonal scale definitions.</div>";
+		if($tonality_file <> '') echo "<div style=\"background-color:white; padding:6px;\"><font color=\"red\">➡</font> It may be necessary to <a target=\"_blank\" href=\"tonality.php?file=".urlencode($tonality_resources.SLASH.$tonality_file)."\">open</a> the ‘<font color=\"blue\">".$tonality_file."</font>’ tonality resource file, allowing access to its tonal scale definitions.</div>";
 		echo "</form>";
 		echo "<hr>";
 		}
@@ -2025,6 +2027,11 @@ function create_chunks($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxc
 
 function save($this_file,$filename,$top_header,$save_content) {
 	global $url_this_page;
+    if (file_exists($this_file)) {
+        $backup_file = $this_file."_bak";
+        if(!copy($this_file, $backup_file))
+            echo "<p>👉 <font color=\"red\">Failed to create backup of the file.</p>";
+		}
 	$handle = @fopen($this_file, "w");
 	if($handle) {
 		$file_header = $top_header . "\n// Data saved as \"" . $filename . "\". Date: " . gmdate('Y-m-d H:i:s');

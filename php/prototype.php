@@ -442,8 +442,9 @@ echo "</p>";
 echo link_to_help();
 
 echo "<h2>Object prototype <big><font color=\"red\">".$object_name."</font></big></h2>";
-
+echo "<div style=\"float:right; background-color:white; padding-right:6px; padding-left:6px; border-radius: 12px;\">";
 echo "<p><font color=\"red\">➡</font> Don’t close the “<font color=\"blue\">".$prototypes_name."</font>” page while editing this prototype!</p>";
+echo "</div>";
 
 $content = @file_get_contents($object_file,TRUE);
 if($content == '') {

@@ -35,6 +35,7 @@ else {
 	echo "</td>";
 	echo "<td style=\"padding:1em; vertical-align:middle; border-radius:1em;\">";
 	echo "<p style=\"text-align:center;\">This interface is running<br />the multi-platform console<br /><br /><i>‘Olympic’ version</i><br />Summer 2024<br /><a target=\"_blank\" href=\"https://bp3.tech\">https://bp3.tech</a></p>";
+	echo "<p>👉&nbsp;Read the <a href=\"https://raw.githubusercontent.com/bolprocessor/bolprocessor/graphics-for-BP3/BP3-changes.txt\" target=\"_blank\">history of changes</a></p>";
 	echo "</td>";
 	echo "</tr>";
 	echo "</table>";

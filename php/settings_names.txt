@@ -14,7 +14,7 @@ Play each substitution		1	1
 Produce all items	(not implemented)	1	1
 Display production		1	1
 Step-by-step produce	(not implemented)	1	1
-Step subrammars	(not implemented)	1	1
+Trace microtonality		1	1
 Trace production		1	1
 Choose candidate rule	(not implemented)	1	1
 Display final score	Bol Processor score	1	1

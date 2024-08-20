@@ -972,6 +972,11 @@ echo "</body>";
 echo "</html>";
 
 function save($this_file,$filename,$top_header,$save_content) {
+    if (file_exists($this_file)) {
+        $backup_file = $this_file."_bak";
+        if(!copy($this_file, $backup_file))
+            echo "<p>👉 <font color=\"red\">Failed to create backup of the file.</p>";
+		}
 	$handle = @fopen($this_file, "w");
 	if($handle) {
 		$file_header = $top_header . "\n// Grammar saved as \"" . $filename . "\". Date: " . gmdate('Y-m-d H:i:s');

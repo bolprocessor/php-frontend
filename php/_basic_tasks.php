@@ -1894,11 +1894,11 @@ function convert2_empty($value) {
 function octave($convention,$key) {
 	switch($convention) {
 		case "English":
+		case "Indian":
 			$octave = intdiv($key,12) - 1;
 			break;
 		case "Italian/Spanish/French":
 		case "French":
-		case "Indian":
 			$octave = intdiv($key,12) - 2;
 			break;
 		}
@@ -2367,7 +2367,7 @@ function display_console_state() {
 	 if($output <> '') {
 		echo "Bol Processor ‘<font color=\"blue\"><b>".$console."</b></font>’ console is responding<br />Version ".$output;
 		$panicfile = str_replace(SLASH,'/',$panicfile);
-		if(isset($filename) AND $filename <> "Compilation" AND $filename <> "Produce" AND  $filename <> "Bol Processor") echo "<div style=\"text-align:right;\"><button type=\"button\" class=\"bouton\" onclick=\"createFile('".$panicfile."');\">PANIC!</button></div>\n";
+		if(isset($filename) AND $filename <> "Compilation" AND $filename <> "Produce" AND  $filename <> "Bol Processor") echo "<div style=\"text-align:right;\"><button type=\"button\" class=\"bouton\" style=\"font-size: small;\" onclick=\"createFile('".$panicfile."');\">PANIC!</button></div>\n";
 		}
 	 else {
 		echo "Bol Processor is not yet installed or not responding&nbsp;😣<br />";
@@ -3454,7 +3454,7 @@ function read_midiport($thefile) {
 
 function read_midiressources() {
 	global $filename, $temp_midi_ressources, $MIDIacceptFilter, $MIDIpassFilter;
-	global $dir_midi_resources,$MIDIinput,$MIDIoutput,$MIDIinputname,$MIDIoutputname,$MIDIinputcomment,$MIDIoutputcomment;
+	global $dir_midi_resources,$MIDIinput,$MIDIoutput,$MIDIinputname,$MIDIoutputname,$MIDIinputcomment,$MIDIoutputcomment,$NumberMIDIinputs;
 	
 	// First try to read  in the "temp" folder
 	$result = read_midiport($temp_midi_ressources."midiport");
@@ -3462,6 +3462,7 @@ function read_midiressources() {
 	if(!$result['found'])
 		$result = read_midiport($dir_midi_resources.$filename."_midiport");
 	if(!$result['found']) {
+		$NumberMIDIinputs = 0;
 		$MIDIinput[0] = 1;
 		$MIDIoutput[0] = 0;
 		$MIDIinputname[0] = $MIDIoutputname[0] = $MIDIoutputcomment[0] = $MIDIinputcomment[0] = '';
