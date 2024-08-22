@@ -25,20 +25,60 @@ echo "</a>   <span id='message3' style=\"margin-bottom:1em;\"></span>";
 echo "</p>";
 echo link_to_help();
 
+$temp_folder = str_replace(' ','_',$filename)."_".my_session_id()."_temp";
+$dir_scales = $temp_dir.$temp_folder.SLASH."scales".SLASH;
+$need_to_save = FALSE;
+$scala_error = '';
+if($_SERVER['REQUEST_METHOD'] == 'POST' AND isset($_POST['import_files'])) {
+    // Check if files were uploaded
+	$error = $ok_kbm = FALSE;
+    if(isset($_FILES['file1'])) {
+        // Check for any upload errors
+        if($_FILES['file1']['error'] === UPLOAD_ERR_OK) {
+            // Read the SCALA file
+            $file1Content = file_get_contents($_FILES['file1']['tmp_name']);
+            $file1Name = $_FILES['file1']['name'];
+			$new_filename1 = str_replace(".scl",'',$file1Name);
+  			}
+		else {
+            $scala_error = "<p><font color=\"red\">➡ Please select a SCALA file!</font></p>";
+			$error = TRUE;
+			}
+		}
+	if(!$error AND isset($_FILES['file2']))
+        if($_FILES['file2']['error'] === UPLOAD_ERR_OK) {
+            // Read the second file
+            $file2Content = file_get_contents($_FILES['file2']['tmp_name']);
+            $file2Name = $_FILES['file2']['name'];
+			$new_filename2 = str_replace(".kbm",'',$file2Name);
+			$ok_kbm = TRUE;
+			}
+	if(!$error) {
+		// Display the contents of both files
+		echo "<h2>Contents of $file1Name:</h2>";
+		echo "<pre>" . htmlspecialchars($file1Content) . "</pre>";
+		$scala_error .= create_from_scl($new_filename1,$file1Content);
+		if($scala_error <> '') $scala_error = "<p><font color=\"red\">➡ Invalid SCALA file:</font> ".$scala_error."</p>";
+		if($ok_kbm AND $scala_error == '') {
+	/*		echo "<h2>Contents of $file2Name:</h2>";
+			echo "<pre>" . htmlspecialchars($file2Content) . "</pre>"; */
+			$scala_error = update_from_kbm($new_filename1,$file2Content);
+			if($scala_error <> '') $scala_error = "<p><font color=\"red\">➡ Invalid KBM file:</font> ".$scala_error."</p>";
+			}
+        }
+    }
+
 echo "<h3>Tonality resource file “".$filename."”</h3>";
 save_settings("last_name",$filename);
 
 if($test) echo "dir = ".$dir."<br />";
 
-$temp_folder = str_replace(' ','_',$filename)."_".my_session_id()."_temp";
 if(!file_exists($temp_dir.$temp_folder)) {
 	mkdir($temp_dir.$temp_folder);
 	}
 if(!file_exists($temp_dir.$temp_folder.SLASH."scales")) {
 	mkdir($temp_dir.$temp_folder.SLASH."scales");
 	}
-$dir_scales = $temp_dir.$temp_folder.SLASH."scales".SLASH;
-$need_to_save = FALSE;
 
 if(isset($_POST['max_scales'])) $max_scales = $_POST['max_scales'];
 else $max_scales = 0;
@@ -61,7 +101,7 @@ if(isset($_POST['create_scale'])) {
 			$source_image = $dir_scale_images.$clean_name_of_file."-source.txt";
 			if(file_exists($source_image)) {
 				$content_source = trim(@file_get_contents($source_image,TRUE));
-				$error_create .= "in </font><font color=\"blue\">‘<a target=\"_blank\" href=\"tonality.php?file=".urlencode($tonality_resources.SLASH.$content_source)."\">".$content_source."</a>’";
+				$error_create .= "in <font color=\"blue\">‘<a target=\"_blank\" href=\"tonality.php?file=".urlencode($tonality_resources.SLASH.$content_source)."\">".$content_source."</a>’/font> ";
 				}
 			echo "</font></p>";
 			}
@@ -363,10 +403,16 @@ if($deleted_scales > 0) {
 	echo "</b></font>&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"undelete_scales\" onclick=\"this.form.target='_self';return true;\" value=\"UNDELETE all scales\">&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"empty_trash\" onclick=\"this.form.target='_self';return true;\" value=\"TRASH deleted scales\">";
 	echo "</p>";
 	}
-echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"create_scale\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#topscales\" value=\"CREATE A NEW TONAL SCALE\">&nbsp;with name <input type=\"text\" name=\"scale_name\" size=\"30\" value=\"\"></p>";
+echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"create_scale\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."\" value=\"CREATE A NEW TONAL SCALE\">&nbsp;with name <input type=\"text\" name=\"scale_name\" size=\"30\" value=\"\"></p>";
+echo $scala_error;
+echo "<p><label for=\"file1\">SCALA file:</label>&nbsp;";
+echo "<input type=\"file\" name=\"file1\" id=\"file1\" accept=\".scl\">&nbsp;";
+echo "➡&nbsp;<input style=\"background-color:azure;\" type=\"submit\" formaction=\"".$url_this_page."\" name=\"import_files\" onclick=\"this.form.target='_self';return true;\" value=\"CREATE A TONAL SCALE using SCALA and KBM files\"><br />";
+echo "<label for=\"file2\">KBM file (optional):</label>&nbsp;";
+echo "<input type=\"file\" name=\"file2\" id=\"file2\" accept=\".kbm\">&nbsp;";
+
+echo "</p>";
 if($error_create <> '') echo $error_create;
-
-
 
 // echo "<textarea name=\"cstables\" rows=\"5\" style=\"width:400px;\">";
 $cstables = '';
@@ -840,16 +886,18 @@ if($max_scales > 0) {
 		echo "&nbsp;<input type=\"submit\" style=\"background-color:yellow;\" name=\"delete_scale_".$i_scale."\" formaction=\"".$url_this_page."&scalefilename=".urlencode($scale_name[$i_scale])."\" onclick=\"this.form.target='_self';return true;\" value=\"DELETE scale (can be reversed)\">";
 		echo "&nbsp;<input type=\"submit\" style=\"background-color:yellow;\" name=\"copy_scale_".$i_scale."\" formaction=\"".$url_this_page."&scalefilename=".urlencode($scale_name[$i_scale])."\" onclick=\"this.form.target='_self';return true;\" value=\"COPY/DUPLICATE scale\">";
 		$scala_file = $dir_scales.$scale_name[$i_scale].".scl";
-		echo "&nbsp;<input type=\"submit\" style=\"background-color:azure;\" name=\"export_scale_".$i_scale."\" formaction=\"".$url_this_page."&scalefilename=".urlencode($scale_name[$i_scale])."#".$i_scale."\" onclick=\"this.form.target='_self';return true;\" value=\"Export to SCALA\">";
-		if(file_exists($scala_file) OR isset($_POST['export_scale_'.$i_scale])) echo "<span style=\"background-color:azure; padding-right:1em;\">—> <a href=\"".$scala_file."\" download=\"".$scale_name[$i_scale].".scl\">Download</a></span>";
+
 		$clean_name_of_file = str_replace("#","_",$scale_name[$i_scale]);
 		$clean_name_of_file = str_replace("/","_",$clean_name_of_file);
 		$dir_image = $dir_scale_images.$clean_name_of_file.".png";
 		if(file_exists($dir_image)) {
 			$k_image++; if($k_image > 10) $k_image = 0;
-			echo " ➡&nbsp;".popup_link($clean_name_of_file,"image",500,410,(100 * $k_image),$dir_image);
+			echo "➡&nbsp;".popup_link($clean_name_of_file,"image",500,410,(100 * $k_image),$dir_image);
 			}
-		echo "<br /><small><font color=\"blue\">".$scale_table[$i_scale]."</font></small>";
+		echo "&nbsp;<input type=\"submit\" style=\"background-color:azure;\" name=\"export_scale_".$i_scale."\" formaction=\"".$url_this_page."&scalefilename=".urlencode($scale_name[$i_scale])."#".$i_scale."\" onclick=\"this.form.target='_self';return true;\" value=\"Export to SCALA\">";
+		if(file_exists($scala_file) OR isset($_POST['export_scale_'.$i_scale])) echo "<span style=\"background-color:azure; padding-right:1em;\">➡&nbsp;<a href=\"".$scala_file."\" download=\"".$scale_name[$i_scale].".scl\">Download</a></span>";
+		if(isset($scale_table[$i_scale])) echo "<br /><small><font color=\"blue\">".$scale_table[$i_scale]."</font></small>";
+		else echo "<br />???";
 		if(isset($scale_fraction[$i_scale])) {
 			$fraction_string = str_replace('[','',str_replace(']','',$scale_fraction[$i_scale]));
 			$fraction_string = preg_replace("/\s+/u",' ',$fraction_string);
@@ -1118,7 +1166,6 @@ echo "</td>";
 
 echo "</tr></table>";
 
-// $$$$
 for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
 	if(isset($scale_fraction[$i_scale]) AND isset($table_names[$i_scale])) {
 		if(isset($_POST['export_scale_'.$i_scale])) {
@@ -1168,4 +1215,242 @@ if($verbose) {
 	echo "</form>";
 	}
 echo "</body></html>";
+
+// ============ FUNCTIONS ============
+
+function create_from_scl($scale_name,$content) {
+	global $dir_scales, $dir_scale_images,$tonality_resources,$need_to_save;
+	$scala_error = '';
+	$new_scale_name = preg_replace("/\s+/u",' ',$scale_name);
+	$clean_name_of_file = str_replace("#","_",$new_scale_name);
+	$clean_name_of_file = str_replace("/","_",$clean_name_of_file);
+	$new_scale_file = $clean_name_of_file.".txt";
+	$old_scale_file = $clean_name_of_file.".old";
+	$result1 = check_duplicate_name($dir_scale_images,$clean_name_of_file.".png");
+	$result2 = check_duplicate_name($dir_scale_images,$clean_name_of_file."-source.txt");
+	$result3 = check_duplicate_name($dir_scales,$new_scale_file);
+	$result4 = check_duplicate_name($dir_scales,$old_scale_file);
+//	if($result1 OR $result2 OR $result3 OR $result4) {
+	if($result3 OR $result4) {
+		$scala_error = "This name <font color=\"blue\">‘".$new_scale_name."’</font> already exists";
+		$source_image = $dir_scale_images.$clean_name_of_file."-source.txt";
+	//	$scala_error .= "@ source_image = ".$source_image."<br />";
+		if(file_exists($source_image)) {
+			$content_source = trim(@file_get_contents($source_image,TRUE));
+			$scala_error .= " in </font><font color=\"blue\">‘<a target=\"_blank\" href=\"tonality.php?file=".urlencode($tonality_resources.SLASH.$content_source)."\">".$content_source."</a>’";
+			}
+		return $scala_error;
+		}
+	else {
+		$need_to_save = TRUE;
+	//	echo "<p>§§§ ".$dir_scales.$new_scale_file."</p>";
+		$handle = fopen($dir_scales.$new_scale_file,"w");
+		fwrite($handle,"\"".$new_scale_name."\"\n");
+		$comment = ''; $comment_done = $numgrades_ok = FALSE;
+		$basefreq = 261.63; // This will be modified by the KBM file
+		$basekey = 60; // This will be modified by the KBM file
+		$table = explode(chr(10),$content);
+		$imax = count($table);
+		$frac = $note = array();
+		$jfrac = 0; $jratio = 0;
+		$frac[$jfrac++] = 1;
+		$frac[$jfrac++] = 1;
+		$ratio[$jratio++] = 1;
+		$note[0] = '';
+		for($i = 0; $i < $imax; $i++) {
+			$line = trim($table[$i]);
+			if($comment_done AND $line == '') continue;
+			if(is_integer($pos=strpos($line,"!")) AND $pos == 0) continue;
+			if(!$comment_done) {
+				$comment = $line;
+				$comment_done = TRUE;
+				continue;
+				}
+			// echo "<p>@".$line."@</p>";
+			if(!$numgrades_ok) {
+				if(!ctype_digit($line) OR intval($line) < 2) {
+					return "Number of grades (".$line.") is not a valid integer<br />";
+					}
+				else {
+					$numgrades_fullscale = intval($line);
+					$numgrades_ok = TRUE;
+					}
+				}
+			$j = 1; $jj = 0;
+			while(TRUE) {
+				if(!isset($table[$i + $j])) break;
+				$line = trim($table[$i + $j]);
+				// echo "<p>@@".$line."@@</p>";
+				if($line == '') break;
+				$j++;
+				if(is_integer($pos=strpos($line,"!")) AND $pos == 0) continue;
+				$jj++;
+				$line = str_replace('\t',' ',$line);
+				$line = preg_replace("/\s+/u",' ',$line);
+				$table2 = explode(' ',$line);
+				$pattern = '/^([1-9][0-9]*)\/([1-9][0-9]*)$/';
+				if(preg_match($pattern,$table2[0],$matches) AND $matches[1] >  0 AND $matches[2] > 0) {
+					$frac[$jfrac++] = $matches[1];
+					$frac[$jfrac++] = $matches[2];
+					$value = number_format($matches[1] / $matches[2],3,'.','');
+					}
+				else {
+					$frac[$jfrac++] = 0;
+					$frac[$jfrac++] = 0;
+					if(!is_numeric($table2[0]) OR $table2[0] < 0) {
+						return "Value ‘".$table2[0]."’ is neither a positive number nor a fraction<br />";
+						}
+					$value = number_format(pow(2,$table2[0] / 1200),3,'.','');
+					}
+				$ratio[$jratio++] = $value;
+				if(count($table2) > 1) {
+					if(is_integer($pos=strpos($table2[1],"c")) AND $pos == 0) {
+					// Found "cents" or at least 'c'
+						if(count($table2) > 2) $note[$jj] = $table2[2];
+						else $note[$jj] = '';
+						}
+					else {
+						if(count($table2) > 1) $note[$jj] = $table2[1];
+						else $note[$jj] = '';
+						}
+					}
+				else $note[$jj] = '';
+				}
+			if($numgrades_fullscale <> ($jj)) {
+				return "Number of grades (".$numgrades_fullscale.") does not match number of lines (".($jj).")<br />";
+				}
+			else {
+				if(isset($table[$i + $j]) AND trim($table[$i + $j]) <> '') {
+					return "An extra non-empty line was found: <b>".$table[$i + $j]."</b><br />";
+					}
+				}
+			break;
+			}
+		$names = "/";
+		$note[0] = $note[$numgrades_fullscale];
+		$convention = '';
+		if(is_integer($pos=strpos($note[0],"do"))) $convention = "fr"; 
+		for($j = 0; $j <= $numgrades_fullscale; $j++) {
+			if($note[$j] <> '') $names .= $note[$j]." ";
+			else $names .= "• ";
+			}
+		$names = trim($names)."/";
+		fwrite($handle,$names."\n");
+		$fractions = "[";
+		for($j = 0; $j <= $numgrades_fullscale; $j++) {
+			$fractions .= $frac[2 * $j]." ";
+			$fractions .= $frac[(2 * $j) + 1]." ";
+			}
+		$fractions = trim($fractions)."]";
+		fwrite($handle,$fractions."\n");
+		if($convention == "fr") $baseoctave = 3;
+		else $baseoctave = 4; // OK for English and Indian conventions
+		fwrite($handle,"|".$baseoctave."|\n");
+		$interval = $ratio[$numgrades_fullscale];
+		$line_table = "f2 0 128 -51 ".$numgrades_fullscale." ".$interval." ".$basefreq." ".$basekey;
+		for($j = 0; $j <= $numgrades_fullscale; $j++) $line_table .= " ".$ratio[$j];
+		fwrite($handle,$line_table."\n");
+		$full_comment = "<html>".$comment."<br />This scale has been imported from a SCALA file ‘".$scale_name.".scl’<br />Created ".date('Y-m-d H:i:s')."<br /></html>";
+		fwrite($handle,$full_comment."\n");
+		fclose($handle);
+		}
+	return $scala_error;
+	}
+
+function update_from_kbm($scl_name,$kbm_content) {
+	global $dir_scales,$need_to_save;
+	$need_to_save = TRUE;
+	$scl_name = preg_replace("/\s+/u",' ',$scl_name);
+	$scl_name = str_replace("#","_",$scl_name);
+	$scl_name = str_replace("/","_",$scl_name);
+	$scl_scale_file = $scl_name.".txt";
+	$scl_content = file_get_contents($dir_scales.$scl_scale_file,TRUE);
+	$table_scl = explode(chr(10),$scl_content);
+	$imax = count($table_scl);
+	$handle = fopen($dir_scales.$scl_scale_file,"w");
+	for($i = 0; $i < $imax; $i++) {
+		$line = trim($table_scl[$i]);
+	//	echo "<p>@".$line ."@</p>";
+		if(is_integer($pos=strpos($line,"f")) AND $pos == 0) {
+			// The Csound line
+			$line = preg_replace("/\s+/u",' ',$line);
+			$table_line = explode(' ',$line);
+			$numgrades_fullscale = $table_line[4];
+			$basefreq = $table_line[6];
+			$basenote = $table_line[7];
+	//		echo "<p>".$numgrades_fullscale."  ".$basefreq."   ".$basenote."</p>";
+			// Let's find these parameters in the KBM file
+			$table_kbm = explode(chr(10),$kbm_content);
+			$jmax = count($table_kbm);
+			for($j = 0; $j < $jmax; $j++) {
+				$line_kbm = trim($table_kbm[$j]);
+				if(is_integer($pos=strpos($line_kbm,"!")) AND $pos == 0) {
+					if(is_integer($pos=stripos($line_kbm,"Size"))) {
+						$j++;
+						$line_kbm = trim($table_kbm[$j]);
+						if(!ctype_digit($line_kbm) OR intval($line_kbm) < 2) {
+							return "Size of map (".$line_kbm.") is not a valid integer<br />";
+							}
+						if(intval($line_kbm) <> $numgrades_fullscale) {
+							return "Size of map (".$line_kbm.") does not match the number of grades in the SCL file (".$numgrades_fullscale.")<br />";
+							}
+						continue;
+						}
+					if(is_integer($pos=stripos($line_kbm,"formal octave"))) {
+						$j++;
+						$line_kbm = trim($table_kbm[$j]);
+						if(!ctype_digit($line_kbm) OR intval($line_kbm) < 2) {
+							return "Scale degree to consider as formal octave (".$line_kbm.") is not a valid integer<br />";
+							}
+						if(intval($line_kbm) <> $numgrades_fullscale) {
+							return "Scale degree to consider as formal octave (".$line_kbm.") does not match the number of grades in the SCL file (".$numgrades_fullscale.")<br />";
+							}
+						continue;
+						}
+					if(is_integer($pos=stripos($line_kbm,"Middle note"))) {
+						$j++;
+						$line_kbm = trim($table_kbm[$j]);
+						if(!ctype_digit($line_kbm) OR intval($line_kbm) < 2) {
+							return "Middle note (".$line_kbm.") is not a valid integer<br />";
+							}
+						$basenote = intval($line_kbm);
+						continue;
+						}
+					if(is_integer($pos=stripos($line_kbm,"Frequency to"))) {
+						$j++;
+						$line_kbm = trim($table_kbm[$j]);
+						if(!is_numeric($line_kbm) OR $line_kbm < 2) {
+							return "Frequency (".$line_kbm.") is not a valid number<br />";
+							}
+						$frequency_kbm = number_format($line_kbm,2);
+						continue;
+						}
+					if(is_integer($pos=stripos($line_kbm,"Reference note"))) {
+						$j++;
+						$line_kbm = trim($table_kbm[$j]);
+						if(!ctype_digit($line_kbm) OR intval($line_kbm) < 2) {
+							return "Reference note (".$line_kbm.") is not a valid integer<br />";
+							}
+						$reference_note_kbm = intval($line_kbm);
+						continue;
+						}
+					}
+				}
+			// We need to interpret the frequency from the reference note in KBM for the base note in BP3
+			if(isset($frequency_kbm) AND isset($reference_note_kbm)) {
+				$basefreq = number_format($frequency_kbm * pow(2,($basenote - $reference_note_kbm) / 12),2);
+			//	echo "<p>basefreq =  ".$basefreq."</p>";
+				$table_line[6] = $basefreq;
+				}
+			$table_line[7] = $basenote;
+			$line = implode(' ',$table_line);
+			}
+		fwrite($handle,$line."\n");
+		}
+
+	fclose($handle);
+	$kbm_error = "<p><font color=\"red\">➡ Invalid KBM format</font></p>";
+	$kbm_error = '';
+	return $kbm_error;
+	}
 ?>

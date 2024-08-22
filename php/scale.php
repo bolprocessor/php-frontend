@@ -23,11 +23,25 @@ if(isset($_POST['download_scala'])) {
 	$content = @file_get_contents($file,TRUE);
     header('Content-Description: File Transfer');
     header('Content-Type: text/plain');
-    header('Content-Disposition: attachment; filename="' . basename($file) . '"');
+    header('Content-Disposition: attachment; filename="'.basename($file).'"');
     header('Expires: 0');
     header('Cache-Control: must-revalidate');
     header('Pragma: public');
-    header('Content-Length: ' . strlen($content));
+    header('Content-Length: '.strlen($content));
+    echo $content;
+    return;
+	}
+
+if(isset($_POST['download_kbm'])) {
+	$file = $dir_scales.$filename.".kbm";
+	$content = @file_get_contents($file,TRUE);
+    header('Content-Description: File Transfer');
+    header('Content-Type: text/plain');
+    header('Content-Disposition: attachment; filename="'.basename($file).'"');
+    header('Expires: 0');
+    header('Cache-Control: must-revalidate');
+    header('Pragma: public');
+    header('Content-Length: '.strlen($content));
     echo $content;
     return;
 	}
@@ -58,7 +72,8 @@ fwrite($h_image,"<?php\n");
 store($h_image,"filename",$filename);
 
 $basekey = 60;
-$baseoctave = 4;
+$convention = 3; // key numbers
+$baseoctave = 4; // Default for Eenglish/Indian conventions
 $transposition_mode = '';
 $p_raise = $q_raise = $p_raised_note = $q_raised_note = $cents_raised_note = $raised_note = $resetbase_note = $name_sensitive_note = '';
 $scale_choice = $selected_grades = $names_notes_fifths = $names_notes_meantone = '';
@@ -94,6 +109,7 @@ if(isset($_POST['scroll'])) {
 $error_raise_note ='';
 if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST['fixkeynumbers']) OR isset($_POST['modifynote']) OR isset($_POST['alignscale']) OR isset($_POST['adjustscale']) OR isset($_POST['create_meantone']) OR isset($_POST['equalize']) OR isset($_POST['add_fifths_up']) OR isset($_POST['add_fifths_down']) OR isset($_POST['modifynames']) OR isset($_POST['use_convention']) OR isset($_POST['resetbase'])) {
 	if(isset($_POST['scale_name'])) $new_scale_name = trim($_POST['scale_name']);
+	if(isset($_POST['convention'])) $convention = $_POST['convention'];
 	else $new_scale_name = '';
 	if($new_scale_name == '') $new_scale_name = $filename;
 	$clean_scale_name = str_replace("#","_",$new_scale_name);
@@ -122,6 +138,8 @@ if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST
 		if($new_cents > 1 AND $new_cents <> $cents)
 			$interval = exp($new_cents / 1200 * log(2));
 		}
+	$new_basekey = abs(intval($_POST['basekey']));
+	if($new_basekey > 0) $basekey = $new_basekey; // 2024-08-22
 	$basefreq = $_POST['basefreq'];
 	$baseoctave = intval($_POST['baseoctave']);
 	if($baseoctave <= 0 OR $baseoctave > 14) $baseoctave = 4;
@@ -143,7 +161,8 @@ if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST
 		else $key[$i] = trim($_POST['key_'.$i]);
 		if($key[$i] == '') $key[$i] = 0;
 		
-		if(isset($_POST['modifynames']) AND isset($_POST['new_name_'.$i]) AND $_POST['new_name_'.$i] <> '')
+	//	if(isset($_POST['modifynames']) AND isset($_POST['new_name_'.$i]) AND $_POST['new_name_'.$i] <> '')
+		if(isset($_POST['modifynames']) AND isset($_POST['new_name_'.$i]))
 			$_POST['name_'.$i] = $_POST['new_name_'.$i];
 		if(!isset($_POST['name_'.$i])) $name[$i] = "•";
 		else $name[$i] = trim($_POST['name_'.$i]);
@@ -151,8 +170,6 @@ if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST
 		$name[$i] = str_replace("/","|",$name[$i]);
 		if($name[$i] == '') $name[$i] = "•";
 		}
-	$new_basekey = abs(intval($_POST['basekey']));
-	if($new_basekey > 0) $basekey = $new_basekey;
 	if($key[0] <> $basekey OR $key[0] == 0 OR $key[$numgrades_fullscale] == 0 OR isset($_POST['fixkeynumbers'])) {
 		$this_key = $basekey;
 		echo "<p><font color=\"red\">➡</font> Keys have been renumbered following ‘basekey’</p>";
@@ -166,7 +183,6 @@ if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST
 		echo "<p><font color=\"red\">WARNING</font>: the first key has been set to <font color=\"blue\">‘".$basekey."’</font> which is the value of <b>basekey</b></p>";
 		$key[0] = $basekey;
 		} */
-	$name[$numgrades_fullscale] = $name[0];
 	if(isset($_POST['modifynote'])) {
 		$p_raised_note = abs(intval($_POST['p_raised_note']));
 		$q_raised_note = abs(intval($_POST['q_raised_note']));
@@ -383,7 +399,7 @@ if(isset($_POST['add_fifths_up']) OR isset($_POST['add_fifths_down'])) {
 	/*	if($name[0] <> '•') $name[$numgrades_fullscale] = merge_names($name[0],$name[$numgrades_fullscale]);
 		else $name[0] = $name[$numgrades_fullscale]; */
 		$name[$numgrades_fullscale] = merge_names($name[0],$name[$numgrades_fullscale]);
-		$name[0] = $name[$numgrades_fullscale];
+		if($convention <> 3) $name[0] = $name[$numgrades_fullscale];
 		}
 	}
 
@@ -439,7 +455,7 @@ if(isset($_POST['resetbase'])) {
 				$q[$j] = $new_q[$j];
 				$ratio[$j] = $new_ratio[$j];
 				}
-			$name[$numgrades_fullscale] = $name[0];
+			if($convention <> 3) $name[$numgrades_fullscale] = $name[0];
 			$p[$numgrades_fullscale] = $p[0] * $interval;
 			$q[$numgrades_fullscale] = $q[0];
 			$ratio[$numgrades_fullscale] = $ratio[0] * $interval;
@@ -449,28 +465,32 @@ if(isset($_POST['resetbase'])) {
 	}
 	
 if(isset($_POST['use_convention'])) {
-	$found = FALSE;
-	for($i = $j = 0; $i <= $numgrades_fullscale; $i++) {
-		if($name[$i] == '') continue;
-		$found = TRUE;
-		$this_note = $name[$i];
-		if(($kfound = array_search($this_note,$Indiannote)) !== FALSE) $k = $kfound;
-		else if(($kfound = array_search($this_note,$AltIndiannote)) !== FALSE) $k = $kfound;
-		else if(($kfound = array_search($this_note,$Englishnote)) !== FALSE) $k = $kfound;
-		else if(($kfound = array_search($this_note,$AltEnglishnote)) !== FALSE) $k = $kfound;
-		else if(($kfound = array_search($this_note,$Frenchnote)) !== FALSE) $k = $kfound;
-		else if(($kfound = array_search($this_note,$AltFrenchnote)) !== FALSE) $k = $kfound;
-		else $k = $j;
-		if(!isset($_POST['new_note_'.$k]))
-			$name[$i] = $_POST['new_note_0'];
-		else $name[$i] = $_POST['new_note_'.$k];
-		$j++;
+	if(isset($_POST['new_convention'])) $convention = $new_convention = $_POST['new_convention'];
+	/* $found = FALSE;
+	 if(FALSE AND $convention <> 3) {
+		for($i = $j = 0; $i <= $numgrades_fullscale; $i++) {
+			if($name[$i] == '') continue;
+			$found = TRUE;
+			$this_note = $name[$i];
+			if(($kfound = array_search($this_note,$Indiannote)) !== FALSE) $k = $kfound;
+			else if(($kfound = array_search($this_note,$AltIndiannote)) !== FALSE) $k = $kfound;
+			else if(($kfound = array_search($this_note,$Englishnote)) !== FALSE) $k = $kfound;
+			else if(($kfound = array_search($this_note,$AltEnglishnote)) !== FALSE) $k = $kfound;
+			else if(($kfound = array_search($this_note,$Frenchnote)) !== FALSE) $k = $kfound;
+			else if(($kfound = array_search($this_note,$AltFrenchnote)) !== FALSE) $k = $kfound;
+			else $k = $j;
+			if(isset($_POST['new_note_'.$k])) $name[$i] = $_POST['new_note_'.$k];
+			$j++;
+			}
+		if(!$found) {
+			for($i = 0; $i < $numgrades_fullscale; $i++) $name[$i] = $_POST['new_note_'.$i];
+			}
 		}
-	if(!$found) {
-		for($i = 0; $i < $numgrades_fullscale; $i++) $name[$i] = $_POST['new_note_'.$i];
-	//	$name[$numgrades_fullscale] = $_POST['new_note_0'];
+	else */ for($i = 0; $i <= $numgrades_fullscale; $i++) {
+		if(isset($_POST['new_note_'.$i])) $name[$i] = $_POST['new_note_'.$i];
+		else $name[$i] = '';
 		}
-	$name[$numgrades_fullscale] = $name[0];
+	if($convention <> 3) $name[$numgrades_fullscale] = $name[0];
 	}
 
 
@@ -582,7 +602,8 @@ if(isset($_POST['create_meantone'])) {
 	/*	if($name[0] <> '•') $name[$numgrades_fullscale] = $name[0];
 		else $name[0] = $name[$numgrades_fullscale]; */
 		$name[$numgrades_fullscale] = merge_names($name[0],$name[$numgrades_fullscale]);
-		$name[0] = $name[$numgrades_fullscale];
+		if($convention <> 3) $name[0] = $name[$numgrades_fullscale];
+	//	else $name[$numgrades_fullscale] = $KeyString.($basekey + $numgrades_fullscale);
 		}
 	}
 
@@ -700,7 +721,8 @@ if(isset($_POST['equalize'])) {
 		/*	if($name[0] <> '•') $name[$numgrades_fullscale] = $name[0];
 			else $name[0] = $name[$numgrades_fullscale]; */
 			$name[$numgrades_fullscale] = merge_names($name[0],$name[$numgrades_fullscale]);
-			$name[0] = $name[$numgrades_fullscale];
+			if($convention <> 3) $name[0] = $name[$numgrades_fullscale];
+		//	else $name[$numgrades_fullscale] = "key#".($basekey + $numgrades_fullscale);
 			}
 		}
 	}
@@ -736,6 +758,9 @@ $message = '';
 if(isset($_POST['savethisfile']) OR isset($_POST['fixkeynumbers']) OR isset($_POST['interpolate']) OR isset($_POST['modifynote']) OR isset($_POST['alignscale'])  OR isset($_POST['adjustscale']) OR isset($_POST['create_meantone']) OR isset($_POST['equalize']) OR isset($_POST['add_fifths_up']) OR isset($_POST['add_fifths_down']) OR isset($_POST['modifynames']) OR isset($_POST['use_convention']) OR isset($_POST['resetbase'])) {
 	$message = "<br /><span id=\"timespan\"><font color=\"red\">... Saving this scale ...</font></span>";
 	if(isset($_POST['syntonic_comma'])) $syntonic_comma = $_POST['syntonic_comma'];
+	if(isset($_POST['convention'])) $convention = $_POST['convention'];
+	if(isset($_POST['new_convention'])) $new_convention = $_POST['new_convention'];
+	else $new_convention = $convention;
 	if(isset($_POST['p_comma']) AND isset($_POST['q_comma'])) {
 		$p_comma = $_POST['p_comma'];
 		$q_comma = $_POST['q_comma'];
@@ -745,6 +770,7 @@ if(isset($_POST['savethisfile']) OR isset($_POST['fixkeynumbers']) OR isset($_PO
 	if(round($syntonic_comma,3) == 21.506 AND ($p_comma * $q_comma) == 0) {
 		$p_comma = 81; $q_comma = 80;
 		}
+	if(isset($_POST['baseoctave'])) $baseoctave = $_POST['baseoctave'];
 	$table = explode(chr(10),$scale_comment);
 	$imax = count($table); $empty = TRUE;
 	$scale_comment = "<html>";
@@ -758,6 +784,10 @@ if(isset($_POST['savethisfile']) OR isset($_POST['fixkeynumbers']) OR isset($_PO
 	if($empty) $scale_comment = '';
 	$handle = fopen($file_link,"w");
 	fwrite($handle,"\"".$scale_name."\"\n");
+
+	// echo "<p>numgrades_fullscale = ".$numgrades_fullscale." </p>";
+//	if($new_convention == 3) $name[$numgrades_fullscale] = $KeyString.($basekey + $numgrades_fullscale);
+
 	$line_table = "f2 0 128 -51 ".$numgrades_fullscale." ".$interval." ".$basefreq." ".$basekey;
 	$scale_note_names = $scale_fractions = $scale_keys = $scale_series = '';
 	for($i = 0; $i <= $numgrades_fullscale; $i++) {
@@ -849,7 +879,7 @@ for($i = 0; $i < $imax; $i++) {
 		die();
 		}
 	}
-echo "Csound function table: <font color=\"blue\">".$scale_table."</font>";
+echo "<a target=\"_blank\" href=\"https://www.csounds.com/manualOLPC/GEN51.html\">Csound GEN51</a> table: <font color=\"blue\">".$scale_table."</font>";
 if($message <> '') echo $message;
 echo "<div style=\"float:right; margin-top:1em; background-color:white; padding:1em; border-radius:5%;\"><h1>Scale “".$filename."”</h1><h3>This version is stored in <font color=\"blue\">‘".$tonality_source."’</font></h3>";
 
@@ -893,7 +923,10 @@ if(isset($_POST['csound_source'])) {
 	$csound_source = $_POST['csound_source'];
 	echo "<input type=\"hidden\" name=\"csound_source\" value=\"".$csound_source."\">";
 	}
-$numgrades_fullscale = $table2[4];
+if(isset($table2[4])) $numgrades_fullscale = $table2[4];
+else {
+	echo "<big><font color=\"red\">This data is invalid</font></big>"; die();
+	}
 $interval = $table2[5];
 $basefreq = $table2[6];
 $basekey = $table2[7];
@@ -1005,9 +1038,9 @@ echo "<input type=\"text\" style=\"font-size:large;\" name=\"scale_name\" size=\
 if(is_integer(strpos($scale_name,' '))) echo " <font color=\"red\">➡</font> avoiding spaces is prefered";
 echo "</h3>";
 
-echo "<p>👉 <a target=\"_blank\" href=\"https://bolprocessor.org/microtonality/\">Read the documentation on microtonality</a></p>";
+echo "<p>👉 Read page ‘<a target=\"_blank\" href=\"https://bolprocessor.org/microtonality/\">Microtonality</a>’</p>";
 
-echo "<input style=\"background-color:azure; font-size:large;\" type=\"submit\" formaction=\"".$url_this_page."\" title=\"Export this tuning in the SCALA format\" name=\"download_scala\" value=\"Download SCALA file\"> (<a target=\"_blank\" href=\"https://www.huygens-fokker.org/scala/scl_format.html\">read documentation</a>)";
+echo "<input style=\"background-color:azure; font-size:large;\" type=\"submit\" formaction=\"".$url_this_page."\" title=\"Export this tuning in the SCALA format\" name=\"download_scala\" value=\"Download SCALA file\"> <input style=\"background-color:azure; font-size:large;\" type=\"submit\" formaction=\"".$url_this_page."\" title=\"Export this tuning in the SCALA format\" name=\"download_kbm\" value=\"Download KBM\"><br />👉 Read documentation <a target=\"_blank\" href=\"https://www.huygens-fokker.org/scala/scl_format.html\">SCALA</a> / <a target=\"_blank\" href=\"https://www.huygens-fokker.org/scala/help.htm#mappings\">KBM</a>";
 
 if(isset($_POST['p_comma']) AND isset($_POST['q_comma'])) {
 	$p_comma = $_POST['p_comma'];
@@ -1111,6 +1144,8 @@ echo "<tr>";
 echo "<td colspan=\"".$numgrades_fullscale."\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"modifynames\" onclick=\"this.form.target='_self';return true;\" formaction=\"scale.php?scalefilename=".urlencode($filename)."\" value=\"SAVE NEW NAMES\">&nbsp;Modify the names of these notes:</td>";
 echo "</tr>";
 echo "<tr>";
+if(isset($_POST['new_convention'])) $convention = $new_convention = $_POST['new_convention'];
+else if(isset($_POST['convention'])) $convention = $_POST['convention'];
 for($j = $j_col = 0; $j < $numgrades_fullscale; $j++) {
 //	if($name[$j] == '') continue;
 	if($j_col >= 12) {
@@ -1125,7 +1160,12 @@ for($j = $j_col = 0; $j < $numgrades_fullscale; $j++) {
 	echo "<input style=\"text-align:center;\" type=\"text\" name=\"new_name_".$j."\" size=\"".$the_width."\" value=\"".$name[$j]."\">";
 	echo "</td>";
 	}
-echo "</tr>"; 
+echo "</tr>";
+if($convention <> 3) {
+	echo "<tr>";
+	echo "<td colspan=\"".$numgrades_fullscale."\" style=\"text-align:center;\">👉 Octave numbers follow these note names</td>";
+	echo "</tr>";
+	}
 echo "</table>";
 echo "</td>";
 echo "</tr><tr>";
@@ -1465,8 +1505,16 @@ if(!$warned_ratios) {
 		}
 	}
 
+if(is_integer($pos=strpos($name[0],"do"))) $convention = 1; 
+if(is_integer($pos=strpos($name[0],"sa"))) $convention = 2; 
+if(is_integer($pos=strpos($name[0],"C"))) $convention = 0;
+if(is_integer($pos=strpos($name[0],$KeyString))) $convention = 3; 
+echo "<input type=\"hidden\" name=\"convention\" value=\"".$convention."\">";
+
 if(isset($_POST['change_convention']) AND isset($_POST['new_convention'])) {
 	$new_convention = $_POST['new_convention'];
+	$old_convention = $convention;
+	if(isset($_POST['baseoctave'])) $baseoctave = $_POST['baseoctave'];
 	$done = FALSE;
 	echo "<hr>";
 	switch($new_convention) {
@@ -1484,14 +1532,21 @@ if(isset($_POST['change_convention']) AND isset($_POST['new_convention'])) {
 			break;
 		case '3':
 			$this_key = $basekey;
-			for($i = 0; $i <= 13; $i++) {
-				$standard_note[$i] = $KeyString.($this_key++);
+			for($i = 0; $i <= $numgrades_fullscale; $i++) {
+				if($numgrades_fullscale == 12) $standard_note[$i] = $KeyString.($this_key++);
+				else {
+					if($name[$i] == '•' OR $name[$i] == '') $standard_note[$i] = '';
+					else $standard_note[$i] = $KeyString.($this_key++);
+					}
 				}
 			break;
 		}
+	if(($old_convention == 0 OR $old_convention == 2 OR $old_convention == 3) AND $new_convention == 1) $baseoctave--;
+	if(($new_convention == 0 OR $new_convention == 2 OR $new_convention == 3) AND $old_convention == 1) $baseoctave++;
 	if($new_convention == 3) {
 		echo "<font color=\"red\">";
-		for($i = 0; $i <= 12; $i++) {
+		for($i = 0; $i <= $numgrades_fullscale; $i++) {
+			if($name[$i] == '•' OR $name[$i] == '') $standard_note[$i] = '';
 			echo "<input type=\"hidden\" name=\"new_note_".$i."\" value=\"".$standard_note[$i]."\">";
 			echo $standard_note[$i]." ";
 			}
@@ -1500,24 +1555,46 @@ if(isset($_POST['change_convention']) AND isset($_POST['new_convention'])) {
 	else {
 		echo "<table style=\"background-color:white;\">";
 		echo "<tr>";
-		for($i = 0; $i < 12; $i++) {
-			echo "<td>";
-			echo "<input type=\"radio\" name=\"new_note_".$i."\" value=\"".$standard_note[$i]."\" checked><br /><b><font color=\"red\">".$standard_note[$i];
-			echo "</font></b></td>";
+		$ii = 0;
+		for($i = 0; $i <= $numgrades_fullscale; $i++) {
+			if($name[$i] <> '•' AND $name[$i] <> '') {
+				echo "<td>";
+				if($numgrades_fullscale == 12) $string = $standard_note[$i];
+				else $string = $standard_note[$ii];
+				echo "<input type=\"radio\" name=\"new_note_".$i."\" value=\"".$string."\" checked><br /><b><font color=\"red\">".$string;
+				$ii++;
+				echo "</font></b>";
+				echo "</td>";
+				}
 			}
 		echo "</tr>";
 		echo "<tr>";
-		for($i = 0; $i < 12; $i++) {
-			echo "<td>";
-			if($alt_note[$i] <> $standard_note[$i]) {
-				echo "<input type=\"radio\" name=\"new_note_".$i."\" value=\"".$alt_note[$i]."\"><br /><b><font color=\"red\">".$alt_note[$i];
-				echo "</font></b>";
+		$ii = 0;
+		for($i = 0; $i <= $numgrades_fullscale; $i++) {
+			if($name[$i] <> '•' AND $name[$i] <> '') {
+				echo "<td>";
+				if($numgrades_fullscale == 12) {
+					$string1 = $standard_note[$i];
+					$string2 = $alt_note[$i];
+					}
+				else {
+					$string1 = $standard_note[$ii];
+					$string2 = $alt_note[$ii];
+					}
+				if($string1 <> $string2) {
+					echo "<input type=\"radio\" name=\"new_note_".$i."\" value=\"".$string2."\"><br /><b><font color=\"red\">".$string2;
+					$ii++;
+					echo "</font></b>";
+					}
+				echo "</td>";
 				}
-			echo "</td>";
 			}
 		echo "</tr>";
 		echo "</table>";
 		}
+	echo "<input type=\"hidden\" name=\"old_convention\" value=\"".$old_convention."\">";
+	echo "<input type=\"hidden\" name=\"new_convention\" value=\"".$new_convention."\">";
+	echo "<input type=\"hidden\" name=\"baseoctave\" value=\"".$baseoctave."\">";
 	echo "&nbsp;<input style=\"background-color:cornsilk;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\">";
 	echo "&nbsp;<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"use_convention\" value=\"USE THIS CONVENTION\">";
 	echo "<hr>";
@@ -1553,6 +1630,7 @@ if($done AND !$warned_ratios) {
 if($done AND $numgrades_with_labels > 2 AND !$warned_ratios) {
 	if(isset($_POST['reduce']) AND isset($_POST['scale_choice']) AND isset($_POST['reduce_scale_name']) AND trim($_POST['reduce_scale_name']) <> '') {
 		$scale_choice = $_POST['scale_choice'];
+		if(isset($_POST['convention'])) $convention = $_POST['convention'];
 		$name_sensitive_note = '';
 		if($scale_choice == "full_scale") $full_scale = TRUE;
 		else $full_scale =  FALSE;
@@ -1578,7 +1656,6 @@ if($done AND $numgrades_with_labels > 2 AND !$warned_ratios) {
 						}
 					if(!$found) $error_create .= "<br /><font color=\"red\"> ➡ ERROR: This note</font> <font color=\"blue\">‘".$some_name."’</font> <font color=\"red\">does not belong to the current scale</font>";
 					}
-			//	else $numgrades--;
 				}
 			$selected_grade_name = $new_selected_grade_name;
 			$numgrades = count($selected_grade_name) - 1;
@@ -2587,13 +2664,14 @@ $line = str_replace('§','?',$line);
 fwrite($h_image,$line);
 fclose($h_image);
 
-// Export SCALA
 $olddir = getcwd();
 chdir($dir_scales);
+
+// Export to SCALA
 $file = $scale_name.".scl";
 $text = "! ".$file."\n";
 $text .= "! Scala file, ref. https://www.huygens-fokker.org/scala/scl_format.html\n";
-if(isset($scale_comment)) {
+if(isset($scale_comment) AND strlen($scale_comment) > 5) {
 	$this_comment = html_to_text($scale_comment,'txt');
 	$this_comment = substr($this_comment, 0, strpos($this_comment, "<br />"));
 	$this_comment = str_replace("-cs.","-to.",$this_comment);
@@ -2618,6 +2696,37 @@ if($handle) {
 	fwrite($handle,$text);
 	fclose($handle);
 	}
+
+// Export to KBM
+$file = $scale_name.".kbm";
+$text = "! ".$file."\n";
+$text .= "! Keyboard mapping (KBM) file\n";
+$text .= "! Size of map. The pattern repeats every so many keys:\n";
+$text .= $numgrades_fullscale."\n";
+$text .= "! First MIDI note number to retune:\n";
+$text .= "0\n";
+$text .= "! Last MIDI note number to retune:\n";
+$text .= "127\n";
+$text .= "! Middle note where the first entry in the mapping is mapped to:\n";
+$text .= $basekey."\n";
+$text .= "! Reference note for which frequency is given:\n";
+$text .= $basekey."\n";
+$text .= "! Frequency to tune the above note to (floating point e.g. 440.0):\n";
+$text .= $basefreq."\n";
+$text .= "! Scale degree to consider as formal octave:\n";
+$text .= $numgrades_fullscale."\n";
+$text .= "! Mapping\n";
+$kk = 0;
+for($k = 0; $k < $numgrades_fullscale; $k++) {
+	if($name[$k] == '' OR $name[$k] == "•") $text .= "x\n";
+	else $text .= $kk++."\n";
+	}
+$handle = fopen($file,"w");
+if($handle) {
+	fwrite($handle,$text);
+	fclose($handle);
+	}
+
 chdir($olddir);
 
 echo "</body>";

@@ -1,8 +1,9 @@
 // Bol Processor BP3 compatible with version BP2.9.8
 // Grammar created from template
 -se.<settings file>
--ho.<alphabet file>
--mi.<sound-object prototypes file>
+-al.<alphabet file>
+-so.<sound-object prototypes file>
+-to.<Tonality resource file>
 -cs.<Csound resource file>
 
 RND
