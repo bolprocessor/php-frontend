@@ -1,5 +1,5 @@
 // Bol Processor BP3
-// Tonality resource file saved as "-to.tryTunings". Date: 2024-08-10 15:21:42
+// Tonality resource file saved as "-to.tryTunings". Date: 2024-08-19 19:15:13
 _begin tables
 "2_cycles_of_fifths"
 /DO REb-c REb=DO#-c DO# RE-c RE MIb-c MIb=RE#-c RE# MI-c MI FA-c FA SOLb-c SOLb=FA#-c FA# SOL-c SOL LAb-c LAb=SOL#-c SOL# LA-c LA SIb-c LA#-c=SIb LA# SI-c SI DO-c DO/
@@ -20,11 +20,11 @@ sp h h p h h h p h h p h h h p h h p h h h h h h p h h p h h h p h h p h h h p h
 f2 0 128 -51 41 2 261.63 60 1 1.013 1.042 1.053 1.067 1.08 1.111 1.125 1.138 1.172 1.185 1.2 1.215 1.25 1.266 1.28 1.317 1.333 1.35 1.389 1.406 1.422 1.44 1.481 1.5 1.519 1.563 1.58 1.6 1.62 1.667 1.688 1.707 1.758 1.778 1.8 1.823 1.875 1.898 1.92 1.975 2
 <html>Three series of perfect fifths including ascending and descending major thirds (Asselin 2000 p.62)<br />Created 2021-01-08 09:02:23<br /></html>
 "Abmaj"
-c21.506289596715 81 80c
 /C C# D D# E F F# G G# A A# B C/
+c21.506289596715 81 80c
 k0 1 2 3 4 5 6 7 8 9 10 11 12k
-sp h p h p p h p h p h p ps
 [1 1 16 15 9 8 6 5 81 64 4 3 64 45 3 2 8 5 27 16 9 5 243 128 2 1]
+sp h p h p p h p h p h p ps
 |4|
 f2 0 128 -51 12 2 261.63 60 1 1.067 1.125 1.2 1.266 1.333 1.422 1.5 1.6 1.688 1.8 1.898 2
 <html>This is a reduction to 12 grades of scale "Ma05" (23 grades) in ‘-cs.12_scales’ in major tonality.<br />Sensitive note = 'Bb'<br />Created on 2021-01-05 18:34:29<br />Scale aligned ratio 1.0125 (2022-03-11 07:57:41)<br /></html>
@@ -243,11 +243,6 @@ sp • • • • • • • • • • • ps
 |4|
 f2 0 128 -51 12 2 261.63 60 1 1.055 1.12 1.186 1.255 1.333 1.406 1.497 1.582 1.677 1.778 1.879 2
 <html>Barca temperament (Asselin 2000 p.106)<br />Created 2021-01-16 17:56:02<br />Added fifths down: “do,fa,sib” starting fraction 1/1 (2021-01-16 17:57:57)<br />Created meantone upward notes “do,sol,re,la,mi,si,fa#” fraction 3/2 adjusted -1/6 comma (2021-01-16 18:02:25)<br />Created meantone upward notes “fa#,do#,sol#,re#” fraction 3/2 (2021-01-16 18:03:49)<br /></html>
-"bbb"
-/• • • • • • • • • • • • •/
-[1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1]
-f2 0 128 -51 12 2 261.63 60 1 1.059 1.122 1.189 1.26 1.335 1.414 1.498 1.587 1.682 1.782 1.888 2
-<html>This is an equal-tempered scale for BP3.<br />Created 2024-08-09 17:35:36<br /></html>
 "bethisy"
 /C C# D Eb E F F# G G# A Bb B C/
 c21.5062895967 81 80c

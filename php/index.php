@@ -260,7 +260,7 @@ $extension = end($table);
 
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 echo "<p style=\"text-align:left;\">";
-if($path <> '') echo "<input style=\"background-color:azure;\" type=\"submit\" name=\"\" value=\"RELOAD THIS PAGE\">";
+if($path <> '') echo "<input style=\"background-color:azure;\" type=\"submit\" name=\"\" value=\"REFRESH THIS PAGE\">";
 if($folder <> '') echo "&nbsp;&nbsp;<big><font color=\"red\">↑</font>&nbsp;<a href=\"".$upper_link."\">UPPER FOLDER</a>&nbsp;<font color=\"red\">↑</font></big>";
 echo "</p>";
 echo "</form>";

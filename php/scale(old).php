@@ -17,7 +17,6 @@ else {
 	}
 $this_title = $filename;
 $url_this_page = "scale.php?".$_SERVER["QUERY_STRING"];
-$need_to_save = FALSE;
 
 if(isset($_POST['download_scala'])) {
 	$file = $dir_scales.$filename.".scl";
@@ -49,6 +48,14 @@ if(isset($_POST['download_kbm'])) {
 
 require_once("_header.php");
 
+if(isset($_POST['csound_source'])) $tonality_source = $_POST['csound_source'];
+else if(isset($_POST['tonality_source'])) $tonality_source = $_POST['tonality_source'];
+else {
+	echo "‘tonality_source’ is not known. It should be set in the ‘-to’ file.";
+	die();
+	}
+// echo $dir_scales." @@@<br />";
+
 $clean_filename = str_replace("#","_",$filename);
 $clean_filename = str_replace("/","_",$clean_filename);
 $file_link = $dir_scales.$clean_filename.".txt";
@@ -56,57 +63,6 @@ if(!file_exists($file_link)) {
 	echo "File may have been mistakenly deleted: ".$file_link;
 	echo "<br />Return to the ‘-to’ page to restore it!"; die();
 	}
-
-if(isset($_POST['csound_source'])) $tonality_source = $_POST['csound_source'];
-else if(isset($_POST['tonality_source'])) $tonality_source = $_POST['tonality_source'];
-else {
-	echo "‘tonality_source’ is not known. It should be set in the ‘-to’ file.";
-	die();
-	}
-
-$kbm_error = '';
-if($_SERVER['REQUEST_METHOD'] == 'POST' AND isset($_POST['import_kbm']) AND isset($_POST['forgood'])) {
-    // Check if files were uploaded
-	$error = $ok_kbm = FALSE;
-    if(isset($_FILES['file'])) {
-        // Check for any upload errors
-        if($_FILES['file']['error'] === UPLOAD_ERR_OK) {
-			$file_lock = $dir_tonality_resources.$tonality_source."_lock";
-		//	echo "file_lock = ".$file_lock."<br />";
-			$time_start = time();
-			$time_end = $time_start + 3;
-			while(TRUE) {
-				if(!file_exists($file_lock)) break;
-				if(time() > $time_end) @unlink($file_lock);
-				sleep(1);
-				}
-			$handle_lock = fopen($file_lock,"w");
-			fwrite($handle_lock,"lock\n");
-			if($handle_lock) fclose($handle_lock);
-            // Read the KBM file
-            $fileContent = file_get_contents($_FILES['file']['tmp_name']);
-            $kbm_filename = $_FILES['file']['name'];
-			echo "<span id=\"timespan\"><p><font color=\"red\">Reading ".$kbm_filename."</font></p></span>";
-	//		echo $dir_scales."<br />";
-			$kbm_error = update_scale_with_kbm('',$file_link,$fileContent);
-			if($kbm_error <> '') {
-				$kbm_error = "<p><font color=\"red\">➡ Invalid KBM file:</font> ".$kbm_error."</p>";
-				@unlink($dir_scales."temp_scale_file.txt");
-				}
-			else {
-				@unlink($file_link);
-				rename($dir_scales."temp_scale_file.txt",$file_link);
-				}
-			@unlink($file_lock);
-  			}
-		else {
-            $kbm_error = "<p><font color=\"red\">➡ Please select a KBM file!</font></p>";
-			$error = TRUE;
-			}
-		}
-	unset($_POST['import_kbm']);
-	unset($_POST['forgood']);
-    }
 
 $save_codes_dir = $dir_scales.$clean_filename."_codes";
 if(!is_dir($save_codes_dir)) mkdir($save_codes_dir);
@@ -151,7 +107,7 @@ if(isset($_POST['scroll'])) {
 	}
 
 $error_raise_note ='';
-if($need_to_save OR isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST['fixkeynumbers']) OR isset($_POST['modifynote']) OR isset($_POST['alignscale']) OR isset($_POST['adjustscale']) OR isset($_POST['create_meantone']) OR isset($_POST['equalize']) OR isset($_POST['add_fifths_up']) OR isset($_POST['add_fifths_down']) OR isset($_POST['modifynames']) OR isset($_POST['use_convention']) OR isset($_POST['resetbase'])) {
+if(isset($_POST['interpolate']) OR isset($_POST['savethisfile']) OR isset($_POST['fixkeynumbers']) OR isset($_POST['modifynote']) OR isset($_POST['alignscale']) OR isset($_POST['adjustscale']) OR isset($_POST['create_meantone']) OR isset($_POST['equalize']) OR isset($_POST['add_fifths_up']) OR isset($_POST['add_fifths_down']) OR isset($_POST['modifynames']) OR isset($_POST['use_convention']) OR isset($_POST['resetbase'])) {
 	if(isset($_POST['scale_name'])) $new_scale_name = trim($_POST['scale_name']);
 	if(isset($_POST['convention'])) $convention = $_POST['convention'];
 	else $new_scale_name = '';
@@ -925,7 +881,7 @@ for($i = 0; $i < $imax; $i++) {
 	}
 echo "<a target=\"_blank\" href=\"https://www.csounds.com/manualOLPC/GEN51.html\">Csound GEN51</a> table: <font color=\"blue\">".$scale_table."</font>";
 if($message <> '') echo $message;
-echo "<div style=\"float:right; margin-top:1em; background-color:white; padding:1em; border-radius:5%;\"><h1>Scale “".$filename."”</h1><h3>This version is stored in <font color=\"blue\">‘<a href=\"tonality.php?file=tonality_resources%2F".$tonality_source."\">".$tonality_source."</a>’</font></h3>";
+echo "<div style=\"float:right; margin-top:1em; background-color:white; padding:1em; border-radius:5%;\"><h1>Scale “".$filename."”</h1><h3>This version is stored in <font color=\"blue\">‘".$tonality_source."’</font></h3>";
 
 $link = "scale_image.php?save_codes_dir=".urlencode($save_codes_dir)."&dir_scale_images=".urlencode($dir_scale_images)."&tonality_source=".urlencode($tonality_source);
 $link_no_marks = $link."&no_marks=1";
@@ -957,7 +913,7 @@ else {
 $image_name = clean_folder_name($filename)."_".round(10 * $new_comma).$more."_image";
 // echo $image_name."<br />";
 $image_height = 820;
-echo "<div class=\"shadow\" style=\"border:2px solid gray; background-color:azure; width:20em;  padding:8px; text-align:center; border-radius: 6px;\">IMAGE:<br /><a onclick=\"window.open('".$link."','".$image_name."','width=1000,height=".$image_height.",left=100'); return false;\" href=\"".$link."\">full</a> - <a onclick=\"window.open('".$link_no_marks."','".$image_name."','width=1000,height=".$image_height.",left=100'); return false;\" href=\"".$link_no_marks."\">no marks</a> - <a onclick=\"window.open('".$link_no_cents."','".$image_name."','width=1000,height=".$image_height.",left=100'); return false;\" href=\"".$link_no_cents."\">no cents</a> - <a onclick=\"window.open('".$link_no_intervals."','".$image_name."','width=1000,height=".$image_height.",left=100'); return false;\" href=\"".$link_no_intervals."\">no intervals</a></div>";
+echo "<div class=\"shadow\" style=\"border:2px solid gray; background-color:azure; width:20em;  padding:8px; text-align:center; border-radius: 6px;\">IMAGE:<br /><a onclick=\"var win = window.open('".$link."','".$image_name."','width=1000,height=".$image_height.",left=100,titlebar=yes'); win.document.title='".$filename."'; return false;\" href=\"".$link."\">full</a> - <a onclick=\"window.open('".$link_no_marks."','".$image_name."','width=1000,height=".$image_height.",left=100'); return false;\" href=\"".$link_no_marks."\">no marks</a> - <a onclick=\"window.open('".$link_no_cents."','".$image_name."','width=1000,height=".$image_height.",left=100'); return false;\" href=\"".$link_no_cents."\">no cents</a> - <a onclick=\"window.open('".$link_no_intervals."','".$image_name."','width=1000,height=".$image_height.",left=100'); return false;\" href=\"".$link_no_intervals."\">no intervals</a></div>";
 
 echo "</div>";
 
@@ -989,12 +945,10 @@ if(($j - 9) > $numgrades_fullscale) {
 	}
 $table = array();
 if($scale_note_names <> '') {
-	$scale_note_names = str_replace("  ",' ',$scale_note_names);
-//	echo "Note names = /".$scale_note_names."/<br />";
 	$table = explode(' ',$scale_note_names);
 	$imax = count($table);
 	if($imax <> ($numgrades_fullscale + 1)) {
-		echo "<p><font color=\"red\">WARNING:</font> the number of grade names (".($imax - 1).") is not <font color=\"red\">numgrades</font> (".$numgrades_fullscale.").</p>";
+		echo "<p><font color=\"red\">WARNING:</font> the number of note names (".($imax - 1).") is not <font color=\"red\">numgrades</font> (".$numgrades_fullscale.").</p>";
 		}
 	}
 if($comma_line <> '') {
@@ -1086,30 +1040,7 @@ echo "</h3>";
 
 echo "<p>👉 Read page ‘<a target=\"_blank\" href=\"https://bolprocessor.org/microtonality/\">Microtonality</a>’</p>";
 
-echo "<input style=\"background-color:azure; font-size:large;\" type=\"submit\" formaction=\"".$url_this_page."\" title=\"Export this tuning in the SCALA format\" name=\"download_scala\" value=\"Download SCALA file\">";
-echo "<input style=\"background-color:azure; font-size:large;\" type=\"submit\" formaction=\"".$url_this_page."\" title=\"Export this keyboard mapping to the KBM format\" name=\"download_kbm\" value=\"Download KBM\">";
-echo "<p>👉 Read documentation <a target=\"_blank\" href=\"https://www.huygens-fokker.org/scala/scl_format.html\">SCALA</a> / <a target=\"_blank\" href=\"https://www.huygens-fokker.org/scala/help.htm#mappings\">KBM</a><br />";
-if(!isset($_POST['import_kbm']) OR isset($_POST['dont'])) echo "<input style=\"background-color:azure; font-size:large;\" type=\"submit\" formaction=\"".$url_this_page."\" title=\"Import a keyboard mapping in the KBM format\" name=\"import_kbm\" value=\"Import KBM\"></p>";
-else echo "</p>";
-
-
-if($kbm_error <> '') echo $kbm_error;
-if(isset($_POST['import_kbm'])) {
-	if(!isset($_POST['dont'])) {
-		$forgood = isset($_POST['forgood']);
-		echo "<input type=\"hidden\" name=\"import_kbm\" value=\"\">";
-		if(!$forgood) {
-			echo "<p><label for=\"file\">KBM file:</label>&nbsp;";
-			echo "<input type=\"file\" name=\"file\" id=\"file\" accept=\".kbm\">&nbsp;";
-			echo "<br />WARNING: this may create new labels of keys. Do you really want it? &nbsp;";
-			echo "<input style=\"background-color:green; color:white;\" type=\"submit\" formaction=\"".$url_this_page."\" name=\"forgood\" value=\"YES\">";
-			echo "<input style=\"background-color:red; color:white;\" type=\"submit\" formaction=\"".$url_this_page."\" name=\"dont\" value=\"NO\"></p>";
-			}
-		else {
-			echo "<p>@Importing</p>";
-			}
-		}
-	}
+echo "<input style=\"background-color:azure; font-size:large;\" type=\"submit\" formaction=\"".$url_this_page."\" title=\"Export this tuning in the SCALA format\" name=\"download_scala\" value=\"Download SCALA file\"> <input style=\"background-color:azure; font-size:large;\" type=\"submit\" formaction=\"".$url_this_page."\" title=\"Export this tuning in the SCALA format\" name=\"download_kbm\" value=\"Download KBM\"><br />👉 Read documentation <a target=\"_blank\" href=\"https://www.huygens-fokker.org/scala/scl_format.html\">SCALA</a> / <a target=\"_blank\" href=\"https://www.huygens-fokker.org/scala/help.htm#mappings\">KBM</a>";
 
 if(isset($_POST['p_comma']) AND isset($_POST['q_comma'])) {
 	$p_comma = $_POST['p_comma'];
@@ -1210,13 +1141,13 @@ echo "<td style=\"white-space:nowrap; padding:6px; vertical-align:middle;\"><fon
 echo "<td rowspan=\"3\" style=\"white-space:nowrap; padding:6px; vertical-align:middle;\">";
 echo "<table style=\"background-color:white;\">";
 echo "<tr>";
-echo "<td colspan=\"".$numgrades_fullscale."\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"modifynames\" onclick=\"this.form.target='_self';return true;\" formaction=\"scale.php?scalefilename=".urlencode($filename)."\" value=\"SAVE NEW NAMES\">&nbsp;➡&nbsp;Record the names of these notes:</td>";
+echo "<td colspan=\"".$numgrades_fullscale."\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"modifynames\" onclick=\"this.form.target='_self';return true;\" formaction=\"scale.php?scalefilename=".urlencode($filename)."\" value=\"SAVE NEW NAMES\">&nbsp;Modify the names of these notes:</td>";
 echo "</tr>";
 echo "<tr>";
 if(isset($_POST['new_convention'])) $convention = $new_convention = $_POST['new_convention'];
 else if(isset($_POST['convention'])) $convention = $_POST['convention'];
-$need_adjust = FALSE;
 for($j = $j_col = 0; $j < $numgrades_fullscale; $j++) {
+//	if($name[$j] == '') continue;
 	if($j_col >= 12) {
 		$j_col = 0;
 		echo "</tr><tr>";
@@ -1225,8 +1156,6 @@ for($j = $j_col = 0; $j < $numgrades_fullscale; $j++) {
 	echo "<td style=\"text-align:center;\">";
 	if($key[$j] > 0)  echo "<font color=\"MediumTurquoise\"><b>".$key[$j]."</b></font><br />";
 	$the_width = strlen($name[$j]);
-	if($the_width > 0 AND $key[$j] <= 0) $need_adjust = TRUE;
-	if($the_width == 0 AND $key[$j] > 0) $need_adjust = TRUE;
 	if($the_width < 5) $the_width = 5;
 	echo "<input style=\"text-align:center;\" type=\"text\" name=\"new_name_".$j."\" size=\"".$the_width."\" value=\"".$name[$j]."\">";
 	echo "</td>";
@@ -1237,14 +1166,10 @@ if($convention <> 3) {
 	echo "<td colspan=\"".$numgrades_fullscale."\" style=\"text-align:center;\">👉 Octave numbers follow these note names</td>";
 	echo "</tr>";
 	}
-echo "</td></tr>";
-if($need_adjust) {
-	echo "<tr><td colspan=\"".$numgrades_fullscale."\">";
-	echo "<input title=\"Reset key numbers of labeled notes starting with basekey\" style=\"background-color:yellow;\" type=\"submit\" name=\"fixkeynumbers\" onclick=\"this.form.target='_self';return true;\" formaction=\"scale.php?scalefilename=".urlencode($filename)."\" value=\"Adjust key numbers\">&nbsp;➡&nbsp;Reset the key numbers of labeled notes starting with the base key";
-	echo "</td></tr>";
-	}
-echo "</table><tr>";
-echo "<td style=\"white-space:nowrap; padding:6px; vertical-align:middle;\"><font color=\"blue\">interval</font> = <input type=\"text\" name=\"interval\" size=\"6\" value=\"".$interval."\">";
+echo "</table>";
+echo "</td>";
+echo "</tr><tr>";
+echo "<td style=\"white-space:nowrap; padding:6px; vertical-align:middle;\"><font color=\"blue\">octave interval</font> = <input type=\"text\" name=\"interval\" size=\"6\" value=\"".$interval."\">";
 $cents = round(cents($interval),1);
 echo " or <input type=\"text\" name=\"interval_cents\" size=\"6\" value=\"".$cents."\"> cents (typically 1200)<br />";
 store($h_image,"interval_cents",$cents);
@@ -1490,7 +1415,7 @@ if(!$warned_ratios) {
 	}
 
 echo "</tr>";
-echo "<tr><th style=\"background-color:azure; padding:4px; position: absolute;\">key&nbsp;<input title=\"Reset key numbers of labeled notes starting with basekey\" style=\"background-color:yellow;\" type=\"submit\" name=\"fixkeynumbers\" onclick=\"this.form.target='_self';return true;\" formaction=\"scale.php?scalefilename=".urlencode($filename)."\" value=\"adjust\"></th>".$somespace;
+echo "<tr><th style=\"background-color:azure; padding:4px; position: absolute;\">key&nbsp;<input title=\"Reset key numbers of labeled notes starting with basekey\" style=\"background-color:yellow;\" type=\"submit\" name=\"fixkeynumbers\" onclick=\"this.form.target='_self';return true;\" formaction=\"scale.php?scalefilename=".urlencode($filename)."\" value=\"fix\"></th>".$somespace;
 $this_key = $basekey;
 for($i = 0; $i <= $numgrades_fullscale; $i++) {
 	echo "<td style=\"text-align:center; padding-top:4px; padding-bottom:4px; padding-left:0px; padding-right:0px; margin-left:0px; margin-right:0px; background-color:cornsilk;\" colspan=\"2\">";
@@ -2742,7 +2667,7 @@ fclose($h_image);
 $olddir = getcwd();
 chdir($dir_scales);
 
-// Store SCALA
+// Export to SCALA
 $file = $scale_name.".scl";
 $text = "! ".$file."\n";
 $text .= "! Scala file, ref. https://www.huygens-fokker.org/scala/scl_format.html\n";
@@ -2772,7 +2697,7 @@ if($handle) {
 	fclose($handle);
 	}
 
-// Store KBM
+// Export to KBM
 $file = $scale_name.".kbm";
 $text = "! ".$file."\n";
 $text .= "! Keyboard mapping (KBM) file\n";
@@ -2801,6 +2726,7 @@ if($handle) {
 	fwrite($handle,$text);
 	fclose($handle);
 	}
+
 chdir($olddir);
 
 echo "</body>";

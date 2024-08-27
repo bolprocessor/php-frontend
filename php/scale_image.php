@@ -9,9 +9,8 @@ $width = 900;
 $top = 160;
 $image_width = $width + 100;
 $image_height = 820;
-// if($image_width < 1000) $image_width = 1000;
 require_once($image_file);
-header("title: ".$filename); // Does not work!
+// header("title: ".$filename); // Does not work!
 header("Content-Type: image/png; charset=utf-8");
 if(isset($_GET['no_marks'])) $no_marks = $_GET['no_marks'];
 else $no_marks = 0;

@@ -1179,7 +1179,7 @@ function reformat_grammar($verbose,$this_file) {
 	return;
 	}
 
-function SaveTonality($verbose,$dir,$filename,$temp_folder,$force) {  // $$$$
+function SaveTonality($verbose,$dir,$filename,$temp_folder,$force) {
 	global $top_header, $test, $temp_dir;
 	$verbose = FALSE;
 	if($verbose) echo "<br />dir = ".$dir."<br />";
@@ -1188,7 +1188,7 @@ function SaveTonality($verbose,$dir,$filename,$temp_folder,$force) {  // $$$$
 	$file_lock3 = $dir.$filename."_lock3";
 //	if($verbose) echo "<br />file_lock3 = ".$file_lock3."<br />";
 	if(file_exists($file_lock3)) return "locked";
-	$file_lock = $filename."_lock";
+	$file_lock = $dir.$filename."_lock";
 	$folder_scales = $temp_dir.$temp_folder.SLASH."scales";
 //	echo "temp_folder = ".$temp_folder."<br />";
 //	echo "folder_scales = ".$folder_scales."<br />";
@@ -1200,12 +1200,12 @@ function SaveTonality($verbose,$dir,$filename,$temp_folder,$force) {  // $$$$
 	$time_end = $time_start + 3;
 	while(TRUE) {
 		if(!file_exists($file_lock)) break;
-		if(time() > $time_end) unlink($file_lock);
+		if(time() > $time_end) @unlink($file_lock);
 		sleep(1);
 		}
-	$handle = fopen($dir.$file_lock,"w");
-	fwrite($handle,"lock\n");
-	fclose($handle);
+	$handle_lock = fopen($file_lock,"w");
+	fwrite($handle_lock,"lock\n");
+	if($handle_lock) fclose($handle_lock);
 	@unlink($dir.$filename);
 	$handle = fopen($dir.$filename,"w");
 	$file_header = $top_header."\n// Tonality resource file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
@@ -1229,7 +1229,7 @@ function SaveTonality($verbose,$dir,$filename,$temp_folder,$force) {  // $$$$
 		}
 	fwrite($handle,"_end tables\n");
 	fclose($handle);
-	unlink($dir.$file_lock);
+	unlink($file_lock);
 	return "saved";
 	}
 
@@ -2712,11 +2712,6 @@ function list_of_tonal_scales($tonality_file) {
 					$clean_name_of_file = str_replace("#","_",$name_of_file);
 					$list[$j] .= " <font color=\"red\">➡</font>&nbsp;".popup_link($clean_name_of_file,"image",500,410,(100 * $k),$dir_image);
 					}
-			/*	$source_image = $dir_scale_images.$clean_name_of_file."-source.txt";
-				if(file_exists($source_image)) {
-					$content_source = trim(@file_get_contents($source_image,TRUE));
-					$list[$j] .= " (".$content_source.")";
-					} */
 				}
 			}
 		}
@@ -3974,4 +3969,146 @@ function copyDirectory($src,$dst) {
     return true;
 	}
 
+function update_scale_with_kbm($scl_name,$scale_file,$kbm_content) {
+	global $dir_scales,$need_to_save;
+	if($scale_file == '') {
+		$scl_name = preg_replace("/\s+/u",' ',$scl_name);
+		$scl_name = str_replace("#","_",$scl_name);
+		$scl_name = str_replace("/","_",$scl_name);
+		$scale_file = $dir_scales.$scl_name.".txt";
+		$need_to_save = TRUE;
+		}
+	$scale_content = file_get_contents($scale_file,TRUE);
+	$table_scl = explode(chr(10),$scale_content);
+	$imax = count($table_scl);
+	$scale_file = "temp_scale_file.txt";
+	$handle = fopen($dir_scales.$scale_file,"w");
+	$new_mapping = FALSE;
+	$note_names = ''; $numgrades_fullscale = 0;
+	for($i = 0; $i < $imax; $i++) {
+		$line = trim($table_scl[$i]);
+		if(is_integer($pos=strpos($line,"/")) AND $pos == 0) {
+			// Note names
+			$note_names = preg_replace("/\s+/u",' ',$line);
+			$note_names = str_replace('/','',$note_names);
+			continue;
+			}
+		if(is_integer($pos=strpos($line,"f")) AND $pos == 0) {
+			// The Csound line
+			$line = preg_replace("/\s+/u",' ',$line);
+			$table_line = explode(' ',$line);
+			$numgrades_fullscale = $table_line[4];
+			$basefreq = $table_line[6];
+			$basenote = $table_line[7];
+	//		echo "<p>".$numgrades_fullscale."  ".$basefreq."   ".$basenote."</p>";
+			// Let's find these parameters in the KBM file
+			$table_kbm = explode(chr(10),$kbm_content);
+			$jmax = count($table_kbm);
+			for($j = 0; $j < $jmax; $j++) {
+				$line_kbm = trim($table_kbm[$j]);
+				if(is_integer($pos=strpos($line_kbm,"!")) AND $pos == 0) {
+					if(is_integer($pos=stripos($line_kbm,"! Size"))) {
+						$j++;
+						$line_kbm = trim($table_kbm[$j]);
+						if(!ctype_digit($line_kbm) OR intval($line_kbm) < 2) {
+							return "Size of map (".$line_kbm.") is not a valid integer<br />";
+							}
+						if(intval($line_kbm) <> $numgrades_fullscale) {
+							return "Size of map (".$line_kbm.") does not match the number of grades in the SCL file (".$numgrades_fullscale.")<br />";
+							}
+						continue;
+						}
+					if(is_integer($pos=stripos($line_kbm,"! Scale degree"))) {
+						$j++;
+						$line_kbm = trim($table_kbm[$j]);
+						if(!ctype_digit($line_kbm) OR intval($line_kbm) < 2) {
+							return "Scale degree to consider as formal octave (".$line_kbm.") is not a valid integer<br />";
+							}
+						if(intval($line_kbm) <> $numgrades_fullscale) {
+							return "Scale degree to consider as formal octave (".$line_kbm.") does not match the number of grades in the SCL file (".$numgrades_fullscale.")<br />";
+							}
+						continue;
+						}
+					if(is_integer($pos=stripos($line_kbm,"! Middle note"))) {
+						$j++;
+						$line_kbm = trim($table_kbm[$j]);
+						if(!ctype_digit($line_kbm) OR intval($line_kbm) < 2) {
+							return "Middle note (".$line_kbm.") is not a valid integer<br />";
+							}
+						$basenote = intval($line_kbm);
+						continue;
+						}
+					if(is_integer($pos=stripos($line_kbm,"! Frequency to"))) {
+						$j++;
+						$line_kbm = trim($table_kbm[$j]);
+						if(!is_numeric($line_kbm) OR $line_kbm < 2) {
+							return "Frequency (".$line_kbm.") is not a valid number<br />";
+							}
+						$frequency_kbm = number_format($line_kbm,2);
+						continue;
+						}
+					if(is_integer($pos=stripos($line_kbm,"! Reference note"))) {
+						$j++;
+						$line_kbm = trim($table_kbm[$j]);
+						if(!ctype_digit($line_kbm) OR intval($line_kbm) < 2) {
+							return "Reference note (".$line_kbm.") is not a valid integer<br />";
+							}
+						$reference_note_kbm = intval($line_kbm);
+						continue;
+						}
+					if(is_integer($pos=stripos($line_kbm,"! Mapping"))) {
+						$line_notes = "/";
+						if($note_names <> '') {
+							$table_notes = explode(' ',$note_names);
+							for($k = 0; $k < count($table_notes); $k++) {
+								$this_note[$k] = $table_notes[$k];
+								}
+							}
+						for($k = 0; $k < $numgrades_fullscale; $k++) {
+							$j++;
+							if(isset($table_kbm[$j]) AND $table_kbm[$j] <> '')
+ 								$line_mapping = trim($table_kbm[$j]);
+							else return "Empty line found in the mapping<br />";
+							if(!ctype_digit($line_mapping) AND $line_mapping <> 'x') {
+								return "Incorrect value (".$line_mapping.") found in the mapping<br />";
+								}
+							if(ctype_digit($line_mapping)) {
+								$key_num = $basenote + intval($line_mapping);
+								if($note_names <> '' AND $this_note[$k] <> '•') {
+									$note = $this_note[$k];
+									}
+								else $note = "key#".$key_num;
+								}
+							else $note = "•";
+							$line_notes .= $note." ";
+						//	echo "note = ".$note."<br />";
+							}
+						if(isset($this_note[$k])) $line_notes .= $this_note[$k];
+						else $line_notes .= "key#".($key_num + 1);
+						$line_notes = $line_notes."/";
+						$new_mapping = TRUE;
+						fwrite($handle,$line_notes."\n");
+						break;
+						}
+					}
+				}
+			// We need to interpret the frequency from the reference note in KBM for the base note in BP3
+			if(isset($frequency_kbm) AND isset($reference_note_kbm)) {
+				$basefreq = number_format($frequency_kbm * pow(2,($basenote - $reference_note_kbm) / 12),2);
+			//	echo "<p>basefreq =  ".$basefreq."</p>";
+				$table_line[6] = $basefreq;
+				}
+			$table_line[7] = $basenote;
+			$line = implode(' ',$table_line);
+			}
+		fwrite($handle,$line."\n");
+		}
+
+	fclose($handle);
+	$file_changed = $dir_scales."_changed";
+	$handle = fopen($file_changed,"w");
+	if($handle) fclose($handle);
+	$kbm_error = '';
+	return $kbm_error;
+	}
 ?>

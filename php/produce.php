@@ -726,7 +726,7 @@ if($n_messages > 0) {
 	if($handle) {
 		$window_name = $grammar_name."_".rand(0,99)."_result";
 		if($bad_image) echo "<p>(<font color=\"red\"><b>*</b></font>) Syntax error in image: negative argument</p>";
-		echo "<p style=\"font-size:larger;\"><input style=\"color:DarkBlue; background-color:yellow; font-size:large;\" onclick=\"window.open('".$result_file."','".$window_name."','width=800,height=600,left=100'); return false;\" type=\"submit\" value=\"Show all ".$n_messages." messages\">";
+		echo "<p style=\"font-size:larger;\"><input style=\"color:DarkBlue; background-color:yellow; font-size:large;\" onclick=\"window.open('".$result_file."','".$window_name."','width=800,height=600,left=100'); return false;\" type=\"submit\" value=\"Show all ".$n_messages." lines\">";
 		if($warnings == 1) echo " <span class=\"blinking\">=> ".$warnings." warning</span>";
 		if($warnings > 1) echo " <span class=\"blinking\">=> ".$warnings." warnings</span>";
 		}

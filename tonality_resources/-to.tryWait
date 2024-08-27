@@ -1,0 +1,83 @@
+// Bol Processor BP3
+// Tonality resource file saved as "-to.tryWait". Date: 2024-08-22 21:10:32
+_begin tables
+"Cmaj"
+/C C# D D# E F F# G G# A A# B C/
+c21.506289596715 81 80c
+k0 1 2 3 4 5 6 7 8 9 10 11 12k
+[1 1 256 243 9 8 32 27 5 4 4 3 45 32 3 2 128 81 5 3 16 9 15 8 2 1]
+sp p p p h p h p p h p h ps
+|4|
+f2 0 128 -51 12 2 261.63 60 1 1.053 1.125 1.185 1.25 1.333 1.406 1.5 1.58 1.667 1.778 1.875 2
+<html>This is a reduction to 12 grades of scale "Ma01" (23 grades) in ‘-cs.12_scales’ in major tonality.<br />Sensitive note = 'D'<br />Created 2021-01-05 18:29:30<br /></html>
+"Zarlino_natural"
+/C C# D D# E F F# G G# A A# B C/
+[1 1 16 15 9 8 6 5 5 4 4 3 64 45 3 2 8 5 5 3 16 9 15 8 2 1]
+|4|
+f2 0 128 -51 12 2 261.63 60 1 1.067 1.125 1.2 1.25 1.333 1.422 1.5 1.6 1.667 1.8 1.875 2
+<html>A traditional scale constructed with simple integer ratios<br /></html>
+"johnston_unt3"
+/• • • • • • • • • • • • • • • • • • • • • • • • • •/
+[1 1 1029 1024 33 32 35 32 36015 32768 147 128 2401 2048 19 16 5 4 5145 4096 21 16 343 256 11 8 735 512 12005 8192 3 2 49 32 49 32 13 8 105 64 1715 1024 7 4 7203 4096 15 8 245 128 2 1]
+f2 0 128 -51 25 2.000 261.63 60 1 1.005 1.031 1.094 1.099 1.148 1.172 1.188 1.250 1.256 1.313 1.340 1.375 1.436 1.465 1.500 1.531 1.531 1.625 1.641 1.675 1.750 1.759 1.875 1.914 2.000
+<html>Johnston final lattice for "The Un-tempered Pianos" and "K"<br />This scale has been imported from a SCALA file.<br />Created 2024-08-22 07:44:18<br /></html>
+"just intonation"
+/C C# D D# E F F# G G# A A# B C/
+[1 1 16 15 9 8 6 5 5 4 4 3 64 45 3 2 8 5 5 3 16 9 15 8 2 1]
+|4|
+f2 0 128 -51 12 2 261.63 60 1 1.067 1.125 1.2 1.25 1.333 1.422 1.5 1.6 1.667 1.8 1.875 2
+<html>A traditional scale constructed with simple integer ratios<br /></html>
+"kirnberger_2"
+/C C# D D# E F F# G G# A A# B C/
+c21.5062895967 81 80c
+k0 1 2 3 4 5 6 7 8 9 10 11 12k
+[1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1]
+sp • • • • • • • • • • • ps
+|4|
+f2 0 128 -51 12 2 261.63 60 1 1.053 1.125 1.185 1.25 1.333 1.406 1.5 1.58 1.677 1.778 1.875 2
+<html>Kirnberger II temperament (Asselin 2000 p. 90)<br />Created 2021-01-16 11:52:39<br />Added fifths down: “do,fa,sib,mib,lab,reb” starting fraction 1/1 (2021-01-16 11:54:59)<br />Added fifths up: “do,sol,re” starting fraction 1/1 (2021-01-16 11:55:59)<br />Created meantone upward notes “re,la,mi” fraction 3/2 adjusted -1/2 comma (2021-01-16 11:57:13)<br />Created meantone upward notes “mi,si,fa#” fraction 3/2 (2021-01-16 11:58:24)<br /></html>
+"meantone_try"
+/key#60 • key#62 • key#64 key#65 • key#67 • key#69 • key#71 key#72/
+c21.506289596715 81 80c
+k0 0 2 0 4 5 0 7 0 9 0 11 12k
+[1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1011 500]
+sp • • • • • • • • • • • •s
+|5|
+f2 0 128 -51 12 2.022 261.63 60 1 1.066 1.125 1.199 1.265 1.349 1.422 1.5 1.599 1.687 1.799 1.896 2.022
+<html>This is a new scale for BP3.  Creation 2020-11-17 22:55:31<br />This scale has been imported from a SCALA file.<br />Created 2024-08-22 07:14:33<br /></html>
+"piano"
+/C C# D D# E F F# G G# A A# B C/
+c21.506289596715 81 80c
+k0 1 2 3 4 5 6 7 8 9 10 11 12k
+[1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 501 250]
+sp • • • • • • • • • • • •s
+|4|
+f2 0 128 -51 12 2.0046 261.63 60 1 1.06 1.123 1.19 1.261 1.336 1.416 1.5 1.59 1.684 1.785 1.891 2.004
+"rameau_en_sib"
+/C C# D D# E F F# G G# A A# B C/
+c21.506289596715 81 80c
+k0 1 2 3 4 5 6 7 8 9 10 11 12k
+[1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1]
+sp • • • • • • • • • • • ps
+|4|
+f2 0 128 -51 12 2 261.63 60 1 1.054 1.118 1.193 1.25 1.337 1.397 1.495 1.591 1.672 1.789 1.869 2
+<html>Rameau B flat temperament (Asselin 2000 p.115)<br />Created 2021-01-16 18:41:56<br />Created meantone upward notes “do,sol,re,la,mi,si” fraction 3/2 adjusted -1/4 comma (2022-02-04 16:38:50)<br />Created meantone downward notes “do,fa,sib” fraction 3/2 adjusted -1/4 comma (2022-02-04 16:40:08)<br />Created meantone downward notes “sib,mib” fraction 3/2 (2022-02-04 16:58:49)<br />Created meantone upward notes “si,fa#” fraction 3/2 adjusted -1/4 comma (2022-02-04 17:10:32)<br />Created meantone downward notes “mib,lab” fraction 3/2 (2022-02-04 17:16:00)<br />Equalized intervals over series “fa#,reb,lab” approx fraction 3/2 adjusted 10.6 cents to ratio = 1.509 (2022-02-04 17:20:39)<br /></html>
+"zest24-supergoya17plus3_Db"
+c21.506289596715 81 80c
+/key#60 • key#61 • key#62 • • key#63 • • key#64 key#65 key#66 key#67 key#68 • key#69 • key#70 key#71 key#72/
+k0 0 1 0 2 0 0 3 0 0 4 5 6 7 8 0 9 0 10 11 12k
+sp • • • • • • • • • • • • • • • • • • • ps
+[1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1]
+|4|
+f2 0 128 -51 20 2.000 261.63 60 1 1.03 1.104 1.133 1.167 1.233 1.285 1.323 1.338 1.377 1.435 1.478 1.505 1.55 1.65 1.707 1.757 1.844 1.92 1.977 2
+<html>Goya-17 plus 484, 676, and 1180 cents<br />This scale has been imported from a SCALA file.<br />Created 2024-08-22 07:41:27<br /></html>
+"zwolle2"
+/C C# D D# E F F# G G# A A# B C/
+c21.506289596715 81 80c
+k0 1 2 3 4 5 6 7 8 9 10 11 12k
+[1 1 0 0 0 0 0 0 5 4 0 0 0 0 0 0 25 16 0 0 0 0 0 0 2 1]
+sp • • • h • • • h • • • ps
+|4|
+f2 0 128 -51 12 2.000 261.63 60 1 1.045 1.118 1.191 1.25 1.337 1.398 1.495 1.563 1.672 1.785 1.869 2
+<html>Henri Arnaut De Zwolle's modified meantone tuning (c. 1440)<br />This scale has been imported from a SCALA file.<br />Created 2024-08-22 07:39:55<br /></html>
+_end tables
