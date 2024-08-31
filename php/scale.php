@@ -217,8 +217,10 @@ if($need_to_save OR isset($_POST['interpolate']) OR isset($_POST['savethisfile']
 	if($key[0] <> $basekey OR $key[0] == 0 OR $key[$numgrades_fullscale] == 0 OR isset($_POST['fixkeynumbers'])) {
 		$this_key = $basekey;
 		echo "<p><font color=\"red\">➡</font> Keys have been renumbered following ‘basekey’</p>";
+	/*	if(isset($_POST['numnotes'])) $numnotes = $_POST['numnotes'];
+		else $numnotes = $numgrades_fullscale; */
 		for($i = 0; $i <= $numgrades_fullscale; $i++) {
-			if($name[$i] <> '' AND $name[$i] <> '•')
+			if(($name[$i] <> '' AND $name[$i] <> '•') OR $numgrades_fullscale == 12)
 				$key[$i] = $this_key++;
 			else $key[$i] = 0;
 			}
@@ -1215,7 +1217,7 @@ echo "</tr>";
 echo "<tr>";
 if(isset($_POST['new_convention'])) $convention = $new_convention = $_POST['new_convention'];
 else if(isset($_POST['convention'])) $convention = $_POST['convention'];
-$need_adjust = FALSE;
+$need_adjust = FALSE; $numnotes = 0;
 for($j = $j_col = 0; $j < $numgrades_fullscale; $j++) {
 	if($j_col >= 12) {
 		$j_col = 0;
@@ -1225,13 +1227,15 @@ for($j = $j_col = 0; $j < $numgrades_fullscale; $j++) {
 	echo "<td style=\"text-align:center;\">";
 	if($key[$j] > 0)  echo "<font color=\"MediumTurquoise\"><b>".$key[$j]."</b></font><br />";
 	$the_width = strlen($name[$j]);
+	if($the_width > 0) $numnotes++;
 	if($the_width > 0 AND $key[$j] <= 0) $need_adjust = TRUE;
-	if($the_width == 0 AND $key[$j] > 0) $need_adjust = TRUE;
+	if($the_width == 0 AND $key[$j] > 0 AND $numgrades_fullscale <> 12) $need_adjust = TRUE;
 	if($the_width < 5) $the_width = 5;
 	echo "<input style=\"text-align:center;\" type=\"text\" name=\"new_name_".$j."\" size=\"".$the_width."\" value=\"".$name[$j]."\">";
 	echo "</td>";
 	}
 echo "</tr>";
+echo "<input type=\"hidden\" name=\"numnotes\" value=\"".$numnotes."\">";
 if($convention <> 3) {
 	echo "<tr>";
 	echo "<td colspan=\"".$numgrades_fullscale."\" style=\"text-align:center;\">👉 Octave numbers follow these note names</td>";
@@ -1710,14 +1714,14 @@ if($done AND $numgrades_with_labels > 2 AND !$warned_ratios) {
 		if($scale_choice == "full_scale") $full_scale = TRUE;
 		else $full_scale =  FALSE;
 		$preserve_numbers = isset($_POST['preserve_numbers']);
-		if($full_scale) $numgrades = $numgrades_fullscale;
+		if($full_scale) $numnotes = $numgrades_fullscale;
 		else {
 			$selected_grades = trim($_POST['selected_grades']);
 			$selected_grades = preg_replace("/\s+/u",' ',$selected_grades);
 			$selected_grade_name = explode(' ',$selected_grades);
-			$numgrades = count($selected_grade_name) - 1;
+			$numnotes = count($selected_grade_name) - 1;
 			$done_grade = $new_selected_grade_name = array();
-			for($i = 0; $i <= $numgrades; $i++) {
+			for($i = 0; $i <= $numnotes; $i++) {
 				$some_name = $selected_grade_name[$i];
 				if($some_name == '-') $some_name = $selected_grade_name[$i] = '•';
 				if($some_name == '•' OR !isset($done_grade[$some_name])) {
@@ -1733,7 +1737,7 @@ if($done AND $numgrades_with_labels > 2 AND !$warned_ratios) {
 					}
 				}
 			$selected_grade_name = $new_selected_grade_name;
-			$numgrades = count($selected_grade_name) - 1;
+			$numnotes = count($selected_grade_name) - 1;
 			}
 		$new_scale_name = trim($_POST['reduce_scale_name']);
 		$new_scale_name = preg_replace("/\s+/u",' ',$new_scale_name);
@@ -1945,7 +1949,7 @@ if($done AND $numgrades_with_labels > 2 AND !$warned_ratios) {
 					fwrite($handle,$the_fractions."\n");
 					fwrite($handle,"|".$baseoctave."|\n");
 					$the_scale = "f2 0 128 -51 ";
-					$the_scale .= $numgrades." ".$interval." ".$basefreq." ".$basekey." ";
+					$the_scale .= $numnotes." ".$interval." ".$basefreq." ".$basekey." ";
 					for($j = $k = 0; $j <= $numgrades_fullscale; $j++) {
 						if(!$full_scale) {
 							if(!isset($selected_grade_name[$k])) continue;
@@ -1966,7 +1970,7 @@ if($done AND $numgrades_with_labels > 2 AND !$warned_ratios) {
 					if($full_scale)
 						$some_comment = "<html>This is a derivation of scale \"".$filename."\" (".$numgrades_fullscale." grades) in ‘".$tonality_source."’";
 					else
-						$some_comment = "<html>This is a reduction to ".$numgrades." grades of scale \"".$filename."\" (".$numgrades_fullscale." grades) in ‘".$tonality_source."’";
+						$some_comment = "<html>This is a reduction to ".$numnotes." grades of scale \"".$filename."\" (".$numgrades_fullscale." grades) in ‘".$tonality_source."’";
 					if($new_scale_mode == "major")
 						$some_comment .= " in major tonality";
 					else if($new_scale_mode == "minor")

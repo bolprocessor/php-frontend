@@ -2635,7 +2635,7 @@ function show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,
 				echo "<div id=\"scales\"  style=\"border-radius: 15px; padding:6px;\"><br />";
 				}
 			else {
-				echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains the definition of tonal scale:";
+				echo "<p style=\"margin-bottom:0px;\">Tonal resource file <font color=\"blue\">‘".$tonality_file."’</font> contains the definition of tonal scale:";
 				echo "<div>";
 				}
 			echo "<ul style=\"margin-top:0px; margin-bottom:0px\">";
