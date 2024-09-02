@@ -25,7 +25,7 @@ Time setting step	(not implemented)	1	1
 Time setting trace		1	1
 Csound trace		1	1
 Use MIDI in/out		0	1
-Reset Notes	Send AllNotesOff and pedals off at the end of item	1	1
+Reset Notes	Send AllNotesOff, pedals off and reset pitchbend at the end of item	1	1
 Compute while playing		1	1
 Trace MIDI interactions		1	1
 Reset rule weights		1	1
@@ -62,7 +62,7 @@ ProgNrFrom		0
 Fade-out time	seconds (end of MIDI files and Csound scores)	1
 C4 (middle C) key number	(0..127) usually 60	1
 A4 frequency (diapason)	Hz (usually 440)	1
-Strike again NoteOn's	Keep checked unless you know why!	1	1
+Strike again NoteOn's	Keep checked unless you know why! (Read https://bp3.tech/csound-checkup/)	1	1
 Default volume	(1..127)	1
 Volume controller	(0..127) usually 7	1
 Default velocity	(1..127)	1

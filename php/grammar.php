@@ -54,7 +54,7 @@ display_console_state();
 $temp_midi_ressources = $temp_dir."trace_".my_session_id()."_".$filename."_";
 
 $url = "index.php?path=".urlencode($current_directory);
-echo "<p>Workspace = <input style=\"background-color:azure;\" name=\"workspace\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$url."','_self');\" value=\"".$current_directory."\">";
+echo "<p>Workspace = <input style=\"background-color:azure;\" name=\"workspace\" type=\"submit\" onclick=\"if(checksaved()) window.open('".$url."','_self');\" value=\"".$current_directory."\">";
 // echo "&nbsp;&nbsp;session_id = ".my_session_id();
 
 $hide = $need_to_save = FALSE;
@@ -480,7 +480,7 @@ if($templates) {
 //	$link_produce .= "&trace_production=1";
 	$link_produce .= "&here=".urlencode($here);
 	$window_name = window_name($filename);
-	echo "<input style=\"color:DarkBlue; background-color:azure;\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"CHECK TEMPLATES\"><br /><br />";
+	echo "<input style=\"color:DarkBlue; background-color:azure;\" onclick=\"if(checksaved()) window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"CHECK TEMPLATES\"><br /><br />";
 	}
 	
 if($produce_all_items > 0) $action = "produce-all";
@@ -548,7 +548,7 @@ $window_name = window_name($filename);
 echo "<b>then…</b>";
 if($file_format == "rtmidi" AND file_exists($refresh_file)) $refresh_instruction = "document.getElementById('refresh').style.display = 'inline';";
 else $refresh_instruction = '';
-echo "&nbsp;<input onmouseover=\"checksaved();\" onclick=\"if(checksaved()) {".$refresh_instruction." window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)\"";
+echo "&nbsp;<input onclick=\"if(checksaved()) {".$refresh_instruction." window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)\"";
 if($error) echo " disabled style=\"background-color:azure; box-shadow: none;\"";
 else echo " style=\"color:DarkBlue; background-color:Aquamarine;\"";
 echo ">";
@@ -699,7 +699,7 @@ if((file_exists($output.SLASH.$default_output_name.".wav") OR file_exists($outpu
 	echo "&nbsp;&nbsp;&nbsp;<input style=\"color:DarkBlue; background-color:azure; font-size:large;\" onclick=\"window.open('".$result_file."','result','width=800,height=600,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Show latests results\">";
 	}
 echo "&nbsp;<input style=\"background-color:azure; font-size:large;\" type=\"submit\" onclick=\"clearsave();\" name=\"compilegrammar\" value=\"COMPILE GRAMMAR\">";
-echo "&nbsp;<input onmouseover=\"checksaved();\" onclick=\"if(checksaved()) {".$refresh_instruction." window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)";
+echo "&nbsp;<input onclick=\"if(checksaved()) {".$refresh_instruction." window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)";
 if($error) {
 	echo " - disabled because of missing files\"";
 	echo " disabled style=\"background-color:azure; box-shadow: none; font-size:large;\"";
@@ -720,7 +720,7 @@ echo "<textarea name=\"thistext\" onchange=\"tellsave()\" rows=\"".$textarea_row
 echo "<p style=\"float:right; margin-right:100px;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></p>";
 // echo "</div>";
 echo "<div>";
-echo "<input onmouseover=\"checksaved();\" onclick=\"if(checksaved()) {".$refresh_instruction." window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)";
+echo "<input onclick=\"if(checksaved()) {".$refresh_instruction." window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)";
 if($error) {
 	echo " - disabled because of missing files\"";
 	echo " disabled style=\"background-color:azure; box-shadow: none; font-size:large;\"";
@@ -786,7 +786,7 @@ if(count($variable) > 0) {
 		fclose($handle);
 		$link_play_variable = $link_produce;
 		$link_play_variable .= "&data=".urlencode($data);
-		echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onmouseover=\"checksaved();\"  onclick=\"if(checksaved()) window.open('".$link_play_variable."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" value=\"".$var."\"> ";
+		echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\"  onclick=\"if(checksaved()) window.open('".$link_play_variable."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" value=\"".$var."\"> ";
 		}
 	}
 	
@@ -932,7 +932,7 @@ if(isset($_POST['manage_instructions'])) {
 			}
 		}
 	echo "</tr>";
-	echo "<tr><td></td><td></td><td><input style=\"background-color:cornsilk;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\"></td><td><input style=\"background-color:Aquamarine;\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) {this.form.target='_self'; return true;} else return false;\" name=\"apply_changes_instructions\" formaction=\"".$url_this_page."#topedition\" value=\"APPLY THESE CHANGES\"></td></tr>";
+	echo "<tr><td></td><td></td><td><input style=\"background-color:cornsilk;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\"></td><td><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"if(checksaved()) {this.form.target='_self'; return true;} else return false;\" name=\"apply_changes_instructions\" formaction=\"".$url_this_page."#topedition\" value=\"APPLY THESE CHANGES\"></td></tr>";
 	echo "</table>";
 	$hide = TRUE;
 	}
@@ -940,7 +940,7 @@ if(!$hide) {
 	echo "<table style=\"background-color:white; border-radius: 15px;\">";
 	echo "<tr>";
 	echo "<td style=\"vertical-align:middle; white-space:nowrap;\">";
-	echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) {this.form.target='_self';return true;} else return false;\" name=\"change_convention\" formaction=\"".$url_this_page."#topchanges\" value=\"APPLY NOTE CONVENTION to this data\"> ➡</td>";
+	echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"if(checksaved()) {this.form.target='_self';return true;} else return false;\" name=\"change_convention\" formaction=\"".$url_this_page."#topchanges\" value=\"APPLY NOTE CONVENTION to this data\"> ➡</td>";
 	echo "<td style=\"vertical-align:middle; white-space:nowrap;\">";
 	echo "<input type=\"radio\" name=\"new_convention\" value=\"0\">English<br />";
 	echo "<input type=\"radio\" name=\"new_convention\" value=\"1\">Italian/Spanish/French<br />";

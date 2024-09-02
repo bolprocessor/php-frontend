@@ -202,6 +202,14 @@ echo "function createFile(pathToFile) {
 echo "}
 </script>";
 
+echo "<script>";
+echo "function clearFields(inputId, nameId, commentId) {
+    document.getElementsByName(inputId)[0].value = \"\";
+    document.getElementsByName(nameId)[0].value = \"\";
+    document.getElementsByName(commentId)[0].value = \"\";\n";
+echo "}
+</script>";
+
 echo "</head>";
 echo "<body>\n";
 ?>

@@ -197,7 +197,7 @@ foreach($dircontent as $thisfile) {
 if(isset($_GET['path'])) $path = urldecode($_GET['path']);
 else $path = '';
 
-$text_help_file = $bp_application_path."BP2_help.txt";
+$text_help_file = $bp_application_path."BP2_help.txt"; // Name should be updated to BP3
 
 if($test) {
 	echo "<small>";
@@ -596,8 +596,10 @@ function compile_help($text_help_file,$html_help_file) {
 				}
 			$title[$i] = $thetitle;
 			$item[$i] = '';
-			for($j = 1; $j < count($table2); $j++)
-				$item[$i] .= $table2[$j]."<br />";
+			for($j = 1; $j < count($table2); $j++) {
+				$item_line = make_links_clickable($table2[$j]);
+				$item[$i] .= $item_line."<br />";
+				}
 			}
 		fwrite($handle,$file_header."\n");
 		$table_of_contents = "<table style=\"border-spacing: 2px;\" cellpadding=\"2px;\"><tr>";
@@ -638,7 +640,7 @@ function compile_help($text_help_file,$html_help_file) {
 function link_to_help() {
 	global $html_help_file;
 	$console_link = "produce.php?instruction=help";
-	$link = "<p>➡ <a onclick=\"window.open('".$html_help_file."','Help','width=800,height=500'); return false;\" href=\"".$html_help_file."\">Display complete help file</a> or the console's <a href=\"".$console_link."\" onclick=\"window.open('".$console_link."','help','width=800,height=800,left=200'); return false;\">help file</a></p>";
+	$link = "<p>➡ Display <a href=\"".$console_link."\" onclick=\"window.open('".$console_link."','help','width=800,height=800,left=200'); return false;\">console's</a> instructions or the <a onclick=\"window.open('".$html_help_file."','Help','width=800,height=500'); return false;\" href=\"".$html_help_file."\">complete help file</a></p>";
 	return $link;
 	}
 
@@ -3723,7 +3725,7 @@ function filter_form_output($i) {
 	global $NoteOffFilter_out, $NoteOnFilter_out, $KeyPressureFilter_out, $ControlChangeFilter_out, $ProgramChangeFilter_out, $ChannelPressureFilter_out, $PitchBendFilter_out, $SystemExclusiveFilter_out, $TimeCodeFilter_out, $SongPositionFilter_out, $SongSelectFilter_out, $TuneRequestFilter_out, $EndSysExFilter_out, $TimingClockFilter_out, $StartFilter_out, $ContinueFilter_out, $ActiveSensingFilter_out, $SystemResetFilter_out;
 	global $url_this_page, $MIDIoutput;
 	echo "<div id=\"showhide_output".$i."\"  style=\"background-color: Snow; width:300px;\">";
-	echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savemidiport\" value=\"SAVE MIDI ports\">";
+	echo "<input style=\"background-color:yellow;\" type=\"submit\" formaction=\"".$url_this_page."\" name=\"savemidiport\" value=\"SAVE MIDI ports\">";
 	echo "<p style=\"margin-left:12px;\"><b>Filter for MIDI output ".$MIDIoutput[$i]."</b></p>";
 	echo "<table style=\"background-color:azure;\">";
 	echo "<tr>";
@@ -3884,12 +3886,13 @@ function display_midi_ports($filename) {
 		echo "MIDI output&nbsp;&nbsp;<input type=\"text\" title=\"".$text_over_number."\" onchange=\"tellsave()\" name=\"MIDIoutput_".$i."\" size=\"2\" value=\"".$value."\">";
 		echo "&nbsp;<input type=\"text\" title=\"".$text_over_name."\" style=\"margin-bottom:6px;\" onchange=\"tellsave()\" name=\"MIDIoutputname_".$i."\" size=\"15\" value=\"".$MIDIoutputname[$i]."\">";
 		echo "&nbsp;<input type=\"text\" title=\"".$text_over_comment."\" name=\"MIDIoutputcomment_".$i."\" size=\"15\" value=\"".$comment."\">";
+		echo "&nbsp;<button type=\"button\" onclick=\"clearFields('MIDIoutput_".$i."','MIDIoutputname_".$i."','MIDIoutputcomment_".$i."')\">Delete</button>";
 		echo "&nbsp;<button style=\"background-color:azure; border-radius: 6px;\" onclick=\"toggledisplay_output(".$i."); return false;\">FILTER</button>";
 		filter_form_output($i);
 		echo "<br />";
 		}
-	echo "<input style=\"float:right; color:DarkBlue; backgroundsave_-color:yellow;\" onclick=\"tellsave()\" type=\"submit\" name=\"create_output\" value=\"Add an output\"><br />";
-	echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savemidiport\" value=\"SAVE MIDI ports\">";
+	echo "<input style=\"float:right; color:DarkBlue; backgroundsave_-color:yellow;\" type=\"submit\" name=\"create_output\" value=\"Add an output\"><br />";
+	echo "<input style=\"background-color:yellow;\" type=\"submit\" formaction=\"".$url_this_page."\" name=\"savemidiport\" value=\"SAVE MIDI ports\">";
 	echo str_replace(' ',"&nbsp;"," 👉 Delete name if changing number")."<br /><br />";
 	for($i = 0; $i < $NumberMIDIinputs; $i++) {
 		if($MIDIinput[$i] == -1) $value = '';
@@ -3899,11 +3902,12 @@ function display_midi_ports($filename) {
 		echo "MIDI input&nbsp;&nbsp;&nbsp;&nbsp;<input type=\"text\" title=\"".$text_over_number."\" onchange=\"tellsave()\" name=\"MIDIinput_".$i."\" size=\"2\" value=\"".$value."\">";
 		echo "&nbsp;<input type=\"text\" title=\"".$text_over_name."\" style=\"margin-bottom:6px;\" onchange=\"tellsave()\" name=\"MIDIinputname_".$i."\" size=\"15\" value=\"".$MIDIinputname[$i]."\">";
 		echo "&nbsp;<input type=\"text\" title=\"".$text_over_comment."\" name=\"MIDIinputcomment_".$i."\" size=\"15\" value=\"".$comment."\">";
+		echo "&nbsp;<button type=\"button\" onclick=\"clearFields('MIDIinput_".$i."', 'MIDIinputname_".$i."', 'MIDIinputcomment_".$i."')\">Delete</button>";
 		echo "&nbsp;<button style=\"background-color:azure; border-radius: 6px;\" onclick=\"toggledisplay_input(".$i."); return false;\">FILTER</button>";
 		filter_form_input($i);
 		echo "<br />";
 		}
-	echo "<input style=\"float:right; color:DarkBlue; backgroundsave_-color:yellow;\" onclick=\"tellsave()\" type=\"submit\" name=\"create_input\" value=\"Add an input\">";
+	echo "<input style=\"float:right; color:DarkBlue; backgroundsave_-color:yellow;\" type=\"submit\" name=\"create_input\" value=\"Add an input\">";
 	return;
 	}
 
@@ -4111,4 +4115,14 @@ function update_scale_with_kbm($scl_name,$scale_file,$kbm_content) {
 	$kbm_error = '';
 	return $kbm_error;
 	}
+
+function make_links_clickable($text) {
+    $pattern = '/\b(?:https?|ftp):\/\/[a-zA-Z0-9-_.]+(?:\.[a-zA-Z0-9-_.]+)+(?:\/[^\s]*)?/';
+    $text_with_links = preg_replace_callback($pattern, function($matches) {
+        $url = $matches[0];
+        return '<a href="'.$url.'" target="_blank">'.$url.'</a>';
+    	}, $text);
+    return $text_with_links;
+	}
+
 ?>

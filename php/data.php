@@ -1480,9 +1480,9 @@ echo "<td style=\"background-color:cornsilk;\">";
 
 find_replace_form();
 
-echo "<div style=\"float:right; vertical-align:middle;\">Import MusicXML: <input style=\"color:red;\" type=\"file\" name=\"music_xml_import\">&nbsp;<input type=\"submit\" style=\"background-color:AquaMarine;\" value=\"← IMPORT\"></div>";
+echo "<div style=\"float:right; vertical-align:middle;\">Import MusicXML: <input style=\"color:red;\"  onclick=\"if(!checksaved()) return false;\" type=\"file\" name=\"music_xml_import\">&nbsp;<input type=\"submit\" onclick=\"if(!checksaved()) return false;\" style=\"background-color:AquaMarine;\" value=\"← IMPORT\"></div>";
 
-echo "<div style=\"text-align:left;\"><input id=\"saveButton\" style=\"background-color:yellow; font-size:large;\"  type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></div>";
+echo "<div style=\"text-align:left;\"><input id=\"saveButton\" style=\"background-color:yellow; font-size:large;\"  type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></div>";
 
 $content = do_replace($content);
 
