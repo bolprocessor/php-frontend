@@ -192,6 +192,7 @@ function list_script_instructions($script_status,$script_more) {
 	}
 
 function save($this_file,$filename,$top_header,$save_content) {
+	if(trim($save_content) == '') return;
 	$handle = fopen($this_file, "w");
 	if($handle) {
 		$file_header = $top_header . "\n// Script saved as \"" . $filename . "\". Date: " . gmdate('Y-m-d H:i:s');

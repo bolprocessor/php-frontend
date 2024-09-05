@@ -3350,7 +3350,7 @@ function find_replace_form() {
 	echo "</p>";
 	echo "<p>";
 	echo "<label for=\"replace\">and replace it with: </label>";
-	echo "<input type=\"text\" name=\"replace\" style=\"background-color:white;\" id=\"replace\">&nbsp;&nbsp;&nbsp;<button class=\"bouton\" type=\"submit\" formaction=\"".$url_this_page."#replace\" name=\"action\" value=\"replace\" onclick=\"clearsave()\">Search and Replace (all)</button>";
+	echo "<input type=\"text\" name=\"replace\" style=\"background-color:white;\" id=\"replace\">&nbsp;&nbsp;&nbsp;<button class=\"bouton\" type=\"submit\" formaction=\"".$url_this_page."#saveButton\" name=\"action\" value=\"replace\" onclick=\"clearsave()\">Search and Replace (all)</button>";
 	echo "</div>";
 	return;
 	}

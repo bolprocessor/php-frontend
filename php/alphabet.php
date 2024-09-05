@@ -23,13 +23,15 @@ echo "<h3>Alphabet file “".$filename."”</h3>";
 save_settings("last_name",$filename);
 
 if(isset($_POST['savethisfile'])) {
-	echo "<p id=\"timespan\" style=\"color:red;\">Saved file…</p>";
 	$content = $_POST['thistext'];
-	$handle = fopen($this_file,"w");
-	$file_header = "// Bol Processor on-line test via PHP\n// Alphabet file saved as ‘".$filename."’. Date: ".gmdate('Y-m-d H:i:s');
-	fwrite($handle,$file_header."\n");
-	fwrite($handle,$content);
-	fclose($handle);
+	if(trim($content) <> '') {
+		echo "<p id=\"timespan\" style=\"color:red;\">Saved file…</p>";
+		$handle = fopen($this_file,"w");
+		$file_header = "// Bol Processor on-line test via PHP\n// Alphabet file saved as ‘".$filename."’. Date: ".gmdate('Y-m-d H:i:s');
+		fwrite($handle,$file_header."\n");
+		fwrite($handle,$content);
+		fclose($handle);
+		}
 	}
 
 if($test) echo "file = ".$file."<br />";

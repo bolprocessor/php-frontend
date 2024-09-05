@@ -38,6 +38,7 @@ echo link_to_help();
 
 $test_musicxml = FALSE;
 $no_chunk_real_time_midi = FALSE;
+$save_warning = '';
 
 echo "<h3>Data file “".$filename."”</h3>";
 save_settings("last_data_name",$filename); 
@@ -1195,16 +1196,16 @@ if(isset($_POST['apply_changes_instructions'])) {
 $refresh_file = $temp_dir."trace_".my_session_id()."_".$filename."_midiport_refresh";
 if(isset($_POST['savemidiport'])) {
 	save_midiressources($filename);
-	echo "<span id=\"timespan\" style=\"color:red; float:right; background-color:white;\">&nbsp;…&nbsp;Saved “".$filename."_midiport” file…</span>";
+	$save_warning = "<span id=\"timespan\" style=\"color:red; float:right; background-color:white;\">&nbsp;…&nbsp;Saved “".$filename."_midiport” file…</span>";
 	@unlink($refresh_file);
 	}
 
 if($need_to_save OR isset($_POST['savethisfile'])) {
-	echo "<p id=\"timespan\" style=\"color:red; float:right; background-color:white;\">Saved ‘".$filename."’file…</p>";
+	$save_warning = "<p id=\"timespan\" style=\"color:red; float:right; background-color:white;\">Saved ‘".$filename."’file…</p>";
 	if(isset($_POST['thistext'])) $content = $_POST['thistext'];
 	$file_format = $default_output_format;
 	if(isset($data_file_format[$filename])) $file_format = $data_file_format[$filename];
-	else $content = '';
+//	else $content = '';
 	if($more_data <> '') $content = $more_data."\n\n".$content;
 	$content = preg_replace("/ +/u",' ',$content);
 	save($this_file,$filename,$top_header,$content);
@@ -1475,6 +1476,7 @@ if($error_mssg <> '') {
 if(intval($note_convention) <> intval($new_convention) AND $new_convention <> '')
 	echo "<p><font color=\"red\">➡</font> WARNING: Note convention should be set to <font color=\"red\">‘".ucfirst(note_convention(intval($new_convention)))."’</font> in the <font color=\"blue\">‘".$settings_file."’</font> settings file</p>";
 
+echo $save_warning;
 echo "<p><button style=\"background-color:yellow; border-radius: 6px; font-size:large;\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button></p>";
 echo "<br /><br /><table style=\"background-color:GhostWhite;\" border=\"0\"><tr>";
 echo "<td style=\"background-color:cornsilk;\">";
@@ -2027,8 +2029,8 @@ function create_chunks($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxc
 	}
 
 function save($this_file,$filename,$top_header,$save_content) {
-	global $url_this_page;
-    if (file_exists($this_file)) {
+	if(trim($save_content) == '') return;
+    if(file_exists($this_file)) {
         $backup_file = $this_file."_bak";
         if(!copy($this_file, $backup_file))
             echo "<p>👉 <font color=\"red\">Failed to create backup of the file.</p>";
@@ -2042,9 +2044,6 @@ function save($this_file,$filename,$top_header,$save_content) {
 		}
 	else {
 		echo "<div style=\"background-color:white; padding: 1em; border-radius: 6px;\"><p>👉 <font color=\"red\"><b>WARNING</b>: Some files have been imported and cannot be modified.</font></p><p><b>Linux user?</b> Open your terminal and type: <font color=\"blue\">sudo /opt/lampp/htdocs/bolprocessor/change_permissions.sh</font><br />(Your password will be required...)</p>";
-	/*	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-		echo "<input style=\"background-color:azure; float:left;\" type=\"submit\" formaction=\"".$url_this_page."\" onclick=\"window.close();\" title=\"\" name=\"change_permissions\" value=\"CHANGE PERMISSIONS\">";
-		echo "</form>"; */
 		echo "</div>"; 
 		}
 	return;

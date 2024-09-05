@@ -24,13 +24,15 @@ echo "<h3>Interaction file “".$filename."”</h3>";
 save_settings("last_name",$filename);
 
 if(isset($_POST['savethisfile'])) {
-	echo "<p id=\"timespan\" style=\"color:red;\">Saved file…</p>";
 	$content = $_POST['thistext'];
-	$handle = fopen($this_file,"w");
-	$file_header = $top_header."\n// MIDI interaction file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
-	fwrite($handle,$file_header."\n");
-	fwrite($handle,$content);
-	fclose($handle);
+	if(trim($content) <> '') {
+		echo "<p id=\"timespan\" style=\"color:red;\">Saved file…</p>";
+		$handle = fopen($this_file,"w");
+		$file_header = $top_header."\n// MIDI interaction file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
+		fwrite($handle,$file_header."\n");
+		fwrite($handle,$content);
+		fclose($handle);
+		}
 	}
 
 try_create_new_file($this_file,$filename);

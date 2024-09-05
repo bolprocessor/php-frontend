@@ -14,6 +14,7 @@ $current_directory = str_replace(SLASH.$filename,'',$file);
 $current_directory = str_replace(SLASH,'/',$current_directory);
 save_settings("last_grammar_directory",$current_directory);
 $textarea_rows = 20;
+$save_warning = '';
 
 if($test) echo "grammar_file = ".$this_file."<br />";
 
@@ -194,12 +195,12 @@ if(isset($_POST['apply_changes_instructions'])) {
 $refresh_file = $temp_dir."trace_".my_session_id()."_".$filename."_midiport_refresh";
 if(isset($_POST['savemidiport'])) {
 	save_midiressources($filename);
-	echo "<span id=\"timespan\" style=\"color:red; float:right; background-color:white;\">&nbsp;…&nbsp;Saved “".$filename."_midiport” file…</span>";
+	$save_warning = "<span id=\"timespan\" style=\"color:red; float:right; background-color:white;\">&nbsp;…&nbsp;Saved “".$filename."_midiport” file…</span>";
 	@unlink($refresh_file);
 	}
 
 if($need_to_save OR isset($_POST['savethisfile']) OR isset($_POST['compilegrammar'])) {
-	if(isset($_POST['savethisfile'])) echo "<span id=\"timespan\" style=\"color:red; float:right; background-color:white;\">&nbsp;…&nbsp;Saved “".$filename."” file…</span>";
+	if(isset($_POST['savethisfile'])) $save_warning = "<span id=\"timespan\" style=\"color:red; float:right; background-color:white;\">&nbsp;…&nbsp;Saved “".$filename."” file…</span>";
 	$content = $_POST['thistext'];
 	if(isset($_POST['alphabet_file'])) $alphabet_file = $_POST['alphabet_file'];
 	else $alphabet_file = '';
@@ -692,10 +693,11 @@ echo "<input type=\"hidden\" name=\"alphabet_file\" value=\"".$alphabet_file."\"
 
 echo "<span  id=\"topedit\">&nbsp;</span>";
 
+echo $save_warning;
 echo "<button style=\"background-color:yellow; border-radius: 6px; font-size:large;\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button><p></p>";
 
 find_replace_form();
-echo "<p><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" onclick=\"clearsave();\" name=\"savethisfile\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".$filename."’\">";
+echo "<p><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" id=\"saveButton\" onclick=\"clearsave();\" name=\"savethisfile\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".$filename."’\">";
 if((file_exists($output.SLASH.$default_output_name.".wav") OR file_exists($output.SLASH.$default_output_name.".mid") OR file_exists($output.SLASH.$default_output_name.".html") OR file_exists($output.SLASH.$default_output_name.".sco")) AND file_exists($result_file)) {
 	echo "&nbsp;&nbsp;&nbsp;<input style=\"color:DarkBlue; background-color:azure; font-size:large;\" onclick=\"window.open('".$result_file."','result','width=800,height=600,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Show latests results\">";
 	}
@@ -973,7 +975,8 @@ echo "</body>";
 echo "</html>";
 
 function save($this_file,$filename,$top_header,$save_content) {
-    if (file_exists($this_file)) {
+	if(trim($save_content) == '') return;
+    if(file_exists($this_file)) {
         $backup_file = $this_file."_bak";
         if(!copy($this_file, $backup_file))
             echo "<p>👉 <font color=\"red\">Failed to create backup of the file.</p>";
