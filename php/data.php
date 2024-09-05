@@ -17,6 +17,7 @@ window.name = '".$filename."'
 $this_file = $bp_application_path.$file;
 $dir = str_replace($filename,'',$this_file);
 $current_directory = str_replace(SLASH.$filename,'',$file);
+$current_directory = str_replace(SLASH,'/',$current_directory);
 save_settings("last_data_directory",$current_directory);
 
 if(isset($_POST['reload'])) {
@@ -1303,18 +1304,19 @@ if($settings_file == '' OR !file_exists($dir.$settings_file)) {
 	echo "•&nbsp;No quantization<br />";
 	}
 else {
+	echo "<input style=\"background-color:yellow;float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_settings."','".$settings_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$settings_file."’\">";
 	if($p_clock > 0 AND $q_clock > 0) {
 		$metronome_settings = 60 * $q_clock / $p_clock;
 		}
 	else $metronome_settings = 0;
 	if($metronome > 0 AND $metronome <> $metronome_settings) {
-		echo "➡&nbsp;Metronome = <font color=\"red\">".$metronome_settings."</font> beats/mn as per <font color=\"blue\">‘".$settings_file."’</font> but it may be changed in data.<br />";
+		echo "➡&nbsp;Metronome = <font color=\"red\">".$metronome_settings."</font> beats/mn as per<br /><font color=\"blue\">‘".$settings_file."’</font> but it may be changed in data.<br />";
 		}
 	if($metronome_settings > 0) $metronome = $metronome_settings;
 	if($metronome <> intval($metronome)) $metronome = sprintf("%.3f",$metronome);
 	$nature_of_time = $nature_of_time_settings;
 	if($metronome > 0.) {
-		echo "⏱ Metronome = <font color=\"red\">".$metronome."</font> beats/mn by default as per <font color=\"blue\">‘".$settings_file."’</font><br />";
+		echo "⏱ Metronome = <font color=\"red\">".$metronome."</font> beats/mn by default as per<br /><font color=\"blue\">‘".$settings_file."’</font><br />";
 		}
 	echo "•&nbsp;Time resolution = <font color=\"red\">".$time_resolution."</font> milliseconds as per <font color=\"blue\">‘".$settings_file."’</font><br />";
 	if($quantize) {
@@ -1332,7 +1334,6 @@ if($max_time_computing > 0) {
 	}
 if($note_convention <> '') echo "• Note convention is <font color=\"red\">‘".ucfirst(note_convention(intval($note_convention)))."’</font> as per <font color=\"blue\">‘".$settings_file."’</font>";
 else echo "• Note convention is <font color=\"red\">‘English’</font> by default";
-if($settings_file <> '' AND file_exists($dir.$settings_file)) echo "<input style=\"background-color:yellow;float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_settings."','".$settings_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$settings_file."’\">";
 echo "</div>";
 
 if(!isset($output_folder) OR $output_folder == '')

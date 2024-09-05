@@ -473,7 +473,7 @@ echo "<br />";
 
 echo "<table style=\"background-color: Cornsilk;\">";
 $show_grammar = isset($last_grammar_page) AND isset($last_grammar_name) AND file_exists("..".SLASH.$last_grammar_directory.SLASH.$last_grammar_name);
-$show_alphabet = isset($last_data_page) AND isset($last_data_name) AND file_exists("..".SLASH.$last_data_directory.SLASH.$last_data_name);
+$show_data = isset($last_data_page) AND isset($last_data_name) AND $last_data_name <> '' AND file_exists("..".SLASH.$last_data_directory.SLASH.$last_data_name);
 if(is_integer(strpos($path,"scale_images"))) {
 	echo "<tr>";
 	echo "<td>";
@@ -483,7 +483,7 @@ if(is_integer(strpos($path,"scale_images"))) {
 	}
 
 if(!is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"tonality_resources"))) {
-	if($path <> '' OR $show_grammar OR $show_alphabet) {
+	if($path <> '' OR $show_grammar OR $show_data) {
 		echo "<tr>";
 		echo "<th>";
 		if(($n1 = display_directory(TRUE,$dir,"grammar")) > 0 OR $show_grammar) {
@@ -495,9 +495,9 @@ if(!is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"t
 			}
 		echo "</th>";
 		echo "<th>";
-		if(($n2 = display_directory(TRUE,$dir,"data")) > 0 OR $show_alphabet) {
+		if(($n2 = display_directory(TRUE,$dir,"data")) > 0 OR $show_data) {
 			echo "<h3>Data project(s)</h3>";
-			if($show_alphabet) {
+			if($show_data) {
 				echo "<p style=\"background-color:snow; padding:6px; border-radius: 0.5em;\">Last visited: <a target=\"_blank\" href=\"".$last_data_page."\">".$last_data_name."</a>";
 				if(isset($last_data_directory) AND $folder <> $last_data_directory) echo "<br />in workspace</font> <a href=\"index.php?path=".$last_data_directory."\">".$last_data_directory."</a></p>";
 				}
@@ -583,7 +583,7 @@ echo "</table>";
 echo "</form>";
 
 function display_directory($test,$dir,$filter) {
-	global $path,$move_files,$move_checked_files,$new_file,$csound_resources,$tonality_resources,$delete_checked_files,$rename_checked_files,$delete_files,$rename_files,$show_dependencies,$trash_folder,$this_page,$url_this_page,$dir_trash_folder,$bp_application_path,$dest_folder,$done,$seen,$dir_csound_resources,$dir_tonality_resources;
+	global $path,$move_files,$move_checked_files,$new_file,$csound_resources,$tonality_resources,$delete_checked_files,$rename_checked_files,$delete_files,$rename_files,$show_dependencies,$trash_folder,$this_page,$url_this_page,$dir_trash_folder,$bp_application_path,$dest_folder,$done,$seen,$dir_csound_resources,$dir_tonality_resources,$last_grammar_name,$last_data_name;
 
 //	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 	$dircontent = scandir($dir);
@@ -626,6 +626,14 @@ function display_directory($test,$dir,$filter) {
 				else {
 					rename($source_file,$destination_file);
 					$this_file_moved = TRUE;
+					if(isset($last_grammar_name) AND $last_grammar_name == $thisfile) {
+						delete_settings_entry("last_grammar_page");
+						delete_settings_entry("last_grammar_name");
+						}
+					if(isset($last_data_name) AND $last_data_name == $thisfile) {
+						delete_settings_entry("last_data_name");
+						delete_settings_entry("last_data_page");
+						}
 					}
 				}
 			}
