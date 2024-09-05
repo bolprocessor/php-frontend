@@ -358,7 +358,7 @@ if($instruction <> "help") {
     $stopfile = str_replace(SLASH,'/',$stopfile);
 	echo "<p id=\"wait\" style=\"text-align:center; background-color:yellow;\"><br /><big><b><span class=\"blinking\">… Bol Processor console is working …</span></b></big><br />(Don't close this window!)<br /><br /><button type=\"button\" class=\"bouton\" onclick=\"createFile('".$stopfile."');\">Click to STOP</button><br /><br /></p>\n";
 	}
-echo str_repeat(' ', 1024);  // send extra spaces to fill browser buffer
+echo str_repeat(' ', 1024);  // send extra spaces to fill browser buffer, useful for Windows
 ob_flush();
 flush();
 

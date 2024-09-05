@@ -1,7 +1,7 @@
 // Bol Processor BP3 compatible with version BP2.9.8
-// Orchestra saved as "default.orc". Date: 2020-11-09 11:03:14
+// Orchestra saved as "easy.orc". Date: 2020-11-09 11:03:14
 ; This is a simple orchestra file for Bol Processor's default Csound score output
-
+; (Now replaced with "0-default.orc")
 ; It contains one single instrument: an oscillator using wave-table 1
 ; Argument p2 is the start date, p3 the duration (as per the standard)
 ; Argument p4 is the pitch in octave point pitch-class format
