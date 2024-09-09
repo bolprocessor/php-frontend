@@ -197,7 +197,7 @@ foreach($dircontent as $thisfile) {
 if(isset($_GET['path'])) $path = urldecode($_GET['path']);
 else $path = '';
 
-$text_help_file = $bp_application_path."BP2_help.txt"; // Name should be updated to BP3
+$text_help_file = $bp_application_path."BP3_help.txt";
 
 if($test) {
 	echo "<small>";
@@ -209,7 +209,7 @@ if($test) {
 	echo "</small><hr>";
 	}
 
-$html_help_file = "BP2_help.html";
+$html_help_file = "BP_help.html";
 $help = compile_help($text_help_file,$html_help_file);
 $top_header = "// Bol Processor BP3";
 
@@ -560,7 +560,7 @@ function compile_help($text_help_file,$html_help_file) {
 	$no_entry = array("ON","OFF","vel");
     if(isset( $filename) AND $filename == "Compilation") return '';
 	if(!file_exists($text_help_file)) {
-		echo "<p style=\"color:MediumTurquoise;\">Warning: “BP2_help.html” has not yet been reconstructed.</p>";
+		echo "<p style=\"color:MediumTurquoise;\">Warning: “BP_help.html” has not yet been reconstructed.</p>";
 		return '';
 		}
 	$content = @file_get_contents($text_help_file,TRUE);

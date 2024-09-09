@@ -254,7 +254,7 @@ $move_files = isset($_POST['move_files']);
 
 $show_dependencies = isset($_POST['show_dependencies']);
 if($folder <> '')
-	echo "<h3>Content of workspace: <font color=\"red\">".$folder."</font></h3>";
+	echo "<h3>Content of workspace: <font color=\"red\">".str_replace(SLASH,'/',$folder)."</font></h3>";
 $table = explode('_',$folder);
 $extension = end($table);
 
