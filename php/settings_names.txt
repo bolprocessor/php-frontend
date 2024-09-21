@@ -1,8 +1,8 @@
 Port		0	
 Csound orchestra	By default: "0-default.orc"	1	
-Quantization	ms	1
-Time resolution	ms	1
-Sync delay	ms after "wait"	1
+Quantization	ms (deft 10)	1
+Time resolution	ms (deft 10)	1
+Sync delay	ms after "wait" (deft 380)	1
 Quantize		1	1
 Striated time	(otherwise smooth)	1	1
 Pclock	Pclock/Qclock is the period of metronome (seconds)	1
