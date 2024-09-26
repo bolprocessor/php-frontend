@@ -9,7 +9,7 @@ Pclock	Pclock/Qclock is the period of metronome (seconds)	1
 Qclock		1
 Jbutt (28 radio button settings)		0
 Non-stop improvize		1	1
-Cyclic play	(not implemented)	1	1
+Max items produced	Except in real-time MIDI (deft 20)	1	
 Play each substitution		1	1
 Produce all items	(not implemented)	1	1
 Display production		1	1

@@ -63,6 +63,11 @@ if(isset($_POST['saveparameters'])) {
 			$value = $newvalue;
 			}
 		if($i == 9) $value = 28; // Jbutt
+		if($i == 11) { // Max items produced
+			$newvalue = intval($value);
+			if($newvalue < 2) $newvalue = 20;
+			$value = $newvalue;
+			}
 		if($i == 41) { // Default buffer size
 			$newvalue = intval($value);
 			if($newvalue < 100) $newvalue = 1000;

@@ -560,7 +560,7 @@ function compile_help($text_help_file,$html_help_file) {
 	$no_entry = array("ON","OFF","vel");
     if(isset( $filename) AND $filename == "Compilation") return '';
 	if(!file_exists($text_help_file)) {
-		echo "<p style=\"color:MediumTurquoise;\">Warning: “BP_help.html” has not yet been reconstructed.</p>";
+		echo "<p style=\"color:MediumTurquoise;\">Warning: “".$html_help_file."” has not yet been reconstructed.</p>";
 		return '';
 		}
 	$content = @file_get_contents($text_help_file,TRUE);
@@ -3756,7 +3756,7 @@ function filter_form_output($i) {
 	global $NoteOffFilter_out, $NoteOnFilter_out, $KeyPressureFilter_out, $ControlChangeFilter_out, $ProgramChangeFilter_out, $ChannelPressureFilter_out, $PitchBendFilter_out, $SystemExclusiveFilter_out, $TimeCodeFilter_out, $SongPositionFilter_out, $SongSelectFilter_out, $TuneRequestFilter_out, $EndSysExFilter_out, $TimingClockFilter_out, $StartFilter_out, $ContinueFilter_out, $ActiveSensingFilter_out, $SystemResetFilter_out;
 	global $url_this_page, $MIDIoutput;
 	echo "<div id=\"showhide_output".$i."\"  style=\"background-color: Snow; width:300px;\">";
-	echo "<input style=\"background-color:yellow;\" type=\"submit\" formaction=\"".$url_this_page."\" name=\"savemidiport\" value=\"SAVE MIDI ports\">";
+	echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savemidiport\" value=\"SAVE MIDI ports\">";
 	echo "<p style=\"margin-left:12px;\"><b>Filter for MIDI output ".$MIDIoutput[$i]."</b></p>";
 	echo "<table style=\"background-color:azure;\">";
 	echo "<tr>";
@@ -3923,7 +3923,7 @@ function display_midi_ports($filename) {
 		echo "<br />";
 		}
 	echo "<input style=\"float:right; color:DarkBlue; backgroundsave_-color:yellow;\" type=\"submit\" name=\"create_output\" value=\"Add an output\"><br />";
-	echo "<input style=\"background-color:yellow;\" type=\"submit\" formaction=\"".$url_this_page."\" name=\"savemidiport\" value=\"SAVE MIDI ports\">";
+	echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savemidiport\" value=\"SAVE MIDI ports\">";
 	echo str_replace(' ',"&nbsp;"," 👉 Delete name if changing number")."<br /><br />";
 	for($i = 0; $i < $NumberMIDIinputs; $i++) {
 		if($MIDIinput[$i] == -1) $value = '';

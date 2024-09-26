@@ -476,7 +476,7 @@ if($output <> '' AND $file_format <> "midi" AND $file_format <> "rtmidi") {
 	echo "<font color=\"red\">➡</font> Read the <a onclick=\"window.open('".$output_link."','".$grammar_name."','width=800,height=700,left=300'); return false;\" href=\"".$output_link."\">output file</a> (or <a href=\"".$output_link."\" download>download it</a>)<br />";
 	}
 if($trace_production OR $instruction == "templates" OR $show_production) {
-    if(file_exists($trace_link) AND $content_trace > 4) 
+    if(file_exists($trace_link) AND strlen($content_trace) > 105) 
         echo "<font color=\"red\">➡</font> Read the <a onclick=\"window.open('".$trace_link."','trace','width=800,height=600,left=400'); return false;\" href=\"".$trace_link."\">trace file</a> (or <a href=\"".$trace_link."\" download>download it</a>)";
     }
 echo "</p>";
