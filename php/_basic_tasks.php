@@ -17,7 +17,7 @@ define('SMOOTH',0);
 $test = FALSE;
 // $test = TRUE;
 
-$permissions = 0777;
+$permissions = 0775;
 
 $file_path = '_settings.php';
 if (!file_exists($file_path)) {
@@ -3709,7 +3709,7 @@ function save_midiport($thisfilename,$acceptFilters,$passFilters,$outFilters) {
 			if(isset($passFilters[$i])) fwrite($file,"MIDIpassFilter\t".$i."\t".$passFilters[$i]."\n");
 			}
 		fclose($file);
-		chmod($thisfilename,0777);
+		chmod($thisfilename,0775);
 		return true;
 		}
 	return false;
@@ -3987,7 +3987,7 @@ function create_variables($script_variables) {
 function copyDirectory($src,$dst) {
     if (!is_dir($src)) return false;
     // Create the destination directory if it doesn't exist
-    if (!is_dir($dst)) mkdir($dst, 0777, true);
+    if (!is_dir($dst)) mkdir($dst, 0775, true);
     $dir = opendir($src);
     while (false !== ($file = readdir($dir))) {
         if ($file != '.' && $file != '..') {

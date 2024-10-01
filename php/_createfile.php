@@ -3,7 +3,6 @@
 // Creating files in the "temp" folder
 // This script is called by the createFile() Javascript in "produce.php"
 // It is helpful to create a "_stop" file when the STOP button is clicked
-// session_write_close(); // Close the session for writing but keep it alive
 
 set_time_limit(0);
 $path_to_file = $_GET['path_to_file'] ?? '';
@@ -14,6 +13,7 @@ if(!empty($path_to_file)) {
 	if(!empty($pid)) file_put_contents($path_to_file,"pid = ".$pid);
 	else file_put_contents($path_to_file,"ok"); // Probably better not to create empty files
 	fclose($handle);
+	chmod($path_to_file,0777);
 	exec('sync'); // This makes it easier for the console to find the file, see the stop() function in ConsoleMain.c
 	}
 // Attempt to kill the console!, doesn't work

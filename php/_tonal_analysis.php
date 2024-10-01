@@ -1253,7 +1253,7 @@ function show_relations_on_image($i_item,$matching_list,$mode,$direction,$scalen
 	$thick_max = 8; $thick = array();
 	if(!is_dir($save_codes_dir)) {
 		mkdir($save_codes_dir);
-		chmod($save_codes_dir,0777);
+		chmod($save_codes_dir,0775);
 		}
 	if($mode == "harmonic") {
 		$direction = "both";

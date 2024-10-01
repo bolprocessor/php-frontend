@@ -21,7 +21,7 @@ $temp_folder = str_replace(' ','+',$temp_folder); // (compatibility with BP2)
 $script_variables = realpath("..") ."/temp_bolprocessor/".$temp_folder."/script_variables.php";
 $dirPath = realpath("..")."/temp_bolprocessor/".$temp_folder;
 if (!file_exists($dirPath)) {
-    mkdir($dirPath, 0777, true);
+    mkdir($dirPath, 0775, true);
     }
 create_variables($script_variables);
 
@@ -182,7 +182,7 @@ function run_script($dir,$dirPath,$this_script_file,$script_variables,$note_conv
 			echo "<p><b>Running script ".$newfile."</b></p>";
 			$new_script_variables = str_replace($this_script_file,$newfile,$script_variables);
 			$newdirPath = str_replace($this_script_file,$newfile,$dirPath);
-			if(!file_exists($newdirPath)) mkdir($newdirPath, 0777, true); 
+			if(!file_exists($newdirPath)) mkdir($newdirPath, 0775, true); 
             create_variables($new_script_variables);
 			run_script($dir,$newdirPath,$newfile,$new_script_variables,$note_convention,$grammar,$output_format);
 			echo "<p><b>Back to script ".$this_script_file."</b></p>";

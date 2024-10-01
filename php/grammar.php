@@ -253,10 +253,10 @@ do $output = str_replace(SLASH.SLASH,SLASH,$output,$count);
 while($count > 0);
 if(!file_exists($output)) {
 	echo "<p><font color=\"red\">Created folder:</font><font color=\"blue\"> ".$output."</font><br />";
-	if (!mkdir($output,0777, true))
+	if(!mkdir($output,0775, true))
 		error_log("Failed to create directory '{$temp_dir}' with error: " . error_get_last()['message']);
 	else
-		chmod($output,0777); // Double-check permissions
+		chmod($output,0775); // Double-check permissions
 	}
 echo link_to_help();
 

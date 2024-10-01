@@ -28,8 +28,8 @@ if(!file_exists($temp_dir.$temp_folder)) mkdir($temp_dir.$temp_folder);
 $script_variables = $temp_dir.$temp_folder.SLASH."script_variables.php";
 // echo "script_variables = ".$script_variables."<br />";
 $dirPath = realpath("..")."/temp_bolprocessor/".$temp_folder;
-if (!file_exists($dirPath)) {
-    mkdir($dirPath, 0777, true);
+if(!file_exists($dirPath)) {
+    mkdir($dirPath, 0775, true);
     }
 create_variables($script_variables);
 require_once($script_variables);

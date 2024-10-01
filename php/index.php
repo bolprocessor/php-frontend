@@ -65,7 +65,7 @@ if(isset($_POST['create_folder'])) {
 			}
 		else {
 			mkdir($dir.SLASH.$foldername);
-			chmod($dir.SLASH.$foldername,0777);
+			chmod($dir.SLASH.$foldername,0775);
 			$new_file = $foldername;
 			}
 		}

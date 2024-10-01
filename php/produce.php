@@ -733,7 +733,7 @@ if($n_messages > 0) {
 	if($handle) fwrite($handle,"</body>\n");
 	if($handle) fclose($handle);
 	}
-else echo "<p>No message produced… Bug in the console?";
+else echo "<p>No message produced…";
 if($trace_csound <> '' AND file_exists($trace_csound)) {
 	$window_name = $grammar_name."_".rand(0,99)."_result";
 	echo "&nbsp;<input style=\"color:DarkBlue; background-color:yellow; font-size:large;\" onclick=\"window.open('".$trace_csound."','".$window_name."','width=800,height=600,left=100'); return false;\" type=\"submit\" value=\"Show Csound trace\">";
