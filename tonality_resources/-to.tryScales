@@ -1,6 +1,15 @@
 // Bol Processor BP3
-// Tonality resource file saved as "-to.tryScales". Date: 2024-08-12 08:58:54
+// Tonality resource file saved as "-to.tryScales". Date: 2024-10-03 14:02:45
 _begin tables
+"Bohlen-Pierce"
+c21.506289596715 81 80c
+/C Db D E F Gb G H Jb J A Bb B C/
+k0 1 2 3 4 5 6 7 8 9 10 11 12 13k
+sp h • • • h h h • • p h h ps
+[1 1 27 25 25 21 9 7 7 5 75 49 5 3 9 5 49 25 15 7 7 3 63 25 25 9 3 1]
+|4|
+f2 0 128 -51 13 3 261.63 60 1 1.08 1.19 1.286 1.4 1.531 1.667 1.8 1.96 2.143 2.333 2.52 2.778 3
+<html>Bohlen-Pierce scale "just intonation"<br />https://midi.org/microtuning-and-alternative-intonation-systems<br />https://en.wikipedia.org/wiki/Bohlen-Pierce_scale<br />Created 2024-10-03 12:33:18<br /></html>
 "Sa-grama_equal_shrutis"
 /Sa • • Re • Ga • • • Ma • • • Pa • • Dha • Ni • • • Sa/
 c21.5062895967 81 80c

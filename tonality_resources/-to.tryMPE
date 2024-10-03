@@ -1,6 +1,15 @@
 // Bol Processor BP3
-// Tonality resource file saved as "-to.tryMPE". Date: 2024-08-31 13:52:53
+// Tonality resource file saved as "-to.tryMPE". Date: 2024-10-03 14:28:00
 _begin tables
+"Bohlen-Pierce"
+/C Db D E F Gb G H Jb J A Bb B C/
+c21.506289596715 81 80c
+k0 1 2 3 4 5 6 7 8 9 10 11 12 13k
+[1 1 27 25 25 21 9 7 7 5 75 49 5 3 9 5 49 25 15 7 7 3 63 25 25 9 3 1]
+sp h • • • h h h • • p h h ps
+|4|
+f2 0 128 -51 13 3 261.63 60 1 1.08 1.19 1.286 1.4 1.531 1.667 1.8 1.96 2.143 2.333 2.52 2.778 3
+<html>Bohlen-Pierce scale "just intonation"<br />https://midi.org/microtuning-and-alternative-intonation-systems<br />https://en.wikipedia.org/wiki/Bohlen-Pierce_scale<br />Created 2024-10-03 12:33:18<br /></html>
 "grama"
 /sa_ r1_ r2_ r3_ r4_ g1_ g2_ g3_ g4_ m1_ m2_ m3_ • p3_ p4_ d1_ d2_ d3_ d4_ n1_ n2_ n3_ n4_ sa_/
 c21.506289596715 81 80c
@@ -20,20 +29,20 @@ sp h p h h p h p h h p h ps
 f2 0 128 -51 12 2 261.63 60 1 1.067 1.125 1.2 1.25 1.333 1.422 1.5 1.6 1.667 1.778 1.875 2
 <html>A traditional scale constructed with simple integer ratios<br /></html>
 "meantone_try"
-c21.506289596715 81 80c
 /key#60 • key#62 • key#64 key#65 • key#67 • key#69 • key#71 key#72/
+c21.506289596715 81 80c
 k0 1 2 3 4 5 6 7 8 9 10 11 12k
-sp • • • • • • • • • • • •s
 [1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1011 500]
+sp • • • • • • • • • • • •s
 |5|
 f2 0 128 -51 12 2.022 261.63 60 1 1.066 1.125 1.199 1.265 1.349 1.422 1.5 1.599 1.687 1.799 1.896 2.022
 <html>This is a new scale for BP3.  Creation 2020-11-17 22:55:31<br />This scale has been imported from a SCALA file.<br />Created 2024-08-22 07:14:33<br /></html>
 "meantone_try2"
+/key#64 • key#66 • key#68 key#69 • key#71 • key#73 • key#75 key#76/
 c21.506289596715 81 80c
-/key#64 • key#66 • key#68 key#69 • key#71 • key#73 • key#75 key#72/
 k0 1 2 3 4 5 6 7 8 9 10 11 12k
-sp • • • • • • • • • • • •s
 [1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1011 500]
+sp • • • • • • • • • • • •s
 |5|
 f2 0 128 -51 12 2.022 261.63 64 1 1.066 1.125 1.199 1.265 1.349 1.422 1.5 1.599 1.687 1.799 1.896 2.022
 <html>This is a new scale for BP3.  Creation 2020-11-17 22:55:31<br />Same as meantone_try except that the base key is #64.<br />Created 2024-08-22 07:14:33<br /></html>
@@ -46,11 +55,11 @@ sp • • • • • • • • • • • •s
 |4|
 f2 0 128 -51 12 2.0046 261.63 60 1 1.06 1.123 1.19 1.261 1.336 1.416 1.5 1.59 1.684 1.785 1.891 2.004
 "zest24-supergoya17plus3_Db"
-c21.506289596715 81 80c
 /key#60 • key#61 • key#62 • • key#63 • • key#64 key#65 key#66 key#67 key#68 • key#69 • key#70 key#71 key#72/
+c21.506289596715 81 80c
 k0 0 1 0 2 0 0 3 0 0 4 5 6 7 8 0 9 0 10 11 12k
-sp • • • • • • • • • • • • • • • • • • • ps
 [1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1]
+sp • • • • • • • • • • • • • • • • • • • ps
 |4|
 f2 0 128 -51 20 2.000 261.63 60 1 1.03 1.104 1.133 1.167 1.233 1.285 1.323 1.338 1.377 1.435 1.478 1.505 1.55 1.65 1.707 1.757 1.844 1.92 1.977 2
 <html>Goya-17 plus 484, 676, and 1180 cents<br />This scale has been imported from a SCALA file.<br />Created 2024-08-22 07:41:27<br /></html>
