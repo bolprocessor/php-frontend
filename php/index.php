@@ -301,7 +301,7 @@ if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension 
 		echo "<div id=\"create\"  style=\"padding-top:6px;\">";
 		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		echo "<p style=\"text-align:left;\">";
-		echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"create_folder\" value=\"CREATE NEW FOLDER IN THIS WORKSPACE\"><br />named:&nbsp;";
+		echo "<input class=\"bouton\"  type=\"submit\" name=\"create_folder\" value=\"CREATE NEW FOLDER IN THIS WORKSPACE\"><br />named:&nbsp;";
 		echo "<input type=\"text\" name=\"foldername\" size=\"20\" style=\"background-color:CornSilk;\" value=\"\">";
 		echo "</p>";
 		echo "</form>";

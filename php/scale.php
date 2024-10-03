@@ -195,7 +195,11 @@ if($need_to_save OR isset($_POST['interpolate']) OR isset($_POST['savethisfile']
 		
 		if(!isset($_POST['ratio_'.$i]) OR $_POST['ratio_'.$i] == '') $ratio[$i] = 0;
 		else $ratio[$i] = trim($_POST['ratio_'.$i]);
-		if($ratio[$i] == '') $ratio[$i] = 0;
+		if($ratio[$i] == '') {
+			if($p[$i] <> 0 AND $q[$i] <> 0)
+			$ratio[$i] = $p[$i] / $q[$i];
+			else $ratio[$i] = 0;
+			}
 		
 		if(!isset($_POST['series_'.$i])) $series[$i] = '';
 		else $series[$i] = trim($_POST['series_'.$i]);
@@ -1218,7 +1222,8 @@ echo "<tr>";
 if(isset($_POST['new_convention'])) $convention = $new_convention = $_POST['new_convention'];
 else if(isset($_POST['convention'])) $convention = $_POST['convention'];
 $need_adjust = FALSE; $numnotes = 0;
-for($j = $j_col = 0; $j < $numgrades_fullscale; $j++) {
+// echo "numgrades_fullscale = ".$numgrades_fullscale."<br />";
+for($j = $j_col = 0; $j <= $numgrades_fullscale; $j++) {
 	if($j_col >= 12) {
 		$j_col = 0;
 		echo "</tr><tr>";
