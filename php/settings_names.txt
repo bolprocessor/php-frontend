@@ -11,7 +11,7 @@ Jbutt (28 radio button settings)		0
 Non-stop improvize		1	1
 Max items produced	Except in real-time MIDI (deft 20)	1	
 Play each substitution		1	1
-Produce all items	(not implemented)	1	1
+Produce all items		1	1
 Display production		1	1
 Step-by-step produce	(not implemented)	1	1
 Trace microtonality		1	1
@@ -42,7 +42,7 @@ Use text color		0	1
 Default buffer size	symbols	1
 Use color in graphics		0	1
 Use buffer limit		0	1
-Max computation time	seconds. Time for console's work (0 = no limit)	1		
+Max computation time	seconds. Time for console's work (0 = no limit) Except in Improvize mode	1		
 Seed for randomization	Positive integer, or 0 if cards need to be shuffled	1
 Use keyboard tokens		0	1
 Note convention	0 = English: C, D, E...<br />1 = Italian/Spanish/French: do, re, mi...<br />2 = Indian: sa, re, ga...<br />3 = Keys<br />4 = Only from tonal scales(s)	1

@@ -855,6 +855,7 @@ function get_setting($parameter,$settings_file) {
 	if($parameter == "produce_all_items") $i = 13;
 	if($parameter == "random_seed") $i = 45;
 	if($parameter == "non_stop_improvize") $i = 10;
+	if($parameter == "max_items") $i = 11;
 	if($parameter == "p_clock") $i = 7;
 	if($parameter == "q_clock") $i = 8;
 	if($parameter == "max_time_computing") $i = 44;
@@ -2457,7 +2458,6 @@ function check_gcc() {
 
 function link_to_tonality() {
 	echo "<p><font color=\"red\">➡</font>&nbsp;<a target=\"_blank\" href=\"index.php?path=tonality_resources\">TONALITY resource folder</a></p>";
-	echo "<hr style=\"border: 8px solid GhostWhite;\">";
 	}
 
 function check_csound() {
@@ -2502,6 +2502,7 @@ function check_csound() {
 		}
 	if($path <> $csound_resources) echo "<font color=\"red\">➡</font>&nbsp;<a target=\"_blank\" href=\"index.php?path=csound_resources\">CSOUND resource folder</a>";
 	echo "</p>";
+	echo "<hr style=\"border: 8px solid GhostWhite;\">";
 	return $result;
 	}
 
@@ -2664,7 +2665,7 @@ function show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,
 		if(($max_scales = count($list_of_tonal_scales)) > 0) {
 			if($max_scales > 1)  {
 				$i = 0;
-				echo "<p style=\"margin-bottom:0px;\">Tonality resource file <font color=\"blue\">‘".$tonality_file."’</font> contains definitions of tonal scales&nbsp;<font color=\"red\">➡</font>&nbsp;<button style=\"background-color:aquamarine; border-radius: 6px; font-size:large;\" onclick=\"togglescales(); return false;\">Show/hide tonal scales</button>";
+				echo "<p id=\"tonal\" style=\"margin-bottom:0px;\">Tonality resource file <font color=\"blue\">‘".$tonality_file."’</font> contains definitions of tonal scales&nbsp;<font color=\"red\">➡</font>&nbsp;<button style=\"background-color:aquamarine; border-radius: 6px; font-size:large;\" onclick=\"togglescales(); return false;\">Show/hide tonal scales</button>";
 				echo "<div id=\"scales\"  style=\"border-radius: 15px; padding:6px;\"><br />";
 				}
 			else {
@@ -3756,7 +3757,7 @@ function filter_form_output($i) {
 	global $NoteOffFilter_out, $NoteOnFilter_out, $KeyPressureFilter_out, $ControlChangeFilter_out, $ProgramChangeFilter_out, $ChannelPressureFilter_out, $PitchBendFilter_out, $SystemExclusiveFilter_out, $TimeCodeFilter_out, $SongPositionFilter_out, $SongSelectFilter_out, $TuneRequestFilter_out, $EndSysExFilter_out, $TimingClockFilter_out, $StartFilter_out, $ContinueFilter_out, $ActiveSensingFilter_out, $SystemResetFilter_out;
 	global $url_this_page, $MIDIoutput;
 	echo "<div id=\"showhide_output".$i."\"  style=\"background-color: Snow; width:300px;\">";
-	echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savemidiport\" value=\"SAVE MIDI ports\">";
+	echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#tonal\" name=\"savemidiport\" value=\"SAVE MIDI ports\">";
 	echo "<p style=\"margin-left:12px;\"><b>Filter for MIDI output ".$MIDIoutput[$i]."</b></p>";
 	echo "<table style=\"background-color:azure;\">";
 	echo "<tr>";
@@ -3923,7 +3924,7 @@ function display_midi_ports($filename) {
 		echo "<br />";
 		}
 	echo "<input style=\"float:right; color:DarkBlue; backgroundsave_-color:yellow;\" type=\"submit\" name=\"create_output\" value=\"Add an output\"><br />";
-	echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savemidiport\" value=\"SAVE MIDI ports\">";
+	echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#tonal\" name=\"savemidiport\" value=\"SAVE MIDI ports\">";
 	echo str_replace(' ',"&nbsp;"," 👉 Delete name if changing number")."<br /><br />";
 	for($i = 0; $i < $NumberMIDIinputs; $i++) {
 		if($MIDIinput[$i] == -1) $value = '';

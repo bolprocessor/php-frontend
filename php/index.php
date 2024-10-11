@@ -253,6 +253,7 @@ $rename_files = isset($_POST['rename_files']);
 $move_files = isset($_POST['move_files']);
 
 $show_dependencies = isset($_POST['show_dependencies']);
+$trash_backups = isset($_POST['trash_backups']);
 if($folder <> '')
 	echo "<h3>Content of workspace: <font color=\"red\">".str_replace(SLASH,'/',$folder)."</font></h3>";
 $table = explode('_',$folder);
@@ -263,10 +264,13 @@ echo "<p style=\"text-align:left;\">";
 if($path <> '') echo "<input style=\"background-color:azure;\" type=\"submit\" name=\"\" value=\"REFRESH THIS PAGE\">";
 if($folder <> '') echo "&nbsp;&nbsp;<big><font color=\"red\">↑</font>&nbsp;<a href=\"".$upper_link."\">UPPER FOLDER</a>&nbsp;<font color=\"red\">↑</font></big>";
 echo "</p>";
-echo "</form>";
 
 $link_list = "file_list.php?dir=".$dir;
-if($path <> '') echo "<p><input style=\"color:DarkBlue; background-color:Azure;\" onclick=\"window.open('".$link_list."','listfiles','width=300,height=600,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"COPY list of files\"></p>";
+if($path <> '' AND $path <> $trash_folder) {
+	echo "<p><input style=\"color:DarkBlue; background-color:Azure;\" onclick=\"window.open('".$link_list."','listfiles','width=300,height=600,left=100'); return false;\" type=\"submit\" name=\"\" value=\"COPY list of files\">&nbsp;";
+	echo "<input style=\"background-color:red; color:white;\" type=\"submit\" name=\"trash_backups\" title=\"Delete '_bak' files\" value=\"MOVE '_bak' files to TRASH\"></p>";
+	}
+echo "</form>";
 
 echo "<script>\n";
 echo "window.onload = function() {
@@ -583,7 +587,7 @@ echo "</table>";
 echo "</form>";
 
 function display_directory($test,$dir,$filter) {
-	global $path,$move_files,$move_checked_files,$new_file,$csound_resources,$tonality_resources,$delete_checked_files,$rename_checked_files,$delete_files,$rename_files,$show_dependencies,$trash_folder,$this_page,$url_this_page,$dir_trash_folder,$bp_application_path,$dest_folder,$done,$seen,$dir_csound_resources,$dir_tonality_resources,$last_grammar_name,$last_data_name;
+	global $path,$move_files,$move_checked_files,$new_file,$csound_resources,$tonality_resources,$delete_checked_files,$rename_checked_files,$delete_files,$rename_files,$show_dependencies,$trash_backups,$trash_folder,$this_page,$url_this_page,$dir_trash_folder,$bp_application_path,$dest_folder,$done,$seen,$dir_csound_resources,$dir_tonality_resources,$last_grammar_name,$last_data_name;
 
 //	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 	$dircontent = scandir($dir);
@@ -602,6 +606,12 @@ function display_directory($test,$dir,$filter) {
 		if($move_files) $check_box = "<input type=\"checkbox\" name=\"move_".$i_file."\"> ";
 		else $check_box = '';
 		$this_file_moved = FALSE;
+		if($trash_backups AND is_integer($pos=strpos($thisfile,"_bak"))) {
+			$source_file = $bp_application_path.$path.SLASH.$thisfile;
+			rename($source_file,$dir_trash_folder.$thisfile);
+			delete_settings($thisfile);
+			continue;
+			}
 		if(!$test AND $move_checked_files AND isset($_POST['move_'.$i_file])) {
 			unset($_POST['move_'.$i_file]);
 			$source_file = $bp_application_path.$path.SLASH.$thisfile;
@@ -758,7 +768,7 @@ function display_directory($test,$dir,$filter) {
 						else echo "<a target=\"_blank\" href=\"".$link."\">";
 						}
 					if($this_is_directory) echo "<b>";
-					echo $thisfile; // $$$$
+					echo $thisfile;
 					if($link <> '') echo "</a>";
 					if($this_is_directory) echo "</b>";
 					echo "&nbsp;";

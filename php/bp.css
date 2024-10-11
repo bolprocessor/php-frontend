@@ -139,6 +139,15 @@ input {
 	font-size: small;
 	background-color: Cornsilk;
 	}
+
+input[type=submit] {
+	border-radius: 6px;
+	margin: 2px;
+	}
+input[type=submit]:hover {
+	cursor: default;
+	}
+
 input[type=text]:hover, input[type=number]:hover, input[type=date]:hover, input[type=file]:hover, input[type=mail]:hover, input[type=email]:hover, input[type=password], input[type=submit]:hover, input[type=search]:hover, textarea:hover, select:hover {
 	box-shadow: -2px -2px Aqua;
 	}
@@ -147,10 +156,6 @@ input[type=checkbox]:enabled:hover {
 	}
 input[type=radio]:hover {
 	box-shadow: -2px -2px Aqua;
-	}
-input[type=submit] {
-	border-radius: 6px;
-	margin: 2px;
 	}
 	
 h1 {

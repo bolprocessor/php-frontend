@@ -402,6 +402,7 @@ if($settings_file <> '' AND file_exists($dir.$settings_file)) {
 	$trace_production = get_setting("trace_production",$settings_file);
 	$note_convention = get_setting("note_convention",$settings_file);
 	$non_stop_improvize = get_setting("non_stop_improvize",$settings_file);
+	$max_items = get_setting("max_items",$settings_file);
 	$p_clock = get_setting("p_clock",$settings_file);
 	$q_clock = get_setting("q_clock",$settings_file);
 	$max_time_computing = get_setting("max_time_computing",$settings_file);
@@ -421,8 +422,8 @@ if($test) echo "url_this_page = ".$url_this_page."<br />";
 
 $csound_is_responsive = FALSE;
 echo "<div style=\"float:right; background-color:white; padding:6px; border-radius: 12px;\">";
-link_to_tonality();
 $csound_is_responsive = check_csound();
+link_to_tonality();
 echo "</div>";
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 echo "<table cellpadding=\"8px;\" style=\"background-color:white; border-radius: 15px; border: 1px solid black;\"><tr style=\"\">";
@@ -550,7 +551,7 @@ $window_name = window_name($filename);
 echo "<b>then…</b>";
 if($file_format == "rtmidi" AND file_exists($refresh_file)) $refresh_instruction = "document.getElementById('refresh').style.display = 'inline';";
 else $refresh_instruction = '';
-echo "&nbsp;<input onclick=\"if(checksaved()) {".$refresh_instruction." window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)\"";
+echo "&nbsp;<input onclick=\"event.preventDefault(); if(checksaved()) {".$refresh_instruction." window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)\"";
 if($error) echo " disabled style=\"background-color:azure; box-shadow: none;\"";
 else echo " style=\"color:DarkBlue; background-color:Aquamarine;\"";
 echo ">";
@@ -614,7 +615,7 @@ if($nature_of_time == STRIATED) echo "•&nbsp;Time is <font color=\"red\">".nat
 else echo "•&nbsp;Time is <font color=\"red\">".nature_of_time($nature_of_time)."</font> (no fixed tempo)<br />";
 if($non_stop_improvize > 0) {
 	echo "• <font color=\"red\">Non-stop improvize</font> as set by <font color=\"blue\">‘".$settings_file."’</font>";
-	if($file_format <> "rtmidi") echo ": <i>only 10 variations will be produced</i>";
+	if($file_format <> "rtmidi") echo ": <i>only ".$max_items." variations will be produced</i>";
 	echo "<br />";
 	}
 if($diapason <> 440) echo "• <font color=\"red\">Diapason</font> (A4 frequency) = <font color=\"red\">".$diapason."</font> Hz as set by <font color=\"blue\">‘".$settings_file."’</font><br />";
@@ -626,7 +627,11 @@ if($C4key <> 60) {
 if($found_elsewhere AND $objects_file <> '') echo "• Sound-object prototype file = <font color=\"blue\">‘".$objects_file."’</font> found in <font color=\"blue\">‘".$alphabet_file."’</font><br />";
 if($note_convention <> '') echo "• Note convention is <font color=\"red\">‘".ucfirst(note_convention(intval($note_convention)))."’</font> as per <font color=\"blue\">‘".$settings_file."’</font><br />";
 else echo "• Note convention is <font color=\"red\">‘English’</font> by default<br />";
-if($produce_all_items == 1) echo "• Produce all items has been set ON by <font color=\"blue\">‘".$settings_file."’</font><br />";
+if($produce_all_items == 1) {
+	echo "• Produce all items has been set ON by <font color=\"blue\">‘".$settings_file."’</font>";
+	if($file_format <> "rtmidi") echo ": <i>only ".$max_items." variations will be produced</i>";
+	echo "<br />";
+	}
 if($show_production == 1) echo "• Show production has been set ON by <font color=\"blue\">‘".$settings_file."’</font><br />";
 if($trace_production == 1) echo "• Trace production has been set ON by <font color=\"blue\">‘".$settings_file."’</font><br />";
 if($settings_file <> '' AND file_exists($dir.$settings_file) AND isset($random_seed) AND $non_stop_improvize > 0) {
@@ -702,7 +707,8 @@ if((file_exists($output.SLASH.$default_output_name.".wav") OR file_exists($outpu
 	echo "&nbsp;&nbsp;&nbsp;<input style=\"color:DarkBlue; background-color:azure; font-size:large;\" onclick=\"window.open('".$result_file."','result','width=800,height=600,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Show latests results\">";
 	}
 echo "&nbsp;<input style=\"background-color:azure; font-size:large;\" type=\"submit\" onclick=\"clearsave();\" name=\"compilegrammar\" value=\"COMPILE GRAMMAR\">";
-echo "&nbsp;<input onclick=\"if(checksaved()) {".$refresh_instruction." window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)";
+
+echo "&nbsp;<input onclick=\"event.preventDefault(); if(checksaved()) {".$refresh_instruction." window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)";
 if($error) {
 	echo " - disabled because of missing files\"";
 	echo " disabled style=\"background-color:azure; box-shadow: none; font-size:large;\"";
@@ -723,13 +729,13 @@ echo "<textarea name=\"thistext\" onchange=\"tellsave()\" rows=\"".$textarea_row
 echo "<p style=\"float:right; margin-right:100px;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></p>";
 // echo "</div>";
 echo "<div>";
-echo "<input onclick=\"if(checksaved()) {".$refresh_instruction." window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)";
+echo "<input onclick=\"event.preventDefault(); if(checksaved()) {".$refresh_instruction." window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)";
 if($error) {
 	echo " - disabled because of missing files\"";
 	echo " disabled style=\"background-color:azure; box-shadow: none; font-size:large;\"";
 	}
 else echo "\" style=\"color:DarkBlue; background-color:Aquamarine; font-size:large;\"";
-echo " title=\"Don't forget to save!\"";
+// echo " title=\"Don't forget to save!\"";
 echo ">";
 $link_test = $link_produce."&test";
 $display_command_title = "DisplayCommand".$filename;

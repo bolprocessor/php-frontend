@@ -1373,8 +1373,8 @@ $result_file = $bp_application_path.$output_folder.SLASH.$project_name."-result.
 $content = show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,$filename,$file_format);
 
 echo "<div style=\"float:right; background-color:white; padding-right:6px; padding-left:6px; border-radius: 12px;\">";
-link_to_tonality();
 $csound_is_responsive = check_csound();
+link_to_tonality();
 echo "</div>";
 echo "<table id=\"topedit\" style=\"background-color:white; border-radius: 15px; border: 1px solid black;\" cellpadding=\"8px;\"><tr style=\"\">";
 echo "<td style=\"white-space:nowrap;\">";
@@ -1410,7 +1410,7 @@ if(file_exists("csound_version.txt")) {
 	if($file_format == "csound") echo " checked";
 	echo ">CSOUND file";
 	}
-echo "<br /><br />&nbsp;&nbsp;&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savethisfile\" value=\"SAVE format\">";
+echo "<br /><br />&nbsp;&nbsp;&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#tonal\" name=\"savethisfile\" value=\"SAVE format\">";
 if($file_format == "rtmidi") echo "&nbsp;<input id=\"refresh\" style=\"background-color:yellow; display:none;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"reload\" value=\"REFRESH\">";
 echo "</p>";
 echo "</td>";
@@ -1825,8 +1825,8 @@ if(!$hide) {
 		if($file_format == "rtmidi" AND file_exists($refresh_file)) $refresh_instruction = "document.getElementById('refresh').style.display = 'inline';";
 		else $refresh_instruction = '';
 		if($error_mssg == '') {
-			echo "<input id=\"playButton\" style=\"color:DarkBlue; background-color:Aquamarine;\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) {".$refresh_instruction." window.open('".$link_play."','".$window_name_play."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" title=\"Play this polymetric expression\" value=\"PLAY\">&nbsp;";
-			if($chunked) echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) {".$refresh_instruction." window.open('".$link_play_chunked."','".$window_name_chunked."','width=800,height=800,left=150,toolbar=yes'); return false;}\" type=\"submit\" name=\"produce\" title=\"Play polymetric expression in chunks (no graphics)\" value=\"PLAY safe (".$chunk_number." chunks)\">&nbsp;";
+			echo "<input id=\"playButton\" style=\"color:DarkBlue; background-color:Aquamarine;\" onmouseover=\"checksaved();\" onclick=\"event.preventDefault(); if(checksaved()) {".$refresh_instruction." window.open('".$link_play."','".$window_name_play."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" title=\"Play this polymetric expression\" value=\"PLAY\">&nbsp;";
+			if($chunked) echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onmouseover=\"checksaved();\" onclick=\"event.preventDefault(); if(checksaved()) {".$refresh_instruction." window.open('".$link_play_chunked."','".$window_name_chunked."','width=800,height=800,left=150,toolbar=yes'); return false;}\" type=\"submit\" name=\"produce\" title=\"Play polymetric expression in chunks (no graphics)\" value=\"PLAY safe (".$chunk_number." chunks)\">&nbsp;";
 			echo "&nbsp;<input style=\"background-color:azure;\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_expand."','".$window_name_expand."','width=800,height=800,left=100'); return false;\" type=\"submit\" name=\"produce\" title=\"Expand this polymetric expression\" value=\"EXPAND\">&nbsp;";
 			}
 		if($tie_mssg <> '' AND $error_mssg == '') echo "<br />";

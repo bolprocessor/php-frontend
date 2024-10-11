@@ -316,7 +316,7 @@ if(windows_system()) {
     $command_show = $command = windows_command($command);
     $command_show = str_replace('^','',$command_show);
     }
-echo "<p><small>command = <font color=\"red\">".$command_show."</font></small></p>\n";
+echo "<p><small><font color=\"red\">BP3 cmd:</font> <font color=\"black\">".$command_show."</font></small></p>\n";
 
 $stopfile = $temp_dir_abs."trace_".my_session_id()."_".$project_fullname."_stop";
 // This will be used by createFile() after clicking the STOP button in produce.php
@@ -633,7 +633,7 @@ if($no_error AND $file_format == "csound") {
                     $command_show = $command = windows_command($command);
                     $command_show = str_replace('^','',$command_show);
                     }
-                echo "<p><small>command = <font color=\"red\">".$command_show."</font></small></p>";
+                echo "<p><small><font color=\"red\">Csound cmd:</font> <font color=\"black\">".$command_show."</font></small></p>";
 				exec($command,$result_csound,$return_var);
 				if($return_var <> 0) {
 					echo "<p><font color=\"red\">➡</font> Csound returned error code <font color=\"red\">‘".$return_var."’</font>.<br /><i>Maybe you are trying to use instruments that do not match</i> <font color=\"blue\">‘".$csound_orchestra."’</font></p>";
