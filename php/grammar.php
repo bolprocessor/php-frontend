@@ -407,6 +407,7 @@ if($settings_file <> '' AND file_exists($dir.$settings_file)) {
 	$q_clock = get_setting("q_clock",$settings_file);
 	$max_time_computing = get_setting("max_time_computing",$settings_file);
 	$produce_all_items = get_setting("produce_all_items",$settings_file);
+//	if($produce_all_items) $show_production = TRUE;
 	$random_seed = get_setting("random_seed",$settings_file);
 	$diapason = get_setting("diapason",$settings_file);
 	$C4key = get_setting("C4key",$settings_file);
@@ -538,6 +539,17 @@ if($csound_orchestra <> '') {
 	if(file_exists($dir_csound_resources.$csound_orchestra)) $link_produce .= "&csound_orchestra=".urlencode($csound_orchestra);
 	}
 $url_settings = "settings.php?file=".urlencode($dir_base.$settings_file);
+if($file_format == "csound") {
+	$csound_file = $output_file;
+	$output_file = str_replace(".sco",'',$output_file);
+	$link_produce .= "&score=".urlencode($output.SLASH.$csound_file);
+	}
+if($file_format == "midi") {
+	$midi_file = $output_file;
+	$output_file = str_replace(".mid",'',$output_file);
+	$link_produce .= "&midifile=".urlencode($output.SLASH.$midi_file);
+	}
+if(($file_format == "rtmidi" OR $file_format == "csound" OR $file_format == "midi") AND $action == "produce-all") $output_file .= ".bpda";
 if($error) echo $error_mssg;
 if($test) echo "output = ".$output."<br />";
 if($test) echo "output_file = ".$output_file."<br />";
@@ -549,6 +561,7 @@ if($trace_production > 0)
 $link_produce .= "&here=".urlencode($here);
 $window_name = window_name($filename);
 echo "<b>then…</b>";
+// echo "<p>".$link_produce."</p>";
 if($file_format == "rtmidi" AND file_exists($refresh_file)) $refresh_instruction = "document.getElementById('refresh').style.display = 'inline';";
 else $refresh_instruction = '';
 echo "&nbsp;<input onclick=\"event.preventDefault(); if(checksaved()) {".$refresh_instruction." window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)\"";
@@ -632,7 +645,7 @@ if($produce_all_items == 1) {
 	if($file_format <> "rtmidi") echo ": <i>only ".$max_items." variations will be produced</i>";
 	echo "<br />";
 	}
-if($show_production == 1) echo "• Show production has been set ON by <font color=\"blue\">‘".$settings_file."’</font><br />";
+else if($show_production == 1) echo "• Show production has been set ON by <font color=\"blue\">‘".$settings_file."’</font><br />";
 if($trace_production == 1) echo "• Trace production has been set ON by <font color=\"blue\">‘".$settings_file."’</font><br />";
 if($settings_file <> '' AND file_exists($dir.$settings_file) AND isset($random_seed) AND $non_stop_improvize > 0) {
 	if($random_seed > 0)

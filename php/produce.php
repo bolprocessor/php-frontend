@@ -48,6 +48,10 @@ if(isset($_GET['here'])) $here = urldecode($_GET['here']);
 else $here = '???';
 if(isset($_GET['csound_file'])) $csound_file = $_GET['csound_file'];
 else $csound_file = '';
+if(isset($_GET['score'])) $score_file = $_GET['score'];
+else $score_file = '';
+if(isset($_GET['midifile'])) $midi_file = $_GET['midifile'];
+else $midi_file = '';
 if(isset($_GET['tonality_file'])) $tonality_file = $_GET['tonality_file'];
 else $tonality_file = '';
 if(isset($_GET['item'])) $item = $_GET['item'];
@@ -89,7 +93,7 @@ echo "</div>";
 	else $alphabet_path = '';
 	if(isset($_GET['format'])) $file_format = $_GET['format'];
 	else $file_format = '';
-	if($file_format <> '' AND isset($_GET['output'])) $output = urldecode($_GET['output']);
+	if(($instruction == "produce-all" OR $file_format <> '') AND isset($_GET['output'])) $output = urldecode($_GET['output']);
 	else $output = '';
 	if(isset($_GET['show_production'])) $show_production = TRUE;
 	else $show_production = FALSE;
@@ -243,14 +247,17 @@ echo "</div>";
 				break;
 			case "midi":
 			//	$command .= " -d --midiout ".$output;
-				$command .= " --midiout ".$output;
+				$command .= " --midiout ".$midi_file;
+				if($instruction == "produce-all") $command .= " -o ".$output;
 				break;
 			case "csound":
 			//	$command .= " -d --csoundout ".$output;
-				$command .= " --csoundout ".$output;
+				$command .= " --csoundout ".$score_file;
+				if($instruction == "produce-all") $command .= " -o ".$output;
 				break;
 			default:
 				$command .= " --rtmidi"; // We use the default destination
+				if($instruction == "produce-all") $command .= " -o ".$output;
 		//		$command .= " -d --rtmidi"; // We use the default destination
 				break;
 			}
@@ -316,7 +323,7 @@ if(windows_system()) {
     $command_show = $command = windows_command($command);
     $command_show = str_replace('^','',$command_show);
     }
-echo "<p><small><font color=\"red\">BP3 cmd:</font> <font color=\"black\">".$command_show."</font></small></p>\n";
+echo "<p><small><font color=\"green\">BP3 ➡</font> <font color=\"black\">".$command_show."</font></small></p>\n";
 
 $stopfile = $temp_dir_abs."trace_".my_session_id()."_".$project_fullname."_stop";
 // This will be used by createFile() after clicking the STOP button in produce.php
@@ -468,23 +475,20 @@ if(!$no_error) {
 		}
 	}
 echo "<p>";
-if($output <> '' AND $file_format <> "midi" AND $file_format <> "rtmidi") {
-	if($file_format <> "csound") {
-		$output_html = clean_up_file_to_html($output);
-		$output_link = $output_html;
-		}
+if($output <> '') {
+	$output_html = clean_up_file_to_html($output);
+	$output_link = $output_html;
 	echo "<font color=\"red\">➡</font> Read the <a onclick=\"window.open('".$output_link."','".$grammar_name."','width=800,height=700,left=300'); return false;\" href=\"".$output_link."\">output file</a> (or <a href=\"".$output_link."\" download>download it</a>)<br />";
 	}
 if($trace_production OR $instruction == "templates" OR $show_production) {
-    if(file_exists($trace_link) AND strlen($content_trace) > 105) 
+    if(file_exists($trace_link) AND strlen($content_trace) > 20) 
         echo "<font color=\"red\">➡</font> Read the <a onclick=\"window.open('".$trace_link."','trace','width=800,height=600,left=400'); return false;\" href=\"".$trace_link."\">trace file</a> (or <a href=\"".$trace_link."\" download>download it</a>)";
     }
 echo "</p>";
 	
 // Show MIDI file
 if($file_format == "midi") {
-	$midi_file_link = $output;
-//	echo "<p>output = ".$output."</p>";
+	$midi_file_link = $midi_file;
 	if(file_exists($midi_file_link) AND filesize($midi_file_link) > 59) {
 //		echo "midi_file_link = ".$midi_file_link."<br />";
 		if(!is_connected() AND $file_format == "midi") {
@@ -586,7 +590,7 @@ if($no_error AND $file_format == "csound") {
 		echo "<p><font color=\"red\">➡</font> No orchestra file has been found here: <font color=\"blue\">".$dir_csound_resources.$csound_orchestra."</font>. Csound will not create a sound file.</p>";
 		}
 	else {
-		$csound_file_link = $output;
+		$csound_file_link = $score_file;
        // echo "csound_file_link = ".$csound_file_link."<br />";
 		$sound_file_link = str_replace(".sco",'',$csound_file_link);
 		// We change the name of the sound file every time to force the browser to refresh the audio tag
@@ -633,7 +637,7 @@ if($no_error AND $file_format == "csound") {
                     $command_show = $command = windows_command($command);
                     $command_show = str_replace('^','',$command_show);
                     }
-                echo "<p><small><font color=\"red\">Csound cmd:</font> <font color=\"black\">".$command_show."</font></small></p>";
+                echo "<p><small><font color=\"green\">Csound ➡</font> <font color=\"black\">".$command_show."</font></small></p>";
 				exec($command,$result_csound,$return_var);
 				if($return_var <> 0) {
 					echo "<p><font color=\"red\">➡</font> Csound returned error code <font color=\"red\">‘".$return_var."’</font>.<br /><i>Maybe you are trying to use instruments that do not match</i> <font color=\"blue\">‘".$csound_orchestra."’</font></p>";

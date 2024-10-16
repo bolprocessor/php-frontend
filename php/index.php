@@ -268,7 +268,7 @@ echo "</p>";
 $link_list = "file_list.php?dir=".$dir;
 if($path <> '' AND $path <> $trash_folder) {
 	echo "<p><input style=\"color:DarkBlue; background-color:Azure;\" onclick=\"window.open('".$link_list."','listfiles','width=300,height=600,left=100'); return false;\" type=\"submit\" name=\"\" value=\"COPY list of files\">&nbsp;";
-	echo "<input style=\"background-color:red; color:white;\" type=\"submit\" name=\"trash_backups\" title=\"Delete '_bak' files\" value=\"MOVE '_bak' files to TRASH\"></p>";
+	if(countBakFiles($dir) > 0) echo "<input style=\"background-color:red; color:white;\" type=\"submit\" name=\"trash_backups\" title=\"Delete '_bak' files\" value=\"MOVE '_bak' files to TRASH\"></p>";
 	}
 echo "</form>";
 
@@ -279,7 +279,6 @@ echo "window.onload = function() {
 echo "</script>\n";
 
 if($path == $trash_folder AND isset($_POST['empty_trash'])) {
-//	echo $bp_application_path.$trash_folder."<br />";
 	if(emptydirectory($bp_application_path.$trash_folder)) echo "<p id=\"refresh\"><font color=\"red\">Trash is empty!</font></p>";
 	}
 
@@ -825,5 +824,20 @@ function folder_list($dir,$list,$path) {
 function do_not_delete($thisfile) {
 	if($thisfile == "scale_images") return TRUE;
 	return FALSE;
+	}
+
+function countBakFiles($directory = '.') {
+    $count = 0;
+    if (is_dir($directory)) {
+        if ($handle = opendir($directory)) {
+            while (false !== ($file = readdir($handle))) {
+                if (is_file($directory . '/' . $file) && preg_match('/_bak$/', $file)) {
+                    $count++;
+					}
+				}
+            closedir($handle);
+			}
+		}
+    return $count;
 	}
 ?>
