@@ -2457,7 +2457,7 @@ function check_gcc() {
 	}
 
 function link_to_tonality() {
-	echo "<p><font color=\"red\">➡</font>&nbsp;<a target=\"_blank\" href=\"index.php?path=tonality_resources\">TONALITY resource folder</a></p>";
+	echo "<p>Using microtonality?</p><p>👉&nbsp;&nbsp;<a target=\"_blank\" href=\"index.php?path=tonality_resources\">TONALITY resource folder</a></p>";
 	}
 
 function check_csound() {
@@ -2500,7 +2500,7 @@ function check_csound() {
 		echo "<p style=\"vertical-align:middle;\"><img src=\"pict/logo_csound.jpg\" width=\"90px;\" style=\"vertical-align:middle;\" />".$version."is responding<br />";
 		$result = TRUE;
 		}
-	if($path <> $csound_resources) echo "<font color=\"red\">➡</font>&nbsp;<a target=\"_blank\" href=\"index.php?path=csound_resources\">CSOUND resource folder</a>";
+	if($path <> $csound_resources) echo "👉&nbsp;&nbsp;<a target=\"_blank\" href=\"index.php?path=csound_resources\">CSOUND resource folder</a>";
 	echo "</p>";
 	echo "<hr style=\"border: 8px solid GhostWhite;\">";
 	return $result;

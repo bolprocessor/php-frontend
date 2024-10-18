@@ -1794,13 +1794,24 @@ if(!$hide) {
 			$data_chunked = $chunked = FALSE;
 			$tie_mssg = '';
 			}
+		$out[$i] = $output_file;
+		if($file_format == "csound") {
+			$cs = $output_file;
+			$out[$i] = str_replace(".sco",'',$output_file);
+			$link_options .= "&score=".urlencode($output.SLASH.$cs);
+			}
+		if($file_format == "midi") {
+			$midi_file = $output_file;
+			$out[$i]  = '';
+			$link_options .= "&midifile=".urlencode($output.SLASH.$midi_file);
+			}
 		$chunk_number = $segment['chunk_number'];
 		$line_recoded = $segment['line_recoded'];
 		$title_this = $segment['title_this'];
 		echo "<tr><td>".$i_item."</td><td>";
-		$link_options_play = $link_options."&output=".urlencode($bp_application_path.$output_folder.SLASH.$output_file)."&format=".$file_format."&item=".$i_item."&title=".urlencode($filename);
+		$link_options_play = $link_options."&output=".urlencode($bp_application_path.$output_folder.SLASH.$out[$i])."&format=".$file_format."&item=".$i_item."&title=".urlencode($filename);
 		$link_options_chunked = $link_options_play;
-		$output_file_expand = str_replace(".sco",'',$output_file);
+		$output_file_expand = str_replace(".sco",'',$out[$i]);
 		$output_file_expand = str_replace(".mid",'',$output_file_expand);
 		$output_file_expand .= ".bpda";
 		$link_options_expand = $link_options."&output=".urlencode($bp_application_path.$output_folder.SLASH.$output_file_expand)."&format=data";
@@ -1824,6 +1835,7 @@ if(!$hide) {
 		if($n2 > $n1) $error_mssg .= "• <font color=\"red\">This score contains ".($n2-$n1)." extra ‘}'</font><br />";
 		if($file_format == "rtmidi" AND file_exists($refresh_file)) $refresh_instruction = "document.getElementById('refresh').style.display = 'inline';";
 		else $refresh_instruction = '';
+	//	echo "<p>@@@".$link_play."</p>";
 		if($error_mssg == '') {
 			echo "<input id=\"playButton\" style=\"color:DarkBlue; background-color:Aquamarine;\" onmouseover=\"checksaved();\" onclick=\"event.preventDefault(); if(checksaved()) {".$refresh_instruction." window.open('".$link_play."','".$window_name_play."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" title=\"Play this polymetric expression\" value=\"PLAY\">&nbsp;";
 			if($chunked) echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onmouseover=\"checksaved();\" onclick=\"event.preventDefault(); if(checksaved()) {".$refresh_instruction." window.open('".$link_play_chunked."','".$window_name_chunked."','width=800,height=800,left=150,toolbar=yes'); return false;}\" type=\"submit\" name=\"produce\" title=\"Play polymetric expression in chunks (no graphics)\" value=\"PLAY safe (".$chunk_number." chunks)\">&nbsp;";

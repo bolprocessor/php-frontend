@@ -284,8 +284,8 @@ if($path == $trash_folder AND isset($_POST['empty_trash'])) {
 
 if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension <> "temp" AND !$delete_files AND !$rename_files AND !$move_files) {
 	echo "<div style=\"float:right; background-color:white; padding:6px; border-radius: 15px;\">";
-	if(!is_integer(strpos($path,$tonality_resources))) link_to_tonality();
 	check_csound();
+	if(!is_integer(strpos($path,$tonality_resources))) link_to_tonality();
 	if($path == $tonality_resources) {
 		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		echo "<p style=\"text-align:left;\">";

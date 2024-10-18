@@ -95,7 +95,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' AND isset($_POST['import_files'])) {
         }
     }
 
-echo "<h3>Tonality resource file “".$filename."”</h3>";
+echo "<h3>Tonality resource “".$filename."”</h3>";
 save_settings("last_name",$filename);
 
 if($test) echo "dir = ".$dir."<br />";

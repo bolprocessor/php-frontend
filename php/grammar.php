@@ -540,9 +540,9 @@ if($csound_orchestra <> '') {
 	}
 $url_settings = "settings.php?file=".urlencode($dir_base.$settings_file);
 if($file_format == "csound") {
-	$csound_file = $output_file;
+	$cs = $output_file;
 	$output_file = str_replace(".sco",'',$output_file);
-	$link_produce .= "&score=".urlencode($output.SLASH.$csound_file);
+	$link_produce .= "&score=".urlencode($output.SLASH.$cs);
 	}
 if($file_format == "midi") {
 	$midi_file = $output_file;
@@ -561,7 +561,7 @@ if($trace_production > 0)
 $link_produce .= "&here=".urlencode($here);
 $window_name = window_name($filename);
 echo "<b>then…</b>";
-// echo "<p>".$link_produce."</p>";
+// echo "<p>@@@ ".$link_produce."</p>";
 if($file_format == "rtmidi" AND file_exists($refresh_file)) $refresh_instruction = "document.getElementById('refresh').style.display = 'inline';";
 else $refresh_instruction = '';
 echo "&nbsp;<input onclick=\"event.preventDefault(); if(checksaved()) {".$refresh_instruction." window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)\"";

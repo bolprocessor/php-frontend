@@ -41,8 +41,8 @@ for($i = 0; $i < $imax; $i++) {
 	}
 
 if(isset($_POST['saveparameters'])) {
-	$saved_warning1 = "<p id=\"timespan2\" style=\"color:green;\">👉 Saved parameters ➡ don't forget to save again related grammar or data!</p>";
-	$saved_warning2 = "<p id=\"timespan3\" style=\"color:green;\">👉 Saved parameters ➡ don't forget to save again related grammar or data!</p>";
+	$saved_warning1 = "<p id=\"timespan2\"><font color=\"red\">➡</font> <font color=\"green\">Saved parameters…</font> <font color=\"red\">Don't forget to save again related grammar or data!</font></p>";
+	$saved_warning2 = "<p id=\"timespan3\"><font color=\"red\">➡</font> <font color=\"green\">Saved parameters…</font> <font color=\"red\">Don't forget to save again related grammar or data!</font></p>";
 	echo $saved_warning1;
 	$handle = fopen($this_file,"w");
 	$file_header = $top_header."\n// Settings file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
@@ -242,13 +242,13 @@ for($i = $j = 0; $i < $imax; $i++) {
 					$metronome = $Qclock * 60 / $Pclock;
 					if(intval($metronome) <> $metronome)
 						$metronome = sprintf("%.4f",$Qclock * 60 / $Pclock);
-					echo "Metronome = <font color=\"red\">".$metronome."</font> <font color=\"blue\">beats/minute</font>";
+					echo "👉 Metronome = <font color=\"red\">".$metronome."</font> <font color=\"blue\">beats/minute</font>";
 					}
 				}
 			if($i == 50) {
 				$GraphicScaleP = intval($table[$i]);
 				$GraphicScaleQ = intval($table[$i+1]);
-				echo "Graphic scale is P/Q = <font color=\"red\">".$GraphicScaleP."/".$GraphicScaleQ."</font>";
+				echo "👉 Graphic scale is P/Q = <font color=\"red\">".$GraphicScaleP."/".$GraphicScaleQ."</font>";
 				}
 				
 			}

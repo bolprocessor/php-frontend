@@ -218,15 +218,12 @@ echo "</div>";
 		}
 
 	$thisalphabet = $alphabet_path;
-	if(is_integer(strpos($thisalphabet,' ')))
-		$thisalphabet = '"'.$thisalphabet.'"';
+	if(is_integer(strpos($thisalphabet,' '))) $thisalphabet = '"'.$thisalphabet.'"';
 		
 	$thisobject = $objects_path;
-	if(is_integer(strpos($thisobject,' ')))
-		$thisobject = '"'.$thisobject.'"';
+	if(is_integer(strpos($thisobject,' '))) $thisobject = '"'.$thisobject.'"';
 	
-	if(is_integer(strpos($output,' ')))
-		$output = '"'.$output.'"';
+	if(is_integer(strpos($output,' '))) $output = '"'.$output.'"';
 		
 	if($settings_path <> '') $command .= " -se ".$thissettings;
 	if($data_path <> '') $command .= " -da ".$thisdata;
@@ -475,10 +472,16 @@ if(!$no_error) {
 		}
 	}
 echo "<p>";
+
+// echo "<p>output = ".$output."</p>";
 if($output <> '') {
-	$output_html = clean_up_file_to_html($output);
-	$output_link = $output_html;
-	echo "<font color=\"red\">➡</font> Read the <a onclick=\"window.open('".$output_link."','".$grammar_name."','width=800,height=700,left=300'); return false;\" href=\"".$output_link."\">output file</a> (or <a href=\"".$output_link."\" download>download it</a>)<br />";
+	if($file_format == "csound") $output_link = $score_file;
+	else if($file_format == "midi") $output_link = '';
+	else {
+		$output_html = clean_up_file_to_html($output);
+		$output_link = $output_html;
+		}
+	if($output_link <> '') echo "<font color=\"red\">➡</font> Read the <a onclick=\"window.open('".$output_link."','".$grammar_name."','width=800,height=700,left=300'); return false;\" href=\"".$output_link."\">output file</a> (or <a href=\"".$output_link."\" download>download it</a>)<br />";
 	}
 if($trace_production OR $instruction == "templates" OR $show_production) {
     if(file_exists($trace_link) AND strlen($content_trace) > 20) 
@@ -591,7 +594,7 @@ if($no_error AND $file_format == "csound") {
 		}
 	else {
 		$csound_file_link = $score_file;
-       // echo "csound_file_link = ".$csound_file_link."<br />";
+      //  echo "csound_file_link = ".$csound_file_link."<br />";
 		$sound_file_link = str_replace(".sco",'',$csound_file_link);
 		// We change the name of the sound file every time to force the browser to refresh the audio tag
        // echo "sound_file_link = ".$sound_file_link."<br />";

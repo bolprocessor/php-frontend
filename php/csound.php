@@ -25,7 +25,7 @@ echo "</a>   <span id='message2' style=\"margin-bottom:1em;\"></span>";
 echo "</p>";
 echo link_to_help();
 
-echo "<h3>Csound resource file “".$filename."”</h3>";
+echo "<h3>Csound resource “".$filename."”</h3>";
 save_settings("last_name",$filename);
 
 if($test) echo "dir = ".$dir."<br />";
