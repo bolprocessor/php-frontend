@@ -3409,7 +3409,7 @@ function ok_output_location($folder,$talk) {
 
 function read_midiport($thefile) {
 	global $MIDIinput,$MIDIoutput,$MIDIinputname,$MIDIinputcomment,$MIDIoutputname,$MIDIoutputcomment; // These are tables!
-	global $MIDIacceptFilter, $MIDIpassFilter, $MIDIoutFilter, $MIDIchannelFilter; // These are tables!
+	global $MIDIacceptFilter, $MIDIpassFilter, $MIDIoutFilter, $MIDIchannelFilter, $MIDIpartFilter; // These are tables!
 	global $NumberMIDIinputs, $NumberMIDIoutputs;
 	$result['found'] = false;
 	if(file_exists($thefile)) {
@@ -3464,6 +3464,13 @@ function read_midiport($thefile) {
 					if(ctype_digit($table[1])) {
 						$i = trim($table[1]);
 						if(count($table) > 2) $MIDIchannelFilter[$i] = trim($table[2]);
+						$foundout++;
+						}
+					}
+				else if(trim($table[0]) == "MIDIpartFilter") {
+					if(ctype_digit($table[1])) {
+						$i = trim($table[1]);
+						if(count($table) > 2) $MIDIpartFilter[$i] = trim($table[2]);
 						$foundout++;
 						}
 					}
@@ -3562,9 +3569,13 @@ function convert_midi_output_filter_to_params($i) {
 	}
 
 function convert_midi_channel_filter_to_params($i) {
-	global $channel_pass, $MIDIchannelFilter;
+	global $channel_pass, $part_pass, $MIDIchannelFilter, $MIDIpartFilter;
 	for($channel = 1; $channel <= 16; $channel++) {
 		$channel_pass[$i][$channel] = $MIDIchannelFilter[$i][$channel - 1];
+		}
+	for($part = 1; $part <= 12; $part++) {
+		if(isset($MIDIpartFilter[$i][$part - 1])) $part_pass[$i][$part] = $MIDIpartFilter[$i][$part - 1];
+		else $part_pass[$i][$part] = 1;
 		}
 	return;	
 	}
@@ -3579,7 +3590,7 @@ function get_parameter($param) {
 
 function save_midiressources($filename) {
 	global $MIDIinput, $MIDIoutput, $MIDIinputname, $MIDIoutputname, $MIDIinputcomment, $MIDIoutputcomment; // These are tables!
-	global $dir_midi_resources, $temp_midi_ressources, $NumberMIDIinputs, $NumberMIDIoutputs, $MIDIchannelFilter;
+	global $dir_midi_resources, $temp_midi_ressources, $NumberMIDIinputs, $NumberMIDIoutputs, $MIDIchannelFilter, $MIDIpartFilter;
 	for($i = 0; $i < $NumberMIDIinputs; $i++) {
 		if(isset($_POST["MIDIinput_".$i])) $MIDIinput[$i] = trim($_POST["MIDIinput_".$i]);
 		if(isset($_POST["MIDIinputname_".$i])) $MIDIinputname[$i] = trim($_POST["MIDIinputname_".$i]);
@@ -3589,12 +3600,16 @@ function save_midiressources($filename) {
 		if(isset($_POST["MIDIoutput_".$i])) $MIDIoutput[$i] = trim($_POST["MIDIoutput_".$i]);
 		if(isset($_POST["MIDIoutputname_".$i])) $MIDIoutputname[$i] = trim($_POST["MIDIoutputname_".$i]);
 		if(isset($_POST["MIDIoutputcomment_".$i])) $MIDIoutputcomment[$i] = trim($_POST["MIDIoutputcomment_".$i]);
-		$MIDIchannelFilter[$i] =  '';
+		$MIDIchannelFilter[$i] = $MIDIpartFilter[$i] = '';
 		for($channel = 1; $channel <= 16; $channel++) {
 			$varName = "channel_out_".$i."_".$channel;
 			$MIDIchannelFilter[$i]  .= isset($_POST[$varName]) ? '1' : '0';
 			}
 //		echo "<br />channelFilters[".$i."] = ".$MIDIchannelFilter[$i] ."<br />";
+		for($part = 1; $part <= 12; $part++) {
+			$varName = "part_out_".$i."_".$part;
+			$MIDIpartFilter[$i]  .= isset($_POST[$varName]) ? '1' : '0';
+			}
 		}
 	$acceptFilters = $passFilters = array();
 	for($i = 0; $i < $NumberMIDIinputs; $i++) {
@@ -3688,7 +3703,7 @@ function save_midiressources($filename) {
 
 function save_midiport($thisfilename,$acceptFilters,$passFilters,$outFilters) {
 	global $MIDIinput, $MIDIoutput, $MIDIinputname, $MIDIinputcomment, $MIDIoutputname, $MIDIoutputcomment; // These are tables!
-	global $NumberMIDIinputs, $NumberMIDIoutputs, $MIDIchannelFilter;
+	global $NumberMIDIinputs, $NumberMIDIoutputs, $MIDIchannelFilter, $MIDIpartFilter;
 	$file = fopen($thisfilename,'w');
 	if($file) {
 		for($i = 0; $i < $NumberMIDIoutputs; $i++) {
@@ -3699,6 +3714,7 @@ function save_midiport($thisfilename,$acceptFilters,$passFilters,$outFilters) {
 			fwrite($file,"MIDIoutput\t".$i."\t".$MIDIoutput[$i]."\t".$MIDIoutputname[$i]."\t".$MIDIoutputcomment[$i]."\n");
 			if(isset($outFilters[$i])) fwrite($file,"MIDIoutFilter\t".$i."\t".$outFilters[$i]."\n");
 			if(isset($MIDIchannelFilter[$i][$i])) fwrite($file,"MIDIchannelFilter\t".$i."\t".$MIDIchannelFilter[$i]."\n");
+			if(isset($MIDIpartFilter[$i][$i])) fwrite($file,"MIDIpartFilter\t".$i."\t".$MIDIpartFilter[$i]."\n");
 			}
 		for($i = 0; $i < $NumberMIDIinputs; $i++) {
 			if($MIDIinput[$i] == '' AND $MIDIinputname[$i] == '' AND $MIDIinputcomment[$i] == '') continue;
@@ -3797,6 +3813,12 @@ function filter_form_output($i) {
 		filter_channel($i,$channel);
 		}
 	echo "</td>";
+	echo "<td style=\"white-space:nowrap;\">";
+	echo "<p>Parts</p>";
+	for($part = 1; $part <=  12; $part++) {
+		filter_part($i,$part);
+		}
+	echo "</td>";
 	echo "</tr>";
 	echo "</table>";
 	filter_output_explanation();
@@ -3810,6 +3832,15 @@ function filter_channel($i,$channel) {
 	if(!isset($channel_pass[$i][$channel]) OR $channel_pass[$i][$channel]) echo " checked";
 	echo " />";
 	echo $channel;
+	}
+
+function filter_part($i,$part) {
+	global $part_pass;
+	$the_post = "part_out_".$i."_".$part;
+	echo "<br /><input type=\"checkbox\" name=\"".$the_post."\" value=\"1\"";
+	if(!isset($part_pass[$i][$part]) OR $part_pass[$i][$part]) echo " checked";
+	echo " />";
+	echo $part;
 	}
 
 function filter_buttons_out($i,$param) {
@@ -3872,6 +3903,7 @@ function filter_output_explanation() {
 	if($file_format <> "rtmidi") return;
 	echo "<p>The event filter specifies which MIDI events can be sent to this output.</p>";
 	echo "<p>The channel filter specifies which MIDI channels can be sent to this output.</p>";
+	echo "<p>The part filter specifies which parts of a score can be sent to this output.</p>";
 	}
 
 function display_midi_ports($filename) {
