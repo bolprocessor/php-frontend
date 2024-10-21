@@ -5,7 +5,6 @@ if(isset($_GET['title'])) $this_title = urldecode($_GET['title']);
 else $this_title = '';
 
 require_once("_header.php");
-display_darklight();
 
 echo "<script type='text/javascript' src='https://www.midijs.net/lib/midi.js'></script>";
 set_time_limit(0);
@@ -320,6 +319,8 @@ if(windows_system()) {
     $command_show = $command = windows_command($command);
     $command_show = str_replace('^','',$command_show);
     }
+
+display_darklight();
 echo "<p><small><b><font color=\"red\">BP3 ➡</font></b> ".$command_show."</small></p>\n";
 
 $stopfile = $temp_dir_abs."trace_".my_session_id()."_".$project_fullname."_stop";

@@ -127,7 +127,6 @@ body.dark-mode a:visited {
 	}
 a:hover {
     border-bottom: 4px solid yellow;
-	background-color: Lavender;
 	}
 a:hover img#darkModeToggle,
 a:hover img#darkModeToggle + * {

@@ -1291,7 +1291,7 @@ if($settings_file <> '' AND file_exists($dir.$settings_file)) {
 	if($csound_default_orchestra <> '') $found_orchestra_in_settings = TRUE;
 	}
 if($quantization == 0) $quantize = FALSE;
-echo "<div style=\"padding:1em; width:690px;  border:1px solid grey; border-radius: 12px;\">";
+echo "<div style=\"padding:1em; width:690px; border:1px solid grey; border-radius: 12px;\">";
 // echo "<div style=\"background-color:white; padding:1em; width:690px; border-radius: 15px;\">";
 if($settings_file == '' OR !file_exists($dir.$settings_file)) {
 	$time_resolution = 10; //  10 milliseconds by default

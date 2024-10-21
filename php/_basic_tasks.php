@@ -640,7 +640,7 @@ function compile_help($text_help_file,$html_help_file) {
 function link_to_help() {
 	global $html_help_file;
 	$console_link = "produce.php?instruction=help";
-	$link = "<p>➡ Display <a href=\"".$console_link."\" onclick=\"window.open('".$console_link."','help','width=800,height=800,left=200'); return false;\">console's</a> instructions or the <a onclick=\"window.open('".$html_help_file."','Help','width=800,height=500'); return false;\" href=\"".$html_help_file."\">complete help file</a></p>";
+	$link = "<p>👉 Display <a href=\"".$console_link."\" onclick=\"window.open('".$console_link."','help','width=800,height=800,left=200'); return false;\">console's</a> instructions or the <a onclick=\"window.open('".$html_help_file."','Help','width=800,height=500'); return false;\" href=\"".$html_help_file."\">complete help file</a></p>";
 	return $link;
 	}
 
@@ -2406,9 +2406,14 @@ function display_console_state() {
 	 if($output <> '') {
 		echo "Bol Processor ‘<span class=\"blue-text\"><b>".$console."</b></span>’ console is responding<br />Version ".$output;
 		$panicfile = str_replace(SLASH,'/',$panicfile);
-		if(isset($filename) AND $filename <> "Compilation" AND $filename <> "Produce" AND  $filename <> "Bol Processor") {
+		if(isset($filename) AND $filename <> "Compilation" AND $filename <> "Produce" AND  $filename <> "Bol Processor" AND $url_this_page <> "index.php") {
 			echo "<div style=\"display: flex; justify-content: flex-end; align-items: center;\"><button type=\"button\" class=\"bouton\" style=\"font-size: small;\" onclick=\"createFile('".$panicfile."');\">PANIC!</button>";
 			echo "&nbsp;&nbsp;<img title=\"Bulb Png PNGs by Vecteezy\" src=\"pict/bulb.png\" id=\"darkModeToggle\" style=\"width:30px;\"/>";
+			echo "</div>\n";
+			}
+		else {
+			echo "<div style=\"display: flex; justify-content: flex-end; align-items: center;\">";
+			echo "Dark/light&nbsp;<img title=\"Bulb Png PNGs by Vecteezy\" src=\"pict/bulb.png\" id=\"darkModeToggle\" style=\"width:40px;\"/>";
 			echo "</div>\n";
 			}
 		}

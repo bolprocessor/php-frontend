@@ -8,8 +8,8 @@ $url_this_page = $this_page = "index.php";
 display_console_state();
 
 echo "<p>";
-echo "<table style=\" border-radius:1em;\"><tr>";
-echo "<td style=\"padding:1em; vertical-align:middle; text-align:center; white-space:nowrap;\">";
+echo "<table style=\"border:1px solid grey; border-radius: 12px;\"><tr>";
+echo "<td style=\"padding:1em; white-space:nowrap;\">";
 
 $test = FALSE;
 if($path <> '') {
@@ -34,7 +34,7 @@ else {
 	echo "<h2>Welcome to Bol Processor ‘BP3’</h2>";
 //	echo "<img src=\"pict/rings.jpg\" width=\"100px;\"/>";
 	echo "</td>";
-	echo "<td style=\"padding:1em; vertical-align:middle; border-radius:1em;\">";
+	echo "<td style=\"padding:1em; border-radius:1em;\">";
 	echo "<p style=\"text-align:center;\">This interface is running<br />the multi-platform console<br /><a target=\"_blank\" href=\"https://bp3.tech\">https://bp3.tech</a></p>";
 	echo "<p>👉&nbsp;Read the <a href=\"https://raw.githubusercontent.com/bolprocessor/bolprocessor/graphics-for-BP3/BP3-changes.txt\" target=\"_blank\">history of changes</a></p>";
 	echo "</td>";
