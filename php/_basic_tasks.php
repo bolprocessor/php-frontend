@@ -442,7 +442,7 @@ function display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,
 				echo "<form method=\"post\" id=\"thisone\" action=\"".$url_this_page."#help_entries\" enctype=\"multipart/form-data\">";
 				echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
 				echo "<input type=\"hidden\" name=\"file_format\" value=\"".$file_format."\">";
-				echo "<button style=\"background-color:azure;\" type=\"submit\" onmouseover=\"checksaved();\" name=\"show_help_entries\">SHOW HELP ENTRIES</button>";
+				echo "<input style=\"background-color:azure;\" type=\"submit\" onmouseover=\"checksaved();\" name=\"show_help_entries\" value=\"SHOW HELP ENTRIES\">";
 				echo "</form></div>";
 				}
 			}
@@ -455,75 +455,75 @@ function display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,
 		$url_this_page = "alphabet.php?file=".urlencode($dir.$alphabet_file);
 		if($test) echo "url_this_page = ".$url_this_page."<br />";
 		echo "<td>";
-		echo "<input style=\"background-color:yellow;float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$alphabet_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$alphabet_file."’\">";
+		echo "<input style=\"color:DarkBlue; background-color:Azure; float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$alphabet_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$alphabet_file."’\">";
 		echo "</td>";
 		}
 	if($grammar_file <> '') {
 		$url_this_page = "grammar.php?file=".urlencode($dir.$grammar_file);
 		if($test) echo "url_this_page = ".$url_this_page."<br />";
 		echo "<td><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-		echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"openobjects\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$grammar_file."’\">&nbsp;";
+		echo "<input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\" name=\"openobjects\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$grammar_file."’\">&nbsp;";
 		echo "</td></form>";
 		}
 	if($objects_file <> '') {
 		$url_this_page = "objects.php?file=".urlencode($dir.$objects_file);
 		echo "<td><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-		echo "<input style=\"background-color:yellow;\" type=\"submit\"  onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$objects_file."’\">&nbsp;";
+		echo "<input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\"  onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$objects_file."’\">&nbsp;";
 		echo "</td></form>";
 		}
 	if($csound_file <> '') {
 		$url_this_page = "csound.php?file=".urlencode($csound_resources.SLASH.$csound_file);
 		echo "<td><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-		echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$csound_file."’\">&nbsp;";
+		echo "<input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$csound_file."’\">&nbsp;";
 		echo "</td></form>";
 		}
 	if($tonality_file <> '') {
 		$url_this_page = "tonality.php?file=".urlencode($tonality_resources.SLASH.$tonality_file);
 		echo "<td><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-		echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$tonality_file."’\">&nbsp;";
+		echo "<input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$tonality_file."’\">&nbsp;";
 		echo "</td></form>";
 		}
 	if($settings_file <> '') {
 		$url_this_page = "settings.php?file=".urlencode($dir.$settings_file);
 		if($test) echo "url_this_page = ".$url_this_page."<br />";
 		echo "<td>";
-		echo "<input style=\"background-color:yellow;float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$settings_file."','width=1000,height=800,left=100'); return false;\" value=\"EDIT ‘".$settings_file."’\">";
+		echo "<input style=\"color:DarkBlue; background-color:Azure; float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$settings_file."','width=1000,height=800,left=100'); return false;\" value=\"EDIT ‘".$settings_file."’\">";
 		echo "</td>";
 		}
 	if($orchestra_file <> '') {
 		$url_this_page = "orchestra.php?file=".urlencode($dir.$orchestra_file);
 		echo "<td>";
-		echo "<input style=\"background-color:yellow;float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$orchestra_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$orchestra_file."’\">";
+		echo "<input style=\"color:DarkBlue; background-color:Azure; float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$orchestra_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$orchestra_file."’\">";
 		echo "</td>";
 		}
 	if($interaction_file <> '') {
 		$url_this_page = "interaction.php?file=".urlencode($dir.$interaction_file);
 		echo "<td>";
-		echo "<input style=\"background-color:yellow;float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$interaction_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$interaction_file."’\">";
+		echo "<input style=\"color:DarkBlue; background-color:Azure; float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$interaction_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$interaction_file."’\">";
 		echo "</td>";
 		}
 	if($midisetup_file <> '') {
 		$url_this_page = "midisetup.php?file=".urlencode($dir.$midisetup_file);
 		echo "<td>";
-		echo "<input style=\"background-color:yellow;float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$midisetup_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$midisetup_file."’\">";
+		echo "<input style=\"color:DarkBlue; background-color:Azure; float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$midisetup_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$midisetup_file."’\">";
 		echo "</td>";
 		}
 	if($timebase_file <> '') {
 		$url_this_page = "timebase.php?file=".urlencode($dir.$timebase_file);
 		echo "<td>";
-		echo "<input style=\"background-color:yellow;float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$timebase_file."','width=1000,height=900,left=50'); return false;\" value=\"EDIT ‘".$timebase_file."’\">";
+		echo "<input style=\"color:DarkBlue; background-color:Azure; float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$timebase_file."','width=1000,height=900,left=50'); return false;\" value=\"EDIT ‘".$timebase_file."’\">";
 		echo "</td>";
 		}
 	if($keyboard_file <> '') {
 		$url_this_page = "keyboard.php?file=".urlencode($dir.$keyboard_file);
 		echo "<td>";
-		echo "<input style=\"background-color:yellow;float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$keyboard_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$keyboard_file."’\">";
+		echo "<input style=\"color:DarkBlue; background-color:Azure; float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$keyboard_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$keyboard_file."’\">";
 		echo "</td>";
 		}
 	if($glossary_file <> '') {
 		$url_this_page = "glossary.php?file=".urlencode($dir.$glossary_file);
 		echo "<td>";
-		echo "<input style=\"background-color:yellow;float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$glossary_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$glossary_file."’\">";
+		echo "<input style=\"color:DarkBlue; background-color:Azure; float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$glossary_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$glossary_file."’\">";
 		echo "</td>";
 		}
 	echo "</tr></table>";
@@ -2393,7 +2393,7 @@ function delete_settings_entry($entry) {
 
 function display_darklight() {
 	echo "<div style=\"display:flex; align-items:center; float:right;\">";
-	echo "<img title=\"Bulb Png PNGs by Vecteezy\" src=\"pict/bulb.png\" id=\"darkModeToggle\" style=\"width:30px;\"/>";
+	echo "&nbsp;<img title=\"Bulb Png PNGs by Vecteezy\" src=\"pict/bulb.png\" id=\"darkModeToggle\" style=\"width:30px; cursor: pointer;\"/>";
 	echo "</div>";
 	}
 
@@ -2408,12 +2408,12 @@ function display_console_state() {
 		$panicfile = str_replace(SLASH,'/',$panicfile);
 		if(isset($filename) AND $filename <> "Compilation" AND $filename <> "Produce" AND  $filename <> "Bol Processor" AND $url_this_page <> "index.php") {
 			echo "<div style=\"display: flex; justify-content: flex-end; align-items: center;\"><button type=\"button\" class=\"bouton\" style=\"font-size: small;\" onclick=\"createFile('".$panicfile."');\">PANIC!</button>";
-			echo "&nbsp;&nbsp;<img title=\"Bulb Png PNGs by Vecteezy\" src=\"pict/bulb.png\" id=\"darkModeToggle\" style=\"width:30px;\"/>";
+			echo "&nbsp;&nbsp;<img title=\"Bulb Png PNGs by Vecteezy\" src=\"pict/bulb.png\" id=\"darkModeToggle\" style=\"width:30px; cursor: pointer;\"/>";
 			echo "</div>\n";
 			}
 		else {
-			echo "<div style=\"display: flex; justify-content: flex-end; align-items: center;\">";
-			echo "Dark/light&nbsp;<img title=\"Bulb Png PNGs by Vecteezy\" src=\"pict/bulb.png\" id=\"darkModeToggle\" style=\"width:40px;\"/>";
+			echo "<div id=\"darkModeToggle\" style=\"display: flex; justify-content: flex-end; align-items: center; cursor: pointer;\">";
+			echo "Dark/light&nbsp;&nbsp;<img title=\"Bulb Png PNGs by Vecteezy\" src=\"pict/bulb.png\"  style=\"width:40px;\"/>";
 			echo "</div>\n";
 			}
 		}

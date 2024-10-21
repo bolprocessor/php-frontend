@@ -1306,7 +1306,7 @@ if($settings_file == '' OR !file_exists($dir.$settings_file)) {
 	echo "•&nbsp;No quantization<br />";
 	}
 else {
-	echo "<input style=\"background-color:yellow;float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_settings."','".$settings_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$settings_file."’\">";
+	echo "<input style=\"color:DarkBlue; background-color:Azure; float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_settings."','".$settings_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$settings_file."’\">";
 	if($p_clock > 0 AND $q_clock > 0) {
 		$metronome_settings = 60 * $q_clock / $p_clock;
 		}
@@ -1373,11 +1373,10 @@ $result_file = $bp_application_path.$output_folder.SLASH.$project_name."-result.
 
 $content = show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,$filename,$file_format);
 
-echo "<div style=\"float:right; padding-right:6px; padding-left:6px; border-radius: 12px;\">";
+echo "<div style=\"float:right; padding-right:6px; padding-left:6px; border-radius:12px;\">";
 $csound_is_responsive = check_csound();
 link_to_tonality();
 echo "</div>";
-// echo "<table id=\"topedit\" style=\"background-color:white; border-radius: 15px; border: 1px solid black;\" cellpadding=\"8px;\"><tr style=\"\">";
 echo "<table id=\"topedit\" cellpadding=\"8px;\" style=\"border:1px solid grey;\"><tr >";
 echo "<td id=\"topmidiports\" style=\"white-space:nowrap;\">";
 if($file_format <> "rtmidi") {
@@ -1479,7 +1478,10 @@ if(intval($note_convention) <> intval($new_convention) AND $new_convention <> ''
 	echo "<p><font color=\"red\">➡</font> WARNING: Note convention should be set to <font color=\"red\">‘".ucfirst(note_convention(intval($new_convention)))."’</font> in the <span class=\"blue-text\">‘".$settings_file."’</span> settings file</p>";
 
 echo $save_warning;
-echo "<p><button style=\"background-color:yellow; border-radius: 6px; font-size:large;\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button></p>";
+if($file_format <> "rtmidi") {
+	echo "<p>&nbsp;</p>";
+	}
+echo "<p><button style=\"color:DarkBlue; background-color:Azure; border-radius: 6px;\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button></p>";
  echo "<br /><table border=\"0\"><tr>";
 echo "<td>";
 
@@ -1491,7 +1493,7 @@ echo "<div style=\"text-align:left;\"><input id=\"saveButton\" style=\"backgroun
 
 $content = do_replace($content);
 
-echo "<br /><textarea id=\"textArea\" name=\"thistext\" onchange=\"tellsave()\" rows=\"40\" style=\"width:700px;\">".$content."</textarea><br /><br />";
+echo "<br /><textarea id=\"textArea\" name=\"thistext\" onchange=\"tellsave()\" rows=\"40\" style=\"width:750px;\">".$content."</textarea><br /><br />";
 
 echo "<div style=\"float:right;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></div>";
 
@@ -1542,7 +1544,7 @@ if(isset($_POST['change_convention']) AND isset($_POST['new_convention'])) {
 	echo "</tr>";
 	echo "</table>";
 	echo "&nbsp;<input style=\"background-color:cornsilk;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\">";
-	echo "&nbsp;<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"use_convention\" value=\"USE THIS CONVENTION\">";
+	echo "&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"use_convention\" value=\"USE THIS CONVENTION\">";
 	$hide = TRUE;
 	}
 
@@ -1671,14 +1673,14 @@ if(!$hide) {
 		$new_settings_file = str_replace("-da.",'',$filename);
 		$new_settings_file = str_replace(".bpda",'',$new_settings_file);
 		$new_settings_file = "-se.".$new_settings_file;
-		echo "<p>&nbsp;</p><p style=\"background-color:white; color:black\"><font color=\"red\">➡</font> <input style=\"background-color:yellow; font-size:large;\" onclick=\"window.open('settings_list.php?dir=".urlencode($dir)."&thispage=".urlencode($url_this_page)."','settingsfiles','width=400,height=400,left=100'); return false;\" type=\"submit\" title=\"Display settings files\" value=\"CHOOSE\"> a settings file or <input style=\"background-color:yellow; font-size:large;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"create_settings_file\" formaction=\"".$url_this_page."\" value=\"CREATE\"> a new file named <input type=\"text\" name=\"new_settings_file\" size=\"25\" value=\"".$new_settings_file."\"></p>";
+		echo "<p>&nbsp;</p><p style=\"background-color:white; color:black\"><font color=\"red\">➡</font> <input style=\"background-color:yellow; font-size:large;\" onclick=\"window.open('settings_list.php?dir=".urlencode($dir)."&thispage=".urlencode($url_this_page)."','settingsfiles','width=400,height=400,left=100'); return false;\" type=\"submit\" title=\"Display settings files\" value=\"CHOOSE\"> a settings file or <input style=\"color:DarkBlue; background-color:Azure; font-size:large;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"create_settings_file\" formaction=\"".$url_this_page."\" value=\"CREATE\"> a new file named <input type=\"text\" name=\"new_settings_file\" size=\"25\" value=\"".$new_settings_file."\"></p>";
 		}
 	else 
-		echo "<p><input style=\"background-color:yellow;\" onclick=\"window.open('settings_list.php?dir=".urlencode($dir)."&thispage=".urlencode($url_this_page)."','settingsfiles','width=400,height=400,left=100'); return false;\" type=\"submit\" title=\"Display settings files\" value=\"CHOOSE\"> a different settings file</p>";
+		echo "<p><input style=\"color:DarkBlue; background-color:Azure;\" onclick=\"window.open('settings_list.php?dir=".urlencode($dir)."&thispage=".urlencode($url_this_page)."','settingsfiles','width=400,height=400,left=100'); return false;\" type=\"submit\" title=\"Display settings files\" value=\"CHOOSE\"> a different settings file</p>";
 	echo "<hr>";
 	echo "<table style=\"border:1px solid grey; border-radius: 12px;\">";
 	echo "<tr>";
-	echo "<td style=\"vertical-align:middle; white-space:nowrap;\"><input style=\"background-color:Aquamarine;\" type=\"submit\" onmouseover=\"checksaved();\" name=\"change_convention\" formaction=\"".$url_this_page."#topchanges\" value=\"APPLY NOTE CONVENTION to this data\"> ➡</td>";
+	echo "<td style=\"vertical-align:middle; white-space:nowrap;\"><input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\" onmouseover=\"checksaved();\" name=\"change_convention\" formaction=\"".$url_this_page."#topchanges\" value=\"APPLY NOTE CONVENTION to this data\"> ➡</td>";
 	echo "<td style=\"vertical-align:middle; white-space:nowrap;\">";
 	echo "<input type=\"radio\" name=\"new_convention\" value=\"0\">English<br />";
 	echo "<input type=\"radio\" name=\"new_convention\" value=\"1\">Italian/Spanish/French<br />";
@@ -1698,36 +1700,36 @@ if(!$hide) {
 	$found_velocity = substr_count($content,"_vel(");
 	$found = FALSE;
 	if($found_chan > 0) {
-		echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onmouseover=\"checksaved();\" name=\"delete_chan\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _chan()\">&nbsp;";
+		echo "<input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\" onmouseover=\"checksaved();\" name=\"delete_chan\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _chan()\">&nbsp;";
 		$found = TRUE;
 		}
 	if($found_ins > 0) {
-		echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"delete_ins\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _ins()\">&nbsp;";
+		echo "<input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"delete_ins\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _ins()\">&nbsp;";
 		$found = TRUE;
 		}
 	if($found_tempo > 0) {
-		echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"delete_tempo\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _tempo()\">&nbsp;";
+		echo "<input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"delete_tempo\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _tempo()\">&nbsp;";
 		$found = TRUE;
 		}
 	if($found_volume > 0) {
-		echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"delete_volume\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _volume()\">&nbsp;";
-		echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"volume_velocity\" formaction=\"".$url_this_page."#topedit\" value=\"volume -> velocity\">&nbsp;";
+		echo "<input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"delete_volume\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _volume()\">&nbsp;";
+		echo "<input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"volume_velocity\" formaction=\"".$url_this_page."#topedit\" value=\"volume -> velocity\">&nbsp;";
 		$found = TRUE;
 		}
 	if($found_velocity > 0) {
-		echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"delete_velocity\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _vel()\">&nbsp;";
-		echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"velocity_volume\" formaction=\"".$url_this_page."#topedit\" value=\"velocity -> volume\">&nbsp;";
+		echo "<input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"delete_velocity\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _vel()\">&nbsp;";
+		echo "<input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"velocity_volume\" formaction=\"".$url_this_page."#topedit\" value=\"velocity -> volume\">&nbsp;";
 		$found = TRUE;
 		}
 	if($found_volume > 0) {
-		echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"modify_volume\" formaction=\"".$url_this_page."#topchanges\" value=\"Modify _volume()\">&nbsp;";
+		echo "<input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"modify_volume\" formaction=\"".$url_this_page."#topchanges\" value=\"Modify _volume()\">&nbsp;";
 		$found = TRUE;
 		}
 	if($found_velocity > 0) {
-		echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"modify_velocity\" formaction=\"".$url_this_page."#topchanges\" value=\"Modify _vel()\">&nbsp;";
+		echo "<input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"modify_velocity\" formaction=\"".$url_this_page."#topchanges\" value=\"Modify _vel()\">&nbsp;";
 		}
 	if($found_chan > 0  OR $found_ins > 0) {
-		echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"manage_instructions\" formaction=\"".$url_this_page."#topchanges\" value=\"MANAGE _chan() AND _ins()\">&nbsp;";
+		echo "<input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"manage_instructions\" formaction=\"".$url_this_page."#topchanges\" value=\"MANAGE _chan() AND _ins()\">&nbsp;";
 		$found = TRUE;
 		}
 	echo "<input type=\"hidden\" name=\"change_velocity_average\" value=\"".$change_velocity_average."\">";
@@ -1752,7 +1754,7 @@ if($imax > 0 AND (substr_count($content,'{') > 0 OR substr_count($content,"-da."
 		if(!$tonal_analysis_possible) echo " disabled";
 		echo ">";
 		echo "Melodic and harmonic tonal intervals of (all) item(s)<br /><i>ignoring channels, instruments, periods, sound-objects and random performance controls.</i></p>";
-		if($tonality_file <> '') echo "<div style=\"background-color:white; color:black; padding:6px;\"><font color=\"red\">➡</font> It may be necessary to <a target=\"_blank\" href=\"tonality.php?file=".urlencode($tonality_resources.SLASH.$tonality_file)."\">open</a> the ‘<span class=\"blue-text\">".$tonality_file."</span>’ tonality resource file, allowing access to its tonal scale definitions.</div>";
+		if($tonality_file <> '') echo "<div style=\"padding:6px;\"><font color=\"red\">➡</font> It may be necessary to <a target=\"_blank\" href=\"tonality.php?file=".urlencode($tonality_resources.SLASH.$tonality_file)."\">open</a> the ‘<span class=\"blue-text\">".$tonality_file."</span>’ tonality resource file, allowing access to its tonal scale definitions.</div>";
 		echo "</form>";
 		echo "<hr>";
 		}

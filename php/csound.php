@@ -850,7 +850,7 @@ echo "<input type=\"hidden\" name=\"dir_scales\" value=\"".$dir_scales."\">";
 
 if(is_integer(strpos($tonality_filename,"-to.")) OR is_integer(strpos($tonality_filename,".bpto"))) {
 	$url_tonality = "tonality.php?file=".urlencode($tonality_resources.SLASH.$tonality_filename);
-	echo "<input style=\"background-color:yellow;\" type=\"submit\" formaction=\"".$url_tonality."\" target=\"_blank\" name=\"opentonality\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$tonality_filename."’\">&nbsp;";
+	echo "<input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\" formaction=\"".$url_tonality."\" target=\"_blank\" name=\"opentonality\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$tonality_filename."’\">&nbsp;";
 	}
 $max_scales = $i_scale; // Beware that we count scales from 1 because 0 is the default equal-tempered scale
 	

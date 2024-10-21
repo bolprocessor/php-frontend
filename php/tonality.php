@@ -73,7 +73,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' AND isset($_POST['import_files'])) {
 		fwrite($handle_lock,"lock\n");
 		if($handle_lock) fclose($handle_lock);
 		// Display the contents of both files
-		echo "<h2>Contents of $file1Name:</h2>";
+		echo "<h3>Contents of $file1Name:</h3>";
 		echo "<pre>".htmlspecialchars($file1Content)."</pre>";
 		$scala_error .= create_from_scl($new_filename1,$scala_filename,$file1Content);
 		if($scala_error <> '') $scala_error = "<p><font color=\"red\">➡ Invalid SCALA file:</font> ".$scala_error."</p>";
@@ -416,7 +416,7 @@ echo "<table><tr><td>";
 
 echo "<input type=\"hidden\" name=\"dir_scales\" value=\"".$dir_scales."\">";
 echo "<div id=\"topscales\"></div>";
-echo "<h2>Tonal scales</h2>";
+echo "<h3>Tonal scales</h3>";
 // if($verbose) echo $dir_scales."<br />";
 $dircontent = scandir($dir_scales);
 $deleted_scales = 0;
@@ -866,7 +866,7 @@ if($max_scales > 0) {
 			echo "</font></p>";
 			}
 		else {
-			echo "<table style=\"background-color:gold;\">";
+			echo "<table>";
 			echo "<tr>";
 			for($i = 0; $i < 12; $i++) {
 				echo "<td>";
@@ -887,13 +887,13 @@ if($max_scales > 0) {
 			echo "</table>";
 			}
 		echo "<p><input style=\"background-color:cornsilk;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\">";
-		echo "&nbsp;<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"use_convention\" value=\"USE THIS CONVENTION IN ALL SCALES\"></p>";
+		echo "&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"use_convention\" value=\"USE THIS CONVENTION IN ALL SCALES\"></p>";
 		echo "<hr>";
 		}
 	if($done) {
 		echo "<table style=\"border:1px solid grey; border-radius: 12px;\">";
 		echo "<tr>";
-		echo "<td style=\"vertical-align:middle; white-space:nowrap;\"><input style=\"background-color:yellow;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"change_convention\" value=\"CHANGE NOTE CONVENTION IN ALL SCALES\"> ➡</td>";
+		echo "<td style=\"vertical-align:middle; white-space:nowrap;\"><input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"change_convention\" value=\"CHANGE NOTE CONVENTION IN ALL SCALES\"> ➡</td>";
 		echo "<td style=\"vertical-align:middle; white-space:nowrap; padding-bottom:6px;\">";
 		echo "<input type=\"radio\" name=\"new_convention\" value=\"0\">English<br />";
 		echo "<input type=\"radio\" name=\"new_convention\" value=\"1\">Italian/Spanish/French<br />";
@@ -915,7 +915,7 @@ if($max_scales > 0) {
 	for($i_scale = 1, $k_image = 0; $i_scale <= $max_scales; $i_scale++) {
 		$link_edit = "scale.php";
 		echo "<li id=\"".$i_scale."\"><font color=\"MediumTurquoise\"><b>".$scale_name[$i_scale]."</b></font> ";
-		echo "➡ <input type=\"submit\" style=\"background-color:Aquamarine;\" name=\"edit_scale\" formaction=\"".$link_edit."?scalefilename=".urlencode($scale_name[$i_scale])."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT\">";
+		echo "➡ <input type=\"submit\" style=\"color:DarkBlue; background-color:Azure;\" name=\"edit_scale\" formaction=\"".$link_edit."?scalefilename=".urlencode($scale_name[$i_scale])."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT\">";
 		echo "&nbsp;<input type=\"submit\" style=\"background-color:yellow;\" name=\"delete_scale_".$i_scale."\" formaction=\"".$url_this_page."&scalefilename=".urlencode($scale_name[$i_scale])."\" onclick=\"this.form.target='_self';return true;\" value=\"DELETE scale (can be reversed)\">";
 		echo "&nbsp;<input type=\"submit\" style=\"background-color:yellow;\" name=\"copy_scale_".$i_scale."\" formaction=\"".$url_this_page."&scalefilename=".urlencode($scale_name[$i_scale])."\" onclick=\"this.form.target='_self';return true;\" value=\"COPY/DUPLICATE scale\">";
 		$scala_file = $dir_scales.$scale_name[$i_scale].".scl";
@@ -989,7 +989,7 @@ if($max_scales > 0) {
 				}
 			}
 	//	echo "<br />";
-		if(isset($scale_note_names[$i_scale])) echo "<br /><font color=\"red\">".str_replace('/','',$scale_note_names[$i_scale])."</font>";
+		if(isset($scale_note_names[$i_scale])) echo "<br /><span class=\"tonalnotes\">".str_replace('/','',$scale_note_names[$i_scale])."</span>";
 		if(isset($scale_comment[$i_scale])) {
 			$this_comment = html_to_text($scale_comment[$i_scale],'txt');
 			$this_comment = substr($this_comment, 0, strpos($this_comment, "<br />"));
@@ -1153,7 +1153,7 @@ echo $dir."<br />";
 			$p_prod = $q_prod = 1;
 			for($i_fraction = $k = 0; $k < $kmaxi; $i_fraction += 2) {
 				if($table_names[$i_scale][$i_fraction / 2] == "•") continue;
-				echo "<font color=\"red\">".$note_name[$i_scale][$k]."</font> ";
+				echo "<span class=\"tonalnotes\">".$note_name[$i_scale][$k]."</span> ";
 				if(($p_interval[$i_scale][$k] * $q_interval[$i_scale][$k]) > 0) {
 					echo "<small>".$p_interval[$i_scale][$k]."/".$q_interval[$i_scale][$k]."</small> ";
 					$p_prod = $p_prod * $p_interval[$i_scale][$k]; // Only required for checking

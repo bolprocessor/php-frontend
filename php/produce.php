@@ -111,7 +111,7 @@ echo "</div>";
 
 	if($instruction == "produce" OR $instruction == "produce-all" OR $instruction == "play" OR $instruction == "play-all" OR $instruction == "expand") {
 		echo "<script>";
-		echo "var sometext = \"<span id=warning><i>Process might take more than ".$max_sleep_time_after_bp_command." seconds.<br />To reduce computation time, you can increase Quantization in the settings</span>\";";
+		echo "var sometext = \"<span id=warning><i>Process might take more than ".$max_sleep_time_after_bp_command." seconds.<br />To reduce computation time, you can increase </i>‘<b>Quantization</b>’<i> in the settings</span>\";";
 		echo "document.body.innerHTML = sometext";
 		echo "</script>";
 		}

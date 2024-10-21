@@ -73,10 +73,12 @@ body.dark-mode h2 {
     }
 
 h3 {
-    color: #007BFF; /* Blue for light mode */
+    color: #007BFF;
+	font-size: 150%;
     }
 body.dark-mode h3 {
-    color: greenyellow;
+    color: #007BFF;
+	font-size: 150%;
     }
 
 textarea {
@@ -267,16 +269,16 @@ input {
 	color:black;
 	}
 
-input[type=checkbox] {
-	accent-color: cornsilk;
-	}
-
 input[type=submit] {
 	border-radius: 6px;
 	margin: 2px;
 	}
 input[type=submit]:hover {
-	cursor: default;
+	cursor: pointer;
+	}
+button:hover {
+	cursor: pointer;
+	box-shadow: -2px -2px Aqua;
 	}
 
 input[type=text]:hover, input[type=number]:hover, input[type=date]:hover, input[type=file]:hover, input[type=mail]:hover, input[type=email]:hover, input[type=password], input[type=submit]:hover, input[type=search]:hover, textarea:hover, select:hover {
@@ -284,9 +286,11 @@ input[type=text]:hover, input[type=number]:hover, input[type=date]:hover, input[
 	}
 input[type=checkbox]:enabled:hover {
 	box-shadow: -2px -2px Aqua;
+	cursor: pointer;
 	}
 input[type=radio]:hover {
 	box-shadow: -2px -2px Aqua;
+	cursor: pointer;
 	}
 	
 h1 {

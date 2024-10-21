@@ -475,7 +475,7 @@ display_directory(FALSE,$dir,"directory");
 if($path <> $trash_folder) echo "▶︎&nbsp;<a target=\"_blank\" href=\"index.php?path=".$trash_folder."\">TRASH</a>  🗑<br />";
 echo "<br />";
 
-echo "<table style=\"background-color: Cornsilk;\">";
+echo "<table style=\"border:1px solid grey; border-radius: 12px;\">";
 $show_grammar = isset($last_grammar_page) AND isset($last_grammar_name) AND file_exists("..".SLASH.$last_grammar_directory.SLASH.$last_grammar_name);
 $show_data = isset($last_data_page) AND isset($last_data_name) AND $last_data_name <> '' AND file_exists("..".SLASH.$last_data_directory.SLASH.$last_data_name);
 if(is_integer(strpos($path,"scale_images"))) {

@@ -933,7 +933,7 @@ for($i = 0; $i < $imax; $i++) {
 echo "<p>";
 echo "&nbsp;&nbsp;<a target=\"_blank\" href=\"https://www.csounds.com/manualOLPC/GEN51.html\">Csound GEN51</a> table: <span class=\"blue-text\">".$scale_table."</span>";
 if($message <> '') echo $message;
-echo "<div style=\"float:right; margin-top:1em; padding:1em; border-radius:5%;\"><h1>Scale “".$filename."”</h1><h3>This version is stored in <span class=\"blue-text\">‘<a href=\"tonality.php?file=tonality_resources%2F".$tonality_source."\">".$tonality_source."</a>’</span></h3>";
+echo "<div style=\"float:right; margin-top:1em; padding:1em; border-radius:5%;\"><h2>Scale “".$filename."”</h2><h3>This version is stored in <span class=\"blue-text\">‘<a href=\"tonality.php?file=tonality_resources%2F".$tonality_source."\">".$tonality_source."</a>’</span></h3>";
 
 $link = "scale_image.php?save_codes_dir=".urlencode($save_codes_dir)."&dir_scale_images=".urlencode($dir_scale_images)."&tonality_source=".urlencode($tonality_source);
 $link_no_marks = $link."&no_marks=1";
@@ -1369,7 +1369,7 @@ if(isset($_POST['change_comma']) AND isset($_POST['list_sensitive_notes']) AND $
 		}
 	} */
 
-echo "<h2 id=\"toptable\">Ratios and names of tonal scale <span class=\"blue-text\">“".$scale_name."”</span></h2>";
+echo "<h3 id=\"toptable\">Ratios and names of tonal scale <span class=\"blue-text\">“".$scale_name."”</span></h3>";
 
 if(!isset($_SESSION['scroll']) OR $_SESSION['scroll'] == 1) {
 	echo "<div  style=\"overflow-x:scroll;\">";
@@ -1385,7 +1385,7 @@ echo "<tr><td style=\"padding-top:4px; padding-bottom:4px;\" colspan=\"5\">";
 if(!isset($_SESSION['scroll']) OR $_SESSION['scroll'] == 1)
 	$scroll_value = "DO NOT SCROLL THIS TABLE";
 else $scroll_value = "SCROLL THIS TABLE";
-echo "<input type=\"submit\" style=\"background-color:yellow; \" name=\"scroll\" onclick=\"this.form.target='_self';return true;\" formaction=\"scale.php?scalefilename=".urlencode($filename)."#toptable\" value=\"".$scroll_value."\">";
+echo "<input type=\"submit\" style=\"color:DarkBlue; background-color:Azure; font-size:large;\" name=\"scroll\" onclick=\"this.form.target='_self';return true;\" formaction=\"scale.php?scalefilename=".urlencode($filename)."#toptable\" value=\"".$scroll_value."\">";
 echo "</td></tr>";
 
 store($h_image,"numgrades_fullscale",$numgrades_fullscale);
@@ -1638,7 +1638,7 @@ if(isset($_POST['change_convention']) AND isset($_POST['new_convention'])) {
 		echo "</font><br />";
 		}
 	else {
-		echo "<table style=\"background-color:gold;\">";
+		echo "<table>";
 		echo "<tr>";
 		$ii = 0;
 		for($i = 0; $i <= $numgrades_fullscale; $i++) {
@@ -1681,14 +1681,14 @@ if(isset($_POST['change_convention']) AND isset($_POST['new_convention'])) {
 	echo "<input type=\"hidden\" name=\"new_convention\" value=\"".$new_convention."\">";
 	echo "<input type=\"hidden\" name=\"baseoctave\" value=\"".$baseoctave."\">";
 	echo "&nbsp;<input style=\"background-color:cornsilk;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\">";
-	echo "&nbsp;<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"use_convention\" value=\"USE THIS CONVENTION\">";
+	echo "&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"use_convention\" value=\"USE THIS CONVENTION\">";
 	echo "<hr>";
 	}
 	
 if($done AND !$warned_ratios) {
 	echo "<hr><table style=\"border:1px solid grey; border-radius: 12px;\">";
 	echo "<tr>";
-	echo "<td style=\"vertical-align:middle; white-space:nowrap;\"><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"change_convention\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#topconvention\" value=\"CHANGE NOTE CONVENTION\"> ➡</td>";
+	echo "<td style=\"vertical-align:middle; white-space:nowrap;\"><input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"change_convention\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#topconvention\" value=\"CHANGE NOTE CONVENTION\"> ➡</td>";
 	echo "<td style=\"vertical-align:middle; white-space:nowrap; padding-bottom:6px;\">";
 	echo "<input type=\"radio\" name=\"new_convention\" value=\"0\">English<br />";
 	echo "<input type=\"radio\" name=\"new_convention\" value=\"1\">Italian/Spanish/French<br />";
@@ -1909,7 +1909,7 @@ if($done AND $numgrades_with_labels > 2 AND !$warned_ratios) {
 						}
 					}
 				if($error_create == '') {
-					echo "<p><font color=\"red\">Exported to</font> <span class=\"blue-text\">‘".$new_scale_name."’</span> <input style=\"background-color:Aquamarine;\" type=\"submit\" name=\"edit_new_scale\" formaction=\"".$link_edit."?scalefilename=".urlencode($new_scale_name)."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$new_scale_name."’\"></p>";
+					echo "<p><font color=\"red\">Exported to</font> <span class=\"blue-text\">‘".$new_scale_name."’</span> <input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\" name=\"edit_new_scale\" formaction=\"".$link_edit."?scalefilename=".urlencode($new_scale_name)."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$new_scale_name."’\"></p>";
 					$handle = fopen($dir_scales.$new_scale_file,"w");
 					fwrite($handle,"\"".$new_scale_name."\"\n");
 					$comma_line = $syntonic_comma;
@@ -2286,7 +2286,7 @@ if($done AND $numgrades_with_labels > 2 AND !$warned_ratios) {
 			
 			// Now save to exported file	
 			echo "<br />";
-			echo "<font color=\"MediumTurquoise\">Saved to new scale</font> <span class=\"blue-text\">‘".$new_scale_name."’</span>&nbsp;<input style=\"background-color:Aquamarine;\" type=\"submit\" name=\"edit_new_scale\" formaction=\"".$link_edit."?scalefilename=".urlencode($new_scale_name)."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$new_scale_name."’\"></p>";
+			echo "<font color=\"MediumTurquoise\">Saved to new scale</font> <span class=\"blue-text\">‘".$new_scale_name."’</span>&nbsp;<input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\" name=\"edit_new_scale\" formaction=\"".$link_edit."?scalefilename=".urlencode($new_scale_name)."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$new_scale_name."’\"></p>";
 			$transpose_scale_name = $new_scale_name;
 			$handle = fopen($dir_scales.$new_scale_file,"w");
 			fwrite($handle,"\"".$new_scale_name."\"\n");

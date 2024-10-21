@@ -331,7 +331,7 @@ if($CsoundInstruments_filename <> '') {
 	if($CsoundInstruments_filename <> '' AND file_exists($CsoundInstruments_file)) {
 		$url_csound_page = "csound.php?file=".urlencode($csound_resources.SLASH.$csound_file);
 		echo "<td><form method=\"post\" action=\"".$url_csound_page."\" enctype=\"multipart/form-data\">";
-		echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$csound_file."’\">&nbsp;";
+		echo "<input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$csound_file."’\">&nbsp;";
 		echo "</td></form>";
 		}
 	}
@@ -346,7 +346,7 @@ if($iobj >= 0) {
 	fwrite($handle,$file_header."\n");
 	fwrite($handle,$filename."\n");
 //	fwrite($handle,"*\n");
-	echo "<table style=\"background-color:gold;\">";
+	echo "<table style=\"background-color:grey;\">";
 	for($i = 0; $i <= $iobj; $i++) {
 		echo "<tr><td style=\"padding:4px; vertical-align:middle;\">";
 		echo "<form method=\"post\" action=\"prototype.php\" enctype=\"multipart/form-data\">";
