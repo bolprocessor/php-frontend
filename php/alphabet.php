@@ -13,13 +13,15 @@ $current_directory = str_replace(SLASH.$filename,'',$file);
 save_settings("last_directory",$current_directory);
 
 require_once("_header.php");
+display_darklight();
 
+echo "<p>";
 $url = "index.php?path=".urlencode($current_directory);
-echo "<p>Workspace = <input style=\"background-color:yellow;\" name=\"workspace\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$url."','_self');\" value=\"".$current_directory."\">";
+echo "&nbsp;Workspace = <input style=\"background-color:azure;\" name=\"workspace\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$url."','_self');\" value=\"".$current_directory."\">";
 
 echo link_to_help();
 
-echo "<h3>Alphabet file “".$filename."”</h3>";
+echo "<h2>Alphabet “".$filename."”</h2>";
 save_settings("last_name",$filename);
 
 if(isset($_POST['savethisfile'])) {
@@ -44,7 +46,7 @@ if($content === FALSE) ask_create_new_file($url_this_page,$filename);
 
 $grammar_file = $objects_file = $csound_file = $tonality_file = $alphabet_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = '';
 $extract_data = extract_data(TRUE,$content);
-echo "<p style=\"color:blue;\">".$extract_data['headers']."</p>";
+echo "<p class=\"blue-text\">".$extract_data['headers']."</p>";
 $content = $extract_data['content'];
 $objects_file = $extract_data['objects'];
 $csound_file = $extract_data['csound'];

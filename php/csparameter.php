@@ -17,6 +17,7 @@ else {
 	}
 $this_title = $parameter_name;
 require_once("_header.php");
+display_darklight();
 
 if($test) echo "folder_this_instrument = ".$folder_this_instrument."<br />";
 if($test) echo "temp_dir = ".$temp_dir."<br />";
@@ -24,10 +25,10 @@ if($test) echo "temp_folder = ".$temp_folder."<br />";
 $parameter_file = $folder_this_instrument.SLASH.$parameter_name.".txt";
 if($test) echo "parameter_name = ".$parameter_name."<br />";
 
-echo "<p>Folder of this instrument: <font color=\"blue\">".$folder_this_instrument."</font>";
+echo "<p>Folder of this instrument: <span class=\"blue-text\">".$folder_this_instrument."</span>";
 echo link_to_help();
 echo "<h2>Csound parameter <big>“<font color=\"MediumTurquoise\">".$parameter_name."</font>”</big></h2>";
-echo "<p>This parameter belongs to <big>_ins(".$instrument_index.") “<font color=\"blue\">".$instrument_name."</font>”</big> in file “<font color=\"blue\">".$csfilename."</font>”</p>";
+echo "<p>This parameter belongs to <big>_ins(".$instrument_index.") “<span class=\"blue-text\">".$instrument_name."</span>”</big> in file “<span class=\"blue-text\">".$csfilename."</span>”</p>";
 
 if(isset($_POST['saveparameter'])) {
 //	echo "parameter_name = ".$parameter_name."<br />";

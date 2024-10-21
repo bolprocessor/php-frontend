@@ -84,5 +84,5 @@ CsoundInstr
 Tpict
 ObjectColor.red = -1
 ObjectColor.green = -1
-ObjectColor.blue = -2
+ObjectColor.#007BFF; = -2
 

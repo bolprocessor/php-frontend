@@ -17,6 +17,7 @@ else {
 $this_title = $instrument_name;
 $instrument_name = str_replace(' ','_',$instrument_name);
 require_once("_header.php");
+display_darklight();
 
 $instrument_folder_name = str_replace('-','_',$instrument_name);
 
@@ -27,9 +28,9 @@ if($test) echo "temp_folder = ".$temp_folder."<br />";
 $folder_this_instrument = $temp_dir.$temp_folder.SLASH.$instrument_folder_name;
 if($test) echo "folder_this_instrument = ".$folder_this_instrument."<br />";
 
-echo "<p>Instrument file: <font color=\"blue\">".$instrument_file."</font>";
+// echo "&nbsp;Instrument file: <span class=\"blue-text\">".$instrument_file."</span>";
 echo link_to_help();
-echo "<h2>Csound instrument <big><font color=\"blue\">_ins(".$instrument_index.")</font> <font color=\"red\">".$instrument_name."</font></big></h2>";
+echo "<h2>Csound instrument <big><span class=\"blue-text\">_ins(".$instrument_index.")</span> <font color=\"red\">".$instrument_name."</font></big></h2>";
 
 $argmax_file = $folder_this_instrument.SLASH."argmax.php";
 		
@@ -51,7 +52,7 @@ if(isset($_POST['create_parameter'])) {
 	$new_parameter = str_replace('-','_',$new_parameter);
 	$new_parameter = str_replace('"','',$new_parameter);
 	if(isset($exists_name[$new_parameter])) {
-		echo "<p><font color=\"red\">A parameter with the same name “<font color=\"blue\">".$new_parameter."</font>” already exists!</font></p>";
+		echo "<p><font color=\"red\">A parameter with the same name “<span class=\"blue-text\">".$new_parameter."</span>” already exists!</font></p>";
 		}
 	else {
 		if($new_parameter <> '') {
@@ -68,7 +69,7 @@ if(isset($_POST['create_parameter'])) {
 
 if(isset($_POST['delete_parameter'])) {
 	$parameter_name = $_POST['parameter_name'];
-	echo "<p><font color=\"red\">Deleted </font><font color=\"blue\"><big>“".$parameter_name."”</big></font>…</p>";
+	echo "<p><font color=\"red\">Deleted </font><span class=\"blue-text\"><big>“".$parameter_name."”</big></span>…</p>";
 	$this_parameter_file = $folder_this_instrument.SLASH.$parameter_name.".txt";
 //	echo $this_parameter_file."<br />";
 	rename($this_parameter_file,$this_parameter_file.".old");
@@ -83,7 +84,7 @@ if(isset($_POST['restore'])) {
 		$extension = end($table);
 		if($extension <> "old") continue;
 		$thisfile = str_replace(".old",'',$oldfile);
-		echo "“<font color=\"blue\">".str_replace(".txt",'',$thisfile)."</font>” ";
+		echo "“<span class=\"blue-text\">".str_replace(".txt",'',$thisfile)."</span>” ";
 		$this_parameter_file = $folder_this_instrument.SLASH.$oldfile;
 		rename($this_parameter_file,str_replace(".old",'',$this_parameter_file));
 		}
@@ -247,7 +248,7 @@ echo "<input type=\"hidden\" name=\"instrument_file\" value=\"".$instrument_file
 $table = explode(chr(10),$content);
 $csfilename = $table[0];
 echo "<input type=\"hidden\" name=\"csfilename\" value=\"".$csfilename."\">";
-echo "<h3>Part of file “<font color=blue>".$csfilename."</font>”</h3>";
+echo "<h3>Part of file “<span class=\"blue-text\">".$csfilename."</span>”</h3>";
 $verbose = TRUE;
 $verbose = FALSE;
 $i = 1;
@@ -348,7 +349,7 @@ for($ii = 0; $ii < 6; $ii++) {
 echo "<p style=\"text-align:left;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" name=\"saveinstrument\" value=\"SAVE THIS INSTRUMENT\"></p>";
 $comment = recode_tags($table[1]);
 echo "<p>Comment: <input type=\"text\" name=\"comment\" size=\"90\" value=\"".$comment."\"></p>";
-echo "<table style=\"background-color: white;\">";
+echo "<table>";
 echo "<tr>";
 echo "<td>";
 echo "<p style=\"text-align:right;\">Index of this instrument: <input type=\"text\" name=\"instrument_index\" size=\"4\" value=\"".$instrument_index."\"><br/>";
@@ -369,7 +370,7 @@ echo "<tr>";
 echo "<td>Instrument pitch argument:</td>";
 echo "<td style=\"padding: 5px;\"><input type=\"text\" name=\"InstrumentPitchIndex\" size=\"4\" value=\"".$InstrumentPitchIndex."\"></td>";
 echo "</tr><tr>";
-echo "<td>Pitch format:</td>";
+echo "<td style=\"text-align:right;\">Pitch format:</td>";
 echo "<td style=\"padding: 5px;\">";
 echo "<input type=\"radio\" name=\"InstrumentPitchFormat\" value=\"0\"";
 if($InstrumentPitchFormat == 0) echo " checked";
@@ -387,9 +388,9 @@ echo "</td>";
 echo "</tr>";
 echo "</table>";
 
-echo "<table style=\"background-color: white;\">";
+echo "<table style=\"background-color: gold;\">";
 echo "<tr>";
-echo "<td style=\"vertical-align:middle;\">";
+echo "<td style=\"vertical-align:middle; padding-left:1em;\">";
 echo "<h3>Parameters associated with MIDI controllers:</h3>";
 $x = intval($InstrumentPitchBendRange);
 if($x == -1) $x = '';
@@ -430,7 +431,7 @@ foreach($dir_instrument as $thisparameter) {
 	$parameter_name = str_replace(".txt.old",'',$thisparameter);
 	$deleted_parameters .= "“".$parameter_name."” ";
 	}
-if($deleted_parameters <> '') echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"restore\" value=\"RESTORE ALL DELETED PARAMETERS\"> = <font color=\"blue\"><big>".$deleted_parameters."</big></font></p>";
+if($deleted_parameters <> '') echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"restore\" value=\"RESTORE ALL DELETED PARAMETERS\"> = <span class=\"blue-text\"><big>".$deleted_parameters."</big></span></p>";
 echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"create_parameter\" value=\"CREATE A NEW PARAMETER\"> named <input type=\"text\" name=\"new_parameter\" size=\"20\" value=\"\"></p>";
 
 echo "</form>";

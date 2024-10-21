@@ -24,7 +24,7 @@ if($no_filter) echo "<font color=\"orange\">";
 while(!feof($file)) {
 	$line = fgets($file);
 	$line_print = htmlentities($line);
-	if($no_filter AND is_integer($pos=strpos($line,"<identification"))) echo "</font><font color=\"blue\">";
+	if($no_filter AND is_integer($pos=strpos($line,"<identification"))) echo "</font><font color=\"#007BFF\">";
 	if($no_filter AND is_integer($pos=strpos($line,"</identification"))) {
 		if($no_filter) echo "</font>";
 		continue;
@@ -152,7 +152,7 @@ while(!feof($file)) {
 	if($found) continue;
 	$couleur = '';
 	if(is_integer(strpos($line,"<step>")) OR is_integer(strpos($line,"<octave>")) OR is_integer(strpos($line,"<alter>")) OR is_integer(strpos($line,"<rest/>"))) $couleur = "red";
-	if(is_integer(strpos($line,"<duration>"))OR is_integer(strpos($line,"<grace/>"))) $couleur = "blue";
+	if(is_integer(strpos($line,"<duration>"))OR is_integer(strpos($line,"<grace/>"))) $couleur = "#007BFF;";
 	if($couleur <> '') $line_print = "<font color = \"".$couleur."\">".$line_print."</font>";
 //	$couleur = '';
 	if($no_filter AND $this_measure == '') echo $line_print."<br />";

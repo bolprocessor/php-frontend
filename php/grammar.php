@@ -55,9 +55,9 @@ display_console_state();
 
 $temp_midi_ressources = $temp_dir."trace_".my_session_id()."_".$filename."_";
 
+echo "<p>";
 $url = "index.php?path=".urlencode($current_directory);
-echo "<p>Workspace = <input style=\"background-color:azure;\" name=\"workspace\" type=\"submit\" onclick=\"if(checksaved()) window.open('".$url."','_self');\" value=\"".$current_directory."\">";
-// echo "&nbsp;&nbsp;session_id = ".my_session_id();
+echo "&nbsp;Workspace = <input style=\"background-color:azure;\" name=\"workspace\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$url."','_self');\" value=\"".$current_directory."\">";
 
 $hide = $need_to_save = FALSE;
 $no_save_midiresources = FALSE;
@@ -195,12 +195,12 @@ if(isset($_POST['apply_changes_instructions'])) {
 $refresh_file = $temp_dir."trace_".my_session_id()."_".$filename."_midiport_refresh";
 if(isset($_POST['savemidiport'])) {
 	save_midiressources($filename);
-	$save_warning = "<span id=\"timespan\" style=\"color:red; float:right; background-color:white;\">&nbsp;…&nbsp;Saved “".$filename."_midiport” file…</span>";
+	$save_warning = "<span id=\"timespan\" style=\"color:red; float:right; background-color:white; padding:6px; border-radius:6px;\">&nbsp;…&nbsp;Saved “".$filename."_midiport” file…</span>";
 	@unlink($refresh_file);
 	}
 
 if($need_to_save OR isset($_POST['savethisfile']) OR isset($_POST['compilegrammar'])) {
-	if(isset($_POST['savethisfile'])) $save_warning = "<span id=\"timespan\" style=\"color:red; float:right; background-color:white;\">&nbsp;…&nbsp;Saved “".$filename."” file…</span>";
+	if(isset($_POST['savethisfile'])) $save_warning = "<span id=\"timespan\" style=\"color:red; float:right; background-color:white; padding:6px; border-radius:6px;\">&nbsp;…&nbsp;Saved “".$filename."” file…</span>";
 	$content = $_POST['thistext'];
 	if(isset($_POST['alphabet_file'])) $alphabet_file = $_POST['alphabet_file'];
 	else $alphabet_file = '';
@@ -252,7 +252,7 @@ $output = $bp_application_path.SLASH.$output_folder;
 do $output = str_replace(SLASH.SLASH,SLASH,$output,$count);
 while($count > 0);
 if(!file_exists($output)) {
-	echo "<p><font color=\"red\">Created folder:</font><font color=\"blue\"> ".$output."</font><br />";
+	echo "<p><font color=\"red\">Created folder:</font><span class=\"blue-text\"> ".$output."</span><br />";
 	if(!mkdir($output,0775, true))
 		error_log("Failed to create directory '{$temp_dir}' with error: " . error_get_last()['message']);
 	else
@@ -260,7 +260,7 @@ if(!file_exists($output)) {
 	}
 echo link_to_help();
 
-echo "<h3>Grammar file “".$filename."”</h3>";
+echo "<h2>Grammar project “".$filename."”</h2>";
 save_settings("last_grammar_name",$filename);
 
 /*
@@ -316,18 +316,8 @@ if(isset($_POST['compilegrammar'])) {
 		}
 	$tracefile = $temp_dir."trace_".my_session_id()."_".$filename.".txt";
 	$command .= " --traceout ".$tracefile;
-	echo "<p style=\"color:red;\" id=\"timespan\"><small>".$command."</small></p>";
-//	$no_error = FALSE;
+	echo "<span id=\"timespan\" style=\"color:red; background-color:white; padding:6px; border-radius:6px;\">".$command."</span>";
 	$o = send_to_console($command);
-/*	$n_messages = count($o);
-	if($n_messages > 0) {
-		for($i=0; $i < $n_messages; $i++) {
-			$mssg = $o[$i];
-			$mssg = clean_up_encoding(FALSE,TRUE,$mssg);
-			if(is_integer($pos=strpos($mssg,"Errors: 0")) AND $pos == 0) $no_error = TRUE;
-			}
-		} */
-//	if(!$no_error) {
 	$trace_link = '';
 	if(file_exists($dir.$tracefile)) {
 		$trace_content = file_get_contents($dir.$tracefile);
@@ -336,9 +326,8 @@ if(isset($_POST['compilegrammar'])) {
 		}
 	if($trace_link <> '') echo "<p><big>👉 <font color=\"red\">Errors found! Open the </font> <a onclick=\"window.open('".$trace_link."','trace','width=800,height=800'); return false;\" href=\"".$trace_link."\">trace file</a>!</big></p>";
 	//	}
-	else echo "<p><font color=\"red\">➡</font> <font color=\"blue\">No error.</font></p>";
+	else echo "<p><font color=\"red\">➡</font> <span class=\"blue-text\">No error.</span></p>";
 	@unlink($dir.$tracefile);
-	// Now reformat the grammar
 	reformat_grammar(FALSE,$this_file);
 	}
 else {
@@ -348,7 +337,7 @@ else {
 	echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
 	echo "<input type=\"hidden\" name=\"file_format\" value=\"".$file_format."\">";
 	echo "<input type=\"hidden\" name=\"random_seed\" value=\"".$random_seed."\">";
-	echo "Location of output files: <font color=\"blue\">".$bp_application_path."</font>";
+	echo "Location of output files: <span class=\"blue-text\">".$bp_application_path."</span>";
 	echo "<input type=\"text\" name=\"output_folder\" size=\"15\" value=\"".$output_folder."\">";
 	echo "&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" name=\"change_output_folder\" value=\"SAVE THIS LOCATION\"><br />➡ global setting for all projects in this session<br /><i>Folder will be created if necessary…</i>";
 	echo "</form>";
@@ -361,7 +350,7 @@ if($content === FALSE) ask_create_new_file($url_this_page,$filename);
 $metronome = 0;
 $nature_of_time = $objects_file = $csound_file = $tonality_file = $alphabet_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = '';
 $extract_data = extract_data(TRUE,$content);
-echo "<p style=\"color:blue;\">".$extract_data['headers']."</p>";
+echo "<p class=\"blue-text\">".$extract_data['headers']."</p>";
 $content = $extract_data['content'];
 $alphabet_file = $extract_data['alphabet'];
 $objects_file = $extract_data['objects'];
@@ -422,12 +411,12 @@ if($settings_file <> '' AND file_exists($dir.$settings_file)) {
 if($test) echo "url_this_page = ".$url_this_page."<br />";
 
 $csound_is_responsive = FALSE;
-echo "<div style=\"float:right; background-color:white; padding:6px; border-radius: 12px;\">";
+echo "<div style=\"float:right; padding:6px; border-radius: 12px;\">";
 $csound_is_responsive = check_csound();
 link_to_tonality();
 echo "</div>";
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-echo "<table cellpadding=\"8px;\" style=\"background-color:white; border-radius: 15px; border: 1px solid black;\"><tr style=\"\">";
+echo "<table cellpadding=\"8px;\" id=\"topmidiports\" style=\"border:1px solid grey;\"><tr style=\"\">";
 echo "<td style=\"white-space:nowrap;\">";
 if($file_format <> "rtmidi") {
 	for($i = 0; $i < $NumberMIDIoutputs; $i++) {
@@ -471,22 +460,10 @@ echo "<br />&nbsp;&nbsp;&nbsp;";
 if($file_format == "rtmidi") echo "<input id=\"refresh\" style=\"background-color:yellow; display:none;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"reload\" value=\"REFRESH\">&nbsp;";
 echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savethisfile\" value=\"SAVE format\">";
 echo "</td>";
-echo "<td id=\"hideshow\" style=\"text-align:right; vertical-align:middle;\" rowspan=\"2\">";
 echo "<input type=\"hidden\" name=\"settings_file\" value=\"".$settings_file."\">";
 echo "<input type=\"hidden\" name=\"csound_file\" value=\"".$csound_file."\">";
 echo "<input type=\"hidden\" name=\"tonality_file\" value=\"".$tonality_file."\">";
-echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"><br /><br />";
-
 $error = FALSE;
-if($templates) {
-	$action = "templates";
-	$link_produce = "produce.php?instruction=".$action."&grammar=".urlencode($this_file);
-//	$link_produce .= "&trace_production=1";
-	$link_produce .= "&here=".urlencode($here);
-	$window_name = window_name($filename);
-	echo "<input style=\"color:DarkBlue; background-color:azure;\" onclick=\"if(checksaved()) window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"CHECK TEMPLATES\"><br /><br />";
-	}
-	
 if($produce_all_items > 0) $action = "produce-all";
 else $action = "produce";
 $link_produce = "produce.php?instruction=".$action."&grammar=".urlencode($this_file);
@@ -528,7 +505,6 @@ if($tonality_file <> '') {
 		}
 	else $link_produce .= "&tonality_file=".urlencode($tonality_file);
 	}
-
 if($csound_orchestra == '') $csound_orchestra = $csound_default_orchestra;
 if($csound_orchestra <> '') {
 	if(file_exists($dir.$csound_orchestra)) {
@@ -550,7 +526,9 @@ if($file_format == "midi") {
 	$link_produce .= "&midifile=".urlencode($output.SLASH.$midi_file);
 	}
 if(($file_format == "rtmidi" OR $file_format == "csound" OR $file_format == "midi") AND $action == "produce-all") $output_file .= ".bpda";
-if($error) echo $error_mssg;
+if($file_format == "rtmidi" AND file_exists($refresh_file)) $refresh_instruction = "document.getElementById('refresh').style.display = 'inline';";
+else $refresh_instruction = '';
+$window_name = window_name($filename);
 if($test) echo "output = ".$output."<br />";
 if($test) echo "output_file = ".$output_file."<br />";
 $link_produce .= "&output=".urlencode($output.SLASH.$output_file)."&format=".$file_format;
@@ -559,19 +537,27 @@ if($show_production > 0)
 if($trace_production > 0)
 	$link_produce .= "&trace_production=1";
 $link_produce .= "&here=".urlencode($here);
-$window_name = window_name($filename);
+if($error) echo $error_mssg;
+/* echo "<td id=\"hideshow\" style=\"text-align:right; vertical-align:middle;\" rowspan=\"2\">";
+echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"><br /><br />";
 echo "<b>then…</b>";
-// echo "<p>@@@ ".$link_produce."</p>";
-if($file_format == "rtmidi" AND file_exists($refresh_file)) $refresh_instruction = "document.getElementById('refresh').style.display = 'inline';";
-else $refresh_instruction = '';
 echo "&nbsp;<input onclick=\"event.preventDefault(); if(checksaved()) {".$refresh_instruction." window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)\"";
 if($error) echo " disabled style=\"background-color:azure; box-shadow: none;\"";
 else echo " style=\"color:DarkBlue; background-color:Aquamarine;\"";
 echo ">";
-echo "</td>";
+echo "</td>"; */
 echo "</tr>";
 echo "</table>";
-echo "<br /><div style=\"background-color:white; padding:1em; width:690px; border-radius: 15px;\">";
+echo "<br />";
+if($templates) {
+	$action = "templates";
+	$link_produce_templates = "produce.php?instruction=".$action."&grammar=".urlencode($this_file);
+//	$link_produce_templates .= "&trace_production=1";
+	$link_produce_templates .= "&here=".urlencode($here);
+	$window_name = window_name($filename);
+	echo "<input style=\"color:DarkBlue; background-color:azure;\" onclick=\"if(checksaved()) window.open('".$link_produce_templates."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"CHECK TEMPLATES\"><br /><br />";
+	}
+echo "<div style=\"padding:1em; width:690px; border:1px solid grey; border-radius: 12px;\">";
 if($settings_file <> '' AND file_exists($dir.$settings_file)) echo "<input style=\"background-color:yellow;float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_settings."','".$settings_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$settings_file."’\">";
 if($settings_file == '' OR !file_exists($dir.$settings_file)) {
 	$time_resolution = 10; //  10 milliseconds by default
@@ -605,20 +591,20 @@ else {
 		}
 	else $metronome_settings = 0;
 	if($metronome > 0 AND $metronome <> $metronome_settings) {
-		echo "➡&nbsp;Conflict: metronome is ".$metronome_settings." beats/mn as per <font color=\"blue\">‘".$settings_file."’</font> and ".$metronome." beats/mn in grammar. We'll use <font color=\"red\">".$metronome."</font> beats/mn<br />";
+		echo "⚠️&nbsp;Conflict: metronome is ".$metronome_settings." beats/mn as per <span class=\"blue-text\">‘".$settings_file."’</span><br />&nbsp;&nbsp;and ".$metronome." beats/mn in grammar. We'll use <font color=\"red\">".$metronome."</font> beats/mn<br />";
 		}
 	if(!is_numeric($metronome)) $metronome = $metronome_settings;
 	if($metronome <> intval($metronome)) $metronome = sprintf("%.3f",$metronome);
 	if(($nature_of_time_settings <> $nature_of_time) AND (is_numeric($nature_of_time))) {
-		echo "➡&nbsp;Conflict: time structure is ".nature_of_time($nature_of_time_settings)." as per <font color=\"blue\">‘".$settings_file."’</font> and ".nature_of_time($nature_of_time)." in grammar. We'll use ".nature_of_time($nature_of_time)."<br />";
+		echo "⚠️&nbsp;Conflict: time structure is ".nature_of_time($nature_of_time_settings)." as per <span class=\"blue-text\">‘".$settings_file."’</span><br />&nbsp;&nbsp;and ".nature_of_time($nature_of_time)." in grammar. We'll use ".nature_of_time($nature_of_time)."<br />";
 		}
 	if(!is_numeric($nature_of_time)) $nature_of_time = $nature_of_time_settings;
 	if($metronome > 0. AND $nature_of_time == STRIATED) {
 		echo "⏱ Metronome = <font color=\"red\">".$metronome."</font> beats/mn<br />";
 		}
-	echo "•&nbsp;Time resolution = <font color=\"red\">".$time_resolution."</font> milliseconds as per <font color=\"blue\">‘".$settings_file."’</font><br />";
+	echo "•&nbsp;Time resolution = <font color=\"red\">".$time_resolution."</font> milliseconds as per <span class=\"blue-text\">‘".$settings_file."’</span><br />";
 	if($quantize) {
-		echo "•&nbsp;Quantization = <font color=\"red\">".$quantization."</font> milliseconds as per <font color=\"blue\">‘".$settings_file."’</font>";
+		echo "•&nbsp;Quantization = <font color=\"red\">".$quantization."</font> milliseconds as per <span class=\"blue-text\">‘".$settings_file."’</span>";
 		if($time_resolution > $quantization) echo "&nbsp;<font color=\"red\">➡</font>&nbsp;may be raised to <font color=\"red\">".$time_resolution."</font>&nbsp;ms…";
 		echo "<br />";
 		}
@@ -627,34 +613,34 @@ else {
 if($nature_of_time == STRIATED) echo "•&nbsp;Time is <font color=\"red\">".nature_of_time($nature_of_time)."</font><br />";
 else echo "•&nbsp;Time is <font color=\"red\">".nature_of_time($nature_of_time)."</font> (no fixed tempo)<br />";
 if($non_stop_improvize > 0) {
-	echo "• <font color=\"red\">Non-stop improvize</font> as set by <font color=\"blue\">‘".$settings_file."’</font>";
+	echo "• <font color=\"red\">Non-stop improvize</font> as set by <span class=\"blue-text\">‘".$settings_file."’</span>";
 	if($file_format <> "rtmidi") echo ": <i>only ".$max_items." variations will be produced</i>";
 	echo "<br />";
 	}
-if($diapason <> 440) echo "• <font color=\"red\">Diapason</font> (A4 frequency) = <font color=\"red\">".$diapason."</font> Hz as set by <font color=\"blue\">‘".$settings_file."’</font><br />";
+if($diapason <> 440) echo "• <font color=\"red\">Diapason</font> (A4 frequency) = <font color=\"red\">".$diapason."</font> Hz as set by <span class=\"blue-text\">‘".$settings_file."’</span><br />";
 if($C4key <> 60) {
-	echo "• <font color=\"red\">C4 key number</font> = <font color=\"red\">".$C4key."</font> as set by <font color=\"blue\">‘".$settings_file."’</font>";
+	echo "• <font color=\"red\">C4 key number</font> = <font color=\"red\">".$C4key."</font> as set by <span class=\"blue-text\">‘".$settings_file."’</span>";
 	if($file_format == "csound") echo " ➡ this has no incidence on Csound scores";
 	echo "<br />";
 	}
-if($found_elsewhere AND $objects_file <> '') echo "• Sound-object prototype file = <font color=\"blue\">‘".$objects_file."’</font> found in <font color=\"blue\">‘".$alphabet_file."’</font><br />";
-if($note_convention <> '') echo "• Note convention is <font color=\"red\">‘".ucfirst(note_convention(intval($note_convention)))."’</font> as per <font color=\"blue\">‘".$settings_file."’</font><br />";
+if($found_elsewhere AND $objects_file <> '') echo "• Sound-object prototype file = <span class=\"blue-text\">‘".$objects_file."’</span> found in <span class=\"blue-text\">‘".$alphabet_file."’</span><br />";
+if($note_convention <> '') echo "• Note convention is <font color=\"red\">‘".ucfirst(note_convention(intval($note_convention)))."’</font> as per <span class=\"blue-text\">‘".$settings_file."’</span><br />";
 else echo "• Note convention is <font color=\"red\">‘English’</font> by default<br />";
 if($produce_all_items == 1) {
-	echo "• Produce all items has been set ON by <font color=\"blue\">‘".$settings_file."’</font>";
+	echo "• Produce all items has been set ON by <span class=\"blue-text\">‘".$settings_file."’</span>";
 	if($file_format <> "rtmidi") echo ": <i>only ".$max_items." variations will be produced</i>";
 	echo "<br />";
 	}
-else if($show_production == 1) echo "• Show production has been set ON by <font color=\"blue\">‘".$settings_file."’</font><br />";
-if($trace_production == 1) echo "• Trace production has been set ON by <font color=\"blue\">‘".$settings_file."’</font><br />";
+else if($show_production == 1) echo "• Show production has been set ON by <span class=\"blue-text\">‘".$settings_file."’</span><br />";
+if($trace_production == 1) echo "• Trace production has been set ON by <span class=\"blue-text\">‘".$settings_file."’</span><br />";
 if($settings_file <> '' AND file_exists($dir.$settings_file) AND isset($random_seed) AND $non_stop_improvize > 0) {
 	if($random_seed > 0)
-		echo "• Random seed has been set to <font color=\"red\">".$random_seed."</font> by <font color=\"blue\">‘".$settings_file."’</font> ➡ Series will be repeated.<br />";
+		echo "• Random seed has been set to <font color=\"red\">".$random_seed."</font> by <span class=\"blue-text\">‘".$settings_file."’</span> ➡ Series will be repeated.<br />";
 	else
-		echo "• Random seed is ‘no seed’ as per <font color=\"blue\">‘".$settings_file."’</font> ➡ Series will vary.<br />";
+		echo "• Random seed is ‘no seed’ as per <span class=\"blue-text\">‘".$settings_file."’</span> ➡ Series will vary.<br />";
 	}
 if($max_time_computing > 0) {
-	echo "• Max console computation time has been set to <font color=\"red\">".$max_time_computing."</font> seconds by <font color=\"blue\">‘".$settings_file."’</font>";
+	echo "• Max console computation time has been set to <font color=\"red\">".$max_time_computing."</font> seconds by <span class=\"blue-text\">‘".$settings_file."’</span>";
 	if($max_time_computing < 30) echo "&nbsp;<font color=\"red\">➡</font>&nbsp;probably too small!";
 	echo "<br />";
 	}
@@ -670,27 +656,27 @@ if($file_format == "csound") {
 	check_function_tables($dir,$csound_file);
 	if($csound_is_responsive) {
 		if($found_orchestra_in_instruments AND file_exists($dir_csound_resources.$csound_orchestra)) {
-			echo "• <font color=\"red\">Csound scores</font> will be produced and converted to sound files (including scales) using orchestra ‘<font color=\"blue\">".$csound_orchestra."</font>’ as specified in <font color=\"blue\">‘".$csound_file."’</font>";
-			if($found_orchestra_in_settings AND file_exists($dir_csound_resources.$csound_default_orchestra) AND $csound_orchestra <> $csound_default_orchestra) echo "<br />&nbsp;&nbsp;<font color=\"red\">➡</font> Orchestra ‘<font color=\"blue\">".$csound_default_orchestra."</font>’ specified in <font color=\"blue\">‘".$settings_file."’</font> will be ignored</font>";
+			echo "• <font color=\"red\">Csound scores</font> will be produced and converted to sound files (including scales) using orchestra ‘<span class=\"blue-text\">".$csound_orchestra."</span>’ as specified in <span class=\"blue-text\">‘".$csound_file."’</span>";
+			if($found_orchestra_in_settings AND file_exists($dir_csound_resources.$csound_default_orchestra) AND $csound_orchestra <> $csound_default_orchestra) echo "<br />&nbsp;&nbsp;<font color=\"red\">➡</font> Orchestra ‘<span class=\"blue-text\">".$csound_default_orchestra."</span>’ specified in <span class=\"blue-text\">‘".$settings_file."’</span> will be ignored</font>";
 			}
 		else if($found_orchestra_in_instruments AND !$found_orchestra_in_settings AND $csound_orchestra <> '') {
-			echo "<font color=\"red\">➡</font> Csound scores will be produced, yet conversion to sound files will not be possible because orchestra ‘<font color=\"blue\">".$csound_orchestra."</font>’ specified in ‘<font color=\"blue\">".$csound_file."</font>’ was not found in the Csound resources folder";
+			echo "<font color=\"red\">➡</font> Csound scores will be produced, yet conversion to sound files will not be possible because orchestra ‘<span class=\"blue-text\">".$csound_orchestra."</span>’ specified in ‘<span class=\"blue-text\">".$csound_file."</span>’ was not found in the Csound resources folder";
 			$csound_orchestra = '';
 			}
 		else if($csound_default_orchestra <> '' AND file_exists($dir_csound_resources.$csound_default_orchestra)) {
 			$csound_orchestra = $csound_default_orchestra;
-			echo "• <font color=\"red\">Csound scores</font> will be produced and converted to sound files (including scales) using orchestra ‘<font color=\"blue\">".$csound_default_orchestra."</font>’</font>";
+			echo "• <font color=\"red\">Csound scores</font> will be produced and converted to sound files (including scales) using orchestra ‘<span class=\"blue-text\">".$csound_default_orchestra."</span>’</font>";
 			}
 		else if($csound_default_orchestra <> '') {
-			echo "<font color=\"red\">➡</font> Csound scores will be produced yet not converted to sound files by orchestra ‘<font color=\"blue\">".$csound_default_orchestra."</font>’ as specified in ‘<font color=\"blue\">".$settings_file."</font>’ because this file was not found in the Csound resources folder";
+			echo "<font color=\"red\">➡</font> Csound scores will be produced yet not converted to sound files by orchestra ‘<span class=\"blue-text\">".$csound_default_orchestra."</span>’ as specified in ‘<span class=\"blue-text\">".$settings_file."</span>’ because this file was not found in the Csound resources folder";
 			$csound_orchestra = '';
 			}
 		else if(file_exists($dir_csound_resources."0-default.orc")) {
 			$csound_orchestra = "0-default.orc";
-			echo "• <font color=\"red\">Csound scores</font> will be produced and converted to sound files using default orchestra file ‘<font color=\"blue\">".$csound_orchestra."</font>’";
+			echo "• <font color=\"red\">Csound scores</font> will be produced and converted to sound files using default orchestra file ‘<span class=\"blue-text\">".$csound_orchestra."</span>’";
 			}
 		else {
-			echo "<font color=\"red\">➡</font> Csound scores will be produced yet not converted to sound files</font> because default orchestra file ‘<font color=\"blue\">0-default.orc</font>’ was not found in the Csound resources folder";
+			echo "<font color=\"red\">➡</font> Csound scores will be produced yet not converted to sound files</font> because default orchestra file ‘<span class=\"blue-text\">0-default.orc</span>’ was not found in the Csound resources folder";
 			$csound_orchestra = '';
 			}
 		if(file_exists($dir_csound_resources.$csound_orchestra)) $link_produce .= "&csound_orchestra=".urlencode($csound_orchestra);
@@ -784,10 +770,21 @@ for($i = 0; $i < $imax; $i++) {
 echo "<form method=\"post\" action=\"".$url_this_page."#expression\" enctype=\"multipart/form-data\">";
 $action = "play";
 $link_produce = "produce.php?instruction=".$action."&grammar=".urlencode($this_file);
+if($file_format == "csound") {
+	$cs = $output_file;
+	$output_file = str_replace(".sco",'',$output_file);
+	$link_produce .= "&score=".urlencode($output.SLASH.$cs);
+	}
+if($file_format == "midi") {
+	$midi_file = $output_file;
+	$output_file = str_replace(".mid",'',$output_file);
+	$link_produce .= "&midifile=".urlencode($output.SLASH.$midi_file);
+	}
 if($alphabet_file <> '') $link_produce .= "&alphabet=".urlencode($dir.$alphabet_file);
 if($settings_file <> '' AND file_exists($dir.$settings_file)) $link_produce .= "&settings=".urlencode($dir.$settings_file);
 if($objects_file <> '') $link_produce .= "&objects=".urlencode($dir.$objects_file);
 if($csound_file <> '') $link_produce .= "&csound_file=".urlencode($csound_file);
+if($tonality_file <> '') $link_produce .= "&tonality_file=".urlencode($tonality_file);
 if(file_exists($dir_csound_resources.$csound_orchestra)) $link_produce .= "&csound_orchestra=".urlencode($csound_orchestra);
 $link_produce .= "&output=".urlencode($output.SLASH.$output_file)."&format=".$file_format;
 if($show_production > 0)
@@ -800,6 +797,7 @@ if(count($variable) > 0) {
 	echo "<h3>Variables (click to use as startup string):</h3>";
 	ksort($variable);
 	$j = 0;
+ //	echo "link_produce = ".$link_produce."<br />";
 	foreach($variable as $var => $val) {
 		$data = $temp_dir.$temp_folder.SLASH.$j.".bpda";
 		$j++;
@@ -820,10 +818,8 @@ $recoded_expression = recode_tags($expression);
 $link_play_expression = $link_produce;
 $link_play_expression .= "&data=".urlencode($data_expression);
 $window_name .= "_startup";
-echo "<hr>";
-
-echo "<p id=\"expression\">Use the following (polymetric) expression as startup:<br />";
-echo "";
+// echo "<hr>";
+echo "<p id=\"expression\">Use the following (polymetric) expression as startup:</p>";
 echo "<textarea name=\"expression\" rows=\"5\" style=\"width:700px;\">".$recoded_expression."</textarea>";
 echo "<br />";
 $error_mssg = '';
@@ -838,17 +834,18 @@ if(isset($_POST['saveexpression'])) {
 		}
 	else {
 		$expression = recode_entities($expression);
-		echo "<p id=\"timespan\"><font color=\"red\">➡ Saving:</font> <font color=\"blue\"><big>".$recoded_expression."</big></font></p>";
+		echo "<p id=\"timespan\"><font color=\"red\">➡ Saving:</font> <span class=\"blue-text\"><big>".$recoded_expression."</big></span></p>";
 	//	$result_file = $output.SLASH.$output_file;
 		$handle = fopen($data_expression,"w");
 		fwrite($handle,$expression."\n");
 		fclose($handle);
 		}
 	}
+// echo "link_play_expression = ".$link_play_expression."<br />";
 echo "<input  type=\"submit\" onclick=\"clearsave();\" name=\"saveexpression\" style=\"background-color:azure;\" value=\"SAVE THIS EXPRESSION\">&nbsp;then&nbsp;<input onclick=\"window.open('".$link_play_expression."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" value=\"PRODUCE ITEM\"";
 if(!file_exists($data_expression)) echo " disabled style=\"background-color:azure; box-shadow: none;\"";
 else echo " style=\"color:DarkBlue; background-color:Aquamarine;\"";
-echo ">";
+echo "><br /><br />";
 echo "<span id=\"topchanges\"></span>";
 
 if(isset($_POST['change_convention']) AND isset($_POST['new_convention'])) {
@@ -869,7 +866,7 @@ if(isset($_POST['change_convention']) AND isset($_POST['new_convention'])) {
 			$alt_note = $AltIndiannote;
 			break;
 		}
-	echo "<table style=\"background-color:white;\">";
+	echo "<table style=\"background-color:gold;\">";
 	echo "<tr>";
 	for($i = 0; $i < 12; $i++) {
 		echo "<td>";
@@ -898,15 +895,15 @@ if(isset($_POST['manage_instructions'])) {
 	$list_of_arguments_chan = list_of_arguments($content,"_chan(");
 	$list_of_arguments_ins = list_of_arguments($content,"_ins(");
 //	for($i = 0; $i < count($list_of_arguments_ins); $i++) echo "“".$list_of_arguments_ins[$i]."”<br />";
-	echo "<table style=\"background-color:cornsilk; border-spacing:6px;\">";
-	echo "<tr><td><b>Instruction</b></td><td style=\"text-align:center;\"><b>Replace with…</b></td><td><b>Instruction</b></td><td style=\"text-align:center;\"><b>Replace with…</b></td></tr>";
+	echo "<table style=\"background-color:gold;\">";
+	echo "<tr><td style=\"vertical-align:middle; padding:6px;\"><b>Instruction</b></td><td style=\"text-align:center;\"><b>Replace with…</b></td><td><b>Instruction</b></td><td style=\"text-align:center;\"><b>Replace with…</b></td></tr>";
 	$imax = count($list_of_arguments_chan);
 	echo "<input type=\"hidden\" name=\"chan_max\" value=\"".$imax."\">";
 	echo "<tr>";
 	for($i = $col = 0; $i < $imax; $i++) {
-		echo "<td style=\"vertical-align:middle;\"><font color=\"MediumTurquoise\"><b>_chan(".$list_of_arguments_chan[$i].")</b></font></td>";
+		echo "<td style=\"vertical-align:middle; padding:6px;\"><font color=\"MediumTurquoise\"><b>_chan(".$list_of_arguments_chan[$i].")</b></font></td>";
 		echo "<input type=\"hidden\" name=\"argument_chan_".$i."\" value=\"".$list_of_arguments_chan[$i]."\">";
-		echo "<td style=\"vertical-align:middle; padding:2px; background-color:white;\">";
+		echo "<td style=\"vertical-align:middle; padding:6px;\">";
 		echo "<input type=\"radio\" name=\"replace_chan_option_".$i."\" value=\"chan\"";
 		echo " checked";
 		echo "> _chan(";
@@ -932,9 +929,9 @@ if(isset($_POST['manage_instructions'])) {
 	echo "<input type=\"hidden\" name=\"ins_max\" value=\"".$jmax."\">";
 	echo "<tr>";
 	for($j = $col = 0; $j < $jmax; $j++) {
-		echo "<td style=\"vertical-align:middle;\"><font color=\"MediumTurquoise\"><b>_ins(".$list_of_arguments_ins[$j].")</b></font></td>";
+		echo "<td style=\"vertical-align:middle; padding:6px;\"><font color=\"MediumTurquoise\"><b>_ins(".$list_of_arguments_ins[$j].")</b></font></td>";
 		echo "<input type=\"hidden\" name=\"argument_ins_".$j."\" value=\"".$list_of_arguments_ins[$j]."\">";
-		echo "<td style=\"vertical-align:middle; padding:2px;; background-color:white;\">";
+		echo "<td style=\"vertical-align:middle; padding:6px;\">";
 		echo "<input type=\"radio\" name=\"replace_ins_option_".$j."\" value=\"chan\"> _chan(";
 		echo "<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_ins_as_chan_".$j."\" size=\"4\" value=\"\">";
 		echo ")<br />";
@@ -954,23 +951,23 @@ if(isset($_POST['manage_instructions'])) {
 			}
 		}
 	echo "</tr>";
-	echo "<tr><td></td><td></td><td><input style=\"background-color:cornsilk;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\"></td><td><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"if(checksaved()) {this.form.target='_self'; return true;} else return false;\" name=\"apply_changes_instructions\" formaction=\"".$url_this_page."#topedition\" value=\"APPLY THESE CHANGES\"></td></tr>";
+	echo "<tr><td></td><td></td><td style=\"vertical-align:middle; padding:6px;\"><input style=\"background-color:cornsilk;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\"></td><td><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"if(checksaved()) {this.form.target='_self'; return true;} else return false;\" name=\"apply_changes_instructions\" formaction=\"".$url_this_page."#topedition\" value=\"APPLY THESE CHANGES\"></td></tr>";
 	echo "</table>";
 	$hide = TRUE;
 	}
 if(!$hide) {
-	echo "<table style=\"background-color:white; border-radius: 15px;\">";
+	echo "<table style=\"border:1px solid grey; border-radius: 12px;\">";
 	echo "<tr>";
 	echo "<td style=\"vertical-align:middle; white-space:nowrap;\">";
 	echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"if(checksaved()) {this.form.target='_self';return true;} else return false;\" name=\"change_convention\" formaction=\"".$url_this_page."#topchanges\" value=\"APPLY NOTE CONVENTION to this data\"> ➡</td>";
-	echo "<td style=\"vertical-align:middle; white-space:nowrap;\">";
+	echo "<td style=\"vertical-align:middle; white-space:nowrap; padding-bottom:4px;\">";
 	echo "<input type=\"radio\" name=\"new_convention\" value=\"0\">English<br />";
 	echo "<input type=\"radio\" name=\"new_convention\" value=\"1\">Italian/Spanish/French<br />";
 	echo "<input type=\"radio\" name=\"new_convention\" value=\"2\">Indian<br />";
 	echo "</td>";
 	echo "</tr><tr><td colspan=2>";
 	if($note_convention <> '') {
-		echo "<p>Current note convention for this grammar is:<br /><font color=\"red\">‘".ucfirst(note_convention(intval($note_convention)))."’</font> as per <font color=\"blue\">‘".$settings_file."’</font><br />You will need to change it after applying a different convention.</p>";
+		echo "<p>Current note convention for this grammar is:<br /><font color=\"red\"><b>".ucfirst(note_convention(intval($note_convention)))."’</font> as per <span class=\"blue-text\">‘".$settings_file."</b></span><br />You will need to change it after applying a different convention.</p>";
 		}
 	echo "</td></tr></table>";
 	echo "<hr>";
@@ -1007,7 +1004,7 @@ function save($this_file,$filename,$top_header,$save_content) {
 		fwrite($handle, $save_content);
 		fclose($handle);
 		}
-	else echo "<div style=\"background-color:white; padding: 1em; border-radius: 6px;\"><p>👉 <font color=\"red\"><b>WARNING</b>: Some files have been imported and cannot be modified.</font></p><p><b>Linux user?</b> Open your terminal and type: <font color=\"blue\">sudo /opt/lampp/htdocs/bolprocessor/change_permissions.sh</font><br />(Your password will be required...)</p></div>";
+	else echo "<div style=\"padding: 1em; border-radius: 6px;\"><p>👉 <font color=\"red\"><b>WARNING</b>: Some files have been imported and cannot be modified.</font></p><p><b>Linux user?</b> Open your terminal and type: <span class=\"blue-text\">sudo /opt/lampp/htdocs/bolprocessor/change_permissions.sh</span><br />(Your password will be required...)</p></div>";
 	return;
 	}
 ?>

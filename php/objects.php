@@ -29,12 +29,14 @@ if(isset($_POST['createcsoundinstruments'])) {
 	}
 
 require_once("_header.php");
+display_darklight();
+
 echo "<p>Workspace = <a href=\"index.php?path=".urlencode($current_directory)."\">".$current_directory;
 echo "</a>   <span id='message1' style=\"margin-bottom:1em;\"></span>";
 echo "</p>";
 echo link_to_help();
 
-echo "<h3>Object prototypes file “".$filename."”</h3>";
+echo "<h2>Object prototypes “".$filename."”</h2>";
 save_settings("last_name",$filename);
 
 if($test) echo "dir = ".$dir."<br />";
@@ -81,12 +83,12 @@ if(isset($_POST['duplicate_object'])) {
 		$copy_object_codes = $temp_dir.$temp_folder.SLASH.$copy_object."_codes";
 		rcopy($this_object_codes,$copy_object_codes);
 		}
-	else echo "<p><font color=\"red\">Cannot create</font> <font color=\"blue\"><big>“".$copy_object."”</big></font> <font color=\"red\">because an object with that name already exists</font></p>";
+	else echo "<p><font color=\"red\">Cannot create</font> <span class=\"blue-text\"><big>“".$copy_object."”</big></span> <font color=\"red\">because an object with that name already exists</font></p>";
 	}
 
 if(isset($_POST['delete_object'])) {
 	$object = $_POST['object_name'];
-	echo "<p><font color=\"red\">Deleted </font><font color=\"blue\"><big>“".$object."”</big></font>…</p>";
+	echo "<p><font color=\"red\">Deleted </font><span class=\"blue-text\"><big>“".$object."”</big></span>…</p>";
 	$this_object_file = $temp_dir.$temp_folder.SLASH.$object.".txt";
 //	echo $this_object_file."<br />";
 	rename($this_object_file,$this_object_file.".old");
@@ -102,7 +104,7 @@ if(isset($_POST['rename_object'])) {
 	$new_object = str_replace('#','-',$new_object);
 	$new_object = str_replace('"','',$new_object);
 	if($new_object <> '') {
-		echo "<p><font color=\"red\">Renamed </font><font color=\"blue\"><big>“".$object."”</big></font> as <font color=\"blue\"><big>“".$new_object."”</big></font>…</p>";
+		echo "<p><font color=\"red\">Renamed </font><span class=\"blue-text\"><big>“".$object."”</big></span> as <span class=\"blue-text\"><big>“".$new_object."”</big></span>…</p>";
 		$this_object_file = $temp_dir.$temp_folder.SLASH.$object.".txt";
 		$new_object_file = $temp_dir.$temp_folder.SLASH.$new_object.".txt";
 	//	echo $new_object_file."<br />";
@@ -120,7 +122,7 @@ if(isset($_POST['rename_object'])) {
 
 if(isset($_POST['restore'])) {
 	echo "<p><font color=\"red\">Restoring: </font>";
-	// echo "<font color=\"blue\">".$object."</font> </p>";
+	// echo "<span class=\"blue-text\">".$object."</span> </p>";
 	$dircontent = scandir($temp_dir.$temp_folder);
 	foreach($dircontent as $oldfile) {
 		if($oldfile == '.' OR $oldfile == ".." OR $oldfile == ".DS_Store") continue;
@@ -128,7 +130,7 @@ if(isset($_POST['restore'])) {
 		$extension = end($table);
 		if($extension <> "old") continue;
 		$thisfile = str_replace(".old",'',$oldfile);
-		echo "<font color=\"blue\">".str_replace(".txt",'',$thisfile)."</font> ";
+		echo "<span class=\"blue-text\">".str_replace(".txt",'',$thisfile)."</span> ";
 		$this_object_file = $temp_dir.$temp_folder.SLASH.$oldfile;
 		rename($this_object_file,str_replace(".old",'',$this_object_file));
 		}
@@ -162,13 +164,13 @@ if(isset($_POST['savethisfile']) OR isset($_POST['create_object']) OR isset($_PO
 	while(TRUE) {
 		if(!file_exists($lock_file)) break;
 		if(time() > $time_end) {
-			echo "<p><font color=\"red\">Maximum time (5 seconds) spent waiting for the sound-object prototypes file to be unlocked:</font> <font color=\"blue\">".$dir.$filename."</font></p>";
+			echo "<p><font color=\"red\">Maximum time (5 seconds) spent waiting for the sound-object prototypes file to be unlocked:</font> <span class=\"blue-text\">".$dir.$filename."</span></p>";
 			$bad = TRUE;
 			break;
 			}
 		}			
 	if(!$bad) {
-		echo "<p id=\"timespan\"><font color=\"red\">Saved file:</font> <font color=\"blue\">";
+		echo "<p id=\"timespan\"><font color=\"red\">Saved file:</font> <font color=\"#007BFF\">";
 		SaveObjectPrototypes(TRUE,$dir,$filename,$temp_dir.$temp_folder,TRUE);
 		}
 	}
@@ -182,7 +184,7 @@ if(strlen(trim($content)) == 0) {
 	}
 $objects_file = $grammar_file = $csound_file = $tonality_file = $alphabet_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = '';
 $extract_data = extract_data(TRUE,$content);
-echo "<p style=\"color:blue;\">".$extract_data['headers']."</p>";
+echo "<p class=\"blue-text\">".$extract_data['headers']."</p>";
 $content = $extract_data['content'];
 $csound_file = $extract_data['csound'];
 
@@ -315,13 +317,13 @@ $maxsounds = $iobj + 1;
 echo "<input type=\"hidden\" name=\"maxsounds\" value=\"".$maxsounds."\">";
 		
 if($handle_object) fclose($handle_object);
-echo "<p style=\"color:blue;\">".$comment_on_file."</p>";
+echo "<p class=\"blue-text\">".$comment_on_file."</p>";
 echo "<p style=\"text-align:left;\">";
 echo "<input style=\"background-color:yellow; font-size:large;\" type=\"submit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’ INCLUDING ALL CHANGES TO PROTOTYPES\"><br />";
 echo "<font color=\"red\">➡</font> Changes in prototypes are <font color=\"red\">autosaved</font> every 30 seconds if changes occurred.<br />Keep this page open as long as you are editing sound-object prototypes!</p>";
 if($autosave) echo "<script type=\"text/javascript\" src=\"autosaveObjects.js\"></script>";
 echo "<p><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" name=\"create_object\" value=\"CREATE A NEW OBJECT\"> named <input type=\"text\" name=\"new_object\" size=\"10\" value=\"\"></p>";
-if($deleted_objects <> '') echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"restore\" value=\"RESTORE ALL DELETED OBJECTS\"> = <font color=\"blue\"><big>".$deleted_objects."</big></font></p>";
+if($deleted_objects <> '') echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"restore\" value=\"RESTORE ALL DELETED OBJECTS\"> = <span class=\"blue-text\"><big>".$deleted_objects."</big></span></p>";
 echo "</form>";
 
 if($CsoundInstruments_filename <> '') {
@@ -344,7 +346,7 @@ if($iobj >= 0) {
 	fwrite($handle,$file_header."\n");
 	fwrite($handle,$filename."\n");
 //	fwrite($handle,"*\n");
-	echo "<table style=\"background-color:lightgrey;\">";
+	echo "<table style=\"background-color:gold;\">";
 	for($i = 0; $i <= $iobj; $i++) {
 		echo "<tr><td style=\"padding:4px; vertical-align:middle;\">";
 		echo "<form method=\"post\" action=\"prototype.php\" enctype=\"multipart/form-data\">";

@@ -2,7 +2,10 @@
 require_once("_basic_tasks.php");
 $url_this_page = "script_exec.php";
 $this_title = "Script console";
+
 require_once("_header.php");
+display_darklight();
+
 set_time_limit(0);
 
 $application_path = $bp_application_path;
@@ -25,7 +28,7 @@ if (!file_exists($dirPath)) {
     }
 create_variables($script_variables);
 
-echo "<h3>Running ".$file."</h3>";
+echo "<h2>Running ".$file."</h2>";
 
 $note_convention = $grammar = $output_format = '';
 run_script($dir,$dirPath,$file,$script_variables,$note_convention,$grammar,$output_format);
@@ -55,7 +58,7 @@ function run_script($dir,$dirPath,$this_script_file,$script_variables,$note_conv
 		if($line == '') continue;
 		$instruction =  get_instruction($line);
 		$recoded_line = recode_tags($line);
-	//	echo "<p style=\"color:blue;\">line = ".$recoded_line."<br />";
+	//	echo "<p class=\"blue-text\">line = ".$recoded_line."<br />";
 		$status = 0; $more = '';
 		if(isset($script_status[$instruction])) {
 			$status = $script_status[$instruction];

@@ -2,6 +2,7 @@
 require_once("_basic_tasks.php");
 $url_this_page = "file_list.php?".$_SERVER["QUERY_STRING"];
 require_once("_header.php");
+display_darklight();
 
 if(isset($_GET['dir'])) $dir = urldecode($_GET['dir']);
 else $dir = '';

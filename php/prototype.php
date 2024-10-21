@@ -16,7 +16,10 @@ else {
 	die();
 	}
 $this_title = $expression = $object_name;
+
 require_once("_header.php");
+display_darklight();
+
 echo "<script type='text/javascript' src='https://www.midijs.net/lib/midi.js'></script>";
 
 $object_foldername = clean_folder_name($object_name);
@@ -34,7 +37,7 @@ if($test) echo "temp_folder = ".$temp_folder."<br />";
 if($test) echo "save_codes_dir = ".$save_codes_dir."<br />";
 
 if(file_exists($deleted_object)) {
-	echo "<p><font color=\"red\">Sound-object</font> <font color=\"blue\">“".$object_name."”</font> <font color=\"red\">has been deleted.<br />Close this tab and return to the “-mi” file in which it has been deleted.<br />Then click the <b>RESTORE ALL DELETED OBJECTS</b> button.</font></p>";
+	echo "<p><font color=\"red\">Sound-object</font> <span class=\"blue-text\">“".$object_name."”</span> <font color=\"red\">has been deleted.<br />Close this tab and return to the “-mi” file in which it has been deleted.<br />Then click the <b>RESTORE ALL DELETED OBJECTS</b> button.</font></p>";
 	die();
 	}
 if(!is_dir($save_codes_dir)) mkdir($save_codes_dir);
@@ -49,7 +52,7 @@ $midi_text_bytes = array();
 if(isset($_FILES['mid_upload']) AND $_FILES['mid_upload']['tmp_name'] <> '') {
 	$upload_filename = $_FILES['mid_upload']['name'];
 	if($_FILES["mid_upload"]["size"] > MAXFILESIZE) {
-		echo "<h3><font color=\"red\">Uploading failed:</font> <font color=\"blue\">".$upload_filename."</font> <font color=\"red\">is larger than ".MAXFILESIZE." bytes</font></h3>";
+		echo "<h3><font color=\"red\">Uploading failed:</font> <span class=\"blue-text\">".$upload_filename."</span> <font color=\"red\">is larger than ".MAXFILESIZE." bytes</font></h3>";
 		}
 	else {
 		$tmpFile = $_FILES['mid_upload']['tmp_name'];
@@ -58,19 +61,19 @@ if(isset($_FILES['mid_upload']) AND $_FILES['mid_upload']['tmp_name'] <> '') {
 		$table = explode('.',$upload_filename);
 		$extension = end($table);
 		if($extension <> "mid" and $extension <> "midi") {
-			echo "<h4><font color=\"red\">Uploading failed:</font> <font color=\"blue\">".$upload_filename."</font> <font color=\"red\">does not have the extension of a MIDI file!</font></h4>";
+			echo "<h4><font color=\"red\">Uploading failed:</font> <span class=\"blue-text\">".$upload_filename."</span> <font color=\"red\">does not have the extension of a MIDI file!</font></h4>";
 			@unlink($midi_file);
 			}
 		else {
 			$MIDIfiletype = MIDIfiletype($midi_file);
 			echo "MIDI file type = ".$MIDIfiletype."<br />";
 			if($MIDIfiletype < 0) {
-				echo "<p><font color=\"red\">File </font>“<font color=\"blue\">".$upload_filename."” <font color=\"red\">is unreadable as a MIDI file.</font></p>";
+				echo "<p><font color=\"red\">File </font>“<span class=\"blue-text\">".$upload_filename."” <font color=\"red\">is unreadable as a MIDI file.</span></p>";
 				$upload_filename = '';
 				@unlink($midi_file);
 				}
 			else if($MIDIfiletype > 1) {
-				echo "<h4><font color=\"red\">MIDI file </font>“<font color=\"blue\">".$upload_filename."</font>” <font color=\"red\"> of </font><font color=\"blue\">type ".$MIDIfiletype." </font><font color=\"red\">is not accepted. Only types 0 and 1 are compliant.</font></h4>";
+				echo "<h4><font color=\"red\">MIDI file </font>“<span class=\"blue-text\">".$upload_filename."</span>” <font color=\"red\"> of </font><span class=\"blue-text\">type ".$MIDIfiletype." </span><font color=\"red\">is not accepted. Only types 0 and 1 are compliant.</font></h4>";
 				$upload_filename = '';
 				@unlink($midi_file);
 				}
@@ -90,13 +93,13 @@ if(isset($_FILES['mid_upload']) AND $_FILES['mid_upload']['tmp_name'] <> '') {
 					}
 				$midi_text_bytes = $temp_bytes;
 				$message = fix_mf2t_file($midi_import,"unnamed_");
-				echo "<h3 id=\"timespan\"><font color=\"red\">Converted MIDI file:</font> <font color=\"blue\">".$upload_filename."</font></h3>";
+				echo "<h3 id=\"timespan\"><font color=\"red\">Converted MIDI file:</font> <span class=\"blue-text\">".$upload_filename."</span></h3>";
 				if($message <> '') echo $message;
 				}
 			}
 		}
 	}
-// else echo "<p>Object file: <font color=\"blue\">".$object_file."</font>";
+// else echo "<p>Object file: <span class=\"blue-text\">".$object_file."</span>";
 unset($_FILES['mid_upload']);
 
 if(isset($_POST['division']) AND $_POST['division'] > 0) $division = $_POST['division'];
@@ -442,8 +445,9 @@ echo "</p>";
 echo link_to_help();
 
 echo "<h2>Object prototype <big><font color=\"red\">".$object_name."</font></big></h2>";
-echo "<div style=\"float:right; background-color:white; padding-right:6px; padding-left:6px; border-radius: 12px;\">";
-echo "<p><font color=\"red\">➡</font> Don’t close the “<font color=\"blue\">".$prototypes_name."</font>” page while editing this prototype!</p>";
+// echo "<div style=\"float:right; background-color:white; padding-right:6px; padding-left:6px; border-radius: 12px;\">";
+echo "<div style=\"float:right; padding-right:6px; padding-left:6px; border-radius: 12px;\">";
+echo "<p><font color=\"red\">➡</font> Don’t close the “<span class=\"blue-text\">".$prototypes_name."</span>” page while editing this prototype!</p>";
 echo "</div>";
 
 $content = @file_get_contents($object_file,TRUE);
@@ -452,7 +456,7 @@ if($content == '') {
 	}
 $extract_data = extract_data(TRUE,$content);
 $source_file = $extract_data['objects'];
-echo "<p style=\"color:blue;\">".$extract_data['headers']."<br />// Source: ".$source_file."</p>";
+echo "<p class=\"blue-text\">".$extract_data['headers']."<br />// Source: ".$source_file."</p>";
 $content = $extract_data['content'];
 
 $table = explode(chr(10),$content);
@@ -532,7 +536,7 @@ if(isset($_POST['playexpression'])) {
 		echo "<p id=\"timespan\"><font color=\"red\">➡ Cannot play empty expression!</font></p>";
 		}
 	else {
-		echo "<p id=\"timespan\"><font color=\"red\">➡ Playing:</font> <font color=\"blue\"><big>".$expression."</big></font></p>";
+		echo "<p id=\"timespan\"><font color=\"red\">➡ Playing:</font> <span class=\"blue-text\"><big>".$expression."</big></span></p>";
 	//	echo "temp_folder = ".$temp_folder."<br />";
 		$data = $temp_dir.$temp_folder.SLASH."expression.bpda";
 		$alphabet = $temp_dir.$temp_folder.SLASH."temp.bpho";
@@ -639,8 +643,8 @@ if(isset($_FILES['mid_upload']) AND isset($_POST['tempo'])) $Tref = $tempo / 100
 else $tempo = 1000 * $Tref;
 // echo "Tref = ".$Tref."<br />";
 echo "Tref = <input type=\"text\" name=\"Tref\" size=\"10\" value=\"".$Tref."\"> ms ➡ ";
-if($Tref > 0) echo "this object is <font color=\"blue\">striated</font> (it has a pivot) and Tref is the period of its reference metronome.<br /><i>Set this value to zero if the object is smooth (no pivot).</i><br />";
-else echo "this object is <font color=\"blue\">smooth</font> (it has no pivot)<br />";
+if($Tref > 0) echo "this object is <span class=\"blue-text\">striated</span> (it has a pivot) and Tref is the period of its reference metronome.<br /><i>Set this value to zero if the object is smooth (no pivot).</i><br />";
+else echo "this object is <span class=\"blue-text\">smooth</span> (it has no pivot)<br />";
 
 $object_quantization = $object_param[$j];
 if(intval($object_quantization) == $object_quantization) $object_quantization = intval($object_quantization);
@@ -791,19 +795,19 @@ if($j >= (count($object_param) - 1)) {
 else {
 /*	if(isset($object_param[$j++])) $red = $object_param[$j];
 	if(isset($object_param[$j++])) $green = $object_param[$j];
-	if(isset($object_param[$j++])) $blue = $object_param[$j]; */
+	if(isset($object_param[$j++])) blue = $object_param[$j]; */
 	}
 
 $silence_before_warning = '';
 if(isset($_POST['silence_before'])) {
 	$PreRoll -= $_POST['SilenceBefore'];
-	$silence_before_warning = "<font color=\"blue\">Inserting a silence before the object amounts to adding a negative value to its pre-roll.<br />The duration remains unchanged but the pre-roll is now: ".$PreRoll." ms</font>";
+	$silence_before_warning = "<span class=\"blue-text\">Inserting a silence before the object amounts to adding a negative value to its pre-roll.<br />The duration remains unchanged but the pre-roll is now: ".$PreRoll." ms</span>";
 	}
 
 $silence_after_warning = '';
 if(isset($_POST['silence_after'])) {
 	$PostRoll += $_POST['SilenceAfter'];
-	$silence_after_warning = "<font color=\"blue\">Appending a silence after the object amounts to adding a positive value to its post-roll.<br />The duration remains unchanged but the post-roll is now: ".$PostRoll." ms</font>";
+	$silence_after_warning = "<span class=\"blue-text\">Appending a silence after the object amounts to adding a positive value to its post-roll.<br />The duration remains unchanged but the post-roll is now: ".$PostRoll." ms</span>";
 	}
 
 echo "<input type=\"radio\" name=\"Pivot_mode\" value=\"18\"";
@@ -1960,10 +1964,11 @@ if(!$no_midi AND file_exists($midi_text)) {
 	if($test) echo "text_link = ".$text_link."<br />";
 	if($test) echo "bytes_link = ".$bytes_link."<br />";
 	if($test) echo "midi_file = ".$midi_file."<br />";
-	echo "<table id=\"midi\" style=\"background-color:white;\"><tr>";
-	echo "<td><div style=\"border:2px solid gray; background-color:azure; width:10em; padding:2px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$text_link."','MIDItext','width=300,height=300'); return false;\" href=\"".$text_link."\">EXPLICIT MIDI codes</a></div></td>";
-	echo "<td><div style=\"border:2px solid gray; background-color:azure; width:13em;  padding:2px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$bytes_link."','MIDIbytes','width=300,height=500,left=400'); return false;\" href=\"".$bytes_link."\">TIME-STAMPED MIDI bytes</a><br /><small>Top number is the number of bytes</small></div></td>";
-	echo "<td style=\"white-space:nowrap;\"><div style=\"border:2px solid gray; background-color:azure; width:15em;  padding:2px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$mf2t_link."','MF2T','width=300,height=500,left=300'); return false;\" href=\"".$mf2t_link."\">MF2T code</a><br />";
+	echo "<table id=\"midi\"><tr>";
+//	echo "<table id=\"midi\" style=\"background-color:white;\"><tr>";
+	echo "<td><div style=\"border:2px solid gray; background-color:azure; color:black; width:10em; padding:2px; text-align:center; border-radius: 6px;\"><a style=\"color: #007BFF;\" onclick=\"window.open('".$text_link."','MIDItext','width=300,height=300'); return false;\" href=\"".$text_link."\">EXPLICIT MIDI codes</a></div></td>";
+	echo "<td><div style=\"border:2px solid gray; background-color:azure; color:black; width:13em;  padding:2px; text-align:center; border-radius: 6px;\"><a style=\"color: #007BFF;\" onclick=\"window.open('".$bytes_link."','MIDIbytes','width=300,height=500,left=400'); return false;\" href=\"".$bytes_link."\">TIME-STAMPED MIDI bytes</a><br /><small>Top number is the number of bytes</small></div></td>";
+	echo "<td style=\"white-space:nowrap;\"><div style=\"border:2px solid gray; background-color:azure; color:black; width:15em;  padding:2px; text-align:center; border-radius: 6px;\"><a style=\"color: #007BFF;\" onclick=\"window.open('".$mf2t_link."','MF2T','width=300,height=500,left=300'); return false;\" href=\"".$mf2t_link."\">MF2T code</a><br />";
 	echo "<small>division = <input type=\"text\" name=\"division\" size=\"5\" value=\"".$division."\"><br />";
 	echo "<small>tempo = ".$tempo." µs<br />timesig = ".$timesig."</small>";
 	echo "</div></td>";
@@ -2021,7 +2026,7 @@ store($h_image,"Tref",$Tref);
 $link = "prototype_image.php?save_codes_dir=".urlencode($save_codes_dir);
 
 if($Duration > 0 OR $object_type > 3)
-	echo "<div class=\"shadow\" style=\"border:2px solid gray; background-color:azure; width:13em;  padding:8px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$link."','".clean_folder_name($object_name)."_image','width=800,height=625,left=100'); return false;\" href=\"".$link."\">IMAGE</a></div>";
+	echo "<div class=\"shadow\" style=\"border:2px solid gray; background-color:azure; color:black; width:13em;  padding:8px; text-align:center; border-radius: 6px;\"><a style=\"color: #007BFF;\" onclick=\"window.open('".$link."','".clean_folder_name($object_name)."_image','width=800,height=625,left=100'); return false;\" href=\"".$link."\">IMAGE</a></div>";
 else echo "<p><font color=\"red\">➡</font> NO IMAGE since duration = 0</p>";
 
 echo "<p style=\"text-align:center;\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"savethisprototype\" formaction=\"".$url_this_page."#midi\" value=\"SAVE THIS PROTOTYPE\">&nbsp;<big> = <b><font color=\"red\">".$object_name."</font></b></big></p>";
@@ -2082,7 +2087,7 @@ echo "<input type=\"hidden\" name=\"division\" value=\"".$division."\">";
 echo "<input type=\"hidden\" name=\"tempo\" value=\"".$tempo."\">";
 echo "<input type=\"hidden\" name=\"timesig\" value=\"".$timesig."\">";
 echo "<textarea name=\"csound_score\" onchange=\"tellsave()\" rows=\"20\" style=\"width:700px;\">".$csound_score."</textarea><br />";
-echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"savecsound\" value=\"SAVE THIS CODE\"></p><p><input style=\"background-color:yellow;\" type=\"submit\" name=\"createcsound\" value=\"CREATE Csound CODE\"> from MIDI codes in “<font color=\"blue\">".$object_name."</font>”</p>";
+echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"savecsound\" value=\"SAVE THIS CODE\"></p><p><input style=\"background-color:yellow;\" type=\"submit\" name=\"createcsound\" value=\"CREATE Csound CODE\"> from MIDI codes in “<span class=\"blue-text\">".$object_name."</span>”</p>";
 echo "</form>";
 
 function fix_csound_score($csound_score,$csound_file,$temp_dir,$temp_folder) {

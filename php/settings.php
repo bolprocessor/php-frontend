@@ -12,10 +12,12 @@ $dir = str_replace($filename,'',$this_file);
 $current_directory = str_replace(SLASH.$filename,'',$file);
 
 require_once("_header.php");
+display_darklight();
+
 // echo "<p>Current directory = <a href=\"index.php?path=".urlencode($current_directory)."\">".$dir."</a></p>";
 echo link_to_help();
 
-echo "<h3>Settings file “".$filename."”</h3>";
+echo "<h2>Settings “".$filename."”</h2>";
 echo "<p><i>This temporary layout will remain until the set of relevant parameters has been finalised.</i></p>";
 
 $bp_parameter_names = @file_get_contents("settings_names.txt",TRUE);
@@ -41,8 +43,8 @@ for($i = 0; $i < $imax; $i++) {
 	}
 
 if(isset($_POST['saveparameters'])) {
-	$saved_warning1 = "<p id=\"timespan2\"><font color=\"red\">➡</font> <font color=\"green\">Saved parameters…</font> <font color=\"red\">Don't forget to save again related grammar or data!</font></p>";
-	$saved_warning2 = "<p id=\"timespan3\"><font color=\"red\">➡</font> <font color=\"green\">Saved parameters…</font> <font color=\"red\">Don't forget to save again related grammar or data!</font></p>";
+	$saved_warning1 = "<p id=\"timespan2\"><font color=\"red\">➡</font> Saved parameters… <font color=\"red\">Don't forget to save again related grammar or data!</font></p>";
+	$saved_warning2 = "<p id=\"timespan3\"><font color=\"red\">➡</font> Saved parameters… <font color=\"red\">Don't forget to save again related grammar or data!</font></p>";
 	echo $saved_warning1;
 	$handle = fopen($this_file,"w");
 	$file_header = $top_header."\n// Settings file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
@@ -59,7 +61,7 @@ if(isset($_POST['saveparameters'])) {
 			$value = trim($_POST[$index]);
 		if(($i == 7 OR $i == 8) AND (!is_numeric($value) OR $value < 1 OR intval($value) <> $value)) {
 			$newvalue = 1;
-			echo "<p>👉 <font color=\"red\">Values of Pclock and Qclock must be positive integers: “</font><font color=\"blue\">".$value."</font><font color=\"red\">” has been replaced with “</font><font color=\"blue\">".$newvalue."</font><font color=\"red\">”.</font></p>";
+			echo "<p>👉 <font color=\"red\">Values of Pclock and Qclock must be positive integers: “</font><span class=\"blue-text\">".$value."</span><font color=\"red\">” has been replaced with “</font><span class=\"blue-text\">".$newvalue."</span><font color=\"red\">”.</font></p>";
 			$value = $newvalue;
 			}
 		if($i == 9) $value = 28; // Jbutt
@@ -79,7 +81,7 @@ if(isset($_POST['saveparameters'])) {
 			$newvalue = intval($value);
 			if($newvalue < 100) $newvalue = 1000;
 			if(strcmp($newvalue,$value) <> 0)
-				echo "<p>👉 <font color=\"red\">Default buffer size must be a (not too small) positive integer: “</font><font color=\"blue\">".$value."</font><font color=\"red\">” has been replaced with “</font><font color=\"blue\">".$newvalue."</font><font color=\"red\">”.</font></p>";
+				echo "<p>👉 <font color=\"red\">Default buffer size must be a (not too small) positive integer: “</font><span class=\"blue-text\">".$value."</span><font color=\"red\">” has been replaced with “</font><span class=\"blue-text\">".$newvalue."</span><font color=\"red\">”.</font></p>";
 			$value = $newvalue;
 			}
 		if($i == 43) $value = 0; // Use buffer limit
@@ -88,20 +90,20 @@ if(isset($_POST['saveparameters'])) {
 			$newvalue = intval($value);
 			if($newvalue < 1) $newvalue = 15;
 			if(strcmp($newvalue,$value) <> 0)
-				echo "<p>👉 <font color=\"red\">Max computation time must be a positive integer: “</font><font color=\"blue\">".$value."</font><font color=\"red\">” has been replaced with “</font><font color=\"blue\">".$newvalue."</font><font color=\"red\">”.</font></p>";
+				echo "<p>👉 <font color=\"red\">Max computation time must be a positive integer: “</font><span class=\"blue-text\">".$value."</span><font color=\"red\">” has been replaced with “</font><span class=\"blue-text\">".$newvalue."</span><font color=\"red\">”.</font></p>";
 			$value = $newvalue;
 			}
 		if($i == 45) { // Seed for randomization
 			$newvalue = intval($value);
 			if($newvalue < 0) $newvalue = - $newvalue;
 			if(strcmp($newvalue,$value) <> 0)
-				echo "<p>👉 <font color=\"red\">Seed for randomization must be a positive integer: “</font><font color=\"blue\">".$value."</font><font color=\"red\">” has been replaced with “</font><font color=\"blue\">".$newvalue."</font><font color=\"red\">”.</font></p>";
+				echo "<p>👉 <font color=\"red\">Seed for randomization must be a positive integer: “</font><span class=\"blue-text\">".$value."</span><font color=\"red\">” has been replaced with “</font><span class=\"blue-text\">".$newvalue."</span><font color=\"red\">”.</font></p>";
 			$value = $newvalue;
 			}
 		if($i == 46) $value = 0; // Use buffer limit
 		if($i == 47 AND (!is_numeric($value) OR $value < 0 OR $value > 4 OR intval($value) <> $value)) {
 			$newvalue = 0;
-			echo "<p>👉 <font color=\"red\">Note convention must be an integer from 0 to 4: “</font><font color=\"blue\">".$value."</font><font color=\"red\">” has been replaced with “</font><font color=\"blue\">".$newvalue."</font><font color=\"red\">”.</font></p>";
+			echo "<p>👉 <font color=\"red\">Note convention must be an integer from 0 to 4: “</font><span class=\"blue-text\">".$value."</span><font color=\"red\">” has been replaced with “</font><span class=\"blue-text\">".$newvalue."</span><font color=\"red\">”.</font></p>";
 			$value = $newvalue;
 			}
 		if($i == 48 OR $i == 49) $value = 0; // StartFromOne and SmartCursor
@@ -109,7 +111,7 @@ if(isset($_POST['saveparameters'])) {
 			$value = intval($value);
 			if($value < 1) {
 				$newvalue = 1;
-				echo "<p>👉 <font color=\"red\">GraphicScaleP and GraphicScaleQ must be positive integers: “</font><font color=\"blue\">".$value."</font><font color=\"red\">” has been replaced with “</font><font color=\"blue\">".$newvalue."</font><font color=\"red\">”.</font></p>";
+				echo "<p>👉 <font color=\"red\">GraphicScaleP and GraphicScaleQ must be positive integers: “</font><span class=\"blue-text\">".$value."</span><font color=\"red\">” has been replaced with “</font><span class=\"blue-text\">".$newvalue."</span><font color=\"red\">”.</font></p>";
 				$value = $newvalue;
 				}
 			}
@@ -121,48 +123,48 @@ if(isset($_POST['saveparameters'])) {
 		if($i == 58) $value = 1; // MIDI file format
 		if($i == 62 AND (!is_numeric($value) OR $value < 0 OR $value > 127 OR intval($value) <> $value)) {
 			$newvalue = 60;
-			echo "<p>👉 <font color=\"red\">C4 key number must be an integer from 0 to 127: “</font><font color=\"blue\">".$value."</font><font color=\"red\">” has been replaced with “</font><font color=\"blue\">".$newvalue."</font><font color=\"red\">”.</font></p>";
+			echo "<p>👉 <font color=\"red\">C4 key number must be an integer from 0 to 127: “</font><span class=\"blue-text\">".$value."</span><font color=\"red\">” has been replaced with “</font><span class=\"blue-text\">".$newvalue."</span><font color=\"red\">”.</font></p>";
 			$value = $newvalue;
 			}
 		if($i == 65 AND (!is_numeric($value) OR $value < 0 OR $value > 127 OR intval($value) <> $value)) {
 			$newvalue = 90;
-			echo "<p>👉 <font color=\"red\">Default volume must be an integer from 0 to 127: “</font><font color=\"blue\">".$value."</font><font color=\"red\">” has been replaced with “</font><font color=\"blue\">".$newvalue."</font><font color=\"red\">”.</font></p>";
+			echo "<p>👉 <font color=\"red\">Default volume must be an integer from 0 to 127: “</font><span class=\"blue-text\">".$value."</span><font color=\"red\">” has been replaced with “</font><span class=\"blue-text\">".$newvalue."</span><font color=\"red\">”.</font></p>";
 			$value = $newvalue;
 			}
 		if($i == 66 AND (!is_numeric($value) OR $value < 0 OR $value > 127 OR intval($value) <> $value)) {
 			$newvalue = 7;
-			echo "<p>👉 <font color=\"red\">Volume controller must be an integer from 0 to 127: “</font><font color=\"blue\">".$value."</font><font color=\"red\">” has been replaced with “</font><font color=\"blue\">".$newvalue."</font><font color=\"red\">”.</font></p>";
+			echo "<p>👉 <font color=\"red\">Volume controller must be an integer from 0 to 127: “</font><span class=\"blue-text\">".$value."</span><font color=\"red\">” has been replaced with “</font><span class=\"blue-text\">".$newvalue."</span><font color=\"red\">”.</font></p>";
 			$value = $newvalue;
 			}
 		if($i == 67 AND (!is_numeric($value) OR $value < 0 OR $value > 127 OR intval($value) <> $value)) {
 			$newvalue = 64;
-			echo "<p>👉 <font color=\"red\">Default velocity must be an integer from 0 to 127: “</font><font color=\"blue\">".$value."</font><font color=\"red\">” has been replaced with “</font><font color=\"blue\">".$newvalue."</font><font color=\"red\">”.</font></p>";
+			echo "<p>👉 <font color=\"red\">Default velocity must be an integer from 0 to 127: “</font><span class=\"blue-text\">".$value."</span><font color=\"red\">” has been replaced with “</font><span class=\"blue-text\">".$newvalue."</span><font color=\"red\">”.</font></p>";
 			$value = $newvalue;
 			}
 		if($i == 68 AND (!is_numeric($value) OR $value < 0 OR $value > 127 OR intval($value) <> $value)) {
 			$newvalue = 64;
-			echo "<p>👉 <font color=\"red\">Default panoramic must be an integer from 0 to 127: “</font><font color=\"blue\">".$value."</font><font color=\"red\">” has been replaced with “</font><font color=\"blue\">".$newvalue."</font><font color=\"red\">”.</font></p>";
+			echo "<p>👉 <font color=\"red\">Default panoramic must be an integer from 0 to 127: “</font><span class=\"blue-text\">".$value."</span><font color=\"red\">” has been replaced with “</font><span class=\"blue-text\">".$newvalue."</span><font color=\"red\">”.</font></p>";
 			$value = $newvalue;
 			}
 		if($i == 69 AND (!is_numeric($value) OR $value < 0 OR $value > 127 OR intval($value) <> $value)) {
 			$newvalue = 10;
-			echo "<p>👉 <font color=\"red\">Panoramic controller must be an integer from 0 to 127: “</font><font color=\"blue\">".$value."</font><font color=\"red\">” has been replaced with “</font><font color=\"blue\">".$newvalue."</font><font color=\"red\">”.</font></p>";
+			echo "<p>👉 <font color=\"red\">Panoramic controller must be an integer from 0 to 127: “</font><span class=\"blue-text\">".$value."</span><font color=\"red\">” has been replaced with “</font><span class=\"blue-text\">".$newvalue."</span><font color=\"red\">”.</font></p>";
 			$value = $newvalue;
 			}
 		if($i == 63 AND !is_numeric($value)) {
 			$newvalue = 440;
-			echo "<p>👉 <font color=\"red\">Metronome (A4 frequency) must be an integer: “</font><font color=\"blue\">".$value."</font><font color=\"red\">” has been replaced with “</font><font color=\"blue\">".$newvalue."</font><font color=\"red\">”.</font></p>";
+			echo "<p>👉 <font color=\"red\">Metronome (A4 frequency) must be an integer: “</font><span class=\"blue-text\">".$value."</span><font color=\"red\">” has been replaced with “</font><span class=\"blue-text\">".$newvalue."</span><font color=\"red\">”.</font></p>";
 			$value = $newvalue;
 			}
 		if($i == 70 AND (!is_numeric($value) OR $value < 1 OR intval($value) <> $value)) {
 			$newvalue = 50;
-			echo "<p>👉 <font color=\"red\">Sampling rate must be a positive integer: “</font><font color=\"blue\">".$value."</font><font color=\"red\">” has been replaced with “</font><font color=\"blue\">".$newvalue."</font><font color=\"red\">”.</font></p>";
+			echo "<p>👉 <font color=\"red\">Sampling rate must be a positive integer: “</font><span class=\"blue-text\">".$value."</span><font color=\"red\">” has been replaced with “</font><span class=\"blue-text\">".$newvalue."</span><font color=\"red\">”.</font></p>";
 			$value = $newvalue;
 			}
 		if($i == 71) $value = 39;
 		if($i == 110 AND (!is_numeric($value) OR intval($value) <> $value OR $value <= 10 OR $value > 127)) {
 			$newvalue = 60;
-			echo "<p>👉 <font color=\"red\">“Block frequency of key” must be an integer from 0 to 127: “</font><font color=\"blue\">".$value."</font><font color=\"red\">” has been replaced with “</font><font color=\"blue\">".$newvalue."</font><font color=\"red\">” (C4).</font></p>";
+			echo "<p>👉 <font color=\"red\">“Block frequency of key” must be an integer from 0 to 127: “</font><span class=\"blue-text\">".$value."</span><font color=\"red\">” has been replaced with “</font><span class=\"blue-text\">".$newvalue."</span><font color=\"red\">” (C4).</font></p>";
 			$value = $newvalue;
 			}
 		if($i > 71 AND $i < 110) $value = 10;
@@ -181,7 +183,7 @@ if(trim($content) == '') {
 	$content = @file_get_contents($template,TRUE);
 	}
 $extract_data = extract_data(TRUE,$content);
-echo "<p style=\"color:blue;\">".$extract_data['headers']."</p>";
+echo "<p class=\"blue-text\">".$extract_data['headers']."</p>";
 $content = $extract_data['content'];
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 echo "<p style=\"text-align:left;\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"saveparameters\" value=\"SAVE TO ‘".$filename."’\"></p>";
@@ -192,7 +194,7 @@ $imax_file = count($table);
 if($imax_file <> $imax_parameters) {
 	echo "<p style=\"color:red;\">WARNING: imax_parameters = ".$imax_parameters.", imax_file = ".$imax_file."</p>";
 	}
-else echo "<p style=\"color:blue;\">".$imax_file." parameters</p>";
+else echo "<p class=\"blue-text\">".$imax_file." parameters</p>";
 
 $imax = $imax_file; $start = TRUE;
 if($imax_file < $imax_parameters) $imax = $imax_parameters;
@@ -242,7 +244,7 @@ for($i = $j = 0; $i < $imax; $i++) {
 					$metronome = $Qclock * 60 / $Pclock;
 					if(intval($metronome) <> $metronome)
 						$metronome = sprintf("%.4f",$Qclock * 60 / $Pclock);
-					echo "👉 Metronome = <font color=\"red\">".$metronome."</font> <font color=\"blue\">beats/minute</font>";
+					echo "👉 Metronome = <font color=\"red\">".$metronome."</font> <span class=\"blue-text\">beats/minute</span>";
 					}
 				}
 			if($i == 50) {

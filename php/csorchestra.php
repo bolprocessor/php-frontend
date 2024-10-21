@@ -11,6 +11,8 @@ $this_file = $bp_application_path.$file;
 $dir = str_replace($filename,'',$this_file);
 
 require_once("_header.php");
+display_darklight();
+
 echo "<p>Current directory = ".$dir."</p>";
 echo link_to_help();
 	

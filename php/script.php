@@ -17,8 +17,11 @@ save_settings("last_directory",$current_directory);
 
 require_once("_header.php");
 display_console_state();
+
+echo "<p>";
 $url = "index.php?path=".urlencode($current_directory);
-echo "<p>Workspace = <input style=\"background-color:azure;\" name=\"workspace\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$url."','_self');\" value=\"".$current_directory."\">";
+echo "&nbsp;Workspace = <input style=\"background-color:azure;\" name=\"workspace\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$url."','_self');\" value=\"".$current_directory."\">";
+
 echo link_to_help();
 
 $need_to_save = FALSE;
@@ -98,12 +101,12 @@ if(isset($_POST['checkscript'])) {
 			if(!file_exists($search_file))
 				$remark = "<font color=\"red\"> ➡ file not found</font>";
 			else
-				$remark = "<font color=\"blue\"> ➡ file found</font>";
+				$remark = "<span class=\"blue-text\"> ➡ file found</span>";
 			}
 		switch($status) {
 			case '0': $tag = "<font color=\"red\">(no)</font>"; break;
 			case '1': $tag = "<font color=\"MediumTurquoise\">✓</font>"; break;
-			case '2': $tag = "<font color=\"blue\">(soon)</font>"; break;
+			case '2': $tag = "<span class=\"blue-text\">(soon)</span>"; break;
 			}
 		$recoded_line = recode_tags($line);
 		echo "&nbsp;&nbsp;&nbsp;".$tag." [<font color=\"MediumTurquoise\">".$instruction.$more."</font>] ".$recoded_line.$remark."<br />";
@@ -115,7 +118,7 @@ if(!isset($_POST['running'])) {
 	$content = @file_get_contents($this_file,TRUE);
 	if($content === FALSE) ask_create_new_file($url_this_page,$filename);
 	$extract_data = extract_data(TRUE,$content);
-	echo "<p style=\"color:blue;\">".$extract_data['headers']."</p>";
+	echo "<p class=\"blue-text\">".$extract_data['headers']."</p>";
 	$content = $extract_data['content'];
 	$content = preg_replace("/[\x20]+/u",' ',$content);
 	}
@@ -183,7 +186,7 @@ function list_script_instructions($script_status,$script_more) {
 		switch($status) {
 			case '0': $tag = "<font color=\"red\">(obsolete)</font>"; break;
 			case '1': $tag = "<font color=\"MediumTurquoise\">✓</font>"; break;
-			case '2': $tag = "<font color=\"blue\">(soon)</font>"; break;
+			case '2': $tag = "<span class=\"blue-text\">(soon)</span>"; break;
 			}
 		$more = $script_more[$instruction];
 		echo $tag." ".$instruction." ".$more."<br />";

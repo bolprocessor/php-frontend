@@ -16,6 +16,8 @@ $num_grades = 12;
 $current_directory = str_replace(SLASH.$filename,'',$file);
 
 require_once("_header.php");
+display_darklight();
+
 echo "<p><small>Current directory = <a href=\"index.php?path=".urlencode($current_directory)."\">".$dir;
 echo "</small></p>";
 echo link_to_help();
@@ -34,7 +36,7 @@ foreach($dircontent as $scale_file) {
 		$table = explode(chr(10),$content);
 		$imax = count($table);
 		$dir_image = $dir_scale_images.$scale_name.".png";
-		echo "<font color=\"blue\">".$scale_name."</font>";
+		echo "<span class=\"blue-text\">".$scale_name."</span>";
 		if(file_exists($dir_image)) {
 			$k_image++; if($k_image > 10) $k_image = 0;
 			echo " ➡&nbsp;".popup_link($scale_name,"image",500,410,(100 * $k_image),$dir_image);
@@ -105,11 +107,11 @@ $num_scales = $i_scale; echo $num_scales." scales<br />";
 echo "<h3>Average difference of fifths:</h3>";
 echo "<table>";
 echo "<tr><td></td>";
-for($i = 0; $i < $num_scales; $i++) echo "<td><font color=\"blue\">".$name[$i]."</font></td>";
+for($i = 0; $i < $num_scales; $i++) echo "<td><span class=\"blue-text\">".$name[$i]."</span></td>";
 echo "</tr>";
 for($j = 0; $j < $num_scales; $j++) {
 	echo "<tr>";
-	echo "<td><font color=\"blue\">".$name[$j]."</font></td>";
+	echo "<td><span class=\"blue-text\">".$name[$j]."</span></td>";
 	for($i = 0; $i < $num_scales; $i++) {
 		if($i < $j) echo "<td></td>";
 		else echo "<td>".round(distance($fifth_cents,$num_grades,$i,$j,0),1)." ¢</td>";
@@ -121,11 +123,11 @@ echo "</table><br />";
 echo "<h3>Smallest average difference of fifths (trying transposition to every grade):</h3>";
 echo "<table>";
 echo "<tr><td></td>";
-for($i = 0; $i < $num_scales; $i++) echo "<td><font color=\"blue\">".$name[$i]."</font></td>";
+for($i = 0; $i < $num_scales; $i++) echo "<td><span class=\"blue-text\">".$name[$i]."</span></td>";
 echo "</tr>";
 for($j = 0; $j < $num_scales; $j++) {
 	echo "<tr>";
-	echo "<td><font color=\"blue\">".$name[$j]."</font></td>";
+	echo "<td><span class=\"blue-text\">".$name[$j]."</span></td>";
 	for($i = 0; $i < $num_scales; $i++) {
 		if($i < $j) echo "<td></td>";
 		else {

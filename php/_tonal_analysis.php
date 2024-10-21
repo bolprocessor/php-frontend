@@ -35,9 +35,10 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 
 	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 	echo "<input class=\"shadow\" style=\"float:right; font-size:large; background-color:azure;\" type=\"submit\" value=\"STOP ANALYSIS\">";
-	echo "<div style=\"background-color:white; padding-left:1em;\">";
+	// echo "<div style=\"background-color:white; padding-left:1em;\">";
+	echo "<div style=\"padding-left:1em;\">";
 	if(isset($_POST['proceed_tonal_analysis']) AND !isset($_POST['save_tonal_settings']) AND !isset($_POST['reset_tonal_settings'])) echo "<input class=\"shadow\" style=\"background-color:yellow; font-size:large; float:left;\" type=\"submit\" formaction=\"".$url_this_page."#tonalanalysis\" title=\"Analyze tonal intervals\" name=\"analyze_tonal\" value=\"ANALYZE AGAIN\"><br /><br />";
-	else echo "<br /><p style=\"text-align:center;\">Check documentation: <a target=\"_blank\" href=\"https://bolprocessor.org/tonal-analysis/\">https://bolprocessor.org/tonal-analysis/</a></p>";
+	else echo "<br /><p>Check documentation: <a target=\"_blank\" href=\"https://bolprocessor.org/tonal-analysis/\">https://bolprocessor.org/tonal-analysis/</a></p>";
 	echo "<center><table style=\"background-color:Gold;\">";
 	echo "<tr><th colspan=\"6\" style=\"text-align:center;\">Intervals checked in the analysis</tr>";
 	echo "<tr><td colspan=\"6\" style=\"white-space:nowrap; padding:6px; text-align:center;\">";
@@ -245,7 +246,7 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 		else $max_show = $measure_max;
 		echo "<input type=\"radio\" name=\"restrict_analysis\" value=\"1\"";
 		if($restrict_analysis) echo " checked";
-		echo "> Restrict analysis from measure <font color=\"blue\">[—</font><input type=\"text\" style=\"border:none; text-align:center;\" name=\"measure_min\" size=\"3\" value=\"".$min_show."\"><font color=\"blue\">—]</font> to <font color=\"blue\">[—</font><input type=\"text\" style=\"border:none; text-align:center;\" name=\"measure_max\" size=\"3\" value=\"".$max_show."\"><font color=\"blue\">—]</font>";
+		echo "> Restrict analysis from measure <span class=\"blue-text\">[—</span><input type=\"text\" style=\"border:none; text-align:center;\" name=\"measure_min\" size=\"3\" value=\"".$min_show."\"><span class=\"blue-text\">—]</span> to <span class=\"blue-text\">[—</span><input type=\"text\" style=\"border:none; text-align:center;\" name=\"measure_max\" size=\"3\" value=\"".$max_show."\"><span class=\"blue-text\">—]</span>";
 		echo "</td></tr>";
 		}
 	echo "<tr><td colspan=\"6\" style=\"white-space:nowrap; padding:4px;\">";
@@ -328,7 +329,7 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 					$data_file = $dir.$line2;
 					$first_line2 = '';
 					if(file_exists($data_file)) {
-						echo "➡ Item in file “<font color=\"blue\">".$data_file."</font>”<br />";
+						echo "➡ Item in file “<span class=\"blue-text\">".$data_file."</span>”<br />";
 						$table3 = explode('/',$data_file);
 						$item_name = end($table3);
 						$content2 = @file_get_contents($data_file,TRUE);
@@ -351,7 +352,7 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 							}
 						}
 					else {
-						echo "<p><font color=\"red\">➡ ERROR: unable to open file</font> “<font color=\"blue\">".$data_file."</font>”</p>";
+						echo "<p><font color=\"red\">➡ ERROR: unable to open file</font> “<span class=\"blue-text\">".$data_file."</span>”</p>";
 						$errors++;
 						}
 					}
@@ -364,7 +365,7 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 			$tonal_scale = $segment['tonal_scale'];
 			$i_item++;
 			if($first_line <> '' AND $first_line2 == '') {
-				echo "➡ This item = <font color=\"blue\">".str_replace("// ",'',$first_line)."</font><br />";
+				echo "➡ This item = <span class=\"blue-text\">".str_replace("// ",'',$first_line)."</span><br />";
 				}
 			echo "<p><b>Item #".$i_item."</b>";
 			$batch_item[$i_batchline] = $i_item;
@@ -385,9 +386,9 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 				continue;
 				}
 			if($first_line2 <> '') {
-				echo "<p style=\"\"><font color=\"blue\">".$first_line2."</font></p>";
+				echo "<p style=\"\"><span class=\"blue-text\">".$first_line2."</span></p>";
 				}
-			if($tonal_scale <> '' AND !$compare_scales) echo "<p>Checking against tonal scale ‘<font color=\"blue\">".$tonal_scale."</font>’ defined in the <a target=\"_blank\" href=\"index.php?path=tonality_resources\"> tonality resource</a> folder</p>";
+			if($tonal_scale <> '' AND !$compare_scales) echo "<p>Checking against tonal scale ‘<span class=\"blue-text\">".$tonal_scale."</span>’ defined in the <a target=\"_blank\" href=\"index.php?path=tonality_resources\"> tonality resource</a> folder</p>";
 			$tie_mssg = $segment['tie_mssg'];
 			$data_chunked = $segment['data_chunked']; 
 			$content_slice = @file_get_contents($data_chunked,TRUE);
@@ -698,7 +699,7 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 				if($scalename == '' OR $resource_name == '')
 					echo "<div style=\"padding:12px; text-align:center;\">No tonal scale specified.<br />Images display<br />equal-tempered scale.</div><br />";
 				else 
-					echo "<div style=\"padding:12px; text-align:center;\">Tonal scale<br />‘<font color=\"blue\">".$scalename."</font>’<br />was found in<br />a temporary folder<br />of ‘<font color=\"blue\">".$resource_name."</font>’</div>";
+					echo "<div style=\"padding:12px; text-align:center;\">Tonal scale<br />‘<span class=\"blue-text\">".$scalename."</span>’<br />was found in<br />a temporary folder<br />of ‘<span class=\"blue-text\">".$resource_name."</span>’</div>";
 				}
 			echo "<hr>";
 			}
@@ -756,7 +757,7 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 				fwrite($handle_csv,"\n");
 				if($batch_item_name[$i_batch] <> '') $line_title = $batch_item_name[$i_batch];
 				else $line_title = "#".$batch_item[$i_batch];
-				fwrite($handle_html,"<td style=\"white-space:nowrap; color:blue;\">".$line_title."&nbsp;</td>");
+				fwrite($handle_html,"<td style=\"white-space:nowrap; color:#007BFF;;\">".$line_title."&nbsp;</td>");
 				fwrite($handle_csv,str_replace("-da.","da.",$line_title));
 				for($j_batch = 0; $j_batch < count($column_name); $j_batch++) {
 					if(isset($rank[$batch_item[$i_batch]][$column_name[$j_batch]])) {
@@ -770,7 +771,7 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 						fwrite($handle_csv,",");
 						}
 					}
-				fwrite($handle_html,"<td style=\"white-space:nowrap; color:blue;\">".$remark[$i_batch]."</td>\n");
+				fwrite($handle_html,"<td style=\"white-space:nowrap; color:#007BFF;;\">".$remark[$i_batch]."</td>\n");
 				fwrite($handle_csv,",".$remark[$i_batch]);
 				fwrite($handle_html,"</tr>\n");
 				fwrite($handle_csv,"\n");
@@ -790,12 +791,12 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 			fwrite($handle_csv,",");
 			fwrite($handle_html,"</tr>\n");
 			fwrite($handle_csv,"\n");
-			fwrite($handle_html,"<td style=\"white-space:nowrap; color:blue;\">Average score</td>");
+			fwrite($handle_html,"<td style=\"white-space:nowrap; color:#007BFF;;\">Average score</td>");
 			fwrite($handle_csv,"Average score");
 			$imax = count($batch_item);
 			for($j_batch = 0; $j_batch < count($column_name); $j_batch++) {
 				$average = round($this_scale_average[$column_name[$j_batch]] / $imax);
-				$column_text = "<font color=\"blue\">".$average."</font>";
+				$column_text = "<span class=\"blue-text\">".$average."</span>";
 				fwrite($handle_html,"<td style=\"\">".$column_text."</td>\n");
 				fwrite($handle_csv,",".$average);
 				}
@@ -837,7 +838,7 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 			for($i_batch = 0; $i_batch < count($batch_item); $i_batch++) {
 				if($batch_item_name[$i_batch] <> '') $line_title = $batch_item_name[$i_batch];
 				else $line_title = "#".$batch_item[$i_batch];
-				$abstract_table .= "<tr><td style=\"white-space:nowrap; color:blue;\">".$line_title."</td>";
+				$abstract_table .= "<tr><td style=\"white-space:nowrap; color:#007BFF;;\">".$line_title."</td>";
 				$best_choice = '';
 				for($j_batch = 0; $j_batch < count($column_name); $j_batch++) {
 					if(isset($rank[$batch_item[$i_batch]][$column_name[$j_batch]])) {
@@ -865,7 +866,7 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 		$duration_process = time() - $time_start;
 		if($errors > 0) echo "<p style=\"text-align:center; color:red;\"><big><b>".$errors." ERROR(s) FOUND</b></big></p>";
 		else {
-			echo "<p style=\"text-align:center;\">Check documentation: <a target=\"_blank\" href=\"https://bolprocessor.org/tonal-analysis/\">https://bolprocessor.org/tonal-analysis/</a></p>";
+			echo "<p>Check documentation: <a target=\"_blank\" href=\"https://bolprocessor.org/tonal-analysis/\">https://bolprocessor.org/tonal-analysis/</a></p>";
 			if($duration_process > 2) echo "<p style=\"text-align:center; color:red;\"><small>All data processed in ".$duration_process." seconds</small></p>";
 			}
 		echo "<br /></div>";
@@ -1334,7 +1335,7 @@ function show_relations_on_image($i_item,$matching_list,$mode,$direction,$scalen
 			}
 		if(!$found) {
 			if($mode == "harmonic") {
-				echo "<p style=\"text-align:center;\"><font color=\"red\">Definition of tonal scale</font> ‘<font color=\"blue\">".$scalename."</font>’ <font color=\"red\">was not found.</font><br />";
+				echo "<p style=\"text-align:center;\"><font color=\"red\">Definition of tonal scale</font> ‘<span class=\"blue-text\">".$scalename."</span>’ <font color=\"red\">was not found.</font><br />";
 				echo "You need to open a <a target=\"_blank\" href=\"index.php?path=tonality_resources\">Csound resource</a> containing a scale with exactly the same name.<br />Then click “ANALYZE AGAIN”</p><br />";
 				}
 			$resource_file = '';
@@ -1354,8 +1355,8 @@ function show_relations_on_image($i_item,$matching_list,$mode,$direction,$scalen
 		if(is_integer($pos=strpos($line,"f")) AND $pos == 0) {
 			$table2 = explode(" ",$line);
 			if(count($table2) < 21) {
-				echo "<font color=\"red\">Definition of tonal scale</font> ‘<font color=\"blue\">".$scalename."</font>’ <font color=\"red\">is not compliant.</font><br />";
-				echo "➡ Check ‘<font color=\"blue\">".$scale_textfile."</font>’ in the opened Csound resource.<br />";
+				echo "<font color=\"red\">Definition of tonal scale</font> ‘<span class=\"blue-text\">".$scalename."</span>’ <font color=\"red\">is not compliant.</font><br />";
+				echo "➡ Check ‘<span class=\"blue-text\">".$scale_textfile."</span>’ in the opened Csound resource.<br />";
 				break;
 				}
 			$numgrades = $table2[4];

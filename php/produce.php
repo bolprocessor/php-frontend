@@ -3,7 +3,10 @@ require_once("_basic_tasks.php");
 $url_this_page = "produce.php";
 if(isset($_GET['title'])) $this_title = urldecode($_GET['title']);
 else $this_title = '';
+
 require_once("_header.php");
+display_darklight();
+
 echo "<script type='text/javascript' src='https://www.midijs.net/lib/midi.js'></script>";
 set_time_limit(0);
 
@@ -170,19 +173,16 @@ echo "</div>";
 		echo "</div>";
 		die();
 		}
-
 	$midifile = $project_name.".mid";
 	if(file_exists($midifile)) {
 	//	echo "<p>midifile = ".$midifile."</p>";
 		@unlink($midifile);
 		}
-
 	$htmlfile = $project_name.".html";
 	if(file_exists($htmlfile)) {
 	//	echo "<p>htmlfile = ".$htmlfile."</p>";
 		@unlink($htmlfile);
 		}
-
 	$time_start = time();
 	$time_end = $time_start + 3;
 /*	while(TRUE) {
@@ -320,7 +320,7 @@ if(windows_system()) {
     $command_show = $command = windows_command($command);
     $command_show = str_replace('^','',$command_show);
     }
-echo "<p><small><font color=\"green\">BP3 ➡</font> <font color=\"black\">".$command_show."</font></small></p>\n";
+echo "<p><small><b><font color=\"red\">BP3 ➡</font></b> ".$command_show."</small></p>\n";
 
 $stopfile = $temp_dir_abs."trace_".my_session_id()."_".$project_fullname."_stop";
 // This will be used by createFile() after clicking the STOP button in produce.php
@@ -341,7 +341,7 @@ if($instruction <> "help") {
 		while(TRUE) {
 			if(!file_exists($lock_file)) break;
 			if(time() > $time_end) {
-				echo "<p id=\"cswait\"><font color=\"red\">Maximum time (5 seconds) spent waiting for the Csound resource file to be unlocked:</font> <font color=\"blue\">".$dir_csound_resources.$csound_file."</font></p>";
+				echo "<p id=\"cswait\"><font color=\"red\">Maximum time (5 seconds) spent waiting for the Csound resource file to be unlocked:</font> <span class=\"blue-text\">".$dir_csound_resources.$csound_file."</span></p>";
 				break;
 				}
 			}
@@ -354,13 +354,13 @@ if($instruction <> "help") {
 		while(TRUE) {
 			if(!file_exists($lock_file)) break;
 			if(time() > $time_end) {
-				echo "<p id=\"miwait\"><font color=\"red\">Maximum time (5 seconds) spent waiting for the sound-object prototypes file to be unlocked:</font> <font color=\"blue\">".$objects_path."</font></p>";
+				echo "<p id=\"miwait\"><font color=\"red\">Maximum time (5 seconds) spent waiting for the sound-object prototypes file to be unlocked:</font> <span class=\"blue-text\">".$objects_path."</span></p>";
 				break;
 				}
 			}
 		}
     $stopfile = str_replace(SLASH,'/',$stopfile);
-	echo "<p id=\"wait\" style=\"text-align:center; background-color:yellow;\"><br /><big><b><span class=\"blinking\">… Bol Processor console is working …</span></b></big><br />(Don't close this window!)<br /><br /><button type=\"button\" class=\"bouton\" onclick=\"createFile('".$stopfile."');\">Click to STOP</button><br /><br /></p>\n";
+	echo "<p id=\"wait\" style=\"text-align:center; background-color:yellow; color:black;\"><br /><big><b><span class=\"blinking\">… Bol Processor console is working …</span></b></big><br />(Don't close this window!)<br /><br /><button type=\"button\" class=\"bouton\" onclick=\"createFile('".$stopfile."');\">Click to STOP</button><br /><br /></p>\n";
 	}
 echo str_repeat(' ', 1024);  // send extra spaces to fill browser buffer, useful for Windows
 ob_flush();
@@ -400,7 +400,7 @@ session_abort();
 // $command = "ASAN_OPTIONS=detect_leaks=0 ".$command; // This is for debugging
 $o = send_to_console($command);
 // if($pid > 0) echo "<small>The pid was <font color=\"red\">".$pid."</font></small><br />";
-echo "<hr>";
+echo "<hr style=\"border: 1px solid black;\">";
 // sleep(1);
 session_reset();
 // sleep(1);
@@ -500,16 +500,16 @@ if($file_format == "midi") {
 			}
 		else {
 			$midi_file_link_url = str_replace(SLASH,'/',$midi_file_link);
-			echo "<p class=\"shadow\" style=\"width:25em;\"><a href=\"#midi\" onClick=\"MIDIjs.play('".$midi_file_link_url."');\"><img src=\"pict/loudspeaker.png\" width=\"70px;\" style=\"vertical-align:middle;\" />Play MIDI file</a>";
-			echo " (<a href=\"#midi\" onClick=\"MIDIjs.stop();\">Stop playing</a>)";
-			echo "&nbsp;or <a href=\"".$midi_file_link."\" download>download it</a></p>";
+			echo "<p class=\"shadow\" style=\"width:25em;\"><a style=\"color:#007BFF;\" href=\"#midi\" onClick=\"MIDIjs.play('".$midi_file_link_url."');\"><img src=\"".$bp_application_path."php/pict/loudspeaker.png\" width=\"70px;\" style=\"vertical-align:middle;\" />Play MIDI file</a>";
+			echo " (<a style=\"color:#007BFF;\" href=\"#midi\" onClick=\"MIDIjs.stop();\">Stop playing</a>)";
+			echo "&nbsp;or <a style=\"color:#007BFF;\" href=\"".$midi_file_link."\" download>download it</a></p>";
 			}
 		}
 	}
 
 // Prepare images if any
 $dircontent = scandir($temp_dir_abs);
-echo "<table style=\"background-color:snow; padding:0px;\"><tr>";
+echo "<table style=\"background-color:snow; color:black; padding:0px;\"><tr>";
 $position_image = 0;
 // echo "<p>project_fullname = ".$project_fullname."</p>";
 foreach($dircontent as $thisfile) {
@@ -527,7 +527,8 @@ foreach($dircontent as $thisfile) {
 		}
 	if(!$found) continue;
 //	echo "<p>FOUND: ".$thisfile."</p>";
-	echo "<td style=\"background-color:white; border-radius: 6px; border: 4px solid Gold; vertical-align:middle; text-align: center; padding:8px; margin:0px;\>";
+//	echo "<td style=\"background-color:white; border-radius: 6px; border: 4px solid Gold; vertical-align:middle; text-align: center; padding:8px; margin:0px;\>";
+	echo "<td style=\"border-radius: 6px; border: 4px solid Gold; background-color:azure; color:black;vertical-align:middle; text-align: center; padding:8px; margin:0px;\>";
 	$number_and_time = str_replace(".html",'',$table[$i + 1]);
 	$table_number = explode('-',$number_and_time);
 	$number = $table_number[0];
@@ -568,7 +569,7 @@ foreach($dircontent as $thisfile) {
 	if($HeightMax < $window_height) $window_height = $HeightMax + 60;
 	$window_width = 1200;
 	if($WidthMax < $window_width) $window_width = $WidthMax +  20;
-	echo "<div style=\"border:2px solid gray; background-color:azure; width:8em;  padding:2px; text-align:center; border-radius: 6px;\"><a onclick=\"window.open('".$link."','".$title1."','width=".$window_width.",height=".$window_height.",left=".$left."'); return false;\" href=\"".$link."\">Image ".$number."</a><br />".$image_time;
+	echo "<div style=\"border:2px solid gray; background-color:azure; color:black; width:8em;  padding:2px; text-align:center; border-radius: 6px;\"><a style=\"color:#007BFF;\" onclick=\"window.open('".$link."','".$title1."','width=".$window_width.",height=".$window_height.",left=".$left."'); return false;\" href=\"".$link."\">Image ".$number."</a><br />".$image_time;
 	if(check_image($link) <> '') {
 		$bad_image = TRUE;
 		echo " <font color=\"red\"><b>*</b></font>";
@@ -587,10 +588,10 @@ echo "<br />";
 if($no_error AND $file_format == "csound") {
 	if($csound_orchestra == '') {
 		$csound_orchestra = "0-default.orc";
-		echo "<p><font color=\"red\">➡</font> Csound orchestra file was not specified. I tried the default orchestra: <font color=\"blue\">".$dir_csound_resources.$csound_orchestra."</font>.</p>";
+		echo "<p><font color=\"red\">➡</font> Csound orchestra file was not specified. I tried the default orchestra: <span class=\"blue-text\">".$dir_csound_resources.$csound_orchestra."</span>.</p>";
 		}
 	if(!file_exists($dir_csound_resources.$csound_orchestra)) {
-		echo "<p><font color=\"red\">➡</font> No orchestra file has been found here: <font color=\"blue\">".$dir_csound_resources.$csound_orchestra."</font>. Csound will not create a sound file.</p>";
+		echo "<p><font color=\"red\">➡</font> No orchestra file has been found here: <span class=\"blue-text\">".$dir_csound_resources.$csound_orchestra."</span>. Csound will not create a sound file.</p>";
 		}
 	else {
 		$csound_file_link = $score_file;
@@ -640,10 +641,10 @@ if($no_error AND $file_format == "csound") {
                     $command_show = $command = windows_command($command);
                     $command_show = str_replace('^','',$command_show);
                     }
-                echo "<p><small><font color=\"green\">Csound ➡</font> <font color=\"black\">".$command_show."</font></small></p>";
+                echo "<p><small><b><font color=\"red\">Csound ➡</font></b> ".$command_show."</small></p>";
 				exec($command,$result_csound,$return_var);
 				if($return_var <> 0) {
-					echo "<p><font color=\"red\">➡</font> Csound returned error code <font color=\"red\">‘".$return_var."’</font>.<br /><i>Maybe you are trying to use instruments that do not match</i> <font color=\"blue\">‘".$csound_orchestra."’</font></p>";
+					echo "<p><font color=\"red\">➡</font> Csound returned error code <font color=\"red\">‘".$return_var."’</font>.<br /><i>Maybe you are trying to use instruments that do not match</i> <span class=\"blue-text\">‘".$csound_orchestra."’</span></p>";
 					}
 				else {
 					$time_spent = time() - $time_start;
@@ -654,7 +655,7 @@ if($no_error AND $file_format == "csound") {
 					$audio_tag .= "Your browser does not support the audio tag.";
 					$audio_tag .= "</audio>";
 					echo $audio_tag;
-					echo "<p><a target=\"_blank\" href=\"".$sound_file_link."\" download>Download this sound file</a> (<font color=\"blue\">".$sound_file_link."</font>)</p>";
+					echo "<p><a target=\"_blank\" href=\"".$sound_file_link."\" download>Download this sound file</a> (<span class=\"blue-text\">".$sound_file_link."</span>)</p>";
 					echo "<p><font color=\"red\">➡</font> If you hear garbage sound or silence it may be due to a mismatch between Csound score and orchestra<br />&nbsp;&nbsp;&nbsp;or some overflow in Csound…</p>";
 					}
 				}
@@ -666,7 +667,7 @@ if($no_error AND $file_format == "csound") {
 $handle = FALSE;
 $terminated = FALSE;
 if(file_exists($stopfile) OR file_exists($panicfile)) $terminated = TRUE;
-if($terminated) echo "<p style=\"color:brown;\"><big>👉 The performance has been interrupted.</big></p>";
+if($terminated) echo "<p style=\"color:red;\"><big>👉 The performance has been interrupted</big></p>";
 if($n_messages > 6000) echo "<p><font color=\"red\">➡</font> Too many messages produced! (".$n_messages.")</p>";
 else {
 	if($result_file <> '') $handle = fopen($result_file,"w");
@@ -690,16 +691,15 @@ else {
 			$audio_tag .= "</audio>";
 			fwrite($handle,$audio_tag."<p>\n");
 			if(file_exists($project_name.".sco")) {
-				fwrite($handle,"<br /><a target=\"_blank\" href=\"".$project_name.".sco\" download>Download Csound score</a> (<font color=\"blue\">".$project_name.".sco</font>)<br />");
+				fwrite($handle,"<br /><a target=\"_blank\" href=\"".$project_name.".sco\" download>Download Csound score</a> (<span class=\"blue-text\">".$project_name.".sco</span>)<br />");
 				}
-			fwrite($handle,"<a target=\"_blank\" href=\"".$project_name.".wav\" download>Download this sound file</a> (<font color=\"blue\">".$project_name.".wav</font>)</p>");
+			fwrite($handle,"<a target=\"_blank\" href=\"".$project_name.".wav\" download>Download this sound file</a> (<span class=\"blue-text\">".$project_name.".wav</span>)</p>");
 			}
 		if(file_exists($project_name.".mid") AND filesize($project_name.".mid") > 59) {
-		//	echo "mid = ".$project_name.".mid<br />";
             $midi_url = str_replace(SLASH,'/',$project_name.".mid");
-			$audio_tag = "<p><b>MIDI file:</b></p><p class=\"shadow\" style=\"width:25em;\"><a href=\"#midi\" onClick=\"MIDIjs.play('".$midi_url."');\"><img src=\"".$bp_application_path."php/pict/loudspeaker.png\" width=\"70px;\" style=\"vertical-align:middle;\" />Play MIDI file</a>";
-			$audio_tag .= " (<a href=\"#midi\" onClick=\"MIDIjs.stop();\">Stop playing</a>)";
-			$audio_tag .= "&nbsp;or <a href=\"".$project_name.".mid\" download>download it</a></p>";
+			$audio_tag = "<p><b>MIDI file:</b></p><p class=\"shadow\" style=\"width:25em;\"><a style=\"color:#007BFF;\" href=\"#midi\" onClick=\"MIDIjs.play('".$midi_url."');\"><img src=\"".$bp_application_path."php/pict/loudspeaker.png\" width=\"70px;\" style=\"vertical-align:middle;\" />Play MIDI file</a>";
+			$audio_tag .= " (<a style=\"color:#007BFF;\" href=\"#midi\" onClick=\"MIDIjs.stop();\">Stop playing</a>)";
+			$audio_tag .= "&nbsp;or <a style=\"color:#007BFF;\" href=\"".$project_name.".mid\" download>download it</a></p>";
 			fwrite($handle,$audio_tag."\n");
 			}
 		if(file_exists($project_name.".html")) {
@@ -722,9 +722,9 @@ if($n_messages > 0) {
 			$mssg = "<font color=red>".$mssg."</font>";
 			}
    //     if(windows_system())
-            $mssg = preg_replace("/(C:.+)$/u","<font color=blue><small>$1</small></font>",$mssg);
+            $mssg = preg_replace("/(C:.+)$/u","<font color=#007BFF><small>$1</small></font>",$mssg);
    //     else
-			$mssg = preg_replace("/(\.\.\/.+)$/u","<font color=blue><small>$1</small></font>",$mssg);
+			$mssg = preg_replace("/(\.\.\/.+)$/u","<font color=#007BFF><small>$1</small></font>",$mssg);
 		if($mssg == "(null)") continue;
 		if($handle) fwrite($handle,$mssg."<br />\n");
 		if($i == 7) echo "… … …<br />";

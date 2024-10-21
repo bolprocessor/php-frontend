@@ -21,9 +21,12 @@ if(windows_system()) {
 	$command = preg_replace("'(?<!^) '","^ ",$command);
 	}
 echo "<link rel=\"stylesheet\" href=\"bp.css\" />\n";
-echo "<p id=\"refresh\" style=\"text-align:center; width:90%;\"><big>----------- Compiling BP3 as ‘<font color=\"blue\">".$console."</font>’. <font color=\"green\">It will take a minute or two.</font> -----------</big></p>"; // "refresh" is the id used for flashing. This is why we read "bp.css"
+echo "<p id=\"refresh\" style=\"text-align:center; width:90%;\"><big>----------- Compiling BP3 as ‘<span class=\"blue-text\">".$console."</span>’. <font color=\"green\">It will take a minute or two.</font> -----------</big></p>"; // "refresh" is the id used for flashing. This is why we read "bp.css"
 echo "<p style=\"text-align:center; width:90%;\">Running: <font color=\"red\">".$command_show."</font></p>";
+
 require_once("_header.php");
+display_darklight();
+
 echo str_repeat(' ', 1024);  // send extra spaces to fill browser buffer
 ob_flush();
 flush();
@@ -42,7 +45,7 @@ if($return_var <> 0) {
 		}
 	}
 else {
-	echo "<p style=\"text-align:center;  width:90%;\"><big>😀&nbsp;&nbsp;<font color=\"green\">Compilation of</font> ‘<font color=\"blue\">".$console."</font>’ <font color=\"green\">worked!</font>&nbsp;&nbsp;😀</big></p>";
+	echo "<p style=\"text-align:center;  width:90%;\"><big>😀&nbsp;&nbsp;<font color=\"green\">Compilation of</font> ‘<span class=\"blue-text\">".$console."</span>’ <font color=\"green\">worked!</font>&nbsp;&nbsp;😀</big></p>";
 	}
 // echo "<p style=\"text-align:center;  width:90%;\">------ End of compilation ------</p>";
 echo "<script>";

@@ -85,11 +85,11 @@ echo "<script>\n";
 echo "function settoggledisplay_input(i) {
 		var x = document.getElementById('showhide_input' + i);
 		var y = document.getElementById(\"hideshow\");
-	    if(x) {
-	      x.className='hidden'; }
-      if(y) {
-        y.className='unhidden'; }
-      }\n";
+    if(x) {
+      x.className='hidden'; }
+    if(y) {
+      y.className='unhidden'; }
+    }\n";
 echo "function settoggledisplay_output(i) {
     var z = document.getElementById('showhide_output' + i);
     if(z) {
@@ -209,6 +209,8 @@ echo "function clearFields(inputId, nameId, commentId) {
     document.getElementsByName(commentId)[0].value = \"\";\n";
 echo "}
 </script>";
+
+echo "<script src=\"darkmode.js\"></script>"; 
 
 echo "</head>";
 echo "<body>\n";

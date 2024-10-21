@@ -447,7 +447,7 @@ function display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,
 				}
 			}
 		}
-	echo "<table style=\"padding:0px; background-color:white; border-spacing: 2px;\" cellpadding=\"0px;\"><tr>";
+	echo "<table style=\"padding:0px; border-spacing: 2px;\" cellpadding=\"0px;\"><tr>";
 	if($error) {
 		echo "<td style=\"vertical-align:middle;\"><big><font color=\"red\" class=\"blinking\">➡</font></big></td>";
 		}
@@ -647,7 +647,7 @@ function link_to_help() {
 function display_help_entries($content) {
 	$table = explode("\n",$content);
 	$ignore = FALSE;
-	$entries = "<br /><table id=\"help_entries\" style=\"border-spacing: 2px;\"><tr><td style=\"padding:1em; background-color:azure;\">";
+	$entries = "<br /><table id=\"help_entries\" style=\"border-spacing: 2px;\"><tr><td style=\"padding:1em; background-color:azure; color:black;\">";
 	for($i = 0; $i < count($table); $i++) {
 		$line = trim($table[$i]);
 		$last_one = FALSE;
@@ -685,8 +685,7 @@ function add_help_links($line) {
 					$l1 = substr($line,0,$pos1);
 					$l2 = substr($line,$pos1,strlen($token));
 					$l3 = substr($line,$pos2,strlen($line) - $pos2);
-				//	$insert = "<a onclick=\"window.open('".$html_help_file."#".$i."','show_".$i."','width=800,height=300'); return false;\" href=\"".$html_help_file."#".$i."\">";
-					$insert = "<a onclick=\"window.open('".$html_help_file."#".$i."','show_help','width=800,height=300'); return false;\" href=\"".$html_help_file."#".$i."\">";
+					$insert = "<a style=\"color:#007BFF;\" onclick=\"window.open('".$html_help_file."#".$i."','show_help','width=800,height=300'); return false;\" href=\"".$html_help_file."#".$i."\">";
 					$line = $l1.$insert.$l2."</a>".$l3;
 					$posdone = $pos1 + strlen($insert);
 					$done[$posdone] = TRUE;
@@ -1372,7 +1371,7 @@ function fix_mf2t_file($file,$tracknames) {
 	$said = $content = FALSE;
 	if(file_exists($file)) $content = @file_get_contents($file,TRUE);
 	if(!$content) {
-		$message .= "<br /><font color=\"red\">Cannot find or open:</font> <font color=\"blue\">".$file."</font>";
+		$message .= "<br /><font color=\"red\">Cannot find or open:</font> <span class=\"blue-text\">".$file."</span>";
 		return $message;
 		}
 	$handle = fopen($file,"w");
@@ -1638,7 +1637,7 @@ function change_occurrences_name_in_files($dir,$old_name,$new_name) {
 		for($i = 0; $i < $imax; $i++) {
 			$line = $table[$i];
 			if(is_integer(strpos($line,$old_name))) {
-				if($i > 1) echo "• Found ‘<font color=\"blue\">".$old_name."</font>’ in ‘<font color=\"blue\">".$thisfile."</font>’ and changed it to ‘<font color=\"blue\">".$new_name."</font>’<br />";
+				if($i > 1) echo "• Found ‘<span class=\"blue-text\">".$old_name."</span>’ in ‘<span class=\"blue-text\">".$thisfile."</span>’ and changed it to ‘<span class=\"blue-text\">".$new_name."</span>’<br />";
 				$line = str_replace($old_name,$new_name,$line);
 				$found = TRUE;
 				}
@@ -2392,16 +2391,26 @@ function delete_settings_entry($entry) {
  	return;
  	}
 
+function display_darklight() {
+	echo "<div style=\"display:flex; align-items:center; float:right;\">";
+	echo "<img title=\"Bulb Png PNGs by Vecteezy\" src=\"pict/bulb.png\" id=\"darkModeToggle\" style=\"width:30px;\"/>";
+	echo "</div>";
+	}
+
 function display_console_state() {
 	global $bp_application_path, $absolute_application_path, $panicfile, $filename, $url_this_page, $console;
-	 echo "<div style=\"display: flex; align-items: center; float: right; background-color: white; padding: 6px; border-radius: 6px;\">";
-	 echo "<img src=\"pict/BP3-logo.png\" style=\"width: 100px;\"/>";  // Corrected CSS for width
+	 echo "<div style=\"display:flex; align-items:center; float:right; padding:6px; border-radius:6px;\">";
+	 echo "<img src=\"pict/BP3-logo.png\" style=\"width:70px;\"/>";
 	 echo "<span style=\"margin-left: 6px;\">";
 	 $output = check_console();
 	 if($output <> '') {
-		echo "Bol Processor ‘<font color=\"blue\"><b>".$console."</b></font>’ console is responding<br />Version ".$output;
+		echo "Bol Processor ‘<span class=\"blue-text\"><b>".$console."</b></span>’ console is responding<br />Version ".$output;
 		$panicfile = str_replace(SLASH,'/',$panicfile);
-		if(isset($filename) AND $filename <> "Compilation" AND $filename <> "Produce" AND  $filename <> "Bol Processor") echo "<div style=\"text-align:right;\"><button type=\"button\" class=\"bouton\" style=\"font-size: small;\" onclick=\"createFile('".$panicfile."');\">PANIC!</button></div>\n";
+		if(isset($filename) AND $filename <> "Compilation" AND $filename <> "Produce" AND  $filename <> "Bol Processor") {
+			echo "<div style=\"display: flex; justify-content: flex-end; align-items: center;\"><button type=\"button\" class=\"bouton\" style=\"font-size: small;\" onclick=\"createFile('".$panicfile."');\">PANIC!</button>";
+			echo "&nbsp;&nbsp;<img title=\"Bulb Png PNGs by Vecteezy\" src=\"pict/bulb.png\" id=\"darkModeToggle\" style=\"width:30px;\"/>";
+			echo "</div>\n";
+			}
 		}
 	 else {
 		echo "Bol Processor is not yet installed or not responding&nbsp;😣<br />";
@@ -2457,7 +2466,7 @@ function check_gcc() {
 	}
 
 function link_to_tonality() {
-	echo "<p>Using microtonality?</p><p>👉&nbsp;&nbsp;<a target=\"_blank\" href=\"index.php?path=tonality_resources\">TONALITY resource folder</a></p>";
+	echo "<p style=\"background-color:azure; color:black; padding:4px; border-radius:6px;\">&nbsp;&nbsp;Using microtonality?<br />👉&nbsp;&nbsp;<a style=\"color:#007BFF;\" target=\"_blank\" href=\"index.php?path=tonality_resources\">TONALITY resource folder</a></p>";
 	}
 
 function check_csound() {
@@ -2471,7 +2480,7 @@ function check_csound() {
     if(!file_exists($this_file)) {
 		echo "&nbsp;&nbsp;&nbsp;<small><font color=\"red\">".$csound_path.SLASH.$csound_name."</font></small>";
 		if(isset($file_format)) echo "<input type=\"hidden\" name=\"file_format\" value=\"".$file_format."\">";
-		echo "<p><img src=\"pict/logo_csound.jpg\" width=\"90px;\" style=\"vertical-align:middle;\" />&nbsp;is not responding<br />or its path (<font color= \"blue\">".$csound_path."</font>) is incorrect<br /><br />";
+		echo "<p><img src=\"pict/logo_csound.png\" width=\"90px;\" style=\"vertical-align:middle;\" />&nbsp;is not responding<br />or its path (<font color= \"#007BFF;\">".$csound_path."</font>) is incorrect<br /><br />";
 		echo "Name: <font color=\"green\">path_to_csound".SLASH." </font><input type=\"text\" name=\"csound_name\" size=\"14\" style=\"background-color:CornSilk;\" value=\"".$csound_name."\"><br />";
 		echo "Path: <input type=\"text\" name=\"csound_path\" size=\"30\" style=\"background-color:CornSilk;text-align:right;\" value=\"".$csound_path."\"><font color=\"green\">".SLASH.$csound_name."</font>";
 		echo "&nbsp;<input style=\"background-color:yellow;\" type=\"submit\"  name=\"csound_path_change\" value=\"TRY\">";
@@ -2497,12 +2506,13 @@ function check_csound() {
 				break;
 				}
 			}
-		echo "<p style=\"vertical-align:middle;\"><img src=\"pict/logo_csound.jpg\" width=\"90px;\" style=\"vertical-align:middle;\" />".$version."is responding<br />";
+		echo "<p style=\"vertical-align:middle; background-color:azure; color:black; padding:4px; border-radius:6px;\"><img src=\"pict/logo_csound.png\" width=\"90px;\" style=\"vertical-align:middle;\" />".$version."is responding<br />";
 		$result = TRUE;
 		}
-	if($path <> $csound_resources) echo "👉&nbsp;&nbsp;<a target=\"_blank\" href=\"index.php?path=csound_resources\">CSOUND resource folder</a>";
+	if($path <> $csound_resources) echo "👉&nbsp;&nbsp;<a style=\"color:#007BFF;\" target=\"_blank\" href=\"index.php?path=csound_resources\">CSOUND resource folder</a>";
 	echo "</p>";
-	echo "<hr style=\"border: 8px solid GhostWhite;\">";
+	// echo "<hr style=\"border: 8px solid GhostWhite;\">";
+	echo "<hr>";
 	return $result;
 	}
 
@@ -2633,14 +2643,14 @@ function show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,
 		$new_csound_file = get_csound_file($dir.$objects_file);
 		$new_csound_file = str_replace("csound_resources/",'',$new_csound_file);
 		if($new_csound_file <> '' AND $new_csound_file <> $csound_file) {
-			echo "<p></p><div style=\"background-color:cornsilk; padding:1em; width:500px; box-shadow: 3px 3px 5px 6px gold; border-radius: 6px;\">";
+			echo "<p></p><div style=\"background-color:cornsilk; color:black; padding:1em; width:500px; box-shadow: 3px 3px 5px 6px gold; border-radius: 6px;\">";
 			if($csound_file == '') {
 				$content = add_instruction($new_csound_file,$content);
 				$csound_file = $new_csound_file;
-				echo "👉&nbsp;&nbsp;Found mention of <font color=\"blue\">‘".$csound_file."’</font> in sound-object file  <br /><font color=\"blue\">‘".$objects_file."’</font>. This indication has been added to the project.<br /><font color=\"red\">You need to</font> <input style=\"background-color:yellow; font-size:large;\" type=\"submit\" onclick=\"clearsave();\" name=\"savethisfile\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".$filename."’\">";
+				echo "👉&nbsp;&nbsp;Found mention of <span style=\"color:#007BFF;\">‘".$csound_file."’</span> in sound-object file  <br /><span style=\"color:#007BFF;\">‘".$objects_file."’</span>. This indication has been added to the project.<br /><font color=\"red\">You need to</font> <input style=\"background-color:yellow; font-size:large;\" type=\"submit\" onclick=\"clearsave();\" name=\"savethisfile\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".$filename."’\">";
 				}
 			else {
-				echo "👉&nbsp;&nbsp;<font color=\"red\">WARNING:</font> File <font color=\"blue\">‘".$objects_file."’</font> indicates that the Csound instruments file <font color=\"blue\">‘".$new_csound_file."’</font> should be associated.<br />This project selects <font color=\"blue\">‘".$csound_file."’</font> instead, <font color=\"red\">which we will use.</font><br />➡ Your can edit <font color=\"blue\">‘".$objects_file."’</font> to solve the inconsistency.";
+				echo "👉&nbsp;&nbsp;<font color=\"red\">WARNING:</font> File <span style=\"color:#007BFF;\">‘".$objects_file."’</span> indicates that the Csound instruments file <span style=\"color:#007BFF;\">‘".$new_csound_file."’</span> should be associated.<br />This project selects <span style=\"color:#007BFF;\">‘".$csound_file."’</span> instead, <font color=\"red\">which we will use.</font><br />➡ Your can edit <span style=\"color:#007BFF;\">‘".$objects_file."’</span> to solve the inconsistency.";
 				}
 			echo "</div>";
 			}
@@ -2648,14 +2658,14 @@ function show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,
 	if($csound_file <> '') {
 		$tonality_file_in_csound = get_tonality_file($dir_csound_resources.$csound_file);
 		if($tonality_file_in_csound <> '' AND $tonality_file_in_csound <> $tonality_file) {
-			echo "<p></p><div style=\"background-color:cornsilk; padding:1em; width:500px; box-shadow: 3px 3px 5px 6px gold; border-radius: 6px;\">";
+			echo "<p></p><div style=\"background-color:cornsilk; color:black; padding:1em; width:500px; box-shadow: 3px 3px 5px 6px gold; border-radius: 6px;\">";
 			if($tonality_file == '') {
 				$content = add_instruction($tonality_file_in_csound,$content);
 				$tonality_file = $tonality_file_in_csound;
-				echo "👉&nbsp;&nbsp;File <font color=\"blue\">‘".$csound_file."’</font> indicates that tonality file <font color=\"blue\">‘".$tonality_file_in_csound."’</font><br />should be associated. This indication has been added to the project.<br /><font color=\"red\">You need to</font> <input style=\"background-color:yellow; font-size:large;\" type=\"submit\" onclick=\"clearsave();\" name=\"savethisfile\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".$filename."’\">";
+				echo "👉&nbsp;&nbsp;File <span style=\"color:#007BFF;\">‘".$csound_file."’</span> indicates that tonality file <span style=\"color:#007BFF;\">‘".$tonality_file_in_csound."’</span><br />should be associated. This indication has been added to the project.<br /><font color=\"red\">You need to</font> <input style=\"background-color:yellow; font-size:large;\" type=\"submit\" onclick=\"clearsave();\" name=\"savethisfile\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".$filename."’\">";
 				}
 			else {
-				echo "👉&nbsp;&nbsp;<font color=\"red\">WARNING:</font> File <font color=\"blue\">‘".$csound_file."’</font> indicates that tonality file<br /><font color=\"blue\">‘".$tonality_file_in_csound."’</font> should be associated.<br />This project selects <font color=\"blue\">‘".$tonality_file."’</font> instead, <font color=\"red\">which we will use.</font><br />Your can edit <font color=\"blue\">‘".$csound_file."’</font> to solve the inconsistency.";
+				echo "👉&nbsp;&nbsp;<font color=\"red\">WARNING:</font> File <span style=\"color:#007BFF;\">‘".$csound_file."’</span> indicates that tonality file<br /><span style=\"color:#007BFF;\">‘".$tonality_file_in_csound."’</span> should be associated.<br />This project selects <span style=\"color:#007BFF;\">‘".$tonality_file."’</span> instead, <font color=\"red\">which we will use.</font><br />Your can edit <span style=\"color:#007BFF;\">‘".$csound_file."’</span> to solve the inconsistency.";
 				}
 			echo "</div>";
 			}
@@ -2665,11 +2675,11 @@ function show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,
 		if(($max_scales = count($list_of_tonal_scales)) > 0) {
 			if($max_scales > 1)  {
 				$i = 0;
-				echo "<p id=\"tonal\" style=\"margin-bottom:0px;\">Tonality resource file <font color=\"blue\">‘".$tonality_file."’</font> contains definitions of tonal scales&nbsp;<font color=\"red\">➡</font>&nbsp;<button style=\"background-color:aquamarine; border-radius: 6px; font-size:large;\" onclick=\"togglescales(); return false;\">Show/hide tonal scales</button>";
+				echo "<p id=\"tonal\" style=\"margin-bottom:0px;\">Tonality resource file <span class=\"blue-text\">‘".$tonality_file."’</span> contains definitions of tonal scales&nbsp;<font color=\"red\">➡</font>&nbsp;<button style=\"background-color:aquamarine; border-radius: 6px; font-size:large;\" onclick=\"togglescales(); return false;\">Show/hide tonal scales</button>";
 				echo "<div id=\"scales\"  style=\"border-radius: 15px; padding:6px;\"><br />";
 				}
 			else {
-				echo "<p style=\"margin-bottom:0px;\">Tonal resource file <font color=\"blue\">‘".$tonality_file."’</font> contains the definition of tonal scale:";
+				echo "<p style=\"margin-bottom:0px;\">Tonal resource file <span class=\"blue-text\">‘".$tonality_file."’</span> contains the definition of this tonal scale:";
 				echo "<div>";
 				}
 			echo "<ul style=\"margin-top:0px; margin-bottom:0px\">";
@@ -2694,7 +2704,7 @@ function show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,
 		$list = $list_of_instruments['list'];
 		$list_index = $list_of_instruments['index'];
 		if(($max_instr = count($list)) > 0) {
-			echo "<p style=\"margin-bottom:0px;\">Csound resource file <font color=\"blue\">‘".$csound_file."’</font> contains definitions of instrument(s):";
+			echo "<p style=\"margin-bottom:0px;\">Csound resource file <span class=\"blue-text\">‘".$csound_file."’</span> contains definitions of instrument(s):";
 			echo "<ol style=\"margin-top:0px; margin-bottom:0px\">";
 			for($i_instr = 0; $i_instr < $max_instr; $i_instr++) {
 				echo "<li><b>_ins(</b><font color=\"MediumTurquoise\">".$list[$i_instr]."</font><b>)</b>";
@@ -2711,7 +2721,7 @@ function show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,
 			echo "</ol>";
 			echo "</p>";
 			}
-		else if($file_format == "csound") echo "<p>Csound resource file <font color=\"blue\">‘".$csound_file."’</font> does not contain definitions of instrument(s). The default instrument <font color=\"blue\">‘0-default.orc’</font> will be used.</p>";
+		else if($file_format == "csound") echo "<p>Csound resource file <span class=\"blue-text\">‘".$csound_file."’</span> does not contain definitions of instrument(s). The default instrument <span class=\"blue-text\">‘0-default.orc’</span> will be used.</p>";
 		}
 	return $content;
 	}
@@ -2735,9 +2745,9 @@ function list_of_tonal_scales($tonality_file) {
 				$list[++$j] = "<font color=\"MediumTurquoise\">".$name_of_file."</font>";
 				}
 			if($line[0] == "/")
-				$list[$j] .= " = <font color=\"darkmagenta\"><b>".str_replace("/",'',$line)."</b></font>";
+				$list[$j] .= " = <span class=\"tonalnotes\"><b>".str_replace("/",'',$line)."</b></span>";
 			if($line[0] == "|") {
-				$list[$j] .= " <font color=\"black\">baseoctave = ".str_replace("|",'',$line)."</font>";
+				$list[$j] .= " baseoctave = ".str_replace("|",'',$line);
 				$clean_name_of_file = str_replace("#","_",$name_of_file);
 				$clean_name_of_file = str_replace(SLASH,"_",$clean_name_of_file);
 				$dir_image = $dir_scale_images.$clean_name_of_file.".png";
@@ -3345,13 +3355,13 @@ function find_replace_form() {
 	global $url_this_page;
 	echo "<div id=\"search\">";
 	echo "<label for=\"find\">Search for: </label>";
-	echo "<input type=\"text\" name=\"find\" style=\"background-color:white;\" id=\"find\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+	echo "<input type=\"text\" name=\"find\" id=\"find\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
 	echo "<label for=\"regex\">Check for regular expression:</label>";
 	echo "<input type=\"checkbox\" name=\"regex\" id=\"regex\">";
 	echo "</p>";
 	echo "<p>";
 	echo "<label for=\"replace\">and replace it with: </label>";
-	echo "<input type=\"text\" name=\"replace\" style=\"background-color:white;\" id=\"replace\">&nbsp;&nbsp;&nbsp;<button class=\"bouton\" type=\"submit\" formaction=\"".$url_this_page."#saveButton\" name=\"action\" value=\"replace\" onclick=\"clearsave()\">Search and Replace (all)</button>";
+	echo "<input type=\"text\" name=\"replace\" id=\"replace\">&nbsp;&nbsp;&nbsp;<button class=\"bouton\" type=\"submit\" formaction=\"".$url_this_page."#saveButton\" name=\"action\" value=\"replace\" onclick=\"clearsave()\">Search and Replace (all)</button>";
 	echo "</div>";
 	return;
 	}
@@ -3366,13 +3376,13 @@ function do_replace($content) {
 		if(!$useRegex) {
 			// Standard replace (case-sensitive)
 			$content = str_replace($find,$replace,$text);
-			echo "<p>Text = “<font color=\"blue\">".$find."</font>” replaced by “<font color=\"blue\">".$replace."</font>”&nbsp;<font color=\"red\"> ➡ Don't forget to save!</font></p>";
+			echo "<p>Text = “<span class=\"blue-text\">".$find."</span>” replaced by “<span class=\"blue-text\">".$replace."</span>”&nbsp;<font color=\"red\"> ➡ Don't forget to save!</font></p>";
 			}
 		else {
 			// Replace using regex
 			$pattern = '/'.$find.'/';
 			$content = preg_replace($pattern,$replace,$text);
-			echo "<p>Pattern = <font color=\"blue\">".$pattern."</font> should be replaced by <font color=\"blue\">".$replace."</font><font color=\"red\"> ➡ Don't forget to save!</font></p>";
+			echo "<p>Pattern = <span class=\"blue-text\">".$pattern."</span> should be replaced by <span class=\"blue-text\">".$replace."</span><font color=\"red\"> ➡ Don't forget to save!</font></p>";
 			}
 		}
 	return $content;
@@ -3402,7 +3412,7 @@ function ok_output_location($folder,$talk) {
 	if($folder == "scripts") $result = FALSE;
 	if(is_integer($pos=strpos($folder,"BP2-")) AND $pos == 0) $result = FALSE;
 	if($folder == $output_folder AND !$talk) $result = FALSE;
-	if(!$result AND $talk) echo "<p><font color=\"red\">ERROR:</font> Folder “<font color=\"blue\">".$folder."</font>” cannot be used for output files.</p>";
+	if(!$result AND $talk) echo "<p><font color=\"red\">ERROR:</font> Folder “<span class=\"blue-text\">".$folder."</span>” cannot be used for output files.</p>";
 	return $result;
 	}
 
@@ -3591,6 +3601,7 @@ function get_parameter($param) {
 function save_midiressources($filename) {
 	global $MIDIinput, $MIDIoutput, $MIDIinputname, $MIDIoutputname, $MIDIinputcomment, $MIDIoutputcomment; // These are tables!
 	global $dir_midi_resources, $temp_midi_ressources, $NumberMIDIinputs, $NumberMIDIoutputs, $MIDIchannelFilter, $MIDIpartFilter;
+	global $temp_dir;
 	for($i = 0; $i < $NumberMIDIinputs; $i++) {
 		if(isset($_POST["MIDIinput_".$i])) $MIDIinput[$i] = trim($_POST["MIDIinput_".$i]);
 		if(isset($_POST["MIDIinputname_".$i])) $MIDIinputname[$i] = trim($_POST["MIDIinputname_".$i]);
@@ -3698,6 +3709,7 @@ function save_midiressources($filename) {
 		}
 	save_midiport($temp_midi_ressources."midiport",$acceptFilters,$passFilters,$outFilters);
 	save_midiport($dir_midi_resources.$filename."_midiport",$acceptFilters,$passFilters,$outFilters);
+	save_midiport($temp_dir."trace_".my_session_id()."_startup.bpda_midiport",$acceptFilters,$passFilters,$outFilters);
 	return;
 	}
 
@@ -3734,7 +3746,7 @@ function save_midiport($thisfilename,$acceptFilters,$passFilters,$outFilters) {
 
 function filter_form_input($i) {
 	global $NoteOffFilter_in, $NoteOnFilter_in, $KeyPressureFilter_in, $ControlChangeFilter_in, $ProgramChangeFilter_in, $ChannelPressureFilter_in, $PitchBendFilter_in, $SystemExclusiveFilter_in, $TimeCodeFilter_in, $SongPositionFilter_in, $SongSelectFilter_in, $TuneRequestFilter_in, $EndSysExFilter_in, $TimingClockFilter_in, $StartFilter_in, $ContinueFilter_in, $ActiveSensingFilter_in, $SystemResetFilter_in, $MIDIinput;
-	echo "<div id=\"showhide_input".$i."\"  style=\"background-color: Snow; width:300px;\">";
+	echo "<div id=\"showhide_input".$i."\"  style=\"width:300px;\">";
 	echo "<p style=\"margin-left:12px;\"><b>Filter for MIDI input ".$MIDIinput[$i]."</b></p>";
 	echo "<p style=\"margin-left:12px;\">0 = reject<br />1 = treat<br />2 = treat + pass</p>";
 	echo "<table class=\"no-border-spacing\">";
@@ -3768,11 +3780,10 @@ function filter_form_input($i) {
 	echo "</div>";
 	}
 
-
 function filter_form_output($i) {
 	global $NoteOffFilter_out, $NoteOnFilter_out, $KeyPressureFilter_out, $ControlChangeFilter_out, $ProgramChangeFilter_out, $ChannelPressureFilter_out, $PitchBendFilter_out, $SystemExclusiveFilter_out, $TimeCodeFilter_out, $SongPositionFilter_out, $SongSelectFilter_out, $TuneRequestFilter_out, $EndSysExFilter_out, $TimingClockFilter_out, $StartFilter_out, $ContinueFilter_out, $ActiveSensingFilter_out, $SystemResetFilter_out;
 	global $url_this_page, $MIDIoutput;
-	echo "<div id=\"showhide_output".$i."\"  style=\"background-color: Snow; width:300px;\">";
+	echo "<div id=\"showhide_output".$i."\"  style=\"width:300px;\">";
 	echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#tonal\" name=\"savemidiport\" value=\"SAVE MIDI ports\">";
 	echo "<p style=\"margin-left:12px;\"><b>Filter for MIDI output ".$MIDIoutput[$i]."</b></p>";
 	echo "<table style=\"background-color:azure;\">";
@@ -3889,11 +3900,11 @@ function filter_buttons_in($i,$param) {
 function filter_input_explanation() {
 	global $file_format;
 	if($file_format <> "rtmidi") return;
-	echo "<p>MIDI input filters are used to process incoming events, for example from a connected<br />piano keyboard or other MIDI devices — including another instance of the BP3.</p>
+	echo "<p>MIDI input filters are used to process incoming events, for example<br />from a connectedpiano keyboard or other MIDI devices — including<br />another instance of the BP3.</p>
 	<ul>
 	<li>By default (option ‘0’), events are ‘rejected’ and nothing happens.</li>
 	<li>If an event is accepted (option ‘1’), it can trigger a script command<br />declared in the score.</li>
-	<li>Accepted events can also be routed to the current MIDI output (option ‘3’).</li>
+	<li>Accepted events can also be routed to the current MIDI output<br />(option ‘3’).</li>
 	<li>Some settings might be changed by the console for consistency.</li>
 	</ul>";
 	}
@@ -3901,9 +3912,9 @@ function filter_input_explanation() {
 function filter_output_explanation() {
 	global $file_format;
 	if($file_format <> "rtmidi") return;
-	echo "<p>The event filter specifies which MIDI events can be sent to this output.</p>";
-	echo "<p>The channel filter specifies which MIDI channels can be sent to this output.</p>";
-	echo "<p>The part filter specifies which parts of a score can be sent to this output.</p>";
+	echo "<p>Event filter specifies which MIDI events can be sent to this output.</p>";
+	echo "<p>Channel filter specifies which MIDI channels can be sent to this output.</p>";
+	echo "<p>Part filter specifies which parts of a score can be sent to this output.</p>";
 	}
 
 function display_midi_ports($filename) {
@@ -3956,7 +3967,7 @@ function display_midi_ports($filename) {
 		echo "<br />";
 		}
 	echo "<input style=\"float:right; color:DarkBlue; backgroundsave_-color:yellow;\" type=\"submit\" name=\"create_output\" value=\"Add an output\"><br />";
-	echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#tonal\" name=\"savemidiport\" value=\"SAVE MIDI ports\">";
+	echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topmidiports\" name=\"savemidiport\" value=\"SAVE MIDI ports\">";
 	echo str_replace(' ',"&nbsp;"," 👉 Delete name if changing number")."<br /><br />";
 	for($i = 0; $i < $NumberMIDIinputs; $i++) {
 		if($MIDIinput[$i] == -1) $value = '';
