@@ -1094,10 +1094,10 @@ echo "</h3>";
 
 echo "<p>👉 Read page ‘<a target=\"_blank\" href=\"https://bolprocessor.org/microtonality/\">Microtonality</a>’</p>";
 
-echo "<input style=\"background-color:azure; font-size:large;\" type=\"submit\" formaction=\"".$url_this_page."\" title=\"Export this tuning in the SCALA format\" name=\"download_scala\" value=\"Download SCALA file\">";
-echo "<input style=\"background-color:azure; font-size:large;\" type=\"submit\" formaction=\"".$url_this_page."\" title=\"Export this keyboard mapping to the KBM format\" name=\"download_kbm\" value=\"Download KBM\">";
+echo "<input class=\"edit big\" type=\"submit\" formaction=\"".$url_this_page."\" title=\"Export this tuning in the SCALA format\" name=\"download_scala\" value=\"Download SCALA file\">";
+echo "<input class=\"edit big\" type=\"submit\" formaction=\"".$url_this_page."\" title=\"Export this keyboard mapping to the KBM format\" name=\"download_kbm\" value=\"Download KBM\">";
 echo "<p>👉 Read documentation <a target=\"_blank\" href=\"https://www.huygens-fokker.org/scala/scl_format.html\">SCALA</a> / <a target=\"_blank\" href=\"https://www.huygens-fokker.org/scala/help.htm#mappings\">KBM</a><br />";
-if(!isset($_POST['import_kbm']) OR isset($_POST['dont'])) echo "<input style=\"background-color:azure; font-size:large;\" type=\"submit\" formaction=\"".$url_this_page."\" title=\"Import a keyboard mapping in the KBM format\" name=\"import_kbm\" value=\"Import KBM\"></p>";
+if(!isset($_POST['import_kbm']) OR isset($_POST['dont'])) echo "<input class=\"edit big\" type=\"submit\" formaction=\"".$url_this_page."\" title=\"Import a keyboard mapping in the KBM format\" name=\"import_kbm\" value=\"Import KBM\"></p>";
 else echo "</p>";
 
 if($kbm_error <> '') echo $kbm_error;
@@ -1217,7 +1217,7 @@ echo "<td style=\"white-space:nowrap; padding:6px; vertical-align:middle;\"><spa
 echo "<td rowspan=\"3\" style=\"white-space:nowrap; padding:6px; vertical-align:middle;\">";
 echo "<table style=\"background-color:gold;\">";
 echo "<tr>";
-echo "<td  style=\"padding-bottom:6px;\" colspan=\"".$numgrades_fullscale."\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"modifynames\" onclick=\"this.form.target='_self';return true;\" formaction=\"scale.php?scalefilename=".urlencode($filename)."\" value=\"SAVE NEW NAMES\">&nbsp;➡&nbsp;Record the names of these notes:</td>";
+echo "<td  style=\"padding-bottom:6px;\" colspan=\"".$numgrades_fullscale."\"><input class=\"save\" type=\"submit\" name=\"modifynames\" onclick=\"this.form.target='_self';return true;\" formaction=\"scale.php?scalefilename=".urlencode($filename)."\" value=\"SAVE NEW NAMES\">&nbsp;➡&nbsp;Record the names of these notes:</td>";
 echo "</tr>";
 echo "<tr>";
 if(isset($_POST['new_convention'])) $convention = $new_convention = $_POST['new_convention'];
@@ -1250,7 +1250,7 @@ if($convention <> 3) {
 echo "</td></tr>";
 if($need_adjust) {
 	echo "<tr><td colspan=\"".$numgrades_fullscale."\">";
-	echo "<input title=\"Reset key numbers of labeled notes starting with basekey\" style=\"background-color:yellow;\" type=\"submit\" name=\"fixkeynumbers\" onclick=\"this.form.target='_self';return true;\" formaction=\"scale.php?scalefilename=".urlencode($filename)."\" value=\"Adjust key numbers\">&nbsp;➡&nbsp;Reset the key numbers of labeled notes starting with the base key";
+	echo "<input title=\"Reset key numbers of labeled notes starting with basekey\" class=\"save\" type=\"submit\" name=\"fixkeynumbers\" onclick=\"this.form.target='_self';return true;\" formaction=\"scale.php?scalefilename=".urlencode($filename)."\" value=\"Adjust key numbers\">&nbsp;➡&nbsp;Reset the key numbers of labeled notes starting with the base key";
 	echo "</td></tr>";
 	}
 echo "</table><tr>";
@@ -1277,7 +1277,7 @@ if($ratio[0] <> 1 AND $name[0] <> '') echo "<br />Here, the frequency of <span c
 echo "</td>";
 echo "</tr></table>";
 
-echo "<p><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"savethisfile\" onclick=\"this.form.target='_self';return true;\" formaction=\"scale.php?scalefilename=".urlencode($filename)."\" value=\"SAVE “".$filename."”\"></p>";
+echo "<p><input class=\"save big\" type=\"submit\" name=\"savethisfile\" onclick=\"this.form.target='_self';return true;\" formaction=\"scale.php?scalefilename=".urlencode($filename)."\" value=\"SAVE “".$filename."”\"></p>";
 
 	
 for($i = 0; $i <= $numgrades_fullscale; $i++) {
@@ -1385,7 +1385,7 @@ echo "<tr><td style=\"padding-top:4px; padding-bottom:4px;\" colspan=\"5\">";
 if(!isset($_SESSION['scroll']) OR $_SESSION['scroll'] == 1)
 	$scroll_value = "DO NOT SCROLL THIS TABLE";
 else $scroll_value = "SCROLL THIS TABLE";
-echo "<input type=\"submit\" style=\"color:DarkBlue; background-color:Azure; font-size:large;\" name=\"scroll\" onclick=\"this.form.target='_self';return true;\" formaction=\"scale.php?scalefilename=".urlencode($filename)."#toptable\" value=\"".$scroll_value."\">";
+echo "<input type=\"submit\" class=\"edit big\" name=\"scroll\" onclick=\"this.form.target='_self';return true;\" formaction=\"scale.php?scalefilename=".urlencode($filename)."#toptable\" value=\"".$scroll_value."\">";
 echo "</td></tr>";
 
 store($h_image,"numgrades_fullscale",$numgrades_fullscale);
@@ -1500,7 +1500,7 @@ if(!$warned_ratios) {
 	}
 
 echo "</tr>";
-echo "<tr><th style=\"background-color:azure; color:black; padding:4px; position: absolute;\">key&nbsp;<input title=\"Reset key numbers of labeled notes starting with basekey\" style=\"background-color:yellow;\" type=\"submit\" name=\"fixkeynumbers\" onclick=\"this.form.target='_self';return true;\" formaction=\"scale.php?scalefilename=".urlencode($filename)."\" value=\"adjust\"></th>".$somespace;
+echo "<tr><th style=\"background-color:azure; color:black; padding:4px; position: absolute;\">key&nbsp;<input title=\"Reset key numbers of labeled notes starting with basekey\" class=\"save\" type=\"submit\" name=\"fixkeynumbers\" onclick=\"this.form.target='_self';return true;\" formaction=\"scale.php?scalefilename=".urlencode($filename)."\" value=\"adjust\"></th>".$somespace;
 $this_key = $basekey;
 for($i = 0; $i <= $numgrades_fullscale; $i++) {
 	echo "<td style=\"text-align:center; padding-top:4px; padding-bottom:4px; padding-left:0px; padding-right:0px; margin-left:0px; margin-right:0px; background-color:cornsilk;\" colspan=\"2\">";
@@ -1569,7 +1569,7 @@ if(!$warned_ratios) {
 		echo "<p><font color=\"red\">➡</font> This scale cannot be aligned to Pythagorean/harmonic cycles of fifths because it contains both too high and too low positions</p>";
 	else {
 		if($low_once OR $high_once) {
-			echo "<p><font color=\"red\">➡</font>&nbsp;<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#toptable\" name=\"adjustscale\" value=\"ADJUST SCALE\"> to Pyth/harm series ";
+			echo "<p><font color=\"red\">➡</font>&nbsp;<input class=\"produce\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#toptable\" name=\"adjustscale\" value=\"ADJUST SCALE\"> to Pyth/harm series ";
 			if($high_once) {
 				echo "lowering";
 				$p_adjust = $q_comma;
@@ -1680,15 +1680,15 @@ if(isset($_POST['change_convention']) AND isset($_POST['new_convention'])) {
 	echo "<input type=\"hidden\" name=\"old_convention\" value=\"".$old_convention."\">";
 	echo "<input type=\"hidden\" name=\"new_convention\" value=\"".$new_convention."\">";
 	echo "<input type=\"hidden\" name=\"baseoctave\" value=\"".$baseoctave."\">";
-	echo "&nbsp;<input style=\"background-color:cornsilk;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\">";
-	echo "&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"use_convention\" value=\"USE THIS CONVENTION\">";
+	echo "&nbsp;<input class=\"cancel\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\">";
+	echo "&nbsp;<input class=\"save\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"use_convention\" value=\"USE THIS CONVENTION\">";
 	echo "<hr>";
 	}
 	
 if($done AND !$warned_ratios) {
 	echo "<hr><table style=\"border:1px solid grey; border-radius: 12px;\">";
 	echo "<tr>";
-	echo "<td style=\"vertical-align:middle; white-space:nowrap;\"><input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"change_convention\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#topconvention\" value=\"CHANGE NOTE CONVENTION\"> ➡</td>";
+	echo "<td style=\"vertical-align:middle; white-space:nowrap;\"><input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"change_convention\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#topconvention\" value=\"CHANGE NOTE CONVENTION\"> ➡</td>";
 	echo "<td style=\"vertical-align:middle; white-space:nowrap; padding-bottom:6px;\">";
 	echo "<input type=\"radio\" name=\"new_convention\" value=\"0\">English<br />";
 	echo "<input type=\"radio\" name=\"new_convention\" value=\"1\">Italian/Spanish/French<br />";
@@ -1700,10 +1700,10 @@ if($done AND !$warned_ratios) {
 	
 	echo "<hr><table>";
 	echo "<tr>";
-	echo "<td><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"interpolate\" value=\"INTERPOLATE\"></td><td>➡ Replace missing ratio values with equal intervals (local temperament)</td>";
+	echo "<td><input class=\"produce\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"interpolate\" value=\"INTERPOLATE\"></td><td>➡ Replace missing ratio values with equal intervals (local temperament)</td>";
 	echo "</tr>";
 	echo "<tr>";
-	echo "<td style=\"vertical-align:middle;\"><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"equalize\" value=\"EQUALIZE INTERVALS\"></td><td>Over note sequence e.g. “C, G, E” etc. separated by commas:<br />(New notes may be created)<br /><input type=\"text\" name=\"names_notes_equalize\" size=\"60\" value=\"".$names_notes_equalize."\"><br />";
+	echo "<td style=\"vertical-align:middle;\"><input class=\"produce\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"equalize\" value=\"EQUALIZE INTERVALS\"></td><td>Over note sequence e.g. “C, G, E” etc. separated by commas:<br />(New notes may be created)<br /><input type=\"text\" name=\"names_notes_equalize\" size=\"60\" value=\"".$names_notes_equalize."\"><br />";
 	echo "<input type=\"checkbox\" name=\"ignore_unlabeled\">Hide unlabeled positions<br />";
 	echo "Approximate fraction of each step = <input type=\"text\" name=\"p_equalize\" size=\"6\" value=\"".$p_equalize."\">/<input type=\"text\" name=\"q_equalize\" size=\"6\" value=\"".$q_equalize."\">";
 	if($error_equalize <> '') echo "<font color=\"red\">".$error_equalize."</font>";
@@ -1909,7 +1909,7 @@ if($done AND $numgrades_with_labels > 2 AND !$warned_ratios) {
 						}
 					}
 				if($error_create == '') {
-					echo "<p><font color=\"red\">Exported to</font> <span class=\"blue-text\">‘".$new_scale_name."’</span> <input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\" name=\"edit_new_scale\" formaction=\"".$link_edit."?scalefilename=".urlencode($new_scale_name)."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$new_scale_name."’\"></p>";
+					echo "<p><font color=\"red\">Exported to</font> <span class=\"blue-text\">‘".$new_scale_name."’</span> <input class=\"edit\" type=\"submit\" name=\"edit_new_scale\" formaction=\"".$link_edit."?scalefilename=".urlencode($new_scale_name)."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$new_scale_name."’\"></p>";
 					$handle = fopen($dir_scales.$new_scale_file,"w");
 					fwrite($handle,"\"".$new_scale_name."\"\n");
 					$comma_line = $syntonic_comma;
@@ -1992,7 +1992,7 @@ if($done AND $numgrades_with_labels > 2 AND !$warned_ratios) {
 		}
 
 	echo "<br /><table><tr id=\"toptranspose\">";
-	echo "<td colspan=\"2\" style=\"vertical-align:middle; padding:4px; white-space:nowrap;\"><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#toptable\" name=\"reduce\" value=\"REDUCE or ADJUST\"> to create a  scale named <input type=\"text\" name=\"reduce_scale_name\" size=\"20\" value=\"".$new_scale_name."\">";
+	echo "<td colspan=\"2\" style=\"vertical-align:middle; padding:4px; white-space:nowrap;\"><input class=\"produce\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#toptable\" name=\"reduce\" value=\"REDUCE or ADJUST\"> to create a  scale named <input type=\"text\" name=\"reduce_scale_name\" size=\"20\" value=\"".$new_scale_name."\">";
 	
 	echo "</td></tr><tr><td colspan=\"2\" style=\"vertical-align:middle; padding:6px; white-space:nowrap;\">";
 	echo "<input type=\"radio\" name=\"scale_choice\" value=\"full_scale\"";
@@ -2286,7 +2286,7 @@ if($done AND $numgrades_with_labels > 2 AND !$warned_ratios) {
 			
 			// Now save to exported file	
 			echo "<br />";
-			echo "<font color=\"MediumTurquoise\">Saved to new scale</font> <span class=\"blue-text\">‘".$new_scale_name."’</span>&nbsp;<input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\" name=\"edit_new_scale\" formaction=\"".$link_edit."?scalefilename=".urlencode($new_scale_name)."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$new_scale_name."’\"></p>";
+			echo "<font color=\"MediumTurquoise\">Saved to new scale</font> <span class=\"blue-text\">‘".$new_scale_name."’</span>&nbsp;<input class=\"edit\" type=\"submit\" name=\"edit_new_scale\" formaction=\"".$link_edit."?scalefilename=".urlencode($new_scale_name)."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$new_scale_name."’\"></p>";
 			$transpose_scale_name = $new_scale_name;
 			$handle = fopen($dir_scales.$new_scale_file,"w");
 			fwrite($handle,"\"".$new_scale_name."\"\n");
@@ -2330,7 +2330,7 @@ if($done AND $numgrades_with_labels > 2 AND !$warned_ratios) {
 		}
 	echo "<table><tr>";
 	echo "<td style=\"vertical-align:middle; padding:4px;\">";
-	echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#toptranspose\" name=\"transpose\" value=\"TRANSPOSITION\"> to create a  scale named <input type=\"text\" name=\"transpose_scale_name\" size=\"20\" value=\"\"><br />";
+	echo "<input class=\"produce\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#toptranspose\" name=\"transpose\" value=\"TRANSPOSITION\"> to create a  scale named <input type=\"text\" name=\"transpose_scale_name\" size=\"20\" value=\"\"><br />";
 	echo "</td></tr><tr><td style=\"vertical-align:middle; padding:4px;\">";
 	echo "<input type=\"radio\" name=\"transposition_mode\" value=\"murcchana\"";
 	if($transposition_mode == "murcchana") echo " checked";
@@ -2347,17 +2347,17 @@ if($done AND $numgrades_with_labels > 2 AND !$warned_ratios) {
 	
 	echo "<table><tr><td style=\"vertical-align:middle; padding:4px;\">";
 	
-	echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#toptranspose\" name=\"modifynote\" value=\"MODIFY NOTE\">&nbsp;";
+	echo "<input class=\"produce\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#toptranspose\" name=\"modifynote\" value=\"MODIFY NOTE\">&nbsp;";
 	echo "<input type=\"text\" name=\"raised_note\" size=\"5\" value=\"".$raised_note."\"> by fraction <input type=\"text\" name=\"p_raised_note\" size=\"4\" value=\"".$p_raised_note."\"><b> / </b><input type=\"text\" name=\"q_raised_note\" size=\"3\" value=\"".$q_raised_note."\"> or <input type=\"text\" name=\"cents_raised_note\" size=\"6\" value=\"".$cents_raised_note."\"> cents";
 	if($error_raise_note <> '') echo "<br />".$error_raise_note;
 	
 	echo "</td></tr><tr><td style=\"vertical-align:middle; padding:4px;\">";
-	echo "<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#toptranspose\" name=\"resetbase\" value=\"RESET BASE OF SCALE\"> to note <input type=\"text\" name=\"resetbase_note\" size=\"6\" value=\"".$q_raise."\">";
+	echo "<input class=\"produce\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#toptranspose\" name=\"resetbase\" value=\"RESET BASE OF SCALE\"> to note <input type=\"text\" name=\"resetbase_note\" size=\"6\" value=\"".$q_raise."\">";
 	if($error_resetbase <> '') echo "<font color=\"red\">".$error_resetbase."</font>";
 	
 	if($ratio[0] <> 1.0) {
 		echo "</td></tr><tr><td style=\"vertical-align:middle; padding:4px;\">";
-		echo "<font color=\"red\">➡</font>&nbsp;<input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#toptranspose\" name=\"alignscale\" value=\"ALIGN SCALE\">&nbsp;to the position of “".$name[0]."” &nbsp;";
+		echo "<font color=\"red\">➡</font>&nbsp;<input class=\"produce\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#toptranspose\" name=\"alignscale\" value=\"ALIGN SCALE\">&nbsp;to the position of “".$name[0]."” &nbsp;";
 		if($ratio[0] > 1) echo "lowering&nbsp;";
 		else echo "raising&nbsp;";
 		echo "all notes by <font color=\"red\">".abs(round(cents($ratio[0]),1))." cents</font>";
@@ -2368,7 +2368,7 @@ if($done AND $numgrades_with_labels > 2 AND !$warned_ratios) {
 
 if($done AND !$warned_ratios) {
 	echo "<hr>";
-	echo "<p><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"create_meantone\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#toptable\" value=\"CREATE MEANTONE\"> temperament scale (<a target=\"_blank\" href=\"https://en.wikipedia.org/wiki/Meantone_temperament\">follow this link</a>) with the following data:";
+	echo "<p><input class=\"produce\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"create_meantone\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#toptable\" value=\"CREATE MEANTONE\"> temperament scale (<a target=\"_blank\" href=\"https://en.wikipedia.org/wiki/Meantone_temperament\">follow this link</a>) with the following data:";
 	if($error_meantone <> '') echo "<font color=\"red\">".$error_meantone."</font>";
 	echo "</p>";
 	echo "<ul>";
@@ -2384,7 +2384,7 @@ if($done AND !$warned_ratios) {
 	echo "</ul>";
 	echo "<hr>";
 	
-	echo "<p><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"add_fifths_up\" value=\"ADD SERIES\"> of <b>ASCENDING</b> fifths<br /><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"add_fifths_down\" value=\"ADD SERIES\"> of <b>DESCENDING</b> fifths";
+	echo "<p><input class=\"produce\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"add_fifths_up\" value=\"ADD SERIES\"> of <b>ASCENDING</b> fifths<br /><input class=\"produce\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"add_fifths_down\" value=\"ADD SERIES\"> of <b>DESCENDING</b> fifths";
 	if($error_fifths <> '') echo "<font color=\"red\">".$error_fifths."</font>";
 	echo "</p><ul>";
 	echo "<li>Start from fraction <input type=\"text\" style=\"text-align:right;\" name=\"p_start_fifths\" size=\"6\" value=\"".$p_start_fifths."\">/<input type=\"text\" name=\"q_start_fifths\" size=\"6\" value=\"".$q_start_fifths."\"></li>";
@@ -2742,7 +2742,7 @@ echo "<input type=\"hidden\" name=\"q_comma\" value=\"".$q_comma."\">";
 $text = html_to_text($scale_comment,"textarea");
 echo "<h3>Comment:</h3>";
 echo "<textarea name=\"scale_comment\" maxlength=\"2590\" rows=\"10\" style=\"width:1000px;\">".$text."</textarea>";
-echo "<p><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" formaction=\"scale.php?scalefilename=".urlencode($filename)."#toptable\" onclick=\"this.form.target='_self';return true;\" name=\"savethisfile\" value=\"SAVE “".$filename."”\"></p>";
+echo "<p><input class=\"save big\" type=\"submit\" formaction=\"scale.php?scalefilename=".urlencode($filename)."#toptable\" onclick=\"this.form.target='_self';return true;\" name=\"savethisfile\" value=\"SAVE “".$filename."”\"></p>";
 echo "</form>";
 $line = "§>\n";
 $line = str_replace('§','?',$line);

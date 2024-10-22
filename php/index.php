@@ -268,7 +268,7 @@ echo "</p>";
 
 $link_list = "file_list.php?dir=".$dir;
 if($path <> '' AND $path <> $trash_folder) {
-	echo "<p><input style=\"color:DarkBlue; background-color:Azure;\" onclick=\"window.open('".$link_list."','listfiles','width=300,height=600,left=100'); return false;\" type=\"submit\" name=\"\" value=\"COPY list of files\">&nbsp;";
+	echo "<p><input class=\"edit\" onclick=\"window.open('".$link_list."','listfiles','width=300,height=600,left=100'); return false;\" type=\"submit\" name=\"\" value=\"COPY list of files\">&nbsp;";
 	if(countBakFiles($dir) > 0) echo "<input style=\"background-color:red; color:white;\" type=\"submit\" name=\"trash_backups\" title=\"Delete '_bak' files\" value=\"MOVE '_bak' files to TRASH\"></p>";
 	}
 echo "</form>";
@@ -290,7 +290,7 @@ if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension 
 	if($path == $tonality_resources) {
 		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		echo "<p style=\"text-align:left;\">";
-		echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"create_tonality\" value=\"CREATE NEW TONALITY FILE\"><br />named:&nbsp";
+		echo "<input class=\"save\" type=\"submit\" name=\"create_tonality\" value=\"CREATE NEW TONALITY FILE\"><br />named:&nbsp";
 		echo "<input type=\"text\" name=\"filename\" size=\"20\" style=\"background-color:CornSilk;\" value=\"\">";
 		$type = "to";
 		echo "<br /><input type=\"radio\" name=\"name_mode\" value=\"prefix\" checked>with prefix ‘-".$type."’";
@@ -312,7 +312,7 @@ if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension 
 		if($path <> '') {
 			echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 			echo "<p style=\"text-align:left;\">";
-			echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"create_grammar\" value=\"CREATE NEW GRAMMAR FILE\"><br />named:&nbsp;";
+			echo "<input class=\"save\" type=\"submit\" name=\"create_grammar\" value=\"CREATE NEW GRAMMAR FILE\"><br />named:&nbsp;";
 			echo "<input type=\"text\" name=\"filename\" size=\"20\" style=\"background-color:CornSilk;\" value=\"\">";
 			$type = "gr";
 			echo "<br /><input type=\"radio\" name=\"name_mode\" value=\"prefix\" checked>with prefix ‘-".$type."’";
@@ -322,7 +322,7 @@ if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension 
 			echo "</form>";
 			echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 			echo "<p style=\"text-align:left;\">";
-			echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"create_data\" value=\"CREATE NEW DATA FILE\"><br />named:&nbsp;";
+			echo "<input class=\"save\" type=\"submit\" name=\"create_data\" value=\"CREATE NEW DATA FILE\"><br />named:&nbsp;";
 			echo "<input type=\"text\" name=\"filename\" size=\"20\" style=\"background-color:CornSilk;\" value=\"\">";
 			$type = "da";
 			echo "<br /><input type=\"radio\" name=\"name_mode\" value=\"prefix\" checked>with prefix ‘-".$type."’";
@@ -332,7 +332,7 @@ if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension 
 			echo "</form>";
 			echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 			echo "<p style=\"text-align:left;\">";
-			echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"create_alphabet\" value=\"CREATE NEW ALPHABET FILE\"><br />named:&nbsp;";
+			echo "<input class=\"save\" type=\"submit\" name=\"create_alphabet\" value=\"CREATE NEW ALPHABET FILE\"><br />named:&nbsp;";
 			echo "<input type=\"text\" name=\"filename\" size=\"20\" style=\"background-color:CornSilk;\" value=\"\">";
 			$type = "ho";
 			echo "<br /><input type=\"radio\" name=\"name_mode\" value=\"prefix\" checked>with prefix ‘-".$type."’";
@@ -342,7 +342,7 @@ if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension 
 			echo "</form>";
 			echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 			echo "<p style=\"text-align:left;\">";
-			echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"create_prototypes\" value=\"CREATE NEW SOUND-OBJECT PROTOTYPE FILE\"><br />named:&nbsp;";
+			echo "<input class=\"save\" type=\"submit\" name=\"create_prototypes\" value=\"CREATE NEW SOUND-OBJECT PROTOTYPE FILE\"><br />named:&nbsp;";
 			echo "<input type=\"text\" name=\"filename\" size=\"20\" style=\"background-color:CornSilk;\" value=\"\">";
 			$type = "so";
 			echo "<br /><input type=\"radio\" name=\"name_mode\" value=\"prefix\" checked>with prefix ‘-".$type."’";
@@ -352,7 +352,7 @@ if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension 
 			echo "</form>";
 			echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 			echo "<p style=\"text-align:left;\">";
-			echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"create_script\" value=\"CREATE NEW SCRIPT\"><br />named:&nbsp;";
+			echo "<input class=\"save\" type=\"submit\" name=\"create_script\" value=\"CREATE NEW SCRIPT\"><br />named:&nbsp;";
 			echo "<input type=\"text\" name=\"filename\" size=\"20\" style=\"background-color:CornSilk;\" value=\"\">";
 			$type = "sc";
 			echo "<br /><input type=\"radio\" name=\"name_mode\" value=\"prefix\" checked>with prefix ‘-".$type."’";
@@ -362,7 +362,7 @@ if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension 
 			echo "</form>";
 			echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 			echo "<p style=\"text-align:left;\">";
-			echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"create_timebase\" value=\"CREATE NEW TIMEBASE\"><br />named:&nbsp;";
+			echo "<input class=\"save\" type=\"submit\" name=\"create_timebase\" value=\"CREATE NEW TIMEBASE\"><br />named:&nbsp;";
 			echo "<input type=\"text\" name=\"filename\" size=\"20\" style=\"background-color:CornSilk;\" value=\"\">";
 			$type = "tb";
 			echo "<br /><input type=\"radio\" name=\"name_mode\" value=\"prefix\" checked>with prefix ‘-".$type."’";
@@ -376,7 +376,7 @@ if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension 
 	else if($path <> $tonality_resources) {
 		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		echo "<p style=\"text-align:left;\">";
-		echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"create_csound\" value=\"CREATE NEW CSOUND RESOURCE FILE\"><br />named:&nbsp";
+		echo "<input class=\"save\" type=\"submit\" name=\"create_csound\" value=\"CREATE NEW CSOUND RESOURCE FILE\"><br />named:&nbsp";
 		echo "<input type=\"text\" name=\"filename\" size=\"20\" style=\"background-color:CornSilk;\" value=\"\">";
 		$type = "cs";
 		echo "<br /><input type=\"radio\" name=\"name_mode\" value=\"prefix\" checked>with prefix ‘-".$type."’";
@@ -386,7 +386,7 @@ if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension 
 		echo "</form>";
 		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		echo "<p style=\"text-align:left;\">";
-		echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"create_csound_orchestra\" value=\"CREATE NEW CSOUND ORCHESTRA FILE\"><br />named:&nbsp";
+		echo "<input class=\"save\" type=\"submit\" name=\"create_csound_orchestra\" value=\"CREATE NEW CSOUND ORCHESTRA FILE\"><br />named:&nbsp";
 		echo "<input type=\"text\" name=\"filename\" size=\"20\" style=\"background-color:CornSilk;\" value=\"\">.orc";
 		echo "</p>";
 		echo "</form>";
@@ -442,11 +442,11 @@ if($move_files) {
 			else $txt = $thisfolder;
 			echo "<input type=\"radio\" name=\"folder_choice\" value=\"".$thisfolder."\">".$txt."<br />";
 			}
-		echo "<p style=\"margin-left:6px;\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"move_checked_files\" value=\"MOVE CHECKED FILES/FOLDERS\">&nbsp;&nbsp;<input style=\"background-color:azure;\" type=\"submit\" name=\"cancel\" value=\"CANCEL\"></p>";
+		echo "<p style=\"margin-left:6px;\"><input class=\"save\" type=\"submit\" name=\"move_checked_files\" value=\"MOVE CHECKED FILES/FOLDERS\">&nbsp;&nbsp;<input style=\"background-color:azure;\" type=\"submit\" name=\"cancel\" value=\"CANCEL\"></p>";
 		echo "</div>";
 		}
 	else {
-		echo "<h3><font color=\"red\">ERROR: no folder found!</font></h3>";
+		echo "<h4><font color=\"red\">ERROR: no folder found!</font></h4>";
 		$move_files = FALSE;
 		}
 	}
@@ -455,13 +455,13 @@ if($move_files) {
 if($path <> '') {
 //	echo "<div style=\"width:30%;\">";
 	if(!$delete_files AND !$rename_files AND !$move_files AND $path <> $trash_folder) {
-		echo "<input style=\"background-color:yellow; margin-top:1em;\" title=\"Delete folders or files\" type=\"submit\" name=\"delete_files\" value=\"DELETE\">";
+		echo "<input class=\"save\" style=\"margin-top:1em;\" title=\"Delete folders or files\" type=\"submit\" name=\"delete_files\" value=\"DELETE\">";
 		}
 	if(!$rename_files AND !$delete_files AND !$move_files) {
-		echo "&nbsp;<input style=\"background-color:yellow; margin-top:1em;\" title=\"Rename folders or files\" type=\"submit\" name=\"rename_files\" value=\"RENAME OR COPY\">";
+		echo "&nbsp;<input class=\"save\"style=\"margin-top:1em;\" title=\"Rename folders or files\" type=\"submit\" name=\"rename_files\" value=\"RENAME OR COPY\">";
 		}
 	if(!$rename_files AND !$delete_files AND !$move_files) {
-		echo "&nbsp;<input style=\"background-color:yellow; margin-top:1em;\" title=\"Move folders or files\" type=\"submit\" name=\"move_files\" value=\"MOVE\">";
+		echo "&nbsp;<input class=\"save\" style=\"margin-top:1em;\" title=\"Move folders or files\" type=\"submit\" name=\"move_files\" value=\"MOVE\">";
 		}
 	if(!$rename_files AND !$delete_files AND !$move_files AND $path == $trash_folder) {
 		echo "<br /><br />🗑&nbsp;<input style=\"background-color:red; color:white;\" title=\"Empty trash\" type=\"submit\" name=\"empty_trash\" value=\"EMPTY THIS TRASH\"> 👉 can't be reversed!<br /><br />";
@@ -491,7 +491,7 @@ if(!is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"t
 		echo "<tr>";
 		echo "<th>";
 		if(($n1 = display_directory(TRUE,$dir,"grammar")) > 0 OR $show_grammar) {
-			echo "<h3>Grammar project(s)</h3>";
+			echo "<h4>Grammar project(s)</h4>";
 			if($show_grammar) {
 				echo "<p style=\"background-color:snow; color:black; padding:6px; border-radius: 0.5em;\">Last visited: <a style=\"color:#007BFF;\" target=\"_blank\" href=\"".$last_grammar_page."\">".$last_grammar_name."</a>";
 				if(isset($last_grammar_directory) AND $folder <> $last_grammar_directory) echo "<br />in workspace</font> <a style=\"color:#007BFF;\" href=\"index.php?path=".$last_grammar_directory."\">".$last_grammar_directory."</a></p>";
@@ -500,7 +500,7 @@ if(!is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"t
 		echo "</th>";
 		echo "<th>";
 		if(($n2 = display_directory(TRUE,$dir,"data")) > 0 OR $show_data) {
-			echo "<h3>Data project(s)</h3>";
+			echo "<h4>Data project(s)</h4>";
 			if($show_data) {
 				echo "<p style=\"background-color:snow; color:black; padding:6px; border-radius: 0.5em;\">Last visited: <a style=\"color:#007BFF;\" target=\"_blank\" href=\"".$last_data_page."\">".$last_data_name."</a>";
 				if(isset($last_data_directory) AND $folder <> $last_data_directory) echo "<br />in workspace</font> <a style=\"color:#007BFF;\" href=\"index.php?path=".$last_data_directory."\">".$last_data_directory."</a></p>";
@@ -510,7 +510,7 @@ if(!is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"t
 		if($path <> '') {
 			echo "<th>";
 			$n3 = display_directory(TRUE,$dir,"script");
-			echo "<h3>Script project(s)</h3>";
+			echo "<h4>Script project(s)</h4>";
 			echo "</th>";
 			}
 		echo"</tr>";
@@ -530,15 +530,15 @@ if(!is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"t
 		echo "<tr>";
 		echo "<th>";
 		$n1 = display_directory(TRUE,$dir,"timebase");
-		echo "<h3>Time base(s)</h3>";
+		echo "<h4>Time base(s)</h4>";
 		echo "</th>";
 		echo "<th>";
 		$n2 = display_directory(TRUE,$dir,"objects");
-		echo "<h3>Sound objects</h3>";
+		echo "<h4>Sound objects</h4>";
 		echo "</th>";
 		echo "<th>";
 		$n3 = display_directory(TRUE,$dir,"glossary");
-		echo "<h3>Glossaries</h3>";
+		echo "<h4>Glossaries</h4>";
 		echo "</th>";
 		echo"</tr>";
 		echo "<tr>";
@@ -555,14 +555,14 @@ if(!is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"t
 		echo "<tr>";
 		echo "<th>";
 		$n1 = display_directory(TRUE,$dir,"settings");
-		echo "<h3>Settings</h3>";
+		echo "<h4>Settings</h4>";
 		echo "</th>";
 		echo "<th>";
 		$n2 = display_directory(TRUE,$dir,"alphabet");
-		echo "<h3>Alphabet(s)</h3>";
+		echo "<h4>Alphabet(s)</h4>";
 		echo "</th>";
 		echo "<th>";
-		echo "<h3>More</h3>";
+		echo "<h4>More</h4>";
 		echo "</th>";
 		echo "</tr>";
 		}
@@ -794,12 +794,12 @@ function display_directory($test,$dir,$filter) {
 		}
 	if($files_shown == 0) return $files_shown;
 	if(!$test AND $move_files)
-		echo "<p style=\"margin-left:6px;\"><font color=\"red\"><big>↑</big></font>&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"move_checked_files\" value=\"MOVE CHECKED FILES/FOLDERS\">&nbsp;&nbsp;<input style=\"background-
+		echo "<p style=\"margin-left:6px;\"><font color=\"red\"><big>↑</big></font>&nbsp;<input class=\"save\" type=\"submit\" name=\"move_checked_files\" value=\"MOVE CHECKED FILES/FOLDERS\">&nbsp;&nbsp;<input style=\"background-
 		color:azure;\" type=\"submit\" name=\"cancel\" value=\"CANCEL\"></p>";
 	if(!$test AND $delete_files)
-		echo "<p style=\"margin-left:6px;\"><font color=\"red\"><big>↑</big></font>&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"delete_checked_files\" value=\"DELETE CHECKED FILES/FOLDERS\"> <font color=\"red\">➡</font> can be reversed <input style=\"background-color:azure;\" type=\"submit\" name=\"cancel\" value=\"CANCEL\"></p>";
+		echo "<p style=\"margin-left:6px;\"><font color=\"red\"><big>↑</big></font>&nbsp;<input class=\"save\" type=\"submit\" name=\"delete_checked_files\" value=\"DELETE CHECKED FILES/FOLDERS\"> <font color=\"red\">➡</font> can be reversed <input style=\"background-color:azure;\" type=\"submit\" name=\"cancel\" value=\"CANCEL\"></p>";
 	if(!$test AND $rename_files)
-		echo "<p style=\"margin-left:6px;\"><font color=\"red\"><big>↑</big></font>&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"rename_checked_files\" value=\"RENAME OR COPY CHECKED FILES/FOLDERS\">&nbsp;&nbsp;<input style=\"background-color:azure;\" type=\"submit\" name=\"cancel\" value=\"CANCEL\"></p>";
+		echo "<p style=\"margin-left:6px;\"><font color=\"red\"><big>↑</big></font>&nbsp;<input class=\"save\" type=\"submit\" name=\"rename_checked_files\" value=\"RENAME OR COPY CHECKED FILES/FOLDERS\">&nbsp;&nbsp;<input style=\"background-color:azure;\" type=\"submit\" name=\"cancel\" value=\"CANCEL\"></p>";
 	return $files_shown;
 	}
 

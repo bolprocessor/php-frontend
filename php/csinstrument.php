@@ -346,7 +346,7 @@ for($ii = 0; $ii < 6; $ii++) {
 	if($verbose) echo "Instrument Panoramic[".$ii."] = ".$InstrumentPanoramic[$ii]."<br />";
 	}
 
-echo "<p style=\"text-align:left;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" name=\"saveinstrument\" value=\"SAVE THIS INSTRUMENT\"></p>";
+echo "<p style=\"text-align:left;\"><input class=\"save big\" type=\"submit\" name=\"saveinstrument\" value=\"SAVE THIS INSTRUMENT\"></p>";
 $comment = recode_tags($table[1]);
 echo "<p>Comment: <input type=\"text\" name=\"comment\" size=\"90\" value=\"".$comment."\"></p>";
 echo "<table>";
@@ -431,8 +431,8 @@ foreach($dir_instrument as $thisparameter) {
 	$parameter_name = str_replace(".txt.old",'',$thisparameter);
 	$deleted_parameters .= "“".$parameter_name."” ";
 	}
-if($deleted_parameters <> '') echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"restore\" value=\"RESTORE ALL DELETED PARAMETERS\"> = <span class=\"blue-text\"><big>".$deleted_parameters."</big></span></p>";
-echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"create_parameter\" value=\"CREATE A NEW PARAMETER\"> named <input type=\"text\" name=\"new_parameter\" size=\"20\" value=\"\"></p>";
+if($deleted_parameters <> '') echo "<p><input class=\"save\" type=\"submit\" name=\"restore\" value=\"RESTORE ALL DELETED PARAMETERS\"> = <span class=\"blue-text\"><big>".$deleted_parameters."</big></span></p>";
+echo "<p><input class=\"save\" type=\"submit\" name=\"create_parameter\" value=\"CREATE A NEW PARAMETER\"> named <input type=\"text\" name=\"new_parameter\" size=\"20\" value=\"\"></p>";
 
 echo "</form>";
 $n = 0;
@@ -478,7 +478,7 @@ if($n > 0) {
 		echo "<input type=\"hidden\" name=\"parameter_name\" value=\"".$parameter_name."\">";
 	echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";
 	echo "<input type=\"hidden\" name=\"instrument_file\" value=\"".$instrument_file."\">";
-		echo "<input style=\"background-color:yellow; \" type=\"submit\" name=\"delete_parameter\" value=\"DELETE\">";
+		echo "<input class=\"save\" type=\"submit\" name=\"delete_parameter\" value=\"DELETE\">";
 		echo "</form>";
 		echo "</td>";
 		echo "</tr>";

@@ -220,7 +220,7 @@ for($i = 0; $i < count($table); $i++) {
 			$CsoundInstruments_file = $dir_csound_resources.$CsoundInstruments_filename;
 			if(!file_exists($CsoundInstruments_file)) {
 				echo "&nbsp;➡&nbsp;";
-				echo "File not found: <input style=\"background-color:yellow;\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" name=\"createcsoundinstruments\" value=\"CREATE ‘".$CsoundInstruments_filename."’\">";
+				echo "File not found: <input class=\"save\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" name=\"createcsoundinstruments\" value=\"CREATE ‘".$CsoundInstruments_filename."’\">";
 				}
 			}
 		echo "<br />";
@@ -319,11 +319,11 @@ echo "<input type=\"hidden\" name=\"maxsounds\" value=\"".$maxsounds."\">";
 if($handle_object) fclose($handle_object);
 echo "<p class=\"blue-text\">".$comment_on_file."</p>";
 echo "<p style=\"text-align:left;\">";
-echo "<input style=\"background-color:yellow; font-size:large;\" type=\"submit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’ INCLUDING ALL CHANGES TO PROTOTYPES\"><br />";
+echo "<input class=\"save big\" type=\"submit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’ INCLUDING ALL CHANGES TO PROTOTYPES\"><br />";
 echo "<font color=\"red\">➡</font> Changes in prototypes are <font color=\"red\">autosaved</font> every 30 seconds if changes occurred.<br />Keep this page open as long as you are editing sound-object prototypes!</p>";
 if($autosave) echo "<script type=\"text/javascript\" src=\"autosaveObjects.js\"></script>";
-echo "<p><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" name=\"create_object\" value=\"CREATE A NEW OBJECT\"> named <input type=\"text\" name=\"new_object\" size=\"10\" value=\"\"></p>";
-if($deleted_objects <> '') echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"restore\" value=\"RESTORE ALL DELETED OBJECTS\"> = <span class=\"blue-text\"><big>".$deleted_objects."</big></span></p>";
+echo "<p><input class=\"save big\" type=\"submit\" name=\"create_object\" value=\"CREATE A NEW OBJECT\"> named <input type=\"text\" name=\"new_object\" size=\"10\" value=\"\"></p>";
+if($deleted_objects <> '') echo "<p><input class=\"save\" type=\"submit\" name=\"restore\" value=\"RESTORE ALL DELETED OBJECTS\"> = <span class=\"blue-text\"><big>".$deleted_objects."</big></span></p>";
 echo "</form>";
 
 if($CsoundInstruments_filename <> '') {
@@ -331,7 +331,7 @@ if($CsoundInstruments_filename <> '') {
 	if($CsoundInstruments_filename <> '' AND file_exists($CsoundInstruments_file)) {
 		$url_csound_page = "csound.php?file=".urlencode($csound_resources.SLASH.$csound_file);
 		echo "<td><form method=\"post\" action=\"".$url_csound_page."\" enctype=\"multipart/form-data\">";
-		echo "<input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$csound_file."’\">&nbsp;";
+		echo "<input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$csound_file."’\">&nbsp;";
 		echo "</td></form>";
 		}
 	}
@@ -376,7 +376,7 @@ if($iobj >= 0) {
 		echo "<input type=\"hidden\" name=\"comment_on_file\" value=\"".$comment_on_file."\">";
 		echo "<input type=\"hidden\" name=\"maxsounds\" value=\"".$maxsounds."\">";
 		echo "<input type=\"hidden\" name=\"object_name\" value=\"".$object_name[$i]."\">";
-		echo "<input style=\"background-color:yellow; \" type=\"submit\" name=\"delete_object\" value=\"DELETE\">";
+		echo "<input class=\"save\" type=\"submit\" name=\"delete_object\" value=\"DELETE\">";
 		echo "</td>";
 		echo "<td style=\"padding:4px; vertical-align:middle;\">";
 		echo "<input style=\"background-color:azure;\" type=\"submit\" name=\"rename_object\" value=\"RENAME AS\">: <input type=\"text\" name=\"object_new_name\" size=\"10\" value=\"\">";

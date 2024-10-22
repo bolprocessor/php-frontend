@@ -63,7 +63,7 @@ if(is_integer($pos=strpos($content,"-mi")) AND $pos > 0) {
 	}
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 
-echo "<p style=\"text-align:left;\"><input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></p>";
+echo "<p style=\"text-align:left;\"><input class=\"save\" type=\"submit\" onclick=\"clearsave();\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></p>";
 echo "<textarea name=\"thistext\" onchange=\"tellsave()\" rows=\"40\" style=\"width:700px;\">".$content."</textarea>";
 echo "</form>";
 

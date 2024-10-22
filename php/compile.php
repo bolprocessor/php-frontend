@@ -9,7 +9,7 @@ if(!file_exists("../source")) {
 	echo "<p><a href=\"index.php\">Return to Bol Processor home page</a></p>";
 	die(); 
 	}
-echo "<p style=\"text-align:center; width:90%;\">Wait before closing this page!</p>";
+echo "<p style=\"text-align:center; width:90%;\">Wait before closing this page…</p>";
 if(file_exists("../".$console)) @unlink("../".$console);
 $this_file = "bp_compile_result.txt";
 if(file_exists($this_file)) @unlink($this_file);
@@ -35,7 +35,7 @@ chdir('..');
 $last_line = exec($command,$output,$return_var);
 chdir("php");
 if(file_exists($this_file)) chmod($this_file,0777);
-echo "<div style=\"background-color:white; padding: 1em; border-radius: 1em;\">";
+echo "<div style=\"padding: 1em; border-radius: 1em;\">";
 if($return_var <> 0) {
 	echo "<p style=\"text-align:center;  width:90%;\">Compilation failed… Check the “source/BP3” folder!</p>";
 	if(file_exists($this_file)) {
@@ -45,9 +45,8 @@ if($return_var <> 0) {
 		}
 	}
 else {
-	echo "<p style=\"text-align:center;  width:90%;\"><big>😀&nbsp;&nbsp;<font color=\"green\">Compilation of</font> ‘<span class=\"blue-text\">".$console."</span>’ <font color=\"green\">worked!</font>&nbsp;&nbsp;😀</big></p>";
+	echo "<p style=\"text-align:center;  width:90%;\"><big>😀&nbsp;&nbsp;Compilation of ‘<span class=\"blue-text\">".$console."</span>’ worked!&nbsp;&nbsp;😀</big></p>";
 	}
-// echo "<p style=\"text-align:center;  width:90%;\">------ End of compilation ------</p>";
 echo "<script>";
 echo "var element = document.getElementById('refresh');
     if (element) {

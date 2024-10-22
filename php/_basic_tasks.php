@@ -455,75 +455,75 @@ function display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,
 		$url_this_page = "alphabet.php?file=".urlencode($dir.$alphabet_file);
 		if($test) echo "url_this_page = ".$url_this_page."<br />";
 		echo "<td>";
-		echo "<input style=\"color:DarkBlue; background-color:Azure; float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$alphabet_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$alphabet_file."’\">";
+		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$alphabet_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$alphabet_file."’\">";
 		echo "</td>";
 		}
 	if($grammar_file <> '') {
 		$url_this_page = "grammar.php?file=".urlencode($dir.$grammar_file);
 		if($test) echo "url_this_page = ".$url_this_page."<br />";
 		echo "<td><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-		echo "<input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\" name=\"openobjects\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$grammar_file."’\">&nbsp;";
+		echo "<input class=\"edit\" type=\"submit\" name=\"openobjects\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$grammar_file."’\">&nbsp;";
 		echo "</td></form>";
 		}
 	if($objects_file <> '') {
 		$url_this_page = "objects.php?file=".urlencode($dir.$objects_file);
 		echo "<td><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-		echo "<input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\"  onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$objects_file."’\">&nbsp;";
+		echo "<input class=\"edit\" type=\"submit\"  onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$objects_file."’\">&nbsp;";
 		echo "</td></form>";
 		}
 	if($csound_file <> '') {
 		$url_this_page = "csound.php?file=".urlencode($csound_resources.SLASH.$csound_file);
 		echo "<td><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-		echo "<input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$csound_file."’\">&nbsp;";
+		echo "<input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$csound_file."’\">&nbsp;";
 		echo "</td></form>";
 		}
 	if($tonality_file <> '') {
 		$url_this_page = "tonality.php?file=".urlencode($tonality_resources.SLASH.$tonality_file);
 		echo "<td><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-		echo "<input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$tonality_file."’\">&nbsp;";
+		echo "<input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$tonality_file."’\">&nbsp;";
 		echo "</td></form>";
 		}
 	if($settings_file <> '') {
 		$url_this_page = "settings.php?file=".urlencode($dir.$settings_file);
 		if($test) echo "url_this_page = ".$url_this_page."<br />";
 		echo "<td>";
-		echo "<input style=\"color:DarkBlue; background-color:Azure; float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$settings_file."','width=1000,height=800,left=100'); return false;\" value=\"EDIT ‘".$settings_file."’\">";
+		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$settings_file."','width=1000,height=800,left=100'); return false;\" value=\"EDIT ‘".$settings_file."’\">";
 		echo "</td>";
 		}
 	if($orchestra_file <> '') {
 		$url_this_page = "orchestra.php?file=".urlencode($dir.$orchestra_file);
 		echo "<td>";
-		echo "<input style=\"color:DarkBlue; background-color:Azure; float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$orchestra_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$orchestra_file."’\">";
+		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$orchestra_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$orchestra_file."’\">";
 		echo "</td>";
 		}
 	if($interaction_file <> '') {
 		$url_this_page = "interaction.php?file=".urlencode($dir.$interaction_file);
 		echo "<td>";
-		echo "<input style=\"color:DarkBlue; background-color:Azure; float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$interaction_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$interaction_file."’\">";
+		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$interaction_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$interaction_file."’\">";
 		echo "</td>";
 		}
 	if($midisetup_file <> '') {
 		$url_this_page = "midisetup.php?file=".urlencode($dir.$midisetup_file);
 		echo "<td>";
-		echo "<input style=\"color:DarkBlue; background-color:Azure; float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$midisetup_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$midisetup_file."’\">";
+		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$midisetup_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$midisetup_file."’\">";
 		echo "</td>";
 		}
 	if($timebase_file <> '') {
 		$url_this_page = "timebase.php?file=".urlencode($dir.$timebase_file);
 		echo "<td>";
-		echo "<input style=\"color:DarkBlue; background-color:Azure; float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$timebase_file."','width=1000,height=900,left=50'); return false;\" value=\"EDIT ‘".$timebase_file."’\">";
+		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$timebase_file."','width=1000,height=900,left=50'); return false;\" value=\"EDIT ‘".$timebase_file."’\">";
 		echo "</td>";
 		}
 	if($keyboard_file <> '') {
 		$url_this_page = "keyboard.php?file=".urlencode($dir.$keyboard_file);
 		echo "<td>";
-		echo "<input style=\"color:DarkBlue; background-color:Azure; float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$keyboard_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$keyboard_file."’\">";
+		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$keyboard_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$keyboard_file."’\">";
 		echo "</td>";
 		}
 	if($glossary_file <> '') {
 		$url_this_page = "glossary.php?file=".urlencode($dir.$glossary_file);
 		echo "<td>";
-		echo "<input style=\"color:DarkBlue; background-color:Azure; float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$glossary_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$glossary_file."’\">";
+		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$glossary_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$glossary_file."’\">";
 		echo "</td>";
 		}
 	echo "</tr></table>";
@@ -533,8 +533,8 @@ function display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,
 function ask_create_new_file($url_this_page,$filename) {
 	echo "File ‘".$filename."’ not found. Do you wish to create a new one under that name?";
 	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-	echo "<p style=\"text-align:left;\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"createfile\" value=\"YES\">";
-	echo "&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"dontcreate\" value=\"NO\"></p>";
+	echo "<p style=\"text-align:left;\"><input class=\"save\" type=\"submit\" name=\"createfile\" value=\"YES\">";
+	echo "&nbsp;<input class=\"save\" type=\"submit\" name=\"dontcreate\" value=\"NO\"></p>";
 	echo "</form>";
 	die();
 	}
@@ -2392,8 +2392,10 @@ function delete_settings_entry($entry) {
  	}
 
 function display_darklight() {
+	global $bp_application_path;
 	echo "<div style=\"display:flex; align-items:center; float:right;\">";
 	echo "&nbsp;<img title=\"Bulb Png PNGs by Vecteezy\" src=\"pict/bulb.png\" id=\"darkModeToggle\" style=\"width:30px; cursor: pointer;\"/>";
+//	echo "&nbsp;<img title=\"Bulb Png PNGs by Vecteezy\" src=\"".$bp_application_path."php/pict/bulb.png\" id=\"darkModeToggle\" style=\"width:30px; cursor: pointer;\"/>";
 	echo "</div>";
 	}
 
@@ -2488,7 +2490,7 @@ function check_csound() {
 		echo "<p><img src=\"pict/logo_csound.png\" width=\"90px;\" style=\"vertical-align:middle;\" />&nbsp;is not responding<br />or its path (<font color= \"#007BFF;\">".$csound_path."</font>) is incorrect<br /><br />";
 		echo "Name: <font color=\"green\">path_to_csound".SLASH." </font><input type=\"text\" name=\"csound_name\" size=\"14\" style=\"background-color:CornSilk;\" value=\"".$csound_name."\"><br />";
 		echo "Path: <input type=\"text\" name=\"csound_path\" size=\"30\" style=\"background-color:CornSilk;text-align:right;\" value=\"".$csound_path."\"><font color=\"green\">".SLASH.$csound_name."</font>";
-		echo "&nbsp;<input style=\"background-color:yellow;\" type=\"submit\"  name=\"csound_path_change\" value=\"TRY\">";
+		echo "&nbsp;<input class=\"save\" type=\"submit\"  name=\"csound_path_change\" value=\"TRY\">";
 		echo "<br />";
 		if(linux_system()) {
 			echo "<br /><font color=\"red\">➡</font>&nbsp;Read instructions in the <a target=\"_blank\" href=\"https://bolprocessor.org/misc/linux-scripts.zip\">script folder</a> to install Csound<br />";
@@ -2652,7 +2654,7 @@ function show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,
 			if($csound_file == '') {
 				$content = add_instruction($new_csound_file,$content);
 				$csound_file = $new_csound_file;
-				echo "👉&nbsp;&nbsp;Found mention of <span style=\"color:#007BFF;\">‘".$csound_file."’</span> in sound-object file  <br /><span style=\"color:#007BFF;\">‘".$objects_file."’</span>. This indication has been added to the project.<br /><font color=\"red\">You need to</font> <input style=\"background-color:yellow; font-size:large;\" type=\"submit\" onclick=\"clearsave();\" name=\"savethisfile\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".$filename."’\">";
+				echo "👉&nbsp;&nbsp;Found mention of <span style=\"color:#007BFF;\">‘".$csound_file."’</span> in sound-object file  <br /><span style=\"color:#007BFF;\">‘".$objects_file."’</span>. This indication has been added to the project.<br /><font color=\"red\">You need to</font> <input class=\"save big\" type=\"submit\" onclick=\"clearsave();\" name=\"savethisfile\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".$filename."’\">";
 				}
 			else {
 				echo "👉&nbsp;&nbsp;<font color=\"red\">WARNING:</font> File <span style=\"color:#007BFF;\">‘".$objects_file."’</span> indicates that the Csound instruments file <span style=\"color:#007BFF;\">‘".$new_csound_file."’</span> should be associated.<br />This project selects <span style=\"color:#007BFF;\">‘".$csound_file."’</span> instead, <font color=\"red\">which we will use.</font><br />➡ Your can edit <span style=\"color:#007BFF;\">‘".$objects_file."’</span> to solve the inconsistency.";
@@ -2667,7 +2669,7 @@ function show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,
 			if($tonality_file == '') {
 				$content = add_instruction($tonality_file_in_csound,$content);
 				$tonality_file = $tonality_file_in_csound;
-				echo "👉&nbsp;&nbsp;File <span style=\"color:#007BFF;\">‘".$csound_file."’</span> indicates that tonality file <span style=\"color:#007BFF;\">‘".$tonality_file_in_csound."’</span><br />should be associated. This indication has been added to the project.<br /><font color=\"red\">You need to</font> <input style=\"background-color:yellow; font-size:large;\" type=\"submit\" onclick=\"clearsave();\" name=\"savethisfile\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".$filename."’\">";
+				echo "👉&nbsp;&nbsp;File <span style=\"color:#007BFF;\">‘".$csound_file."’</span> indicates that tonality file <span style=\"color:#007BFF;\">‘".$tonality_file_in_csound."’</span><br />should be associated. This indication has been added to the project.<br /><font color=\"red\">You need to</font> <input class=\"save big\" type=\"submit\" onclick=\"clearsave();\" name=\"savethisfile\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".$filename."’\">";
 				}
 			else {
 				echo "👉&nbsp;&nbsp;<font color=\"red\">WARNING:</font> File <span style=\"color:#007BFF;\">‘".$csound_file."’</span> indicates that tonality file<br /><span style=\"color:#007BFF;\">‘".$tonality_file_in_csound."’</span> should be associated.<br />This project selects <span style=\"color:#007BFF;\">‘".$tonality_file."’</span> instead, <font color=\"red\">which we will use.</font><br />Your can edit <span style=\"color:#007BFF;\">‘".$csound_file."’</span> to solve the inconsistency.";
@@ -3789,7 +3791,7 @@ function filter_form_output($i) {
 	global $NoteOffFilter_out, $NoteOnFilter_out, $KeyPressureFilter_out, $ControlChangeFilter_out, $ProgramChangeFilter_out, $ChannelPressureFilter_out, $PitchBendFilter_out, $SystemExclusiveFilter_out, $TimeCodeFilter_out, $SongPositionFilter_out, $SongSelectFilter_out, $TuneRequestFilter_out, $EndSysExFilter_out, $TimingClockFilter_out, $StartFilter_out, $ContinueFilter_out, $ActiveSensingFilter_out, $SystemResetFilter_out;
 	global $url_this_page, $MIDIoutput;
 	echo "<div id=\"showhide_output".$i."\"  style=\"width:300px;\">";
-	echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#tonal\" name=\"savemidiport\" value=\"SAVE MIDI ports\">";
+	echo "<input class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#tonal\" name=\"savemidiport\" value=\"SAVE MIDI ports\">";
 	echo "<p style=\"margin-left:12px;\"><b>Filter for MIDI output ".$MIDIoutput[$i]."</b></p>";
 	echo "<table style=\"background-color:azure;\">";
 	echo "<tr>";
@@ -3967,12 +3969,12 @@ function display_midi_ports($filename) {
 		echo "&nbsp;<input type=\"text\" title=\"".$text_over_name."\" style=\"margin-bottom:6px;\" onchange=\"tellsave()\" name=\"MIDIoutputname_".$i."\" size=\"15\" value=\"".$MIDIoutputname[$i]."\">";
 		echo "&nbsp;<input type=\"text\" title=\"".$text_over_comment."\" name=\"MIDIoutputcomment_".$i."\" size=\"15\" value=\"".$comment."\">";
 		echo "&nbsp;<button type=\"button\" onclick=\"clearFields('MIDIoutput_".$i."','MIDIoutputname_".$i."','MIDIoutputcomment_".$i."')\">Delete</button>";
-		echo "&nbsp;<button style=\"background-color:azure; border-radius: 6px;\" onclick=\"toggledisplay_output(".$i."); return false;\">FILTER</button>";
+		echo "&nbsp;<button style=\"background-color:azure; border-radius:6px;\" onclick=\"toggledisplay_output(".$i."); return false;\">FILTER</button>";
 		filter_form_output($i);
 		echo "<br />";
 		}
-	echo "<input style=\"float:right; color:DarkBlue; backgroundsave_-color:yellow;\" type=\"submit\" name=\"create_output\" value=\"Add an output\"><br />";
-	echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topmidiports\" name=\"savemidiport\" value=\"SAVE MIDI ports\">";
+	echo "<input class=\"save\" style=\"float:right;\" type=\"submit\" name=\"create_output\" value=\"Add an output\"><br />";
+	echo "<input class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topmidiports\" name=\"savemidiport\" value=\"SAVE MIDI ports\">";
 	echo str_replace(' ',"&nbsp;"," 👉 Delete name if changing number")."<br /><br />";
 	for($i = 0; $i < $NumberMIDIinputs; $i++) {
 		if($MIDIinput[$i] == -1) $value = '';
@@ -3987,7 +3989,7 @@ function display_midi_ports($filename) {
 		filter_form_input($i);
 		echo "<br />";
 		}
-	echo "<input style=\"float:right; color:DarkBlue; backgroundsave_-color:yellow;\" type=\"submit\" name=\"create_input\" value=\"Add an input\">";
+	echo "<input class=\"save\" style=\"float:right;\" type=\"submit\" name=\"create_input\" value=\"Add an input\">";
 	return;
 	}
 

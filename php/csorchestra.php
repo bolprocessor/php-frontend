@@ -36,7 +36,7 @@ $table = explode(chr(10),$content);
 $imax = count($table);
 if($imax > $textarea_rows) $textarea_rows = $imax;
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-echo "<p style=\"text-align:left;\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></p>";
+echo "<p style=\"text-align:left;\"><input class=\"save\" type=\"submit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></p>";
 echo "<textarea name=\"thistext\" rows=\"".$textarea_rows."\" style=\"width:700px;\">".$content."</textarea>";
 echo "</form>";
 ?>

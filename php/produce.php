@@ -274,7 +274,7 @@ if($instruction <> "help") {
 		// echo $running_trace."<br />";
 		echo "<input type=\"hidden\" name=\"running_trace\" value=\"".$running_trace."\">";
 		echo "<input style=\"color:DarkBlue; background-color:yellow;\" onclick=\"window.close();\" type=\"submit\" value=\"WAIT UNTIL IT IS OVER\">";
-		echo "&nbsp;&nbsp;<input style=\"background-color:Aquamarine;\" type=\"submit\" name=\"ignore\" value=\"IGNORE\">";
+		echo "&nbsp;&nbsp;<input class=\"produce\" type=\"submit\" name=\"ignore\" value=\"IGNORE\">";
 		echo "</form>";
 		die();
 		}
@@ -683,6 +683,8 @@ else {
 		$header .= "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js\"></script>\n";
 		$header .= "</head><body>\n";
 		fwrite($handle,$header."\n");
+	/*	$top = "<?php\nrequire(\"../php/_basic_tasks.php\");\nrequire(\"../php/_header.php\");\ndisplay_darklight();\necho(\"OK\");\n?>";
+		fwrite($handle,$top."\n"); */
 		fwrite($handle,"<h2 id=\"midi\">".$grammar_name."</h2>\n");
 		fwrite($handle,"<small>Results as per ".date('Y-m-d H:i:s')."</small><br />\n");
 		if(file_exists($project_name.".wav")) {

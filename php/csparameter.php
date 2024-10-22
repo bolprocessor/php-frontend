@@ -68,7 +68,7 @@ echo "<input type=\"hidden\" name=\"instrument_name\" value=\"".$instrument_name
 echo "<input type=\"hidden\" name=\"instrument_index\" value=\"".$instrument_index."\">";
 echo "<input type=\"hidden\" name=\"csfilename\" value=\"".$csfilename."\">";
 
-echo "<p style=\"text-align:left;\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"saveparameter\" value=\"SAVE THIS PARAMETER\"></p>";
+echo "<p style=\"text-align:left;\"><input class=\"save\" type=\"submit\" name=\"saveparameter\" value=\"SAVE THIS PARAMETER\"></p>";
 
 $content = file_get_contents($parameter_file,TRUE);
 $table = explode(chr(10),$content);

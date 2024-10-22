@@ -312,7 +312,7 @@ for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
 	if(isset($_POST['copy_scale_'.$i_scale])) {
 		echo "<p><font color=\"red\">➡ The destination file should be closed to make sure that the export takes place</font></p>";
 		echo "<form method=\"post\" action=\"".$url_this_page."&scalefilename=".urlencode($scalefilename)."\" enctype=\"multipart/form-data\">";
-		echo "<input style=\"background-color:cornsilk;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\">&nbsp;<input type=\"submit\" style=\"background-color:aquamarine; font-size:large;\" name=\"\" onclick=\"this.form.target='_self';return true;\" value=\"Click to copy scale ‘".$scalefilename."’ to:\"><br />";
+		echo "<input class=\"cancel\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\">&nbsp;<input type=\"submit\" style=\"background-color:aquamarine; font-size:large;\" name=\"\" onclick=\"this.form.target='_self';return true;\" value=\"Click to copy scale ‘".$scalefilename."’ to:\"><br />";
 		echo "<blockquote>";
 		echo "<input type=\"hidden\" name=\"copy_this_scale\" value=\"1\">";
 		$dircontent = scandir($dir);
@@ -389,7 +389,7 @@ $content = $extract_data['content'];
 // echo $content."<br />";
 
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-echo "<p style=\"text-align:left;\"><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"savealldata\" onclick=\"this.form.target='_self';return true;\" value=\"SAVE ‘".$filename."’\"></p>";
+echo "<p style=\"text-align:left;\"><input class=\"save big\" type=\"submit\" name=\"savealldata\" onclick=\"this.form.target='_self';return true;\" value=\"SAVE ‘".$filename."’\"></p>";
 
 echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";
 echo "<input type=\"hidden\" name=\"dir\" value=\"".$dir."\">";
@@ -436,7 +436,7 @@ if($deleted_scales > 0) {
 	echo "<input style=\"background-color:red; color:white;\" type=\"submit\" name=\"empty_trash\" onclick=\"this.form.target='_self';return true;\" value=\"TRASH deleted scales\">";
 	echo "</p>";
 	}
-echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"create_scale\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."\" value=\"CREATE A NEW TONAL SCALE\">&nbsp;with name <input type=\"text\" name=\"scale_name\" size=\"30\" value=\"\"></p>";
+echo "<p><input class=\"save\" type=\"submit\" name=\"create_scale\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."\" value=\"CREATE A NEW TONAL SCALE\">&nbsp;with name <input type=\"text\" name=\"scale_name\" size=\"30\" value=\"\"></p>";
 echo $scala_error;
 echo "<p><label for=\"file1\">SCALA file:</label>&nbsp;";
 echo "<input type=\"file\" name=\"file1\" id=\"file1\" accept=\".scl\">&nbsp;";
@@ -807,8 +807,8 @@ if($max_scales > 0) {
 		
 	if(isset($_POST['reassign_keys'])) {
 		$done = FALSE;
-		echo "<p><font color=\"red\">➡</font> <input style=\"background-color:cornsilk;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\">";
-		echo "&nbsp;<input type=\"submit\" style=\"background-color:yellow; font-size:large;\" name=\"record_new_keys\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#topscales\" value=\"REASSIGN:\"> a key to each note (<b>basekey</b> = 60):</p>";
+		echo "<p><font color=\"red\">➡</font> <input class=\"cancel\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\">";
+		echo "&nbsp;<input type=\"submit\" class=\"save big\" name=\"record_new_keys\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#topscales\" value=\"REASSIGN:\"> a key to each note (<b>basekey</b> = 60):</p>";
 		echo "<table>";
 		echo "<tr>";
 		for($i = 0; $i <= 12; $i++) {
@@ -886,14 +886,14 @@ if($max_scales > 0) {
 			echo "</tr>";
 			echo "</table>";
 			}
-		echo "<p><input style=\"background-color:cornsilk;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\">";
-		echo "&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"use_convention\" value=\"USE THIS CONVENTION IN ALL SCALES\"></p>";
+		echo "<p><input class=\"cancel\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\">";
+		echo "&nbsp;<input class=\"save\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"use_convention\" value=\"USE THIS CONVENTION IN ALL SCALES\"></p>";
 		echo "<hr>";
 		}
 	if($done) {
 		echo "<table style=\"border:1px solid grey; border-radius: 12px;\">";
 		echo "<tr>";
-		echo "<td style=\"vertical-align:middle; white-space:nowrap;\"><input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"change_convention\" value=\"CHANGE NOTE CONVENTION IN ALL SCALES\"> ➡</td>";
+		echo "<td style=\"vertical-align:middle; white-space:nowrap;\"><input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"change_convention\" value=\"CHANGE NOTE CONVENTION IN ALL SCALES\"> ➡</td>";
 		echo "<td style=\"vertical-align:middle; white-space:nowrap; padding-bottom:6px;\">";
 		echo "<input type=\"radio\" name=\"new_convention\" value=\"0\">English<br />";
 		echo "<input type=\"radio\" name=\"new_convention\" value=\"1\">Italian/Spanish/French<br />";
@@ -904,20 +904,20 @@ if($max_scales > 0) {
 		echo "</table>";
 		}
 	if($done) {
-		echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"export_scales\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#export\" value=\"EXPORT TONAL SCALES\">";
-		echo "&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"delete_scales\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#export\" value=\"DELETE SEVERAL SCALES\">";
-		echo "&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"compare_scales\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#export\" value=\"COMPARE TONAL SCALES\">";
+		echo "<p><input class=\"save\" type=\"submit\" name=\"export_scales\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#export\" value=\"EXPORT TONAL SCALES\">";
+		echo "&nbsp;<input class=\"save\" type=\"submit\" name=\"delete_scales\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#export\" value=\"DELETE SEVERAL SCALES\">";
+		echo "&nbsp;<input class=\"save\" type=\"submit\" name=\"compare_scales\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#export\" value=\"COMPARE TONAL SCALES\">";
 		}
-	echo "&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" name=\"reassign_keys\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#topscales\" value=\"REASSIGN KEYS\">";
+	echo "&nbsp;<input class=\"save\" type=\"submit\" name=\"reassign_keys\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#topscales\" value=\"REASSIGN KEYS\">";
 	echo "</p>";
 	echo "<ol style=\"border:1px solid grey; padding-top:6px; padding-bottom:6px; padding-right:6px;\">";
 	$table_names = $p_interval = $q_interval = $cent_position = $ratio_interval = array();
 	for($i_scale = 1, $k_image = 0; $i_scale <= $max_scales; $i_scale++) {
 		$link_edit = "scale.php";
 		echo "<li id=\"".$i_scale."\"><font color=\"MediumTurquoise\"><b>".$scale_name[$i_scale]."</b></font> ";
-		echo "➡ <input type=\"submit\" style=\"color:DarkBlue; background-color:Azure;\" name=\"edit_scale\" formaction=\"".$link_edit."?scalefilename=".urlencode($scale_name[$i_scale])."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT\">";
-		echo "&nbsp;<input type=\"submit\" style=\"background-color:yellow;\" name=\"delete_scale_".$i_scale."\" formaction=\"".$url_this_page."&scalefilename=".urlencode($scale_name[$i_scale])."\" onclick=\"this.form.target='_self';return true;\" value=\"DELETE scale (can be reversed)\">";
-		echo "&nbsp;<input type=\"submit\" style=\"background-color:yellow;\" name=\"copy_scale_".$i_scale."\" formaction=\"".$url_this_page."&scalefilename=".urlencode($scale_name[$i_scale])."\" onclick=\"this.form.target='_self';return true;\" value=\"COPY/DUPLICATE scale\">";
+		echo "➡ <input type=\"submit\" class=\"edit\" name=\"edit_scale\" formaction=\"".$link_edit."?scalefilename=".urlencode($scale_name[$i_scale])."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT\">";
+		echo "&nbsp;<input type=\"submit\" class=\"save\" name=\"delete_scale_".$i_scale."\" formaction=\"".$url_this_page."&scalefilename=".urlencode($scale_name[$i_scale])."\" onclick=\"this.form.target='_self';return true;\" value=\"DELETE scale (can be reversed)\">";
+		echo "&nbsp;<input type=\"submit\" class=\"save\" name=\"copy_scale_".$i_scale."\" formaction=\"".$url_this_page."&scalefilename=".urlencode($scale_name[$i_scale])."\" onclick=\"this.form.target='_self';return true;\" value=\"COPY/DUPLICATE scale\">";
 		$scala_file = $dir_scales.$scale_name[$i_scale].".scl";
 
 		$clean_name_of_file = str_replace("#","_",$scale_name[$i_scale]);
@@ -1020,8 +1020,8 @@ if($max_scales > 0) {
 		}
 	
 	if(isset($_POST['delete_scales'])) {
-		echo "<p><input style=\"background-color:cornsilk;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\">";
-		echo "&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"delete_these_scales\" formaction=\"".$url_this_page."#export\" value=\"DELETE THE FOLLOWING SCALES:\"> (cannot be undone)</p>";
+		echo "<p><input class=\"cancel\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\">";
+		echo "&nbsp;<input class=\"save\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"delete_these_scales\" formaction=\"".$url_this_page."#export\" value=\"DELETE THE FOLLOWING SCALES:\"> (cannot be undone)</p>";
 		for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
 			echo "<input type=\"checkbox\" name=\"delete_scale_".$i_scale."\"><span class=\"blue-text\">".$scale_name[$i_scale]."</span><br />";
 			}
@@ -1197,7 +1197,7 @@ echo $dir."<br />";
 	}
 echo "<input type=\"hidden\" name=\"max_scales\" value=\"".$max_scales."\">";
 
-echo "<p><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"savealldata\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#topscales\" value=\"SAVE ‘".$filename."’\"></p>";
+echo "<p><input class=\"save big\" type=\"submit\" name=\"savealldata\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#topscales\" value=\"SAVE ‘".$filename."’\"></p>";
 echo "</td>";
 
 echo "</tr></table>";
@@ -1246,7 +1246,7 @@ for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
 if($verbose) {
 	echo "<hr>";
 	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-	// echo "<p style=\"text-align:left;\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></p>";
+	// echo "<p style=\"text-align:left;\"><input class=\"save\" type=\"submit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></p>";
 	echo "<textarea name=\"thistext\" rows=\"20\" style=\"width:700px;\">".$content."</textarea>";
 	echo "</form>";
 	}

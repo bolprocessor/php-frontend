@@ -186,7 +186,7 @@ $extract_data = extract_data(TRUE,$content);
 echo "<p class=\"blue-text\">".$extract_data['headers']."</p>";
 $content = $extract_data['content'];
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-echo "<p style=\"text-align:left;\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"saveparameters\" value=\"SAVE TO ‘".$filename."’\"></p>";
+echo "<p style=\"text-align:left;\"><input class=\"save\" type=\"submit\" name=\"saveparameters\" value=\"SAVE TO ‘".$filename."’\"></p>";
 echo "<table style=\"border-spacing: 2px;\" cellpadding=\"2px;\">";
 
 $table = explode(chr(10),$content);
@@ -260,7 +260,7 @@ for($i = $j = 0; $i < $imax; $i++) {
 	$j++;
 	}
 echo "</table>";
-echo "<p id=\"bottom\" style=\"text-align:left;\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"saveparameters\" formaction=\"".$url_this_page."#bottom\" value=\"SAVE PARAMETERS TO ‘".$filename."’\"></p>";
+echo "<p id=\"bottom\" style=\"text-align:left;\"><input class=\"save\" type=\"submit\" name=\"saveparameters\" formaction=\"".$url_this_page."#bottom\" value=\"SAVE PARAMETERS TO ‘".$filename."’\"></p>";
 echo $saved_warning2;
 echo "</form>";
 ?>

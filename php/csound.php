@@ -238,7 +238,7 @@ for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
 	if(isset($_POST['copy_scale_'.$i_scale])) {
 		echo "<p><font color=\"red\">➡ The destination file should be closed to make sure that the export takes place</font></p>";
 		echo "<form method=\"post\" action=\"".$url_this_page."&scalefilename=".urlencode($scalefilename)."\" enctype=\"multipart/form-data\">";
-		echo "<input style=\"background-color:cornsilk;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\">&nbsp;<input type=\"submit\" style=\"background-color:aquamarine; font-size:large;\" name=\"\" onclick=\"this.form.target='_self';return true;\" value=\"Click to copy scale ‘".$scalefilename."’ to:\"><br />";
+		echo "<input class=\"cancel\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\">&nbsp;<input type=\"submit\" style=\"background-color:aquamarine; font-size:large;\" name=\"\" onclick=\"this.form.target='_self';return true;\" value=\"Click to copy scale ‘".$scalefilename."’ to:\"><br />";
 		echo "<blockquote>";
 		echo "<input type=\"hidden\" name=\"copy_this_scale\" value=\"1\">";
 		$dircontent = scandir($dir);
@@ -409,7 +409,7 @@ echo "<p class=\"blue-text\">".$extract_data['headers']."</p>";
 $content = $extract_data['content'];
 
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-echo "<p style=\"text-align:left;\"><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"savealldata\" onclick=\"this.form.target='_self';return true;\" value=\"SAVE ‘".$filename."’\"></p>";
+echo "<p style=\"text-align:left;\"><input class=\"save big\" type=\"submit\" name=\"savealldata\" onclick=\"this.form.target='_self';return true;\" value=\"SAVE ‘".$filename."’\"></p>";
 
 if($autosave) {
 	echo "<p><font color=\"red\">➡</font> All data is <font color=\"red\">autosaved</font> every 30 seconds if changes occurred.<br />Keep this page open as long as you are editing instruments or scales!</p>";
@@ -443,8 +443,8 @@ if($CsoundOrchestraName == '') {
 	}
 echo "Csound orchestra file = <input type=\"text\" name=\"CsoundOrchestraName\" size=\"30\" value=\"".$CsoundOrchestraName."\">";
 $link = "file_list.php?dir=".$dir_csound_resources."&extension=orc";
-echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"savealldata\" onclick=\"this.form.target='_self';return true;\" value=\"SAVE\">";
-echo " <input style=\"color:DarkBlue; background-color:Azure;\" onclick=\"window.open('".$link."','listorchestra','width=200,height=300,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"which one?\">";
+echo "<input class=\"save\" type=\"submit\" name=\"savealldata\" onclick=\"this.form.target='_self';return true;\" value=\"SAVE\">";
+echo " <input class=\"edit\" onclick=\"window.open('".$link."','listorchestra','width=200,height=300,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"which one?\">";
 	echo " ➡ ";
 if($warn_not_empty)
 	echo "<font color=\"red\">WARNING: this field should’nt be empty. By default it has been set to ‘default.orc’. </font>";
@@ -850,7 +850,7 @@ echo "<input type=\"hidden\" name=\"dir_scales\" value=\"".$dir_scales."\">";
 
 if(is_integer(strpos($tonality_filename,"-to.")) OR is_integer(strpos($tonality_filename,".bpto"))) {
 	$url_tonality = "tonality.php?file=".urlencode($tonality_resources.SLASH.$tonality_filename);
-	echo "<input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\" formaction=\"".$url_tonality."\" target=\"_blank\" name=\"opentonality\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$tonality_filename."’\">&nbsp;";
+	echo "<input class=\"edit\" type=\"submit\" formaction=\"".$url_tonality."\" target=\"_blank\" name=\"opentonality\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$tonality_filename."’\">&nbsp;";
 	}
 $max_scales = $i_scale; // Beware that we count scales from 1 because 0 is the default equal-tempered scale
 	
@@ -900,7 +900,7 @@ if($deleted_instruments <> '') echo "<p><input style=\"background-color:azure;\"
 echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";
 echo "<input type=\"hidden\" name=\"filename\" value=\"".$filename."\">";
 
-echo "<p><input style=\"background-color:yellow; font-size:larger;\" type=\"submit\" name=\"create_instrument\" onclick=\"this.form.target='_self';return true;\" value=\"CREATE A NEW INSTRUMENT\">&nbsp;named: <input type=\"text\" name=\"new_instrument\" size=\"20\" value=\"\"></p>";
+echo "<p><input class=\"save big\" type=\"submit\" name=\"create_instrument\" onclick=\"this.form.target='_self';return true;\" value=\"CREATE A NEW INSTRUMENT\">&nbsp;named: <input type=\"text\" name=\"new_instrument\" size=\"20\" value=\"\"></p>";
 echo "</form>";
 
 if($number_instruments > 0) {
@@ -948,7 +948,7 @@ if($number_instruments > 0) {
 			$arg = "whichCsoundInstrument_".$ch;
 			echo "<input type=\"hidden\" name=\"".$arg."\" value=\"".$whichCsoundInstrument[$ch]."\">";
 			}
-		echo "<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"delete_instrument\" value=\"DELETE\">";
+		echo "<input class=\"save\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"delete_instrument\" value=\"DELETE\">";
 		echo "</td>";
 		echo "<td style=\"text-align:right; padding:5px; vertical-align:middle;\">";
 		echo "<input style=\"background-color:azure;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"duplicate_instrument\" value=\"DUPLICATE AS\">: <input type=\"text\" name=\"copy_instrument\" size=\"15\" value=\"\">";

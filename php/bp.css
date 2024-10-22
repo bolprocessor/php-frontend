@@ -74,11 +74,20 @@ body.dark-mode h2 {
 
 h3 {
     color: #007BFF;
-	font-size: 150%;
+	font-size: 140%;
     }
 body.dark-mode h3 {
     color: #007BFF;
-	font-size: 150%;
+	font-size: 140%;
+    }
+
+h4 {
+    color: #007BFF;
+	font-size: 120%;
+    }
+body.dark-mode h4 {
+    color: #007BFF;
+	font-size: 120%;
     }
 
 textarea {
@@ -263,10 +272,35 @@ td {
     color: white;
 	}
 
-input {
+input[type=text] {
 	font-size: small;
 	background-color: Cornsilk;
 	color:black;
+	}
+
+.save {
+	background-color: yellow;
+	border-radius: 6px;
+	}
+
+.edit {
+	color:DarkBlue;
+	background-color:Azure; 
+	border-radius: 6px;
+	}
+
+.produce {
+	color:DarkBlue;
+	background-color:Aquamarine;
+	border-radius: 6px;
+	}
+
+.cancel {
+	background-color:Cornsilk;
+	}
+
+.big {
+    font-size: large;
 	}
 
 input[type=submit] {

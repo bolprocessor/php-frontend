@@ -576,7 +576,7 @@ fwrite($h_image,"<?php\n");
 
 echo "<form method=\"post\" action=\"prototype.php\" enctype=\"multipart/form-data\">";
 
-echo "<p style=\"text-align:left;\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"savethisprototype\" value=\"SAVE THIS PROTOTYPE\"></p>";
+echo "<p style=\"text-align:left;\"><input class=\"save\" type=\"submit\" name=\"savethisprototype\" value=\"SAVE THIS PROTOTYPE\"></p>";
 
 echo "<p style=\"text-align:left;\"><input style=\"background-color:azure;\" type=\"submit\" name=\"playexpression\" value=\"PLAY THIS EXPRESSION (real-time MIDI):\">&nbsp;➡&nbsp;<input type=\"text\" name=\"expression\" size=\"30\" value=\"".$expression."\"></p>";
 
@@ -1987,7 +1987,7 @@ echo "➡ <i>If changes are not visible on these pop-up windows, juste clear the
 	}
 else echo "<p>No MIDI codes in this sound-object prototype</p>";
 
-if($new_midi) echo "<p style=\"color:red;\">You should save this prototype to preserve uploaded MIDI codes! ➡ <input style=\"background-color:yellow;\" type=\"submit\" name=\"savethisprototype\" formaction=\"".$url_this_page."#midi\" value=\"SAVE IT\">&nbsp;<input style=\"background-color:azure;\" type=\"submit\" formaction=\"".$url_this_page."#midi\" name=\"cancel\" formaction=\"".$url_this_page."#midi\" value=\"CANCEL\"></p>";
+if($new_midi) echo "<p style=\"color:red;\">You should save this prototype to preserve uploaded MIDI codes! ➡ <input class=\"save\" type=\"submit\" name=\"savethisprototype\" formaction=\"".$url_this_page."#midi\" value=\"SAVE IT\">&nbsp;<input style=\"background-color:azure;\" type=\"submit\" formaction=\"".$url_this_page."#midi\" name=\"cancel\" formaction=\"".$url_this_page."#midi\" value=\"CANCEL\"></p>";
 
 echo "<font color=\"red\">➡</font> Create or replace MIDI codes loading a MIDI file (*.mid): <input type=\"file\" name=\"mid_upload\">&nbsp;<input type=\"submit\" value=\" send \">";
 
@@ -2029,7 +2029,7 @@ if($Duration > 0 OR $object_type > 3)
 	echo "<div class=\"shadow\" style=\"border:2px solid gray; background-color:azure; color:black; width:13em;  padding:8px; text-align:center; border-radius: 6px;\"><a style=\"color: #007BFF;\" onclick=\"window.open('".$link."','".clean_folder_name($object_name)."_image','width=800,height=625,left=100'); return false;\" href=\"".$link."\">IMAGE</a></div>";
 else echo "<p><font color=\"red\">➡</font> NO IMAGE since duration = 0</p>";
 
-echo "<p style=\"text-align:center;\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"savethisprototype\" formaction=\"".$url_this_page."#midi\" value=\"SAVE THIS PROTOTYPE\">&nbsp;<big> = <b><font color=\"red\">".$object_name."</font></b></big></p>";
+echo "<p style=\"text-align:center;\"><input class=\"save\" type=\"submit\" name=\"savethisprototype\" formaction=\"".$url_this_page."#midi\" value=\"SAVE THIS PROTOTYPE\">&nbsp;<big> = <b><font color=\"red\">".$object_name."</font></b></big></p>";
 echo "</form>";
 
 echo "<hr>";
@@ -2087,7 +2087,7 @@ echo "<input type=\"hidden\" name=\"division\" value=\"".$division."\">";
 echo "<input type=\"hidden\" name=\"tempo\" value=\"".$tempo."\">";
 echo "<input type=\"hidden\" name=\"timesig\" value=\"".$timesig."\">";
 echo "<textarea name=\"csound_score\" onchange=\"tellsave()\" rows=\"20\" style=\"width:700px;\">".$csound_score."</textarea><br />";
-echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"savecsound\" value=\"SAVE THIS CODE\"></p><p><input style=\"background-color:yellow;\" type=\"submit\" name=\"createcsound\" value=\"CREATE Csound CODE\"> from MIDI codes in “<span class=\"blue-text\">".$object_name."</span>”</p>";
+echo "<p><input class=\"save\" type=\"submit\" name=\"savecsound\" value=\"SAVE THIS CODE\"></p><p><input class=\"save\" type=\"submit\" name=\"createcsound\" value=\"CREATE Csound CODE\"> from MIDI codes in “<span class=\"blue-text\">".$object_name."</span>”</p>";
 echo "</form>";
 
 function fix_csound_score($csound_score,$csound_file,$temp_dir,$temp_folder) {

@@ -167,7 +167,7 @@ echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/fo
 echo "<input type=\"hidden\" name=\"changestatus\" value=\"1\">";
 echo "<input type=\"hidden\" name=\"maxticks\" value=\"".$maxticks."\">";
 echo "<input type=\"hidden\" name=\"maxbeats\" value=\"".$maxbeats."\">";
-echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"savealldata\" value=\"SAVE ALL DATA\">";
+echo "<input class=\"save\" type=\"submit\" name=\"savealldata\" value=\"SAVE ALL DATA\">";
 echo "<p>&nbsp;&nbsp;&nbsp;<input type=\"text\" name=\"p_clock\" size=\"8\" value=\"".$p_clock."\"> beats in <input type=\"text\" name=\"q_clock\" size=\"8\" value=\"".$q_clock."\"> sec. ➡ mm = ".$metronome." beats/mn</p>";
 if(file_exists($midi_import_mf2t)) {
 	$new_metronome = metronome(1000000,$tempo);
@@ -203,9 +203,9 @@ for($i_cycle = 0; $i_cycle < $maxticks; $i_cycle++) {
 	else echo ($i_cycle + 1);
 	echo "</b><br />";
 	if(!$mute[$i_cycle])
-		echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"inactivate_".$i_cycle."\" value=\"MUTE\">";
+		echo "<input class=\"save\" type=\"submit\" name=\"inactivate_".$i_cycle."\" value=\"MUTE\">";
 	else
-		echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"activate_".$i_cycle."\" value=\"ACTIVATE\">";
+		echo "<input class=\"save\" type=\"submit\" name=\"activate_".$i_cycle."\" value=\"ACTIVATE\">";
 	echo "</td>";
 	echo "<td style=\"padding:6px;\">Cycle of <input type=\"text\" name=\"TickCycle_".$i_cycle."\" size=\"3\" value=\"".$TickCycle[$i_cycle]."\"> beat(s) [max 40]</td>";
 	echo "<td colspan=\"2\" style=\"text-align: right;\">Speed ratio <input type=\"text\" name=\"Ptick_".$i_cycle."\" size=\"3\" value=\"".$Ptick[$i_cycle]."\">&nbsp;/&nbsp;<input type=\"text\" name=\"Qtick_".$i_cycle."\" size=\"3\" value=\"".$Qtick[$i_cycle]."\"></td>";
@@ -248,9 +248,9 @@ if(file_exists($midi_import_mf2t)) {
 	else echo ($i_midifile + 1);
 	echo "</b><br />";
 	if(!$mute[$i_midifile])
-		echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"inactivate_".$i_midifile."\" value=\"MUTE\">";
+		echo "<input class=\"save\" type=\"submit\" name=\"inactivate_".$i_midifile."\" value=\"MUTE\">";
 	else
-		echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"activate_".$i_midifile."\" value=\"ACTIVATE\">";
+		echo "<input class=\"save\" type=\"submit\" name=\"activate_".$i_midifile."\" value=\"ACTIVATE\">";
 	echo "</td>";
 	echo "<td colspan=\"3\" style=\"padding:6px; text-align:center;\">";
 	if(isset($_POST['upload_filename']) AND $_POST['upload_filename'] <> '') $upload_filename = $_POST['upload_filename'];
@@ -273,7 +273,7 @@ $comment = trim(str_replace("DATA:",'',$comment));
 $comment = str_ireplace("<HTML>",'',$comment);
 $comment = str_ireplace("</HTML>",'',$comment);
 echo "<tr><td colspan=\"4\" style=\"padding:6px;\">";
-echo "<div style=\"float:right;\"><input style=\"background-color:yellow;\" type=\"submit\" name=\"addtrack\" value=\"ADD ANOTHER TRACK\"></div>";
+echo "<div style=\"float:right;\"><input class=\"save\" type=\"submit\" name=\"addtrack\" value=\"ADD ANOTHER TRACK\"></div>";
 
 echo "Comment on this timebase:<br /><input type=\"text\" name=\"comment\" size=\"80\" value=\"".$comment."\">";
 echo "</td></tr>";
@@ -452,7 +452,7 @@ if(file_exists($midi_file)) {
 	if(!$MIDIfile_exists OR $mute[$i_midifile]) echo "<br />up to <input type=\"text\" name=\"max_repeat\" size=\"3\" value=\"".$max_repeat."\">&nbsp;repetitions and less than <input type=\"text\" name=\"max_time_play\" size=\"3\" value=\"".$max_time_play."\">&nbsp;sec ending with silence of <input type=\"text\" name=\"end_silence\" size=\"5\" value=\"".$end_silence."\">&nbsp;ms";
 	echo "&nbsp;&nbsp;&nbsp;➡ Show <a onclick=\"window.open('".$mf2t."','combinedMIDIbytes','width=300,height=500,left=100'); return false;\" href=\"".$mf2t."\">MF2T code</a>";
 	}
-echo "<p><input style=\"background-color:yellow;\" type=\"submit\" name=\"savealldata\" value=\"SAVE ALL DATA\"></p>";
+echo "<p><input class=\"save\" type=\"submit\" name=\"savealldata\" value=\"SAVE ALL DATA\"></p>";
 echo "</form>";
 
 echo "<p>Equivalent polymetric expression:<br /><small><span style=\"color:#007BFF;;\">".$polymetric_expression."</span></small></p>";

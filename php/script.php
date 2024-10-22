@@ -128,20 +128,20 @@ else {
 	}
 
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-echo "<p><button style=\"background-color:yellow; border-radius: 6px; font-size:large;\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button></p>";
-echo "<table style=\"background-color:GhostWhite;\" border=\"0\"><tr>";
-echo "<td style=\"background-color:cornsilk;\">";
+echo "<p><button class=\"edit\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button></p>";
+echo "<table border=\"0\"><tr>";
+echo "<td>";
 find_replace_form();
 
-echo "<table style=\"background-color:white;\"><tr>";
+echo "<table><tr>";
 echo "<td>";
 $link = "script_exec.php?dir=".urlencode($dir);
 $link .= "&file=".urlencode($filename);
 $link .= "&temp_folder=".urlencode($temp_folder);
 $window_name = window_name($filename);
-echo "<p style=\"text-align:left;\"><input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" id=\"here\"  name=\"savethisfile\" value=\"SAVE ‘".$filename."’\">&nbsp;";
-echo "<input style=\"background-color:yellow;\" type=\"submit\" name=\"checkscript\" onmouseover=\"checksaved();\" value=\"CHECK THIS SCRIPT\">&nbsp;";
-echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"if(checksaved()) {window.open('".$link."','".$window_name."','width=800,height=800,left=150,toolbar=yes'); return false;}\" type=\"submit\" name=\"running\" value=\"RUN THIS SCRIPT\"></p>";
+echo "<p style=\"text-align:left;\"><input class=\"save\" type=\"submit\" onclick=\"clearsave();\" id=\"here\"  name=\"savethisfile\" value=\"SAVE ‘".$filename."’\">&nbsp;";
+echo "<input class=\"save\" type=\"submit\" name=\"checkscript\" onmouseover=\"checksaved();\" value=\"CHECK THIS SCRIPT\">&nbsp;";
+echo "<input class=\"produce\" onclick=\"if(checksaved()) {window.open('".$link."','".$window_name."','width=800,height=800,left=150,toolbar=yes'); return false;}\" type=\"submit\" name=\"running\" value=\"RUN THIS SCRIPT\"></p>";
 
 $content = do_replace($content);
 echo "<textarea name=\"thistext\" onchange=\"tellsave()\" rows=\"30\" style=\"width:700px;\">".$content."</textarea>";
@@ -150,7 +150,7 @@ echo "</form>";
 echo "</td>";
 echo "<td>";
 echo "<h3>Add script instruction:</h3>";
-echo "<table style=\"background-color:white;\">";
+echo "<table>";
 $i = 0;
 foreach($script_status as $instruction => $status) {
 	if($status <> 1) continue;

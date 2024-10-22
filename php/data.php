@@ -556,7 +556,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			echo "<div style=\"width:75%; padding:1em; box-shadow: -5px 5px 5px 0px gold;\">";
 			$window_name = $upload_filename;
 			$link_preview = "preview_musicxml.php?music_xml_file=".urlencode($music_xml_file)."&title=".urlencode($upload_filename);
-			echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_preview."','".$window_name."','width=600,height=800,left=200'); return false;\" type=\"submit\" name=\"preview\" value=\"PREVIEW MusicXML file\" title=\"\"> <b>(simplified)</b><br /><br />";
+			echo "<input class=\"produce\" onclick=\"window.open('".$link_preview."','".$window_name."','width=600,height=800,left=200'); return false;\" type=\"submit\" name=\"preview\" value=\"PREVIEW MusicXML file\" title=\"\"> <b>(simplified)</b><br /><br />";
 			if($report <> '') {
 				echo $report;
 				echo "<hr>";
@@ -640,7 +640,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 					echo "&nbsp;controler #<input type=\"text\" style=\"border:none; text-align:center;\" name=\"".$index2."\" size=\"5\" value=\"".$switch_controler[$i]."\"> (64 to 95) on MIDI channel <input type=\"text\" style=\"border:none; text-align:center;\" name=\"".$index3."\" size=\"5\" value=\"".$switch_channel[$i]."\"> (1 to 16)";
 					$this_link_preview = $link_preview."&filter=pedal";
 					$window_name = $upload_filename."_trill";
-					if(!$found_pedal_command) echo "&nbsp;<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$this_link_preview."','".$window_name."','width=600,height=400,left=0'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\">";
+					if(!$found_pedal_command) echo "&nbsp;<input class=\"produce\" onclick=\"window.open('".$this_link_preview."','".$window_name."','width=600,height=400,left=0'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\">";
 					echo "<br />";
 					$found_pedal_command = TRUE;
 					}
@@ -652,7 +652,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				echo ">&nbsp;<font color=\"red\">➡</font> Ignore trills (some have been found in this score)";
 				$this_link_preview = $link_preview."&filter=trill";
 				$window_name = $upload_filename."_trill";
-				echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$this_link_preview."','".$window_name."','width=600,height=400,left=200'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\">&nbsp;";
+				echo "<input class=\"produce\" onclick=\"window.open('".$this_link_preview."','".$window_name."','width=600,height=400,left=200'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\">&nbsp;";
 				echo "<input type=\"checkbox\" name=\"chromatic_trills\"";
 				if($chromatic_trills) echo " checked";
 				echo ">&nbsp;➡&nbsp;make them chromatic<br />";
@@ -664,7 +664,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				echo ">&nbsp;<font color=\"red\">➡</font> Ignore mordents (some have been found in this score)";
 				$this_link_preview = $link_preview."&filter=mordent";
 				$window_name = $upload_filename."_mordent";
-				echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$this_link_preview."','".$window_name."','width=600,height=400,left=150'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\">&nbsp;";
+				echo "<input class=\"produce\" onclick=\"window.open('".$this_link_preview."','".$window_name."','width=600,height=400,left=150'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\">&nbsp;";
 				echo "<input type=\"checkbox\" name=\"chromatic_mordents\"";
 				if($chromatic_mordents) echo " checked";
 				echo ">&nbsp;➡&nbsp;make them chromatic<br />";
@@ -676,7 +676,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				echo ">&nbsp;<font color=\"red\">➡</font> Ignore turns (some have been found in this score)";
 				$link_preview .= "&filter=turn";
 				$window_name = $upload_filename."_turn";
-				echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$link_preview."','".$window_name."','width=600,height=400,left=100'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\">&nbsp;";
+				echo "<input class=\"produce\" onclick=\"window.open('".$link_preview."','".$window_name."','width=600,height=400,left=100'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\">&nbsp;";
 				echo "<input type=\"checkbox\" name=\"chromatic_turns\"";
 				if($chromatic_turns) echo " checked";
 				echo ">&nbsp;➡&nbsp;make them chromatic<br />";
@@ -688,7 +688,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				echo ">&nbsp;<font color=\"red\">➡</font> Ignore fermata (some have been found in this score)";
 				$this_link_preview = $link_preview."&filter=fermata";
 				$window_name = $upload_filename."_fermata";
-				echo "&nbsp;<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$this_link_preview."','".$window_name."','width=600,height=400,left=50'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\"><br />";
+				echo "&nbsp;<input class=\"produce\" onclick=\"window.open('".$this_link_preview."','".$window_name."','width=600,height=400,left=50'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\"><br />";
 				}
 			else $ignore_fermata = FALSE;
 			if($found_arpeggio) {
@@ -697,7 +697,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				echo ">&nbsp;<font color=\"red\">➡</font> Ignore arpeggios (some have been found in this score)";
 				$this_link_preview = $link_preview."&filter=arpeggio";
 				$window_name = $upload_filename."_arpeggio";
-				echo "&nbsp;<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$this_link_preview."','".$window_name."','width=600,height=400,left=0'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\"><br />";
+				echo "&nbsp;<input class=\"produce\" onclick=\"window.open('".$this_link_preview."','".$window_name."','width=600,height=400,left=0'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\"><br />";
 				}
 			else $ignore_arpeggios = FALSE;
 			if($found_slur) {
@@ -706,7 +706,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				echo ">&nbsp;<font color=\"red\">➡</font> Interpret slurs (some have been found in this score)";
 				$this_link_preview = $link_preview."&filter=slur";
 				$window_name = $upload_filename."_slur";
-				echo "&nbsp;<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$this_link_preview."','".$window_name."','width=600,height=400,left=0'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\"><br />";
+				echo "&nbsp;<input class=\"produce\" onclick=\"window.open('".$this_link_preview."','".$window_name."','width=600,height=400,left=0'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\"><br />";
 				echo "&nbsp;&nbsp;&nbsp;… as extra duration (legato) = <input type=\"text\" style=\"border:none; text-align:center;\" name=\"slur_length\" size=\"2\" value=\"".$slur_length."\">&nbsp;%<br />";
 				}
 			else $include_slurs = FALSE;
@@ -748,7 +748,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				echo ">&nbsp;Include breaths (some have been found in this score)";
 				$this_link_preview = $link_preview."&filter=breath";
 				$window_name = $upload_filename."_breath";
-				echo "&nbsp;<input style=\"color:DarkBlue; background-color:Aquamarine;\" onclick=\"window.open('".$this_link_preview."','".$window_name."','width=600,height=400,left=0'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\"><br />";
+				echo "&nbsp;<input class=\"produce\" onclick=\"window.open('".$this_link_preview."','".$window_name."','width=600,height=400,left=0'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\"><br />";
 				echo "&nbsp;&nbsp;&nbsp;… with breath length = <input type=\"text\" style=\"border:none; text-align:center;\" name=\"p_breath_length\" size=\"2\" value=\"".$p_breath_length."\">/<input type=\"text\" style=\"border:none; text-align:center;\" name=\"q_breath_length\" size=\"2\" value=\"".$q_breath_length."\"> beat(s)<br />";
 				echo "&nbsp;&nbsp;&nbsp;… and breath tag = <input type=\"text\" style=\"border:none; text-align:center;\" name=\"breath_tag\" size=\"4\" value=\"".$breath_tag."\"><br />";
 				}
@@ -783,7 +783,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			echo "<input type=\"checkbox\" name=\"delete_current\">&nbsp;Delete current data<br />";
 			echo "<input type=\"hidden\" name=\"upload_filename\" value=\"".$upload_filename."\">";
 			echo "<input type=\"hidden\" name=\"number_parts\" value=\"".$number_parts."\">";
-			echo "<font color=\"red\">➡</font> Now, select parts and <input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"select_parts\" value=\"CONVERT\">&nbsp;or&nbsp;<input style=\"background-color:azure;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"cancel\" value=\"QUIT IMPORTING\">";
+			echo "<font color=\"red\">➡</font> Now, select parts and <input class=\"produce\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"select_parts\" value=\"CONVERT\">&nbsp;or&nbsp;<input style=\"background-color:azure;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"cancel\" value=\"QUIT IMPORTING\">";
 			echo "</div>";
 			if($found_pedal_command AND $reload_musicxml) {
 				for($i = 0; $i < $number_parts; $i++) {
@@ -1306,7 +1306,7 @@ if($settings_file == '' OR !file_exists($dir.$settings_file)) {
 	echo "•&nbsp;No quantization<br />";
 	}
 else {
-	echo "<input style=\"color:DarkBlue; background-color:Azure; float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_settings."','".$settings_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$settings_file."’\">";
+	echo "<input class=\"edit\"  style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_settings."','".$settings_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$settings_file."’\">";
 	if($p_clock > 0 AND $q_clock > 0) {
 		$metronome_settings = 60 * $q_clock / $p_clock;
 		}
@@ -1411,8 +1411,8 @@ if(file_exists("csound_version.txt")) {
 	if($file_format == "csound") echo " checked";
 	echo ">CSOUND file";
 	}
-echo "<br /><br />&nbsp;&nbsp;&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#tonal\" name=\"savethisfile\" value=\"SAVE format\">";
-if($file_format == "rtmidi") echo "&nbsp;<input id=\"refresh\" style=\"background-color:yellow; display:none;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"reload\" value=\"REFRESH\">";
+echo "<br /><br />&nbsp;&nbsp;&nbsp;<input class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#tonal\" name=\"savethisfile\" value=\"SAVE format\">";
+if($file_format == "rtmidi") echo "&nbsp;<input id=\"refresh\" class=\"save\" style=\"display:none;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"reload\" value=\"REFRESH\">";
 echo "</p>";
 echo "</td>";
 // if($file_format == "rtmidi") filter_form();
@@ -1481,7 +1481,7 @@ echo $save_warning;
 if($file_format <> "rtmidi") {
 	echo "<p>&nbsp;</p>";
 	}
-echo "<p><button style=\"color:DarkBlue; background-color:Azure; border-radius: 6px;\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button></p>";
+echo "<p><button class=\"edit\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button></p>";
  echo "<br /><table border=\"0\"><tr>";
 echo "<td>";
 
@@ -1489,13 +1489,13 @@ find_replace_form();
 
 echo "<div style=\"float:right; vertical-align:middle;\">Import MusicXML: <input style=\"color:red;\"  onclick=\"if(!checksaved()) return false;\" type=\"file\" name=\"music_xml_import\">&nbsp;<input type=\"submit\" onclick=\"if(!checksaved()) return false;\" style=\"background-color:AquaMarine;\" value=\"← IMPORT\"></div>";
 
-echo "<div style=\"text-align:left;\"><input id=\"saveButton\" style=\"background-color:yellow; font-size:large;\"  type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></div>";
+echo "<div style=\"text-align:left;\"><input id=\"saveButton\" class=\"save big\"  type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></div>";
 
 $content = do_replace($content);
 
 echo "<br /><textarea id=\"textArea\" name=\"thistext\" onchange=\"tellsave()\" rows=\"40\" style=\"width:750px;\">".$content."</textarea><br /><br />";
 
-echo "<div style=\"float:right;\"><input style=\"background-color:yellow; font-size:large;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></div>";
+echo "<div style=\"float:right;\"><input class=\"save big\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></div>";
 
 echo "</form>";
 
@@ -1543,8 +1543,8 @@ if(isset($_POST['change_convention']) AND isset($_POST['new_convention'])) {
 		}
 	echo "</tr>";
 	echo "</table>";
-	echo "&nbsp;<input style=\"background-color:cornsilk;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\">";
-	echo "&nbsp;<input style=\"background-color:yellow;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"use_convention\" value=\"USE THIS CONVENTION\">";
+	echo "&nbsp;<input class=\"cancel\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\">";
+	echo "&nbsp;<input class=\"save\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"use_convention\" value=\"USE THIS CONVENTION\">";
 	$hide = TRUE;
 	}
 
@@ -1569,7 +1569,7 @@ if(isset($_POST['modify_velocity'])) {
 	echo "<td style=\"text-align:center;\">".$max_velocity."</td>";
 	echo "<td style=\"text-align:center;\"><input type=\"text\" style=\"border:none; text-align:center;\" name=\"change_velocity_max\" size=\"6\" value=\"".$change_velocity_max."\"></td>";
 	echo "</tr>";
-	echo "<tr><td style=\"text-align:center;\"><input style=\"background-color:cornsilk;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\"></td><td></td><td style=\"text-align:center;\"><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"apply_velocity_change\" value=\"APPLY\"></td></tr>";
+	echo "<tr><td style=\"text-align:center;\"><input class=\"cancel\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\"></td><td></td><td style=\"text-align:center;\"><input class=\"produce\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"apply_velocity_change\" value=\"APPLY\"></td></tr>";
 	echo "</table>";
 	echo "<hr>";
 	$hide = TRUE;
@@ -1596,7 +1596,7 @@ if(isset($_POST['modify_volume'])) {
 	echo "<td style=\"text-align:center;\">".$volume_max."</td>";
 	echo "<td style=\"text-align:center;\"><input type=\"text\" style=\"border:none; text-align:center;\" name=\"change_volume_max\" size=\"6\" value=\"".$change_volume_max."\"></td>";
 	echo "</tr>";
-	echo "<tr><td style=\"text-align:center;\"><input style=\"background-color:cornsilk;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\"></td><td></td><td style=\"text-align:center;\"><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"apply_volume_change\" value=\"APPLY\"></td></tr>";
+	echo "<tr><td style=\"text-align:center;\"><input class=\"cancel\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\"></td><td></td><td style=\"text-align:center;\"><input class=\"produce\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"apply_volume_change\" value=\"APPLY\"></td></tr>";
 	echo "</table>";
 	echo "<hr>";
 	$hide = TRUE;
@@ -1664,7 +1664,7 @@ if(isset($_POST['manage_instructions'])) {
 			}
 		}
 	echo "</tr>";
-	echo "<tr><td></td><td></td><td><input style=\"background-color:cornsilk;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\"></td><td><input style=\"background-color:Aquamarine;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"apply_changes_instructions\" formaction=\"".$url_this_page."#topedition\" value=\"APPLY THESE CHANGES\"></td></tr>";
+	echo "<tr><td></td><td></td><td><input class=\"cancel\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\"></td><td><input class=\"produce\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"apply_changes_instructions\" formaction=\"".$url_this_page."#topedition\" value=\"APPLY THESE CHANGES\"></td></tr>";
 	echo "</table>";
 	$hide = TRUE;
 	}
@@ -1673,14 +1673,14 @@ if(!$hide) {
 		$new_settings_file = str_replace("-da.",'',$filename);
 		$new_settings_file = str_replace(".bpda",'',$new_settings_file);
 		$new_settings_file = "-se.".$new_settings_file;
-		echo "<p>&nbsp;</p><p style=\"background-color:white; color:black\"><font color=\"red\">➡</font> <input style=\"background-color:yellow; font-size:large;\" onclick=\"window.open('settings_list.php?dir=".urlencode($dir)."&thispage=".urlencode($url_this_page)."','settingsfiles','width=400,height=400,left=100'); return false;\" type=\"submit\" title=\"Display settings files\" value=\"CHOOSE\"> a settings file or <input style=\"color:DarkBlue; background-color:Azure; font-size:large;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"create_settings_file\" formaction=\"".$url_this_page."\" value=\"CREATE\"> a new file named <input type=\"text\" name=\"new_settings_file\" size=\"25\" value=\"".$new_settings_file."\"></p>";
+		echo "<p>&nbsp;</p><p style=\"background-color:white; color:black\"><font color=\"red\">➡</font> <input class=\"save big\" onclick=\"window.open('settings_list.php?dir=".urlencode($dir)."&thispage=".urlencode($url_this_page)."','settingsfiles','width=400,height=400,left=100'); return false;\" type=\"submit\" title=\"Display settings files\" value=\"CHOOSE\"> a settings file or <input class=\"edit big\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"create_settings_file\" formaction=\"".$url_this_page."\" value=\"CREATE\"> a new file named <input type=\"text\" name=\"new_settings_file\" size=\"25\" value=\"".$new_settings_file."\"></p>";
 		}
 	else 
-		echo "<p><input style=\"color:DarkBlue; background-color:Azure;\" onclick=\"window.open('settings_list.php?dir=".urlencode($dir)."&thispage=".urlencode($url_this_page)."','settingsfiles','width=400,height=400,left=100'); return false;\" type=\"submit\" title=\"Display settings files\" value=\"CHOOSE\"> a different settings file</p>";
+		echo "<p><input class=\"edit\" onclick=\"window.open('settings_list.php?dir=".urlencode($dir)."&thispage=".urlencode($url_this_page)."','settingsfiles','width=400,height=400,left=100'); return false;\" type=\"submit\" title=\"Display settings files\" value=\"CHOOSE\"> a different settings file</p>";
 	echo "<hr>";
 	echo "<table style=\"border:1px solid grey; border-radius: 12px;\">";
 	echo "<tr>";
-	echo "<td style=\"vertical-align:middle; white-space:nowrap;\"><input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\" onmouseover=\"checksaved();\" name=\"change_convention\" formaction=\"".$url_this_page."#topchanges\" value=\"APPLY NOTE CONVENTION to this data\"> ➡</td>";
+	echo "<td style=\"vertical-align:middle; white-space:nowrap;\"><input class=\"edit\" type=\"submit\" onmouseover=\"checksaved();\" name=\"change_convention\" formaction=\"".$url_this_page."#topchanges\" value=\"APPLY NOTE CONVENTION to this data\"> ➡</td>";
 	echo "<td style=\"vertical-align:middle; white-space:nowrap;\">";
 	echo "<input type=\"radio\" name=\"new_convention\" value=\"0\">English<br />";
 	echo "<input type=\"radio\" name=\"new_convention\" value=\"1\">Italian/Spanish/French<br />";
@@ -1700,36 +1700,36 @@ if(!$hide) {
 	$found_velocity = substr_count($content,"_vel(");
 	$found = FALSE;
 	if($found_chan > 0) {
-		echo "<input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\" onmouseover=\"checksaved();\" name=\"delete_chan\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _chan()\">&nbsp;";
+		echo "<input class=\"edit\" type=\"submit\" onmouseover=\"checksaved();\" name=\"delete_chan\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _chan()\">&nbsp;";
 		$found = TRUE;
 		}
 	if($found_ins > 0) {
-		echo "<input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"delete_ins\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _ins()\">&nbsp;";
+		echo "<input class=\"edit\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"delete_ins\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _ins()\">&nbsp;";
 		$found = TRUE;
 		}
 	if($found_tempo > 0) {
-		echo "<input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"delete_tempo\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _tempo()\">&nbsp;";
+		echo "<input class=\"edit\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"delete_tempo\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _tempo()\">&nbsp;";
 		$found = TRUE;
 		}
 	if($found_volume > 0) {
-		echo "<input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"delete_volume\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _volume()\">&nbsp;";
-		echo "<input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"volume_velocity\" formaction=\"".$url_this_page."#topedit\" value=\"volume -> velocity\">&nbsp;";
+		echo "<input class=\"edit\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"delete_volume\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _volume()\">&nbsp;";
+		echo "<input class=\"edit\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"volume_velocity\" formaction=\"".$url_this_page."#topedit\" value=\"volume -> velocity\">&nbsp;";
 		$found = TRUE;
 		}
 	if($found_velocity > 0) {
-		echo "<input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"delete_velocity\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _vel()\">&nbsp;";
-		echo "<input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"velocity_volume\" formaction=\"".$url_this_page."#topedit\" value=\"velocity -> volume\">&nbsp;";
+		echo "<input class=\"edit\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"delete_velocity\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _vel()\">&nbsp;";
+		echo "<input class=\"edit\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"velocity_volume\" formaction=\"".$url_this_page."#topedit\" value=\"velocity -> volume\">&nbsp;";
 		$found = TRUE;
 		}
 	if($found_volume > 0) {
-		echo "<input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"modify_volume\" formaction=\"".$url_this_page."#topchanges\" value=\"Modify _volume()\">&nbsp;";
+		echo "<input class=\"edit\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"modify_volume\" formaction=\"".$url_this_page."#topchanges\" value=\"Modify _volume()\">&nbsp;";
 		$found = TRUE;
 		}
 	if($found_velocity > 0) {
-		echo "<input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"modify_velocity\" formaction=\"".$url_this_page."#topchanges\" value=\"Modify _vel()\">&nbsp;";
+		echo "<input class=\"edit\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"modify_velocity\" formaction=\"".$url_this_page."#topchanges\" value=\"Modify _vel()\">&nbsp;";
 		}
 	if($found_chan > 0  OR $found_ins > 0) {
-		echo "<input style=\"color:DarkBlue; background-color:Azure;\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"manage_instructions\" formaction=\"".$url_this_page."#topchanges\" value=\"MANAGE _chan() AND _ins()\">&nbsp;";
+		echo "<input class=\"edit\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"manage_instructions\" formaction=\"".$url_this_page."#topchanges\" value=\"MANAGE _chan() AND _ins()\">&nbsp;";
 		$found = TRUE;
 		}
 	echo "<input type=\"hidden\" name=\"change_velocity_average\" value=\"".$change_velocity_average."\">";
@@ -1750,7 +1750,7 @@ if($imax > 0 AND (substr_count($content,'{') > 0 OR substr_count($content,"-da."
 		}
 	else {
 		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-		echo "<p><input style=\"background-color:yellow; font-size:large; margin-right:1em;\" type=\"submit\" onmouseover=\"checksaved();\" formaction=\"".$url_this_page."#tonalanalysis\" title=\"Analyze tonal intervals\" name=\"analyze_tonal\" value=\"ANALYZE INTERVALS\"";
+		echo "<p><input class=\"save big\" style=\"margin-right:1em;\" type=\"submit\" onmouseover=\"checksaved();\" formaction=\"".$url_this_page."#tonalanalysis\" title=\"Analyze tonal intervals\" name=\"analyze_tonal\" value=\"ANALYZE INTERVALS\"";
 		if(!$tonal_analysis_possible) echo " disabled";
 		echo ">";
 		echo "Melodic and harmonic tonal intervals of (all) item(s)<br /><i>ignoring channels, instruments, periods, sound-objects and random performance controls.</i></p>";
@@ -1762,7 +1762,6 @@ if($imax > 0 AND (substr_count($content,'{') > 0 OR substr_count($content,"-da."
 echo "</td>";
 $window_name = window_name($filename);
 if(!$hide) {
-//	echo "<td style=\"background-color:cornsilk;\">";
 	echo "<td>";
 	echo "<table style=\"background-color:Gold;\">";
 	if($imax > 0 AND substr_count($content,'{') > 0) {
@@ -1774,7 +1773,7 @@ if(!$hide) {
 		echo "<input type=\"hidden\" name=\"file_format\" value=\"".$file_format."\">";
 		echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
 		echo "<tr><td colspan=\"2\" style=\"vertical-align:middle; padding:6px;\">";
-		echo "<div style=\"float:right;\"><input style=\"color:DarkBlue; background-color:Aquamarine;\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_grammar."','".$window_name_grammar."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"create_grammar\" title=\"Create grammar using items on this page\" value=\"CREATE GRAMMAR\"></div>";
+		echo "<div style=\"float:right;\"><input class=\"produce\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_grammar."','".$window_name_grammar."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"create_grammar\" title=\"Create grammar using items on this page\" value=\"CREATE GRAMMAR\"></div>";
 		echo "<input type=\"submit\" onclick=\"clearsave();\" style=\"background-color:AquaMarine;\" formaction=\"".$url_this_page."#topedit\" name=\"explode\" value=\"EXPLODE\">&nbsp;<font color=\"red\">➡ </font><i>split</i> {…}&nbsp;<i>expressions (measures)</i>";
 		echo "</td></tr>";
 		if($imax > 0) {
@@ -1845,8 +1844,8 @@ if(!$hide) {
 		else $refresh_instruction = '';
 	//	echo "<p>@@@".$link_play."</p>";
 		if($error_mssg == '') {
-			echo "<input id=\"playButton\" style=\"color:DarkBlue; background-color:Aquamarine;\" onmouseover=\"checksaved();\" onclick=\"event.preventDefault(); if(checksaved()) {".$refresh_instruction." window.open('".$link_play."','".$window_name_play."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" title=\"Play this polymetric expression\" value=\"PLAY\">&nbsp;";
-			if($chunked) echo "<input style=\"color:DarkBlue; background-color:Aquamarine;\" onmouseover=\"checksaved();\" onclick=\"event.preventDefault(); if(checksaved()) {".$refresh_instruction." window.open('".$link_play_chunked."','".$window_name_chunked."','width=800,height=800,left=150,toolbar=yes'); return false;}\" type=\"submit\" name=\"produce\" title=\"Play polymetric expression in chunks (no graphics)\" value=\"PLAY safe (".$chunk_number." chunks)\">&nbsp;";
+			echo "<input id=\"playButton\" class=\"produce\" onmouseover=\"checksaved();\" onclick=\"event.preventDefault(); if(checksaved()) {".$refresh_instruction." window.open('".$link_play."','".$window_name_play."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" title=\"Play this polymetric expression\" value=\"PLAY\">&nbsp;";
+			if($chunked) echo "<input class=\"produce\" onmouseover=\"checksaved();\" onclick=\"event.preventDefault(); if(checksaved()) {".$refresh_instruction." window.open('".$link_play_chunked."','".$window_name_chunked."','width=800,height=800,left=150,toolbar=yes'); return false;}\" type=\"submit\" name=\"produce\" title=\"Play polymetric expression in chunks (no graphics)\" value=\"PLAY safe (".$chunk_number." chunks)\">&nbsp;";
 			echo "&nbsp;<input style=\"background-color:azure;\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_expand."','".$window_name_expand."','width=800,height=800,left=100'); return false;\" type=\"submit\" name=\"produce\" title=\"Expand this polymetric expression\" value=\"EXPAND\">&nbsp;";
 			}
 		if($tie_mssg <> '' AND $error_mssg == '') echo "<br />";
