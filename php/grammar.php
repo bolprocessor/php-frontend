@@ -57,7 +57,7 @@ $temp_midi_ressources = $temp_dir."trace_".my_session_id()."_".$filename."_";
 
 echo "<p>";
 $url = "index.php?path=".urlencode($current_directory);
-echo "&nbsp;Workspace = <input style=\"background-color:azure;\" name=\"workspace\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$url."','_self');\" value=\"".$current_directory."\">";
+echo "&nbsp;Workspace = <input class=\"edit\" name=\"workspace\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$url."','_self');\" value=\"".$current_directory."\">";
 
 $hide = $need_to_save = FALSE;
 $no_save_midiresources = FALSE;
@@ -416,7 +416,7 @@ $csound_is_responsive = check_csound();
 link_to_tonality();
 echo "</div>";
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-echo "<table cellpadding=\"8px;\" id=\"topmidiports\" style=\"border:1px solid grey;\"><tr style=\"\">";
+echo "<table cellpadding=\"8px;\" id=\"topmidiports\" class=\"thinborder\"><tr>";
 echo "<td style=\"white-space:nowrap;\">";
 if($file_format <> "rtmidi") {
 	for($i = 0; $i < $NumberMIDIoutputs; $i++) {
@@ -555,9 +555,9 @@ if($templates) {
 //	$link_produce_templates .= "&trace_production=1";
 	$link_produce_templates .= "&here=".urlencode($here);
 	$window_name = window_name($filename);
-	echo "<input style=\"color:DarkBlue; background-color:azure;\" onclick=\"if(checksaved()) window.open('".$link_produce_templates."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"CHECK TEMPLATES\"><br /><br />";
+	echo "<input class=\"edit\" onclick=\"if(checksaved()) window.open('".$link_produce_templates."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"CHECK TEMPLATES\"><br /><br />";
 	}
-echo "<div style=\"padding:1em; width:690px; border:1px solid grey; border-radius: 12px;\">";
+echo "<div style=\"padding:1em; width:690px;\" class=\"thinborder\">";
 if($settings_file <> '' AND file_exists($dir.$settings_file)) echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_settings."','".$settings_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$settings_file."’\">";
 if($settings_file == '' OR !file_exists($dir.$settings_file)) {
 	$time_resolution = 10; //  10 milliseconds by default
@@ -698,19 +698,19 @@ echo "<input type=\"hidden\" name=\"alphabet_file\" value=\"".$alphabet_file."\"
 echo "<span  id=\"topedit\">&nbsp;</span>";
 
 echo $save_warning;
-echo "<br /><button class=\"edit\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button><p></p>";
+echo "<br /><button class=\"edit big\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button><p></p>";
 
 find_replace_form();
 echo "<p><input class=\"save big\" type=\"submit\" id=\"saveButton\" onclick=\"clearsave();\" name=\"savethisfile\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".$filename."’\">";
 if((file_exists($output.SLASH.$default_output_name.".wav") OR file_exists($output.SLASH.$default_output_name.".mid") OR file_exists($output.SLASH.$default_output_name.".html") OR file_exists($output.SLASH.$default_output_name.".sco")) AND file_exists($result_file)) {
-	echo "&nbsp;&nbsp;&nbsp;<input style=\"color:DarkBlue; background-color:azure; font-size:large;\" onclick=\"window.open('".$result_file."','result','width=800,height=600,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Show latests results\">";
+	echo "&nbsp;&nbsp;&nbsp;<input class=\"edit\" style=\"font-size:large;\" onclick=\"window.open('".$result_file."','result','width=800,height=600,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Show latests results\">";
 	}
 echo "&nbsp;<input class=\"edit big\" type=\"submit\" onclick=\"clearsave();\" name=\"compilegrammar\" value=\"COMPILE GRAMMAR\">";
 
 echo "&nbsp;<input onclick=\"event.preventDefault(); if(checksaved()) {".$refresh_instruction." window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)";
 if($error) {
 	echo " - disabled because of missing files\"";
-	echo " disabled style=\"background-color:azure; box-shadow: none; font-size:large;\"";
+	echo " class=\"edit big disabled\" style=\"box-shadow: none;\" disabled ";
 	}
 else echo "\" class=\"produce big\"";
 echo ">";
@@ -731,10 +731,9 @@ echo "<div>";
 echo "<input onclick=\"event.preventDefault(); if(checksaved()) {".$refresh_instruction." window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)";
 if($error) {
 	echo " - disabled because of missing files\"";
-	echo " disabled style=\"background-color:azure; box-shadow: none; font-size:large;\"";
+	echo " class=\"edit big disabled\" style=\"box-shadow: none;\" disabled ";
 	}
 else echo "\" class=\"produce big\"";
-// echo " title=\"Don't forget to save!\"";
 echo ">";
 $link_test = $link_produce."&test";
 $display_command_title = "DisplayCommand".$filename;
@@ -794,7 +793,7 @@ if($trace_production > 0)
 $link_produce .= "&here=".urlencode($here);
 $window_name = window_name($filename);
 if(count($variable) > 0) {
-	echo "<h3>Variables (click to use as startup string):</h3>";
+	echo "<p>Variables (click to use as startup string):</p>";
 	ksort($variable);
 	$j = 0;
 	foreach($variable as $var => $val) {
@@ -841,8 +840,8 @@ if(isset($_POST['saveexpression'])) {
 		}
 	}
 // echo "link_play_expression = ".$link_play_expression."<br />";
-echo "<input  type=\"submit\" onclick=\"clearsave();\" name=\"saveexpression\" class=\"save\" value=\"SAVE THIS EXPRESSION\">&nbsp;then&nbsp;<input onclick=\"window.open('".$link_play_expression."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" value=\"PRODUCE ITEM\"";
-if(!file_exists($data_expression)) echo " disabled style=\"background-color:azure; box-shadow: none;\"";
+echo "<input  type=\"submit\" onclick=\"clearsave();\" name=\"saveexpression\" class=\"save\" value=\"SAVE EXPRESSION\">&nbsp;then&nbsp;<input onclick=\"window.open('".$link_play_expression."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" value=\"PRODUCE ITEM\"";
+if(!file_exists($data_expression)) echo " disabled class=\"edit disabled\" style=\"box-shadow: none;\"";
 else echo " class=\"produce\"";
 echo "><br /><br />";
 echo "<span id=\"topchanges\"></span>";
@@ -955,7 +954,7 @@ if(isset($_POST['manage_instructions'])) {
 	$hide = TRUE;
 	}
 if(!$hide) {
-	echo "<table style=\"border:1px solid grey; border-radius: 12px;\">";
+	echo "<table class=\"thinborder\">";
 	echo "<tr>";
 	echo "<td style=\"vertical-align:middle; white-space:nowrap;\">";
 	echo "<input class=\"edit\" type=\"submit\" onclick=\"if(checksaved()) {this.form.target='_self';return true;} else return false;\" name=\"change_convention\" formaction=\"".$url_this_page."#topchanges\" value=\"APPLY NOTE CONVENTION to this data\"> ➡</td>";

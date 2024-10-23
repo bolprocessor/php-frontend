@@ -24,7 +24,7 @@ display_darklight();
 
 echo "<p>";
 $url = "index.php?path=".urlencode($current_directory);
-echo "&nbsp;Workspace = <input style=\"background-color:azure;\" name=\"workspace\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$url."','_self');\" value=\"".$current_directory."\">";
+echo "&nbsp;Workspace = <input class=\"edit\" name=\"workspace\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$url."','_self');\" value=\"".$current_directory."\">";
 
 echo link_to_help();
 
@@ -432,7 +432,7 @@ foreach($dircontent as $some_scale) {
 		}
 	}
 if($deleted_scales > 0) {
-	echo "</b></font>&nbsp;<input style=\"background-color:azure;\" type=\"submit\" name=\"undelete_scales\" onclick=\"this.form.target='_self';return true;\" value=\"UNDELETE all scales\">&nbsp;";
+	echo "</b></font>&nbsp;<input class=\"edit\" type=\"submit\" name=\"undelete_scales\" onclick=\"this.form.target='_self';return true;\" value=\"UNDELETE all scales\">&nbsp;";
 	echo "<input style=\"background-color:red; color:white;\" type=\"submit\" name=\"empty_trash\" onclick=\"this.form.target='_self';return true;\" value=\"TRASH deleted scales\">";
 	echo "</p>";
 	}
@@ -440,7 +440,7 @@ echo "<p><input class=\"save\" type=\"submit\" name=\"create_scale\" onclick=\"t
 echo $scala_error;
 echo "<p><label for=\"file1\">SCALA file:</label>&nbsp;";
 echo "<input type=\"file\" name=\"file1\" id=\"file1\" accept=\".scl\">&nbsp;";
-echo "➡&nbsp;<input style=\"background-color:azure;\" type=\"submit\" formaction=\"".$url_this_page."\" name=\"import_files\" onclick=\"this.form.target='_self';return true;\" value=\"CREATE A TONAL SCALE using SCALA and KBM files\"><br />";
+echo "➡&nbsp;<input class=\"edit\" type=\"submit\" formaction=\"".$url_this_page."\" name=\"import_files\" onclick=\"this.form.target='_self';return true;\" value=\"CREATE A TONAL SCALE using SCALA and KBM files\"><br />";
 echo "<label for=\"file2\">KBM file (optional):</label>&nbsp;";
 echo "<input type=\"file\" name=\"file2\" id=\"file2\" accept=\".kbm\">&nbsp;";
 
@@ -891,7 +891,7 @@ if($max_scales > 0) {
 		echo "<hr>";
 		}
 	if($done) {
-		echo "<table style=\"border:1px solid grey; border-radius: 12px;\">";
+		echo "<table class=\"thinborder\">";
 		echo "<tr>";
 		echo "<td style=\"vertical-align:middle; white-space:nowrap;\"><input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"change_convention\" value=\"CHANGE NOTE CONVENTION IN ALL SCALES\"> ➡</td>";
 		echo "<td style=\"vertical-align:middle; white-space:nowrap; padding-bottom:6px;\">";
@@ -910,7 +910,7 @@ if($max_scales > 0) {
 		}
 	echo "&nbsp;<input class=\"save\" type=\"submit\" name=\"reassign_keys\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#topscales\" value=\"REASSIGN KEYS\">";
 	echo "</p>";
-	echo "<ol style=\"border:1px solid grey; padding-top:6px; padding-bottom:6px; padding-right:6px;\">";
+	echo "<ol style=\"padding-top:6px; padding-bottom:6px; padding-right:6px;\" class=\"thinborder\">";
 	$table_names = $p_interval = $q_interval = $cent_position = $ratio_interval = array();
 	for($i_scale = 1, $k_image = 0; $i_scale <= $max_scales; $i_scale++) {
 		$link_edit = "scale.php";
@@ -927,7 +927,7 @@ if($max_scales > 0) {
 			$k_image++; if($k_image > 10) $k_image = 0;
 			echo "➡&nbsp;".popup_link($clean_name_of_file,"image",500,410,(100 * $k_image),$dir_image);
 			}
-		echo "&nbsp;<input type=\"submit\" style=\"background-color:azure;\" name=\"export_scale_".$i_scale."\" formaction=\"".$url_this_page."&scalefilename=".urlencode($scale_name[$i_scale])."#".$i_scale."\" onclick=\"this.form.target='_self';return true;\" value=\"Export to SCALA\">";
+		echo "&nbsp;<input type=\"submit\" class=\"edit\" name=\"export_scale_".$i_scale."\" formaction=\"".$url_this_page."&scalefilename=".urlencode($scale_name[$i_scale])."#".$i_scale."\" onclick=\"this.form.target='_self';return true;\" value=\"Export to SCALA\">";
 		if(file_exists($scala_file) OR isset($_POST['export_scale_'.$i_scale])) echo "<span style=\"padding-right:1em;\">➡&nbsp;<a href=\"".$scala_file."\" download=\"".$scale_name[$i_scale].".scl\">Download</a></span>";
 		if(isset($scale_table[$i_scale])) echo "<br /><small><span class=\"blue-text\">".$scale_table[$i_scale]."</span></small>";
 		else {
@@ -1096,10 +1096,10 @@ if($max_scales > 0) {
 		
 	if(isset($_POST['export_scales'])) {
 		echo "<form method=\"post\" action=\"".$url_this_page."#export\" enctype=\"multipart/form-data\">";
-		echo "<hr><table style=\"background-color:gold;\">";
+		echo "<hr><table class=\"thicktable\">";
 		echo "<tr>";
 		echo "<td>";
-		echo "<input type=\"submit\" style=\"background-color:azure; \" name=\"export_to\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."\" value=\"Cancel\">";
+		echo "<input type=\"submit\" class=\"edit\" name=\"export_to\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."\" value=\"Cancel\">";
 		echo "&nbsp;<input type=\"submit\" style=\"background-color:aquamarine; \" name=\"export_to\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#export\" value=\"EXPORT:\"><br /><br />";
 		for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
 			echo "<input type=\"checkbox\" name=\"export_".$i_scale."\"><span class=\"blue-text\">".$scale_name[$i_scale]."</span><br />";
@@ -1127,11 +1127,11 @@ echo $dir."<br />";
 	
 	if(isset($_POST['compare_scales'])) {
 		echo "<form method=\"post\" action=\"".$url_this_page."#export\" enctype=\"multipart/form-data\">";
-		echo "<hr><table style=\"background-color:gold;\">";
+		echo "<hr><table class=\"thicktable\">";
 		echo "<tr>";
 		echo "<td style=\"padding-bottom:6px;\">";
 		$url_classification = "compare_scales.php?file=".urlencode($current_directory.SLASH.$filename);
-		echo "<input type=\"submit\" style=\"background-color:azure; \" name=\"export_to\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."\" value=\"Cancel\">";
+		echo "<input type=\"submit\" class=\"edit\" name=\"export_to\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."\" value=\"Cancel\">";
 		echo "&nbsp;<input type=\"submit\" style=\"background-color:aquamarine; \" name=\"export_to\" onclick=\"this.form.target='_blank';return true;\" formaction=\"".$url_classification."\" value=\"COMPARE selected scales:\"><br /><br />";
 		for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
 			echo "<input type=\"checkbox\" name=\"compare_".$scale_name[$i_scale]."\"><span class=\"blue-text\">".$scale_name[$i_scale]."</span><br />";
@@ -1144,7 +1144,7 @@ echo $dir."<br />";
 		}
 		
 	echo "<h3>Scale intervals (only labeled notes)</h3>";
-	echo "<ol style=\"border:1px solid grey; padding-top:6px; padding-bottom:6px; padding-right:6px;\">";
+	echo "<ol style=\"padding-top:6px; padding-bottom:6px; padding-right:6px;\" class=\"thinborder\">";
 	for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
 		if(isset($scale_fraction[$i_scale]) AND isset($table_names[$i_scale])) {
 			$kmaxi = count($p_interval[$i_scale]);

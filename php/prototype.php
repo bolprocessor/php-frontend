@@ -578,7 +578,7 @@ echo "<form method=\"post\" action=\"prototype.php\" enctype=\"multipart/form-da
 
 echo "<p style=\"text-align:left;\"><input class=\"save\" type=\"submit\" name=\"savethisprototype\" value=\"SAVE THIS PROTOTYPE\"></p>";
 
-echo "<p style=\"text-align:left;\"><input style=\"background-color:azure;\" type=\"submit\" name=\"playexpression\" value=\"PLAY THIS EXPRESSION (real-time MIDI):\">&nbsp;➡&nbsp;<input type=\"text\" name=\"expression\" size=\"30\" value=\"".$expression."\"></p>";
+echo "<p style=\"text-align:left;\"><input class=\"edit\" type=\"submit\" name=\"playexpression\" value=\"PLAY THIS EXPRESSION (real-time MIDI):\">&nbsp;➡&nbsp;<input type=\"text\" name=\"expression\" size=\"30\" value=\"".$expression."\"></p>";
 
 echo "<input type=\"hidden\" name=\"object_name\" value=\"".$object_name."\">";
 echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";
@@ -1987,7 +1987,7 @@ echo "➡ <i>If changes are not visible on these pop-up windows, juste clear the
 	}
 else echo "<p>No MIDI codes in this sound-object prototype</p>";
 
-if($new_midi) echo "<p style=\"color:red;\">You should save this prototype to preserve uploaded MIDI codes! ➡ <input class=\"save\" type=\"submit\" name=\"savethisprototype\" formaction=\"".$url_this_page."#midi\" value=\"SAVE IT\">&nbsp;<input style=\"background-color:azure;\" type=\"submit\" formaction=\"".$url_this_page."#midi\" name=\"cancel\" formaction=\"".$url_this_page."#midi\" value=\"CANCEL\"></p>";
+if($new_midi) echo "<p style=\"color:red;\">You should save this prototype to preserve uploaded MIDI codes! ➡ <input class=\"save\" type=\"submit\" name=\"savethisprototype\" formaction=\"".$url_this_page."#midi\" value=\"SAVE IT\">&nbsp;<input class=\"edit\" type=\"submit\" formaction=\"".$url_this_page."#midi\" name=\"cancel\" formaction=\"".$url_this_page."#midi\" value=\"CANCEL\"></p>";
 
 echo "<font color=\"red\">➡</font> Create or replace MIDI codes loading a MIDI file (*.mid): <input type=\"file\" name=\"mid_upload\">&nbsp;<input type=\"submit\" value=\" send \">";
 
@@ -1998,25 +1998,25 @@ store($h_image,"PostRoll",$PostRoll);
 echo "Real MIDI duration of this object will be:<br /><b>event duration - pre-roll + post-roll</b> = ".$Duration." - (".$PreRoll.") + (".$PostRoll.") = ".$real_duration." ms<br />for a metronome period Tref = ".$Tref." ms";
 if($duration_warning <> '') echo $duration_warning;
 echo "<input type=\"hidden\" name=\"Duration\" value=\"".$Duration."\">";
-echo "<p><input style=\"background-color:azure;\" type=\"submit\" name=\"adjust_duration\" formaction=\"".$url_this_page."#midi\" value=\"Adjust event time duration\"> to <input type=\"text\" name=\"NewDuration\" size=\"8\" value=\"".$Duration."\"> ms<br />";
-if($Tref > 0) echo "<input style=\"background-color:azure;\" type=\"submit\" name=\"adjust_beats\" formaction=\"".$url_this_page."#midi\" value=\"Adjust event beat duration\"> to <input type=\"text\" name=\"NewBeats\" size=\"8\" value=\"".round($Duration/($Tref),2)."\"> beats (striated object with Tref = ".($Tref / $resolution)." ticks of ".$resolution." ms, i.e. ".($Tref)." ms)";
+echo "<p><input class=\"edit\" type=\"submit\" name=\"adjust_duration\" formaction=\"".$url_this_page."#midi\" value=\"Adjust event time duration\"> to <input type=\"text\" name=\"NewDuration\" size=\"8\" value=\"".$Duration."\"> ms<br />";
+if($Tref > 0) echo "<input class=\"edit\" type=\"submit\" name=\"adjust_beats\" formaction=\"".$url_this_page."#midi\" value=\"Adjust event beat duration\"> to <input type=\"text\" name=\"NewBeats\" size=\"8\" value=\"".round($Duration/($Tref),2)."\"> beats (striated object with Tref = ".($Tref / $resolution)." ticks of ".$resolution." ms, i.e. ".($Tref)." ms)";
 echo "</p>";
 
 echo "<p>";
-echo "<p><input style=\"background-color:azure;\" type=\"submit\" name=\"crop_duration\" formaction=\"".$url_this_page."#midi\" value=\"Crop event time duration\"> to <input type=\"text\" name=\"CroppedDuration\" size=\"8\" value=\"\"> ms (truncate the end of the MIDI sequence)<br />";
+echo "<p><input class=\"edit\" type=\"submit\" name=\"crop_duration\" formaction=\"".$url_this_page."#midi\" value=\"Crop event time duration\"> to <input type=\"text\" name=\"CroppedDuration\" size=\"8\" value=\"\"> ms (truncate the end of the MIDI sequence)<br />";
 echo "</p>";
 
 if($silence_before_warning <> '') echo "<font color=\"red\">➡</font> ".$silence_before_warning."<br />";
-echo "<input style=\"background-color:azure;\" type=\"submit\" name=\"silence_before\" formaction=\"".$url_this_page."#midi\" value=\"Insert silence before this object\"> = <input type=\"text\" name=\"SilenceBefore\" size=\"8\" value=\"\"> ms ➡ current pre-roll = ".$PreRoll." ms<br />";
+echo "<input class=\"edit\" type=\"submit\" name=\"silence_before\" formaction=\"".$url_this_page."#midi\" value=\"Insert silence before this object\"> = <input type=\"text\" name=\"SilenceBefore\" size=\"8\" value=\"\"> ms ➡ current pre-roll = ".$PreRoll." ms<br />";
 
 if($silence_after_warning <> '') echo "<font color=\"red\">➡</font> ".$silence_after_warning."<br />";
-echo "<input style=\"background-color:azure;\" type=\"submit\" name=\"silence_after\" formaction=\"".$url_this_page."#midi\" value=\"Append silence after this object\"> = <input type=\"text\" name=\"SilenceAfter\" size=\"8\" value=\"\"> ms ➡ current post-roll = ".$PostRoll." ms<br /><br />";
+echo "<input class=\"edit\" type=\"submit\" name=\"silence_after\" formaction=\"".$url_this_page."#midi\" value=\"Append silence after this object\"> = <input type=\"text\" name=\"SilenceAfter\" size=\"8\" value=\"\"> ms ➡ current post-roll = ".$PostRoll." ms<br /><br />";
 
 if(!$new_midi AND !$no_midi) {
 	echo "<p>CHANGE MIDI CONTROLS</p>";
-	echo "<p style=\"text-align:left;\"><input style=\"background-color:azure;\" type=\"submit\" name=\"suppress_pressure\" formaction=\"".$url_this_page."#midi\" value=\"SUPPRESS channel pressure\">&nbsp;<input style=\"background-color:azure;\" type=\"submit\" name=\"suppress_polyphonic_pressure\" formaction=\"".$url_this_page."#midi\" value=\"SUPPRESS polyphonic pressure\">&nbsp;<input style=\"background-color:azure;\" type=\"submit\" name=\"suppress_pitchbend\" formaction=\"".$url_this_page."#midi\" value=\"SUPPRESS pitchbend\">&nbsp;<input style=\"background-color:azure;\" type=\"submit\" name=\"suppress_volume\" formaction=\"".$url_this_page."#midi\" value=\"SUPPRESS volume control\"><br />";
-	echo "<input style=\"background-color:azure;\" type=\"submit\" name=\"suppress_modulation\" formaction=\"".$url_this_page."#midi\" value=\"SUPPRESS modulation\">&nbsp;<input style=\"background-color:azure;\" type=\"submit\" name=\"suppress_program\" formaction=\"".$url_this_page."#midi\" value=\"SUPPRESS program changes\">&nbsp;<input style=\"background-color:azure;\" type=\"submit\" name=\"suppress_panoramic\" formaction=\"".$url_this_page."#midi\" value=\"SUPPRESS panoramic\"><br /><input style=\"background-color:azure;\" type=\"submit\" name=\"add_allnotes_off\" formaction=\"".$url_this_page."#midi\" value=\"APPEND AllNotesOff (all channels)\">&nbsp;<input style=\"background-color:azure;\" type=\"submit\" name=\"suppress_allnotes_off\" formaction=\"".$url_this_page."#midi\" value=\"SUPPRESS AllNotesOff (all channels)\"><br /><input style=\"background-color:azure;\" type=\"submit\" name=\"delete_midi\" formaction=\"".$url_this_page."#midi\" value=\"SUPPRESS all MIDI codes\"><br />";
-	echo "<input style=\"background-color:azure;\" type=\"submit\" name=\"quantize_NoteOn\" formaction=\"".$url_this_page."#midi\" value=\"QUANTIZE NoteOns\"> = 1 / <input type=\"text\" name=\"NoteOnQuantize\" size=\"4\" formaction=\"".$url_this_page."#midi\" value=\"64\"> beat</p>";
+	echo "<p style=\"text-align:left;\"><input class=\"edit\" type=\"submit\" name=\"suppress_pressure\" formaction=\"".$url_this_page."#midi\" value=\"SUPPRESS channel pressure\">&nbsp;<input class=\"edit\" type=\"submit\" name=\"suppress_polyphonic_pressure\" formaction=\"".$url_this_page."#midi\" value=\"SUPPRESS polyphonic pressure\">&nbsp;<input class=\"edit\" type=\"submit\" name=\"suppress_pitchbend\" formaction=\"".$url_this_page."#midi\" value=\"SUPPRESS pitchbend\">&nbsp;<input class=\"edit\" type=\"submit\" name=\"suppress_volume\" formaction=\"".$url_this_page."#midi\" value=\"SUPPRESS volume control\"><br />";
+	echo "<input class=\"edit\" type=\"submit\" name=\"suppress_modulation\" formaction=\"".$url_this_page."#midi\" value=\"SUPPRESS modulation\">&nbsp;<input class=\"edit\" type=\"submit\" name=\"suppress_program\" formaction=\"".$url_this_page."#midi\" value=\"SUPPRESS program changes\">&nbsp;<input class=\"edit\" type=\"submit\" name=\"suppress_panoramic\" formaction=\"".$url_this_page."#midi\" value=\"SUPPRESS panoramic\"><br /><input class=\"edit\" type=\"submit\" name=\"add_allnotes_off\" formaction=\"".$url_this_page."#midi\" value=\"APPEND AllNotesOff (all channels)\">&nbsp;<input class=\"edit\" type=\"submit\" name=\"suppress_allnotes_off\" formaction=\"".$url_this_page."#midi\" value=\"SUPPRESS AllNotesOff (all channels)\"><br /><input class=\"edit\" type=\"submit\" name=\"delete_midi\" formaction=\"".$url_this_page."#midi\" value=\"SUPPRESS all MIDI codes\"><br />";
+	echo "<input class=\"edit\" type=\"submit\" name=\"quantize_NoteOn\" formaction=\"".$url_this_page."#midi\" value=\"QUANTIZE NoteOns\"> = 1 / <input type=\"text\" name=\"NoteOnQuantize\" size=\"4\" formaction=\"".$url_this_page."#midi\" value=\"64\"> beat</p>";
 	}
 
 store($h_image,"object_name",$object_name);

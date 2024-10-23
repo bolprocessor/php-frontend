@@ -20,7 +20,7 @@ display_darklight();
 
 echo "<p>";
 $url = "index.php?path=".urlencode($current_directory);
-echo "&nbsp;Workspace = <input style=\"background-color:azure;\" name=\"workspace\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$url."','_self');\" value=\"".$current_directory."\">";
+echo "&nbsp;Workspace = <input class=\"edit\" name=\"workspace\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$url."','_self');\" value=\"".$current_directory."\">";
 
 echo "<h2>Interaction file “".$filename."”</h2>";
 save_settings("last_name",$filename);

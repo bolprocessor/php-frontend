@@ -1215,7 +1215,7 @@ echo "<table>";
 echo "<tr>";
 echo "<td style=\"white-space:nowrap; padding:6px; vertical-align:middle;\"><span class=\"blue-text\">numgrades</span> = <input type=\"text\" name=\"numgrades\" size=\"5\" value=\"".$numgrades_fullscale."\"> (typically 12)</td>";
 echo "<td rowspan=\"3\" style=\"white-space:nowrap; padding:6px; vertical-align:middle;\">";
-echo "<table style=\"background-color:gold;\">";
+echo "<table class=\"thicktable\">";
 echo "<tr>";
 echo "<td  style=\"padding-bottom:6px;\" colspan=\"".$numgrades_fullscale."\"><input class=\"save\" type=\"submit\" name=\"modifynames\" onclick=\"this.form.target='_self';return true;\" formaction=\"scale.php?scalefilename=".urlencode($filename)."\" value=\"SAVE NEW NAMES\">&nbsp;➡&nbsp;Record the names of these notes:</td>";
 echo "</tr>";
@@ -1686,7 +1686,7 @@ if(isset($_POST['change_convention']) AND isset($_POST['new_convention'])) {
 	}
 	
 if($done AND !$warned_ratios) {
-	echo "<hr><table style=\"border:1px solid grey; border-radius: 12px;\">";
+	echo "<hr><table class=\"thinborder\">";
 	echo "<tr>";
 	echo "<td style=\"vertical-align:middle; white-space:nowrap;\"><input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"change_convention\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#topconvention\" value=\"CHANGE NOTE CONVENTION\"> ➡</td>";
 	echo "<td style=\"vertical-align:middle; white-space:nowrap; padding-bottom:6px;\">";
@@ -2417,7 +2417,7 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 		else if($new_scale_name <> '') $this_name = $new_scale_name;
 		echo "<h3>Structure of transposed tonal scale <span class=\"blue-text\">‘".$this_name."’</span> (cents):</h3>";
 		}
-	echo "<table style=\"background-color:gold;\">";
+	echo "<table class=\"thicktable\">";
 	echo "<tr><td></td>";
 	$num = $sum = array();
 	for($j = $jj = 0; $j <= $numgrades_fullscale; $j++) {
@@ -2506,7 +2506,7 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 	
 	$fifth = $fourth = $wolffifth = $wolffourth = $harmthird = $pyththird = array();
 	$nr_wolf = $sum_comma = 0;
-	echo "<table style=\"background-color:gold;\">";
+	echo "<table class=\"thicktable\">";
 	echo "<tr><td style=\"vertical-align:middle; padding:4px;\"><b>Perfect 5th</b></td><td><b>Wolf 5th</b></td><td><b>Perfect 4th</b></td><td><b>Wolf 4th</b></td><td><b>Harm. maj. 3d</b></td><td><b>Pyth. maj. 3d</b></td></tr>";
 	echo "<tr><td style=\"vertical-align:middle; text-align:center; padding:4px;\">";
 	for($j = 0; $j < $numgrades_fullscale; $j++) {
@@ -2717,7 +2717,7 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 				}
 			}
 		}
-	echo "<table style=\"background-color:gold;\">";
+	echo "<table class=\"thicktable\">";
 	for($j = $jmin; $j <= $jmax; $j++) {
 		echo "<tr>";
 		for($i = $imin; $i <= $imax; $i++) {

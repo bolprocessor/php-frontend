@@ -355,7 +355,7 @@ if($iobj >= 0) {
 		echo "<input type=\"hidden\" name=\"prototypes_file\" value=\"".$dir.$filename."\">";
 		echo "<input type=\"hidden\" name=\"prototypes_name\" value=\"".$filename."\">";
 		echo "<input type=\"hidden\" name=\"CsoundInstruments_file\" value=\"".$CsoundInstruments_file."\">";
-		echo "<input style=\"background-color:azure; font-size:larger;\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" name=\"object_name\" value=\"".$object_name[$i]."\">";
+		echo "<input class=\"edit big\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" name=\"object_name\" value=\"".$object_name[$i]."\">";
 		fwrite($handle,$object_name[$i]."\n");
 		echo "</form>";
 		echo "</td>";
@@ -379,10 +379,10 @@ if($iobj >= 0) {
 		echo "<input class=\"save\" type=\"submit\" name=\"delete_object\" value=\"DELETE\">";
 		echo "</td>";
 		echo "<td style=\"padding:4px; vertical-align:middle;\">";
-		echo "<input style=\"background-color:azure;\" type=\"submit\" name=\"rename_object\" value=\"RENAME AS\">: <input type=\"text\" name=\"object_new_name\" size=\"10\" value=\"\">";
+		echo "<input class=\"edit\" type=\"submit\" name=\"rename_object\" value=\"RENAME AS\">: <input type=\"text\" name=\"object_new_name\" size=\"10\" value=\"\">";
 		echo "</td>";
 		echo "<td style=\"padding:4px; vertical-align:middle;\">";
-		echo "<input style=\"background-color:azure;\" type=\"submit\" name=\"duplicate_object\" value=\"DUPLICATE AS\">: <input type=\"text\" name=\"copy_object\" size=\"10\" value=\"\">";
+		echo "<input class=\"edit\" type=\"submit\" name=\"duplicate_object\" value=\"DUPLICATE AS\">: <input type=\"text\" name=\"copy_object\" size=\"10\" value=\"\">";
 		echo "</td>";
 		echo "</tr>";
 		echo "</form>";

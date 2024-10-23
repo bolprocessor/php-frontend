@@ -181,7 +181,7 @@ if(file_exists($midi_import_mf2t)) {
 		}
 	}
 
-echo "<table style=\"background-color:gold;\">";
+echo "<table class=\"thicktable\">";
 for($i_cycle = 0; $i_cycle < $maxticks; $i_cycle++) {
 	$mute[$i_cycle] = FALSE;
 	if(isset($_POST['mute_'.$i_cycle])) $mute[$i_cycle] = $_POST['mute_'.$i_cycle];

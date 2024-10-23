@@ -31,7 +31,7 @@ require_once("_header.php");
 display_console_state();
 
 $url = "index.php?path=".urlencode($current_directory);
-echo "&nbsp;Workspace = <input style=\"background-color:azure;\" name=\"workspace\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$url."','_self');\" value=\"".$current_directory."\">";
+echo "&nbsp;Workspace = <input class=\"edit\" name=\"workspace\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$url."','_self');\" value=\"".$current_directory."\">";
 
 echo link_to_help();
 
@@ -783,7 +783,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			echo "<input type=\"checkbox\" name=\"delete_current\">&nbsp;Delete current data<br />";
 			echo "<input type=\"hidden\" name=\"upload_filename\" value=\"".$upload_filename."\">";
 			echo "<input type=\"hidden\" name=\"number_parts\" value=\"".$number_parts."\">";
-			echo "<font color=\"red\">➡</font> Now, select parts and <input class=\"produce\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"select_parts\" value=\"CONVERT\">&nbsp;or&nbsp;<input style=\"background-color:azure;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"cancel\" value=\"QUIT IMPORTING\">";
+			echo "<font color=\"red\">➡</font> Now, select parts and <input class=\"produce\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"select_parts\" value=\"CONVERT\">&nbsp;or&nbsp;<input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"cancel\" value=\"QUIT IMPORTING\">";
 			echo "</div>";
 			if($found_pedal_command AND $reload_musicxml) {
 				for($i = 0; $i < $number_parts; $i++) {
@@ -1291,7 +1291,7 @@ if($settings_file <> '' AND file_exists($dir.$settings_file)) {
 	if($csound_default_orchestra <> '') $found_orchestra_in_settings = TRUE;
 	}
 if($quantization == 0) $quantize = FALSE;
-echo "<div style=\"padding:1em; width:690px; border:1px solid grey; border-radius: 12px;\">";
+echo "<div style=\"padding:1em; width:690px;\" class=\"thinborder\">";
 // echo "<div style=\"background-color:white; padding:1em; width:690px; border-radius: 15px;\">";
 if($settings_file == '' OR !file_exists($dir.$settings_file)) {
 	$time_resolution = 10; //  10 milliseconds by default
@@ -1377,7 +1377,7 @@ echo "<div style=\"float:right; padding-right:6px; padding-left:6px; border-radi
 $csound_is_responsive = check_csound();
 link_to_tonality();
 echo "</div>";
-echo "<table id=\"topedit\" cellpadding=\"8px;\" style=\"border:1px solid grey;\"><tr >";
+echo "<table id=\"topedit\" cellpadding=\"8px;\" class=\"thinborder\"><tr >";
 echo "<td id=\"topmidiports\" style=\"white-space:nowrap;\">";
 if($file_format <> "rtmidi") {
 	for($i = 0; $i < $NumberMIDIoutputs; $i++) {
@@ -1409,7 +1409,7 @@ echo ">MIDI file";
 if(file_exists("csound_version.txt")) {
 	echo "<br /><input type=\"radio\" name=\"file_format\" value=\"csound\"";
 	if($file_format == "csound") echo " checked";
-	echo ">CSOUND file";
+	echo ">Csound score";
 	}
 echo "<br /><br />&nbsp;&nbsp;&nbsp;<input class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#tonal\" name=\"savethisfile\" value=\"SAVE format\">";
 if($file_format == "rtmidi") echo "&nbsp;<input id=\"refresh\" class=\"save\" style=\"display:none;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"reload\" value=\"REFRESH\">";
@@ -1481,7 +1481,7 @@ echo $save_warning;
 if($file_format <> "rtmidi") {
 	echo "<p>&nbsp;</p>";
 	}
-echo "<p><button class=\"edit\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button></p>";
+echo "<p><button class=\"edit big\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button></p>";
  echo "<br /><table border=\"0\"><tr>";
 echo "<td>";
 
@@ -1678,7 +1678,7 @@ if(!$hide) {
 	else 
 		echo "<p><input class=\"edit\" onclick=\"window.open('settings_list.php?dir=".urlencode($dir)."&thispage=".urlencode($url_this_page)."','settingsfiles','width=400,height=400,left=100'); return false;\" type=\"submit\" title=\"Display settings files\" value=\"CHOOSE\"> a different settings file</p>";
 	echo "<hr>";
-	echo "<table style=\"border:1px solid grey; border-radius: 12px;\">";
+	echo "<table class=\"thinborder\">";
 	echo "<tr>";
 	echo "<td style=\"vertical-align:middle; white-space:nowrap;\"><input class=\"edit\" type=\"submit\" onmouseover=\"checksaved();\" name=\"change_convention\" formaction=\"".$url_this_page."#topchanges\" value=\"APPLY NOTE CONVENTION to this data\"> ➡</td>";
 	echo "<td style=\"vertical-align:middle; white-space:nowrap;\">";
@@ -1763,7 +1763,7 @@ echo "</td>";
 $window_name = window_name($filename);
 if(!$hide) {
 	echo "<td>";
-	echo "<table style=\"background-color:Gold;\">";
+	echo "<table class=\"thicktable\">";
 	if($imax > 0 AND substr_count($content,'{') > 0) {
 		$window_name_grammar = $window_name."_grammar";
 		$link_grammar = "produce.php?data=".urlencode($this_file);
@@ -1846,7 +1846,7 @@ if(!$hide) {
 		if($error_mssg == '') {
 			echo "<input id=\"playButton\" class=\"produce\" onmouseover=\"checksaved();\" onclick=\"event.preventDefault(); if(checksaved()) {".$refresh_instruction." window.open('".$link_play."','".$window_name_play."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" title=\"Play this polymetric expression\" value=\"PLAY\">&nbsp;";
 			if($chunked) echo "<input class=\"produce\" onmouseover=\"checksaved();\" onclick=\"event.preventDefault(); if(checksaved()) {".$refresh_instruction." window.open('".$link_play_chunked."','".$window_name_chunked."','width=800,height=800,left=150,toolbar=yes'); return false;}\" type=\"submit\" name=\"produce\" title=\"Play polymetric expression in chunks (no graphics)\" value=\"PLAY safe (".$chunk_number." chunks)\">&nbsp;";
-			echo "&nbsp;<input style=\"background-color:azure;\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_expand."','".$window_name_expand."','width=800,height=800,left=100'); return false;\" type=\"submit\" name=\"produce\" title=\"Expand this polymetric expression\" value=\"EXPAND\">&nbsp;";
+			echo "&nbsp;<input class=\"edit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_expand."','".$window_name_expand."','width=800,height=800,left=100'); return false;\" type=\"submit\" name=\"produce\" title=\"Expand this polymetric expression\" value=\"EXPAND\">&nbsp;";
 			}
 		if($tie_mssg <> '' AND $error_mssg == '') echo "<br />";
 		if($tie_mssg <> '') echo $tie_mssg;

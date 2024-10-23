@@ -20,7 +20,7 @@ display_console_state();
 
 echo "<p>";
 $url = "index.php?path=".urlencode($current_directory);
-echo "&nbsp;Workspace = <input style=\"background-color:azure;\" name=\"workspace\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$url."','_self');\" value=\"".$current_directory."\">";
+echo "&nbsp;Workspace = <input class=\"edit\" name=\"workspace\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$url."','_self');\" value=\"".$current_directory."\">";
 
 echo link_to_help();
 
@@ -128,7 +128,7 @@ else {
 	}
 
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-echo "<p><button class=\"edit\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button></p>";
+echo "<p><button class=\"edit big\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button></p>";
 echo "<table border=\"0\"><tr>";
 echo "<td>";
 find_replace_form();
@@ -145,7 +145,7 @@ echo "<input class=\"produce\" onclick=\"if(checksaved()) {window.open('".$link.
 
 $content = do_replace($content);
 echo "<textarea name=\"thistext\" onchange=\"tellsave()\" rows=\"30\" style=\"width:700px;\">".$content."</textarea>";
-echo "<p style=\"text-align:left;\"><input style=\"background-color:azure;\" type=\"submit\" name=\"listinstructions\" value=\"LIST ALL SCRIPT INSTRUCTIONS\"> ➡ including obsolete ones</p>";
+echo "<p style=\"text-align:left;\"><input class=\"edit\" type=\"submit\" name=\"listinstructions\" value=\"LIST ALL SCRIPT INSTRUCTIONS\"> ➡ including obsolete ones</p>";
 echo "</form>";
 echo "</td>";
 echo "<td>";
@@ -159,7 +159,7 @@ foreach($script_status as $instruction => $status) {
 	$entry = $instruction." ".$script_more[$instruction];
 	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 	echo "<input type=\"hidden\" name=\"i\" value=\"".$i."\">";
-	echo "<input style=\"background-color:azure;\" onclick=\"tellsave()\" type=\"submit\" name=\"addinstruction\" value=\"".$entry."\">";
+	echo "<input class=\"edit\" onclick=\"tellsave()\" type=\"submit\" name=\"addinstruction\" value=\"".$entry."\">";
 	echo "</form>";
 	echo "</td>";
 	echo "</tr>";

@@ -896,7 +896,7 @@ else {
 
 echo "</tr><tr><td colspan=\"2\">";
 echo "<h2 id=\"instruments\">Instruments</h2>";
-if($deleted_instruments <> '') echo "<p><input style=\"background-color:azure;\" type=\"submit\" name=\"restore\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#instruments\" value=\"RESTORE ALL DELETED INSTRUMENTS\">&nbsp;<span class=\"blue-text\"><big>".$deleted_instruments."</big></span></p>";
+if($deleted_instruments <> '') echo "<p><input class=\"edit\" type=\"submit\" name=\"restore\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#instruments\" value=\"RESTORE ALL DELETED INSTRUMENTS\">&nbsp;<span class=\"blue-text\"><big>".$deleted_instruments."</big></span></p>";
 echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";
 echo "<input type=\"hidden\" name=\"filename\" value=\"".$filename."\">";
 
@@ -905,7 +905,7 @@ echo "</form>";
 
 if($number_instruments > 0) {
 	echo "<h3>Click Csound instruments below to edit them:</h3>";
-	echo "<table style=\"padding:1em; border:1px solid grey; border-radius: 12px;\">";
+	echo "<table style=\"padding:1em;\" class=\"thinborder\">";
 	$done_index = array();
 	for($j = 0; $j < $number_instruments; $j++) {
 		echo "<tr><td style=\"padding: 5px; vertical-align:middle; white-space:nowrap\">";
@@ -922,7 +922,7 @@ if($number_instruments > 0) {
 		$done_index[$this_index] = TRUE;
 		echo "<input type=\"hidden\" name=\"instrument_index\" value=\"".$this_index."\">";
 		echo "<big>_ins(".$this_index.")</big> ";
-		echo "<input style=\"background-color:azure; font-size:larger;\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" name=\"instrument_name\" value=\"".$CsoundInstrumentName[$j]."\">";
+		echo "<input class=\"edit big\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" name=\"instrument_name\" value=\"".$CsoundInstrumentName[$j]."\">";
 		$folder_this_instrument = $temp_dir.$temp_folder.SLASH.$CsoundInstrumentName[$j];
 		$argmax_file = $folder_this_instrument.SLASH."argmax.php";
 		$argmax_all = max_argument($argmax_file);
@@ -951,7 +951,7 @@ if($number_instruments > 0) {
 		echo "<input class=\"save\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"delete_instrument\" value=\"DELETE\">";
 		echo "</td>";
 		echo "<td style=\"text-align:right; padding:5px; vertical-align:middle;\">";
-		echo "<input style=\"background-color:azure;\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"duplicate_instrument\" value=\"DUPLICATE AS\">: <input type=\"text\" name=\"copy_instrument\" size=\"15\" value=\"\">";
+		echo "<input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"duplicate_instrument\" value=\"DUPLICATE AS\">: <input type=\"text\" name=\"copy_instrument\" size=\"15\" value=\"\">";
 		echo "</td>";
 		echo "</tr>";
 		echo "</form>";

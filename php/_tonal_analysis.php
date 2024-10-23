@@ -39,7 +39,7 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 	echo "<div style=\"padding-left:1em;\">";
 	if(isset($_POST['proceed_tonal_analysis']) AND !isset($_POST['save_tonal_settings']) AND !isset($_POST['reset_tonal_settings'])) echo "<input class=\"shadow save big\" style=\"float:left;\" type=\"submit\" formaction=\"".$url_this_page."#tonalanalysis\" title=\"Analyze tonal intervals\" name=\"analyze_tonal\" value=\"ANALYZE AGAIN\"><br /><br />";
 	else echo "<br /><p>Check documentation: <a target=\"_blank\" href=\"https://bolprocessor.org/tonal-analysis/\">https://bolprocessor.org/tonal-analysis/</a></p>";
-	echo "<center><table style=\"background-color:Gold;\">";
+	echo "<center><table class=\"thicktable\">";
 	echo "<tr><th colspan=\"6\" style=\"text-align:center;\">Intervals checked in the analysis</tr>";
 	echo "<tr><td colspan=\"6\" style=\"white-space:nowrap; padding:6px; text-align:center;\">";
 	echo "<i>Checking additional ratios such as the harmonic minor third (frequency ratio 6/5) may be advised</i>";
@@ -250,8 +250,8 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 		echo "</td></tr>";
 		}
 	echo "<tr><td colspan=\"6\" style=\"white-space:nowrap; padding:4px;\">";
-	echo "<input style=\"background-color:azure; float:left;\" type=\"submit\" formaction=\"".$url_this_page."#tonalanalysis\" title=\"\" name=\"reset_tonal_settings\" value=\"RESET SETTINGS TO DEFAULT\">";
-	echo "<input style=\"background-color:azure; float:right;\" type=\"submit\" formaction=\"".$url_this_page."#tonalanalysis\" title=\"\" name=\"save_tonal_settings\" value=\"SAVE SETTINGS TO WORKSPACE “".$current_directory."”\">";
+	echo "<input class=\"edit\" style=\"float:left;\" type=\"submit\" formaction=\"".$url_this_page."#tonalanalysis\" title=\"\" name=\"reset_tonal_settings\" value=\"RESET SETTINGS TO DEFAULT\">";
+	echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" formaction=\"".$url_this_page."#tonalanalysis\" title=\"\" name=\"save_tonal_settings\" value=\"SAVE SETTINGS TO WORKSPACE “".$current_directory."”\">";
 	echo "</td></tr>";
 	echo "</table>";
 	if(!isset($_POST['proceed_tonal_analysis']) OR  isset($_POST['save_tonal_settings']) OR isset($_POST['reset_tonal_settings'])) echo "<br /><input class=\"shadow\" class=\"save big\" type=\"submit\" onmouseover=\"checksaved();\" formaction=\"".$url_this_page."#tonalanalysis\" title=\"Analyze tonal intervals\" name=\"analyze_tonal\" value=\"ANALYZE ITEM(s)\">";
@@ -451,7 +451,7 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 				}
 			$matching_list = array();
 			if(!$compare_scales) {
-				echo "<center><table style=\"background-color:Gold;\">";
+				echo "<center><table class=\"thicktable\">";
 				echo "<tr><th colspan=\"3\" style=\"text-align:center;\">Numbers are proportional to total durations</th></tr>";
 				echo "<tr><td style=\"padding:6px;\">Melodic intervals (up)</td><td style=\"padding:6px;\">Melodic intervals (down)</td><td style=\"padding:6px;\">Harmonic intervals</td></tr>";
 				echo "<tr><td>";
@@ -611,7 +611,7 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 						arsort($total_score);
 						if($grand_total > 0) {
 							$i_rank = $old_total = $i_line2 = 0;
-							echo "<center><table style=\"background-color:Gold;\">";
+							echo "<center><table class=\"thicktable\">";
 							if(!$batch_processing) {
 								echo "<tr><td colspan=\"3\" style=\"background-color:Gold;\"><div class=\"shadow\" style=\"background-color:azure;padding:6px; border-radius: 6px;\"><i>Numbers are proportional to durations<br />of intervals matching the scale</i></div></td><th>&nbsp;Melodic score (up)&nbsp;</th><th>&nbsp;Melodic score (down)&nbsp;</th><th>&nbsp;Harmonic score&nbsp;</th><th></th></tr>";
 								echo "<th></th><th>Select</th><th style=\"text-align:right;\">weight:&nbsp;</th><td>".$weight_melodic_up."</td><td>".$weight_melodic_down."</td><td>".$weight_harmonic."</td><th>Weighted total</th></tr>";

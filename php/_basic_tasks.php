@@ -442,7 +442,7 @@ function display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,
 				echo "<form method=\"post\" id=\"thisone\" action=\"".$url_this_page."#help_entries\" enctype=\"multipart/form-data\">";
 				echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
 				echo "<input type=\"hidden\" name=\"file_format\" value=\"".$file_format."\">";
-				echo "<input style=\"background-color:azure;\" type=\"submit\" onmouseover=\"checksaved();\" name=\"show_help_entries\" value=\"SHOW HELP ENTRIES\">";
+				echo "<input class=\"edit\" type=\"submit\" onmouseover=\"checksaved();\" name=\"show_help_entries\" value=\"SHOW HELP ENTRIES\">";
 				echo "</form></div>";
 				}
 			}
@@ -2409,7 +2409,7 @@ function display_console_state() {
 		echo "Bol Processor ‘<span class=\"blue-text\"><b>".$console."</b></span>’ console is responding<br />Version ".$output;
 		$panicfile = str_replace(SLASH,'/',$panicfile);
 		if(isset($filename) AND $filename <> "Compilation" AND $filename <> "Produce" AND  $filename <> "Bol Processor" AND $url_this_page <> "index.php") {
-			echo "<div style=\"display: flex; justify-content: flex-end; align-items: center;\"><button type=\"button\" class=\"bouton\" style=\"font-size: small;\" onclick=\"createFile('".$panicfile."');\">PANIC!</button>";
+			echo "<div style=\"display: flex; justify-content: flex-end; align-items: center;\"><button type=\"button\" class=\"produce\" style=\"font-size: small;\" onclick=\"createFile('".$panicfile."');\">PANIC!</button>";
 			echo "&nbsp;&nbsp;<img title=\"Bulb Png PNGs by Vecteezy\" src=\"pict/bulb.png\" id=\"darkModeToggle\" style=\"width:30px; cursor: pointer;\"/>";
 			echo "</div>\n";
 			}
@@ -2430,6 +2430,7 @@ function display_console_state() {
 			}
 		else
 			echo "Some files are missing or misplaced.<br />👉&nbsp;&nbsp;Visit <a target=\"_blank\" href=\"https://bolprocessor.org/check-bp3/#install\">https://bolprocessor.org/check-bp3/</a><br />and follow instructions!";
+		display_darklight();
 	 	}
 	 echo "</span>";
 	 echo "</div>";
@@ -2473,7 +2474,7 @@ function check_gcc() {
 	}
 
 function link_to_tonality() {
-	echo "<p style=\"background-color:azure; color:black; padding:4px; border-radius:6px;\">&nbsp;&nbsp;Using microtonality?<br />👉&nbsp;&nbsp;<a style=\"color:#007BFF;\" target=\"_blank\" href=\"index.php?path=tonality_resources\">TONALITY resource folder</a></p>";
+	echo "<p style=\"background-color:azure; color:black; padding:4px; border-radius:6px; line-height:2;\">&nbsp;🎶&nbsp;&nbsp;Using microtonality?<br />👉&nbsp;&nbsp;<a style=\"color:#007BFF;\" target=\"_blank\" href=\"index.php?path=tonality_resources\">TONALITY resource folder</a></p>";
 	}
 
 function check_csound() {
@@ -2650,7 +2651,7 @@ function show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,
 		$new_csound_file = get_csound_file($dir.$objects_file);
 		$new_csound_file = str_replace("csound_resources/",'',$new_csound_file);
 		if($new_csound_file <> '' AND $new_csound_file <> $csound_file) {
-			echo "<p></p><div style=\"background-color:cornsilk; color:black; padding:1em; width:500px; box-shadow: 3px 3px 5px 6px gold; border-radius: 6px;\">";
+			echo "<p></p><div class=\"warning\">";
 			if($csound_file == '') {
 				$content = add_instruction($new_csound_file,$content);
 				$csound_file = $new_csound_file;
@@ -2665,7 +2666,7 @@ function show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,
 	if($csound_file <> '') {
 		$tonality_file_in_csound = get_tonality_file($dir_csound_resources.$csound_file);
 		if($tonality_file_in_csound <> '' AND $tonality_file_in_csound <> $tonality_file) {
-			echo "<p></p><div style=\"background-color:cornsilk; color:black; padding:1em; width:500px; box-shadow: 3px 3px 5px 6px gold; border-radius: 6px;\">";
+			echo "<p></p><div class=\"warning\">";
 			if($tonality_file == '') {
 				$content = add_instruction($tonality_file_in_csound,$content);
 				$tonality_file = $tonality_file_in_csound;
@@ -3368,7 +3369,7 @@ function find_replace_form() {
 	echo "</p>";
 	echo "<p>";
 	echo "<label for=\"replace\">and replace it with: </label>";
-	echo "<input type=\"text\" name=\"replace\" id=\"replace\">&nbsp;&nbsp;&nbsp;<button class=\"bouton\" type=\"submit\" formaction=\"".$url_this_page."#saveButton\" name=\"action\" value=\"replace\" onclick=\"clearsave()\">Search and Replace (all)</button>";
+	echo "<input type=\"text\" name=\"replace\" id=\"replace\">&nbsp;&nbsp;&nbsp;<button class=\"produce\" type=\"submit\" formaction=\"".$url_this_page."#saveButton\" name=\"action\" value=\"replace\" onclick=\"clearsave()\">Search and Replace (all)</button>";
 	echo "</div>";
 	return;
 	}
@@ -3793,7 +3794,7 @@ function filter_form_output($i) {
 	echo "<div id=\"showhide_output".$i."\"  style=\"width:300px;\">";
 	echo "<input class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#tonal\" name=\"savemidiport\" value=\"SAVE MIDI ports\">";
 	echo "<p style=\"margin-left:12px;\"><b>Filter for MIDI output ".$MIDIoutput[$i]."</b></p>";
-	echo "<table style=\"background-color:azure;\">";
+	echo "<table class=\"edit\">";
 	echo "<tr>";
 	echo "<td>";
 	echo "<table class=\"no-border-spacing\">";
@@ -3969,7 +3970,7 @@ function display_midi_ports($filename) {
 		echo "&nbsp;<input type=\"text\" title=\"".$text_over_name."\" style=\"margin-bottom:6px;\" onchange=\"tellsave()\" name=\"MIDIoutputname_".$i."\" size=\"15\" value=\"".$MIDIoutputname[$i]."\">";
 		echo "&nbsp;<input type=\"text\" title=\"".$text_over_comment."\" name=\"MIDIoutputcomment_".$i."\" size=\"15\" value=\"".$comment."\">";
 		echo "&nbsp;<button type=\"button\" onclick=\"clearFields('MIDIoutput_".$i."','MIDIoutputname_".$i."','MIDIoutputcomment_".$i."')\">Delete</button>";
-		echo "&nbsp;<button style=\"background-color:azure; border-radius:6px;\" onclick=\"toggledisplay_output(".$i."); return false;\">FILTER</button>";
+		echo "&nbsp;<button class=\"edit\" onclick=\"toggledisplay_output(".$i."); return false;\">FILTER</button>";
 		filter_form_output($i);
 		echo "<br />";
 		}
@@ -3985,7 +3986,7 @@ function display_midi_ports($filename) {
 		echo "&nbsp;<input type=\"text\" title=\"".$text_over_name."\" style=\"margin-bottom:6px;\" onchange=\"tellsave()\" name=\"MIDIinputname_".$i."\" size=\"15\" value=\"".$MIDIinputname[$i]."\">";
 		echo "&nbsp;<input type=\"text\" title=\"".$text_over_comment."\" name=\"MIDIinputcomment_".$i."\" size=\"15\" value=\"".$comment."\">";
 		echo "&nbsp;<button type=\"button\" onclick=\"clearFields('MIDIinput_".$i."', 'MIDIinputname_".$i."', 'MIDIinputcomment_".$i."')\">Delete</button>";
-		echo "&nbsp;<button style=\"background-color:azure; border-radius: 6px;\" onclick=\"toggledisplay_input(".$i."); return false;\">FILTER</button>";
+		echo "&nbsp;<button class=\"edit\" onclick=\"toggledisplay_input(".$i."); return false;\">FILTER</button>";
 		filter_form_input($i);
 		echo "<br />";
 		}

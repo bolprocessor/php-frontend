@@ -388,7 +388,7 @@ echo "</td>";
 echo "</tr>";
 echo "</table>";
 
-echo "<table style=\"background-color: gold;\">";
+echo "<table class=\"thicktable\">";
 echo "<tr>";
 echo "<td style=\"vertical-align:middle; padding-left:1em;\">";
 echo "<h3>Parameters associated with MIDI controllers:</h3>";
@@ -465,7 +465,7 @@ if($n > 0) {
 		echo "<input type=\"hidden\" name=\"csfilename\" value=\"".$csfilename."\">";
 		echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";
 		echo "<input type=\"hidden\" name=\"folder_this_instrument\" value=\"".$folder_this_instrument."\">";
-		echo "<input style=\"background-color:azure; font-size:larger;\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" name=\"parameter_name\" value=\"".$parameter_name."\">";
+		echo "<input class=\"edit big\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" name=\"parameter_name\" value=\"".$parameter_name."\">";
 		echo "</form>";
 		echo "</td>";
 		echo "<td style=\"padding: 5px; vertical-align:middle;\">";
