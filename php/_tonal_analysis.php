@@ -227,7 +227,7 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 		echo "> Evaluate adequacy of all tuning schemes defined in ‘<a target=\"_blank\" href=\"tonality.php?file=".urlencode($tonality_resources.SLASH.$tonality_file)."\">".$tonality_file."</a>’ in terms of consonance</p>";
 		}
 	else {
-		echo "<font color=\"red\">➡</font> You could also compare scales after declaring a ‘-to’ resource file on top of data and open the file in the <a target=\"_blank\" href=\"tonality.php?file=".urlencode($tonality_resources.SLASH.$tonality_file)."\"> tonality resource folder</a>";
+		echo "<font color=\"red\">➡</font> You could also compare scales after declaring a ‘-to’ resource file on top of data and open the file in the <a target=\"_blank\" href=\"index.php?path=tonality_resources\"> tonality resource folder</a>";
 		$compare_scales = 0;
 		}
 	echo "</td></tr>";

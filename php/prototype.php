@@ -549,10 +549,9 @@ if(isset($_POST['playexpression'])) {
 		$application_path = $bp_application_path;
 		$command = $application_path."bp play";
 		$command .= " -da ".$data;
-		$command .= " -ho ".$alphabet;
-		$command .= " -mi \"".$prototypes_file."\"";
+		$command .= " -al ".$alphabet;
+		$command .= " -so \"".$prototypes_file."\"";
 		// if($CsoundInstruments_file <> '') $command .= " -cs \"".$CsoundInstruments_file."\"";
-	//	$command .= " -d --rtmidi ";
 		$command .= " --rtmidi ";
 		// $command .= " --traceout ".$tracefile;
 		echo "<p style=\"color:red;\"><small>".$command."</small></p>";
@@ -578,7 +577,7 @@ echo "<form method=\"post\" action=\"prototype.php\" enctype=\"multipart/form-da
 
 echo "<p style=\"text-align:left;\"><input class=\"save\" type=\"submit\" name=\"savethisprototype\" value=\"SAVE THIS PROTOTYPE\"></p>";
 
-echo "<p style=\"text-align:left;\"><input class=\"edit\" type=\"submit\" name=\"playexpression\" value=\"PLAY THIS EXPRESSION (real-time MIDI):\">&nbsp;➡&nbsp;<input type=\"text\" name=\"expression\" size=\"30\" value=\"".$expression."\"></p>";
+/* echo "<p style=\"text-align:left;\"><input class=\"edit\" type=\"submit\" name=\"playexpression\" value=\"PLAY THIS EXPRESSION (real-time MIDI):\">&nbsp;➡&nbsp;<input type=\"text\" name=\"expression\" size=\"30\" value=\"".$expression."\"></p>"; */
 
 echo "<input type=\"hidden\" name=\"object_name\" value=\"".$object_name."\">";
 echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";

@@ -1742,7 +1742,7 @@ echo "</form>";
 $table = explode(chr(10),$content);
 $imax = count($table);
 if($imax > 0 AND (substr_count($content,'{') > 0 OR substr_count($content,"-da.") > 0  OR substr_count($content,".bpda") > 0) AND !$hide) {
-	echo "<h2 id=\"tonalanalysis\">Tonal analysis: “".$filename."”</h2>";
+	echo "<h3 id=\"tonalanalysis\">Tonal analysis: “".$filename."”</h3>";
 	$tonal_analysis_possible = !($note_convention > 2);
 	if(!$tonal_analysis_possible) echo "<p><font color=\"red\">➡ Tonal analysis is only possible with names of notes in English, Italian/Spanish/French or Indian conventions.</font></p>";
 	if(isset($_POST['analyze_tonal']) OR isset($_POST['save_tonal_settings']) OR isset($_POST['reset_tonal_settings'])) {

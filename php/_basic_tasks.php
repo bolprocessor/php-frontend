@@ -2415,7 +2415,7 @@ function display_console_state() {
 			}
 		else {
 			echo "<div id=\"darkModeToggle\" style=\"display: flex; justify-content: flex-end; align-items: center; cursor: pointer;\">";
-			echo "Dark/light&nbsp;&nbsp;<img title=\"Bulb Png PNGs by Vecteezy\" src=\"pict/bulb.png\"  style=\"width:40px;\"/>";
+			echo "dark&nbsp;/&nbsp;light&nbsp;&nbsp;<img title=\"Bulb Png PNGs by Vecteezy\" src=\"pict/bulb.png\"  style=\"width:40px;\"/>";
 			echo "</div>\n";
 			}
 		}
@@ -2474,7 +2474,7 @@ function check_gcc() {
 	}
 
 function link_to_tonality() {
-	echo "<p style=\"background-color:azure; color:black; padding:4px; border-radius:6px; line-height:2;\">&nbsp;🎶&nbsp;&nbsp;Using microtonality?<br />👉&nbsp;&nbsp;<a style=\"color:#007BFF;\" target=\"_blank\" href=\"index.php?path=tonality_resources\">TONALITY resource folder</a></p>";
+	echo "<p style=\"background-color:azure; color:black; padding:4px; border-radius:6px; line-height:2;\">&nbsp;🎶&nbsp;&nbsp;Using microtonality?<br />&nbsp;👉&nbsp;&nbsp;<a style=\"color:#007BFF;\" target=\"_blank\" href=\"index.php?path=tonality_resources\">TONALITY resource folder</a></p>";
 	}
 
 function check_csound() {
@@ -2514,10 +2514,10 @@ function check_csound() {
 				break;
 				}
 			}
-		echo "<p style=\"vertical-align:middle; background-color:azure; color:black; padding:4px; border-radius:6px;\"><img src=\"pict/logo_csound.png\" width=\"90px;\" style=\"vertical-align:middle;\" />".$version."is responding<br />";
+		echo "<p style=\"vertical-align:middle; background-color:azure; color:black; padding-top:4px; padding-left:4px; padding-right:4px; padding-bottom:12px; border-radius:6px;\"><img src=\"pict/logo_csound.png\" width=\"90px;\" style=\"vertical-align:middle;\" />".$version."is responding<br />";
 		$result = TRUE;
 		}
-	if($path <> $csound_resources) echo "👉&nbsp;&nbsp;<a style=\"color:#007BFF;\" target=\"_blank\" href=\"index.php?path=csound_resources\">CSOUND resource folder</a>";
+	if($path <> $csound_resources) echo "&nbsp;👉&nbsp;&nbsp;<a style=\"color:#007BFF;\" target=\"_blank\" href=\"index.php?path=csound_resources\">CSOUND resource folder</a><br />";
 	echo "</p>";
 	// echo "<hr style=\"border: 8px solid GhostWhite;\">";
 	echo "<hr>";
