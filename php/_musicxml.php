@@ -143,7 +143,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 					else $simplify = simplify($default_tempo[$section],$max_term_in_fraction);
 					$n = $simplify['p'] / $simplify['q'];
 					$current_period = 1 / $n;
-					if($list_this OR $trace_tempo) $report .= "• Measure #".$i_measure." part [".$score_part."] starts with mm = <span class=\"blue-text\">".($simplify['p'] * 60 / $simplify['q'])."</span>, current period = ".round($current_period,2)."s, current tempo = ".$current_tempo.", default tempo[".$section."] = ".$default_tempo[$section]." (metronome = ".(60 * $n).")<br />";
+					if($list_this OR $trace_tempo) $report .= "• Measure #".$i_measure." part [".$score_part."] starts with mm = <span class=\"green-text\">".($simplify['p'] * 60 / $simplify['q'])."</span>, current period = ".round($current_period,2)."s, current tempo = ".$current_tempo.", default tempo[".$section."] = ".$default_tempo[$section]." (metronome = ".(60 * $n).")<br />";
 					$p_fermata_date[$i_measure][$score_part] = $q_fermata_date[$i_measure][$score_part] = $p_fermata_duration[$i_measure][$score_part] = $q_fermata_duration[$i_measure][$score_part] = array();
 					$sum_volume_part[$section][$score_part] = $number_volume_part[$section][$score_part] = 0;
 					if(!isset($old_volume[$score_part])) $old_volume[$score_part] = 64;
@@ -400,7 +400,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 								$curr_event[$score_part][$j]['q_dur'] = 1;
 								$is_chord = FALSE;
 								$j++;
-								if($trace_tempo OR $list_this) $report .= "••• New metronome = <span class=\"blue-text\">".$tempo."</span> as beat-type changed to ".$new_beat_type." yielding time signature = ".$beat_unit[$score_part]."/".($beat_divide['q'] * 4 / $beat_divide['p'])." p/q = ".$beat_divide['p']."/".$beat_divide['q']."<br />";
+								if($trace_tempo OR $list_this) $report .= "••• New metronome = <span class=\"green-text\">".$tempo."</span> as beat-type changed to ".$new_beat_type." yielding time signature = ".$beat_unit[$score_part]."/".($beat_divide['q'] * 4 / $beat_divide['p'])." p/q = ".$beat_divide['p']."/".$beat_divide['q']."<br />";
 								} */
 							$beat_type[$score_part] = $new_beat_type;
 							continue;
@@ -679,7 +679,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							if($list_this) $report .= "measure #".$i_measure." field #".($i_field_of_measure + 1)."<br />";
 							}
 						if(isset($the_event['ornament'])) {
-							if($list_this) $report .= "<span class=\"blue-text\">".$the_event['ornament']."</span> ";
+							if($list_this) $report .= "<span class=\"green-text\">".$the_event['ornament']."</span> ";
 							if(isset($the_event['chromatic']) AND $the_event['chromatic'])
 							if($list_this) $report .= "(chromatic) ";
 							if($the_event['ornament'] == "trill") {
@@ -700,7 +700,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							$simplify = simplify($fraction,$max_term_in_fraction);
 							$fraction = $simplify['fraction'];
 							if(isset($the_event['word'])) {
-								if($list_this OR $trace_tempo) $report .= "••• Dynamic sign “<span class=\"blue-text\">".$the_event['word']."</span>” setting metronome to ".$new_tempo."<br />";
+								if($list_this OR $trace_tempo) $report .= "••• Dynamic sign “<span class=\"green-text\">".$the_event['word']."</span>” setting metronome to ".$new_tempo."<br />";
 							//	$current_period = 60 / $new_tempo;
 								}
 							$current_period = 60 / $new_tempo; // Fixed by BB 2022-02-14
@@ -716,7 +716,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							$final_metronome = $new_tempo;
 							if($p_time_field == 0) {
 								$convert_measure[$score_part] .= "||".$new_tempo."||"; // Added by BB 2022-02-01
-								if($list_this OR $trace_tempo) $report .= "<font color=\"red\">mm</font> Measure #".$i_measure." part [".$score_part."] field #".($i_field_of_part + 1)." metronome set to <span class=\"blue-text\">".$new_tempo."</span> at date ".$p_date_this_tempo/($q_date_this_tempo * $divisions[$score_part])." beat(s) [d]<br />";
+								if($list_this OR $trace_tempo) $report .= "<font color=\"red\">mm</font> Measure #".$i_measure." part [".$score_part."] field #".($i_field_of_part + 1)." metronome set to <span class=\"green-text\">".$new_tempo."</span> at date ".$p_date_this_tempo/($q_date_this_tempo * $divisions[$score_part])." beat(s) [d]<br />";
 								$current_period = 60 / $new_tempo;
 								$new_tempo = 0;
 								}
@@ -764,7 +764,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							// Grace notes starting measure (e.g. measure #1 of Beethoven-fugue-b-flat-major) 
 							$convert_measure[$score_part] .= "||".$new_tempo."||";
 							$current_period = 60 / $new_tempo;
-							if($list_this OR $trace_tempo) $report .= "<font color=\"red\">mm</font> Measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)." metronome set to <span class=\"blue-text\">".$new_tempo."</span> at date ".$fraction_date." beat(s) [a]<br />";
+							if($list_this OR $trace_tempo) $report .= "<font color=\"red\">mm</font> Measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)." metronome set to <span class=\"green-text\">".$new_tempo."</span> at date ".$fraction_date." beat(s) [a]<br />";
 							$final_metronome = $new_tempo;
 							$fraction = $new_tempo."/60";
 							$simplify = simplify($fraction,$max_term_in_fraction);
@@ -781,7 +781,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							if($i_field_of_part > 0 AND $new_tempo > 0) {
 								$convert_measure[$score_part] .= "||".$new_tempo."||";
 								$current_period = 60 / $new_tempo;
-								if($list_this OR $trace_tempo) $report .= "<font color=\"red\">mm</font> Measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)." metronome set to <span class=\"blue-text\">".$new_tempo."</span> at date ".$fraction_date." beat(s) [b]<br />";
+								if($list_this OR $trace_tempo) $report .= "<font color=\"red\">mm</font> Measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)." metronome set to <span class=\"green-text\">".$new_tempo."</span> at date ".$fraction_date." beat(s) [b]<br />";
 								$final_metronome = $new_tempo;
 								$new_tempo = 0;
 								}
@@ -826,7 +826,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 									$fraction_date_new_tempo = $p_time_field."/".($q_time_field * $divisions[$score_part]);
 									$simplify = simplify($fraction_date_new_tempo,$max_term_in_fraction);
 									$fraction_date_new_tempo = $simplify['fraction'];
-									if($list_this OR $trace_tempo) $report .= "<font color=\"red\">mm</font> Measure #".$i_measure." part [".$score_part."] field #".($i_field_of_part + 1)." metronome set to <span class=\"blue-text\">".$new_tempo."</span> at date ".$fraction_date_new_tempo." beat(s) [c]<br />";
+									if($list_this OR $trace_tempo) $report .= "<font color=\"red\">mm</font> Measure #".$i_measure." part [".$score_part."] field #".($i_field_of_part + 1)." metronome set to <span class=\"green-text\">".$new_tempo."</span> at date ".$fraction_date_new_tempo." beat(s) [c]<br />";
 									$final_metronome = $new_tempo;
 									if($p_time_field == 0 AND $i_field_of_part == 0) {
 										$fraction = $new_tempo."/60";
@@ -843,7 +843,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 								if($new_tempo > 0) {
 									$stream .= "||".$new_tempo."||";
 									$current_period = 60 / $new_tempo;
-									if($list_this OR $trace_tempo) $report .= "<font color=\"red\">mm</font> Measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)." metronome set to <span class=\"blue-text\">".$new_tempo."</span> at date ".$fraction_date." beat(s) [d]<br />";
+									if($list_this OR $trace_tempo) $report .= "<font color=\"red\">mm</font> Measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)." metronome set to <span class=\"green-text\">".$new_tempo."</span> at date ".$fraction_date." beat(s) [d]<br />";
 									$final_metronome = $new_tempo;
 									if($p_time_field == 0 AND $i_field_of_part == 0) {
 										$fraction = $new_tempo."/60";
@@ -1000,7 +1000,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 						
 						if(isset($the_event['arpeggio']) AND $the_event['type'] == "seq") {
 							// This sometimes happens!
-							if($list_this) $report .= "<span class=\"blue-text\">Arpeggio</span> measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)."<br />";
+							if($list_this) $report .= "<span class=\"green-text\">Arpeggio</span> measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)."<br />";
 							$next_is_arpeggio = TRUE;
 							}
 
@@ -1010,7 +1010,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							if($new_tempo > 0) {
 								$convert_measure[$score_part] .= "||".$new_tempo."||";
 								$current_period = 60 / $new_tempo;
-								if($list_this OR $trace_tempo) $report .= "• Measure #".$i_measure." part [".$score_part."] field #".($i_field_of_part + 1)." metronome set to <span class=\"blue-text\">".$new_tempo."</span> at date ".$fraction_date." beat(s) [e]<br />";
+								if($list_this OR $trace_tempo) $report .= "• Measure #".$i_measure." part [".$score_part."] field #".($i_field_of_part + 1)." metronome set to <span class=\"green-text\">".$new_tempo."</span> at date ".$fraction_date." beat(s) [e]<br />";
 								$final_metronome = $new_tempo;
 								if($p_time_field == 0 AND $i_field_of_part == 0) {
 									$fraction = $new_tempo."/60";
@@ -1073,7 +1073,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 								}
 							if(isset($the_event['arpeggio']) AND !$next_is_arpeggio) {
 								$convert_measure[$score_part] .= "arpeggio(".$i_measure.")";
-								if($list_this) $report .= "<span class=\"blue-text\">Arpeggio</span> measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)."<br />";
+								if($list_this) $report .= "<span class=\"green-text\">Arpeggio</span> measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)."<br />";
 								}
 							$next_is_arpeggio = FALSE;
 							$physical_time += $current_period * ($p_duration / $q_duration / $divisions[$score_part]);
@@ -1201,7 +1201,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 									if($new_tempo > 0) { // maybe useless
 										$convert_measure[$score_part] .= "||".$new_tempo."||";
 										$current_period = 60 / $new_tempo;
-										if($list_this OR $trace_tempo) $report .= "<font color=\"red\">mm</font> Measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)." metronome set to <span class=\"blue-text\">".$new_tempo."</span> at date ".$fraction_date." beat(s) [f]<br />";
+										if($list_this OR $trace_tempo) $report .= "<font color=\"red\">mm</font> Measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)." metronome set to <span class=\"green-text\">".$new_tempo."</span> at date ".$fraction_date." beat(s) [f]<br />";
 										$final_metronome = $new_tempo;
 										if($p_time_field == 0 AND $i_field_of_part == 0) {
 											$fraction = $new_tempo."/60";
@@ -1275,7 +1275,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 												if($new_tempo <> round(60 / $current_period)) { // Added by BB 2021-03-16
 													$convert_measure[$score_part] .= " ||".$new_tempo."|| ";
 													$current_period = 60 / $new_tempo; // Added by BB 2021-03-16
-													if($list_this OR $trace_tempo) $report .= "<font color=\"red\">mm</font> Measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)." metronome set to <span class=\"blue-text\">".$new_tempo."</span> (".($i_new_tempo - 1)."th value) during rest at date ".$fraction_date_new_tempo."  beat(s)<br />";
+													if($list_this OR $trace_tempo) $report .= "<font color=\"red\">mm</font> Measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)." metronome set to <span class=\"green-text\">".$new_tempo."</span> (".($i_new_tempo - 1)."th value) during rest at date ".$fraction_date_new_tempo."  beat(s)<br />";
 													$final_metronome = $new_tempo;
 													}
 												$new_tempo = 0;
@@ -1438,8 +1438,8 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 					if($test_musicxml)
 						echo "End measure ".$i_measure." time_measure = ".$p_time_field."/".$q_time_field." tempo_this_measure = ".$sum_tempo_measure[$section][$i_measure]."/".$number_tempo_measure[$section][$i_measure]." default_tempo[section] = ".$default_tempo[$section]." implicit = ".(1 * $implicit[$section][$i_measure])." old_tempo = ".$old_tempo."<br /><br />";
 					if(!$ignore_channels AND isset($midi_channel[$score_part])) $data .= " _chan(".$midi_channel[$score_part].")";
-					if($reload_musicxml AND $number_parts > 1 ) {						
-						if($include_parts) $data .= "[".$score_part."]";
+					if($reload_musicxml AND $number_parts > 1 ) {
+						if($include_parts) $data .= " _part(".$i_part.") ";
 						if($apply_rndtime[$i_part - 1]) $data .= " _rndtime(".$rndtime[$i_part - 1].") ";
 						if($apply_rndvel[$i_part - 1]) $data .= " _rndvel(".$rndvel[$i_part - 1].") ";
 						}
@@ -1532,7 +1532,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 												}
 											else $i_new_tempo = -1;
 											$stream .= " ||".$new_tempo."|| ";
-											if($list_this OR $trace_tempo) $report .= "<font color=\"red\">mm</font> Measure #".$i_measure." part [".$score_part."] field #".($j + 1)." metronome set to <span class=\"blue-text\">".$new_tempo."</span> (".$i_new_tempo_mem."th value) during additional rest at date ".$fraction_date_new_tempo." beat(s)<br />";
+											if($list_this OR $trace_tempo) $report .= "<font color=\"red\">mm</font> Measure #".$i_measure." part [".$score_part."] field #".($j + 1)." metronome set to <span class=\"green-text\">".$new_tempo."</span> (".$i_new_tempo_mem."th value) during additional rest at date ".$fraction_date_new_tempo." beat(s)<br />";
 											$final_metronome = $new_tempo;
 											$new_tempo = 0;
 											}
@@ -1562,8 +1562,8 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 					else $warning = FALSE;
 					$warning = FALSE; // Fixed by BB 2022-02-14
 					if($warning AND $list_this) $report .= "<font color=\"red\">";
-			//		if($list_this) $report .= "➡ Measure #".$i_measure." part [".$score_part."] physical time = ".round($max_physical_time,2)."s, average metronome of this measure = ".$metronome_this_measure.", final metronome = <span class=\"blue-text\">".$final_metronome."</span><br />";
-					if($list_this OR $trace_tempo) $report .= "➡ Measure #".$i_measure." part [".$score_part."] physical time = ".round($max_physical_time,2)."s, final metronome = <span class=\"blue-text\">".$final_metronome."</span><br />"; // Fixed by BB 2022-02-14
+			//		if($list_this) $report .= "➡ Measure #".$i_measure." part [".$score_part."] physical time = ".round($max_physical_time,2)."s, average metronome of this measure = ".$metronome_this_measure.", final metronome = <span class=\"green-text\">".$final_metronome."</span><br />";
+					if($list_this OR $trace_tempo) $report .= "➡ Measure #".$i_measure." part [".$score_part."] physical time = ".round($max_physical_time,2)."s, final metronome = <span class=\"green-text\">".$final_metronome."</span><br />"; // Fixed by BB 2022-02-14
 					if($warning AND $list_this) $report .= "</font>";
 					if($final_metronome > 0) $metronome_this_measure = $final_metronome; // Fixed by BB 2022-02-14
 					$physical_time = $max_physical_time = 0.;
@@ -1778,7 +1778,7 @@ function process_ornamentation($data,$fifths,$trace_ornamentations) {
 		else $name_ornament .= " short";
 		$new_expression = ornament($note,$long,$link,$diatonic_scale,$direction,$fifths,$trill,$trill_beats,$turn,$turn_beats,$chromatic,$trace_ornamentations);
 		if($trace_ornamentations) {
-			echo "<span class=\"blue-text\">".$name_ornament."</span>";
+			echo "<span class=\"green-text\">".$name_ornament."</span>";
 			if($chromatic) echo " (chromatic)";
 			echo " = ".$new_expression."<br /><br />";
 			}
@@ -2035,7 +2035,7 @@ function process_arpeggios($data,$score_divisions,$trace_ornamentations) {
 		$new_expression2 .= "}";
 		$new_expression = str_replace(" }","}",$new_expression1.$new_expression2);
 		$new_expression = str_replace(",}","}",$new_expression);
-		if($trace_ornamentations) echo "<span class=\"blue-text\">Arpeggio</span> = ".$new_expression." in measure #".$i_measure."<br /><br />";
+		if($trace_ornamentations) echo "<span class=\"green-text\">Arpeggio</span> = ".$new_expression." in measure #".$i_measure."<br /><br />";
 		$d1 = substr($data,0,$pos1);
 		$d2 = substr($data,$pos2 + 1,strlen($data) - $pos2 - 1);
 		$data = $d1.$new_expression.$d2;

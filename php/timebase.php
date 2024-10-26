@@ -36,7 +36,7 @@ $upload_filename = '';
 if(isset($_FILES['mid_upload']) AND $_FILES['mid_upload']['tmp_name'] <> '') {
 	$upload_filename = $_FILES['mid_upload']['name'];
 	if($_FILES["mid_upload"]["size"] > MAXFILESIZE) {
-		echo "<h3><font color=\"red\">Uploading failed:</font> <span class=\"blue-text\">".$upload_filename."</span> <font color=\"red\">is larger than ".MAXFILESIZE." bytes</font></h3>";
+		echo "<h3><font color=\"red\">Uploading failed:</font> <span class=\"green-text\">".$upload_filename."</span> <font color=\"red\">is larger than ".MAXFILESIZE." bytes</font></h3>";
 		}
 	else {
 		$tmpFile = $_FILES['mid_upload']['tmp_name'];
@@ -47,7 +47,7 @@ if(isset($_FILES['mid_upload']) AND $_FILES['mid_upload']['tmp_name'] <> '') {
 		$table = explode('.',$upload_filename);
 		$extension = end($table);
 		if($extension <> "mid" and $extension <> "midi") {
-			echo "<h4><font color=\"red\">Uploading failed:</font> <span class=\"blue-text\">".$upload_filename."</span> <font color=\"red\">is not a MIDI file!</font></h4>";
+			echo "<h4><font color=\"red\">Uploading failed:</font> <span class=\"green-text\">".$upload_filename."</span> <font color=\"red\">is not a MIDI file!</font></h4>";
 			@unlink($midi_import_file);
 			}
 		else {
@@ -55,16 +55,16 @@ if(isset($_FILES['mid_upload']) AND $_FILES['mid_upload']['tmp_name'] <> '') {
 		//	echo "midi_import_file = ".$midi_import_file."<br />";
 			$MIDIfiletype = MIDIfiletype($midi_import_file);
 			if($MIDIfiletype < 0) {
-				echo "<p><font color=\"red\">File </font>“<span class=\"blue-text\">".$upload_filename."” <font color=\"red\">is unreadable as a MIDI file.</span></p>";
+				echo "<p><font color=\"red\">File </font>“<span class=\"green-text\">".$upload_filename."” <font color=\"red\">is unreadable as a MIDI file.</span></p>";
 				$upload_filename = $_POST['upload_filename'] = '';
 				}
 		//	echo "MIDI filetype = ".$MIDIfiletype."<br />";
 			else if($MIDIfiletype > 1) {
-				echo "<h4><font color=\"red\">MIDI file </font>“<span class=\"blue-text\">".$upload_filename."</span>” <font color=\"red\"> of </font><span class=\"blue-text\">type ".$MIDIfiletype." </span><font color=\"red\">is not accepted. Only types 0 and 1 are compliant.</font></h4>";
+				echo "<h4><font color=\"red\">MIDI file </font>“<span class=\"green-text\">".$upload_filename."</span>” <font color=\"red\"> of </font><span class=\"green-text\">type ".$MIDIfiletype." </span><font color=\"red\">is not accepted. Only types 0 and 1 are compliant.</font></h4>";
 				$upload_filename = $_POST['upload_filename'] = '';
 				}
 			else {
-				echo "<h3 id=\"timespan\"><font color=\"red\">Converting MIDI file:</font> <span class=\"blue-text\">".$upload_filename."</span></h3>";
+				echo "<h3 id=\"timespan\"><font color=\"red\">Converting MIDI file:</font> <span class=\"green-text\">".$upload_filename."</span></h3>";
 				echo "MIDI filetype = ".$MIDIfiletype."<br />";
 				$midi = new Midi();
 				$midi_text_bytes = convert_mf2t_to_bytes(FALSE,$midi_import_mf2t,$midi,$midi_import_file);
@@ -139,7 +139,7 @@ $content = @file_get_contents($this_file,TRUE);
 if($content === FALSE) ask_create_new_file($url_this_page,$filename);
 if(trim($content) == '') $content = @file_get_contents("timebase_template",TRUE);
 $extract_data = extract_data(TRUE,$content);
-echo "<p class=\"blue-text\">".$extract_data['headers']."</p>";
+echo "<p class=\"green-text\">".$extract_data['headers']."</p>";
 $content = $extract_data['content'];
 $j = 0;
 $table = explode(chr(10),$content);
@@ -255,7 +255,7 @@ if(file_exists($midi_import_mf2t)) {
 	echo "<td colspan=\"3\" style=\"padding:6px; text-align:center;\">";
 	if(isset($_POST['upload_filename']) AND $_POST['upload_filename'] <> '') $upload_filename = $_POST['upload_filename'];
 	echo "<input type=\"hidden\" name=\"upload_filename\" value=\"".$upload_filename."\">";
-	echo "<a href=\"#midi\" onClick=\"MIDIjs.play('".$midi_import_file."');\"><img src=\"pict/loudspeaker.png\" width=\"70px;\" style=\"vertical-align:middle;\" />Play “<span class=\"blue-text\">".$upload_filename."</span>” MIDI file</a>";
+	echo "<a href=\"#midi\" onClick=\"MIDIjs.play('".$midi_import_file."');\"><img src=\"pict/loudspeaker.png\" width=\"70px;\" style=\"vertical-align:middle;\" />Play “<span class=\"green-text\">".$upload_filename."</span>” MIDI file</a>";
 	echo " (<a href=\"#midi\" onClick=\"MIDIjs.stop();\">Stop playing</a>)";
 	echo "<br />Duration = ".round($duration_of_midifile / 1000, 3)." sec = ".$beats_of_midifile." beats<br />Division = <input type=\"text\" name=\"division\" size=\"5\" value=\"".$division."\">&nbsp;&nbsp;&nbsp;Tempo = <input type=\"text\" name=\"tempo\" size=\"7\" value=\"".$tempo."\"> µs ➡ show <a onclick=\"window.open('".$midi_import_mf2t."','importedMIDIbytes','width=300,height=500,left=300'); return false;\" href=\"".$midi_import_mf2t."\">MF2T code</a>";
 	echo "</td></tr>";

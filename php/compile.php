@@ -20,8 +20,8 @@ if(windows_system()) {
 	$command = $command_show = escapeshellcmd($command);
 	$command = preg_replace("'(?<!^) '","^ ",$command);
 	}
-echo "<link rel=\"stylesheet\" href=\"bp.css\" />\n";
-echo "<p id=\"refresh\" style=\"text-align:center; width:90%;\"><big>----------- Compiling BP3 as ‘<span class=\"blue-text\">".$console."</span>’. <font color=\"green\">It will take a minute or two.</font> -----------</big></p>"; // "refresh" is the id used for flashing. This is why we read "bp.css"
+echo "<link rel=\"stylesheet\" href=\"bp-light.css\" />\n";
+echo "<p id=\"refresh\" style=\"text-align:center; width:90%;\"><big>----------- Compiling BP3 as ‘<span class=\"green-text\">".$console."</span>’. <font color=\"green\">It will take a minute or two.</font> -----------</big></p>"; // "refresh" is the id used for flashing. This is why we read "bp-light.css"
 echo "<p style=\"text-align:center; width:90%;\">Running: <font color=\"red\">".$command_show."</font></p>";
 
 require_once("_header.php");
@@ -45,7 +45,7 @@ if($return_var <> 0) {
 		}
 	}
 else {
-	echo "<p style=\"text-align:center;  width:90%;\"><big>😀&nbsp;&nbsp;Compilation of ‘<span class=\"blue-text\">".$console."</span>’ worked!&nbsp;&nbsp;😀</big></p>";
+	echo "<p style=\"text-align:center;  width:90%;\"><big>😀&nbsp;&nbsp;Compilation of ‘<span class=\"green-text\">".$console."</span>’ worked!&nbsp;&nbsp;😀</big></p>";
 	}
 echo "<script>";
 echo "var element = document.getElementById('refresh');
@@ -55,10 +55,10 @@ echo "var element = document.getElementById('refresh');
 echo "</script>";
 if($return_var <> 0) {
 	if(mac_system()) {
-		echo "<div class=\"edit\" style=\"padding:12px; width:90%; margin: auto;\"><p style=\"text-align:center; width: 90%;\">Since this compilation failed<br />you may need to install <a target=\"_blank\" href=\"https://www.cnet.com/tech/computing/install-command-line-developer-tools-in-os-x/\">command line developer tools in OS X</a>.</p><p style=\"text-align:center; width: 90%;\">Recent versions of MacOS do it automatically and no further adjustment is required.</p><p style=\"text-align:center; width: 90%;\">Send a message to <a href=\"mailto:contact@bolprocessor.org\">contact@bolprocessor.org</a> in case of trouble</p></div>";
+		echo "<div class=\"edit\" style=\"padding:12px; width:90%; margin: auto;\"><p style=\"text-align:center; width: 90%;\">Since this compilation failed<br />you may need to install <a target=\"_blank\" class=\"linkdotted\" href=\"https://www.cnet.com/tech/computing/install-command-line-developer-tools-in-os-x/\">command line developer tools in OS X</a>.</p><p style=\"text-align:center; width: 90%;\">Recent versions of MacOS do it automatically and no further adjustment is required.</p><p style=\"text-align:center; width: 90%;\">Send a message to <a href=\"mailto:contact@bolprocessor.org\">contact@bolprocessor.org</a> in case of trouble</p></div>";
 		}
 	else {
-		echo "<div class=\"edit\" style=\"padding:12px; width:90%; margin: auto;\"><p style=\"text-align:center; width: 90%;\">Since this compilation failed (because the “make” command did not work)<br />please check compiling instructions on the page: <a target=\"_blank\" href=\"https://bolprocessor.org/check-bp3/#compile-bp-and-check-its-operation\">Compile ‘".$console."’ and check its operation</a></p><p style=\"text-align:center; width: 90%;\">Send a message to <a href=\"mailto:contact@bolprocessor.org\">contact@bolprocessor.org</a> in case of trouble</p></div>";
+		echo "<div class=\"edit\" style=\"padding:12px; width:90%; margin: auto;\"><p style=\"text-align:center; width: 90%;\">Since this compilation failed (because the “make” command did not work)<br />please check compiling instructions on the page: <a target=\"_blank\" class=\"linkdotted\" href=\"https://bolprocessor.org/check-bp3/#compile-bp-and-check-its-operation\">Compile ‘".$console."’ and check its operation</a></p><p style=\"text-align:center; width: 90%;\">Send a message to <a href=\"mailto:contact@bolprocessor.org\">contact@bolprocessor.org</a> in case of trouble</p></div>";
 		}
 	}
 echo "<p style=\"text-align:center; width:90%;\"><big>👉&nbsp;&nbsp;<a href=\"\" onclick=\"window.close();\">Now close this page</a></big></p>";

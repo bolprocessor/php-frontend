@@ -60,7 +60,7 @@ if(isset($_POST['create_scale'])) {
 		$result3 = check_duplicate_name($dir_scales,$new_scale_file);
 		$result4 = check_duplicate_name($dir_scales,$old_scale_file);
 		if($result1 OR $result2 OR $result3 OR $result4) {
-			$error_create = "<p><font color=\"red\">ERROR: This name</font> <span class=\"blue-text\">‘".$new_scale_name."’</span> <font color=\"red\">already exists";
+			$error_create = "<p><font color=\"red\">ERROR: This name</font> <span class=\"green-text\">‘".$new_scale_name."’</span> <font color=\"red\">already exists";
 			$source_image = $dir_scale_images.$clean_name_of_file."-source.txt";
 			if(file_exists($source_image)) {
 				$content_source = trim(@file_get_contents($source_image,TRUE));
@@ -142,11 +142,11 @@ if(isset($_POST['copy_this_scale'])) {
 			$result1 = check_duplicate_name($dir_scales,$new_scale_file);
 			$result2 = check_duplicate_name($dir_scales,$old_scale_file);
 			if($result1 OR $result2) {
-				echo "<p><font color=\"red\">WARNING</font>: This name <span class=\"blue-text\">‘".$new_scale_name."’</span> already exists</p>";
+				echo "<p><font color=\"red\">WARNING</font>: This name <span class=\"green-text\">‘".$new_scale_name."’</span> already exists</p>";
 				}
 			else {
-				echo "<p>Copied <span class=\"blue-text\">‘".$scalefilename."’</span> ";
-				echo "to: <span class=\"blue-text\">‘".$new_scale_file."’</span></p>";
+				echo "<p>Copied <span class=\"green-text\">‘".$scalefilename."’</span> ";
+				echo "to: <span class=\"green-text\">‘".$new_scale_file."’</span></p>";
 				$content = file_get_contents($dir_scales.$scalefilename.".txt",TRUE);
 				$table = explode("\n",$content);
 				$im = count($table);
@@ -168,7 +168,7 @@ if(isset($_POST['copy_this_scale'])) {
 				}
 			}
 		else {
-			echo "<p><font color=\"red\">Copying</font> <span class=\"blue-text\">‘".$scalefilename."’</span> <font color=\"red\">to </font><span class=\"blue-text\">‘".$destination."’</span></p>";
+			echo "<p><font color=\"red\">Copying</font> <span class=\"green-text\">‘".$scalefilename."’</span> <font color=\"red\">to </font><span class=\"green-text\">‘".$destination."’</span></p>";
 			echo "<p><font color=\"red\">➡</font> <a target=\"_blank\" href=\"csound.php?file=".urlencode($csound_resources.SLASH.$destination)."\">Edit ‘".$destination."’</a></p>";
 			$file_lock = $dir.$destination."_lock";
 			$time_start = time();
@@ -176,13 +176,13 @@ if(isset($_POST['copy_this_scale'])) {
 			while(TRUE) {
 				if(!file_exists($file_lock)) break;
 				if(time() > $time_end) {
-					echo "<p><font color=\"red\">For an unknown reason the destination file is blocked by a trace file</font> <span class=\"blue-text\">‘".$file_lock."’</span>. You should delete it by hand!</p>";
+					echo "<p><font color=\"red\">For an unknown reason the destination file is blocked by a trace file</font> <span class=\"green-text\">‘".$file_lock."’</span>. You should delete it by hand!</p>";
 					break;
 					}
 				sleep(1);
 				}
 			$content = file_get_contents($dir.$destination,TRUE);
-			if(!$content) echo "<p><font color=\"red\">For an unknown reason the destination file </font> <span class=\"blue-text\">‘".$file_lock."’</span> is empty</p>";
+			if(!$content) echo "<p><font color=\"red\">For an unknown reason the destination file </font> <span class=\"green-text\">‘".$file_lock."’</span> is empty</p>";
 			else {
 				$file_lock2 = $dir.$destination."_lock2";
 				$handle = fopen($file_lock2,"w");
@@ -227,7 +227,7 @@ if(isset($_POST['copy_this_scale'])) {
 				fclose($handle);
 			//	unlink($file_lock2);
 				if(!$can_copy) {
-					echo "<p><font color=\"red\">A scale with the same name</font> <span class=\"blue-text\">‘".$scalefilename."’</span> <font color=\"red\">already exists in</font> <span class=\"blue-text\">‘".$destination."’</span><font color=\"red\">. You need to delete it before copying this version</font></p>";
+					echo "<p><font color=\"red\">A scale with the same name</font> <span class=\"green-text\">‘".$scalefilename."’</span> <font color=\"red\">already exists in</font> <span class=\"green-text\">‘".$destination."’</span><font color=\"red\">. You need to delete it before copying this version</font></p>";
 					}
 				}
 			}
@@ -263,7 +263,7 @@ for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
 if(isset($_POST['delete_instrument'])) {
 	$instrument = $_POST['instrument_name'];
 	$number_channels = $_POST['number_channels'];
-	echo "<p><font color=\"red\">Deleted </font><span class=\"blue-text\"><big>“".$instrument."”</big></span>…</p>";
+	echo "<p><font color=\"red\">Deleted </font><span class=\"green-text\"><big>“".$instrument."”</big></span>…</p>";
 	$this_instrument_file = $temp_dir.$temp_folder.SLASH.$instrument.".txt";
 	rename($this_instrument_file,$this_instrument_file.".old");
 	$number_instruments = $_POST['number_instruments'] - 1;
@@ -285,9 +285,9 @@ if(isset($_POST['restore'])) {
 		$new_name = str_replace(".old",'',$this_instrument_file);
 		if(!file_exists($new_name)) {
 			rename($this_instrument_file,$new_name);
-			echo "“<span class=\"blue-text\">".str_replace(".txt",'',$thisfile)."</span>” ";
+			echo "“<span class=\"green-text\">".str_replace(".txt",'',$thisfile)."</span>” ";
 			}
-		else echo "“<span class=\"blue-text\"><del>".str_replace(".txt",'',$thisfile)."</del></span>” ";
+		else echo "“<span class=\"green-text\"><del>".str_replace(".txt",'',$thisfile)."</del></span>” ";
 		}
 	$_POST['number_instruments'] = $number_instruments;
 	echo "</p>";
@@ -320,7 +320,7 @@ if(isset($_POST['create_instrument'])) {
 	$new_instrument = str_replace(' ','_',$new_instrument);
 	$new_instrument = str_replace('"','',$new_instrument);
 	if(isset($exists_name[$new_instrument])) {
-		echo "<p><font color=\"red\">An instrument named “<span class=\"blue-text\">".$new_instrument."</span>” already exists!</font></p>";
+		echo "<p><font color=\"red\">An instrument named “<span class=\"green-text\">".$new_instrument."</span>” already exists!</font></p>";
 		}
 	else if($new_instrument <> '') {
 		$new_instrument_file = $temp_dir.$temp_folder.SLASH.$new_instrument.".txt";
@@ -345,7 +345,7 @@ if(isset($_POST['duplicate_instrument'])) {
 	$copy_instrument = str_replace('"','',$copy_instrument);
 	if($copy_instrument <> '') {
 		if(isset($exists_name[$copy_instrument])) {
-			echo "<p><font color=\"red\">Cannot create</font> <span class=\"blue-text\"><big>“".$copy_instrument."”</big></span> <font color=\"red\">because an instrument with the same name already exists</font></p>";
+			echo "<p><font color=\"red\">Cannot create</font> <span class=\"green-text\"><big>“".$copy_instrument."”</big></span> <font color=\"red\">because an instrument with the same name already exists</font></p>";
 			}
 		else {
 			$file_lock = $dir.$filename."_lock2";
@@ -378,7 +378,7 @@ if(isset($_POST['duplicate_instrument'])) {
 
 $lock2 = $dir.$filename."_lock2";
 if($need_to_save OR isset($_POST['savealldata']) OR isset($_POST['delete_instrument']) OR isset($_POST['restore']) OR isset($_POST['create_instrument'])) {
-		echo "<p id=\"timespan\"><font color=\"red\">Saving file:</font> <span class=\"blue-text\">".$filename."</span></p>";
+		echo "<p id=\"timespan\"><font color=\"red\">Saving file:</font> <span class=\"green-text\">".$filename."</span></p>";
 		$warn_not_empty = SaveCsoundInstruments(FALSE,$dir,$filename,$temp_dir.$temp_folder,TRUE);
 		// We also save tonality data separately
 /*		$tonality_filename = str_replace("-cs.","-to.",$filename);
@@ -405,7 +405,7 @@ if(strlen(trim($content)) == 0) {
 	$content = @file_get_contents($template,TRUE);
 	}
 $extract_data = extract_data(FALSE,$content);
-echo "<p class=\"blue-text\">".$extract_data['headers']."</p>";
+echo "<p class=\"green-text\">".$extract_data['headers']."</p>";
 $content = $extract_data['content'];
 
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
@@ -455,7 +455,7 @@ if(file_exists($dir.$CsoundOrchestraName)) {
 	}
 $path = str_replace($bp_application_path,'',$dir_csound_resources);
 if(file_exists($orchestra_filename)) {
-	echo "<a target=\"_blank\" href=\"csorchestra.php?file=".urlencode($path.$CsoundOrchestraName)."\">Edit this file</a>";
+	echo "<a class=\"linkdotted\" target=\"_blank\" href=\"csorchestra.php?file=".urlencode($path.$CsoundOrchestraName)."\">Edit this file</a>";
 	}
 else {
 	echo "File not found: <a target=\"_blank\" href=\"csorchestra.php?file=".urlencode($path.$CsoundOrchestraName)."\">create it!</a>";
@@ -860,14 +860,14 @@ if($max_scales > 1) {
 	$dir_tonality = $dir_tonality_resources;
 	// Save scale definitions to a "-to" file
 	SaveTonality(FALSE,$dir_tonality,$tonality_filename,$temp_dir.$temp_folder,TRUE);
-	echo "<p><font color=\"red\">➡</font> Tonality file ‘<span class=\"blue-text\">".$tonality_filename."</span>’ has been created or updated</p>";
+	echo "<p><font color=\"red\">➡</font> Tonality file ‘<span class=\"green-text\">".$tonality_filename."</span>’ has been created or updated</p>";
 	}
 
 echo "</td>";
 echo "<td>";
 if($number_instruments > 0) {
 	echo "<h3>MIDI channel association of instruments:</h3>";
-	echo "<table style=\"background-color:gold\">";
+	echo "<table class=\"thicktable\">";
 	echo "<tr>";
 	echo "<td style=\"padding: 5px; vertical-align:middle;\">MIDI<br />channel</td><td>Instrument index</td>";
 	echo "</tr>";
@@ -896,7 +896,7 @@ else {
 
 echo "</tr><tr><td colspan=\"2\">";
 echo "<h2 id=\"instruments\">Instruments</h2>";
-if($deleted_instruments <> '') echo "<p><input class=\"edit\" type=\"submit\" name=\"restore\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#instruments\" value=\"RESTORE ALL DELETED INSTRUMENTS\">&nbsp;<span class=\"blue-text\"><big>".$deleted_instruments."</big></span></p>";
+if($deleted_instruments <> '') echo "<p><input class=\"edit\" type=\"submit\" name=\"restore\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#instruments\" value=\"RESTORE ALL DELETED INSTRUMENTS\">&nbsp;<span class=\"green-text\"><big>".$deleted_instruments."</big></span></p>";
 echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";
 echo "<input type=\"hidden\" name=\"filename\" value=\"".$filename."\">";
 
@@ -905,10 +905,10 @@ echo "</form>";
 
 if($number_instruments > 0) {
 	echo "<h3>Click Csound instruments below to edit them:</h3>";
-	echo "<table style=\"padding:1em;\" class=\"thinborder\">";
+	echo "<table  class=\"thicktable\">";
 	$done_index = array();
 	for($j = 0; $j < $number_instruments; $j++) {
-		echo "<tr><td style=\"padding: 5px; vertical-align:middle; white-space:nowrap\">";
+		echo "<tr><td class=\"middle\" style=\"padding:12px; white-space:nowrap\">";
 		echo "<form method=\"post\" action=\"csinstrument.php\" enctype=\"multipart/form-data\">";
 		echo "<input type=\"hidden\" name=\"tonality_filename\" value=\"".$tonality_filename."\">";
 		echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";
@@ -929,10 +929,10 @@ if($number_instruments > 0) {
 		echo "&nbsp;(".$argmax_all."&nbsp;args)";
 		echo "</form>";
 		echo "</td>";
-		echo "<td style=\"vertical-align:middle;\">";
+		echo "<td class=\"middle\">";
 		echo "<small>".$InstrumentComment[$j]."</small>";
 		echo "</td>";
-		echo "<td style=\"padding: 5px; vertical-align:middle;\">";
+		echo "<td class=\"middle\">";
 		echo "<form method=\"post\" action=\"".$url_this_page."#instruments\" enctype=\"multipart/form-data\">";
 		echo "<input type=\"hidden\" name=\"tonality_filename\" value=\"".$tonality_filename."\">";
 		echo "<input type=\"hidden\" name=\"dir\" value=\"".$dir."\">";
@@ -950,7 +950,7 @@ if($number_instruments > 0) {
 			}
 		echo "<input class=\"save\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"delete_instrument\" value=\"DELETE\">";
 		echo "</td>";
-		echo "<td style=\"text-align:right; padding:5px; vertical-align:middle;\">";
+		echo "<td class=\"middle\" style=\"text-align:right; padding:5px;\">";
 		echo "<input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"duplicate_instrument\" value=\"DUPLICATE AS\">: <input type=\"text\" name=\"copy_instrument\" size=\"15\" value=\"\">";
 		echo "</td>";
 		echo "</tr>";
@@ -961,47 +961,7 @@ if($number_instruments > 0) {
 echo "</td>";
 echo "</tr></table>";
 
-/*
-for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
-	if(isset($scale_fraction[$i_scale]) AND isset($table_names[$i_scale])) {
-		if(isset($_POST['export_scale_'.$i_scale])) {
-			$olddir = getcwd();
-			chdir($dir_scales);
-			$file = $scale_name[$i_scale].".scl";
-			$text = "! ".$file."\n";
-			$text .= "! Scala file, ref. https://www.huygens-fokker.org/scala/scl_format.html\n";
-			if(isset($scale_comment[$i_scale])) {
-				$this_comment = html_to_text($scale_comment[$i_scale],'txt');
-				$this_comment = substr($this_comment, 0, strpos($this_comment, "<br />"));
-				$this_comment = str_replace("-cs.","-to.",$this_comment);
-				$text .= $this_comment."\n";
-				}
-			else $text .= "This scale is called '".$scale_name[$i_scale]."'\n";
-			$text .= "! Created by the Bol Processor\n";
-			$kmaxi = count($p_interval[$i_scale]);
-			$text .= $kmaxi."\n";
-			for($i_fraction = $k = 0; $k < $kmaxi; $i_fraction += 2) {
-				if($table_names[$i_scale][$i_fraction / 2] == "•") continue;
-				if(($p_interval[$i_scale][$k] * $q_interval[$i_scale][$k]) > 0) {
-					$text .= $p_position[$i_scale][$k]."/".$q_position[$i_scale][$k]." ".$note_name[$i_scale][$k + 1]."\n";
-					$k++;
-					}
-				else {
-					$cents = round(1200 * log($ratio[$i_scale][$k]) / log(2));
-					$text .= $cents." cents ".$note_name[$i_scale][$k + 1]."\n";
-					$k++;
-					}
-				}
-			$handle = fopen($file,"w");
-			if($handle) {
-				fwrite($handle,$text);
-				fclose($handle);
-				}
-			chdir($olddir);
-			break;
-			}
-		}
-	} */
+// $verbose = TRUE;
 
 if($verbose) {
 	echo "<hr>";

@@ -9,7 +9,7 @@ display_console_state();
 
 echo "<p>";
 echo "<table class=\"thinborder\"><tr>";
-echo "<td style=\"padding:1em; white-space:nowrap;\">";
+echo "<td style=\"padding:1em; white-space:nowrap; text-align:center; vertical-align:middle;\">";
 
 $test = FALSE;
 if($path <> '') {
@@ -32,11 +32,12 @@ if($path <> '') {
 	}
 else {
 	echo "<h2>Welcome to Bol Processor ‘BP3’</h2>";
-//	echo "<img src=\"pict/rings.jpg\" width=\"100px;\"/>";
+	echo "<span class=\"night\"><a style=\"border-bottom:none;\" target=\"blank\" title=\"depositphotos\" href=\"https://depositphotos.com/photo/halloween-pumpkin-1189743.html\"><img src=\"pict/pumpkin.png\" width=\"100px;\"/></a></span>";
+	echo "<span class=\"day\"><a style=\"border-bottom:none;\" target=\"blank\" title=\"Sunbeam Vectors by Vecteezy\" href=\"https://www.vecteezy.com/free-vector/sunbeam\"><img src=\"pict/sun.png\" width=\"100px;\"/></a></span>";
 	echo "</td>";
-	echo "<td style=\"padding:1em; border-radius:1em;\">";
-	echo "<p style=\"text-align:center;\">This interface is running<br />the multi-platform console<br /><a target=\"_blank\" href=\"https://bp3.tech\">https://bp3.tech</a></p>";
-	echo "<p>👉&nbsp;Read the <a href=\"https://raw.githubusercontent.com/bolprocessor/bolprocessor/graphics-for-BP3/BP3-changes.txt\" target=\"_blank\">history of changes</a></p>";
+	echo "<td style=\"padding:1em; border-radius:1em; vertical-align:middle;\">";
+	echo "<p class=\"big\" style=\"text-align:center;\">This interface is running<br />the multi-platform console<br /><br /><a target=\"_blank\" class=\"linkdotted\" href=\"https://bp3.tech\">https://bp3.tech</a></p>";
+	echo "<p>👉&nbsp;Read the <a class=\"linkdotted\" class=\"linkdotted\" href=\"https://raw.githubusercontent.com/bolprocessor/bolprocessor/graphics-for-BP3/BP3-changes.txt\" target=\"_blank\">history of changes</a></p>";
 	echo "</td>";
 	echo "</tr>";
 	echo "</table>";
@@ -284,7 +285,7 @@ if($path == $trash_folder AND isset($_POST['empty_trash'])) {
 	}
 
 if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension <> "temp" AND !$delete_files AND !$rename_files AND !$move_files) {
-	echo "<div style=\"float:right; padding:6px; border-radius: 15px;\">";
+	echo "<div style=\"float:right; padding:6px; background-color:transparent;\">";
 	check_csound();
 	if(!is_integer(strpos($path,$tonality_resources))) link_to_tonality();
 	if($path == $tonality_resources) {
@@ -300,12 +301,11 @@ if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension 
 		echo "</form>";
 		}
 	if($path <> $csound_resources AND $path <> $tonality_resources) {
-		echo "<hr>";
-		echo "<button class=\"edit big\" onclick=\"togglecreate(); return false;\">CREATE FILES AND FOLDERS</button>";
-		echo "<div id=\"create\" style=\"padding:6px;\">";
+		echo "<br /><button class=\"produce big\" onclick=\"togglecreate(); return false;\">CREATE FILES AND FOLDERS</button>";
+		echo "<div id=\"create\" style=\"padding:6px; background-color:transparent;\">";
 		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		echo "<p style=\"text-align:left;\">";
-		echo "<input class=\"produce\"  type=\"submit\" name=\"create_folder\" value=\"CREATE NEW FOLDER IN THIS WORKSPACE\"><br />named:&nbsp;";
+		echo "<input class=\"save\"  type=\"submit\" name=\"create_folder\" value=\"CREATE NEW FOLDER IN THIS WORKSPACE\"><br />named:&nbsp;";
 		echo "<input type=\"text\" name=\"foldername\" size=\"20\" style=\"background-color:CornSilk;\" value=\"\">";
 		echo "</p>";
 		echo "</form>";
@@ -417,7 +417,7 @@ $done = $seen = array();
 $dest_folder = '';
 if(isset($_POST['move_checked_files'])) {
 	if(isset($_POST['folder_choice']) AND ($dest_folder = $_POST['folder_choice']) <> '') {
-		echo "<p id=\"refresh\"><font color=\"red\">➡ Moving selected files/folders</font> to ‘<span class=\"blue-text\">".$dest_folder."</span>’</p>";
+		echo "<p id=\"refresh\"><font color=\"red\">➡ Moving selected files/folders</font> to ‘<span class=\"green-text\">".$dest_folder."</span>’</p>";
 		}
 	else {
 		echo "<p><font color=\"red\">➡ No destination folder was selected, move canceled</font></p>";
@@ -431,7 +431,7 @@ if($move_files) {
 	$list_folders = folder_list($bp_application_path,$list_folders,'');
 	$imax = count($list_folders);
 	if($imax > 0) {
-		echo "<div style=\"float:right; padding:6px; border-radius: 15px;\">";
+		echo "<div style=\"float:right; padding:6px; border-radius:12px;\">";
 		echo "<h3>Move all selected files to folder:</h3>";
 		for($i = 0; $i < $imax; $i++) {
 			$thisfolder = $list_folders[$i];
@@ -442,7 +442,7 @@ if($move_files) {
 			else $txt = $thisfolder;
 			echo "<input type=\"radio\" name=\"folder_choice\" value=\"".$thisfolder."\">".$txt."<br />";
 			}
-		echo "<p style=\"margin-left:6px;\"><input class=\"save\" type=\"submit\" name=\"move_checked_files\" value=\"MOVE CHECKED FILES/FOLDERS\">&nbsp;&nbsp;<input class=\"edit\" type=\"submit\" name=\"cancel\" value=\"CANCEL\"></p>";
+		echo "<p style=\"margin-left:6px;\"><input class=\"save\" type=\"submit\" name=\"move_checked_files\" value=\"MOVE CHECKED FILES/FOLDERS\">&nbsp;&nbsp;<input class=\"cancel\" type=\"submit\" name=\"cancel\" value=\"CANCEL\"></p>";
 		echo "</div>";
 		}
 	else {
@@ -472,7 +472,7 @@ if($path <> '') {
 	}
 
 display_directory(FALSE,$dir,"directory");
-if($path <> $trash_folder) echo "▶︎&nbsp;<a target=\"_blank\" href=\"index.php?path=".$trash_folder."\">TRASH</a>  🗑<br />";
+if($path <> $trash_folder) echo "▶︎&nbsp;<a target=\"_blank\" href=\"index.php?path=".$trash_folder."\">TRASH  🗑</a><br />";
 echo "<br />";
 
 echo "<table class=\"thinborder\">";
@@ -619,14 +619,14 @@ function display_directory($test,$dir,$filter) {
 				echo "<p><font color=\"red\">➡ Cannot move a folder to its own content</font></p>";
 				}
 			else if(file_exists($destination_file)) {
-				if($dest_folder <> '') $the_dest = "‘<span class=\"blue-text\">".$dest_folder."</span>’";
+				if($dest_folder <> '') $the_dest = "‘<span class=\"green-text\">".$dest_folder."</span>’";
 				else $the_dest = "the root folder";
-				echo "<p><font color=\"red\">➡ There is already</font> a file or folder named ‘<span class=\"blue-text\">".$thisfile."</span>’ in ".$the_dest."</p>";
+				echo "<p><font color=\"red\">➡ There is already</font> a file or folder named ‘<span class=\"green-text\">".$thisfile."</span>’ in ".$the_dest."</p>";
 				}
 			else {
 				if(is_dir($dir.SLASH.$thisfile)) {
 					if(is_integer($pos=strpos($destination_file,$source_file)))
-						echo "<p><font color=\"red\">➡ Cannot move</font> folder ‘<span class=\"blue-text\">".$thisfile."</span>’ into itself!</p>";
+						echo "<p><font color=\"red\">➡ Cannot move</font> folder ‘<span class=\"green-text\">".$thisfile."</span>’ into itself!</p>";
 					else {
 						rename($source_file,$destination_file);
 						$this_file_moved = TRUE;
@@ -673,20 +673,20 @@ function display_directory($test,$dir,$filter) {
 		if(!$test) echo $check_box;
 
 		if(!$test AND $path <> $csound_resources AND $path <> $trash_folder AND ($type == "csound" OR $type == "csorchestra")) {
-			echo "Moved ‘<span class=\"blue-text\">".$dir.SLASH.$thisfile."</span>’ to ‘<span class=\"blue-text\">".$dir_csound_resources.$thisfile."</span>’<br />";
+			echo "Moved ‘<span class=\"green-text\">".$dir.SLASH.$thisfile."</span>’ to ‘<span class=\"green-text\">".$dir_csound_resources.$thisfile."</span>’<br />";
 			if(file_exists($dir_csound_resources.$thisfile)) @unlink($dir.SLASH.$thisfile);
 			else rename($dir.SLASH.$thisfile,$dir_csound_resources.$thisfile);
 			}
 		else {
 			if(!$test AND $path <> $tonality_resources AND $path <> $trash_folder AND $type == "tonality") {
-				echo "Moved ‘<span class=\"blue-text\">".$dir.SLASH.$thisfile."</span>’ to ‘<span class=\"blue-text\">".$dir_tonality_resources.$thisfile."</span>’<br />";
+				echo "Moved ‘<span class=\"green-text\">".$dir.SLASH.$thisfile."</span>’ to ‘<span class=\"green-text\">".$dir_tonality_resources.$thisfile."</span>’<br />";
 				if(file_exists($dir_tonality_resources.$thisfile)) @unlink($dir.SLASH.$thisfile);
 				else rename($dir.SLASH.$thisfile,$dir_tonality_resources.$thisfile);
 				}
 			else {
 				$renamed = FALSE;
 				if(!$test AND $delete_checked_files AND isset($_POST['delete_'.$i_file])) {
-					echo "<p><font color=\"red\">➡</font> Deleted ‘<span class=\"blue-text\">".$thisfile."</span>’ (moved to <a target=\"_blank\" href=\"index.php?path=".$trash_folder."\">trash folder</a>)</p>";
+					echo "<p><font color=\"red\">➡</font> Deleted ‘<span class=\"green-text\">".$thisfile."</span>’ (moved to <a target=\"_blank\" href=\"index.php?path=".$trash_folder."\">trash folder</a>)</p>";
 					rename($dir.SLASH.$thisfile,$dir_trash_folder.$thisfile);
 					delete_settings($thisfile);
 					continue;

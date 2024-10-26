@@ -27,7 +27,7 @@ save_settings("last_name",$filename);
 if(isset($_POST['savethisfile'])) {
 	$content = $_POST['thistext'];
 	if(trim($content) <> '') {
-		echo "<p id=\"timespan\" style=\"color:red;\">Saved file…</p>";
+		echo "<span id=\"timespan\" style=\"color:red; float:right; background-color:white; padding:6px; border-radius:6px;\">&nbsp;Saved “".$this_file."” file…</span>";
 		$handle = fopen($this_file,"w");
 		$file_header = "// Bol Processor on-line test via PHP\n// Alphabet file saved as ‘".$filename."’. Date: ".gmdate('Y-m-d H:i:s');
 		fwrite($handle,$file_header."\n");
@@ -46,7 +46,7 @@ if($content === FALSE) ask_create_new_file($url_this_page,$filename);
 
 $grammar_file = $objects_file = $csound_file = $tonality_file = $alphabet_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = '';
 $extract_data = extract_data(TRUE,$content);
-echo "<p class=\"blue-text\">".$extract_data['headers']."</p>";
+echo "<p class=\"green-text\">".$extract_data['headers']."</p>";
 $content = $extract_data['content'];
 $objects_file = $extract_data['objects'];
 $csound_file = $extract_data['csound'];

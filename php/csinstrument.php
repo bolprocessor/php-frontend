@@ -28,9 +28,9 @@ if($test) echo "temp_folder = ".$temp_folder."<br />";
 $folder_this_instrument = $temp_dir.$temp_folder.SLASH.$instrument_folder_name;
 if($test) echo "folder_this_instrument = ".$folder_this_instrument."<br />";
 
-// echo "&nbsp;Instrument file: <span class=\"blue-text\">".$instrument_file."</span>";
+// echo "&nbsp;Instrument file: <span class=\"green-text\">".$instrument_file."</span>";
 echo link_to_help();
-echo "<h2>Csound instrument <big><span class=\"blue-text\">_ins(".$instrument_index.")</span> <font color=\"red\">".$instrument_name."</font></big></h2>";
+echo "<h2>Csound instrument <big><span class=\"green-text\">_ins(".$instrument_index.")</span> <font color=\"red\">".$instrument_name."</font></big></h2>";
 
 $argmax_file = $folder_this_instrument.SLASH."argmax.php";
 		
@@ -52,7 +52,7 @@ if(isset($_POST['create_parameter'])) {
 	$new_parameter = str_replace('-','_',$new_parameter);
 	$new_parameter = str_replace('"','',$new_parameter);
 	if(isset($exists_name[$new_parameter])) {
-		echo "<p><font color=\"red\">A parameter with the same name “<span class=\"blue-text\">".$new_parameter."</span>” already exists!</font></p>";
+		echo "<p><font color=\"red\">A parameter with the same name “<span class=\"green-text\">".$new_parameter."</span>” already exists!</font></p>";
 		}
 	else {
 		if($new_parameter <> '') {
@@ -69,7 +69,7 @@ if(isset($_POST['create_parameter'])) {
 
 if(isset($_POST['delete_parameter'])) {
 	$parameter_name = $_POST['parameter_name'];
-	echo "<p><font color=\"red\">Deleted </font><span class=\"blue-text\"><big>“".$parameter_name."”</big></span>…</p>";
+	echo "<p><font color=\"red\">Deleted </font><span class=\"green-text\"><big>“".$parameter_name."”</big></span>…</p>";
 	$this_parameter_file = $folder_this_instrument.SLASH.$parameter_name.".txt";
 //	echo $this_parameter_file."<br />";
 	rename($this_parameter_file,$this_parameter_file.".old");
@@ -84,7 +84,7 @@ if(isset($_POST['restore'])) {
 		$extension = end($table);
 		if($extension <> "old") continue;
 		$thisfile = str_replace(".old",'',$oldfile);
-		echo "“<span class=\"blue-text\">".str_replace(".txt",'',$thisfile)."</span>” ";
+		echo "“<span class=\"green-text\">".str_replace(".txt",'',$thisfile)."</span>” ";
 		$this_parameter_file = $folder_this_instrument.SLASH.$oldfile;
 		rename($this_parameter_file,str_replace(".old",'',$this_parameter_file));
 		}
@@ -248,7 +248,7 @@ echo "<input type=\"hidden\" name=\"instrument_file\" value=\"".$instrument_file
 $table = explode(chr(10),$content);
 $csfilename = $table[0];
 echo "<input type=\"hidden\" name=\"csfilename\" value=\"".$csfilename."\">";
-echo "<h3>Part of file “<span class=\"blue-text\">".$csfilename."</span>”</h3>";
+echo "<h3>Part of file “<span class=\"green-text\">".$csfilename."</span>”</h3>";
 $verbose = TRUE;
 $verbose = FALSE;
 $i = 1;
@@ -417,7 +417,6 @@ echo MIDIparameter_argument(4,"Panoramic",$InstrumentPanoramicStartIndex,$Instru
 echo "</td>";
 echo "</tr>";
 echo "<table>";
-echo "<hr>";
 
 if(!is_dir($folder_this_instrument)) mkdir($folder_this_instrument);
 echo "<h3>Other (MIDI unrelated) parameters:</h3>";
@@ -431,7 +430,7 @@ foreach($dir_instrument as $thisparameter) {
 	$parameter_name = str_replace(".txt.old",'',$thisparameter);
 	$deleted_parameters .= "“".$parameter_name."” ";
 	}
-if($deleted_parameters <> '') echo "<p><input class=\"save\" type=\"submit\" name=\"restore\" value=\"RESTORE ALL DELETED PARAMETERS\"> = <span class=\"blue-text\"><big>".$deleted_parameters."</big></span></p>";
+if($deleted_parameters <> '') echo "<p><input class=\"save\" type=\"submit\" name=\"restore\" value=\"RESTORE ALL DELETED PARAMETERS\"> = <span class=\"green-text\"><big>".$deleted_parameters."</big></span></p>";
 echo "<p><input class=\"save\" type=\"submit\" name=\"create_parameter\" value=\"CREATE A NEW PARAMETER\"> named <input type=\"text\" name=\"new_parameter\" size=\"20\" value=\"\"></p>";
 
 echo "</form>";

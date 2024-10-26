@@ -58,7 +58,7 @@ function run_script($dir,$dirPath,$this_script_file,$script_variables,$note_conv
 		if($line == '') continue;
 		$instruction =  get_instruction($line);
 		$recoded_line = recode_tags($line);
-	//	echo "<p class=\"blue-text\">line = ".$recoded_line."<br />";
+	//	echo "<p class=\"green-text\">line = ".$recoded_line."<br />";
 		$status = 0; $more = '';
 		if(isset($script_status[$instruction])) {
 			$status = $script_status[$instruction];

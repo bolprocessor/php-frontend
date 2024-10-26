@@ -162,7 +162,7 @@ if($need_to_save OR isset($_POST['interpolate']) OR isset($_POST['savethisfile']
 	$result1 = check_duplicate_name($dir_scales,$clean_scale_name.".txt");
 	$result2 = check_duplicate_name($dir_scales,$clean_scale_name.".old");
 	if($new_scale_name <> $filename AND ($result1 OR $result2)) {
-		echo "<p><font color=\"red\">WARNING</font>: This name <span class=\"blue-text\">‘".$new_scale_name."’</span> already exists</p>";
+		echo "<p><font color=\"red\">WARNING</font>: This name <span class=\"green-text\">‘".$new_scale_name."’</span> already exists</p>";
 		$scale_name = $filename;
 		}
 	else {
@@ -231,7 +231,7 @@ if($need_to_save OR isset($_POST['interpolate']) OR isset($_POST['savethisfile']
 			}
 		}
 /*	if($key[0] <> $basekey) {
-		echo "<p><font color=\"red\">WARNING</font>: the first key has been set to <span class=\"blue-text\">‘".$basekey."’</span> which is the value of <b>basekey</b></p>";
+		echo "<p><font color=\"red\">WARNING</font>: the first key has been set to <span class=\"green-text\">‘".$basekey."’</span> which is the value of <b>basekey</b></p>";
 		$key[0] = $basekey;
 		} */
 	if(isset($_POST['modifynote'])) {
@@ -931,9 +931,9 @@ for($i = 0; $i < $imax; $i++) {
 		}
 	}
 echo "<p>";
-echo "&nbsp;&nbsp;<a target=\"_blank\" href=\"https://www.csounds.com/manualOLPC/GEN51.html\">Csound GEN51</a> table: <span class=\"blue-text\">".$scale_table."</span>";
+echo "&nbsp;&nbsp;<a target=\"_blank\" class=\"linkdotted\" href=\"https://www.csounds.com/manualOLPC/GEN51.html\">Csound GEN51</a> table: <span class=\"green-text\">".$scale_table."</span>";
 if($message <> '') echo $message;
-echo "<div style=\"float:right; margin-top:1em; padding:1em; border-radius:5%;\"><h2>Scale “".$filename."”</h2><h3>This version is stored in <span class=\"blue-text\">‘<a href=\"tonality.php?file=tonality_resources%2F".$tonality_source."\">".$tonality_source."</a>’</span></h3>";
+echo "<div style=\"float:right; margin-top:1em; padding:1em; border-radius:5%;\"><h2>Scale “".$filename."”</h2><h3>This version is stored in <span class=\"green-text\">‘<a href=\"tonality.php?file=tonality_resources%2F".$tonality_source."\">".$tonality_source."</a>’</span></h3>";
 
 $link = "scale_image.php?save_codes_dir=".urlencode($save_codes_dir)."&dir_scale_images=".urlencode($dir_scale_images)."&tonality_source=".urlencode($tonality_source);
 $link_no_marks = $link."&no_marks=1";
@@ -965,13 +965,13 @@ else {
 $image_name = clean_folder_name($filename)."_".round(10 * $new_comma).$more."_image";
 // echo $image_name."<br />";
 $image_height = 820;
-echo "<div class=\"shadow\" style=\"border:2px solid gray; background-color:azure; color:black; width:20em;  padding:8px; text-align:center; border-radius: 6px;\">IMAGE:<br /><a style=\"color:#007BFF;\" onclick=\"window.open('".$link."','".$image_name."','width=1000,height=".$image_height.",left=100'); return false;\" href=\"".$link."\">full</a> - <a style=\"color:#007BFF;\" onclick=\"window.open('".$link_no_marks."','".$image_name."','width=1000,height=".$image_height.",left=100'); return false;\" href=\"".$link_no_marks."\">no marks</a> - <a style=\"color:#007BFF;\" onclick=\"window.open('".$link_no_cents."','".$image_name."','width=1000,height=".$image_height.",left=100'); return false;\" href=\"".$link_no_cents."\">no cents</a> - <a style=\"color:#007BFF;\" onclick=\"window.open('".$link_no_intervals."','".$image_name."','width=1000,height=".$image_height.",left=100'); return false;\" href=\"".$link_no_intervals."\">no intervals</a></div>";
+echo "<div class=\"shadow\" style=\"border:2px solid gray; background-color:azure; color:black; width:20em;  padding:8px; text-align:center; border-radius: 6px;\">IMAGE:<br /><a class=\"linkdotted\" style=\"color:#007BFF;\" onclick=\"window.open('".$link."','".$image_name."','width=1000,height=".$image_height.",left=100'); return false;\" href=\"".$link."\">full</a> - <a class=\"linkdotted\" style=\"color:#007BFF;\" onclick=\"window.open('".$link_no_marks."','".$image_name."','width=1000,height=".$image_height.",left=100'); return false;\" href=\"".$link_no_marks."\">no marks</a> - <a class=\"linkdotted\" style=\"color:#007BFF;\" onclick=\"window.open('".$link_no_cents."','".$image_name."','width=1000,height=".$image_height.",left=100'); return false;\" href=\"".$link_no_cents."\">no cents</a> - <a class=\"linkdotted\" style=\"color:#007BFF;\" onclick=\"window.open('".$link_no_intervals."','".$image_name."','width=1000,height=".$image_height.",left=100'); return false;\" href=\"".$link_no_intervals."\">no intervals</a></div>";
 
 echo "</div>";
 
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 if(isset($_POST['csound_source'])) {
-	echo "<p>👉 <a target=\"_blank\" href=\"https://www.csounds.com/manual/html/GEN51.html\">Read the Csound documentation</a></p>";
+	echo "<p>👉 <a target=\"_blank\" class=\"linkdotted\" href=\"https://www.csounds.com/manual/html/GEN51.html\">Read the Csound documentation</a></p>";
 	$csound_source = $_POST['csound_source'];
 	echo "<input type=\"hidden\" name=\"csound_source\" value=\"".$csound_source."\">";
 	}
@@ -1092,11 +1092,11 @@ echo "<input type=\"text\" style=\"font-size:large;\" name=\"scale_name\" size=\
 if(is_integer(strpos($scale_name,' '))) echo " <font color=\"red\">➡</font> avoiding spaces is prefered";
 echo "</h3>";
 
-echo "<p>👉 Read page ‘<a target=\"_blank\" href=\"https://bolprocessor.org/microtonality/\">Microtonality</a>’</p>";
+echo "<p>👉 Read page ‘<a target=\"_blank\" class=\"linkdotted\" href=\"https://bolprocessor.org/microtonality/\">Microtonality</a>’</p>";
 
 echo "<input class=\"edit big\" type=\"submit\" formaction=\"".$url_this_page."\" title=\"Export this tuning in the SCALA format\" name=\"download_scala\" value=\"Download SCALA file\">";
 echo "<input class=\"edit big\" type=\"submit\" formaction=\"".$url_this_page."\" title=\"Export this keyboard mapping to the KBM format\" name=\"download_kbm\" value=\"Download KBM\">";
-echo "<p>👉 Read documentation <a target=\"_blank\" href=\"https://www.huygens-fokker.org/scala/scl_format.html\">SCALA</a> / <a target=\"_blank\" href=\"https://www.huygens-fokker.org/scala/help.htm#mappings\">KBM</a><br />";
+echo "<p>👉 Read documentation <a target=\"_blank\" class=\"linkdotted\" href=\"https://www.huygens-fokker.org/scala/scl_format.html\">SCALA</a> / <a target=\"_blank\" class=\"linkdotted\" href=\"https://www.huygens-fokker.org/scala/help.htm#mappings\">KBM</a><br />";
 if(!isset($_POST['import_kbm']) OR isset($_POST['dont'])) echo "<input class=\"edit big\" type=\"submit\" formaction=\"".$url_this_page."\" title=\"Import a keyboard mapping in the KBM format\" name=\"import_kbm\" value=\"Import KBM\"></p>";
 else echo "</p>";
 
@@ -1149,19 +1149,19 @@ if(isset($_POST['change_comma']) AND isset($_POST['list_sensitive_notes']) AND $
 	if($list_sensitive_notes <> '') {
 		$table_sensitive_notes = explode(' ',$list_sensitive_notes);
 		echo "<p>Sensitive notes: ";
-		for($i = 0; $i < count($table_sensitive_notes); $i++) if(isset($name[$table_sensitive_notes[$i]])) echo "<span class=\"blue-text\">".$name[$table_sensitive_notes[$i]]."</span> ";
+		for($i = 0; $i < count($table_sensitive_notes); $i++) if(isset($name[$table_sensitive_notes[$i]])) echo "<span class=\"green-text\">".$name[$table_sensitive_notes[$i]]."</span> ";
 		echo "<br />";
 		}
 	if($list_wolffifth_notes <> '') {
 		$table_wolffifth_notes = explode(' ',$list_wolffifth_notes);
 		echo "Wolffifth notes: ";
-		for($i = 0; $i < count($table_wolffifth_notes); $i++) if(isset($name[$table_wolffifth_notes[$i]])) echo "<span class=\"blue-text\">".$name[$table_wolffifth_notes[$i]]."</span> ";
+		for($i = 0; $i < count($table_wolffifth_notes); $i++) if(isset($name[$table_wolffifth_notes[$i]])) echo "<span class=\"green-text\">".$name[$table_wolffifth_notes[$i]]."</span> ";
 		echo "</p>"; 
 		}
 	if($list_wolffourth_notes <> '') {
 		$table_wolffourth_notes = explode(' ',$list_wolffourth_notes);
 		echo "Wolffourth notes: ";
-		for($i = 0; $i < count($table_wolffourth_notes); $i++) if(isset($name[$table_wolffourth_notes[$i]])) echo "<span class=\"blue-text\">".$name[$table_wolffourth_notes[$i]]."</span> ";
+		for($i = 0; $i < count($table_wolffourth_notes); $i++) if(isset($name[$table_wolffourth_notes[$i]])) echo "<span class=\"green-text\">".$name[$table_wolffourth_notes[$i]]."</span> ";
 		echo "</p>"; 
 		}
 	if($new_comma < 0 OR $new_comma > 56.8) echo "<p>➡ Cannot set syntonic comma to: <font color=\"red\">".$new_comma."</font> cents because it should stay in range 0 ... 56.8 cents</p>";
@@ -1213,7 +1213,7 @@ if(isset($_POST['change_comma']) AND isset($_POST['list_sensitive_notes']) AND $
 
 echo "<table>";
 echo "<tr>";
-echo "<td style=\"white-space:nowrap; padding:6px; vertical-align:middle;\"><span class=\"blue-text\">numgrades</span> = <input type=\"text\" name=\"numgrades\" size=\"5\" value=\"".$numgrades_fullscale."\"> (typically 12)</td>";
+echo "<td style=\"white-space:nowrap; padding:6px; vertical-align:middle;\"><span class=\"green-text\">numgrades</span> = <input type=\"text\" name=\"numgrades\" size=\"5\" value=\"".$numgrades_fullscale."\"> (typically 12)</td>";
 echo "<td rowspan=\"3\" style=\"white-space:nowrap; padding:6px; vertical-align:middle;\">";
 echo "<table class=\"thicktable\">";
 echo "<tr>";
@@ -1240,6 +1240,7 @@ for($j = $j_col = 0; $j <= $numgrades_fullscale; $j++) {
 	echo "<input style=\"text-align:center;\" type=\"text\" name=\"new_name_".$j."\" size=\"".$the_width."\" value=\"".$name[$j]."\">";
 	echo "</td>";
 	}
+if($j_col < 12) for($j_col= $j_col; $j_col < 12; $j_col++) echo "<td>&nbsp;</td>";
 echo "</tr>";
 echo "<input type=\"hidden\" name=\"numnotes\" value=\"".$numnotes."\">";
 if($convention <> 3) {
@@ -1254,7 +1255,7 @@ if($need_adjust) {
 	echo "</td></tr>";
 	}
 echo "</table><tr>";
-echo "<td style=\"white-space:nowrap; padding:6px; vertical-align:middle;\"><span class=\"blue-text\">interval</span> = <input type=\"text\" name=\"interval\" size=\"6\" value=\"".$interval."\">";
+echo "<td style=\"white-space:nowrap; padding:6px; vertical-align:middle;\"><span class=\"green-text\">interval</span> = <input type=\"text\" name=\"interval\" size=\"6\" value=\"".$interval."\">";
 $cents = round(cents($interval),1);
 echo " or <input type=\"text\" name=\"interval_cents\" size=\"6\" value=\"".$cents."\"> cents (typically 1200)<br />";
 store($h_image,"interval_cents",$cents);
@@ -1263,17 +1264,17 @@ store($h_image,"p_comma",$p_comma);
 store($h_image,"q_comma",$q_comma);
 echo "</tr><tr>";
 echo "<td style=\"white-space:nowrap; padding:6px; vertical-align:middle;\">";
-echo "<p><span class=\"blue-text\">syntonic comma</span> = <font color=\"red\">".round($syntonic_comma,1)."</font> cents";
+echo "<p><span class=\"green-text\">syntonic comma</span> = <font color=\"red\">".round($syntonic_comma,1)."</font> cents";
 	if(($p_comma * $q_comma) > 0) echo " = ratio <font color=\"red\">".$p_comma."/".$q_comma."</font>";
 	echo "</p><p><input style=\"background-color:aquamarine;\" type=\"submit\" name=\"change_comma\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#topcomma\" value=\"CHANGE COMMA VALUE TO:\">&nbsp;ratio&nbsp;<input type=\"text\" name=\"new_p_comma\" size=\"3\" value=\"\"> / <input type=\"text\" name=\"new_q_comma\" size=\"3\" value=\"\">&nbsp;&nbsp;or&nbsp;<input type=\"text\" name=\"new_comma\" size=\"6\" value=\"\"> cents";
 	echo "</p>";
 echo "</td>";
 echo "</tr>";
 echo "<tr>";
-echo "<td style=\"white-space:nowrap; padding:6px; vertical-align:middle;\"><span class=\"blue-text\">basekey</span> = <input type=\"text\" name=\"basekey\" size=\"5\" value=\"".$basekey."\">";
-echo "&nbsp;&nbsp;<span class=\"blue-text\">baseoctave</span> = <input type=\"text\" name=\"baseoctave\" size=\"5\" value=\"".$baseoctave."\"></td>";
-echo "<td style=\"padding:6px; vertical-align:middle;\"><span class=\"blue-text\">basefreq</span> = <input type=\"text\" name=\"basefreq\" size=\"7\" value=\"".$basefreq."\">&nbsp;Hz<br />This is the frequency for fraction 1/1, assuming a 440 Hz diapason.";
-if($ratio[0] <> 1 AND $name[0] <> '') echo "<br />Here, the frequency of <span class=\"blue-text\">‘".$name[0]."’</span> would be <font color=\"red\">".round(($basefreq * $ratio[0]),2)."</font> Hz if it is the <i>block key</i>.";
+echo "<td style=\"white-space:nowrap; padding:6px; vertical-align:middle;\"><span class=\"green-text\">basekey</span> = <input type=\"text\" name=\"basekey\" size=\"5\" value=\"".$basekey."\">";
+echo "&nbsp;&nbsp;<span class=\"green-text\">baseoctave</span> = <input type=\"text\" name=\"baseoctave\" size=\"5\" value=\"".$baseoctave."\"></td>";
+echo "<td style=\"padding:6px; vertical-align:middle;\"><span class=\"green-text\">basefreq</span> = <input type=\"text\" name=\"basefreq\" size=\"7\" value=\"".$basefreq."\">&nbsp;Hz<br />This is the frequency for fraction 1/1, assuming a 440 Hz diapason.";
+if($ratio[0] <> 1 AND $name[0] <> '') echo "<br />Here, the frequency of <span class=\"green-text\">‘".$name[0]."’</span> would be <font color=\"red\">".round(($basefreq * $ratio[0]),2)."</font> Hz if it is the <i>block key</i>.";
 echo "</td>";
 echo "</tr></table>";
 
@@ -1307,19 +1308,19 @@ if(isset($_POST['change_comma']) AND isset($_POST['list_sensitive_notes']) AND $
 	if($list_sensitive_notes <> '') {
 		$table_sensitive_notes = explode(' ',$list_sensitive_notes);
 		echo "<p>Sensitive notes: ";
-		for($i = 0; $i < count($table_sensitive_notes); $i++) if(isset($name[$table_sensitive_notes[$i]])) echo "<span class=\"blue-text\">".$name[$table_sensitive_notes[$i]]."</span> ";
+		for($i = 0; $i < count($table_sensitive_notes); $i++) if(isset($name[$table_sensitive_notes[$i]])) echo "<span class=\"green-text\">".$name[$table_sensitive_notes[$i]]."</span> ";
 		echo "<br />";
 		}
 	if($list_wolffifth_notes <> '') {
 		$table_wolffifth_notes = explode(' ',$list_wolffifth_notes);
 		echo "Wolffifth notes: ";
-		for($i = 0; $i < count($table_wolffifth_notes); $i++) if(isset($name[$table_wolffifth_notes[$i]])) echo "<span class=\"blue-text\">".$name[$table_wolffifth_notes[$i]]."</span> ";
+		for($i = 0; $i < count($table_wolffifth_notes); $i++) if(isset($name[$table_wolffifth_notes[$i]])) echo "<span class=\"green-text\">".$name[$table_wolffifth_notes[$i]]."</span> ";
 		echo "</p>"; 
 		}
 	if($list_wolffourth_notes <> '') {
 		$table_wolffourth_notes = explode(' ',$list_wolffourth_notes);
 		echo "Wolffourth notes: ";
-		for($i = 0; $i < count($table_wolffourth_notes); $i++) if(isset($name[$table_wolffourth_notes[$i]])) echo "<span class=\"blue-text\">".$name[$table_wolffourth_notes[$i]]."</span> ";
+		for($i = 0; $i < count($table_wolffourth_notes); $i++) if(isset($name[$table_wolffourth_notes[$i]])) echo "<span class=\"green-text\">".$name[$table_wolffourth_notes[$i]]."</span> ";
 		echo "</p>"; 
 		}
 	if($new_comma < 0 OR $new_comma > 56.8) echo "<p>➡ Cannot set syntonic comma to: <font color=\"red\">".$new_comma."</font> cents because it should stay in range 0 ... 56.8 cents</p>";
@@ -1369,7 +1370,7 @@ if(isset($_POST['change_comma']) AND isset($_POST['list_sensitive_notes']) AND $
 		}
 	} */
 
-echo "<h3 id=\"toptable\">Ratios and names of tonal scale <span class=\"blue-text\">“".$scale_name."”</span></h3>";
+echo "<h3 id=\"toptable\">Ratios and names of tonal scale <span class=\"green-text\">“".$scale_name."”</span></h3>";
 
 if(!isset($_SESSION['scroll']) OR $_SESSION['scroll'] == 1) {
 	echo "<div  style=\"overflow-x:scroll;\">";
@@ -1473,7 +1474,7 @@ if(!$warned_ratios) {
 			$cents = "«—&nbsp;".$cents."c&nbsp;—»";
 			}
 		echo "<td style=\"white-space:nowrap; text-align:center; padding-top:4px; padding-bottom:4px; padding-left:0px; padding-right:0px; margin-left:0px; margin-right:0px;\" colspan=\"2\">";
-		echo "<span class=\"blue-text\">".$cents."</span>";
+		echo "<span class=\"green-text\">".$cents."</span>";
 		echo "</td>";
 		}
 	echo "</tr>";
@@ -1552,7 +1553,7 @@ if(!$warned_ratios) {
 						$high = $high_once = TRUE; $gap = $low_interval;
 						}
 					echo "<font color=\"red\">➡</font>&nbsp;Position ";
-					if($name[$j] <> '') echo "<span class=\"blue-text\">‘".$name[$j]."’</span> ";
+					if($name[$j] <> '') echo "<span class=\"green-text\">‘".$name[$j]."’</span> ";
 					if(($p[$j] * $q[$j]) <> 0) echo $p[$j]."/".$q[$j];
 					else echo round($ratio[$j],3);
 					echo " outside Pyth/harm cycles of fifths (too ";
@@ -1739,7 +1740,7 @@ if($done AND $numgrades_with_labels > 2 AND !$warned_ratios) {
 							$found = TRUE; break;
 							}
 						}
-					if(!$found) $error_create .= "<br /><font color=\"red\"> ➡ ERROR: This note</font> <span class=\"blue-text\">‘".$some_name."’</span> <font color=\"red\">does not belong to the current scale</font>";
+					if(!$found) $error_create .= "<br /><font color=\"red\"> ➡ ERROR: This note</font> <span class=\"green-text\">‘".$some_name."’</span> <font color=\"red\">does not belong to the current scale</font>";
 					}
 				}
 			$selected_grade_name = $new_selected_grade_name;
@@ -1754,14 +1755,14 @@ if($done AND $numgrades_with_labels > 2 AND !$warned_ratios) {
 		$result1 = check_duplicate_name($dir_scales,$new_scale_file);
 		$result2 = check_duplicate_name($dir_scales,$old_scale_file);
 		if($result1 OR $result2) {
-			$error_create = "<br /><font color=\"red\"> ➡ ERROR: This name</font> <span class=\"blue-text\">‘".$new_scale_name."’</span> <font color=\"red\">already exists</font>";
+			$error_create = "<br /><font color=\"red\"> ➡ ERROR: This name</font> <span class=\"green-text\">‘".$new_scale_name."’</span> <font color=\"red\">already exists</font>";
 			}
 		if($error_create == '') {
 			if(isset($_POST['major_minor'])) {
 				$new_scale_mode = $_POST['major_minor'];
 				$name_sensitive_note = trim($_POST['name_sensitive_note']);
 				if($name_sensitive_note <> '' AND $new_scale_mode == "none") {
-					$error_create = "<br /><font color=\"red\"> ➡ Select option for raising/lowering sensitive note</font> <span class=\"blue-text\">‘".$name_sensitive_note."’</span>";
+					$error_create = "<br /><font color=\"red\"> ➡ Select option for raising/lowering sensitive note</font> <span class=\"green-text\">‘".$name_sensitive_note."’</span>";
 					}
 				if($new_scale_mode <> "none") {
 					if($name_sensitive_note == '') {
@@ -1789,7 +1790,7 @@ if($done AND $numgrades_with_labels > 2 AND !$warned_ratios) {
 					//		echo "j_tonic = ".$j_tonic."<br />";
 							if(!$full_scale AND $j_tonic >= 0 AND $new_scale_mode == "major") {
 								if($series[$j_tonic] == 'h') {
-									echo "<p><font color=\"red\">➡</font>&nbsp;Labeled positions have been raised by 1 comma to put the tonic <span class=\"blue-text\">‘".$name[$j_tonic]."’</span> into Pythagorean series of fiths</p>";
+									echo "<p><font color=\"red\">➡</font>&nbsp;Labeled positions have been raised by 1 comma to put the tonic <span class=\"green-text\">‘".$name[$j_tonic]."’</span> into Pythagorean series of fiths</p>";
 									$p_align = $p_comma;
 									$q_align = $q_comma;
 									if(($p_comma * $q_comma) == 0) {
@@ -1801,7 +1802,7 @@ if($done AND $numgrades_with_labels > 2 AND !$warned_ratios) {
 								}
 							if(!$full_scale AND $j_tonic >= 0 AND $new_scale_mode == "minor") {
 								if($series[$j_tonic] == 'p') {
-									echo "<p><font color=\"red\">➡</font>&nbsp;Labeled positions have been lowered by 1 comma to put the tonic <span class=\"blue-text\">‘".$name[$j_tonic]."’</span> into harmonic series of fiths</p>";
+									echo "<p><font color=\"red\">➡</font>&nbsp;Labeled positions have been lowered by 1 comma to put the tonic <span class=\"green-text\">‘".$name[$j_tonic]."’</span> into harmonic series of fiths</p>";
 									$p_align = $q_comma;
 									$q_align = $p_comma;
 									if(($p_comma * $q_comma) == 0) {
@@ -1833,7 +1834,7 @@ if($done AND $numgrades_with_labels > 2 AND !$warned_ratios) {
 									}
 								}
 							if($j >= $numgrades_fullscale)
-								$error_create = "<br /><font color=\"red\"> ➡ ERROR: Sensitive note <span class=\"blue-text\">‘".$name_sensitive_note."’</span> <font color=\"red\">was not found in this scale</font>";
+								$error_create = "<br /><font color=\"red\"> ➡ ERROR: Sensitive note <span class=\"green-text\">‘".$name_sensitive_note."’</span> <font color=\"red\">was not found in this scale</font>";
 							else {
 								if(($p_transpose * $q_transpose) <> 0) {
 									$gcd = gcd($p_transpose,$q_transpose);
@@ -1909,7 +1910,7 @@ if($done AND $numgrades_with_labels > 2 AND !$warned_ratios) {
 						}
 					}
 				if($error_create == '') {
-					echo "<p><font color=\"red\">Exported to</font> <span class=\"blue-text\">‘".$new_scale_name."’</span> <input class=\"edit\" type=\"submit\" name=\"edit_new_scale\" formaction=\"".$link_edit."?scalefilename=".urlencode($new_scale_name)."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$new_scale_name."’\"></p>";
+					echo "<p><font color=\"red\">Exported to</font> <span class=\"green-text\">‘".$new_scale_name."’</span> <input class=\"edit\" type=\"submit\" name=\"edit_new_scale\" formaction=\"".$link_edit."?scalefilename=".urlencode($new_scale_name)."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$new_scale_name."’\"></p>";
 					$handle = fopen($dir_scales.$new_scale_file,"w");
 					fwrite($handle,"\"".$new_scale_name."\"\n");
 					$comma_line = $syntonic_comma;
@@ -2043,7 +2044,7 @@ if($done AND $numgrades_with_labels > 2 AND !$warned_ratios) {
 		$result1 = check_duplicate_name($dir_scales,$new_scale_file);
 		$result2 = check_duplicate_name($dir_scales,$old_scale_file);
 		if($result1 OR $result2) {
-			$error_transpose .= "<font color=\"red\"> ➡ ERROR: This name</font> <span class=\"blue-text\">‘".$new_scale_name."’</span> <font color=\"red\">already exists</font><br />";
+			$error_transpose .= "<font color=\"red\"> ➡ ERROR: This name</font> <span class=\"green-text\">‘".$new_scale_name."’</span> <font color=\"red\">already exists</font><br />";
 			}
 		$p_raise = abs(intval($_POST['p_raise']));
 		$q_raise = abs(intval($_POST['q_raise']));
@@ -2068,9 +2069,9 @@ if($done AND $numgrades_with_labels > 2 AND !$warned_ratios) {
 					$jj++;
 					}
 				if($j_transpose_from < 0)
-					$error_transpose .= "<font color=\"red\"> ➡ ERROR: Transpose from note <span class=\"blue-text\">‘".$transpose_from_note."’</span> <font color=\"red\">was not found in this scale</font><br />";
+					$error_transpose .= "<font color=\"red\"> ➡ ERROR: Transpose from note <span class=\"green-text\">‘".$transpose_from_note."’</span> <font color=\"red\">was not found in this scale</font><br />";
 				if($j_transpose_to < 0 AND $transposition_mode == "murcchana")
-					$error_transpose .= "<font color=\"red\"> ➡ ERROR: Transpose to note <span class=\"blue-text\">‘".$transpose_to_note."’</span> <font color=\"red\">was not found in this scale</font><br />";
+					$error_transpose .= "<font color=\"red\"> ➡ ERROR: Transpose to note <span class=\"green-text\">‘".$transpose_to_note."’</span> <font color=\"red\">was not found in this scale</font><br />";
 				if($error_transpose == '') {
 					$p_transpose_from = $p[$j_transpose_from];
 					$q_transpose_from = $q[$j_transpose_from];
@@ -2080,7 +2081,7 @@ if($done AND $numgrades_with_labels > 2 AND !$warned_ratios) {
 						$q_transpose_from = $q_transpose_from / $gcd;
 						}
 					$ratio_transpose_from = $ratio[$j_transpose_from];
-					echo "<p><font color=\"MediumTurquoise\">Transposition from</font> <span class=\"blue-text\">‘".$transpose_from_note."’</span> fraction ".$p_transpose_from."/".$q_transpose_from." (".$grade_transpose_from."th position) ";
+					echo "<p><font color=\"MediumTurquoise\">Transposition from</font> <span class=\"green-text\">‘".$transpose_from_note."’</span> fraction ".$p_transpose_from."/".$q_transpose_from." (".$grade_transpose_from."th position) ";
 					$p_transpose_to = $p[$j_transpose_to];
 					$q_transpose_to = $q[$j_transpose_to];
 					if(($p_transpose_to * $q_transpose_to) <> 0) {
@@ -2089,7 +2090,7 @@ if($done AND $numgrades_with_labels > 2 AND !$warned_ratios) {
 						$q_transpose_to = $q_transpose_to / $gcd;
 						}
 					$ratio_transpose_to = $ratio[$j_transpose_to];
-					echo "<font color=\"MediumTurquoise\">to</font> <span class=\"blue-text\">‘".$transpose_to_note."’</span> fraction ".$p_transpose_to."/".$q_transpose_to." (".$grade_transpose_to."th position)</p>";
+					echo "<font color=\"MediumTurquoise\">to</font> <span class=\"green-text\">‘".$transpose_to_note."’</span> fraction ".$p_transpose_to."/".$q_transpose_to." (".$grade_transpose_to."th position)</p>";
 					$p_transpose = $p_transpose_to * $q_transpose_from;
 					$q_transpose = $q_transpose_to * $p_transpose_from;
 					if(($p_transpose * $q_transpose) <> 0) {
@@ -2142,7 +2143,7 @@ if($done AND $numgrades_with_labels > 2 AND !$warned_ratios) {
 							$this_ratio = $p_new/$q_new;
 							}
 						$cents_new = cents($this_ratio);
-						echo "<span class=\"blue-text\">".$name_this_grade[$jj]."</span> ratio ";
+						echo "<span class=\"green-text\">".$name_this_grade[$jj]."</span> ratio ";
 						if(($p_new * $q_new) > 0) echo $p_new."/".$q_new." = ";
 						echo round($this_ratio,3);
 						echo " = ".round($cents_new)." cents";
@@ -2177,7 +2178,7 @@ if($done AND $numgrades_with_labels > 2 AND !$warned_ratios) {
 						for($jj = 0; $jj <= $numgrades_with_labels; $jj++) {
 							if(abs($cents - $cents_new_this_grade[$jj]) < 2) {
 								if($name[$j] <> $name_this_grade[$jj]) {
-									echo "➡ Note <span class=\"blue-text\">‘".$name_this_grade[$jj]."’</span> relocated to position ".$j."<br />";
+									echo "➡ Note <span class=\"green-text\">‘".$name_this_grade[$jj]."’</span> relocated to position ".$j."<br />";
 									}
 								$new_name[$j] = $name_this_grade[$jj];
 								$p[$j] = $p_new_this_grade[$jj];
@@ -2278,7 +2279,7 @@ if($done AND $numgrades_with_labels > 2 AND !$warned_ratios) {
 							$new_ratio = $new_ratio * $interval;
 						}
 					$ratio[$j] = $new_ratio;
-					echo "<span class=\"blue-text\">‘".$name[$j]."’</span> new ratio = ".round($new_ratio,3);
+					echo "<span class=\"green-text\">‘".$name[$j]."’</span> new ratio = ".round($new_ratio,3);
 					if(($p[$j] * $q[$j]) <> 0) echo " = ".$p_new."/".$q_new;
 					echo "<br />";
 					}
@@ -2286,7 +2287,7 @@ if($done AND $numgrades_with_labels > 2 AND !$warned_ratios) {
 			
 			// Now save to exported file	
 			echo "<br />";
-			echo "<font color=\"MediumTurquoise\">Saved to new scale</font> <span class=\"blue-text\">‘".$new_scale_name."’</span>&nbsp;<input class=\"edit\" type=\"submit\" name=\"edit_new_scale\" formaction=\"".$link_edit."?scalefilename=".urlencode($new_scale_name)."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$new_scale_name."’\"></p>";
+			echo "<font color=\"MediumTurquoise\">Saved to new scale</font> <span class=\"green-text\">‘".$new_scale_name."’</span>&nbsp;<input class=\"edit\" type=\"submit\" name=\"edit_new_scale\" formaction=\"".$link_edit."?scalefilename=".urlencode($new_scale_name)."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$new_scale_name."’\"></p>";
 			$transpose_scale_name = $new_scale_name;
 			$handle = fopen($dir_scales.$new_scale_file,"w");
 			fwrite($handle,"\"".$new_scale_name."\"\n");
@@ -2368,7 +2369,7 @@ if($done AND $numgrades_with_labels > 2 AND !$warned_ratios) {
 
 if($done AND !$warned_ratios) {
 	echo "<hr>";
-	echo "<p><input class=\"produce\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"create_meantone\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#toptable\" value=\"CREATE MEANTONE\"> temperament scale (<a target=\"_blank\" href=\"https://en.wikipedia.org/wiki/Meantone_temperament\">follow this link</a>) with the following data:";
+	echo "<p><input class=\"produce\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"create_meantone\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#toptable\" value=\"CREATE MEANTONE\"> temperament scale (<a target=\"_blank\" class=\"linkdotted\" href=\"https://en.wikipedia.org/wiki/Meantone_temperament\">follow this link</a>) with the following data:";
 	if($error_meantone <> '') echo "<font color=\"red\">".$error_meantone."</font>";
 	echo "</p>";
 	echo "<ul>";
@@ -2415,7 +2416,7 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 	else {
 		if($transpose_scale_name <> '') $this_name = $transpose_scale_name;
 		else if($new_scale_name <> '') $this_name = $new_scale_name;
-		echo "<h3>Structure of transposed tonal scale <span class=\"blue-text\">‘".$this_name."’</span> (cents):</h3>";
+		echo "<h3>Structure of transposed tonal scale <span class=\"green-text\">‘".$this_name."’</span> (cents):</h3>";
 		}
 	echo "<table class=\"thicktable\">";
 	echo "<tr><td></td>";
@@ -2497,7 +2498,7 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 			$string_sensitive_notes .= $name[$sensitive_note]." ";
 			}
 		}
-	echo "<p style=\"\"><b>Colors: <span class=\"blue-text\">Perfect fifth</span> — <font color=\"red\">Wolf fifth</font> — <font color=\"BlueViolet\">Wolf fourth</font> — <font color=\"MediumTurquoise\">Harmonic major third</font> — <font color=\"brown\">Pythagorean major third</font></b><br />➡ <i>Wolf fifths indicate ‘sensitive notes’";
+	echo "<p style=\"\"><b>Colors: <span class=\"green-text\">Perfect fifth</span> — <font color=\"red\">Wolf fifth</font> — <font color=\"BlueViolet\">Wolf fourth</font> — <font color=\"MediumTurquoise\">Harmonic major third</font> — <font color=\"brown\">Pythagorean major third</font></b><br />➡ <i>Wolf fifths indicate ‘sensitive notes’";
 	if($list_sensitive_notes <> '') echo ", here: </i><b><font color=\"red\">".trim($string_sensitive_notes)."</font></b><i>";
 	echo "</i></p>";
 	echo "<input type=\"hidden\" name=\"list_sensitive_notes\" value=\"".$list_sensitive_notes."\">";
@@ -2526,7 +2527,7 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 				if($dist < -1) {
 					$deviation = " (-".round(abs($dist)).")";
 					}
-				echo "<span class=\"blue-text\">".$name[$j]." ".$name[$k]."</span><small>".$deviation."</small><br />";
+				echo "<span class=\"green-text\">".$name[$j]." ".$name[$k]."</span><small>".$deviation."</small><br />";
 				$fifth[$j] = $k;
 				store2($h_image,"fifth",$j,$k);
 				}
@@ -2576,7 +2577,7 @@ if($numgrades_with_labels > 2 AND $error_transpose == '' AND $error_create == ''
 				if($dist < -1) {
 					$deviation = " (-".round(abs($dist)).")";
 					}
-				echo "<span class=\"blue-text\">".$name[$j]." ".$name[$k]."</span><small>".$deviation."</small><br />";
+				echo "<span class=\"green-text\">".$name[$j]." ".$name[$k]."</span><small>".$deviation."</small><br />";
 				$fourth[$j] = $k;
 			//	store2($h_image,"fourth",$j,$k);
 				$sum_comma += $perfect_fourth - $pos;
@@ -2890,7 +2891,7 @@ function change_ratio_in_harmonic_cycle_of_fifths($this_note,$change_ratio,$numg
 	if(isset($changed_ratio[$this_note])) return;
 	$changed_ratio[$this_note] = TRUE;
 	if($series[$this_note] <> 'h') return;
-	echo "<span class=\"blue-text\">".$name[$this_note]."</span> ";
+	echo "<span class=\"green-text\">".$name[$this_note]."</span> ";
 	for($j = 0; $j < $numgrades_fullscale; $j++) {
 		if($j == $this_note OR $name[$j] == '') continue;
 		if(($p[$j] * $p[$this_note] * $q[$j] * $q[$this_note]) > 0)

@@ -9,21 +9,22 @@ $table = explode(SLASH,$file);
 $filename = end($table);
 $this_file = $bp_application_path.$file;
 $dir = str_replace($filename,'',$this_file);
+$current_directory = str_replace(SLASH.$filename,'',$file);
 
 require_once("_header.php");
 display_darklight();
 
-echo "<p>Current directory = ".$dir."</p>";
+echo "<p><small>Current directory = <a class=\"linkdotted\" href=\"index.php?path=".urlencode($current_directory)."\">".$dir."</a></small></p>";
 echo link_to_help();
 	
 echo "<h2>Csound orchestra file <big>“<font color=\"MediumTurquoise\">".$filename."</font>”</big></h2>";
 
 if(isset($_POST['savethisfile'])) {
-	echo "<p id=\"timespan\" style=\"color:red;\">Saved file…</p>";
 	$content = $_POST['thistext'];
 	$handle = fopen($this_file,"w");
 	fwrite($handle,$content);
 	fclose($handle);
+	echo "<span id=\"timespan\" style=\"color:red; float:right; background-color:white; padding:6px; border-radius:6px;\">Saved “".$this_file."” file…</span>";
 	}
 
 try_create_new_file($this_file,$filename);

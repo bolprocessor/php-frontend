@@ -24,7 +24,7 @@ echo "<h2>Keyboard file “".$filename."”</h2>";
 save_settings("last_name",$filename); 
 
 if(isset($_POST['savethisfile'])) {
-	echo "<p id=\"timespan\" style=\"color:red;\">Saved file…</p>";
+	echo "<span id=\"timespan\" style=\"color:red; float:right; background-color:white; padding:6px; border-radius:6px;\">&nbsp;Saved “".$this_file."” file…</span>";
 	$content = $_POST['thistext'];
 	$handle = fopen($this_file,"w");
 	$file_header = $top_header."\n// Keyboard file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
@@ -37,7 +37,7 @@ try_create_new_file($this_file,$filename);
 $content = @file_get_contents($this_file,TRUE);
 if($content === FALSE) ask_create_new_file($url_this_page,$filename);
 $extract_data = extract_data(TRUE,$content);
-echo "<p class=\"blue-text\">".$extract_data['headers']."</p>";
+echo "<p class=\"green-text\">".$extract_data['headers']."</p>";
 $content = $extract_data['content'];
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 

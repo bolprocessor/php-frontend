@@ -284,6 +284,123 @@ for($i = 0; $i < 7; $i++) {
 	$x_three = $x_three * 3;
 	}
 
+// ------ SCRIPTS ------
+
+echo "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js\"></script>\n";
+echo "<script>";
+echo "function createFile(pathToFile) {
+    $.ajax({
+        url: '_createfile.php',
+        data: { path_to_file: pathToFile },
+        success: function(response) {
+            document.getElementById('message').innerHTML = response;
+        },
+        error: function() {
+            document.getElementById('message').innerHTML = \"Error creating the file.\";
+        }
+    });\n";
+echo "}
+</script>";
+echo "<script>\n";
+echo "$(document).ready(function() {
+  $(\"#parent1\").click(function() {
+    $(\".child1\").prop(\"checked\", this.checked);
+  });
+
+  $('.child1').click(function() {
+    if ($('.child1:checked').length == $('.child1').length) {
+      $('#parent1').prop('checked', true);
+    } else {
+      $('#parent1').prop('checked', false);
+    }
+  });
+});";
+echo "</script>\n";
+
+echo "<script>\n";
+echo "function hide_textarea() {
+    var x = document.getElementById('textArea');
+    x.className='hidden';
+    }\n";
+echo "function settoggledisplay_input(i) {
+		var x = document.getElementById('showhide_input' + i);
+		var y = document.getElementById(\"hideshow\");
+    if(x) {
+      x.className='hidden'; }
+    if(y) {
+      y.className='unhidden'; }
+    }\n";
+echo "function settoggledisplay_output(i) {
+    var z = document.getElementById('showhide_output' + i);
+    if(z) {
+      z.className='hidden'; }
+      }\n";
+echo "function toggleAllDisplays(imax) {
+      for (var i = 0; i <= imax; i++) {
+          settoggledisplay_input(i);
+          settoggledisplay_output(i);
+      }
+    }\n";
+echo "function toggledisplay_input(i) {
+	    var x = document.getElementById('showhide_input' + i);
+      var y = document.getElementById(\"hideshow\");
+	    if(x) {
+	      x.className=(x.className=='hidden')?'unhidden':'hidden'; }
+      if(y) {
+        y.className=(y.className=='hidden')?'unhidden':'hidden'; }
+	  }\n";
+echo "function toggledisplay_output(i) {
+      var z = document.getElementById('showhide_output' + i);
+      if(z) {
+        z.className=(z.className=='hidden')?'unhidden':'hidden'; }
+    }\n";
+echo "function settogglesearch() {
+      var z = document.getElementById(\"search\");
+      if(z) {
+        z.className='hidden'; }
+      }\n";
+echo "function togglesearch() {
+      var z = document.getElementById(\"search\");
+      if(z) {
+        z.className=(z.className=='hidden')?'unhidden':'hidden'; }
+    }\n";
+
+echo "function settogglescales() {
+      var z = document.getElementById(\"scales\");
+      if(z) {
+        z.className='hidden'; }
+      }\n";
+echo "function togglescales() {
+      var z = document.getElementById(\"scales\");
+      if(z) {
+        z.className=(z.className=='hidden')?'unhidden':'hidden'; }
+    }\n";
+
+echo "function settogglecreate() {
+      var z = document.getElementById(\"create\");
+      if(z) {
+        z.className='hidden'; }
+      }\n";
+echo "function togglecreate() {
+      var z = document.getElementById(\"create\");
+      if(z) {
+        z.className=(z.className=='hidden')?'unhidden':'hidden'; }
+    }\n";
+echo "</script>\n";
+
+echo "<script>\n";
+echo "function tellsave() {\n";
+echo "localStorage.setItem('data','dirty');\n";
+echo "}</script>\n";
+
+echo "<script>";
+echo "function clearFields(inputId, nameId, commentId) {
+    document.getElementsByName(inputId)[0].value = \"\";
+    document.getElementsByName(nameId)[0].value = \"\";
+    document.getElementsByName(commentId)[0].value = \"\";\n";
+echo "}
+</script>";
+
 // --------- FUNCTIONS ------------
 
 /* function findExecutable($exeName) {
@@ -308,7 +425,6 @@ function findCsoundPath($exeName) {
 	return false;
     }
 	
-
 function extract_data($compact,$content) {
 	$said = FALSE;
 	$content = trim($content);
@@ -438,7 +554,7 @@ function display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,
 				echo $entries."<br />";
 				}
 			else {
-				echo "<div style=\"float:right; margin-top:36px;\">";
+				echo "<div style=\"float:right; margin-top:36px; background-color:transparent;\">";
 				echo "<form method=\"post\" id=\"thisone\" action=\"".$url_this_page."#help_entries\" enctype=\"multipart/form-data\">";
 				echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
 				echo "<input type=\"hidden\" name=\"file_format\" value=\"".$file_format."\">";
@@ -447,83 +563,83 @@ function display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,
 				}
 			}
 		}
-	echo "<table style=\"padding:0px; border-spacing: 2px;\" cellpadding=\"0px;\"><tr>";
+	echo "<table style=\"padding:0px; border-spacing:2px; background-color:transparent;\" cellpadding=\"0px;\"><tr style=\"background-color:transparent;\">";
 	if($error) {
 		echo "<td style=\"vertical-align:middle;\"><big><font color=\"red\" class=\"blinking\">➡</font></big></td>";
 		}
 	if($alphabet_file <> '') {
 		$url_this_page = "alphabet.php?file=".urlencode($dir.$alphabet_file);
 		if($test) echo "url_this_page = ".$url_this_page."<br />";
-		echo "<td>";
-		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$alphabet_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$alphabet_file."’\">";
+		echo "<td style=\"background-color:transparent;\">";
+		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" onclick=\"window.open('".$url_this_page."','".$alphabet_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".begin_with(20,$alphabet_file)."’\">";
 		echo "</td>";
 		}
 	if($grammar_file <> '') {
 		$url_this_page = "grammar.php?file=".urlencode($dir.$grammar_file);
 		if($test) echo "url_this_page = ".$url_this_page."<br />";
-		echo "<td><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-		echo "<input class=\"edit\" type=\"submit\" name=\"openobjects\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$grammar_file."’\">&nbsp;";
+		echo "<td style=\"background-color:transparent;\"><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+		echo "<input class=\"edit\" type=\"submit\" name=\"opengrammar\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".begin_with(20,$grammar_file)."’\">&nbsp;";
 		echo "</td></form>";
 		}
 	if($objects_file <> '') {
 		$url_this_page = "objects.php?file=".urlencode($dir.$objects_file);
-		echo "<td><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-		echo "<input class=\"edit\" type=\"submit\"  onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$objects_file."’\">&nbsp;";
+		echo "<td style=\"background-color:transparent;\"><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+		echo "<input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".begin_with(20,$objects_file)."’\">&nbsp;";
 		echo "</td></form>";
 		}
 	if($csound_file <> '') {
 		$url_this_page = "csound.php?file=".urlencode($csound_resources.SLASH.$csound_file);
-		echo "<td><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-		echo "<input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$csound_file."’\">&nbsp;";
+		echo "<td style=\"background-color:transparent;\"><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+		echo "<input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".begin_with(20,$csound_file)."’\">&nbsp;";
 		echo "</td></form>";
 		}
 	if($tonality_file <> '') {
 		$url_this_page = "tonality.php?file=".urlencode($tonality_resources.SLASH.$tonality_file);
-		echo "<td><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-		echo "<input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$tonality_file."’\">&nbsp;";
+		echo "<td style=\"background-color:transparent;\"><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+		echo "<input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".begin_with(20,$tonality_file)."’\">&nbsp;";
 		echo "</td></form>";
 		}
 	if($settings_file <> '') {
 		$url_this_page = "settings.php?file=".urlencode($dir.$settings_file);
 		if($test) echo "url_this_page = ".$url_this_page."<br />";
-		echo "<td>";
-		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$settings_file."','width=1000,height=800,left=100'); return false;\" value=\"EDIT ‘".$settings_file."’\">";
+		echo "<td style=\"background-color:transparent;\">";
+		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$settings_file."','width=1000,height=800,left=100'); return false;\" value=\"EDIT ‘".begin_with(20,$settings_file)."’\">";
 		echo "</td>";
 		}
 	if($orchestra_file <> '') {
 		$url_this_page = "orchestra.php?file=".urlencode($dir.$orchestra_file);
-		echo "<td>";
-		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$orchestra_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$orchestra_file."’\">";
+		echo "<td style=\"background-color:transparent;\">";
+		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$orchestra_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".begin_with(20,$orchestra_file)."’\">";
 		echo "</td>";
 		}
 	if($interaction_file <> '') {
 		$url_this_page = "interaction.php?file=".urlencode($dir.$interaction_file);
-		echo "<td>";
-		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$interaction_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$interaction_file."’\">";
+		echo "<td style=\"background-color:transparent;\">";
+		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$interaction_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".begin_with(20,$interaction_file)."’\">";
 		echo "</td>";
 		}
 	if($midisetup_file <> '') {
 		$url_this_page = "midisetup.php?file=".urlencode($dir.$midisetup_file);
-		echo "<td>";
-		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$midisetup_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$midisetup_file."’\">";
+		echo "<td style=\"background-color:transparent;\">";
+		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$midisetup_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".begin_with(20,$midisetup_file)."’\">";
 		echo "</td>";
 		}
 	if($timebase_file <> '') {
 		$url_this_page = "timebase.php?file=".urlencode($dir.$timebase_file);
-		echo "<td>";
-		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$timebase_file."','width=1000,height=900,left=50'); return false;\" value=\"EDIT ‘".$timebase_file."’\">";
+		echo "<td style=\"background-color:transparent;\">";
+		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$timebase_file."','width=1000,height=900,left=50'); return false;\" value=\"EDIT ‘".begin_with(20,$timebase_file)."’\">";
 		echo "</td>";
 		}
 	if($keyboard_file <> '') {
 		$url_this_page = "keyboard.php?file=".urlencode($dir.$keyboard_file);
-		echo "<td>";
-		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$keyboard_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$keyboard_file."’\">";
+		echo "<td style=\"background-color:transparent;\">";
+		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$keyboard_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".begin_with(20,$keyboard_file)."’\">";
 		echo "</td>";
 		}
 	if($glossary_file <> '') {
 		$url_this_page = "glossary.php?file=".urlencode($dir.$glossary_file);
-		echo "<td>";
-		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$glossary_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$glossary_file."’\">";
+		echo "<td style=\"background-color:transparent;\">";
+		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$glossary_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".begin_with(20,$glossary_file)."’\">";
 		echo "</td>";
 		}
 	echo "</tr></table>";
@@ -569,7 +685,7 @@ function compile_help($text_help_file,$html_help_file) {
 		$file_header .= "<html lang=\"en\">";
 		$file_header .= "<head>";
 		$file_header .= "<meta content=\"text/html; charset=utf-8\" http-equiv=\"Content-Type\" />";
-		$file_header .= "<link rel=\"stylesheet\" href=\"bp.css\" />\n";
+		$file_header .= "<link rel=\"stylesheet\" href=\"bp-light.css\" />\n";
 		$file_header .= "<script>\n";
 		$file_header .= "function unhide(divID) {
 	    var x = document.getElementById(divID);
@@ -640,7 +756,7 @@ function compile_help($text_help_file,$html_help_file) {
 function link_to_help() {
 	global $html_help_file;
 	$console_link = "produce.php?instruction=help";
-	$link = "<p>👉 Display <a href=\"".$console_link."\" onclick=\"window.open('".$console_link."','help','width=800,height=800,left=200'); return false;\">console's</a> instructions or the <a onclick=\"window.open('".$html_help_file."','Help','width=800,height=500'); return false;\" href=\"".$html_help_file."\">complete help file</a></p>";
+	$link = "<p>👉 Display <a class=\"linkdotted\" href=\"".$console_link."\" onclick=\"window.open('".$console_link."','help','width=800,height=800,left=200'); return false;\">console's instructions</a> or the <a class=\"linkdotted\" onclick=\"window.open('".$html_help_file."','Help','width=800,height=500'); return false;\" href=\"".$html_help_file."\">complete help file</a></p>";
 	return $link;
 	}
 
@@ -1371,7 +1487,7 @@ function fix_mf2t_file($file,$tracknames) {
 	$said = $content = FALSE;
 	if(file_exists($file)) $content = @file_get_contents($file,TRUE);
 	if(!$content) {
-		$message .= "<br /><font color=\"red\">Cannot find or open:</font> <span class=\"blue-text\">".$file."</span>";
+		$message .= "<br /><font color=\"red\">Cannot find or open:</font> <span class=\"green-text\">".$file."</span>";
 		return $message;
 		}
 	$handle = fopen($file,"w");
@@ -1637,7 +1753,7 @@ function change_occurrences_name_in_files($dir,$old_name,$new_name) {
 		for($i = 0; $i < $imax; $i++) {
 			$line = $table[$i];
 			if(is_integer(strpos($line,$old_name))) {
-				if($i > 1) echo "• Found ‘<span class=\"blue-text\">".$old_name."</span>’ in ‘<span class=\"blue-text\">".$thisfile."</span>’ and changed it to ‘<span class=\"blue-text\">".$new_name."</span>’<br />";
+				if($i > 1) echo "• Found ‘<span class=\"green-text\">".$old_name."</span>’ in ‘<span class=\"green-text\">".$thisfile."</span>’ and changed it to ‘<span class=\"green-text\">".$new_name."</span>’<br />";
 				$line = str_replace($old_name,$new_name,$line);
 				$found = TRUE;
 				}
@@ -2401,20 +2517,20 @@ function display_darklight() {
 
 function display_console_state() {
 	global $bp_application_path, $absolute_application_path, $panicfile, $filename, $url_this_page, $console;
-	 echo "<div style=\"display:flex; align-items:center; float:right; padding:6px; border-radius:6px;\">";
-	 echo "<img src=\"pict/BP3-logo.png\" style=\"width:70px;\"/>";
-	 echo "<span style=\"margin-left: 6px;\">";
+	 echo "<div style=\"display:flex; align-items:center; float:right; padding:6px; background-color:transparent;\">";
+	 echo "<a target=\"_blank\" href=\"".$bp_application_path."/php\"><img src=\"pict/BP3-logo.png\" style=\"width:70px; margin-bottom:12px;\"/></a>";
+	 echo "<span style=\"margin-left: 1em;\">";
 	 $output = check_console();
 	 if($output <> '') {
-		echo "Bol Processor ‘<span class=\"blue-text\"><b>".$console."</b></span>’ console is responding<br />Version ".$output;
+		echo "Bol Processor ‘<span class=\"green-text\"><b>".$console."</b></span>’ console is responding<br />Version ".$output;
 		$panicfile = str_replace(SLASH,'/',$panicfile);
 		if(isset($filename) AND $filename <> "Compilation" AND $filename <> "Produce" AND  $filename <> "Bol Processor" AND $url_this_page <> "index.php") {
-			echo "<div style=\"display: flex; justify-content: flex-end; align-items: center;\"><button type=\"button\" class=\"produce\" style=\"font-size: small;\" onclick=\"createFile('".$panicfile."');\">PANIC!</button>";
+			echo "<div style=\"display:flex; justify-content:flex-end; align-items:center; background-color:transparent;\"><button type=\"button\" class=\"produce\" style=\"font-size: small;\" onclick=\"createFile('".$panicfile."');\">PANIC!</button>";
 			echo "&nbsp;&nbsp;<img title=\"Bulb Png PNGs by Vecteezy\" src=\"pict/bulb.png\" id=\"darkModeToggle\" style=\"width:30px; cursor: pointer;\"/>";
 			echo "</div>\n";
 			}
 		else {
-			echo "<div id=\"darkModeToggle\" style=\"display: flex; justify-content: flex-end; align-items: center; cursor: pointer;\">";
+			echo "<div id=\"darkModeToggle\" style=\"display:flex; justify-content:flex-end; align-items:center; cursor:pointer; background-color:transparent;\">";
 			echo "dark&nbsp;/&nbsp;light&nbsp;&nbsp;<img title=\"Bulb Png PNGs by Vecteezy\" src=\"pict/bulb.png\"  style=\"width:40px;\"/>";
 			echo "</div>\n";
 			}
@@ -2424,12 +2540,12 @@ function display_console_state() {
 		if(check_installation()) {
 			$link = "compile.php";
 			echo "Source files of BP3 have been found. You can (re)compile it.<br />";
-			if(!check_gcc()) if(windows_system()) echo "👉&nbsp;&nbsp;However, ‘gcc’ is not responding.<br />You first need to <a target=\"_blank\" href=\"https://bolprocessor.org/install-mingw/\">install and set up MinGW</a>.";
-				else echo "👉&nbsp;&nbsp;However, ‘gcc’ is not responding. You need to install<br />the <a target=\"_blank\" href=\"https://www.cnet.com/tech/computing/install-command-line-developer-tools-in-os-x/\">command line developer tools</a> or <a target=\"_blanl\" href=\"https://developer.apple.com/support/xcode/\">Xcode</a>.";
+			if(!check_gcc()) if(windows_system()) echo "👉&nbsp;&nbsp;However, ‘gcc’ is not responding.<br />You first need to <a class=\"linkdotted\" target=\"_blank\" href=\"https://bolprocessor.org/install-mingw/\">install and set up MinGW</a>.";
+				else echo "👉&nbsp;&nbsp;However, ‘gcc’ is not responding. You need to install<br />the <a class=\"linkdotted\" target=\"_blank\" href=\"https://www.cnet.com/tech/computing/install-command-line-developer-tools-in-os-x/\">command line developer tools</a> or <a class=\"linkdotted\" target=\"_blanl\" href=\"https://developer.apple.com/support/xcode/\">Xcode</a>.";
 			else echo "👉&nbsp;&nbsp;<a onclick=\"window.open('".$link."','trace','width=800,height=800'); return false;\"  href=\"".$link."\">Click to run the compiler</a>, then <a href=\"".$url_this_page."\">reload this page</a>.";
 			}
 		else
-			echo "Some files are missing or misplaced.<br />👉&nbsp;&nbsp;Visit <a target=\"_blank\" href=\"https://bolprocessor.org/check-bp3/#install\">https://bolprocessor.org/check-bp3/</a><br />and follow instructions!";
+			echo "Some files are missing or misplaced.<br />👉&nbsp;&nbsp;Visit <a target=\"_blank\" class=\"linkdotted\" href=\"https://bolprocessor.org/check-bp3/#install\">https://bolprocessor.org/check-bp3/</a><br />and follow instructions!";
 		display_darklight();
 	 	}
 	 echo "</span>";
@@ -2474,7 +2590,7 @@ function check_gcc() {
 	}
 
 function link_to_tonality() {
-	echo "<p style=\"background-color:azure; color:black; padding:4px; border-radius:6px; line-height:2;\">&nbsp;🎶&nbsp;&nbsp;Using microtonality?<br />&nbsp;👉&nbsp;&nbsp;<a style=\"color:#007BFF;\" target=\"_blank\" href=\"index.php?path=tonality_resources\">TONALITY resource folder</a></p>";
+	echo "<p class=\"thinborder\" style=\"background-color:azure; color:black; padding:4px; border-radius:6px; line-height:2;\">&nbsp;🎶&nbsp;&nbsp;Using microtonality?<br />&nbsp;👉&nbsp;&nbsp;<a style=\"color:#007BFF;\" target=\"_blank\" href=\"index.php?path=tonality_resources\">TONALITY resource folder</a></p>";
 	}
 
 function check_csound() {
@@ -2494,10 +2610,10 @@ function check_csound() {
 		echo "&nbsp;<input class=\"save\" type=\"submit\"  name=\"csound_path_change\" value=\"TRY\">";
 		echo "<br />";
 		if(linux_system()) {
-			echo "<br /><font color=\"red\">➡</font>&nbsp;Read instructions in the <a target=\"_blank\" href=\"https://bolprocessor.org/misc/linux-scripts.zip\">script folder</a> to install Csound<br />";
+			echo "<br /><font color=\"red\">➡</font>&nbsp;Read instructions in the <a target=\"_blank\" //bolprocessor.org/misc/linux-scripts.zip\">script folder</a> to install Csound<br />";
 			}
 		else {
-			echo "<br /><font color=\"red\">➡</font>&nbsp;<a target=\"_blank\" href=\"https://csound.com/download.html\">Follow this link</a> to install Csound<br />";
+			echo "<br /><font color=\"red\">➡</font>&nbsp;<a target=\"_blank\" class=\"linkdotted\" href=\"https://csound.com/download.html\">Follow this link</a> to install Csound<br />";
 			}
 	    $result = FALSE;
 		}
@@ -2514,13 +2630,11 @@ function check_csound() {
 				break;
 				}
 			}
-		echo "<p style=\"vertical-align:middle; background-color:azure; color:black; padding-top:4px; padding-left:4px; padding-right:4px; padding-bottom:12px; border-radius:6px;\"><img src=\"pict/logo_csound.png\" width=\"90px;\" style=\"vertical-align:middle;\" />".$version."is responding<br />";
+		echo "<p class=\"thinborder\" style=\"vertical-align:middle; background-color:azure; color:black; padding-top:4px; padding-left:4px; padding-right:4px; padding-bottom:12px; border-radius:6px;\"><img src=\"pict/logo_csound.png\" width=\"90px;\" style=\"vertical-align:middle;\" />".$version."is responding<br />";
 		$result = TRUE;
 		}
 	if($path <> $csound_resources) echo "&nbsp;👉&nbsp;&nbsp;<a style=\"color:#007BFF;\" target=\"_blank\" href=\"index.php?path=csound_resources\">CSOUND resource folder</a><br />";
 	echo "</p>";
-	// echo "<hr style=\"border: 8px solid GhostWhite;\">";
-	echo "<hr>";
 	return $result;
 	}
 
@@ -2581,7 +2695,7 @@ function html_to_text($text,$type) {
 
 function popup_link($image_name,$text,$image_width,$image_height,$left_margin,$link) {
 	$link = str_replace("#","_",$link);
-	$popup_link = "<a onclick=\"window.open('".$link."','".$image_name."','toolbar=no,scrollbars=yes,resizable=yes,width=".$image_width.",height=".$image_height.",left=".$left_margin."'); return false;\" href=\"".$link."\">".$text."</a>";
+	$popup_link = "<a class=\"linkdotted\" onclick=\"window.open('".$link."','".$image_name."','toolbar=no,scrollbars=yes,resizable=yes,width=".$image_width.",height=".$image_height.",left=".$left_margin."'); return false;\" href=\"".$link."\">".$text."</a>";
 	return $popup_link;
 	}
 
@@ -2680,14 +2794,14 @@ function show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,
 		}
 	if($tonality_file <> '') {
 		$list_of_tonal_scales = list_of_tonal_scales($dir_tonality_resources.$tonality_file);
-		if(($max_scales = count($list_of_tonal_scales)) > 0) {
+		if((!isset($_POST['analyze_tonal']) AND $max_scales = count($list_of_tonal_scales)) > 0) {
 			if($max_scales > 1)  {
 				$i = 0;
-				echo "<p id=\"tonal\" style=\"margin-bottom:0px;\">Tonality resource file <span class=\"blue-text\">‘".$tonality_file."’</span> contains definitions of tonal scales&nbsp;<font color=\"red\">➡</font>&nbsp;<button style=\"background-color:aquamarine; border-radius: 6px; font-size:large;\" onclick=\"togglescales(); return false;\">Show/hide tonal scales</button>";
+				echo "<p id=\"tonal\" style=\"margin-bottom:0px;\">Tonality resource file <span class=\"green-text\">‘".$tonality_file."’</span> contains definitions of tonal scales&nbsp;<font color=\"red\">➡</font>&nbsp;<button style=\"background-color:aquamarine; border-radius: 6px; font-size:large;\" onclick=\"togglescales(); return false;\">Show/hide tonal scales</button>";
 				echo "<div id=\"scales\"  style=\"border-radius: 15px; padding:6px;\"><br />";
 				}
 			else {
-				echo "<p style=\"margin-bottom:0px;\">Tonal resource file <span class=\"blue-text\">‘".$tonality_file."’</span> contains the definition of this tonal scale:";
+				echo "<p style=\"margin-bottom:0px;\">Tonal resource file <span class=\"green-text\">‘".$tonality_file."’</span> contains the definition of this tonal scale:";
 				echo "<div>";
 				}
 			echo "<ul style=\"margin-top:0px; margin-bottom:0px\">";
@@ -2707,12 +2821,12 @@ function show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,
 		echo "<p>Csound instruments have not been loaded (no ‘-cs’ file) although the file format is CSOUND.<br />";
 		echo "➡ Instruction “_ins()” will be ignored</p>";
 		}
-	if($csound_file <> '') {
+	if($csound_file <> '' AND !isset($_POST['analyze_tonal'])) {
 		$list_of_instruments = list_of_instruments($dir_csound_resources.$csound_file);
 		$list = $list_of_instruments['list'];
 		$list_index = $list_of_instruments['index'];
 		if(($max_instr = count($list)) > 0) {
-			echo "<p style=\"margin-bottom:0px;\">Csound resource file <span class=\"blue-text\">‘".$csound_file."’</span> contains definitions of instrument(s):";
+			echo "<p style=\"margin-bottom:0px;\">Csound resource file <span class=\"green-text\">‘".$csound_file."’</span> contains definitions of instrument(s):";
 			echo "<ol style=\"margin-top:0px; margin-bottom:0px\">";
 			for($i_instr = 0; $i_instr < $max_instr; $i_instr++) {
 				echo "<li><b>_ins(</b><font color=\"MediumTurquoise\">".$list[$i_instr]."</font><b>)</b>";
@@ -2729,7 +2843,7 @@ function show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,
 			echo "</ol>";
 			echo "</p>";
 			}
-		else if($file_format == "csound") echo "<p>Csound resource file <span class=\"blue-text\">‘".$csound_file."’</span> does not contain definitions of instrument(s). The default instrument <span class=\"blue-text\">‘0-default.orc’</span> will be used.</p>";
+		else if($file_format == "csound") echo "<p>Csound resource file <span class=\"green-text\">‘".$csound_file."’</span> does not contain definitions of instrument(s). The default instrument <span class=\"green-text\">‘0-default.orc’</span> will be used.</p>";
 		}
 	return $content;
 	}
@@ -3384,13 +3498,13 @@ function do_replace($content) {
 		if(!$useRegex) {
 			// Standard replace (case-sensitive)
 			$content = str_replace($find,$replace,$text);
-			echo "<p>Text = “<span class=\"blue-text\">".$find."</span>” replaced by “<span class=\"blue-text\">".$replace."</span>”&nbsp;<font color=\"red\"> ➡ Don't forget to save!</font></p>";
+			echo "<p>Text = “<span class=\"green-text\">".$find."</span>” replaced by “<span class=\"green-text\">".$replace."</span>”&nbsp;<font color=\"red\"> ➡ Don't forget to save!</font></p>";
 			}
 		else {
 			// Replace using regex
 			$pattern = '/'.$find.'/';
 			$content = preg_replace($pattern,$replace,$text);
-			echo "<p>Pattern = <span class=\"blue-text\">".$pattern."</span> should be replaced by <span class=\"blue-text\">".$replace."</span><font color=\"red\"> ➡ Don't forget to save!</font></p>";
+			echo "<p>Pattern = <span class=\"green-text\">".$pattern."</span> should be replaced by <span class=\"green-text\">".$replace."</span><font color=\"red\"> ➡ Don't forget to save!</font></p>";
 			}
 		}
 	return $content;
@@ -3420,7 +3534,7 @@ function ok_output_location($folder,$talk) {
 	if($folder == "scripts") $result = FALSE;
 	if(is_integer($pos=strpos($folder,"BP2-")) AND $pos == 0) $result = FALSE;
 	if($folder == $output_folder AND !$talk) $result = FALSE;
-	if(!$result AND $talk) echo "<p><font color=\"red\">ERROR:</font> Folder “<span class=\"blue-text\">".$folder."</span>” cannot be used for output files.</p>";
+	if(!$result AND $talk) echo "<p><font color=\"red\">ERROR:</font> Folder “<span class=\"green-text\">".$folder."</span>” cannot be used for output files.</p>";
 	return $result;
 	}
 
@@ -3755,9 +3869,9 @@ function save_midiport($thisfilename,$acceptFilters,$passFilters,$outFilters) {
 function filter_form_input($i) {
 	global $NoteOffFilter_in, $NoteOnFilter_in, $KeyPressureFilter_in, $ControlChangeFilter_in, $ProgramChangeFilter_in, $ChannelPressureFilter_in, $PitchBendFilter_in, $SystemExclusiveFilter_in, $TimeCodeFilter_in, $SongPositionFilter_in, $SongSelectFilter_in, $TuneRequestFilter_in, $EndSysExFilter_in, $TimingClockFilter_in, $StartFilter_in, $ContinueFilter_in, $ActiveSensingFilter_in, $SystemResetFilter_in, $MIDIinput;
 	echo "<div id=\"showhide_input".$i."\"  style=\"width:300px;\">";
-	echo "<p style=\"margin-left:12px;\"><b>Filter for MIDI input ".$MIDIinput[$i]."</b></p>";
+	echo "<h3 style=\"margin-left:12px;\"><b>Filter for MIDI input ".$MIDIinput[$i]."</b></h3>";
 	echo "<p style=\"margin-left:12px;\">0 = reject<br />1 = treat<br />2 = treat + pass</p>";
-	echo "<table class=\"no-border-spacing\">";
+	echo "<table class=\"thinborder\">";
 	echo "<tr>";
 	echo "<td>";
 	echo "</td>";
@@ -3791,10 +3905,10 @@ function filter_form_input($i) {
 function filter_form_output($i) {
 	global $NoteOffFilter_out, $NoteOnFilter_out, $KeyPressureFilter_out, $ControlChangeFilter_out, $ProgramChangeFilter_out, $ChannelPressureFilter_out, $PitchBendFilter_out, $SystemExclusiveFilter_out, $TimeCodeFilter_out, $SongPositionFilter_out, $SongSelectFilter_out, $TuneRequestFilter_out, $EndSysExFilter_out, $TimingClockFilter_out, $StartFilter_out, $ContinueFilter_out, $ActiveSensingFilter_out, $SystemResetFilter_out;
 	global $url_this_page, $MIDIoutput;
-	echo "<div id=\"showhide_output".$i."\"  style=\"width:300px;\">";
+	echo "<div id=\"showhide_output".$i."\" style=\"width:300px;\">";
 	echo "<input class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#tonal\" name=\"savemidiport\" value=\"SAVE MIDI ports\">";
-	echo "<p style=\"margin-left:12px;\"><b>Filter for MIDI output ".$MIDIoutput[$i]."</b></p>";
-	echo "<table class=\"edit\">";
+	echo "<h3 style=\"margin-left:12px;\"><b>Filter for MIDI output ".$MIDIoutput[$i]."</b></h3>";
+	echo "<table class=\"thinborder\">";
 	echo "<tr>";
 	echo "<td>";
 	echo "<table class=\"no-border-spacing\">";
@@ -3908,7 +4022,7 @@ function filter_buttons_in($i,$param) {
 function filter_input_explanation() {
 	global $file_format;
 	if($file_format <> "rtmidi") return;
-	echo "<p>MIDI input filters are used to process incoming events, for example<br />from a connectedpiano keyboard or other MIDI devices — including<br />another instance of the BP3.</p>
+	echo "<p>MIDI input filters are used to process incoming events, for example<br />from a connected piano keyboard or other MIDI devices — including<br />another instance of the BP3.</p>
 	<ul>
 	<li>By default (option ‘0’), events are ‘rejected’ and nothing happens.</li>
 	<li>If an event is accepted (option ‘1’), it can trigger a script command<br />declared in the score.</li>
@@ -3920,9 +4034,11 @@ function filter_input_explanation() {
 function filter_output_explanation() {
 	global $file_format;
 	if($file_format <> "rtmidi") return;
-	echo "<p>Event filter specifies which MIDI events can be sent to this output.</p>";
-	echo "<p>Channel filter specifies which MIDI channels can be sent to this output.</p>";
-	echo "<p>Part filter specifies which parts of a score can be sent to this output.</p>";
+	echo "<ul>";
+	echo "<li>Event filter specifies which MIDI events can be sent to this output.</li>";
+	echo "<li>Channel filter specifies which MIDI channels can be sent to this output.</li>";
+	echo "<li>Part filter specifies which parts of a score can be sent to this output.</li>";
+	echo "</ul>";
 	}
 
 function display_midi_ports($filename) {
@@ -4208,4 +4324,351 @@ function make_links_clickable($text) {
     return $text_with_links;
 	}
 
+function midifile_player($midi_file_link) {
+	global $bp_application_path;
+	$text = "<p class=\"shadow\" style=\"width:25em;\">";
+	$text .= "<img src=\"".$bp_application_path."php/pict/loudspeaker.png\" width=\"70px;\" style=\"vertical-align:middle;\" />";
+	$text .= "<a href=\"#nowhere\" style=\"color:#007BFF;\" onClick=\"MIDIjs.play('".$midi_file_link."');\">";
+	$text .= "Play MIDI file</a>";
+	$text .= " (<a href=\"#nowhere\" style=\"color:#007BFF;\" onClick=\"MIDIjs.stop();\">Stop playing</a>)";
+	$text .= "&nbsp;or <a style=\"color:#007BFF;\" href=\"".$midi_file_link."\" download>download it</a></p>";
+	return $text;
+	}
+
+function begin_with($n_chars,$text) {
+	$text = (strlen($text) > $n_chars) ? substr($text,0,$n_chars) . "…" : $text;
+	return $text;
+	}
+
+function apply_changes_instructions($content) {
+	$extract_data = extract_data(TRUE,$content);
+	$newcontent = $extract_data['content'];
+	$imax = $_POST['chan_max'];
+	for($i = 0; $i < $imax; $i++) {
+		$argument = $_POST['argument_chan_'.$i];
+		$option = $_POST['replace_chan_option_'.$i];
+		switch($option) {
+			case "chan":
+				$new_argument = "@&".$_POST['replace_chan_as_chan_'.$i];
+				if($new_argument >= 0)
+					$newcontent = str_replace("_chan(".$argument.")","_chan(".$new_argument.")",$newcontent);
+			break;
+			case "ins":
+				$new_argument = "@&".$_POST['replace_chan_as_ins_'.$i];
+				if($new_argument >= 0)
+					$newcontent = str_replace("_chan(".$argument.")","_ins(".$new_argument.")",$newcontent);
+			break;
+			case "part":
+				$new_argument = "@&".$_POST['replace_chan_as_part_'.$i];
+				if($new_argument >= 0)
+					$newcontent = str_replace("_chan(".$argument.")","_part(".$new_argument.")",$newcontent);
+			break;
+			case "chan_ins":
+				$new_argument_chan = "@&".$_POST['replace_chan_as_chan1_'.$i];
+				$new_argument_ins = "@&".$_POST['replace_chan_as_ins1_'.$i];
+				if($new_argument_chan >= 0 AND $new_argument_ins >= 0)
+					$newcontent = str_replace("_chan(".$argument.")","_chan(".$new_argument_chan.") _ins(".$new_argument_ins.")",$newcontent);
+			break;
+			case "chan_part":
+				$new_argument_chan = "@&".$_POST['replace_chan_as_chan2_'.$i];
+				$new_argument_part = "@&".$_POST['replace_chan_as_part1_'.$i];
+				if($new_argument_chan >= 0 AND $new_argument_part >= 0)
+					$newcontent = str_replace("_chan(".$argument.")","_chan(".$new_argument_chan.") _part(".$new_argument_part.")",$newcontent);
+			break;
+			case "delete":
+				$newcontent = str_replace("_chan(".$argument.")",'',$newcontent);
+			break;
+			}
+		}
+	$jmax = $_POST['ins_max'];
+	for($j = 0; $j < $jmax; $j++) {
+		$argument = $_POST['argument_ins_'.$j];
+		$option = $_POST['replace_ins_option_'.$j];
+		switch($option) {
+			case "chan":
+				$new_argument = "@&".$_POST['replace_ins_as_chan_'.$j];
+				if($new_argument >= 0)
+					$newcontent = str_replace("_ins(".$argument.")","_chan(".$new_argument.")",$newcontent);
+			break;
+			case "ins":
+				$new_argument = "@&".$_POST['replace_ins_as_ins_'.$j];
+				if($new_argument >= 0)
+					$newcontent = str_replace("_ins(".$argument.")","_ins(".$new_argument.")",$newcontent);
+			break;
+			case "part":
+				$new_argument = "@&".$_POST['replace_ins_as_part_'.$j];
+				if($new_argument >= 0)
+					$newcontent = str_replace("_ins(".$argument.")","_part(".$new_argument.")",$newcontent);
+			break;
+			case "ins_chan":
+				$new_argument_ins = "@&".$_POST['replace_ins_as_ins1_'.$j];
+				$new_argument_chan = "@&".$_POST['replace_ins_as_chan1_'.$j];
+				if($new_argument_ins >= 0 AND $new_argument_chan >= 0)
+					$newcontent = str_replace("_ins(".$argument.")","_ins(".$new_argument_ins.") _chan(".$new_argument_chan.")",$newcontent);
+			break;
+			case "ins_part":
+				$new_argument_ins = "@&".$_POST['replace_ins_as_ins2_'.$j];
+				$new_argument_part = "@&".$_POST['replace_ins_as_part1_'.$j];
+				if($new_argument_ins >= 0 AND $new_argument_part >= 0)
+					$newcontent = str_replace("_ins(".$argument.")","_ins(".$new_argument_ins.") _part(".$new_argument_part.")",$newcontent);
+			break;
+			case "delete":
+				$newcontent = str_replace("_ins(".$argument.")",'',$newcontent);
+			break;
+			}
+		}
+
+	$kmax = $_POST['part_max'];
+	for($k = 0; $k < $kmax; $k++) {
+		$argument = $_POST['argument_part_'.$k];
+		$option = $_POST['replace_part_option_'.$k];
+		switch($option) {
+			case "chan":
+				$new_argument = "@&".$_POST['replace_part_as_chan_'.$k];
+				if($new_argument >= 0)
+					$newcontent = str_replace("_part(".$argument.")","_chan(".$new_argument.")",$newcontent);
+			break;
+			case "ins":
+				$new_argument = "@&".$_POST['replace_part_as_ins_'.$k];
+				if($new_argument >= 0)
+					$newcontent = str_replace("_part(".$argument.")","_ins(".$new_argument.")",$newcontent);
+			break;
+			case "part":
+				$new_argument = "@&".$_POST['replace_part_as_part_'.$k];
+				if($new_argument >= 0)
+					$newcontent = str_replace("_part(".$argument.")","_part(".$new_argument.")",$newcontent);
+			break;
+			case "part_chan":
+				$new_argument_part = "@&".$_POST['replace_part_as_part1_'.$k];
+				$new_argument_chan = "@&".$_POST['replace_part_as_chan1_'.$k];
+				if($new_argument_part >= 0 AND $new_argument_chan >= 0)
+					$newcontent = str_replace("_part(".$argument.")","_part(".$new_argument_part.") _chan(".$new_argument_chan.")",$newcontent);
+			break;
+			case "part_ins":
+				$new_argument_part = "@&".$_POST['replace_part_as_part2_'.$k];
+				$new_argument_ins = "@&".$_POST['replace_part_as_ins1_'.$k];
+				if($new_argument_part >= 0 AND $new_argument_ins >= 0)
+					$newcontent = str_replace("_part(".$argument.")","_part(".$new_argument_part.") _ins(".$new_argument_ins.")",$newcontent);
+			break;
+			case "delete":
+				$newcontent = str_replace("_part(".$argument.")",'',$newcontent);
+			break;
+			}
+		}
+	return $newcontent;
+	}
+
+function show_changes_instructions($content) {
+	global $url_this_page;
+	$list_of_arguments_chan = list_of_arguments($content,"_chan(");
+	$list_of_arguments_ins = list_of_arguments($content,"_ins(");
+	$list_of_arguments_part = list_of_arguments($content,"_part(");
+	echo "<br /><table class=\"thicktable\">";
+	echo "<tr><td><b>Instruction</b></td><td style=\"text-align:center;\"><b>Replace with…</b></td><td><b>Instruction</b></td><td style=\"text-align:center;\"><b>Replace with…</b></td></tr>";
+	$imax = count($list_of_arguments_chan);
+	echo "<input type=\"hidden\" name=\"chan_max\" value=\"".$imax."\">";
+	echo "<tr>";
+	for($i = $col = 0; $i < $imax; $i++) {
+		echo "<td style=\"vertical-align:middle;\"><font color=\"MediumTurquoise\"><b>_chan(".$list_of_arguments_chan[$i].")</b></font></td>";
+		echo "<input type=\"hidden\" name=\"argument_chan_".$i."\" value=\"".$list_of_arguments_chan[$i]."\">";
+		echo "<td style=\"vertical-align:middle; padding:2px;\">";
+		echo "<input type=\"radio\" name=\"replace_chan_option_".$i."\" value=\"chan\"";
+		echo " checked";
+		echo "> _chan(";
+		echo "<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_chan_as_chan_".$i."\" size=\"4\" value=\"".$list_of_arguments_chan[$i]."\">";
+		echo ")<br />";
+		echo "<input type=\"radio\" name=\"replace_chan_option_".$i."\" value=\"ins\">";
+		echo "_ins(";
+		echo "<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_chan_as_ins_".$i."\" size=\"6\" value=\"\">";
+		echo ")<br />";
+		echo "<input type=\"radio\" name=\"replace_chan_option_".$i."\" value=\"part\">";
+		echo "_part(";
+		echo "<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_chan_as_part_".$i."\" size=\"6\" value=\"\">";
+		echo ")<br />";
+
+		echo "<input type=\"radio\" name=\"replace_chan_option_".$i."\" value=\"chan_ins\">";
+		echo "_chan(<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_chan_as_chan1_".$i."\" size=\"6\" value=\"\">)&nbsp;";
+		echo "_ins(<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_chan_as_ins1_".$i."\" size=\"6\" value=\"\">)<br />";
+		echo "<input type=\"radio\" name=\"replace_chan_option_".$i."\" value=\"chan_part\">";
+		echo "_chan(<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_chan_as_chan2_".$i."\" size=\"6\" value=\"\">)&nbsp;";
+		echo "_part(<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_chan_as_part1_".$i."\" size=\"6\" value=\"\">)<br />";
+		echo "<input type=\"radio\" name=\"replace_chan_option_".$i."\" value=\"delete\"> delete _chan(".$list_of_arguments_chan[$i].") ";
+		echo "</td>";
+		$col++;
+		if($col == 2) {
+			echo "</tr><tr>";
+			$col = 0;
+			}
+		}
+	if($col == 1) echo "<td>&nbsp;</td><td>&nbsp;</td>";
+	echo "</tr>";
+	$jmax = count($list_of_arguments_ins);
+	echo "<input type=\"hidden\" name=\"ins_max\" value=\"".$jmax."\">";
+	echo "<tr>";
+	for($j = $col = 0; $j < $jmax; $j++) {
+		echo "<td style=\"vertical-align:middle;\"><font color=\"MediumTurquoise\"><b>_ins(".$list_of_arguments_ins[$j].")</b></font></td>";
+		echo "<input type=\"hidden\" name=\"argument_ins_".$j."\" value=\"".$list_of_arguments_ins[$j]."\">";
+		echo "<td style=\"vertical-align:middle; padding:2px;\">";
+		echo "<input type=\"radio\" name=\"replace_ins_option_".$j."\" value=\"chan\"> _chan(";
+		echo "<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_ins_as_chan_".$j."\" size=\"4\" value=\"\">";
+		echo ")<br />";
+		echo "<input type=\"radio\" name=\"replace_ins_option_".$j."\" value=\"ins\" checked>";
+		echo "_ins(";
+		echo "<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_ins_as_ins_".$j."\" size=\"6\" value=\"".$list_of_arguments_ins[$j]."\">";
+		echo ")<br />";
+		echo "<input type=\"radio\" name=\"replace_ins_option_".$j."\" value=\"part\"> _part(";
+		echo "<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_ins_as_part_".$j."\" size=\"4\" value=\"\">";
+		echo ")<br />";
+
+		echo "<input type=\"radio\" name=\"replace_ins_option_".$j."\" value=\"ins_chan\">";
+		echo "_ins(<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_ins_as_ins1_".$j."\" size=\"6\" value=\"\">)";
+		echo "_chan(<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_ins_as_chan1_".$j."\" size=\"6\" value=\"\">)&nbsp;<br />";
+
+		echo "<input type=\"radio\" name=\"replace_ins_option_".$j."\" value=\"ins_part\">";
+		echo "_ins(<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_ins_as_ins2_".$j."\" size=\"6\" value=\"\">)";
+		echo "_part(<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_ins_as_part1_".$j."\" size=\"6\" value=\"\">)&nbsp;<br />";
+		echo "<input type=\"radio\" name=\"replace_ins_option_".$j."\" value=\"delete\"> delete _ins(".$list_of_arguments_ins[$j].")";
+		echo "</td>";
+		$col++;
+		if($col == 2) {
+			echo "</tr><tr>";
+			$col = 0;
+			}
+		}
+	if($col == 1) echo "<td>&nbsp;</td><td>&nbsp;</td>";
+	echo "</tr>";
+	$kmax = count($list_of_arguments_part);
+	echo "<input type=\"hidden\" name=\"part_max\" value=\"".$kmax."\">";
+	echo "<tr>";
+	for($k = $col = 0; $k < $kmax; $k++) {
+		echo "<td style=\"vertical-align:middle;\"><font color=\"MediumTurquoise\"><b>_part(".$list_of_arguments_part[$k].")</b></font></td>";
+		echo "<input type=\"hidden\" name=\"argument_part_".$k."\" value=\"".$list_of_arguments_part[$k]."\">";
+		echo "<td style=\"vertical-align:middle; padding:2px;\">";
+		echo "<input type=\"radio\" name=\"replace_part_option_".$k."\" value=\"chan\"> _chan(";
+		echo "<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_part_as_chan_".$k."\" size=\"4\" value=\"\">";
+		echo ")<br />";
+		echo "<input type=\"radio\" name=\"replace_part_option_".$k."\" value=\"ins\" checked>";
+		echo "_ins(";
+		echo "<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_part_as_ins_".$k."\" size=\"6\" value=\"\">";
+		echo ")<br />";
+		echo "<input type=\"radio\" name=\"replace_part_option_".$k."\" value=\"part\" checked>";
+		echo "_part(";
+		echo "<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_part_as_part_".$k."\" size=\"6\" value=\"".$list_of_arguments_part[$k]."\">";
+		echo ")<br />";
+
+		echo "<input type=\"radio\" name=\"replace_part_option_".$k."\" value=\"part_chan\">";
+		echo "_part(<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_part_as_part1_".$k."\" size=\"6\" value=\"\">)";
+		echo "_chan(<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_part_as_chan1_".$k."\" size=\"6\" value=\"\">)&nbsp;<br />";
+		echo "<input type=\"radio\" name=\"replace_part_option_".$k."\" value=\"part_ins\">";
+		echo "_part(<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_part_as_part2_".$k."\" size=\"6\" value=\"\">)";
+		echo "_ins(<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_part_as_ins1_".$k."\" size=\"6\" value=\"\">)&nbsp;<br />";
+		echo "<input type=\"radio\" name=\"replace_part_option_".$k."\" value=\"delete\"> delete _part(".$list_of_arguments_part[$k].")";
+		echo "</td>";
+		$col++;
+		if($col == 2) {
+			echo "</tr><tr>";
+			$col = 0;
+			}
+		}
+	if($col == 1) echo "<td>&nbsp;</td><td>&nbsp;</td>";
+	echo "</tr>";
+	echo "<tr><td></td><td></td><td><input class=\"cancel\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\"></td><td><input class=\"produce\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"apply_changes_instructions\" formaction=\"".$url_this_page."#topedition\" value=\"APPLY THESE CHANGES\"></td></tr>";
+	echo "</table>";
+	return;
+	}
+
+function display_note_conventions($note_convention) {
+	global $url_this_page, $Englishnote, $AltEnglishnote, $Frenchnote, $AltFrenchnote, $Indiannote, $AltIndiannote;
+	$hide = FALSE;
+	if(isset($_POST['change_convention']) AND isset($_POST['new_convention'])) {
+	//	echo "<form id=\"topchanges\" method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+		$hide = TRUE;
+		$new_convention = $_POST['new_convention'];
+		echo "<input type=\"hidden\" name=\"new_convention\" value=\"".$new_convention."\">";
+		echo "<input type=\"hidden\" name=\"old_convention\" value=\"".$note_convention."\">";
+		echo "<br />";
+		switch($new_convention) {
+			case '0':
+				$standard_note = $Englishnote;
+				$alt_note = $AltEnglishnote;
+				break;
+			case '1':
+				$standard_note = $Frenchnote;
+				$alt_note = $AltFrenchnote;
+				break;
+			case '2':
+				$standard_note = $Indiannote;
+				$alt_note = $AltIndiannote;
+				break;
+			}
+		echo "<table>";
+		echo "<tr>";
+		for($i = 0; $i < 12; $i++) {
+			echo "<td>";
+			echo "<input type=\"radio\" name=\"new_note_".$i."\" value=\"".$standard_note[$i]."\" checked><br /><b><font color=\"red\">".$standard_note[$i];
+			echo "</font></b></td>";
+			}
+		echo "</tr>";
+		echo "<tr>";
+		for($i = 0; $i < 12; $i++) {
+			echo "<td>";
+			if($alt_note[$i] <> $standard_note[$i]) {
+				echo "<input type=\"radio\" name=\"new_note_".$i."\" value=\"".$alt_note[$i]."\"><br /><b><font color=\"red\">".$alt_note[$i];
+				echo "</font></b>";
+				}
+			echo "</td>";
+			}
+		echo "</tr>";
+		echo "</table>";
+		echo "&nbsp;<input class=\"cancel\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\">";
+		echo "&nbsp;<input class=\"save\" type=\"submit\" onclick=\"this.form.target='_self'; return true;\" name=\"use_convention\" formaction=\"".$url_this_page."\" value=\"USE THIS CONVENTION\">";
+
+		$hide = TRUE;
+	//	echo "</form>";
+		}
+	return $hide;
+	}
+
+function use_convention($this_file) {
+	global $Englishnote, $AltEnglishnote, $Frenchnote, $AltFrenchnote, $Indiannote, $AltIndiannote;
+	$old_convention = $_POST['old_convention'];
+	$new_convention = $_POST['new_convention'];
+	echo "<p>old_convention = ".$old_convention."</p>";
+	echo "<p>new_convention = ".$new_convention."</p>";
+	$change_octave = 0;
+	if($old_convention == 1 AND $new_convention <> 1) {
+		$change_octave = +1;
+		}
+	if($old_convention <> '' AND $old_convention <> 1 AND $new_convention == 1) {
+		$change_octave = -1;
+		}
+	$content = @file_get_contents($this_file,TRUE);
+	$extract_data = extract_data(TRUE,$content);
+	$newcontent = $extract_data['content'];
+	mb_internal_encoding("UTF-8");  // Set internal character encoding to UTF-8
+	$newcontent = mb_ereg_replace("\n","<br>", $newcontent);
+	for($i = 0; $i < 12; $i++) {
+		$new_note = $_POST['new_note_'.$i];
+		if($new_convention <> 1) {
+			$bass_octave = "00"; $new_octave = 0;
+			$newcontent = mb_ereg_replace($Frenchnote[$i].$bass_octave,$new_note."@".$new_octave,$newcontent);
+			$newcontent = mb_ereg_replace($AltFrenchnote[$i].$bass_octave,$new_note."@".$new_octave,$newcontent);
+			}
+		for($octave = 15; $octave >= 0; $octave--) {
+			$new_octave = $octave + $change_octave;
+			if($new_octave < 0) $new_octave = "00";
+			if($new_convention <> 0) $newcontent = mb_ereg_replace($Englishnote[$i].$octave,$new_note."@".$new_octave,$newcontent);
+			if($new_convention <> 0) $newcontent = mb_ereg_replace($AltEnglishnote[$i].$octave,$new_note."@".$new_octave,$newcontent);
+			if($new_convention <> 1) $newcontent = mb_ereg_replace($Frenchnote[$i].$octave,$new_note."@".$new_octave,$newcontent);
+			if($new_convention <> 1) $newcontent = mb_ereg_replace($AltFrenchnote[$i].$octave,$new_note."@".$new_octave,$newcontent);
+			if($new_convention <> 2) $newcontent = mb_ereg_replace($Indiannote[$i].$octave,$new_note."@".$new_octave,$newcontent);
+			if($new_convention <> 2) $newcontent = mb_ereg_replace($AltIndiannote[$i].$octave,$new_note."@".$new_octave,$newcontent);
+			}
+		}
+	$newcontent = mb_ereg_replace("<br>","\n",$newcontent);
+	$newcontent = mb_ereg_replace("@",'',$newcontent);
+	// This '@' is required to avoid confusion between "re" in Indian and Italian/Spanish/French conventions
+	$_POST['thistext'] = $newcontent;
+	return $new_convention;
+	}
 ?>

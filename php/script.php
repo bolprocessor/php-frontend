@@ -61,7 +61,7 @@ if(isset($_POST['addinstruction'])) {
 	
 if($need_to_save OR isset($_POST['savethisfile']) OR isset($_POST['checkscript']) OR isset($_POST['addinstruction'])) {
 	if(isset($_POST['savethisfile']))
-		echo "<p id=\"timespan\" style=\"color:red;\">Saved file…</p>";
+		echo "<span id=\"timespan\" style=\"color:red; float:right; background-color:white; padding:6px; border-radius:6px;\">&nbsp;Saved “".$this_file."” file…</span>";
 	$content = $_POST['thistext'];
 
 	$content = recode_entities($content);
@@ -101,12 +101,12 @@ if(isset($_POST['checkscript'])) {
 			if(!file_exists($search_file))
 				$remark = "<font color=\"red\"> ➡ file not found</font>";
 			else
-				$remark = "<span class=\"blue-text\"> ➡ file found</span>";
+				$remark = "<span class=\"green-text\"> ➡ file found</span>";
 			}
 		switch($status) {
 			case '0': $tag = "<font color=\"red\">(no)</font>"; break;
 			case '1': $tag = "<font color=\"MediumTurquoise\">✓</font>"; break;
-			case '2': $tag = "<span class=\"blue-text\">(soon)</span>"; break;
+			case '2': $tag = "<span class=\"green-text\">(soon)</span>"; break;
 			}
 		$recoded_line = recode_tags($line);
 		echo "&nbsp;&nbsp;&nbsp;".$tag." [<font color=\"MediumTurquoise\">".$instruction.$more."</font>] ".$recoded_line.$remark."<br />";
@@ -118,7 +118,7 @@ if(!isset($_POST['running'])) {
 	$content = @file_get_contents($this_file,TRUE);
 	if($content === FALSE) ask_create_new_file($url_this_page,$filename);
 	$extract_data = extract_data(TRUE,$content);
-	echo "<p class=\"blue-text\">".$extract_data['headers']."</p>";
+	echo "<p class=\"green-text\">".$extract_data['headers']."</p>";
 	$content = $extract_data['content'];
 	$content = preg_replace("/[\x20]+/u",' ',$content);
 	}
@@ -139,9 +139,9 @@ $link = "script_exec.php?dir=".urlencode($dir);
 $link .= "&file=".urlencode($filename);
 $link .= "&temp_folder=".urlencode($temp_folder);
 $window_name = window_name($filename);
-echo "<p style=\"text-align:left;\"><input class=\"save\" type=\"submit\" onclick=\"clearsave();\" id=\"here\"  name=\"savethisfile\" value=\"SAVE ‘".$filename."’\">&nbsp;";
-echo "<input class=\"save\" type=\"submit\" name=\"checkscript\" onmouseover=\"checksaved();\" value=\"CHECK THIS SCRIPT\">&nbsp;";
-echo "<input class=\"produce\" onclick=\"if(checksaved()) {window.open('".$link."','".$window_name."','width=800,height=800,left=150,toolbar=yes'); return false;}\" type=\"submit\" name=\"running\" value=\"RUN THIS SCRIPT\"></p>";
+echo "<p style=\"text-align:left;\"><input class=\"save big\" type=\"submit\" onclick=\"clearsave();\" id=\"here\"  name=\"savethisfile\" value=\"SAVE ‘".$filename."’\">&nbsp;";
+echo "<input class=\"save big\" type=\"submit\" name=\"checkscript\" onmouseover=\"checksaved();\" value=\"CHECK THIS SCRIPT\">&nbsp;";
+echo "<input class=\"produce big\" onclick=\"if(checksaved()) {window.open('".$link."','".$window_name."','width=800,height=800,left=150,toolbar=yes'); return false;}\" type=\"submit\" name=\"running\" value=\"RUN THIS SCRIPT\"></p>";
 
 $content = do_replace($content);
 echo "<textarea name=\"thistext\" onchange=\"tellsave()\" rows=\"30\" style=\"width:700px;\">".$content."</textarea>";
@@ -186,7 +186,7 @@ function list_script_instructions($script_status,$script_more) {
 		switch($status) {
 			case '0': $tag = "<font color=\"red\">(obsolete)</font>"; break;
 			case '1': $tag = "<font color=\"MediumTurquoise\">✓</font>"; break;
-			case '2': $tag = "<span class=\"blue-text\">(soon)</span>"; break;
+			case '2': $tag = "<span class=\"green-text\">(soon)</span>"; break;
 			}
 		$more = $script_more[$instruction];
 		echo $tag." ".$instruction." ".$more."<br />";

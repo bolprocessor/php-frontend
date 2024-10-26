@@ -28,7 +28,10 @@ if(isset($_POST['reload'])) {
 	}
 
 require_once("_header.php");
-display_console_state();
+
+if(isset($_POST['stop_analysis'])) unset($_POST['analyze_tonal']);
+
+if(!isset($_POST['analyze_tonal'])) display_console_state();
 
 $url = "index.php?path=".urlencode($current_directory);
 echo "&nbsp;Workspace = <input class=\"edit\" name=\"workspace\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$url."','_self');\" value=\"".$current_directory."\">";
@@ -38,9 +41,10 @@ echo link_to_help();
 $test_musicxml = FALSE;
 $no_chunk_real_time_midi = FALSE;
 $save_warning = '';
+$new_convention = '';
 
 echo "<h2>Data project “".$filename."”</h2>";
-save_settings("last_data_name",$filename); 
+save_settings("last_data_name",$filename);
 
 $temp_folder = str_replace(' ','_',$filename)."_".my_session_id()."_temp";
 if(!file_exists($temp_dir.$temp_folder)) {
@@ -61,9 +65,9 @@ if(isset($_POST['csound_file'])) $csound_file = $_POST['csound_file'];
 if(isset($_POST['tonality_file'])) $tonality_file = $_POST['tonality_file'];
 if(isset($_POST['objects_file'])) $objects_file = $_POST['objects_file'];
 
-if(isset($_POST['new_convention']))
+/* if(isset($_POST['new_convention']))
 	$new_convention = $_POST['new_convention'];
-else $new_convention = '';
+else $new_convention = ''; */
 
 if(isset($_POST['select_parts'])) {
 	$upload_filename = $_POST['upload_filename'];
@@ -80,7 +84,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 	$no_save_midiresources = TRUE;
 	if(!$reload_musicxml) $upload_filename = $_FILES['music_xml_import']['name'];
 	if(!$reload_musicxml AND $_FILES["music_xml_import"]["size"] > MAXFILESIZE) {
-		echo "<h3><font color=\"red\">Uploading failed:</font> <span class=\"blue-text\">".$upload_filename."</span> <font color=\"red\">is larger than ".MAXFILESIZE." bytes</font></h3>";
+		echo "<h3><font color=\"red\">Uploading failed:</font> <span class=\"green-text\">".$upload_filename."</span> <font color=\"red\">is larger than ".MAXFILESIZE." bytes</font></h3>";
 		}
 	else {
 		// First we save current content of window
@@ -128,7 +132,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$extension = end($table);
 			}
 		if(!$reload_musicxml AND $extension <> "musicxml" AND $extension <> "xml") {
-			echo "<h4><font color=\"red\">Uploading failed:</font> <span class=\"blue-text\">".$upload_filename."</span> <font color=\"red\">does not have the extension of a MusicXML file!</font></h4>";
+			echo "<h4><font color=\"red\">Uploading failed:</font> <span class=\"green-text\">".$upload_filename."</span> <font color=\"red\">does not have the extension of a MusicXML file!</font></h4>";
 			}
 		else {
 			$score_part = '';
@@ -551,7 +555,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$data = $first_scale.$data;
 			$more_data .= "\n".$data;
 
-			echo "<h3><font color=\"red\">Importing MusicXML file:</font> <span class=\"blue-text\">".$upload_filename."</span></h3>";
+			echo "<h3><font color=\"red\">Importing MusicXML file:</font> <span class=\"green-text\">".$upload_filename."</span></h3>";
 		//	echo "<div style=\"background-color:white; width:75%; padding:1em; box-shadow: -5px 5px 5px 0px gold;\">";
 			echo "<div style=\"width:75%; padding:1em; box-shadow: -5px 5px 5px 0px gold;\">";
 			$window_name = $upload_filename;
@@ -931,42 +935,17 @@ if(isset($_GET['newsettings'])) {
 	}
 
 if(isset($_POST['use_convention'])) {
-	$old_convention = $_POST['old_convention'];
-	$change_octave = 0;
-	if($old_convention == 1 AND $new_convention <> 1) $change_octave = +1;
-	if($old_convention <> '' AND $old_convention <> 1 AND $new_convention == 1) $change_octave = -1;
-	$content = @file_get_contents($this_file,TRUE);
-	$extract_data = extract_data(TRUE,$content);
-	$newcontent = $extract_data['content'];
-	mb_internal_encoding("UTF-8");  // Set internal character encoding to UTF-8
-	$newcontent = mb_ereg_replace("\n","<br>", $newcontent);
-	for($i = 0; $i < 12; $i++) {
-		$new_note = $_POST['new_note_'.$i];
-		for($octave = 15; $octave >= 0; $octave--) {
-			$new_octave = $octave + $change_octave;
-			if($new_octave < 0) $new_octave = "00";
-			if($new_convention <> 0) $newcontent = mb_ereg_replace($Englishnote[$i].$octave,$new_note."@".$new_octave,$newcontent);
-			if($new_convention <> 0) $newcontent = mb_ereg_replace($AltEnglishnote[$i].$octave,$new_note."@".$new_octave,$newcontent);
-			if($new_convention <> 1) $newcontent = mb_ereg_replace($Frenchnote[$i].$octave,$new_note."@".$new_octave,$newcontent);
-			if($new_convention <> 1) $newcontent = mb_ereg_replace($AltFrenchnote[$i].$octave,$new_note."@".$new_octave,$newcontent);
-			if($new_convention <> 2) $newcontent = mb_ereg_replace($Indiannote[$i].$octave,$new_note."@".$new_octave,$newcontent);
-			if($new_convention <> 2) $newcontent = mb_ereg_replace($AltIndiannote[$i].$octave,$new_note."@".$new_octave,$newcontent);
-			}
-		}
-	$newcontent = mb_ereg_replace("<br>","\n",$newcontent);
-	$newcontent = mb_ereg_replace("@",'',$newcontent);
-	// This '@' is required to avoid confusion between "re" in Indian and Italian/Spanish/French conventions
-	$_POST['thistext'] = $newcontent;
+	$new_convention = use_convention($this_file);
 	$no_save_midiresources = TRUE;
 	$need_to_save = TRUE;
-	echo "<div style=\"background-color:white; color:black; padding: 1em; border-radius: 6px;\"><p>👉 Current note convention for this data should now be <font color=\"red\">‘".ucfirst(note_convention(intval($new_convention)))."’</font>. You need to change it in the settings file.</p></div>";
+	echo "<div class=\"warning\">👉 Current note convention for this data will now be <font color=\"red\">‘".ucfirst(note_convention(intval($new_convention)))."’</font>. If necessary, change it in the settings file.</div>";
 	}
 
 if(isset($_POST['delete_chan'])) {
 	$content = @file_get_contents($this_file,TRUE);
 	$extract_data = extract_data(TRUE,$content);
 	$newcontent = $extract_data['content'];
-	$newcontent = preg_replace("/\s*_chan\([^\)]+\)\s*/u",'',$newcontent);
+	$newcontent = preg_replace("/_chan\([^\)]+\)/u",' ',$newcontent);
 	$_POST['thistext'] = $newcontent;
 	$no_save_midiresources = TRUE;
 	$need_to_save = TRUE;
@@ -976,7 +955,17 @@ if(isset($_POST['delete_ins'])) {
 	$content = @file_get_contents($this_file,TRUE);
 	$extract_data = extract_data(TRUE,$content);
 	$newcontent = $extract_data['content'];
-	$newcontent = preg_replace("/\s*_ins\([^\)]+\)\s*/u",'',$newcontent);
+	$newcontent = preg_replace("/_ins\([^\)]+\)/u",' ',$newcontent);
+	$_POST['thistext'] = $newcontent;
+	$no_save_midiresources = TRUE;
+	$need_to_save = TRUE;
+	}
+
+if(isset($_POST['delete_part'])) {
+	$content = @file_get_contents($this_file,TRUE);
+	$extract_data = extract_data(TRUE,$content);
+	$newcontent = $extract_data['content'];
+	$newcontent = preg_replace("/_part\([^\)]+\)/u",' ',$newcontent);
 	$_POST['thistext'] = $newcontent;
 	$no_save_midiresources = TRUE;
 	$need_to_save = TRUE;
@@ -986,7 +975,7 @@ if(isset($_POST['delete_tempo'])) {
 	$content = @file_get_contents($this_file,TRUE);
 	$extract_data = extract_data(TRUE,$content);
 	$newcontent = $extract_data['content'];
-	$newcontent = preg_replace("/\s*_tempo\([^\)]+\)\s*/u",'',$newcontent);
+	$newcontent = preg_replace("/_tempo\([^\)]+\)/u",' ',$newcontent);
 	$_POST['thistext'] = $newcontent;
 	$no_save_midiresources = TRUE;
 	$need_to_save = TRUE;
@@ -996,7 +985,7 @@ if(isset($_POST['delete_volume'])) {
 	$content = @file_get_contents($this_file,TRUE);
 	$extract_data = extract_data(TRUE,$content);
 	$newcontent = $extract_data['content'];
-	$newcontent = preg_replace("/\s*_volume\([^\)]+\)\s*/u",'',$newcontent);
+	$newcontent = preg_replace("/_volume\([^\)]+\)/u",' ',$newcontent);
 	$_POST['thistext'] = $newcontent;
 	$no_save_midiresources = TRUE;
 	$need_to_save = TRUE;
@@ -1026,7 +1015,7 @@ if(isset($_POST['delete_velocity'])) {
 	$content = @file_get_contents($this_file,TRUE);
 	$extract_data = extract_data(TRUE,$content);
 	$newcontent = $extract_data['content'];
-	$newcontent = preg_replace("/\s*_vel\([^\)]+\)\s*/u",'',$newcontent);
+	$newcontent = preg_replace("/_vel\([^\)]+\)/u",' ',$newcontent);
 	$_POST['thistext'] = $newcontent;
 	$no_save_midiresources = TRUE;
 	$need_to_save = TRUE;
@@ -1141,54 +1130,7 @@ if(isset($_POST['apply_volume_change'])) {
 	
 if(isset($_POST['apply_changes_instructions'])) {
 	$content = @file_get_contents($this_file,TRUE);
-	$extract_data = extract_data(TRUE,$content);
-	$newcontent = $extract_data['content'];
-	$imax = $_POST['chan_max'];
-	for($i = 0; $i < $imax; $i++) {
-		$argument = $_POST['argument_chan_'.$i];
-		$option = $_POST['replace_chan_option_'.$i];
-		switch($option) {
-			case "chan":
-				$new_argument = "@&".$_POST['replace_chan_as_chan_'.$i];
-				$newcontent = str_replace("_chan(".$argument.")","_chan(".$new_argument.")",$newcontent);
-			break;
-			case "ins":
-				$new_argument = "@&".$_POST['replace_chan_as_ins_'.$i];
-				$newcontent = str_replace("_chan(".$argument.")","_ins(".$new_argument.")",$newcontent);
-			break;
-			case "chan_ins":
-				$new_argument_chan = "@&".$_POST['replace_chan_as_chan1_'.$i];
-				$new_argument_ins = "@&".$_POST['replace_chan_as_ins1_'.$i];
-				$newcontent = str_replace("_chan(".$argument.")","_chan(".$new_argument_chan.") _ins(".$new_argument_ins.")",$newcontent);
-			break;
-			case "delete":
-				$newcontent = str_replace("_chan(".$argument.")",'',$newcontent);
-			break;
-			}
-		}
-	$jmax = $_POST['ins_max'];
-	for($j = 0; $j < $jmax; $j++) {
-		$argument = $_POST['argument_ins_'.$j];
-		$option = $_POST['replace_ins_option_'.$j];
-		switch($option) {
-			case "chan":
-				$new_argument = "@&".$_POST['replace_ins_as_chan_'.$j];
-				$newcontent = str_replace("_chan(".$argument.")","_chan(".$new_argument.")",$newcontent);
-			break;
-			case "ins":
-				$new_argument = "@&".$_POST['replace_ins_as_ins_'.$j];
-				$newcontent = str_replace("_chan(".$argument.")","_ins(".$new_argument.")",$newcontent);
-			break;
-			case "chan_ins":
-				$new_argument_chan = "@&".$_POST['replace_ins_as_chan1_'.$j];
-				$new_argument_ins = "@&".$_POST['replace_ins_as_ins1_'.$j];
-				$newcontent = str_replace("_ins(".$argument.")","_chan(".$new_argument_chan.") _ins(".$new_argument_ins.")",$newcontent);
-			break;
-			case "delete":
-				$newcontent = str_replace("_ins(".$argument.")",'',$newcontent);
-			break;
-			}
-		}
+	$newcontent = apply_changes_instructions($content);
 	$_POST['thistext'] = str_replace("@&",'',$newcontent);
 	$need_to_save = TRUE;
 	}
@@ -1226,7 +1168,7 @@ if($content === FALSE) ask_create_new_file($url_this_page,$filename);
 $metronome = 0;
 $nature_of_time = $time_structure = $objects_file = $csound_file = $tonality_file = $tonality_file = $alphabet_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = '';
 $extract_data = extract_data(TRUE,$content);
-echo "<p class=\"blue-text\">".$extract_data['headers']."</p>";
+echo "<p class=\"green-text\">".$extract_data['headers']."</p>";
 $content = $extract_data['content'];
 $alphabet_file = $extract_data['alphabet'];
 $objects_file = $extract_data['objects'];
@@ -1291,52 +1233,54 @@ if($settings_file <> '' AND file_exists($dir.$settings_file)) {
 	if($csound_default_orchestra <> '') $found_orchestra_in_settings = TRUE;
 	}
 if($quantization == 0) $quantize = FALSE;
-echo "<div style=\"padding:1em; width:690px;\" class=\"thinborder\">";
-// echo "<div style=\"background-color:white; padding:1em; width:690px; border-radius: 15px;\">";
-if($settings_file == '' OR !file_exists($dir.$settings_file)) {
-	$time_resolution = 10; //  10 milliseconds by default
-	$metronome =  60;
-	$p_clock = $q_clock = 1;
-	$nature_of_time = STRIATED;
-	if($time_structure <> '')
-		echo "⏱ Metronome (time base) is not specified by a ‘-se’ file. It will be set to <font color=\"red\">60</font> beats per minute. Time structure may be changed in data.<br />";
-	else
-		echo "⏱ Metronome (time base) is not specified by a ‘-se’ file. It will be set to <font color=\"red\">60</font> beats per minute.<br />";
-	echo "•&nbsp;Time resolution = <font color=\"red\">".$time_resolution."</font> milliseconds (by default)<br />";
-	echo "•&nbsp;No quantization<br />";
-	}
-else {
-	echo "<input class=\"edit\"  style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_settings."','".$settings_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$settings_file."’\">";
-	if($p_clock > 0 AND $q_clock > 0) {
-		$metronome_settings = 60 * $q_clock / $p_clock;
+
+if(!isset($_POST['analyze_tonal'])) {
+	echo "<div style=\"padding:1em; width:690px;\" class=\"thinborder\">";
+	if($settings_file == '' OR !file_exists($dir.$settings_file)) {
+		$time_resolution = 10; //  10 milliseconds by default
+		$metronome =  60;
+		$p_clock = $q_clock = 1;
+		$nature_of_time = STRIATED;
+		if($time_structure <> '')
+			echo "⏱ Metronome (time base) is not specified by a ‘-se’ file. It will be set to <font color=\"red\">60</font> beats per minute. Time structure may be changed in data.<br />";
+		else
+			echo "⏱ Metronome (time base) is not specified by a ‘-se’ file. It will be set to <font color=\"red\">60</font> beats per minute.<br />";
+		echo "•&nbsp;Time resolution = <font color=\"red\">".$time_resolution."</font> milliseconds (by default)<br />";
+		echo "•&nbsp;No quantization<br />";
 		}
-	else $metronome_settings = 0;
-	if($metronome > 0 AND $metronome <> $metronome_settings) {
-		echo "➡&nbsp;Metronome = <font color=\"red\">".$metronome_settings."</font> beats/mn as per<br /><span class=\"blue-text\">‘".$settings_file."’</span> but it may be changed in data.<br />";
+	else {
+		echo "<input class=\"edit\"  style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_settings."','".$settings_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".begin_with(20,$settings_file)."’\">";
+		if($p_clock > 0 AND $q_clock > 0) {
+			$metronome_settings = 60 * $q_clock / $p_clock;
+			}
+		else $metronome_settings = 0;
+		if($metronome > 0 AND $metronome <> $metronome_settings) {
+			echo "➡&nbsp;Metronome = <font color=\"red\">".$metronome_settings."</font> beats/mn as per<br /><span class=\"green-text\">‘".$settings_file."’</span> but it may be changed in data.<br />";
+			}
+		if($metronome_settings > 0) $metronome = $metronome_settings;
+		if($metronome <> intval($metronome)) $metronome = sprintf("%.3f",$metronome);
+		$nature_of_time = $nature_of_time_settings;
+		if($metronome > 0.) {
+			echo "⏱ Metronome = <font color=\"red\">".$metronome."</font> beats/mn by default as per <span class=\"green-text\">‘".$settings_file."’</span><br />";
+			}
+		echo "•&nbsp;Time resolution = <font color=\"red\">".$time_resolution."</font> milliseconds as per <span class=\"green-text\">‘".$settings_file."’</span><br />";
+		if($quantize) {
+			echo "•&nbsp;Quantization = <font color=\"red\">".$quantization."</font> milliseconds as per <span class=\"green-text\">‘".$settings_file."’</span>";
+			if($time_resolution > $quantization) echo "&nbsp;<font color=\"red\">➡</font>&nbsp;may be raised to <font color=\"red\">".$time_resolution."</font>&nbsp;ms…";
+			echo "<br />";
+			}
+		else echo "•&nbsp;No quantization<br />";
 		}
-	if($metronome_settings > 0) $metronome = $metronome_settings;
-	if($metronome <> intval($metronome)) $metronome = sprintf("%.3f",$metronome);
-	$nature_of_time = $nature_of_time_settings;
-	if($metronome > 0.) {
-		echo "⏱ Metronome = <font color=\"red\">".$metronome."</font> beats/mn by default as per <span class=\"blue-text\">‘".$settings_file."’</span><br />";
-		}
-	echo "•&nbsp;Time resolution = <font color=\"red\">".$time_resolution."</font> milliseconds as per <span class=\"blue-text\">‘".$settings_file."’</span><br />";
-	if($quantize) {
-		echo "•&nbsp;Quantization = <font color=\"red\">".$quantization."</font> milliseconds as per <span class=\"blue-text\">‘".$settings_file."’</span>";
-		if($time_resolution > $quantization) echo "&nbsp;<font color=\"red\">➡</font>&nbsp;may be raised to <font color=\"red\">".$time_resolution."</font>&nbsp;ms…";
+	echo "•&nbsp;Time structure is <font color=\"red\">".nature_of_time($nature_of_time)."</font> by default but it may be changed in data<br />";
+	if($max_time_computing > 0) {
+		echo "• Max console computation time has been set to <font color=\"red\">".$max_time_computing."</font> seconds by <span class=\"green-text\">‘".$settings_file."’</span>";
+		if($max_time_computing < 30) echo "&nbsp;<font color=\"red\">➡</font>&nbsp;probably too small!";
 		echo "<br />";
 		}
-	else echo "•&nbsp;No quantization<br />";
+	if($note_convention <> '') echo "• Note convention is <font color=\"red\">‘".ucfirst(note_convention(intval($note_convention)))."’</font> as per <span class=\"green-text\">‘".$settings_file."’</span>";
+	else echo "• Note convention is <font color=\"red\">‘English’</font> by default";
+	echo "</div><br />";
 	}
-echo "•&nbsp;Time structure is <font color=\"red\">".nature_of_time($nature_of_time)."</font> by default but it may be changed in data<br />";
-if($max_time_computing > 0) {
-	echo "• Max console computation time has been set to <font color=\"red\">".$max_time_computing."</font> seconds by <span class=\"blue-text\">‘".$settings_file."’</span>";
-	if($max_time_computing < 30) echo "&nbsp;<font color=\"red\">➡</font>&nbsp;probably too small!";
-	echo "<br />";
-	}
-if($note_convention <> '') echo "• Note convention is <font color=\"red\">‘".ucfirst(note_convention(intval($note_convention)))."’</font> as per <span class=\"blue-text\">‘".$settings_file."’</span>";
-else echo "• Note convention is <font color=\"red\">‘English’</font> by default";
-echo "</div>";
 
 if(!isset($output_folder) OR $output_folder == '')
     $output_folder = "my_output";
@@ -1344,7 +1288,7 @@ $output = $bp_application_path.SLASH.$output_folder;
 do $output = str_replace(SLASH.SLASH,SLASH,$output,$count);
 while($count > 0);
 if(!file_exists($output)) {
-    echo "<p><font color=\"red\">Created folder:</font><span class=\"blue-text\"> ".$output."</span><br />";
+    echo "<p><font color=\"red\">Created folder:</font><span class=\"green-text\"> ".$output."</span><br />";
    	if(!mkdir($output,0775, true))
         error_log("Failed to create directory '{$temp_dir}' with error: " . error_get_last()['message']);
 	else
@@ -1365,7 +1309,7 @@ $output_file = add_proper_extension($file_format,$output_file);
 // echo "<p>output_file = ".$output_file."</p>";
 
 if(!is_connected() AND $file_format == "midi") {
-	echo "<p style=\"color:red;\">➡ Cannot find the MIDI file player “midijs.net”… Are you connected to Internet?</p>";
+	echo "<p style=\"color:red;\">➡ Cannot find the MIDI file er “midijs.net”… Are you connected to Internet?</p>";
 	}
 
 $project_name = preg_replace("/\.[a-z]+$/u",'',$output_file);
@@ -1373,84 +1317,89 @@ $result_file = $bp_application_path.$output_folder.SLASH.$project_name."-result.
 
 $content = show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,$filename,$file_format);
 
-echo "<div style=\"float:right; padding-right:6px; padding-left:6px; border-radius:12px;\">";
-$csound_is_responsive = check_csound();
-link_to_tonality();
-echo "</div>";
-echo "<table id=\"topedit\" cellpadding=\"8px;\" class=\"thinborder\"><tr >";
-echo "<td id=\"topmidiports\" style=\"white-space:nowrap;\">";
-if($file_format <> "rtmidi") {
-	for($i = 0; $i < $NumberMIDIoutputs; $i++) {
-		echo "<input type=\"hidden\" name=\"MIDIoutput_".$i."\" value=\"".$MIDIoutput[$i]."\">";
-		echo "<input type=\"hidden\" name=\"MIDIoutputname_".$i."\" value=\"".$MIDIoutputname[$i]."\">";
+if(!isset($_POST['analyze_tonal'])) {
+	echo "<div style=\"float:right; padding-right:6px; padding-left:6px; background-color:transparent;\">";
+	$csound_is_responsive = check_csound();
+	link_to_tonality();
+	echo "</div>";
+	}
+
+if(!isset($_POST['analyze_tonal'])) {
+	echo "<table id=\"topedit\" cellpadding=\"8px;\" class=\"thinborder\"><tr >";
+	echo "<td id=\"topmidiports\" style=\"white-space:nowrap;\">";
+	if($file_format <> "rtmidi") {
+		for($i = 0; $i < $NumberMIDIoutputs; $i++) {
+			echo "<input type=\"hidden\" name=\"MIDIoutput_".$i."\" value=\"".$MIDIoutput[$i]."\">";
+			echo "<input type=\"hidden\" name=\"MIDIoutputname_".$i."\" value=\"".$MIDIoutputname[$i]."\">";
+			}
+		for($i = 0; $i < $NumberMIDIinputs; $i++) {
+			echo "<input type=\"hidden\" name=\"MIDIinput_".$i."\" value=\"".$MIDIinput[$i]."\">";
+			echo "<input type=\"hidden\" name=\"MIDIinputname_".$i."\" value=\"".$MIDIinputname[$i]."\">";
+			}
+		echo "<p>Name of output file (with proper extension):<br />";
+		echo "<input type=\"text\" name=\"output_file\" size=\"25\" value=\"".$output_file."\">&nbsp;";
+		echo "</p>";
 		}
-	for($i = 0; $i < $NumberMIDIinputs; $i++) {
-		echo "<input type=\"hidden\" name=\"MIDIinput_".$i."\" value=\"".$MIDIinput[$i]."\">";
-		echo "<input type=\"hidden\" name=\"MIDIinputname_".$i."\" value=\"".$MIDIinputname[$i]."\">";
+	else {
+		echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
+		display_midi_ports($filename);
 		}
-	echo "<p>Name of output file (with proper extension):<br />";
-	echo "<input type=\"text\" name=\"output_file\" size=\"25\" value=\"".$output_file."\">&nbsp;";
+	read_midiressources($filename);
+	// if($file_format == "rtmidi") echo " 👉 Delete the name if you change a number!";
+	echo "</td>";
+	echo "<td><p style=\"text-align:left;\">";
+	echo "<input type=\"radio\" name=\"file_format\" value=\"rtmidi\"";
+	if($file_format == "rtmidi") echo " checked";
+	echo ">Real-time MIDI";
+	echo "<br /><input type=\"radio\" name=\"file_format\" value=\"midi\"";
+	if($file_format == "midi") echo " checked";
+	echo ">MIDI file";
+	if(file_exists("csound_version.txt")) {
+		echo "<br /><input type=\"radio\" name=\"file_format\" value=\"csound\"";
+		if($file_format == "csound") echo " checked";
+		echo ">Csound score";
+		}
+	echo "<br /><br />&nbsp;&nbsp;&nbsp;<input class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#tonal\" name=\"savethisfile\" value=\"SAVE format\">";
+	if($file_format == "rtmidi") echo "&nbsp;<input id=\"refresh\" class=\"save\" style=\"display:none;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"reload\" value=\"REFRESH\">";
 	echo "</p>";
+	echo "</td>";
+	// if($file_format == "rtmidi") filter_form();
+	echo "</tr>";
+	echo "</table>";
 	}
-else {
-	echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
-	display_midi_ports($filename);
-	}
-read_midiressources($filename);
-// if($file_format == "rtmidi") echo " 👉 Delete the name if you change a number!";
-echo "</td>";
-echo "<td><p style=\"text-align:left;\">";
-echo "<input type=\"radio\" name=\"file_format\" value=\"rtmidi\"";
-if($file_format == "rtmidi") echo " checked";
-echo ">Real-time MIDI";
-echo "<br /><input type=\"radio\" name=\"file_format\" value=\"midi\"";
-if($file_format == "midi") echo " checked";
-echo ">MIDI file";
-if(file_exists("csound_version.txt")) {
-	echo "<br /><input type=\"radio\" name=\"file_format\" value=\"csound\"";
-	if($file_format == "csound") echo " checked";
-	echo ">Csound score";
-	}
-echo "<br /><br />&nbsp;&nbsp;&nbsp;<input class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#tonal\" name=\"savethisfile\" value=\"SAVE format\">";
-if($file_format == "rtmidi") echo "&nbsp;<input id=\"refresh\" class=\"save\" style=\"display:none;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"reload\" value=\"REFRESH\">";
-echo "</p>";
-echo "</td>";
-// if($file_format == "rtmidi") filter_form();
-echo "</tr>";
-echo "</table>";
 
 $link_options = '';
 if($grammar_file <> '') {
 	if(!file_exists($dir.$grammar_file)) {
-		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING:</font> <span class=\"blue-text\">".$grammar_file."</span> not found<br />";
+		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING:</font> <span class=\"green-text\">".$grammar_file."</span> not found<br />";
 		$error = TRUE;
 		}
 	else $link_options .= "&grammar=".urlencode($dir.$grammar_file);
 	}
 if($alphabet_file <> '') {
 	if(!file_exists($dir.$alphabet_file)) {
-		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING:</font> <span class=\"blue-text\">".$alphabet_file."</span> not found<br />";
+		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING:</font> <span class=\"green-text\">".$alphabet_file."</span> not found<br />";
 		$error = TRUE;
 		}
 	else $link_options .= "&alphabet=".urlencode($dir.$alphabet_file);
 	}
 if($settings_file <> '') {
 	if(!file_exists($dir.$settings_file)) {
-		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING:</font> <span class=\"blue-text\">".$settings_file."</span> not found<br />";
+		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING:</font> <span class=\"green-text\">".$settings_file."</span> not found<br />";
 		$error = TRUE;
 		}
 	else $link_options .= "&settings=".urlencode($dir.$settings_file);
 	}
 if($objects_file <> '') {
 	if(!file_exists($dir.$objects_file)) {
-		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING:</font> <span class=\"blue-text\">".$objects_file."</span> not found<br />";
+		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING:</font> <span class=\"green-text\">".$objects_file."</span> not found<br />";
 		$error = TRUE;
 		}
 	else $link_options .= "&objects=".urlencode($dir.$objects_file);
 	}
 if($csound_file <> '') {
 	if(!file_exists($dir_csound_resources.$csound_file)) {
-		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING:</font> <span class=\"blue-text\">".$csound_file."</span> not found<br />";
+		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING:</font> <span class=\"green-text\">".$csound_file."</span> not found<br />";
 		$error = TRUE;
 		}
 	else {
@@ -1475,78 +1424,33 @@ if($error_mssg <> '') {
 	}
 
 if(intval($note_convention) <> intval($new_convention) AND $new_convention <> '')
-	echo "<p><font color=\"red\">➡</font> WARNING: Note convention should be set to <font color=\"red\">‘".ucfirst(note_convention(intval($new_convention)))."’</font> in the <span class=\"blue-text\">‘".$settings_file."’</span> settings file</p>";
+	echo "<p><font color=\"red\">➡</font> WARNING: Note convention should be set to <font color=\"red\">‘".ucfirst(note_convention(intval($new_convention)))."’</font> in the <span class=\"green-text\">‘".$settings_file."’</span> settings file</p>";
 
-echo $save_warning;
-if($file_format <> "rtmidi") {
-	echo "<p>&nbsp;</p>";
+if(!isset($_POST['analyze_tonal'])) {
+	echo $save_warning;
+	if($file_format <> "rtmidi") {
+		echo "<p>&nbsp;</p>";
+		}
+	echo "<p><button class=\"edit big\"\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button></p>";
+	echo "<br /><br /><table border=\"0\" style=\"background-color:transparent;\"><tr style=\"background-color:transparent;\">";
+	echo "<td style=\"background-color:transparent;\">";
+
+	find_replace_form();
+
+	echo "<div style=\"float:right; vertical-align:middle; background-color:transparent;\">Import MusicXML: <input style=\"color:red;\"  onclick=\"if(!checksaved()) return false;\" type=\"file\" name=\"music_xml_import\">&nbsp;<input type=\"submit\" onclick=\"if(!checksaved()) return false;\" style=\"background-color:AquaMarine;\" value=\"← IMPORT\"></div>";
+
+	echo "<div style=\"text-align:left; background-color:transparent;\"><input id=\"saveButton\" class=\"save big\"  type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".begin_with(20,$filename)."’\"></div>";
+
+	$content = do_replace($content);
+
+	echo "<br /><textarea id=\"textArea\" name=\"thistext\" onchange=\"tellsave()\" rows=\"40\" style=\"width:750px;\">".$content."</textarea><br /><br />";
+
+	echo "<div style=\"float:right; background-color:transparent;\"><input class=\"save big\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".begin_with(20,$filename)."’\"></div>";
+
+	display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,$objects_file,$csound_file,$tonality_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
 	}
-echo "<p><button class=\"edit big\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button></p>";
- echo "<br /><table border=\"0\"><tr>";
-echo "<td>";
-
-find_replace_form();
-
-echo "<div style=\"float:right; vertical-align:middle;\">Import MusicXML: <input style=\"color:red;\"  onclick=\"if(!checksaved()) return false;\" type=\"file\" name=\"music_xml_import\">&nbsp;<input type=\"submit\" onclick=\"if(!checksaved()) return false;\" style=\"background-color:AquaMarine;\" value=\"← IMPORT\"></div>";
-
-echo "<div style=\"text-align:left;\"><input id=\"saveButton\" class=\"save big\"  type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></div>";
-
-$content = do_replace($content);
-
-echo "<br /><textarea id=\"textArea\" name=\"thistext\" onchange=\"tellsave()\" rows=\"40\" style=\"width:750px;\">".$content."</textarea><br /><br />";
-
-echo "<div style=\"float:right;\"><input class=\"save big\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></div>";
-
-echo "</form>";
-
-display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,$objects_file,$csound_file,$tonality_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
 
 $hide = FALSE;
-
-echo "<form  id=\"topchanges\" method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-if(isset($_POST['change_convention']) AND isset($_POST['new_convention'])) {
-	$new_convention = $_POST['new_convention'];
-	echo "<input type=\"hidden\" name=\"new_convention\" value=\"".$new_convention."\">";
-	echo "<input type=\"hidden\" name=\"old_convention\" value=\"".$note_convention."\">";
-	echo "<hr>";
-	switch($new_convention) {
-		case '0':
-			$standard_note = $Englishnote;
-			$alt_note = $AltEnglishnote;
-			break;
-		case '1':
-			$standard_note = $Frenchnote;
-			$alt_note = $AltFrenchnote;
-			break;
-		case '2':
-			$standard_note = $Indiannote;
-			$alt_note = $AltIndiannote;
-			break;
-		}
-	// echo "<table style=\"background-color:white;\">";
-	echo "<table>";
-	echo "<tr>";
-	for($i = 0; $i < 12; $i++) {
-		echo "<td>";
-		echo "<input type=\"radio\" name=\"new_note_".$i."\" value=\"".$standard_note[$i]."\" checked><br /><b><font color=\"red\">".$standard_note[$i];
-		echo "</font></b></td>";
-		}
-	echo "</tr>";
-	echo "<tr>";
-	for($i = 0; $i < 12; $i++) {
-		echo "<td>";
-		if($alt_note[$i] <> $standard_note[$i]) {
-			echo "<input type=\"radio\" name=\"new_note_".$i."\" value=\"".$alt_note[$i]."\"><br /><b><font color=\"red\">".$alt_note[$i];
-			echo "</font></b>";
-			}
-		echo "</td>";
-		}
-	echo "</tr>";
-	echo "</table>";
-	echo "&nbsp;<input class=\"cancel\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\">";
-	echo "&nbsp;<input class=\"save\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"use_convention\" value=\"USE THIS CONVENTION\">";
-	$hide = TRUE;
-	}
 
 if(isset($_POST['modify_velocity'])) {
 	echo "<hr>";
@@ -1559,7 +1463,7 @@ if(isset($_POST['modify_velocity'])) {
 	$max_velocity = search_value("max",$data,"_vel");
 	echo "<input type=\"hidden\" name=\"velocity_average\" value=\"".$velocity_average."\">";
 	echo "<input type=\"hidden\" name=\"max_velocity\" value=\"".$max_velocity."\">";
-	echo "<table style=\"background-color:cornsilk; border-spacing:6px;\">";
+	echo "<table class=\"thinborder\">";
 	echo "<tr><td></td><td style=\"text-align:center;\"><b>Current value</b></td><td style=\"text-align:center;\"><b>Replace with<br />(0 … 127)</b></td></tr>";
 	echo "<tr><td>Average</td>";
 	echo "<td style=\"text-align:center;\">".$velocity_average."</td>";
@@ -1569,7 +1473,12 @@ if(isset($_POST['modify_velocity'])) {
 	echo "<td style=\"text-align:center;\">".$max_velocity."</td>";
 	echo "<td style=\"text-align:center;\"><input type=\"text\" style=\"border:none; text-align:center;\" name=\"change_velocity_max\" size=\"6\" value=\"".$change_velocity_max."\"></td>";
 	echo "</tr>";
-	echo "<tr><td style=\"text-align:center;\"><input class=\"cancel\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\"></td><td></td><td style=\"text-align:center;\"><input class=\"produce\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"apply_velocity_change\" value=\"APPLY\"></td></tr>";
+	echo "<tr><td style=\"text-align:center;\"><input class=\"cancel\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\"></td><td></td>";
+	echo "<td style=\"text-align:center;\">";
+	if($velocity_average >= 1)
+		echo "<input class=\"produce\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"apply_velocity_change\" value=\"APPLY\">";
+	else echo "<p>Not applicable</p>";
+	echo "</td></tr>";
 	echo "</table>";
 	echo "<hr>";
 	$hide = TRUE;
@@ -1586,7 +1495,7 @@ if(isset($_POST['modify_volume'])) {
 	$volume_max = search_value("max",$data,"_volume");
 	echo "<input type=\"hidden\" name=\"volume_average\" value=\"".$volume_average."\">";
 	echo "<input type=\"hidden\" name=\"volume_max\" value=\"".$volume_max."\">";
-	echo "<table style=\"background-color:cornsilk; border-spacing:6px;\">";
+	echo "<table class=\"thinborder\">";
 	echo "<tr><td></td><td style=\"text-align:center;\"><b>Current value</b></td><td style=\"text-align:center;\"><b>Replace with<br />(0 … 127)</b></td></tr>";
 	echo "<tr><td>Average</td>";
 	echo "<td style=\"text-align:center;\">".$volume_average."</td>";
@@ -1596,92 +1505,43 @@ if(isset($_POST['modify_volume'])) {
 	echo "<td style=\"text-align:center;\">".$volume_max."</td>";
 	echo "<td style=\"text-align:center;\"><input type=\"text\" style=\"border:none; text-align:center;\" name=\"change_volume_max\" size=\"6\" value=\"".$change_volume_max."\"></td>";
 	echo "</tr>";
-	echo "<tr><td style=\"text-align:center;\"><input class=\"cancel\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\"></td><td></td><td style=\"text-align:center;\"><input class=\"produce\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"apply_volume_change\" value=\"APPLY\"></td></tr>";
+	echo "<tr><td style=\"text-align:center;\"><input class=\"cancel\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\"></td><td></td>";
+	
+	// <td style=\"text-align:center;\"><input class=\"produce\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"apply_volume_change\" value=\"APPLY\"></td></tr>";
+
+
+	echo "<td style=\"text-align:center;\">";
+	if($volume_average >= 1)
+		echo "<input class=\"produce\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"apply_volume_change\" value=\"APPLY\">";
+	else echo "<p>Not applicable</p>";
+	echo "</td></tr>";
+
 	echo "</table>";
 	echo "<hr>";
 	$hide = TRUE;
 	}
 
+echo "<span id=\"topchanges\"></span>";
 if(isset($_POST['manage_instructions'])) {
-	echo "<hr>";
-	$list_of_arguments_chan = list_of_arguments($content,"_chan(");
-	$list_of_arguments_ins = list_of_arguments($content,"_ins(");
-	echo "<table style=\"background-color:cornsilk; color:black; border-spacing:6px;\">";
-	echo "<tr><td><b>Instruction</b></td><td style=\"text-align:center;\"><b>Replace with…</b></td><td><b>Instruction</b></td><td style=\"text-align:center;\"><b>Replace with…</b></td></tr>";
-	$imax = count($list_of_arguments_chan);
-	echo "<input type=\"hidden\" name=\"chan_max\" value=\"".$imax."\">";
-	echo "<tr>";
-	for($i = $col = 0; $i < $imax; $i++) {
-		echo "<td style=\"vertical-align:middle;\"><font color=\"MediumTurquoise\"><b>_chan(".$list_of_arguments_chan[$i].")</b></font></td>";
-		echo "<input type=\"hidden\" name=\"argument_chan_".$i."\" value=\"".$list_of_arguments_chan[$i]."\">";
-	//	echo "<td style=\"vertical-align:middle; padding:2px; background-color:white;\">";
-		echo "<td style=\"vertical-align:middle; padding:2px;\">";
-		echo "<input type=\"radio\" name=\"replace_chan_option_".$i."\" value=\"chan\"";
-		echo " checked";
-		echo "> _chan(";
-		echo "<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_chan_as_chan_".$i."\" size=\"4\" value=\"".$list_of_arguments_chan[$i]."\">";
-		echo ")<br />";
-		echo "<input type=\"radio\" name=\"replace_chan_option_".$i."\" value=\"ins\">";
-		echo "_ins(";
-		echo "<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_chan_as_ins_".$i."\" size=\"6\" value=\"\">";
-		echo ")<br />";
-		echo "<input type=\"radio\" name=\"replace_chan_option_".$i."\" value=\"chan_ins\">";
-		echo "_chan(<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_chan_as_chan1_".$i."\" size=\"6\" value=\"\">)&nbsp;";
-		echo "_ins(<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_chan_as_ins1_".$i."\" size=\"6\" value=\"\">)<br />";
-		echo "<input type=\"radio\" name=\"replace_chan_option_".$i."\" value=\"delete\"> <i>delete _chan(".$list_of_arguments_chan[$i].")</i>";
-		echo "</td>";
-		$col++;
-		if($col == 2) {
-			echo "</tr><tr>";
-			$col = 0;
-			}
-		}
-	echo "</tr>";
-	$jmax = count($list_of_arguments_ins);
-	echo "<input type=\"hidden\" name=\"ins_max\" value=\"".$jmax."\">";
-	echo "<tr>";
-	for($j = $col = 0; $j < $jmax; $j++) {
-		echo "<td style=\"vertical-align:middle;\"><font color=\"MediumTurquoise\"><b>_ins(".$list_of_arguments_ins[$j].")</b></font></td>";
-		echo "<input type=\"hidden\" name=\"argument_ins_".$j."\" value=\"".$list_of_arguments_ins[$j]."\">";
-		echo "<td style=\"vertical-align:middle; padding:2px;\">";
-	//	echo "<td style=\"vertical-align:middle; padding:2px; background-color:white;\">";
-		echo "<input type=\"radio\" name=\"replace_ins_option_".$j."\" value=\"chan\"> _chan(";
-		echo "<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_ins_as_chan_".$j."\" size=\"4\" value=\"\">";
-		echo ")<br />";
-		echo "<input type=\"radio\" name=\"replace_ins_option_".$j."\" value=\"ins\" checked>";
-		echo "_ins(";
-		echo "<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_ins_as_ins_".$j."\" size=\"6\" value=\"".$list_of_arguments_ins[$j]."\">";
-		echo ")<br />";
-		echo "<input type=\"radio\" name=\"replace_ins_option_".$j."\" value=\"chan_ins\">";
-		echo "_chan(<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_ins_as_chan1_".$j."\" size=\"6\" value=\"\">)&nbsp;";
-		echo "_ins(<input type=\"text\" style=\"border:none; text-align:center;\" name=\"replace_ins_as_ins1_".$j."\" size=\"6\" value=\"\">)<br />";
-		echo "<input type=\"radio\" name=\"replace_ins_option_".$j."\" value=\"delete\"> <i>delete ins(".$list_of_arguments_ins[$j].")</i>";
-		echo "</td>";
-		$col++;
-		if($col == 2) {
-			echo "</tr><tr>";
-			$col = 0;
-			}
-		}
-	echo "</tr>";
-	echo "<tr><td></td><td></td><td><input class=\"cancel\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\"></td><td><input class=\"produce\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"apply_changes_instructions\" formaction=\"".$url_this_page."#topedition\" value=\"APPLY THESE CHANGES\"></td></tr>";
-	echo "</table>";
+	show_changes_instructions($content);
 	$hide = TRUE;
 	}
-if(!$hide) {
+$hide = display_note_conventions($note_convention);
+
+if(!$hide AND !isset($_POST['analyze_tonal'])) {
 	if($settings_file == '') {
 		$new_settings_file = str_replace("-da.",'',$filename);
 		$new_settings_file = str_replace(".bpda",'',$new_settings_file);
 		$new_settings_file = "-se.".$new_settings_file;
-		echo "<p>&nbsp;</p><p style=\"background-color:white; color:black\"><font color=\"red\">➡</font> <input class=\"save big\" onclick=\"window.open('settings_list.php?dir=".urlencode($dir)."&thispage=".urlencode($url_this_page)."','settingsfiles','width=400,height=400,left=100'); return false;\" type=\"submit\" title=\"Display settings files\" value=\"CHOOSE\"> a settings file or <input class=\"edit big\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"create_settings_file\" formaction=\"".$url_this_page."\" value=\"CREATE\"> a new file named <input type=\"text\" name=\"new_settings_file\" size=\"25\" value=\"".$new_settings_file."\"></p>";
+		echo "<p>&nbsp;</p><p style=\"background-color:white; color:black\"><font color=\"red\">➡</font> <input class=\"save big\" onclick=\"window.open('settings_list.php?dir=".urlencode($dir)."&thispage=".urlencode($url_this_page)."','settingsfiles','width=400,height=400,left=100'); return false;\" type=\"submit\" title=\"Display settings file\" value=\"CHOOSE\"> a settings file or <input class=\"edit big\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"create_settings_file\" formaction=\"".$url_this_page."\" value=\"CREATE\"> a new file named <input type=\"text\" name=\"new_settings_file\" size=\"25\" value=\"".$new_settings_file."\"></p>";
 		}
 	else 
-		echo "<p><input class=\"edit\" onclick=\"window.open('settings_list.php?dir=".urlencode($dir)."&thispage=".urlencode($url_this_page)."','settingsfiles','width=400,height=400,left=100'); return false;\" type=\"submit\" title=\"Display settings files\" value=\"CHOOSE\"> a different settings file</p>";
-	echo "<hr>";
+		echo "<p><input class=\"edit\" onclick=\"window.open('settings_list.php?dir=".urlencode($dir)."&thispage=".urlencode($url_this_page)."','settingsfiles','width=400,height=400,left=100'); return false;\" type=\"submit\" title=\"Display settings file\" value=\"CHOOSE\"> a different settings file</p>";
 	echo "<table class=\"thinborder\">";
 	echo "<tr>";
 	echo "<td style=\"vertical-align:middle; white-space:nowrap;\"><input class=\"edit\" type=\"submit\" onmouseover=\"checksaved();\" name=\"change_convention\" formaction=\"".$url_this_page."#topchanges\" value=\"APPLY NOTE CONVENTION to this data\"> ➡</td>";
 	echo "<td style=\"vertical-align:middle; white-space:nowrap;\">";
+	echo "<input type=\"hidden\" name=\"old_convention\" value=\"".$note_convention."\">";
 	echo "<input type=\"radio\" name=\"new_convention\" value=\"0\">English<br />";
 	echo "<input type=\"radio\" name=\"new_convention\" value=\"1\">Italian/Spanish/French<br />";
 	echo "<input type=\"radio\" name=\"new_convention\" value=\"2\">Indian<br />";
@@ -1689,22 +1549,30 @@ if(!$hide) {
 	echo "</tr>";
 	echo "<tr><td colspan=2 style=\"padding:6px;\">";
 	if($note_convention <> '') {
-		echo "<p>Current note convention for this data is:<br /><font color=\"red\"><b>".ucfirst(note_convention(intval($note_convention)))."</b></font> as per <span class=\"blue-text\">‘".$settings_file."’</span><br />You will need to change it after applying a different convention.</p>";
+		echo "<p>Current note convention for this data is:<br /><font color=\"red\"><b>".ucfirst(note_convention(intval($note_convention)))."</b></font> as per <span class=\"green-text\">‘".$settings_file."’</span><br />You will need to change it after applying a different convention.</p>";
 		}
-	echo "</td></tr></table>";
-	echo "<hr>";
+	echo "</td></tr></table><br />";
 	$found_chan = substr_count($content,"_chan(");
 	$found_ins = substr_count($content,"_ins(");
+	$found_part = substr_count($content,"_part(");
 	$found_tempo = substr_count($content,"_tempo(");
 	$found_volume = substr_count($content,"_volume(");
 	$found_velocity = substr_count($content,"_vel(");
 	$found = FALSE;
+	if($found_chan > 0 OR $found_ins > 0 OR $found_part > 0) {
+		echo "<input class=\"edit\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"manage_instructions\" formaction=\"".$url_this_page."#topchanges\" value=\"MANAGE _chan(), _ins(), _part()\">&nbsp;";
+		$found = TRUE;
+		}
 	if($found_chan > 0) {
 		echo "<input class=\"edit\" type=\"submit\" onmouseover=\"checksaved();\" name=\"delete_chan\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _chan()\">&nbsp;";
 		$found = TRUE;
 		}
 	if($found_ins > 0) {
 		echo "<input class=\"edit\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"delete_ins\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _ins()\">&nbsp;";
+		$found = TRUE;
+		}
+	if($found_part > 0) {
+		echo "<input class=\"edit\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"delete_part\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _part()\">&nbsp;";
 		$found = TRUE;
 		}
 	if($found_tempo > 0) {
@@ -1727,16 +1595,13 @@ if(!$hide) {
 		}
 	if($found_velocity > 0) {
 		echo "<input class=\"edit\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"modify_velocity\" formaction=\"".$url_this_page."#topchanges\" value=\"Modify _vel()\">&nbsp;";
-		}
-	if($found_chan > 0  OR $found_ins > 0) {
-		echo "<input class=\"edit\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"manage_instructions\" formaction=\"".$url_this_page."#topchanges\" value=\"MANAGE _chan() AND _ins()\">&nbsp;";
 		$found = TRUE;
 		}
 	echo "<input type=\"hidden\" name=\"change_velocity_average\" value=\"".$change_velocity_average."\">";
 	echo "<input type=\"hidden\" name=\"change_velocity_max\" value=\"".$change_velocity_max."\">";
 	echo "<input type=\"hidden\" name=\"change_volume_average\" value=\"".$change_volume_average."\">";
 	echo "<input type=\"hidden\" name=\"change_volume_max\" value=\"".$change_volume_max."\">";
-	if($found) echo "<hr>";
+//	if($found) echo "<hr>";
 	}
 echo "</form>";
 $table = explode(chr(10),$content);
@@ -1750,19 +1615,19 @@ if($imax > 0 AND (substr_count($content,'{') > 0 OR substr_count($content,"-da."
 		}
 	else {
 		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-		echo "<p><input class=\"save big\" style=\"margin-right:1em;\" type=\"submit\" onmouseover=\"checksaved();\" formaction=\"".$url_this_page."#tonalanalysis\" title=\"Analyze tonal intervals\" name=\"analyze_tonal\" value=\"ANALYZE INTERVALS\"";
+		echo "<p><input class=\"edit big\" style=\"margin-right:1em;\" type=\"submit\" onmouseover=\"checksaved();\" formaction=\"".$url_this_page."#tonalanalysis\" title=\"Analyze tonal intervals\" name=\"analyze_tonal\" value=\"ANALYZE INTERVALS\"";
 		if(!$tonal_analysis_possible) echo " disabled";
 		echo ">";
 		echo "Melodic and harmonic tonal intervals of (all) item(s)<br /><i>ignoring channels, instruments, periods, sound-objects and random performance controls.</i></p>";
-		if($tonality_file <> '') echo "<div style=\"padding:6px;\"><font color=\"red\">➡</font> It may be necessary to <a target=\"_blank\" href=\"tonality.php?file=".urlencode($tonality_resources.SLASH.$tonality_file)."\">open</a> the ‘<span class=\"blue-text\">".$tonality_file."</span>’ tonality resource file, allowing access to its tonal scale definitions.</div>";
+		if($tonality_file <> '') echo "<div style=\"padding:6px;\"><font color=\"red\">➡</font> It may be necessary to <a class=\"linkdotted\" target=\"_blank\" href=\"tonality.php?file=".urlencode($tonality_resources.SLASH.$tonality_file)."\">open</a> the ‘<span class=\"green-text\">".$tonality_file."</span>’ tonality resource file, allowing access to its tonal scale definitions.</div>";
 		echo "</form>";
-		echo "<hr>";
+	//	echo "<hr>";
 		}
 	}
 echo "</td>";
 $window_name = window_name($filename);
-if(!$hide) {
-	echo "<td>";
+if(!$hide AND !isset($_POST['analyze_tonal'])) {
+	echo "<td style=\"background-color:transparent;\">";
 	echo "<table class=\"thicktable\">";
 	if($imax > 0 AND substr_count($content,'{') > 0) {
 		$window_name_grammar = $window_name."_grammar";
@@ -1773,12 +1638,12 @@ if(!$hide) {
 		echo "<input type=\"hidden\" name=\"file_format\" value=\"".$file_format."\">";
 		echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
 		echo "<tr><td colspan=\"2\" style=\"vertical-align:middle; padding:6px;\">";
+		echo "<input type=\"submit\" onclick=\"clearsave();\" style=\"background-color:AquaMarine;\" formaction=\"".$url_this_page."#topedit\" name=\"explode\" value=\"EXPLODE\">&nbsp;<font color=\"red\">➡ </font>split {…}&nbsp;expressions (measures)";
 		echo "<div style=\"float:right;\"><input class=\"produce\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_grammar."','".$window_name_grammar."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"create_grammar\" title=\"Create grammar using items on this page\" value=\"CREATE GRAMMAR\"></div>";
-		echo "<input type=\"submit\" onclick=\"clearsave();\" style=\"background-color:AquaMarine;\" formaction=\"".$url_this_page."#topedit\" name=\"explode\" value=\"EXPLODE\">&nbsp;<font color=\"red\">➡ </font><i>split</i> {…}&nbsp;<i>expressions (measures)</i>";
 		echo "</td></tr>";
 		if($imax > 0) {
 			echo "<tr><td colspan=\"2\" style=\"vertical-align:middle; padding:6px;\">";
-			echo "<input type=\"submit\" onclick=\"clearsave();\" style=\"background-color:AquaMarine;\" formaction=\"".$url_this_page."#topedit\" name=\"implode\" value=\"IMPLODE\">&nbsp;<font color=\"red\">➡ </font><i>merge</i> {…}&nbsp;<i>expressions (measures)</i>";
+			echo "<input type=\"submit\" onclick=\"clearsave();\" style=\"background-color:AquaMarine;\" formaction=\"".$url_this_page."#topedit\" name=\"implode\" value=\"IMPLODE\">&nbsp;<font color=\"red\">➡ </font>merge {…}&nbsp;expressions (measures)";
 			echo "</td></tr>";
 			}
 		echo "</form>";
@@ -1830,12 +1695,12 @@ if(!$hide) {
 		$link_play_chunked .= $link_options_play;
 		$link_expand = $link_produce."&instruction=expand";
 		$link_expand .= $link_options_expand;
-		$window_name_play = $window_name."_play";
+		$window_name_ = $window_name."_";
 		$window_name_expand = $window_name."_expand";
 		$window_name_chunked = $window_name."_chunked";
-	//	echo "<small>".urldecode($link_play)."</small><br />";
+	//	echo "<small>".urldecode($link_)."</small><br />";
 	//	echo "<small>".urldecode($link_expand)."</small><br />";
-	//	echo "<small>".urldecode($link_play_chunked)."</small><br />";
+	//	echo "<small>".urldecode($link__chunked)."</small><br />";
 		$n1 = substr_count($line_recoded,'{');
 		$n2 = substr_count($line_recoded,'}');
 		if($n1 > $n2) $error_mssg .= "• <font color=\"red\">This score contains ".($n1-$n2)." extra ‘{'</font><br />";
@@ -1843,10 +1708,11 @@ if(!$hide) {
 		if($file_format == "rtmidi" AND file_exists($refresh_file)) $refresh_instruction = "document.getElementById('refresh').style.display = 'inline';";
 		else $refresh_instruction = '';
 	//	echo "<p>@@@".$link_play."</p>";
+	//	echo "<p>@@@".$link_play_chunked."</p>";
 		if($error_mssg == '') {
-			echo "<input id=\"playButton\" class=\"produce\" onmouseover=\"checksaved();\" onclick=\"event.preventDefault(); if(checksaved()) {".$refresh_instruction." window.open('".$link_play."','".$window_name_play."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" title=\"Play this polymetric expression\" value=\"PLAY\">&nbsp;";
+			echo "<input id=\"Button\" class=\"produce\" onmouseover=\"checksaved();\" onclick=\"event.preventDefault(); if(checksaved()) {".$refresh_instruction." window.open('".$link_play."','".$window_name_."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" title=\"Play polymetric expression\" value=\"PLAY\">&nbsp;";
 			if($chunked) echo "<input class=\"produce\" onmouseover=\"checksaved();\" onclick=\"event.preventDefault(); if(checksaved()) {".$refresh_instruction." window.open('".$link_play_chunked."','".$window_name_chunked."','width=800,height=800,left=150,toolbar=yes'); return false;}\" type=\"submit\" name=\"produce\" title=\"Play polymetric expression in chunks (no graphics)\" value=\"PLAY safe (".$chunk_number." chunks)\">&nbsp;";
-			echo "&nbsp;<input class=\"edit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_expand."','".$window_name_expand."','width=800,height=800,left=100'); return false;\" type=\"submit\" name=\"produce\" title=\"Expand this polymetric expression\" value=\"EXPAND\">&nbsp;";
+			echo "&nbsp;<input class=\"edit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_expand."','".$window_name_expand."','width=800,height=800,left=100'); return false;\" type=\"submit\" name=\"produce\" title=\"Expand polymetric expression\" value=\"EXPAND\">&nbsp;";
 			}
 		if($tie_mssg <> '' AND $error_mssg == '') echo "<br />";
 		if($tie_mssg <> '') echo $tie_mssg;
@@ -1858,7 +1724,7 @@ if(!$hide) {
 		else $line_show = $line_recoded;
 		echo "<small>";
 		if($title_this <> '') $line_show = "<b><font color=\"AquaMarine\">[".$title_this."]</font></b> ".$line_show;
-		echo "<span class=\"blue-text\">".$line_show."</span>";
+		echo "<span class=\"green-text\">".$line_show."</span>";
 		echo "</small></td></tr>";
 		}
 	echo "</table>";
@@ -2062,13 +1928,13 @@ function save($this_file,$filename,$top_header,$save_content) {
 		fclose($handle);
 		}
 	else {
-		echo "<div style=\"background-color:white; color:black; padding: 1em; border-radius: 6px;\"><p>👉 <font color=\"red\"><b>WARNING</b>: Some files have been imported and cannot be modified.</font></p><p><b>Linux user?</b> Open your terminal and type: <span class=\"blue-text\">sudo /opt/lampp/htdocs/bolprocessor/change_permissions.sh</span><br />(Your password will be required...)</p>";
+		echo "<div style=\"background-color:white; color:black; padding: 1em; border-radius: 6px;\"><p>👉 <font color=\"red\"><b>WARNING</b>: Some files have been imported and cannot be modified.</font></p><p><b>Linux user?</b> Open your terminal and type: <span class=\"green-text\">sudo /opt/lampp/htdocs/bolprocessor/change_permissions.sh</span><br />(Your password will be required...)</p>";
 		echo "</div>"; 
 		}
 	return;
 	}
 
-// The follwing does not work yet. It is meant to handle "save" when typing command S
+// The following does not work yet. It is meant to handle "save" when typing command S
 // The code for capturing the key is in _header.php
 
 /* if($_SERVER['REQUEST_METHOD'] == 'POST') {

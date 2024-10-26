@@ -18,11 +18,10 @@ $current_directory = str_replace(SLASH.$filename,'',$file);
 require_once("_header.php");
 display_darklight();
 
-echo "<p><small>Current directory = <a href=\"index.php?path=".urlencode($current_directory)."\">".$dir;
-echo "</small></p>";
+echo "<p><small>Current directory = <a class=\"linkdotted\" href=\"index.php?path=".urlencode($current_directory)."\">".$dir."</a></small></p>";
 echo link_to_help();
 
-echo "<h3>Comparison of scales selected in Csound resource file “".$filename."”</h3>";
+echo "<h2>Comparison of scales selected in tonality resource file “".$filename."”</h2>";
 $temp_folder = str_replace(' ','_',$filename)."_".my_session_id()."_temp";
 $dir_scales = $temp_dir.$temp_folder.SLASH."scales".SLASH;
 
@@ -30,13 +29,13 @@ $dircontent = scandir($dir_scales);
 $i_scale = $k_image = 0;
 foreach($dircontent as $scale_file) {
 	$scale_name = str_replace(".txt",'',$scale_file);
-	if(isset($_POST['compare_'.$scale_name])) {
+	if(isset($_POST['compare_'.str_replace(' ','_',$scale_name)])) {
 		$name[$i_scale] = $scale_name;
 		$content = file_get_contents($dir_scales.$scale_file,TRUE);
 		$table = explode(chr(10),$content);
 		$imax = count($table);
 		$dir_image = $dir_scale_images.$scale_name.".png";
-		echo "<span class=\"blue-text\">".$scale_name."</span>";
+		echo "<span class=\"green-text\">".$scale_name."</span>";
 		if(file_exists($dir_image)) {
 			$k_image++; if($k_image > 10) $k_image = 0;
 			echo " ➡&nbsp;".popup_link($scale_name,"image",500,410,(100 * $k_image),$dir_image);
@@ -105,13 +104,13 @@ foreach($dircontent as $scale_file) {
 $num_scales = $i_scale; echo $num_scales." scales<br />";
 
 echo "<h3>Average difference of fifths:</h3>";
-echo "<table>";
+echo "<table class=\"thicktable\">";
 echo "<tr><td></td>";
-for($i = 0; $i < $num_scales; $i++) echo "<td><span class=\"blue-text\">".$name[$i]."</span></td>";
+for($i = 0; $i < $num_scales; $i++) echo "<td><span class=\"green-text\">".$name[$i]."</span></td>";
 echo "</tr>";
 for($j = 0; $j < $num_scales; $j++) {
 	echo "<tr>";
-	echo "<td><span class=\"blue-text\">".$name[$j]."</span></td>";
+	echo "<td><span class=\"green-text\">".$name[$j]."</span></td>";
 	for($i = 0; $i < $num_scales; $i++) {
 		if($i < $j) echo "<td></td>";
 		else echo "<td>".round(distance($fifth_cents,$num_grades,$i,$j,0),1)." ¢</td>";
@@ -121,13 +120,13 @@ for($j = 0; $j < $num_scales; $j++) {
 echo "</table><br />";
 
 echo "<h3>Smallest average difference of fifths (trying transposition to every grade):</h3>";
-echo "<table>";
+echo "<table class=\"thicktable\">";
 echo "<tr><td></td>";
-for($i = 0; $i < $num_scales; $i++) echo "<td><span class=\"blue-text\">".$name[$i]."</span></td>";
+for($i = 0; $i < $num_scales; $i++) echo "<td><span class=\"green-text\">".$name[$i]."</span></td>";
 echo "</tr>";
 for($j = 0; $j < $num_scales; $j++) {
 	echo "<tr>";
-	echo "<td><span class=\"blue-text\">".$name[$j]."</span></td>";
+	echo "<td><span class=\"green-text\">".$name[$j]."</span></td>";
 	for($i = 0; $i < $num_scales; $i++) {
 		if($i < $j) echo "<td></td>";
 		else {
