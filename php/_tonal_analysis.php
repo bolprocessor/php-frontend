@@ -34,10 +34,10 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 	$number_subfiles = substr_count($content,"-da.") + substr_count($content,".bpda");
 
 	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-	echo "<input class=\"shadow cancel big\" style=\"float:right;\" name=\"stop_analysis\" type=\"submit\" value=\"STOP ANALYSIS\">";
+	echo "<input class=\"shadow cancel big\" style=\"float:right;\" name=\"stop_analysis\" type=\"submit\" value=\"EXIT ANALYSIS\">";
 	echo "<div style=\"padding-left:1em;\">";
-	if(isset($_POST['proceed_tonal_analysis']) AND !isset($_POST['save_tonal_settings']) AND !isset($_POST['reset_tonal_settings'])) echo "<input class=\"shadow edit big\" style=\"float:left;\" type=\"submit\" formaction=\"".$url_this_page."#top_analysis\" title=\"Analyze tonal intervals\" name=\"analyze_tonal\" onclick=\"document.body.style.cursor = 'wait';\" value=\"ANALYZE AGAIN\"><br /><br />";
-	else echo "<br /><p>Check documentation: <a target=\"_blank\" class=\"linkdotted\" href=\"https://bolprocessor.org/tonal-analysis/\">https://bolprocessor.org/tonal-analysis/</a></p>";
+	if(isset($_POST['proceed_tonal_analysis']) AND !isset($_POST['save_tonal_settings']) AND !isset($_POST['reset_tonal_settings'])) echo "<input class=\"shadow edit big\" style=\"float:left;\" type=\"submit\" formaction=\"".$url_this_page."#top_analysis\" title=\"Analyze tonal intervals\" name=\"analyze_tonal\" onclick=\"document.body.setAttribute('style','cursor:wait;');\" value=\"ANALYZE AGAIN\"><br /><br />";
+	else echo "<br /><p style=\"text-align:center;\">Check documentation: <a target=\"_blank\" class=\"linkdotted\" href=\"https://bolprocessor.org/tonal-analysis/\">https://bolprocessor.org/tonal-analysis/</a></p>";
 	echo "<center><table class=\"thicktable\">";
 	echo "<tr><th colspan=\"6\" style=\"text-align:center;\">Intervals checked in the analysis</tr>";
 	echo "<tr><td colspan=\"6\" style=\"white-space:nowrap; padding:6px; text-align:center;\">";
@@ -253,7 +253,7 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 	echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" formaction=\"".$url_this_page."#top_analysis\" title=\"\" name=\"save_tonal_settings\" value=\"SAVE SETTINGS TO WORKSPACE “".$current_directory."”\">";
 	echo "</td></tr>";
 	echo "</table>";
-	if(!isset($_POST['proceed_tonal_analysis']) OR isset($_POST['save_tonal_settings']) OR isset($_POST['reset_tonal_settings'])) echo "<br /><input class=\"edit big shadow\" type=\"submit\" onmouseover=\"checksaved();\" formaction=\"".$url_this_page."#top_analysis\" title=\"Analyze tonal intervals\" name=\"analyze_tonal\" onclick=\"document.body.style.cursor = 'wait';\"  value=\"ANALYZE ITEM(s)\">";
+	if(!isset($_POST['proceed_tonal_analysis']) OR isset($_POST['save_tonal_settings']) OR isset($_POST['reset_tonal_settings'])) echo "<br /><input class=\"edit big shadow\" type=\"submit\" onmouseover=\"checksaved();\" formaction=\"".$url_this_page."#top_analysis\" title=\"Analyze tonal intervals\" name=\"analyze_tonal\" onclick=\"document.body.setAttribute('style','cursor:wait;');\"  value=\"ANALYZE ITEM(s)\">";
 	echo "</center>";
 	echo "<input type=\"hidden\" name=\"proceed_tonal_analysis\" value=\"ok\">";
 	echo "</form>";
@@ -615,10 +615,11 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 								echo "<tr><td colspan=\"3\" style=\"background-color:Gold;\"><div class=\"shadow\" style=\"background-color:azure; padding:6px; border-radius: 6px;\"><i>Numbers are proportional to durations<br />of intervals matching the scale</i></div></td><th>&nbsp;Melodic score (up)&nbsp;</th><th>&nbsp;Melodic score (down)&nbsp;</th><th>&nbsp;Harmonic score&nbsp;</th><th></th></tr>";
 								echo "<th></th><th>Select</th><th style=\"text-align:right;\">weight:&nbsp;</th><td class=\"middle\">".$weight_melodic_up."</td><td class=\"middle\">".$weight_melodic_down."</td><td class=\"middle\">".$weight_harmonic."</td><th>Weighted total</th></tr>";
 								}
-							else echo "<tr><th>Rank</th><th>Select then</th><th><input class=\"edit\" type=\"submit\" formaction=\"".$url_this_page."#top_analysis\" title=\"Analyze tonal intervals\" onclick=\"document.body.style.cursor = 'wait';\" name=\"analyze_tonal\" value=\" AGAIN\"></th><th>&nbsp;Melodic score (up)&nbsp;</th><th>&nbsp;Melodic score (down)&nbsp;</th><th>&nbsp;Harmonic score&nbsp;</th><th>Score</th></tr>";
+							else echo "<tr><th>Rank</th><th>Select then</th><th><input class=\"edit\" type=\"submit\" formaction=\"".$url_this_page."#top_analysis\" title=\"Analyze tonal intervals\" onclick=\"document.body.setAttribute('style','cursor:wait;');\" name=\"analyze_tonal\" value=\" AGAIN\"></th><th>&nbsp;Melodic score (up)&nbsp;</th><th>&nbsp;Melodic score (down)&nbsp;</th><th>&nbsp;Harmonic score&nbsp;</th><th>Score</th></tr>";
 							$found_declared_scale = FALSE;
-							$display_ok = TRUE; $max_total = 0;
+							$max_total = 0;
 							foreach($total_score as $scale => $total) {
+								$display_ok = TRUE; // 2024-10-28
 								if(!$batch_processing AND $total == 0) continue;
 								$i_line2++;
 								if($batch_processing AND $tonal_scale == '' AND ($i_rank > 2 OR $i_line2 > 10)) $display_ok = FALSE;
@@ -653,14 +654,14 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 									$scale_link = $dir_scale_images.$clean_name_of_file.".png";
 									echo "<td class=\"middle\">";
 									if(file_exists($scale_link))
-										echo "<a onclick=\"window.open('".$scale_link."','".$clean_name_of_file."_image','width=800,height=657,left=100'); return false;\" href=\"".$scale_link."\">".$scale."</a>";
+										echo "<a onclick=\"window.open('".nice_url($scale_link)."','".$clean_name_of_file."_image','width=800,height=657,left=100'); return false;\" href=\"".nice_url($scale_link)."\">".$scale."</a>";
 									else echo $scale;
 									echo "</td><td class=\"middle\">".round($evaluate['melodic_up'][$scale]/$lcm,0)."</td><td class=\"middle\">".round($weight_melodic_down * $evaluate['melodic_down'][$scale]/$lcm,0)."</td><td class=\"middle\">".round($evaluate['harmonic'][$scale]/$lcm,0)."</td><td class=\"middle\">".$old_total."</td>";
 									echo "</tr>";
 									}
 								if($batch_processing AND $found_declared_scale AND $i_rank > 2) $display_ok = FALSE;
 								}
-							if(!$batch_processing) echo "<tr><td class=\"middle\" colspan=\"6\">&nbsp;<font color=\"red\"><b>↑</b></font>&nbsp;&nbsp;<input class=\"edit\" type=\"submit\" formaction=\"".$url_this_page."#top_analysis\" title=\"Analyze tonal intervals\" onclick=\"document.body.style.cursor = 'wait';\" name=\"analyze_tonal\" value=\"ANALYZE AGAIN\"> for a graphic display of results on selected scales</td></tr>";
+							if(!$batch_processing) echo "<tr><td class=\"middle\" colspan=\"6\">&nbsp;<font color=\"red\"><b>↑</b></font>&nbsp;&nbsp;<input class=\"edit\" type=\"submit\" formaction=\"".$url_this_page."#top_analysis\" title=\"Analyze tonal intervals\" onclick=\"document.body.setAttribute('style','cursor:wait;');\" name=\"analyze_tonal\" value=\"ANALYZE AGAIN\"> for a graphic display of results on selected scales</td></tr>";
 							echo "</table></center><br />";
 							}
 						else echo "<p style=\"text-align:center;\"><font color=\"red\">No matching tonal scale was found.</font><br />";
@@ -730,9 +731,9 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 			fwrite($handle_html,"<p>Date: ".gmdate('Y-m-d H:i:s')." — check documentation: <a target=\"_blank\" class=\"linkdotted\" href=\"https://bolprocessor.org/tonal-analysis/\">https://bolprocessor.org/tonal-analysis/</a></p>");
 			fwrite($handle_html,"<table><tr>\n");
 			$download_link = "<p style=\"text-align:center;\"><h3>Download results:&nbsp;</h3>\n";
-			$download_link .= "<a href=\"".$batch_html_filename."\" download=\"".$batch_html_filename."\"><input class=\"save\" type=\"submit\" value=\"HTML\"></a><br /><br />";
-			$download_link .= "<a href=\"".$batch_abstract_filename."\" download=\"".$batch_abstract_filename."\"><input class=\"save\" type=\"submit\" value=\"abstract\"></a><br /><br />";
-			$download_link .= "<a href=\"".$batch_csv_filename."\" download=\"".$batch_csv_filename."\"><input class=\"save\" type=\"submit\" value=\"CSV\"></a>";
+			$download_link .= "<a href=\"".nice_url($batch_html_filename)."\" download=\"".$batch_html_filename."\"><input class=\"save\" type=\"submit\" value=\"HTML\"></a><br /><br />";
+			$download_link .= "<a href=\"".nice_url($batch_abstract_filename)."\" download=\"".$batch_abstract_filename."\"><input class=\"save\" type=\"submit\" value=\"abstract\"></a><br /><br />";
+			$download_link .= "<a href=\"".nice_url($batch_csv_filename)."\" download=\"".$batch_csv_filename."\"><input class=\"save\" type=\"submit\" value=\"CSV\"></a>";
 			echo "</p>";
 			fwrite($handle_html,"<th>".$download_link."</th>\n");
 			$best_score = 0;
@@ -861,12 +862,12 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 			fclose($handle_csv);
 			fclose($handle_abstract);
 			$link = str_replace(SLASH,'/',$batch_html_link);
-			echo "<p style=\"text-align:center;\"><input class=\"shadow edit big\" onclick=\"window.open('".$link."','batch','width=1200,height=500,left=0'); return false;\" type=\"submit\" name=\"produce\" value=\"SHOW ALL RESULTS\"></p>";
+			echo "<p style=\"text-align:center;\"><input class=\"shadow edit big\" onclick=\"window.open('".nice_url($link)."','batch','width=1200,height=500,left=0'); return false;\" type=\"submit\" name=\"produce\" value=\"SHOW ALL RESULTS\"></p>";
 			}
 		$duration_process = time() - $time_start;
 		if($errors > 0) echo "<p style=\"text-align:center; color:red;\"><big><b>".$errors." ERROR(s) FOUND</b></big></p>";
 		else {
-			echo "<p>Check documentation: <a target=\"_blank\" class=\"linkdotted\" href=\"https://bolprocessor.org/tonal-analysis/\">https://bolprocessor.org/tonal-analysis/</a></p>";
+			echo "<p style=\"text-align:center;\">Check documentation: <a target=\"_blank\" class=\"linkdotted\" href=\"https://bolprocessor.org/tonal-analysis/\">https://bolprocessor.org/tonal-analysis/</a></p>";
 			if($duration_process > 2) echo "<p style=\"text-align:center; color:red;\"><small>All data processed in ".$duration_process." seconds</small></p>";
 			}
 		echo "<br /></div>";
@@ -1570,9 +1571,9 @@ function show_relations_on_image($i_item,$matching_list,$mode,$direction,$scalen
 		if($float OR $mode == "harmonic") echo " float:".$side.";";
 		echo "\">SHOW IMAGE (".$mode.")<br />";
 		if($scalename <> '') echo "‘<font color=\"red\">".$scalename."</font>’<br />";
-		echo "<a style=\"color:#007BFF;\" onclick=\"window.open('".$link_full."','".$image_name_full."','width=".$image_width.",height=".$image_height.",left=".$left_position."'); return false;\" href=\"".$link_full."\">full</a>";
-		echo "&nbsp;-&nbsp;<a style=\"color:#007BFF;\" onclick=\"window.open('".$link_only."','".$image_name_only."','width=".$image_width.",height=".$image_height.",left=".$left_position."'); return false;\" href=\"".$link_only."\">only scale</a>";
-		echo "&nbsp;-&nbsp;<a style=\"color:#007BFF;\" onclick=\"window.open('".$link_reduced."','".$image_name_reduced."','width=".$image_width.",height=".$image_height.",left=".$left_position."'); return false;\" href=\"".$link_reduced."\">only links</a>";
+		echo "<a style=\"color:#007BFF;\" onclick=\"window.open('".nice_url($link_full)."','".$image_name_full."','width=".$image_width.",height=".$image_height.",left=".$left_position."'); return false;\" href=\"".nice_url($link_full)."\">full</a>";
+		echo "&nbsp;-&nbsp;<a style=\"color:#007BFF;\" onclick=\"window.open('".nice_url($link_only)."','".$image_name_only."','width=".$image_width.",height=".$image_height.",left=".$left_position."'); return false;\" href=\"".nice_url($link_only)."\">only scale</a>";
+		echo "&nbsp;-&nbsp;<a style=\"color:#007BFF;\" onclick=\"window.open('".nice_url($link_reduced)."','".$image_name_reduced."','width=".$image_width.",height=".$image_height.",left=".$left_position."'); return false;\" href=\"".nice_url($link_reduced)."\">only links</a>";
 		$said = FALSE;
 		// $done = array();
 		$h = 0;
@@ -1685,7 +1686,7 @@ function evaluate_scale($i_item,$scale_name,$mode,$direction,$ratio,$matching_li
 	$clean_name_of_file = str_replace("#","_",$scale_name);
 	$clean_name_of_file = str_replace(SLASH,"_",$clean_name_of_file);
 	$scale_link = $dir_scale_images.$clean_name_of_file.".png";
-	$scale_link = "<a onclick=\"window.open('".$scale_link."','".$clean_name_of_file."_image','width=800,height=657,left=100'); return false;\" href=\"".$scale_link."\">".$scale_name."</a>";
+	$scale_link = "<a onclick=\"window.open('".nice_url($scale_link)."','".$clean_name_of_file."_image','width=800,height=657,left=100'); return false;\" href=\"".nice_url($scale_link)."\">".$scale_name."</a>";
 	for($i_mark = 0; $i_mark < count($position_melodic_mark_up); $i_mark++) {
 		if(intval($position_melodic_mark_up[$i_mark]['p']) < 1) continue;
 		$cent_mark_melodic_up[$i_mark] = round(cents($position_melodic_mark_up[$i_mark]['p'] / $position_melodic_mark_up[$i_mark]['q']));

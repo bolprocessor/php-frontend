@@ -257,7 +257,7 @@ if(file_exists($midi_import_mf2t)) {
 	echo "<input type=\"hidden\" name=\"upload_filename\" value=\"".$upload_filename."\">";
 	echo "<a href=\"#midi\" onClick=\"MIDIjs.play('".$midi_import_file."');\"><img src=\"pict/loudspeaker.png\" width=\"70px;\" style=\"vertical-align:middle;\" />Play “<span class=\"green-text\">".$upload_filename."</span>” MIDI file</a>";
 	echo " (<a href=\"#midi\" onClick=\"MIDIjs.stop();\">Stop playing</a>)";
-	echo "<br />Duration = ".round($duration_of_midifile / 1000, 3)." sec = ".$beats_of_midifile." beats<br />Division = <input type=\"text\" name=\"division\" size=\"5\" value=\"".$division."\">&nbsp;&nbsp;&nbsp;Tempo = <input type=\"text\" name=\"tempo\" size=\"7\" value=\"".$tempo."\"> µs ➡ show <a onclick=\"window.open('".$midi_import_mf2t."','importedMIDIbytes','width=300,height=500,left=300'); return false;\" href=\"".$midi_import_mf2t."\">MF2T code</a>";
+	echo "<br />Duration = ".round($duration_of_midifile / 1000, 3)." sec = ".$beats_of_midifile." beats<br />Division = <input type=\"text\" name=\"division\" size=\"5\" value=\"".$division."\">&nbsp;&nbsp;&nbsp;Tempo = <input type=\"text\" name=\"tempo\" size=\"7\" value=\"".$tempo."\"> µs ➡ show <a onclick=\"window.open('".nice_url($midi_import_mf2t)."','importedMIDIbytes','width=300,height=500,left=300'); return false;\" href=\"".nice_url($midi_import_mf2t)."\">MF2T code</a>";
 	echo "</td></tr>";
 	$colspan = 3;
 	}
@@ -450,7 +450,7 @@ if(file_exists($midi_file)) {
 	echo "&nbsp;<a href=\"#midi\" onClick=\"MIDIjs.play('".$midi_file."');\"><img src=\"pict/loudspeaker.png\" width=\"70px;\" style=\"vertical-align:middle;\" />Play combined MIDI file</a>";
 	echo " (<a href=\"#midi\" onClick=\"MIDIjs.stop();\">Stop playing</a>)";
 	if(!$MIDIfile_exists OR $mute[$i_midifile]) echo "<br />up to <input type=\"text\" name=\"max_repeat\" size=\"3\" value=\"".$max_repeat."\">&nbsp;repetitions and less than <input type=\"text\" name=\"max_time_play\" size=\"3\" value=\"".$max_time_play."\">&nbsp;sec ending with silence of <input type=\"text\" name=\"end_silence\" size=\"5\" value=\"".$end_silence."\">&nbsp;ms";
-	echo "&nbsp;&nbsp;&nbsp;➡ Show <a onclick=\"window.open('".$mf2t."','combinedMIDIbytes','width=300,height=500,left=100'); return false;\" href=\"".$mf2t."\">MF2T code</a>";
+	echo "&nbsp;&nbsp;&nbsp;➡ Show <a onclick=\"window.open('".nice_url($mf2t)."','combinedMIDIbytes','width=300,height=500,left=100'); return false;\" href=\"".nice_url($mf2t)."\">MF2T code</a>";
 	}
 echo "<p><input class=\"save\" type=\"submit\" name=\"savealldata\" value=\"SAVE ALL DATA\"></p>";
 echo "</form>";

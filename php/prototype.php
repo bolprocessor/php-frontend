@@ -1964,9 +1964,9 @@ if(!$no_midi AND file_exists($midi_text)) {
 	if($test) echo "bytes_link = ".$bytes_link."<br />";
 	if($test) echo "midi_file = ".$midi_file."<br />";
 	echo "<table class=\"thinborder\" id=\"midi\"><tr>";
-	echo "<td><div style=\"border:2px solid gray; background-color:azure; color:black; width:10em; padding:2px; text-align:center; border-radius: 6px;\"><a class=\"linkdotted\" style=\"color: #007BFF;\" onclick=\"window.open('".$text_link."','MIDItext','width=300,height=300'); return false;\" href=\"".$text_link."\">EXPLICIT MIDI codes</a></div></td>";
-	echo "<td><div style=\"border:2px solid gray; background-color:azure; color:black; width:13em;  padding:2px; text-align:center; border-radius: 6px;\"><a class=\"linkdotted\" style=\"color: #007BFF;\" onclick=\"window.open('".$bytes_link."','MIDIbytes','width=300,height=500,left=400'); return false;\" href=\"".$bytes_link."\">TIME-STAMPED MIDI bytes</a><br /><small>Top number is the number of bytes</small></div></td>";
-	echo "<td style=\"white-space:nowrap;\"><div style=\"border:2px solid gray; background-color:azure; color:black; width:15em;  padding:2px; text-align:center; border-radius: 6px;\"><a class=\"linkdotted\" style=\"color: #007BFF;\" onclick=\"window.open('".$mf2t_link."','MF2T','width=300,height=500,left=300'); return false;\" href=\"".$mf2t_link."\">MF2T code</a><br />";
+	echo "<td><div style=\"border:2px solid gray; background-color:azure; color:black; width:10em; padding:2px; text-align:center; border-radius: 6px;\"><a class=\"linkdotted\" style=\"color: #007BFF;\" onclick=\"window.open('".nice_url($text_link)."','MIDItext','width=300,height=300'); return false;\" href=\"".nice_url($text_link)."\">EXPLICIT MIDI codes</a></div></td>";
+	echo "<td><div style=\"border:2px solid gray; background-color:azure; color:black; width:13em;  padding:2px; text-align:center; border-radius: 6px;\"><a class=\"linkdotted\" style=\"color: #007BFF;\" onclick=\"window.open('".nice_url($bytes_link)."','MIDIbytes','width=300,height=500,left=400'); return false;\" href=\"".nice_url($bytes_link)."\">TIME-STAMPED MIDI bytes</a><br /><small>Top number is the number of bytes</small></div></td>";
+	echo "<td style=\"white-space:nowrap;\"><div style=\"border:2px solid gray; background-color:azure; color:black; width:15em;  padding:2px; text-align:center; border-radius: 6px;\"><a class=\"linkdotted\" style=\"color: #007BFF;\" onclick=\"window.open('".nice_url($mf2t_link)."','MF2T','width=300,height=500,left=300'); return false;\" href=\"".nice_url($mf2t_link)."\">MF2T code</a><br />";
 	echo "<small>division = <input type=\"text\" name=\"division\" size=\"5\" value=\"".$division."\"><br />";
 	echo "<small>tempo = ".$tempo." µs<br />timesig = ".$timesig."</small>";
 	echo "</div></td>";
@@ -2026,7 +2026,7 @@ store($h_image,"Tref",$Tref);
 $link = "prototype_image.php?save_codes_dir=".urlencode($save_codes_dir);
 
 if($Duration > 0 OR $object_type > 3)
-	echo "<div class=\"shadow\" style=\"border:2px solid gray; background-color:azure; color:black; width:13em;  padding:8px; text-align:center; border-radius: 6px;\"><a class=\"linkdotted\" style=\"color: #007BFF;\" onclick=\"window.open('".$link."','".clean_folder_name($object_name)."_image','width=800,height=625,left=100'); return false;\" href=\"".$link."\">IMAGE</a></div>";
+	echo "<div class=\"shadow\" style=\"border:2px solid gray; background-color:azure; color:black; width:13em;  padding:8px; text-align:center; border-radius: 6px;\"><a class=\"linkdotted\" style=\"color: #007BFF;\" onclick=\"window.open('".$link."','".clean_folder_name($object_name)."_image','width=800,height=625,left=100'); return false;\" href=\"".nice_url($link)."\">IMAGE</a></div>";
 else echo "<p><font color=\"red\">➡</font> NO IMAGE since duration = 0</p>";
 
 echo "<p style=\"text-align:center;\"><input class=\"save big\" type=\"submit\" name=\"savethisprototype\" formaction=\"".$url_this_page."#midi\" value=\"SAVE THIS PROTOTYPE\">&nbsp;<big> = <b><font color=\"red\">".$object_name."</font></b></big></p>";

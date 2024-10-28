@@ -515,6 +515,8 @@ function extract_data($compact,$content) {
 		else if($line <> '') $start = FALSE;
 		}
 	$extract_data['content'] = implode(chr(10),$table_out);
+	// Below, we fix an old error of naming tempered tunings
+	$extract_data['content'] = str_replace("_scale(meantone_","_scale(",$extract_data['content']);
 	return $extract_data;
 	}
 
@@ -758,7 +760,7 @@ function compile_help($text_help_file,$html_help_file) {
 function link_to_help() {
 	global $html_help_file;
 	$console_link = "produce.php?instruction=help";
-	$link = "<p>👉 Display <a class=\"linkdotted\" href=\"".$console_link."\" onclick=\"window.open('".$console_link."','help','width=800,height=800,left=200'); return false;\">console's instructions</a> or the <a class=\"linkdotted\" onclick=\"window.open('".$html_help_file."','Help','width=800,height=500'); return false;\" href=\"".$html_help_file."\">complete help file</a></p>";
+	$link = "<p>👉 Display <a class=\"linkdotted\" href=\"".nice_url($console_link)."\" onclick=\"window.open('".$console_link."','help','width=800,height=800,left=200'); return false;\">console's instructions</a> or the <a class=\"linkdotted\" onclick=\"window.open('".nice_url($html_help_file)."','Help','width=800,height=500'); return false;\" href=\"".nice_url($html_help_file)."\">complete help file</a></p>";
 	return $link;
 	}
 
@@ -803,7 +805,7 @@ function add_help_links($line) {
 					$l1 = substr($line,0,$pos1);
 					$l2 = substr($line,$pos1,strlen($token));
 					$l3 = substr($line,$pos2,strlen($line) - $pos2);
-					$insert = "<a style=\"color:#007BFF;\" onclick=\"window.open('".$html_help_file."#".$i."','show_help','width=800,height=300'); return false;\" href=\"".$html_help_file."#".$i."\">";
+					$insert = "<a style=\"color:#007BFF;\" onclick=\"window.open('".nice_url($html_help_file)."#".$i."','show_help','width=800,height=300'); return false;\" href=\"".nice_url($html_help_file)."#".$i."\">";
 					$line = $l1.$insert.$l2."</a>".$l3;
 					$posdone = $pos1 + strlen($insert);
 					$done[$posdone] = TRUE;
@@ -1869,6 +1871,11 @@ function new_name($name) {
 	return $name;
 	}
 
+function nice_url($url) {
+	$url = str_replace(SLASH,'/',$url);
+	return $url;
+	}
+
 function MIDIparameter_argument($i,$parameter,$StartIndex,$EndIndex,$TableIndex,$param_value,$IsLogX,$IsLogY,$GEN) {
 	$r = "<table>";
 	$r .= "<tr>";
@@ -2544,7 +2551,7 @@ function display_console_state() {
 			echo "Source files of BP3 have been found. You can (re)compile it.<br />";
 			if(!check_gcc()) if(windows_system()) echo "👉&nbsp;&nbsp;However, ‘gcc’ is not responding.<br />You first need to <a class=\"linkdotted\" target=\"_blank\" href=\"https://bolprocessor.org/install-mingw/\">install and set up MinGW</a>.";
 				else echo "👉&nbsp;&nbsp;However, ‘gcc’ is not responding. You need to install<br />the <a class=\"linkdotted\" target=\"_blank\" href=\"https://www.cnet.com/tech/computing/install-command-line-developer-tools-in-os-x/\">command line developer tools</a> or <a class=\"linkdotted\" target=\"_blanl\" href=\"https://developer.apple.com/support/xcode/\">Xcode</a>.";
-			else echo "👉&nbsp;&nbsp;<a onclick=\"window.open('".$link."','trace','width=800,height=800'); return false;\"  href=\"".$link."\">Click to run the compiler</a>, then <a href=\"".$url_this_page."\">reload this page</a>.";
+			else echo "👉&nbsp;&nbsp;<a onclick=\"window.open('".nice_url($link)."','trace','width=800,height=800'); return false;\"  href=\"".nice_url($link)."\">Click to run the compiler</a>, then <a href=\"".$url_this_page."\">reload this page</a>.";
 			}
 		else
 			echo "Some files are missing or misplaced.<br />👉&nbsp;&nbsp;Visit <a target=\"_blank\" class=\"linkdotted\" href=\"https://bolprocessor.org/check-bp3/#install\">https://bolprocessor.org/check-bp3/</a><br />and follow instructions!";
@@ -2697,7 +2704,7 @@ function html_to_text($text,$type) {
 
 function popup_link($image_name,$text,$image_width,$image_height,$left_margin,$link) {
 	$link = str_replace("#","_",$link);
-	$popup_link = "<a class=\"linkdotted\" onclick=\"window.open('".$link."','".$image_name."','toolbar=no,scrollbars=yes,resizable=yes,width=".$image_width.",height=".$image_height.",left=".$left_margin."'); return false;\" href=\"".$link."\">".$text."</a>";
+	$popup_link = "<a class=\"linkdotted\" onclick=\"window.open('".nice_url($link)."','".$image_name."','toolbar=no,scrollbars=yes,resizable=yes,width=".$image_width.",height=".$image_height.",left=".$left_margin."'); return false;\" href=\"".nice_url($link)."\">".$text."</a>";
 	return $popup_link;
 	}
 
@@ -4333,7 +4340,7 @@ function midifile_player($midi_file_link) {
 	$text .= "<a href=\"#nowhere\" style=\"color:#007BFF;\" onClick=\"MIDIjs.play('".$midi_file_link."');\">";
 	$text .= "Play MIDI file</a>";
 	$text .= " (<a href=\"#nowhere\" style=\"color:#007BFF;\" onClick=\"MIDIjs.stop();\">Stop playing</a>)";
-	$text .= "&nbsp;or <a style=\"color:#007BFF;\" href=\"".$midi_file_link."\" download>download it</a></p>";
+	$text .= "&nbsp;or <a style=\"color:#007BFF;\" href=\"".nice_url($midi_file_link)."\" download>download it</a></p>";
 	return $text;
 	}
 

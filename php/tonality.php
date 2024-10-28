@@ -929,7 +929,7 @@ if($max_scales > 0) {
 			echo "➡&nbsp;".popup_link($clean_name_of_file,"image",500,410,(100 * $k),$dir);
 			}
 		echo "&nbsp;<input type=\"submit\" class=\"edit\" name=\"export_scale_".$i_scale."\" formaction=\"".$url_this_page."&scalefilename=".urlencode($scale_name[$i_scale])."#".$i_scale."\" onclick=\"this.form.target='_self';return true;\" value=\"Export to SCALA\">";
-		if(file_exists($scala_file) OR isset($_POST['export_scale_'.$i_scale])) echo "<span style=\"padding-right:1em;\">➡&nbsp;<a href=\"".$scala_file."\" download=\"".$scale_name[$i_scale].".scl\">Download</a></span>";
+		if(file_exists($scala_file) OR isset($_POST['export_scale_'.$i_scale])) echo "<span style=\"padding-right:1em;\">➡&nbsp;<a href=\"".nice_url($scala_file)."\" download=\"".$scale_name[$i_scale].".scl\">Download</a></span>";
 		if(isset($scale_table[$i_scale])) echo "<br /><small><span class=\"green-text\">".$scale_table[$i_scale]."</span></small>";
 		else {
 			echo "<br />???";

@@ -1249,7 +1249,7 @@ if(!isset($_POST['analyze_tonal'])) {
 		echo "•&nbsp;No quantization<br />";
 		}
 	else {
-		echo "<input class=\"edit\"  style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_settings."','".$settings_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".begin_with(20,$settings_file)."’\">";
+		echo "<input class=\"edit\"  style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".nice_url($url_settings)."','".$settings_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".begin_with(20,$settings_file)."’\">";
 		if($p_clock > 0 AND $q_clock > 0) {
 			$metronome_settings = 60 * $q_clock / $p_clock;
 			}
@@ -1607,7 +1607,10 @@ echo "</form>";
 $table = explode(chr(10),$content);
 $imax = count($table);
 if($imax > 0 AND (substr_count($content,'{') > 0 OR substr_count($content,"-da.") > 0  OR substr_count($content,".bpda") > 0) AND !$hide) {
-	echo "<h3 id=\"tonalanalysis\">Tonal analysis: “".$filename."”</h3>";
+	echo "<span id=\"tonalanalysis\"></span>";
+	if(isset($_POST['analyze_tonal']))
+		echo "<h3 style=\"text-align:center;\">Tonal analysis: “".$filename."”</h3>";
+	else echo "<h3>Tonal analysis: “".$filename."”</h3>";
 	$tonal_analysis_possible = !($note_convention > 2);
 	if(!$tonal_analysis_possible) echo "<p><font color=\"red\">➡ Tonal analysis is only possible with names of notes in English, Italian/Spanish/French or Indian conventions.</font></p>";
 	if(isset($_POST['analyze_tonal']) OR isset($_POST['save_tonal_settings']) OR isset($_POST['reset_tonal_settings'])) {

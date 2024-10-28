@@ -264,12 +264,12 @@ $extension = end($table);
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 echo "<p style=\"text-align:left;\">";
 if($path <> '') echo "<input class=\"edit\" type=\"submit\" name=\"\" value=\"REFRESH THIS PAGE\">";
-if($folder <> '') echo "&nbsp;&nbsp;<big><font color=\"red\">↑</font>&nbsp;<a href=\"".$upper_link."\">UPPER FOLDER</a>&nbsp;<font color=\"red\">↑</font></big>";
+if($folder <> '') echo "&nbsp;&nbsp;<big><font color=\"red\">↑</font>&nbsp;<a href=\"".nice_url($upper_link)."\">UPPER FOLDER</a>&nbsp;<font color=\"red\">↑</font></big>";
 echo "</p>";
 
 $link_list = "file_list.php?dir=".$dir;
 if($path <> '' AND $path <> $trash_folder) {
-	echo "<p><input class=\"edit\" onclick=\"window.open('".$link_list."','listfiles','width=300,height=600,left=100'); return false;\" type=\"submit\" name=\"\" value=\"COPY list of files\">&nbsp;";
+	echo "<p><input class=\"edit\" onclick=\"window.open('".nice_url($link_list)."','listfiles','width=300,height=600,left=100'); return false;\" type=\"submit\" name=\"\" value=\"COPY list of files\">&nbsp;";
 	if(countBakFiles($dir) > 0) echo "<input style=\"background-color:red; color:white;\" type=\"submit\" name=\"trash_backups\" title=\"Delete '_bak' files\" value=\"MOVE '_bak' files to TRASH\"></p>";
 	}
 echo "</form>";
@@ -493,7 +493,7 @@ if(!is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"t
 		if(($n1 = display_directory(TRUE,$dir,"grammar")) > 0 OR $show_grammar) {
 			echo "<h4>Grammar project(s)</h4>";
 			if($show_grammar) {
-				echo "<p style=\"background-color:snow; color:black; padding:6px; border-radius: 0.5em;\">Last visited: <a style=\"color:#007BFF;\" target=\"_blank\" href=\"".$last_grammar_page."\">".$last_grammar_name."</a>";
+				echo "<p style=\"background-color:snow; color:black; padding:6px; border-radius: 0.5em;\">Last visited: <a style=\"color:#007BFF;\" target=\"_blank\" href=\"".nice_url($last_grammar_page)."\">".$last_grammar_name."</a>";
 				if(isset($last_grammar_directory) AND $folder <> $last_grammar_directory) echo "<br />in workspace</font> <a style=\"color:#007BFF;\" href=\"index.php?path=".$last_grammar_directory."\">".$last_grammar_directory."</a></p>";
 				}
 			}
@@ -502,7 +502,7 @@ if(!is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"t
 		if(($n2 = display_directory(TRUE,$dir,"data")) > 0 OR $show_data) {
 			echo "<h4>Data project(s)</h4>";
 			if($show_data) {
-				echo "<p style=\"background-color:snow; color:black; padding:6px; border-radius: 0.5em;\">Last visited: <a style=\"color:#007BFF;\" target=\"_blank\" href=\"".$last_data_page."\">".$last_data_name."</a>";
+				echo "<p style=\"background-color:snow; color:black; padding:6px; border-radius: 0.5em;\">Last visited: <a style=\"color:#007BFF;\" target=\"_blank\" href=\"".nice_url($last_data_page)."\">".$last_data_name."</a>";
 				if(isset($last_data_directory) AND $folder <> $last_data_directory) echo "<br />in workspace</font> <a style=\"color:#007BFF;\" href=\"index.php?path=".$last_data_directory."\">".$last_data_directory."</a></p>";
 				}
 			}
@@ -727,7 +727,7 @@ function display_directory($test,$dir,$filter) {
 								if($type <> "directory") copy($dir.SLASH.$old_name,$dir.SLASH.$new_name);
 								else rcopy($dir.SLASH.$old_name,$dir.SLASH.$new_name);
 								$link = $type.".php?file=".urlencode($path.SLASH.$new_name);
-								echo "‘<font color=\"green\">".$old_name."</font>’ <font color=\"red\">➡</font> copied to <a target=\"_blank\" href=\"".$link."\">".$new_name."</a><br />";
+								echo "‘<font color=\"green\">".$old_name."</font>’ <font color=\"red\">➡</font> copied to <a target=\"_blank\" href=\"".nice_url($link)."\">".$new_name."</a><br />";
 								}
 							else {
 								rename($dir.SLASH.$old_name,$dir.SLASH.$new_name);
@@ -763,8 +763,8 @@ function display_directory($test,$dir,$filter) {
 					else $link = $type.".php?file=".urlencode($path.SLASH.$thisfile);
 					if($type == "image") $link = $dir.SLASH.$thisfile;
 					if($link <> '') {
-						if($this_is_directory) echo "<a href=\"".$link."\">";
-						else echo "<a target=\"_blank\" href=\"".$link."\">";
+						if($this_is_directory) echo "<a href=\"".nice_url($link)."\">";
+						else echo "<a target=\"_blank\" href=\"".nice_url($link)."\">";
 						}
 					if($this_is_directory) echo "<b>";
 					echo $thisfile;

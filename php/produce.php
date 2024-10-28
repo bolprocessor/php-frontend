@@ -470,24 +470,24 @@ echo "</script>";
 if(!$no_error) {
 	if(strlen($content_trace) > 4) {
 		echo "<p><font color=\"red\" class=\"blinking\">Errors found… </font> ";
-		echo "Check the <a onclick=\"window.open('".$trace_link."','errors','width=800,height=500,left=400'); return false;\" href=\"".$trace_link."\">error trace</a> file!</p>";
+		echo "Check the <a onclick=\"window.open('".nice_url($trace_link)."','errors','width=800,height=500,left=400'); return false;\" href=\"".$trace_link."\">error trace</a> file!</p>";
 		}
 	}
 echo "<p>";
 
 // echo "<p>output = ".$output."</p>";
 if($output <> '') {
-	if($file_format == "csound") $output_link = $score_file;
+	if($file_format == "csound") $output_link = nice_url($score_file);
 	else if($file_format == "midi") $output_link = '';
 	else {
 		$output_html = clean_up_file_to_html($output);
-		$output_link = $output_html;
+		$output_link = str_replace(SLASH,'/',$output_html);
 		}
 	if($output_link <> '') echo "<font color=\"red\">➡</font> Read the <a class=\"linkdotted\" onclick=\"window.open('".$output_link."','".$grammar_name."','width=800,height=700,left=300'); return false;\" href=\"".$output_link."\">output file</a> (or <a class=\"linkdotted\" href=\"".$output_link."\" download>download it</a>)<br />";
 	}
 if($trace_production OR $instruction == "templates" OR $show_production) {
     if(file_exists($trace_link) AND strlen($content_trace) > 20) 
-        echo "<font color=\"red\">➡</font> Read the <a class=\"linkdotted\" onclick=\"window.open('".$trace_link."','trace','width=800,height=600,left=400'); return false;\" href=\"".$trace_link."\">trace file</a> (or <a class=\"linkdotted\" href=\"".$trace_link."\" download>download it</a>)";
+        echo "<font color=\"red\">➡</font> Read the <a class=\"linkdotted\" onclick=\"window.open('".nice_url($trace_link)."','trace','width=800,height=600,left=400'); return false;\" href=\"".$trace_link."\">trace file</a> (or <a class=\"linkdotted\" href=\"".nice_url($trace_link)."\" download>download it</a>)";
     }
 echo "</p>";
 	
@@ -497,7 +497,7 @@ if($file_format == "midi") {
 //		echo "midi_file_link = ".$midi_file_link."<br />";
 		if(!is_connected() AND $file_format == "midi") {
 			echo "<p style=\"color:red;\">➡ Cannot find the MIDI file player “midijs.net”… Are you connected to Internet?</p>";
-			echo "<p><a href=\"".$midi_file_link."\" download>Download the MIDI file</a></p>";
+			echo "<p><a href=\"".nice_url($midi_file_link)."\" download>Download the MIDI file</a></p>";
 			}
 		else {
 			$midi_file_link_url = str_replace(SLASH,'/',$midi_file_link);
@@ -565,13 +565,12 @@ foreach($dircontent as $thisfile) {
 		$j++;
 		}
 	$link = $temp_dir.$thisfile;
-    $link = str_replace(SLASH,'/',$link);
 	$left = 10 + (50 * ($position_image - 1));
 	$window_height = 600;
 	if($HeightMax < $window_height) $window_height = $HeightMax + 60;
 	$window_width = 1200;
 	if($WidthMax < $window_width) $window_width = $WidthMax +  20;
-	echo "<div style=\"border:2px solid gray; background-color:azure; color:black; width:8em;  padding:2px; text-align:center; border-radius: 6px;\"><a style=\"color:#007BFF;\" onclick=\"window.open('".$link."','".$title1."','width=".$window_width.",height=".$window_height.",left=".$left."'); return false;\" href=\"".$link."\">Image ".$number."</a><br />".$image_time;
+	echo "<div style=\"border:2px solid gray; background-color:azure; color:black; width:8em;  padding:2px; text-align:center; border-radius: 6px;\"><a style=\"color:#007BFF;\" onclick=\"window.open('".nice_url($link)."','".$title1."','width=".$window_width.",height=".$window_height.",left=".$left."'); return false;\" href=\"".$link."\">Image ".$number."</a><br />".$image_time;
 	if(check_image($link) <> '') {
 		$bad_image = TRUE;
 		echo " <font color=\"red\"><b>*</b></font>";
@@ -637,6 +636,8 @@ if($no_error AND $file_format == "csound") {
 		        else
                     $command = $csound_path.SLASH.$csound_name." --wave -o ".$sound_file_link." ".$dir_csound_resources.$csound_orchestra." ".$csound_file_link;
                 $trace_csound = $temp_dir_abs."trace_csound.txt";
+                $trace_csound_link = $temp_dir."trace_csound.txt";
+                $trace_csound_link = str_replace(SLASH,'/',$trace_csound_link);
 				$command .= " 2>".$trace_csound;
                 $command_show = $command;
                 if(windows_system()) {
@@ -657,7 +658,7 @@ if($no_error AND $file_format == "csound") {
 					$audio_tag .= "Your browser does not support the audio tag.";
 					$audio_tag .= "</audio>";
 					echo $audio_tag;
-					echo "<p><a target=\"_blank\" href=\"".$sound_file_link."\" download>Download this sound file</a> (<span class=\"green-text\">".$sound_file_link."</span>)</p>";
+					echo "<p><a target=\"_blank\" href=\"".nice_url($sound_file_link)."\" download>Download this sound file</a> (<span class=\"green-text\">".nice_url($sound_file_link)."</span>)</p>";
 					echo "<p><font color=\"red\">➡</font> If you hear garbage sound or silence it may be due to a mismatch between Csound score and orchestra<br />&nbsp;&nbsp;&nbsp;or some overflow in Csound…</p>";
 					}
 				}
@@ -702,13 +703,10 @@ else {
 		if(file_exists($project_name.".mid") AND filesize($project_name.".mid") > 59) {
             $midi_url = str_replace(SLASH,'/',$project_name.".mid");
 			$audio_tag = midifile_player($midi_url);
-	/*		$audio_tag = "<p><b>MIDI file:</b></p><p class=\"shadow\" style=\"width:25em;\"><a style=\"color:#007BFF;\" href=\"#midi\" onClick=\"MIDIjs.play('".$midi_url."');\"><img src=\"".$bp_application_path."php/pict/loudspeaker.png\" width=\"70px;\" style=\"vertical-align:middle;\" />Play MIDI file</a>";
-			$audio_tag .= " (<a style=\"color:#007BFF;\" href=\"#midi\" onClick=\"MIDIjs.stop();\">Stop playing</a>)";
-			$audio_tag .= "&nbsp;or <a style=\"color:#007BFF;\" href=\"".$project_name.".mid\" download>download it</a></p>"; */
 			fwrite($handle,$audio_tag."\n");
 			}
 		if(file_exists($project_name.".html")) {
-			fwrite($handle,"<p><font color=\"red\">➡</font> Read the <a class=\"linkdotted\" onclick=\"window.open('".$project_name.".html','".$file_format."','width=800,height=700,left=300'); return false;\" href=\"".$project_name.".html\">data file</a> (or <a class=\"linkdotted\" href=\"".$project_name.".bpda\" download>download it</a>)</p>\n");
+			fwrite($handle,"<p><font color=\"red\">➡</font> Read the <a class=\"linkdotted\" onclick=\"window.open('".$project_name.".html','".$file_format."','width=800,height=700,left=300'); return false;\" href=\"".$project_name.".html\">data file</a> (or <a class=\"linkdotted\" href=\"".nice_url($project_name).".bpda\" download>download it</a>)</p>\n");
 			}
 		fwrite($handle,"<p><b>Messages:</b></p>\n");
 		}
@@ -738,7 +736,7 @@ if($n_messages > 0) {
 	if($handle) {
 		$window_name = $grammar_name."_".rand(0,99)."_result";
 		if($bad_image) echo "<p>(<font color=\"red\"><b>*</b></font>) Syntax error in image: negative argument</p>";
-		echo "<p style=\"font-size:larger;\"><input style=\"color:DarkBlue; background-color:yellow; font-size:large;\" onclick=\"window.open('".$result_file."','".$window_name."','width=800,height=600,left=100'); return false;\" type=\"submit\" value=\"Show all ".$n_messages." lines\">";
+		echo "<p style=\"font-size:larger;\"><input class=\"save big\" onclick=\"window.open('".nice_url($result_file)."','".$window_name."','width=800,height=600,left=100'); return false;\" type=\"submit\" value=\"Show all ".$n_messages." lines\">";
 		if($warnings == 1) echo " <span class=\"blinking\">=> ".$warnings." warning</span>";
 		if($warnings > 1) echo " <span class=\"blinking\">=> ".$warnings." warnings</span>";
 		}
@@ -748,7 +746,7 @@ if($n_messages > 0) {
 else echo "<p>No message produced…";
 if($trace_csound <> '' AND file_exists($trace_csound)) {
 	$window_name = $grammar_name."_".rand(0,99)."_result";
-	echo "&nbsp;<input style=\"color:DarkBlue; background-color:yellow; font-size:large;\" onclick=\"window.open('".$trace_csound."','".$window_name."','width=800,height=600,left=100'); return false;\" type=\"submit\" value=\"Show Csound trace\">";
+	echo "&nbsp;<input class=\"save big\" onclick=\"window.open('".nice_url($trace_csound_link)."','".$window_name."','width=800,height=600,left=100'); return false;\" type=\"submit\" value=\"Show Csound trace\">";
 	}
 echo "</p>";
 

@@ -259,7 +259,7 @@ if(isset($_POST['compilegrammar'])) {
 		if($trace_content !== false && strlen($trace_content) > 10)
 			$trace_link = clean_up_file_to_html($dir.$tracefile);
 		}
-	if($trace_link <> '') echo "<p><big>👉 <font color=\"red\">Errors found! Open the </font> <a onclick=\"window.open('".$trace_link."','trace','width=800,height=800'); return false;\" href=\"".$trace_link."\">trace file</a>!</big></p>";
+	if($trace_link <> '') echo "<p><big>👉 <font color=\"red\">Errors found! Open the </font> <a onclick=\"window.open('".nice_url($trace_link)."','trace','width=800,height=800'); return false;\" href=\"".nice_url($trace_link)."\">trace file</a>!</big></p>";
 	//	}
 	else echo "<p><font color=\"red\">➡</font> <span class=\"green-text\">No error.</span></p>";
 	@unlink($dir.$tracefile);
@@ -414,7 +414,7 @@ if($settings_file <> '') {
 	if(!file_exists($dir.$settings_file)) {
 		$url_settings = "settings.php?file=".urlencode($dir_base.$settings_file);
 		$error_mssg .= "<font color=\"red\">WARNING: ".$dir_base.$settings_file." not found.</font>";
-		$error_mssg .= "&nbsp;<input class=\"save\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_settings."','".$settings_file."','width=800,height=800,left=100'); return false;\" value=\"CREATE IT\"><br />";
+		$error_mssg .= "&nbsp;<input class=\"save\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".nice_url($url_settings)."','".$settings_file."','width=800,height=800,left=100'); return false;\" value=\"CREATE IT\"><br />";
 		$error = TRUE;
 		}
 	else $link_produce .= "&settings=".urlencode($dir.$settings_file);
@@ -493,7 +493,7 @@ if($templates) {
 	echo "<input class=\"edit\" onclick=\"if(checksaved()) window.open('".$link_produce_templates."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"CHECK TEMPLATES\"><br /><br />";
 	}
 echo "<div style=\"padding:1em; width:690px;\" class=\"thinborder\">";
-if($settings_file <> '' AND file_exists($dir.$settings_file)) echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_settings."','".$settings_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$settings_file."’\">";
+if($settings_file <> '' AND file_exists($dir.$settings_file)) echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".nice_url($url_settings)."','".$settings_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$settings_file."’\">";
 if($settings_file == '' OR !file_exists($dir.$settings_file)) {
 	$time_resolution = 10; //  10 milliseconds by default
 	if($metronome > 0) {
@@ -631,14 +631,13 @@ echo "<input type=\"hidden\" name=\"time_structure\" value=\"".$time_structure."
 echo "<input type=\"hidden\" name=\"alphabet_file\" value=\"".$alphabet_file."\">";
 
 echo "<span  id=\"topedit\">&nbsp;</span>";
-
 echo $save_warning;
 echo "<br /><button class=\"edit big\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button><p></p>";
 
 find_replace_form();
 echo "<p><input class=\"save big\" type=\"submit\" id=\"saveButton\" onclick=\"clearsave();\" name=\"savethisfile\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".begin_with(20,$filename)."’\">";
 if((file_exists($output.SLASH.$default_output_name.".wav") OR file_exists($output.SLASH.$default_output_name.".mid") OR file_exists($output.SLASH.$default_output_name.".html") OR file_exists($output.SLASH.$default_output_name.".sco")) AND file_exists($result_file)) {
-	echo "&nbsp;&nbsp;&nbsp;<input class=\"edit\" style=\"font-size:large;\" onclick=\"window.open('".$result_file."','result','width=800,height=600,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Show latests results\">";
+	echo "&nbsp;&nbsp;&nbsp;<input class=\"edit\" style=\"font-size:large;\" onclick=\"window.open('".nice_url($result_file)."','result','width=800,height=600,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Show latests results\">";
 	}
 echo "&nbsp;<input class=\"edit big\" type=\"submit\" onclick=\"clearsave();\" name=\"compilegrammar\" value=\"COMPILE GRAMMAR\">";
 
@@ -670,7 +669,7 @@ else echo "\" class=\"produce big\"";
 echo ">";
 $link_test = $link_produce."&test";
 $display_command_title = "DisplayCommand".$filename;
-echo "&nbsp;<input class=\"edit\" onclick=\"window.open('".$link_test."','".$display_command_title."','width=1000,height=200,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Display command line\">";
+echo "&nbsp;<input class=\"edit\" onclick=\"window.open('".nice_url($link_test)."','".$display_command_title."','width=1000,height=200,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Display command line\">";
 echo "</div>";
 echo "</form>";
 display_more_buttons(FALSE,$content,$url_this_page,$dir,'',$objects_file,$csound_file,$tonality_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
@@ -772,7 +771,7 @@ if(isset($_POST['saveexpression'])) {
 		}
 	}
 // echo "link_play_expression = ".$link_play_expression."<br />";
-echo "<input  type=\"submit\" onclick=\"clearsave();\" name=\"saveexpression\" class=\"save\" value=\"SAVE EXPRESSION\">&nbsp;then&nbsp;<input onclick=\"window.open('".$link_play_expression."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" value=\"PRODUCE ITEM\"";
+echo "<input  type=\"submit\" onclick=\"clearsave();\" name=\"saveexpression\" class=\"save\" value=\"SAVE EXPRESSION\">&nbsp;then&nbsp;<input onclick=\"window.open('".nice_url($link_play_expression)."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" value=\"PRODUCE ITEM\"";
 if(!file_exists($data_expression)) echo " disabled class=\"edit disabled\" style=\"box-shadow: none;\"";
 else echo " class=\"produce\"";
 echo "><br /><br />";
