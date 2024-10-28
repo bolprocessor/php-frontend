@@ -66,9 +66,6 @@ else $item = 0;
 $check_command_line = FALSE;
 $sound_file_link = $result_file = $tracefile = '';
 $project_fullname = '';
-// echo "absolute_path = ".$absolute_application_path."<br />";
-$temp_dir_abs = $temp_dir;
-if(windows_system()) $temp_dir_abs = str_replace("..".SLASH,$absolute_application_path,$temp_dir);
 // echo "temp_dir = ".$temp_dir."<br />";
 if($instruction == "help") {
 	$command = $application_path.$console." --help";
@@ -606,7 +603,7 @@ if($no_error AND $file_format == "csound") {
        // echo "sound_file_link = ".$sound_file_link."<br />";
         $sound_file_link .= "@".rand(10000,99999).".wav";
       //  echo "sound_file_link = ".$sound_file_link."<br />";
-		$table = explode('/',$csound_file_link);
+		$table = explode(SLASH,$csound_file_link);
 		$csound_file_name = end($table);
        // echo "csound_file_name = ".$csound_file_name."<br />";
 		$project_name = str_replace(".sco",'',$csound_file_name);

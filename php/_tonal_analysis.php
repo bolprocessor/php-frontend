@@ -704,11 +704,11 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 			}
 		
 		$batch_html_filename = str_replace("-da.",'',$filename)."_batch.html";
-		$batch_html_link = $temp_dir.$temp_folder.SLASH.$batch_html_filename;
+		$batch_html_link = $temp_dir.$temp_folder."/".$batch_html_filename;
 		$batch_csv_filename = str_replace("-da.",'',$filename)."_batch.csv";
-		$batch_csv_link = $temp_dir.$temp_folder.SLASH.$batch_csv_filename;
+		$batch_csv_link = $temp_dir.$temp_folder."/".$batch_csv_filename;
 		$batch_abstract_filename = str_replace("-da.",'',$filename)."_abstract.html";
-		$batch_abstract_link = $temp_dir.$temp_folder.SLASH.$batch_abstract_filename;
+		$batch_abstract_link = $temp_dir.$temp_folder."/".$batch_abstract_filename;
 		if($batch_processing AND $compare_scales AND isset($column_name)) {
 			$handle_html = fopen($batch_html_link,"w");
 			$handle_csv = fopen($batch_csv_link,"w");
@@ -860,7 +860,8 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 			fclose($handle_html);
 			fclose($handle_csv);
 			fclose($handle_abstract);
-			echo "<p style=\"text-align:center;\"><input class=\"shadow edit big\" onclick=\"window.open('".$batch_html_link."','batch','width=1200,height=500,left=0'); return false;\" type=\"submit\" name=\"produce\" value=\"SHOW ALL RESULTS\"></p>";
+			$link = str_replace(SLASH,'/',$batch_html_link);
+			echo "<p style=\"text-align:center;\"><input class=\"shadow edit big\" onclick=\"window.open('".$link."','batch','width=1200,height=500,left=0'); return false;\" type=\"submit\" name=\"produce\" value=\"SHOW ALL RESULTS\"></p>";
 			}
 		$duration_process = time() - $time_start;
 		if($errors > 0) echo "<p style=\"text-align:center; color:red;\"><big><b>".$errors." ERROR(s) FOUND</b></big></p>";
@@ -1383,9 +1384,12 @@ function show_relations_on_image($i_item,$matching_list,$mode,$direction,$scalen
 				if(!isset($note_name[$grade])) {
 					$this_note = $table2[$grade];
 					$this_position = note_position($this_note);
-					if($note_convention == 0) $this_note = $Englishnote[$this_position];
-					else if($note_convention == 1) $this_note = $Frenchnote[$this_position];
-					else $this_note = $Indiannote[$this_position];
+					if($this_position >= 0) {
+						if($note_convention == 0) $this_note = $Englishnote[$this_position]; // $$$ Undefined key array
+						else if($note_convention == 1) $this_note = $Frenchnote[$this_position];
+						else $this_note = $Indiannote[$this_position];
+						}
+					else $this_note = "?";
 					$note_name[$grade] = $this_note;
 					}
 				}
