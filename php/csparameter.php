@@ -74,7 +74,7 @@ $content = file_get_contents($parameter_file,TRUE);
 $table = explode(chr(10),$content);
 $comment = $table[1];
 echo "<p>Comment: <input type=\"text\" name=\"comment\" size=\"90\" value=\"".$comment."\"></p>";
-echo "<table>";
+echo "<table class=\"thicktable\">";
 echo "<tr>";
 echo "<td></td>";
 echo "<td>start</td>";

@@ -908,8 +908,9 @@ if($number_instruments > 0) {
 	echo "<table  class=\"thicktable\">";
 	$done_index = array();
 	for($j = 0; $j < $number_instruments; $j++) {
-		echo "<tr><td class=\"middle\" style=\"padding:12px; white-space:nowrap\">";
+		echo "<tr class=\"middle\">";
 		echo "<form method=\"post\" action=\"csinstrument.php\" enctype=\"multipart/form-data\">";
+		echo "<td class=\"middle\" style=\"white-space:nowrap\">";
 		echo "<input type=\"hidden\" name=\"tonality_filename\" value=\"".$tonality_filename."\">";
 		echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";
 		echo "<input type=\"hidden\" name=\"instrument_file\" value=\"".$instrument_file[$j]."\">";
@@ -921,19 +922,19 @@ if($number_instruments > 0) {
 			}
 		$done_index[$this_index] = TRUE;
 		echo "<input type=\"hidden\" name=\"instrument_index\" value=\"".$this_index."\">";
-		echo "<big>_ins(".$this_index.")</big> ";
+		echo "<p><big>_ins(".$this_index.")</big> ";
 		echo "<input class=\"edit big\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" name=\"instrument_name\" value=\"".$CsoundInstrumentName[$j]."\">";
 		$folder_this_instrument = $temp_dir.$temp_folder.SLASH.$CsoundInstrumentName[$j];
 		$argmax_file = $folder_this_instrument.SLASH."argmax.php";
 		$argmax_all = max_argument($argmax_file);
-		echo "&nbsp;(".$argmax_all."&nbsp;args)";
-		echo "</form>";
+		echo "&nbsp;(".$argmax_all."&nbsp;args)</p>";
 		echo "</td>";
+		echo "</form>";
 		echo "<td class=\"middle\">";
 		echo "<small>".$InstrumentComment[$j]."</small>";
 		echo "</td>";
-		echo "<td class=\"middle\">";
 		echo "<form method=\"post\" action=\"".$url_this_page."#instruments\" enctype=\"multipart/form-data\">";
+		echo "<td class=\"middle\">";
 		echo "<input type=\"hidden\" name=\"tonality_filename\" value=\"".$tonality_filename."\">";
 		echo "<input type=\"hidden\" name=\"dir\" value=\"".$dir."\">";
 		echo "<input type=\"hidden\" name=\"filename\" value=\"".$filename."\">";
@@ -953,8 +954,8 @@ if($number_instruments > 0) {
 		echo "<td class=\"middle\" style=\"text-align:right; padding:5px;\">";
 		echo "<input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"duplicate_instrument\" value=\"DUPLICATE AS\">: <input type=\"text\" name=\"copy_instrument\" size=\"15\" value=\"\">";
 		echo "</td>";
-		echo "</tr>";
 		echo "</form>";
+		echo "</tr>";
 		}
 	echo "</table>";
 	}

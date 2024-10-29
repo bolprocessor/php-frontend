@@ -1093,12 +1093,11 @@ if(is_integer(strpos($scale_name,' '))) echo " <font color=\"red\">➡</font> av
 echo "</h3>";
 
 echo "<p>👉 Read page ‘<a target=\"_blank\" class=\"linkdotted\" href=\"https://bolprocessor.org/microtonality/\">Microtonality</a>’</p>";
-
 echo "<input class=\"edit big\" type=\"submit\" formaction=\"".$url_this_page."\" title=\"Export this tuning in the SCALA format\" name=\"download_scala\" value=\"Download SCALA file\">";
 echo "<input class=\"edit big\" type=\"submit\" formaction=\"".$url_this_page."\" title=\"Export this keyboard mapping to the KBM format\" name=\"download_kbm\" value=\"Download KBM\">";
-echo "<p>👉 Read documentation <a target=\"_blank\" class=\"linkdotted\" href=\"https://www.huygens-fokker.org/scala/scl_format.html\">SCALA</a> / <a target=\"_blank\" class=\"linkdotted\" href=\"https://www.huygens-fokker.org/scala/help.htm#mappings\">KBM</a><br />";
-if(!isset($_POST['import_kbm']) OR isset($_POST['dont'])) echo "<input class=\"edit big\" type=\"submit\" formaction=\"".$url_this_page."\" title=\"Import a keyboard mapping in the KBM format\" name=\"import_kbm\" value=\"Import KBM\"></p>";
-else echo "</p>";
+echo "<p>👉 Read documentation <a target=\"_blank\" class=\"linkdotted\" href=\"https://www.huygens-fokker.org/scala/scl_format.html\">SCALA</a> / <a target=\"_blank\" class=\"linkdotted\" href=\"https://www.huygens-fokker.org/scala/help.htm#mappings\">KBM</a></p>";
+if(!isset($_POST['import_kbm']) OR isset($_POST['dont'])) echo "<p><input class=\"edit big\" type=\"submit\" formaction=\"".$url_this_page."\" title=\"Import a keyboard mapping in the KBM format\" name=\"import_kbm\" value=\"Import KBM\"></p>";
+// else echo "</p>";
 
 if($kbm_error <> '') echo $kbm_error;
 if(isset($_POST['import_kbm'])) {

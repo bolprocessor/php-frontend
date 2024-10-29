@@ -1911,8 +1911,8 @@ function MIDIparameter_argument($i,$parameter,$StartIndex,$EndIndex,$TableIndex,
 	$r .= "<input type=\"text\" name=\"TableIndex_".$i."\" size=\"4\" value=\"".$x."\">";
 	$r .= "</td>";
 	$r .= "</tr>";
-	$r .= "</table><br />";
-	$r .= "<table>";
+	$r .= "</table>";
+	$r .= "<table class=\"thinborder\" style=\"margin-bottom:6px;\">";
 	$r .= "<tr>";
 	$r .= "<td colspan=\"6\">";
 	$r .= "▷ <font color=\"red\">".$parameter."</font> mapping of variations";
@@ -2518,14 +2518,14 @@ function delete_settings_entry($entry) {
 
 function display_darklight() {
 	global $bp_application_path;
-	echo "<div style=\"display:flex; align-items:center; float:right;\">";
-	echo "&nbsp;<img title=\"Bulb Png PNGs by Vecteezy\" src=\"pict/bulb.png\" id=\"darkModeToggle\" style=\"width:30px; cursor: pointer;\"/>";
-//	echo "&nbsp;<img title=\"Bulb Png PNGs by Vecteezy\" src=\"".$bp_application_path."php/pict/bulb.png\" id=\"darkModeToggle\" style=\"width:30px; cursor: pointer;\"/>";
+	echo "<div background-color:transparent; style=\"display:flex; align-items:center; float:right;\">";
+//	echo "<img id=\"darkModeToggle\" title=\"Bulb Png PNGs by Vecteezy\" src=\"pict/bulb.png\" style=\"width:30px; cursor: pointer;\"/>";
+	echo "<div id=\"darkModeToggle\" class=\"myswitch\"/></div>";
 	echo "</div>";
 	}
 
 function display_console_state() {
-	global $bp_application_path, $absolute_application_path, $panicfile, $filename, $url_this_page, $console;
+	global $bp_application_path, $absolute_application_path, $panicfile, $filename, $url_this_page, $console, $file_format;
 	 echo "<div style=\"display:flex; align-items:center; float:right; padding:6px; background-color:transparent;\">";
 	 echo "<a target=\"_blank\" href=\"".$bp_application_path."/php\"><img src=\"pict/BP3-logo.png\" style=\"width:70px; margin-bottom:12px;\"/></a>";
 	 echo "<span style=\"margin-left: 1em;\">";
@@ -2534,13 +2534,18 @@ function display_console_state() {
 		echo "Bol Processor ‘<span class=\"green-text\"><b>".$console."</b></span>’ console is responding<br />Version ".$output;
 		$panicfile = str_replace(SLASH,'/',$panicfile);
 		if(isset($filename) AND $filename <> "Compilation" AND $filename <> "Produce" AND  $filename <> "Bol Processor" AND $url_this_page <> "index.php") {
-			echo "<div style=\"display:flex; justify-content:flex-end; align-items:center; background-color:transparent;\"><button type=\"button\" class=\"produce\" style=\"font-size: small;\" onclick=\"createFile('".$panicfile."');\">PANIC!</button>";
-			echo "&nbsp;&nbsp;<img title=\"Bulb Png PNGs by Vecteezy\" src=\"pict/bulb.png\" id=\"darkModeToggle\" style=\"width:30px; cursor: pointer;\"/>";
+			echo "<div style=\"display:flex; justify-content:flex-end; align-items:center; background-color:transparent;\">";
+			if($file_format == "rtmidi") echo "<button type=\"button\" class=\"produce\" style=\"font-size: small;\" onclick=\"createFile('".$panicfile."');\">PANIC!</button>";
+			echo "&nbsp;&nbsp;";
+		//	echo "<img title=\"Bulb Png PNGs by Vecteezy\" src=\"pict/bulb.png\" style=\"width:30px; cursor: pointer;\"/>";
+			echo "<div id=\"darkModeToggle\" class=\"myswitch\"/></div>";
 			echo "</div>\n";
 			}
 		else {
-			echo "<div id=\"darkModeToggle\" style=\"display:flex; justify-content:flex-end; align-items:center; cursor:pointer; background-color:transparent;\">";
-			echo "dark&nbsp;/&nbsp;light&nbsp;&nbsp;<img title=\"Bulb Png PNGs by Vecteezy\" src=\"pict/bulb.png\"  style=\"width:40px;\"/>";
+			echo "<div style=\"display:flex; justify-content:flex-end; align-items:center; cursor:pointer; background-color:transparent;\">";
+		//	echo "dark&nbsp;/&nbsp;light&nbsp;&nbsp;";
+		//	echo "<img title=\"Bulb Png PNGs by Vecteezy\" src=\"pict/bulb.png\"  style=\"width:40px;\"/>";
+			echo "<div id=\"darkModeToggle\" class=\"myswitch\"/></div>";
 			echo "</div>\n";
 			}
 		}

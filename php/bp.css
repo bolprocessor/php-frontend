@@ -18,25 +18,23 @@ body {
 body.light-mode div {
     background-color: white;
     color: black;
- /*   transition: background-color 0.3s, color 0.3s; */
 	}
 div {
-    background-color: black;
+	background-color: black;
     color: GhostWhite;
 	}
 
 body.light-mode table {
-    background-color: white;
+    background-color: transparent;
     color: black;
- /*   transition: background-color 0.3s, color 0.3s; */
 	}
 table {
-    background-color: black;
+    background-color: transparent;
     color: GhostWhite;
 	}
 
 body.light-mode td {
-    background-color: white;
+    background-color: transparent;
     color: black;
 	text-align:left;
 	vertical-align:top;
@@ -44,10 +42,9 @@ body.light-mode td {
 	padding-right:6px;
 	padding-top:4px;
 	padding-bottom:0px;
-    /*   transition: background-color 0.3s, color 0.3s; */
 	}
 td {
-    background-color: black;
+    background-color: transparent; 
     color: GhostWhite;
 	text-align:left;
 	vertical-align:top;
@@ -441,9 +438,34 @@ body.light-mode .day {
 	 display: none;
 	}
 
-#showhide {
+body.light-mode #showhide {
 	 background-color: white;
 	 width: 80%;
+	}
+#showhide {
+	 background-color: black;
+	 width: 80%;
+	}
+
+body.light-mode .myswitch {
+	background-image: url("pict/night.png");
+	background-repeat: no-repeat;
+	cursor: pointer;
+	width: 30px;
+	height: 23px;
+	display: inline-block;
+	position: relative;
+	}
+.myswitch {
+	background-image: url("pict/bulb.png");
+	background-size: contain;
+	background-repeat: no-repeat;
+	vertical-align: middle;
+	cursor: pointer;
+	width: 30px;
+	height: 30px;
+	display: inline-block;
+	position: relative;
 	}
 
 @media only screen and (min-device-width : 320px) and (max-device-width : 1024px) {

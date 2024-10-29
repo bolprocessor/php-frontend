@@ -390,8 +390,8 @@ echo "</table>";
 
 echo "<table class=\"thicktable\">";
 echo "<tr>";
-echo "<td style=\"vertical-align:middle; padding-left:1em;\">";
-echo "<h3>Parameters associated with MIDI controllers:</h3>";
+echo "<td style=\"padding-left:1em; padding-top:1em;\">";
+echo "<h3>Parameters associated with MIDI controllers</h3>";
 $x = intval($InstrumentPitchBendRange);
 if($x == -1) $x = '';
 echo "Pichbender range: +/- <input type=\"text\" name=\"InstrumentPitchBendRange\" size=\"8\" value=\"".$x."\"> cents";
@@ -419,7 +419,7 @@ echo "</tr>";
 echo "<table>";
 
 if(!is_dir($folder_this_instrument)) mkdir($folder_this_instrument);
-echo "<h3>Other (MIDI unrelated) parameters:</h3>";
+echo "<h3>Other (MIDI unrelated) parameters</h3>";
 $dir_instrument = scandir($folder_this_instrument);
 $deleted_parameters = '';
 foreach($dir_instrument as $thisparameter) {
@@ -443,7 +443,7 @@ foreach($dir_instrument as $thisparameter) {
 	$n++;
 	}
 if($n > 0) {
-	echo "<table>";
+	echo "<table class=\"thicktable\">";
 	echo "<tr>";
 	echo "<td colspan=\"3\"><font color=\"red\">➡</font> Click the blue button to edit…</td>";
 	echo "</tr>";
@@ -457,29 +457,29 @@ if($n > 0) {
 		$table = explode(chr(10),$content);
 		$comment = $table[1];
 		echo "<tr>";
-		echo "<td style=\"padding: 5px; vertical-align:middle;\">";
 		echo "<form method=\"post\" action=\"csparameter.php\" enctype=\"multipart/form-data\">";
+		echo "<td class=\"middle\" style=\"padding:5px;\">";
 		echo "<input type=\"hidden\" name=\"instrument_name\" value=\"".$instrument_name."\">";
 		echo "<input type=\"hidden\" name=\"instrument_index\" value=\"".$instrument_index."\">";
 		echo "<input type=\"hidden\" name=\"csfilename\" value=\"".$csfilename."\">";
 		echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";
 		echo "<input type=\"hidden\" name=\"folder_this_instrument\" value=\"".$folder_this_instrument."\">";
 		echo "<input class=\"edit big\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" name=\"parameter_name\" value=\"".$parameter_name."\">";
-		echo "</form>";
 		echo "</td>";
-		echo "<td style=\"padding: 5px; vertical-align:middle;\">";
+		echo "</form>";
+		echo "<td class=\"middle\" style=\"padding:5px;\">";
 		echo $comment."<br />";
 		echo "</td>";
-		echo "<td style=\"padding: 5px; vertical-align:middle;\">";
 		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+		echo "<td class=\"middle\" style=\"padding:5px;\">";
 		echo "<input type=\"hidden\" name=\"instrument_name\" value=\"".$instrument_name."\">";
 		echo "<input type=\"hidden\" name=\"instrument_index\" value=\"".$instrument_index."\">";
 		echo "<input type=\"hidden\" name=\"parameter_name\" value=\"".$parameter_name."\">";
-	echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";
-	echo "<input type=\"hidden\" name=\"instrument_file\" value=\"".$instrument_file."\">";
+		echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";
+		echo "<input type=\"hidden\" name=\"instrument_file\" value=\"".$instrument_file."\">";
 		echo "<input class=\"save\" type=\"submit\" name=\"delete_parameter\" value=\"DELETE\">";
-		echo "</form>";
 		echo "</td>";
+		echo "</form>";
 		echo "</tr>";
 		}
 	echo "</table>";

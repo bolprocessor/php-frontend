@@ -31,6 +31,8 @@ require_once("_header.php");
 
 if(isset($_POST['stop_analysis'])) unset($_POST['analyze_tonal']);
 
+$file_format = $default_output_format;
+if(isset($data_file_format[$filename])) $file_format = $data_file_format[$filename];
 if(!isset($_POST['analyze_tonal'])) display_console_state();
 
 $url = "index.php?path=".urlencode($current_directory);

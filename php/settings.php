@@ -211,7 +211,7 @@ for($i = $j = 0; $i < $imax; $i++) {
 		echo "<input type=\"hidden\" name=\"parameter_".$j."\" value=\"".$value."\">";
 		}
 	else {
-		echo "<tr style=\"background-color:white;\">";
+		echo "<tr>";
 		echo "<td>";
 		echo $j.") ";
 		if(isset($parameter_name[$j])) echo $parameter_name[$j];
