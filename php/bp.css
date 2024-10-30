@@ -55,11 +55,54 @@ td {
 	}
 
 body.light-mode .green-text {
-    color: seagreen;
+    color: seagreen !important;
     }
 .green-text {
-    color: greenyellow;
+    color: greenyellow !important;
     }
+
+body.light-mode .red-text {
+    color: red !important;
+    }
+.red-text {
+    color: darkorange !important;
+    }
+
+body.light-mode .turquoise-text {
+    color: MediumTurquoise !important;
+    }
+.turquoise-text {
+    color: MediumTurquoise !important;
+    }
+
+body.light-mode .violet-text {
+    color: blueviolet !important;
+    }
+.violet-text {
+    color: fuchsia !important;
+    }
+
+body.light-mode .brown-text {
+    color: brown !important;
+    }
+.brown-text {
+    color: goldenrod !important;
+    }
+
+body.light-mode .orange-text {
+    color: orange !important;
+    }
+.orange-text {
+    color: orange !important;
+    }
+
+body.light-mode .darkblue-text {
+    color: royalblue !important;
+    }
+.darkblue-text {
+    color: royalblue !important;
+    }
+
 
 body.light-mode h2 {
     color: black;
@@ -69,20 +112,20 @@ h2 {
     }
 
 body.light-mode h3 {
-    color: #007BFF;
+    color: royalblue;
 	font-size: 140%;
     }
 h3 {
-    color: #007BFF;
+    color: skyblue;
 	font-size: 140%;
     }
 
 body.light-mode h4 {
-    color: #007BFF;
+    color: royalblue;
 	font-size: 120%;
     }
 h4 {
-    color: #007BFF;
+    color: blue;
 	font-size: 120%;
     }
 
@@ -123,14 +166,14 @@ tr {
 	}
 
 body.light-mode a:link {
-	color: #007BFF;
+	color: royalblue;
 	}
 a:link {
 	color: aqua;
 	text-decoration: none; 
 	}
 body.light-mode a:visited {
-	color: #007BFF;
+	color: royalblue;
 	}
 a:visited {
 	color: aqua;
@@ -152,7 +195,7 @@ a:hover img#darkModeToggle + * {
 	}
 
 body.light-mode .linkdotted {
-	border-bottom: 2px dotted #007BFF;
+	border-bottom: 2px dotted royalblue;
 	}
 .linkdotted {
 	border-bottom: none;

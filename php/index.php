@@ -62,7 +62,7 @@ if(isset($_POST['create_folder'])) {
 	if($foldername <> '') {
 		if($test) echo "new folder = ".$new_file."<br />";
 		if(file_exists($dir.SLASH.$foldername)) {
-			echo "<p><font color=\"red\">This folder already exists:</font> <font color=\"red\">".$foldername."</font></p>";
+			echo "<p><span class=\"red-text\">This folder already exists:</span> <span class=\"red-text\">".$foldername."</span></p>";
 			unset($_POST['create_folder']);
 			}
 		else {
@@ -83,7 +83,7 @@ if(isset($_POST['create_grammar'])) {
 		$new_file = $filename;
 		if($test) echo "newfile = ".$new_file."<br />";
 		if(file_exists($dir.SLASH.$filename)) {
-			echo "<p><font color=\"red\">This file already exists:</font> <font color=\"red\">".$filename."</font></p>";
+			echo "<p><span class=\"red-text\">This file already exists:</span> <span class=\"red-text\">".$filename."</span></p>";
 			unset($_POST['create_grammar']);
 			}
 		else {
@@ -103,7 +103,7 @@ if(isset($_POST['create_data'])) {
 	if($filename <> '') {
 		$new_file = $filename;
 		if(file_exists($dir.SLASH.$filename)) {
-			echo "<p><font color=\"red\">This file already exists:</font> <font color=\"red\">".$filename."</font></p>";
+			echo "<p><span class=\"red-text\">This file already exists:</span> <span class=\"red-text\">".$filename."</span></p>";
 			unset($_POST['create_data']);
 			}
 		else {
@@ -123,7 +123,7 @@ if(isset($_POST['create_alphabet'])) {
 	if($filename <> '') {
 		$new_file = $filename;
 		if(file_exists($dir.SLASH.$filename)) {
-			echo "<p><font color=\"red\">This file already exists:</font> <font color=\"red\">".$filename."</font></p>";
+			echo "<p><span class=\"red-text\">This file already exists:</span> <span class=\"red-text\">".$filename."</span></p>";
 			unset($_POST['create_alphabet']);
 			}
 		else {
@@ -143,7 +143,7 @@ if(isset($_POST['create_timebase'])) {
 	if($filename <> '') {
 		$new_file = $filename;
 		if(file_exists($dir.SLASH.$filename)) {
-			echo "<p><font color=\"red\">This file already exists:</font> <font color=\"red\">".$filename."</font></p>";
+			echo "<p><span class=\"red-text\">This file already exists:</span> <span class=\"red-text\">".$filename."</span></p>";
 			unset($_POST['create_timebase']);
 			}
 		else {
@@ -163,7 +163,7 @@ if(isset($_POST['create_prototypes'])) {
 	if($filename <> '') {
 		$new_file = $filename;
 		if(file_exists($dir.SLASH.$filename)) {
-			echo "<p><font color=\"red\">This file already exists:</font> <font color=\"red\">".$filename."</font></p>";
+			echo "<p><span class=\"red-text\">This file already exists:</span> <span class=\"red-text\">".$filename."</span></p>";
 			unset($_POST['create_prototypes']);
 			}
 		else {
@@ -183,7 +183,7 @@ if(isset($_POST['create_csound'])) {
 		$filename = good_name($type,$filename,$name_mode);
 		$new_file = $filename;
 		if(file_exists($dir.SLASH.$filename)) {
-			echo "<p><font color=\"red\">This file already exists:</font> <font color=\"red\">".$filename."</font></p>";
+			echo "<p><span class=\"red-text\">This file already exists:</span> <span class=\"red-text\">".$filename."</span></p>";
 			unset($_POST['create_csound']);
 			}
 		else {
@@ -203,7 +203,7 @@ if(isset($_POST['create_tonality'])) {
 		$filename = good_name($type,$filename,$name_mode);
 		$new_file = $filename;
 		if(file_exists($dir.SLASH.$filename)) {
-			echo "<p><font color=\"red\">This file already exists:</font> <font color=\"red\">".$filename."</font></p>";
+			echo "<p><span class=\"red-text\">This file already exists:</span> <span class=\"red-text\">".$filename."</span></p>";
 			unset($_POST['create_tonality']);
 			}
 		else {
@@ -222,7 +222,7 @@ if(isset($_POST['create_csound_orchestra'])) {
 		$filename = $filename.".orc";
 		$new_file = $filename;
 		if(file_exists($dir.SLASH.$filename)) {
-			echo "<p><font color=\"red\">This file already exists:</font> <font color=\"red\">".$filename."</font></p>";
+			echo "<p><span class=\"red-text\">This file already exists:</span> <span class=\"red-text\">".$filename."</span></p>";
 			}
 		else {
 			$handle = fopen($dir.SLASH.$filename,"w");
@@ -240,7 +240,7 @@ if(isset($_POST['create_script'])) {
 	if($filename <> '') {
 		$new_file = $filename;
 		if(file_exists($dir.SLASH.$filename)) {
-			echo "<p><font color=\"red\">This file already exists:</font> <font color=\"red\">".$filename."</font></p>";
+			echo "<p><span class=\"red-text\">This file already exists:</span> <span class=\"red-text\">".$filename."</span></p>";
 			unset($_POST['create_script']);
 			}
 		else {
@@ -257,14 +257,14 @@ $move_files = isset($_POST['move_files']);
 $show_dependencies = isset($_POST['show_dependencies']);
 $trash_backups = isset($_POST['trash_backups']);
 if($folder <> '')
-	echo "<h3>Content of workspace: <font color=\"red\">".str_replace(SLASH,'/',$folder)."</font></h3>";
+	echo "<h3>Content of workspace: <span class=\"red-text\">".str_replace(SLASH,'/',$folder)."</span></h3>";
 $table = explode('_',$folder);
 $extension = end($table);
 
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 echo "<p style=\"text-align:left;\">";
 if($path <> '') echo "<input class=\"edit\" type=\"submit\" name=\"\" value=\"REFRESH THIS PAGE\">";
-if($folder <> '') echo "&nbsp;&nbsp;<big><font color=\"red\">↑</font>&nbsp;<a href=\"".nice_url($upper_link)."\">UPPER FOLDER</a>&nbsp;<font color=\"red\">↑</font></big>";
+if($folder <> '') echo "&nbsp;&nbsp;<big><span class=\"red-text\">↑</span>&nbsp;<a href=\"".nice_url($upper_link)."\">UPPER FOLDER</a>&nbsp;<span class=\"red-text\">↑</span></big>";
 echo "</p>";
 
 $link_list = "file_list.php?dir=".$dir;
@@ -281,7 +281,7 @@ echo "window.onload = function() {
 echo "</script>\n";
 
 if($path == $trash_folder AND isset($_POST['empty_trash'])) {
-	if(emptydirectory($bp_application_path.$trash_folder)) echo "<p id=\"refresh\"><font color=\"red\">Trash is empty!</font></p>";
+	if(emptydirectory($bp_application_path.$trash_folder)) echo "<p id=\"refresh\"><span class=\"red-text\">Trash is empty!</span></p>";
 	}
 
 if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension <> "temp" AND !$delete_files AND !$rename_files AND !$move_files) {
@@ -402,7 +402,7 @@ else $delete_checked_files = FALSE;
 if(isset($_POST['rename_checked_files'])) {
 	$rename_files = FALSE;
 	$rename_checked_files = TRUE;
-	echo "<p id=\"refresh\"><font color=\"red\">Renamed or copied checked files</font></p>";
+	echo "<p id=\"refresh\"><span class=\"red-text\">Renamed or copied checked files</span></p>";
 	}
 else $rename_checked_files = FALSE;
 if(isset($_POST['move_checked_files'])) {
@@ -417,10 +417,10 @@ $done = $seen = array();
 $dest_folder = '';
 if(isset($_POST['move_checked_files'])) {
 	if(isset($_POST['folder_choice']) AND ($dest_folder = $_POST['folder_choice']) <> '') {
-		echo "<p id=\"refresh\"><font color=\"red\">➡ Moving selected files/folders</font> to ‘<span class=\"green-text\">".$dest_folder."</span>’</p>";
+		echo "<p id=\"refresh\"><span class=\"red-text\">➡ Moving selected files/folders</span> to ‘<span class=\"green-text\">".$dest_folder."</span>’</p>";
 		}
 	else {
-		echo "<p><font color=\"red\">➡ No destination folder was selected, move canceled</font></p>";
+		echo "<p><span class=\"red-text\">➡ No destination folder was selected, move canceled</span></p>";
 		$move_checked_files = FALSE;
 		}
 	$move_files = FALSE;
@@ -446,7 +446,7 @@ if($move_files) {
 		echo "</div>";
 		}
 	else {
-		echo "<h4><font color=\"red\">ERROR: no folder found!</font></h4>";
+		echo "<h4><span class=\"red-text\">ERROR: no folder found!</span></h4>";
 		$move_files = FALSE;
 		}
 	}
@@ -493,8 +493,8 @@ if(!is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"t
 		if(($n1 = display_directory(TRUE,$dir,"grammar")) > 0 OR $show_grammar) {
 			echo "<h4>Grammar project(s)</h4>";
 			if($show_grammar) {
-				echo "<p style=\"background-color:snow; color:black; padding:6px; border-radius: 0.5em;\">Last visited: <a style=\"color:#007BFF;\" target=\"_blank\" href=\"".nice_url($last_grammar_page)."\">".$last_grammar_name."</a>";
-				if(isset($last_grammar_directory) AND $folder <> $last_grammar_directory) echo "<br />in workspace</font> <a style=\"color:#007BFF;\" href=\"index.php?path=".$last_grammar_directory."\">".$last_grammar_directory."</a></p>";
+				echo "<p style=\"background-color:snow; color:black; padding:6px; border-radius: 0.5em;\">Last visited: <a class=\"blue-text\" target=\"_blank\" href=\"".nice_url($last_grammar_page)."\">".$last_grammar_name."</a>";
+				if(isset($last_grammar_directory) AND $folder <> $last_grammar_directory) echo "<br />in workspace</font> <a class=\"blue-text\" href=\"index.php?path=".$last_grammar_directory."\">".$last_grammar_directory."</a></p>";
 				}
 			}
 		echo "</th>";
@@ -502,8 +502,8 @@ if(!is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"t
 		if(($n2 = display_directory(TRUE,$dir,"data")) > 0 OR $show_data) {
 			echo "<h4>Data project(s)</h4>";
 			if($show_data) {
-				echo "<p style=\"background-color:snow; color:black; padding:6px; border-radius: 0.5em;\">Last visited: <a style=\"color:#007BFF;\" target=\"_blank\" href=\"".nice_url($last_data_page)."\">".$last_data_name."</a>";
-				if(isset($last_data_directory) AND $folder <> $last_data_directory) echo "<br />in workspace</font> <a style=\"color:#007BFF;\" href=\"index.php?path=".$last_data_directory."\">".$last_data_directory."</a></p>";
+				echo "<p style=\"background-color:snow; color:black; padding:6px; border-radius: 0.5em;\">Last visited: <a class=\"blue-text\" target=\"_blank\" href=\"".nice_url($last_data_page)."\">".$last_data_name."</a>";
+				if(isset($last_data_directory) AND $folder <> $last_data_directory) echo "<br />in workspace</font> <a class=\"blue-text\" href=\"index.php?path=".$last_data_directory."\">".$last_data_directory."</a></p>";
 				}
 			}
 		echo "</th>";
@@ -616,17 +616,17 @@ function display_directory($test,$dir,$filter) {
 			$source_file = $bp_application_path.$path.SLASH.$thisfile;
 			$destination_file = $bp_application_path.$dest_folder.SLASH.$thisfile;
 			if(is_integer($pos=strpos($dest_folder,$thisfile)) AND $pos == 0) {
-				echo "<p><font color=\"red\">➡ Cannot move a folder to its own content</font></p>";
+				echo "<p><span class=\"red-text\">➡ Cannot move a folder to its own content</span></p>";
 				}
 			else if(file_exists($destination_file)) {
 				if($dest_folder <> '') $the_dest = "‘<span class=\"green-text\">".$dest_folder."</span>’";
 				else $the_dest = "the root folder";
-				echo "<p><font color=\"red\">➡ There is already</font> a file or folder named ‘<span class=\"green-text\">".$thisfile."</span>’ in ".$the_dest."</p>";
+				echo "<p><span class=\"red-text\">➡ There is already</span> a file or folder named ‘<span class=\"green-text\">".$thisfile."</span>’ in ".$the_dest."</p>";
 				}
 			else {
 				if(is_dir($dir.SLASH.$thisfile)) {
 					if(is_integer($pos=strpos($destination_file,$source_file)))
-						echo "<p><font color=\"red\">➡ Cannot move</font> folder ‘<span class=\"green-text\">".$thisfile."</span>’ into itself!</p>";
+						echo "<p><span class=\"red-text\">➡ Cannot move</span> folder ‘<span class=\"green-text\">".$thisfile."</span>’ into itself!</p>";
 					else {
 						rename($source_file,$destination_file);
 						$this_file_moved = TRUE;
@@ -669,7 +669,7 @@ function display_directory($test,$dir,$filter) {
 		if($test AND ($filter == '' OR $filter == $type)) $seen[$thisfile] = TRUE;
 	
 		if(!ok_output_location($thisfile,FALSE)) continue;
-		if(!$test AND $new_file == $thisfile AND $filter <> "directory") echo "<font color=\"red\">➡</font> ";
+		if(!$test AND $new_file == $thisfile AND $filter <> "directory") echo "<span class=\"red-text\">➡</span> ";
 		if(!$test) echo $check_box;
 
 		if(!$test AND $path <> $csound_resources AND $path <> $trash_folder AND ($type == "csound" OR $type == "csorchestra")) {
@@ -686,7 +686,7 @@ function display_directory($test,$dir,$filter) {
 			else {
 				$renamed = FALSE;
 				if(!$test AND $delete_checked_files AND isset($_POST['delete_'.$i_file])) {
-					echo "<p><font color=\"red\">➡</font> Deleted ‘<span class=\"green-text\">".$thisfile."</span>’ (moved to <a target=\"_blank\" href=\"index.php?path=".$trash_folder."\">trash folder</a>)</p>";
+					echo "<p><span class=\"red-text\">➡</span> Deleted ‘<span class=\"green-text\">".$thisfile."</span>’ (moved to <a target=\"_blank\" href=\"index.php?path=".$trash_folder."\">trash folder</a>)</p>";
 					rename($dir.SLASH.$thisfile,$dir_trash_folder.$thisfile);
 					delete_settings($thisfile);
 					continue;
@@ -720,14 +720,14 @@ function display_directory($test,$dir,$filter) {
 							}
 						$old_name = $thisfile;
 						if(file_exists($dir.SLASH.$new_name)) {
-							echo "<font color=\"red\">➡</font> Can't rename to existing ‘".$new_name."’: ";
+							echo "<span class=\"red-text\">➡</span> Can't rename to existing ‘".$new_name."’: ";
 							}
 						else {
 							if($make_copy) {
 								if($type <> "directory") copy($dir.SLASH.$old_name,$dir.SLASH.$new_name);
 								else rcopy($dir.SLASH.$old_name,$dir.SLASH.$new_name);
 								$link = $type.".php?file=".urlencode($path.SLASH.$new_name);
-								echo "‘<font color=\"green\">".$old_name."</font>’ <font color=\"red\">➡</font> copied to <a target=\"_blank\" href=\"".nice_url($link)."\">".$new_name."</a><br />";
+								echo "‘<span class=\"green-text\">".$old_name."</span>’ <span class=\"red-text\">➡</span> copied to <a target=\"_blank\" href=\"".nice_url($link)."\">".$new_name."</a><br />";
 								}
 							else {
 								rename($dir.SLASH.$old_name,$dir.SLASH.$new_name);
@@ -771,7 +771,7 @@ function display_directory($test,$dir,$filter) {
 					if($link <> '') echo "</a>";
 					if($this_is_directory) echo "</b>";
 					echo "&nbsp;";
-					if($renamed) echo "(<font color=\"red\">renamed</font>)&nbsp;";
+					if($renamed) echo "(<span class=\"red-text\">renamed</span>)&nbsp;";
 					if($rename_files) {
 						echo "&nbsp;➡&nbsp;&nbsp;<input type=\"text\" style=\"border:2px; solid #dadada; border-bottom-style: groove; text-align:left;\" name=\"new_name_".$i_file."\" size=\"30\" value=\"\">";
 						echo "<input type=\"checkbox\" name=\"copy_".$i_file."\">&nbsp;➡&nbsp;make a copy";
@@ -794,11 +794,11 @@ function display_directory($test,$dir,$filter) {
 		}
 	if($files_shown == 0) return $files_shown;
 	if(!$test AND $move_files)
-		echo "<p style=\"margin-left:6px;\"><font color=\"red\"><big>↑</big></font>&nbsp;<input class=\"save\" type=\"submit\" name=\"move_checked_files\" value=\"MOVE CHECKED FILES/FOLDERS\">&nbsp;&nbsp;<input class=\"cancel\" type=\"submit\" name=\"cancel\" value=\"CANCEL\"></p>";
+		echo "<p style=\"margin-left:6px;\"><span class=\"red-text\"><big>↑</big></span>&nbsp;<input class=\"save\" type=\"submit\" name=\"move_checked_files\" value=\"MOVE CHECKED FILES/FOLDERS\">&nbsp;&nbsp;<input class=\"cancel\" type=\"submit\" name=\"cancel\" value=\"CANCEL\"></p>";
 	if(!$test AND $delete_files)
-		echo "<p style=\"margin-left:6px;\"><font color=\"red\"><big>↑</big></font>&nbsp;<input class=\"save\" type=\"submit\" name=\"delete_checked_files\" value=\"DELETE CHECKED FILES/FOLDERS\"> <font color=\"red\">➡</font> can be reversed <input class=\"cancel\" type=\"submit\" name=\"cancel\" value=\"CANCEL\"></p>";
+		echo "<p style=\"margin-left:6px;\"><span class=\"red-text\"><big>↑</big></span>&nbsp;<input class=\"save\" type=\"submit\" name=\"delete_checked_files\" value=\"DELETE CHECKED FILES/FOLDERS\"> <span class=\"red-text\">➡</span> can be reversed <input class=\"cancel\" type=\"submit\" name=\"cancel\" value=\"CANCEL\"></p>";
 	if(!$test AND $rename_files)
-		echo "<p style=\"margin-left:6px;\"><font color=\"red\"><big>↑</big></font>&nbsp;<input class=\"save\" type=\"submit\" name=\"rename_checked_files\" value=\"RENAME OR COPY CHECKED FILES/FOLDERS\">&nbsp;&nbsp;<input class=\"cancel\" type=\"submit\" name=\"cancel\" value=\"CANCEL\"></p>";
+		echo "<p style=\"margin-left:6px;\"><span class=\"red-text\"><big>↑</big></span>&nbsp;<input class=\"save\" type=\"submit\" name=\"rename_checked_files\" value=\"RENAME OR COPY CHECKED FILES/FOLDERS\">&nbsp;&nbsp;<input class=\"cancel\" type=\"submit\" name=\"cancel\" value=\"CANCEL\"></p>";
 	return $files_shown;
 	}
 

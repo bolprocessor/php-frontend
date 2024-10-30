@@ -19,14 +19,14 @@ $defaults = $credit = $part_list = $print = $notations = $system = $staff = FALS
 $couleur = $this_measure = '';
 $forget_words = array("staff","accidental","stem","staves","words","/words","notations","slur","/measure","print","/print","pitch","/pitch","offset");
 $file = fopen($music_xml_file,"r");
-$arrow = "<font color=\"red\">➡</font>&nbsp;";
-if($no_filter) echo "<font color=\"orange\">";
+$arrow = "<span class=\"red-text\">➡</span>&nbsp;";
+if($no_filter) echo "<span class=\"orange-text\">";
 while(!feof($file)) {
 	$line = fgets($file);
 	$line_print = htmlentities($line);
-	if($no_filter AND is_integer($pos=strpos($line,"<identification"))) echo "</font><font color=\"#007BFF\">";
+	if($no_filter AND is_integer($pos=strpos($line,"<identification"))) echo "</span><span class=\"green-text\">";
 	if($no_filter AND is_integer($pos=strpos($line,"</identification"))) {
-		if($no_filter) echo "</font>";
+		if($no_filter) echo "</span>";
 		continue;
 		}
 	if(is_integer($pos=strpos($line,"<part "))) {
@@ -38,7 +38,7 @@ while(!feof($file)) {
 	if(is_integer($pos=strpos($line,"<!DOCTYPE"))) continue;
 	if(is_integer($pos=strpos($line,"<measure "))) {
 		$number = trim(preg_replace("/.*number=\"([^\"]+)\".*/u","$1",$line));
-		$this_measure = "<br /><b><font color=\"green\">== Measure #".$number." ==</font></b><br />";
+		$this_measure = "<br /><b><span class=\"green-text\">== Measure #".$number." ==</span></b><br />";
 		continue;
 		}
 	if(is_integer($pos=strpos($line,"</measure"))) {
@@ -47,69 +47,69 @@ while(!feof($file)) {
 		if(!$no_filter) $print_this = FALSE;
 		continue;
 		}
-	$couleur = "black";
+	$couleur = '';
 	if(is_integer($pos=strpos($line,"<pedal"))) {
 		if($filter == "pedal") {
-			$print_this = TRUE; $couleur = "green";
+			$print_this = TRUE; $couleur = "green-text";
 			$this_measure .= $arrow;
 			}
-		$this_measure .= "<font color=\"".$couleur."\">".$line_print."</font><br />";
+		$this_measure .= "<span class=\"".$couleur."\">".$line_print."</span><br />";
 		continue;
 		}
 	if(is_integer($pos=strpos($line,"trill-mark"))) {
 		if($filter == "trill") {
-			$print_this = TRUE; $couleur = "green";
+			$print_this = TRUE; $couleur = "green-text";
 			$this_measure .= $arrow;
 			}
-		$this_measure .= "<font color=\"".$couleur."\">".$line_print."</font><br />";
+		$this_measure .= "<span class=\"".$couleur."\">".$line_print."</span><br />";
 		continue;
 		}
 	if(is_integer($pos=strpos($line,"slur"))) {
 		if($filter == "slur") {
-			$print_this = TRUE; $couleur = "green";
+			$print_this = TRUE; $couleur = "green-text";
 			$this_measure .= $arrow;
 			}
-		$this_measure .= "<font color=\"".$couleur."\">".$line_print."</font><br />";
+		$this_measure .= "<span class=\"".$couleur."\">".$line_print."</span><br />";
 		continue;
 		}
 	if(is_integer($pos=strpos($line,"mordent"))) {
 		if($filter == "mordent") {
-			$print_this = TRUE; $couleur = "green";
+			$print_this = TRUE; $couleur = "green-text";
 			$this_measure .= $arrow;
 			}
-		$this_measure .= "<font color=\"".$couleur."\">".$line_print."</font><br />";
+		$this_measure .= "<span class=\"".$couleur."\">".$line_print."</span><br />";
 		continue;
 		}
 	if(is_integer($pos=strpos($line,"breath-mark"))) {
 		if($filter == "breath") {
-			$print_this = TRUE; $couleur = "green";
+			$print_this = TRUE; $couleur = "green-text";
 			$this_measure .= $arrow;
 			}
-		$this_measure .= "<font color=\"".$couleur."\">".$line_print."</font><br />";
+		$this_measure .= "<span class=\"".$couleur."\">".$line_print."</span><br />";
 		continue;
 		}
 	if(is_integer($pos=strpos($line,"<turn"))) {
 		if($filter == "turn") {
-			$print_this = TRUE; $couleur = "green";
+			$print_this = TRUE; $couleur = "green-text";
 			$this_measure .= $arrow;
 			}
-		$this_measure .= "<font color=\"".$couleur."\">".$line_print."</font><br />";
+		$this_measure .= "<span class=\"".$couleur."\">".$line_print."</span><br />";
 		continue;
 		}
 	if(is_integer($pos=strpos($line,"<fermata"))) {
 		if($filter == "fermata") {
-			$print_this = TRUE; $couleur = "green";
+			$print_this = TRUE; $couleur = "green-text";
 			$this_measure .= $arrow;
 			}
-		$this_measure .= "<font color=\"".$couleur."\">".$line_print."</font><br />";
+		$this_measure .= "<span class=\"".$couleur."\">".$line_print."</span><br />";
 		continue;
 		}
 	if(is_integer($pos=strpos($line,"<arpeggiate"))) {
 		if($filter == "arpeggio") {
-			$print_this = TRUE; $couleur = "green";
+			$print_this = TRUE; $couleur = "green-text";
 			$this_measure .= $arrow;
 			}
-		$this_measure .= "<font color=\"".$couleur."\">".$line_print."</font><br />";
+		$this_measure .= "<span class=\"".$couleur."\">".$line_print."</span><br />";
 		continue;
 		}
 
@@ -151,9 +151,9 @@ while(!feof($file)) {
 		if($found = is_integer($pos=strpos($line,"<".$forget_words[$i]))) break;
 	if($found) continue;
 	$couleur = '';
-	if(is_integer(strpos($line,"<step>")) OR is_integer(strpos($line,"<octave>")) OR is_integer(strpos($line,"<alter>")) OR is_integer(strpos($line,"<rest/>"))) $couleur = "red";
-	if(is_integer(strpos($line,"<duration>"))OR is_integer(strpos($line,"<grace/>"))) $couleur = "#007BFF;";
-	if($couleur <> '') $line_print = "<font color = \"".$couleur."\">".$line_print."</font>";
+	if(is_integer(strpos($line,"<step>")) OR is_integer(strpos($line,"<octave>")) OR is_integer(strpos($line,"<alter>")) OR is_integer(strpos($line,"<rest/>"))) $couleur = "red-text";
+	if(is_integer(strpos($line,"<duration>"))OR is_integer(strpos($line,"<grace/>"))) $couleur = "blue-text";
+	if($couleur <> '') $line_print = "<span class=\"".$couleur."\">".$line_print."</span>";
 //	$couleur = '';
 	if($no_filter AND $this_measure == '') echo $line_print."<br />";
 	else $this_measure .= $line_print."<br />";

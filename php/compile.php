@@ -21,7 +21,7 @@ if(windows_system()) {
 	$command = preg_replace("'(?<!^) '","^ ",$command);
 	}
 echo "<link rel=\"stylesheet\" href=\"bp-light.css\" />\n";
-echo "<p id=\"refresh\" style=\"text-align:center; width:90%;\"><big>----------- Compiling BP3 as ‘<span class=\"green-text\">".$console."</span>’. <font color=\"green\">It will take a minute or two.</font> -----------</big></p>"; // "refresh" is the id used for flashing. This is why we read "bp-light.css"
+echo "<p id=\"refresh\" style=\"text-align:center; width:90%;\"><big>----------- Compiling BP3 as ‘<span class=\"green-text\">".$console."</span>’. It will take a minute or two. -----------</big></p>"; // "refresh" is the id used for flashing. This is why we read "bp-light.css"
 echo "<p style=\"text-align:center; width:90%;\">Running: <span class=\"green-text\">".$command_show."</span></p>";
 
 require_once("_header.php");

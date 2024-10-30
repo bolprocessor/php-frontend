@@ -12,9 +12,9 @@ if(isset($_GET['save'])) {
 	if(!$test) {
 		$result = SaveTonality(FALSE,$dir,$filename,$temp_folder,FALSE);
 		if($result == "locked") {
-			echo "<font color=\"red\"> ➡ CANNOT autosave: please</font> <a href=\"tonality.php?file=".urlencode($tonality_resources.SLASH.$filename)."\">RELOAD</a> this page!";
+			echo "<span class=\"red-text\"> ➡ CANNOT autosave: please</span> <a href=\"tonality.php?file=".urlencode($tonality_resources.SLASH.$filename)."\">RELOAD</a> this page!";
 			}
-		else if($result <> "skipped") echo "&nbsp;&nbsp;&nbsp;<font color=\"red\">".date('H\hi')."</font> ➡ <font color=\"red\">Autosaved all tonal scales to</font> “<span class=\"green-text\">".$filename."</span>”";
+		else if($result <> "skipped") echo "&nbsp;&nbsp;&nbsp;<span class=\"red-text\">".date('H\hi')."</span> ➡ <span class=\"red-text\">Autosaved all tonal scales to</span> “<span class=\"green-text\">".$filename."</span>”";
 		}
 	}
 ?>

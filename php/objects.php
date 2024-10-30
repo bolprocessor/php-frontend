@@ -83,12 +83,12 @@ if(isset($_POST['duplicate_object'])) {
 		$copy_object_codes = $temp_dir.$temp_folder.SLASH.$copy_object."_codes";
 		rcopy($this_object_codes,$copy_object_codes);
 		}
-	else echo "<p><font color=\"red\">Cannot create</font> <span class=\"green-text\"><big>“".$copy_object."”</big></span> <font color=\"red\">because an object with that name already exists</font></p>";
+	else echo "<p><span class=\"red-text\">Cannot create</span> <span class=\"green-text\"><big>“".$copy_object."”</big></span> <span class=\"red-text\">because an object with that name already exists</span></p>";
 	}
 
 if(isset($_POST['delete_object'])) {
 	$object = $_POST['object_name'];
-	echo "<p><font color=\"red\">Deleted </font><span class=\"green-text\"><big>“".$object."”</big></span>…</p>";
+	echo "<p><span class=\"red-text\">Deleted </span><span class=\"green-text\"><big>“".$object."”</big></span>…</p>";
 	$this_object_file = $temp_dir.$temp_folder.SLASH.$object.".txt";
 //	echo $this_object_file."<br />";
 	rename($this_object_file,$this_object_file.".old");
@@ -104,7 +104,7 @@ if(isset($_POST['rename_object'])) {
 	$new_object = str_replace('#','-',$new_object);
 	$new_object = str_replace('"','',$new_object);
 	if($new_object <> '') {
-		echo "<p><font color=\"red\">Renamed </font><span class=\"green-text\"><big>“".$object."”</big></span> as <span class=\"green-text\"><big>“".$new_object."”</big></span>…</p>";
+		echo "<p><span class=\"red-text\">Renamed </span><span class=\"green-text\"><big>“".$object."”</big></span> as <span class=\"green-text\"><big>“".$new_object."”</big></span>…</p>";
 		$this_object_file = $temp_dir.$temp_folder.SLASH.$object.".txt";
 		$new_object_file = $temp_dir.$temp_folder.SLASH.$new_object.".txt";
 	//	echo $new_object_file."<br />";
@@ -121,7 +121,7 @@ if(isset($_POST['rename_object'])) {
 	}
 
 if(isset($_POST['restore'])) {
-	echo "<p><font color=\"red\">Restoring: </font>";
+	echo "<p><span class=\"red-text\">Restoring: </span>";
 	// echo "<span class=\"green-text\">".$object."</span> </p>";
 	$dircontent = scandir($temp_dir.$temp_folder);
 	foreach($dircontent as $oldfile) {
@@ -164,7 +164,7 @@ if(isset($_POST['savethisfile']) OR isset($_POST['create_object']) OR isset($_PO
 	while(TRUE) {
 		if(!file_exists($lock_file)) break;
 		if(time() > $time_end) {
-			echo "<p><font color=\"red\">Maximum time (5 seconds) spent waiting for the sound-object prototypes file to be unlocked:</font> <span class=\"green-text\">".$dir.$filename."</span></p>";
+			echo "<p><span class=\"red-text\">Maximum time (5 seconds) spent waiting for the sound-object prototypes file to be unlocked:</span> <span class=\"green-text\">".$dir.$filename."</span></p>";
 			$bad = TRUE;
 			break;
 			}
@@ -320,7 +320,7 @@ if($handle_object) fclose($handle_object);
 echo "<p class=\"green-text\">".$comment_on_file."</p>";
 echo "<p style=\"text-align:left;\">";
 echo "<input class=\"save big\" type=\"submit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’ INCLUDING ALL CHANGES TO PROTOTYPES\"><br />";
-echo "<font color=\"red\">➡</font> Changes in prototypes are <font color=\"red\">autosaved</font> every 30 seconds if changes occurred.<br />Keep this page open as long as you are editing sound-object prototypes!</p>";
+echo "<span class=\"red-text\">➡</span> Changes in prototypes are <span class=\"red-text\">autosaved</span> every 30 seconds if changes occurred.<br />Keep this page open as long as you are editing sound-object prototypes!</p>";
 if($autosave) echo "<script type=\"text/javascript\" src=\"autosaveObjects.js\"></script>";
 echo "<p><input class=\"save\" type=\"submit\" name=\"create_object\" value=\"CREATE A NEW OBJECT\"> named <input type=\"text\" name=\"new_object\" size=\"10\" value=\"\"></p>";
 if($deleted_objects <> '') echo "<p><input class=\"save\" type=\"submit\" name=\"restore\" value=\"RESTORE ALL DELETED OBJECTS\"> = <span class=\"green-text\"><big>".$deleted_objects."</big></span></p>";
@@ -339,7 +339,7 @@ else $CsoundInstruments_file = '';
 
 if($iobj >= 0) {
 //	echo "<hr>";
-	echo "<h3 style=\"margin-left:1em;\"><font color=\"red\"><big>↓</big></font>&nbsp;&nbsp;Click any of these ".($iobj + 1)." object prototypes to edit it</h3>";
+	echo "<h3 style=\"margin-left:1em;\"><span class=\"red-text\"><big>↓</big></span>&nbsp;&nbsp;Click any of these ".($iobj + 1)." object prototypes to edit it</h3>";
 	$temp_alphabet_file = $temp_dir.$temp_folder.SLASH."temp.bpho";
 	$handle = fopen($temp_alphabet_file,"w");
 	$file_header = $top_header."\n// Alphabet saved as \"temp.bpho\". Date: ".gmdate('Y-m-d H:i:s');

@@ -37,7 +37,7 @@ if(!file_exists($dirPath)) {
 create_variables($script_variables);
 require_once($script_variables);
 
-echo "<h2>Script <big>“<font color=\"MediumTurquoise\">".$filename."</font>”</big></h2>";
+echo "<h2>Script <big>“<span class=\"turquoise-text\">".$filename."</span>”</big></h2>";
 save_settings("last_name",$filename); 
 
 if(isset($_POST['addinstruction'])) {
@@ -99,17 +99,17 @@ if(isset($_POST['checkscript'])) {
 		if($instruction == "Run script" OR $instruction == "Load grammar" OR $instruction == "Settings") {
 			$search_file = $dir.str_replace($instruction." ",'',$line);
 			if(!file_exists($search_file))
-				$remark = "<font color=\"red\"> ➡ file not found</font>";
+				$remark = "<span class=\"red-text\"> ➡ file not found</span>";
 			else
 				$remark = "<span class=\"green-text\"> ➡ file found</span>";
 			}
 		switch($status) {
-			case '0': $tag = "<font color=\"red\">(no)</font>"; break;
-			case '1': $tag = "<font color=\"MediumTurquoise\">✓</font>"; break;
+			case '0': $tag = "<span class=\"red-text\">(no)</span>"; break;
+			case '1': $tag = "<span class=\"turquoise-text\">✓</span>"; break;
 			case '2': $tag = "<span class=\"green-text\">(soon)</span>"; break;
 			}
 		$recoded_line = recode_tags($line);
-		echo "&nbsp;&nbsp;&nbsp;".$tag." [<font color=\"MediumTurquoise\">".$instruction.$more."</font>] ".$recoded_line.$remark."<br />";
+		echo "&nbsp;&nbsp;&nbsp;".$tag." [<span class=\"turquoise-text\">".$instruction.$more."</span>] ".$recoded_line.$remark."<br />";
 		}
 	}
 
@@ -184,8 +184,8 @@ echo "</html>";
 function list_script_instructions($script_status,$script_more) {
 	foreach($script_status as $instruction => $status) {
 		switch($status) {
-			case '0': $tag = "<font color=\"red\">(obsolete)</font>"; break;
-			case '1': $tag = "<font color=\"MediumTurquoise\">✓</font>"; break;
+			case '0': $tag = "<span class=\"red-text\">(obsolete)</span>"; break;
+			case '1': $tag = "<span class=\"turquoise-text\">✓</span>"; break;
 			case '2': $tag = "<span class=\"green-text\">(soon)</span>"; break;
 			}
 		$more = $script_more[$instruction];

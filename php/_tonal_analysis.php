@@ -226,7 +226,7 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 		echo "> Evaluate adequacy of all tuning schemes defined in ‘<a target=\"_blank\" href=\"tonality.php?file=".urlencode($tonality_resources.SLASH.$tonality_file)."\">".$tonality_file."</a>’ in terms of consonance</p>";
 		}
 	else {
-		echo "<font color=\"red\">➡</font> You could also compare scales after declaring a ‘-to’ resource file on top of data and open the file in the <a target=\"_blank\" href=\"index.php?path=tonality_resources\"> tonality resource folder</a>";
+		echo "<span class=\"red-text\">➡</span> You could also compare scales after declaring a ‘-to’ resource file on top of data and open the file in the <a target=\"_blank\" href=\"index.php?path=tonality_resources\"> tonality resource folder</a>";
 		$compare_scales = 0;
 		}
 	echo "</td></tr>";
@@ -351,7 +351,7 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 							}
 						}
 					else {
-						echo "<p><font color=\"red\">➡ ERROR: unable to open file</font> “<span class=\"green-text\">".$data_file."</span>”</p>";
+						echo "<p><span class=\"red-text\">➡ ERROR: unable to open file</span> “<span class=\"green-text\">".$data_file."</span>”</p>";
 						$errors++;
 						}
 					}
@@ -371,9 +371,9 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 			$batch_item_name[$i_batchline] = $item_name;
 			$remark[$i_batchline] = $first_line2;
 			$i_batchline++;
-			if($item_name <> '') echo " <font color=\"red\">".$item_name."</font>";
-			if($tonal_scale <> '') echo " assigned scale <font color=\"red\">".$tonal_scale."</font>";
-			if(!$compare_scales) echo " — note convention is ‘<font color=\"red\">".ucfirst(note_convention(intval($note_convention)))."</font>’";
+			if($item_name <> '') echo " <span class=\"red-text\">".$item_name."</span>";
+			if($tonal_scale <> '') echo " assigned scale <span class=\"red-text\">".$tonal_scale."</span>";
+			if(!$compare_scales) echo " — note convention is ‘<span class=\"red-text\">".ucfirst(note_convention(intval($note_convention)))."</span>’";
 			echo "</p>";
 			if($note_convention > 0) {
 				echo "This item is in a note convention which tonal analysis does not support. Convert it to ‘English’!<br />";
@@ -661,10 +661,10 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 									}
 								if($batch_processing AND $found_declared_scale AND $i_rank > 2) $display_ok = FALSE;
 								}
-							if(!$batch_processing) echo "<tr><td class=\"middle\" colspan=\"6\">&nbsp;<font color=\"red\"><b>↑</b></font>&nbsp;&nbsp;<input class=\"edit\" type=\"submit\" formaction=\"".$url_this_page."#top_analysis\" title=\"Analyze tonal intervals\" onclick=\"document.body.setAttribute('style','cursor:wait;');\" name=\"analyze_tonal\" value=\"ANALYZE AGAIN\"> for a graphic display of results on selected scales</td></tr>";
+							if(!$batch_processing) echo "<tr><td class=\"middle\" colspan=\"6\">&nbsp;<span class=\"red-text\"><b>↑</b></span>&nbsp;&nbsp;<input class=\"edit\" type=\"submit\" formaction=\"".$url_this_page."#top_analysis\" title=\"Analyze tonal intervals\" onclick=\"document.body.setAttribute('style','cursor:wait;');\" name=\"analyze_tonal\" value=\"ANALYZE AGAIN\"> for a graphic display of results on selected scales</td></tr>";
 							echo "</table></center><br />";
 							}
-						else echo "<p style=\"text-align:center;\"><font color=\"red\">No matching tonal scale was found.</font><br />";
+						else echo "<p style=\"text-align:center;\"><span class=\"red-text\">No matching tonal scale was found.</span><br />";
 						}
 					if($found_scale AND isset($display_result[$i_item])) {
 						foreach($display_result[$i_item] as $tonal_scale => $this_result) {
@@ -681,7 +681,7 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 						}
 					}
 				if(!$found_scale /* AND $image_shown */) {
-					echo "<p style=\"text-align:center;\"><font color=\"red\"><big>No definition of tonal scale was found.</big></font><br /><br />";
+					echo "<p style=\"text-align:center;\"><span class=\"red-text\"><big>No definition of tonal scale was found.</big></span><br /><br />";
 					echo "You need to open the ‘<a target=\"_blank\" href=\"tonality.php?file=".urlencode($tonality_resources.SLASH.$tonality_file)."\">".$tonality_file."</a>’ resource file to use its tonal scale definitions.</p>";
 					break;
 					}
@@ -744,7 +744,7 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 				}
 			for($j_batch = 0; $j_batch < count($column_name); $j_batch++) {
 				$column_text = $column_name[$j_batch];
-				if($this_scale_score[$column_text] == $best_score) $column_text = "<font color=\"red\">".$column_text."</font>";
+				if($this_scale_score[$column_text] == $best_score) $column_text = "<span class=\"red-text\">".$column_text."</span>";
 				fwrite($handle_html,"<th style=\"writing-mode:vertical-lr; text-orientation:mixed; text-align:right;\">".$column_text."</th>\n");
 				fwrite($handle_csv,",");
 				fwrite($handle_csv,$column_name[$j_batch]);
@@ -757,12 +757,12 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 				fwrite($handle_csv,"\n");
 				if($batch_item_name[$i_batch] <> '') $line_title = $batch_item_name[$i_batch];
 				else $line_title = "#".$batch_item[$i_batch];
-				fwrite($handle_html,"<td class=\"middle\" style=\"white-space:nowrap; color:#007BFF;;\">".$line_title."&nbsp;</td>");
+				fwrite($handle_html,"<td class=\"middle\" claa=\"blue-text\" style=\"white-space:nowrap;\">".$line_title."&nbsp;</td>");
 				fwrite($handle_csv,str_replace("-da.","da.",$line_title));
 				for($j_batch = 0; $j_batch < count($column_name); $j_batch++) {
 					if(isset($rank[$batch_item[$i_batch]][$column_name[$j_batch]])) {
 						$this_score = $rank[$batch_item[$i_batch]][$column_name[$j_batch]];
-						if($this_score == 1) $this_score = "<font color=\"red\"><b>".$this_score."</b></font>";
+						if($this_score == 1) $this_score = "<span class=\"red-text\"><b>".$this_score."</b></span>";
 						fwrite($handle_html,"<td class=\"middle\">".$this_score."</td>\n");
 						fwrite($handle_csv,",".$rank[$batch_item[$i_batch]][$column_name[$j_batch]]);
 						}
@@ -771,7 +771,7 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 						fwrite($handle_csv,",");
 						}
 					}
-				fwrite($handle_html,"<td style=\"white-space:nowrap; color:#007BFF;;\">".$remark[$i_batch]."</td>\n");
+				fwrite($handle_html,"<td  class=\"blue-text\" style=\"white-space:nowrap;\">".$remark[$i_batch]."</td>\n");
 				fwrite($handle_csv,",".$remark[$i_batch]);
 				fwrite($handle_html,"</tr>\n");
 				fwrite($handle_csv,"\n");
@@ -782,8 +782,8 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 			fwrite($handle_csv,"Ranked first (times)");
 			for($j_batch = 0; $j_batch < count($column_name); $j_batch++) {
 				$column_text = $this_scale_score[$column_name[$j_batch]];
-				if($column_text == $best_score) $column_text = "<font color=\"red\"><b>".$column_text."</b></font>";
-				else $column_text = "<font color=\"green\"><b>".$column_text."</b></font>";
+				if($column_text == $best_score) $column_text = "<span class=\"red-text\"><b>".$column_text."</b></span>";
+				else $column_text = "<span class=\"green-text\"><b>".$column_text."</b></span>";
 				fwrite($handle_html,"<td>".$column_text."</td>\n");
 				fwrite($handle_csv,",".$this_scale_score[$column_name[$j_batch]]);
 				}
@@ -791,7 +791,7 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 			fwrite($handle_csv,",");
 			fwrite($handle_html,"</tr>\n");
 			fwrite($handle_csv,"\n");
-			fwrite($handle_html,"<td style=\"white-space:nowrap; color:#007BFF;;\">Average score</td>");
+			fwrite($handle_html,"<td class=\"blue-text\" style=\"white-space:nowrap;\">Average score</td>");
 			fwrite($handle_csv,"Average score");
 			$imax = count($batch_item);
 			for($j_batch = 0; $j_batch < count($column_name); $j_batch++) {
@@ -838,14 +838,14 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 			for($i_batch = 0; $i_batch < count($batch_item); $i_batch++) {
 				if($batch_item_name[$i_batch] <> '') $line_title = $batch_item_name[$i_batch];
 				else $line_title = "#".$batch_item[$i_batch];
-				$abstract_table .= "<tr><td style=\"white-space:nowrap; color:#007BFF;;\">".$line_title."</td>";
+				$abstract_table .= "<tr><td class=\"blue-text\" style=\"white-space:nowrap;\">".$line_title."</td>";
 				$best_choice = '';
 				for($j_batch = 0; $j_batch < count($column_name); $j_batch++) {
 					if(isset($rank[$batch_item[$i_batch]][$column_name[$j_batch]])) {
 						$this_score = $rank[$batch_item[$i_batch]][$column_name[$j_batch]];
 						if($this_score == 1) {
 							if($best_choice <> '') $best_choice .= ", ";
-							$best_choice .= "<font color=\"red\">".$column_name[$j_batch]."</font>";
+							$best_choice .= "<span class=\"red-text\">".$column_name[$j_batch]."</span>";
 							}
 						}
 					}
@@ -1336,7 +1336,7 @@ function show_relations_on_image($i_item,$matching_list,$mode,$direction,$scalen
 			}
 		if(!$found) {
 			if($mode == "harmonic") {
-				echo "<p style=\"text-align:center;\"><font color=\"red\">Definition of tonal scale</font> ‘<span class=\"green-text\">".$scalename."</span>’ <font color=\"red\">was not found.</font><br />";
+				echo "<p style=\"text-align:center;\"><span class=\"red-text\">Definition of tonal scale</span> ‘<span class=\"green-text\">".$scalename."</span>’ <span class=\"red-text\">was not found.</span><br />";
 				echo "You need to open a <a target=\"_blank\" href=\"index.php?path=tonality_resources\">Csound resource</a> containing a scale with exactly the same name.<br />Then click “ANALYZE AGAIN”</p><br />";
 				}
 			$resource_file = '';
@@ -1356,7 +1356,7 @@ function show_relations_on_image($i_item,$matching_list,$mode,$direction,$scalen
 		if(is_integer($pos=strpos($line,"f")) AND $pos == 0) {
 			$table2 = explode(" ",$line);
 			if(count($table2) < 21) {
-				echo "<font color=\"red\">Definition of tonal scale</font> ‘<span class=\"green-text\">".$scalename."</span>’ <font color=\"red\">is not compliant.</font><br />";
+				echo "<span class=\"red-text\">Definition of tonal scale</span> ‘<span class=\"green-text\">".$scalename."</span>’ <span class=\"red-text\">is not compliant.</span><br />";
 				echo "➡ Check ‘<span class=\"green-text\">".$scale_textfile."</span>’ in the opened Csound resource.<br />";
 				break;
 				}
@@ -1570,10 +1570,10 @@ function show_relations_on_image($i_item,$matching_list,$mode,$direction,$scalen
 		echo "<div class=\"shadow\" style=\"border:2px solid gray; background-color:azure; color:black; width:15em; padding:8px; text-align:center; border-radius: 6px;";
 		if($float OR $mode == "harmonic") echo " float:".$side.";";
 		echo "\">SHOW IMAGE (".$mode.")<br />";
-		if($scalename <> '') echo "‘<font color=\"red\">".$scalename."</font>’<br />";
-		echo "<a style=\"color:#007BFF;\" onclick=\"window.open('".nice_url($link_full)."','".$image_name_full."','width=".$image_width.",height=".$image_height.",left=".$left_position."'); return false;\" href=\"".nice_url($link_full)."\">full</a>";
-		echo "&nbsp;-&nbsp;<a style=\"color:#007BFF;\" onclick=\"window.open('".nice_url($link_only)."','".$image_name_only."','width=".$image_width.",height=".$image_height.",left=".$left_position."'); return false;\" href=\"".nice_url($link_only)."\">only scale</a>";
-		echo "&nbsp;-&nbsp;<a style=\"color:#007BFF;\" onclick=\"window.open('".nice_url($link_reduced)."','".$image_name_reduced."','width=".$image_width.",height=".$image_height.",left=".$left_position."'); return false;\" href=\"".nice_url($link_reduced)."\">only links</a>";
+		if($scalename <> '') echo "‘<span class=\"red-text\">".$scalename."</span>’<br />";
+		echo "<a class=\"blue-text\" onclick=\"window.open('".nice_url($link_full)."','".$image_name_full."','width=".$image_width.",height=".$image_height.",left=".$left_position."'); return false;\" href=\"".nice_url($link_full)."\">full</a>";
+		echo "&nbsp;-&nbsp;<a class=\"blue-text\" onclick=\"window.open('".nice_url($link_only)."','".$image_name_only."','width=".$image_width.",height=".$image_height.",left=".$left_position."'); return false;\" href=\"".nice_url($link_only)."\">only scale</a>";
+		echo "&nbsp;-&nbsp;<a class=\"blue-text\" onclick=\"window.open('".nice_url($link_reduced)."','".$image_name_reduced."','width=".$image_width.",height=".$image_height.",left=".$left_position."'); return false;\" href=\"".nice_url($link_reduced)."\">only links</a>";
 		$said = FALSE;
 		// $done = array();
 		$h = 0;

@@ -8,7 +8,7 @@ if(isset($_GET['save'])) {
 	$temp_folder = $_POST['temp_folder'];
 	if(!$test) {
 		$result = SaveObjectPrototypes(FALSE,$dir,$filename,$temp_folder,FALSE);
-		if($result <> "skipped") echo "&nbsp;&nbsp;&nbsp;<font color=\"red\">".date('H\hi')."</font> ➡ <font color=\"red\">Autosaved all prototypes in</font> “<span class=\"green-text\">".$filename."</span>”";
+		if($result <> "skipped") echo "&nbsp;&nbsp;&nbsp;<span class=\"red-text\">".date('H\hi')."</span> ➡ <span class=\"red-text\">Autosaved all prototypes in</span> “<span class=\"green-text\">".$filename."</span>”";
 		}
 	}
 ?>

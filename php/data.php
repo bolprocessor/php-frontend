@@ -86,7 +86,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 	$no_save_midiresources = TRUE;
 	if(!$reload_musicxml) $upload_filename = $_FILES['music_xml_import']['name'];
 	if(!$reload_musicxml AND $_FILES["music_xml_import"]["size"] > MAXFILESIZE) {
-		echo "<h3><font color=\"red\">Uploading failed:</font> <span class=\"green-text\">".$upload_filename."</span> <font color=\"red\">is larger than ".MAXFILESIZE." bytes</font></h3>";
+		echo "<h3><span class=\"red-text\">Uploading failed:</span> <span class=\"green-text\">".$upload_filename."</span> <span class=\"red-text\">is larger than ".MAXFILESIZE." bytes</span></h3>";
 		}
 	else {
 		// First we save current content of window
@@ -134,7 +134,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$extension = end($table);
 			}
 		if(!$reload_musicxml AND $extension <> "musicxml" AND $extension <> "xml") {
-			echo "<h4><font color=\"red\">Uploading failed:</font> <span class=\"green-text\">".$upload_filename."</span> <font color=\"red\">does not have the extension of a MusicXML file!</font></h4>";
+			echo "<h4><span class=\"red-text\">Uploading failed:</span> <span class=\"green-text\">".$upload_filename."</span> <span class=\"red-text\">does not have the extension of a MusicXML file!</span></h4>";
 			}
 		else {
 			$score_part = '';
@@ -238,9 +238,9 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				$list_settings .= "// Changed metronome to min ".$change_metronome_min.", average ".$change_metronome_average.", max ".$change_metronome_max."\n";
 				}
 			if($change_metronome_min < 1 AND ($change_metronome_max > 0 OR $change_metronome_average > 0))
-				$error_change_metronome .= "<font color=\"red\">ERROR changing metronome = minimum value should be positive</font><br />";
+				$error_change_metronome .= "<span class=\"red-text\">ERROR changing metronome = minimum value should be positive</span><br />";
 			if(($change_metronome_min >= $change_metronome_max OR $change_metronome_average <= $change_metronome_min OR $change_metronome_average >= $change_metronome_max) AND ($change_metronome_max > 0 OR $change_metronome_average > 0))
-				$error_change_metronome .= "<font color=\"red\">ERROR changing metronome: values are not compatible</font><br />";
+				$error_change_metronome .= "<span class=\"red-text\">ERROR changing metronome: values are not compatible</span><br />";
 			if($error_change_metronome <> '') $change_metronome_average = $change_metronome_min = $change_metronome_max = 0;
 			$file = fopen($music_xml_file,"r");
 			$print_info = FALSE;
@@ -557,7 +557,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$data = $first_scale.$data;
 			$more_data .= "\n".$data;
 
-			echo "<h3><font color=\"red\">Importing MusicXML file:</font> <span class=\"green-text\">".$upload_filename."</span></h3>";
+			echo "<h3><span class=\"red-text\">Importing MusicXML file:</span> <span class=\"green-text\">".$upload_filename."</span></h3>";
 		//	echo "<div style=\"background-color:white; width:75%; padding:1em; box-shadow: -5px 5px 5px 0px gold;\">";
 			echo "<div style=\"width:75%; padding:1em; box-shadow: -5px 5px 5px 0px gold;\">";
 			$window_name = $upload_filename;
@@ -642,7 +642,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 						}
 					echo "<input type=\"checkbox\" name=\"".$index1."\"";
 					if($accept_pedal[$i]) echo " checked";
-					echo ">&nbsp;<font color=\"red\">➡</font> Interpret ‘pedal’ commands in part ‘".$part_label[$i]."’:";
+					echo ">&nbsp;<span class=\"red-text\">➡</span> Interpret ‘pedal’ commands in part ‘".$part_label[$i]."’:";
 					echo "&nbsp;controler #<input type=\"text\" style=\"border:none; text-align:center;\" name=\"".$index2."\" size=\"5\" value=\"".$switch_controler[$i]."\"> (64 to 95) on MIDI channel <input type=\"text\" style=\"border:none; text-align:center;\" name=\"".$index3."\" size=\"5\" value=\"".$switch_channel[$i]."\"> (1 to 16)";
 					$this_link_preview = $link_preview."&filter=pedal";
 					$window_name = $upload_filename."_trill";
@@ -655,7 +655,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			if($found_trill) {
 				echo "<input type=\"checkbox\" name=\"ignore_trills\"";
 				if($ignore_trills) echo " checked";
-				echo ">&nbsp;<font color=\"red\">➡</font> Ignore trills (some have been found in this score)";
+				echo ">&nbsp;<span class=\"red-text\">➡</span> Ignore trills (some have been found in this score)";
 				$this_link_preview = $link_preview."&filter=trill";
 				$window_name = $upload_filename."_trill";
 				echo "<input class=\"produce\" onclick=\"window.open('".$this_link_preview."','".$window_name."','width=600,height=400,left=200'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\">&nbsp;";
@@ -667,7 +667,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			if($found_mordent) {
 				echo "<input type=\"checkbox\" name=\"ignore_mordents\"";
 				if($ignore_mordents) echo " checked";
-				echo ">&nbsp;<font color=\"red\">➡</font> Ignore mordents (some have been found in this score)";
+				echo ">&nbsp;<span class=\"red-text\">➡</span> Ignore mordents (some have been found in this score)";
 				$this_link_preview = $link_preview."&filter=mordent";
 				$window_name = $upload_filename."_mordent";
 				echo "<input class=\"produce\" onclick=\"window.open('".$this_link_preview."','".$window_name."','width=600,height=400,left=150'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\">&nbsp;";
@@ -679,7 +679,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			if($found_turn) {
 				echo "<input type=\"checkbox\" name=\"ignore_turns\"";
 				if($ignore_turns) echo " checked";
-				echo ">&nbsp;<font color=\"red\">➡</font> Ignore turns (some have been found in this score)";
+				echo ">&nbsp;<span class=\"red-text\">➡</span> Ignore turns (some have been found in this score)";
 				$link_preview .= "&filter=turn";
 				$window_name = $upload_filename."_turn";
 				echo "<input class=\"produce\" onclick=\"window.open('".$link_preview."','".$window_name."','width=600,height=400,left=100'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\">&nbsp;";
@@ -691,7 +691,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			if($found_fermata) {
 				echo "<input type=\"checkbox\" name=\"ignore_fermata\"";
 				if($ignore_fermata) echo " checked";
-				echo ">&nbsp;<font color=\"red\">➡</font> Ignore fermata (some have been found in this score)";
+				echo ">&nbsp;<span class=\"red-text\">➡</span> Ignore fermata (some have been found in this score)";
 				$this_link_preview = $link_preview."&filter=fermata";
 				$window_name = $upload_filename."_fermata";
 				echo "&nbsp;<input class=\"produce\" onclick=\"window.open('".$this_link_preview."','".$window_name."','width=600,height=400,left=50'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\"><br />";
@@ -700,7 +700,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			if($found_arpeggio) {
 				echo "<input type=\"checkbox\" name=\"ignore_arpeggios\"";
 				if($ignore_arpeggios) echo " checked";
-				echo ">&nbsp;<font color=\"red\">➡</font> Ignore arpeggios (some have been found in this score)";
+				echo ">&nbsp;<span class=\"red-text\">➡</span> Ignore arpeggios (some have been found in this score)";
 				$this_link_preview = $link_preview."&filter=arpeggio";
 				$window_name = $upload_filename."_arpeggio";
 				echo "&nbsp;<input class=\"produce\" onclick=\"window.open('".$this_link_preview."','".$window_name."','width=600,height=400,left=0'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\"><br />";
@@ -709,7 +709,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			if($found_slur) {
 				echo "<input type=\"checkbox\" name=\"include_slurs\"";
 				if($include_slurs) echo " checked";
-				echo ">&nbsp;<font color=\"red\">➡</font> Interpret slurs (some have been found in this score)";
+				echo ">&nbsp;<span class=\"red-text\">➡</span> Interpret slurs (some have been found in this score)";
 				$this_link_preview = $link_preview."&filter=slur";
 				$window_name = $upload_filename."_slur";
 				echo "&nbsp;<input class=\"produce\" onclick=\"window.open('".$this_link_preview."','".$window_name."','width=600,height=400,left=0'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\"><br />";
@@ -789,7 +789,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			echo "<input type=\"checkbox\" name=\"delete_current\">&nbsp;Delete current data<br />";
 			echo "<input type=\"hidden\" name=\"upload_filename\" value=\"".$upload_filename."\">";
 			echo "<input type=\"hidden\" name=\"number_parts\" value=\"".$number_parts."\">";
-			echo "<font color=\"red\">➡</font> Now, select parts and <input class=\"produce\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"select_parts\" value=\"CONVERT\">&nbsp;or&nbsp;<input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"cancel\" value=\"QUIT IMPORTING\">";
+			echo "<span class=\"red-text\">➡</span> Now, select parts and <input class=\"produce\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"select_parts\" value=\"CONVERT\">&nbsp;or&nbsp;<input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"cancel\" value=\"QUIT IMPORTING\">";
 			echo "</div>";
 			if($found_pedal_command AND $reload_musicxml) {
 				for($i = 0; $i < $number_parts; $i++) {
@@ -932,7 +932,7 @@ if(isset($_GET['newsettings'])) {
 	$_POST['thistext'] = $settings_file."\n\n".$newcontent;
 	$no_save_midiresources = TRUE;
 	$need_to_save = TRUE;
-	$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING: this is a new tag/window. Close the previous one to avoid mixing versions!</font><br />";
+	$error_mssg .= "<span class=\"red-text blinking\">WARNING: this is a new tag/window. Close the previous one to avoid mixing versions!</span><br />";
 	$error = TRUE;
 	}
 
@@ -940,7 +940,7 @@ if(isset($_POST['use_convention'])) {
 	$new_convention = use_convention($this_file);
 	$no_save_midiresources = TRUE;
 	$need_to_save = TRUE;
-	echo "<div class=\"warning\">👉 Current note convention for this data will now be <font color=\"red\">‘".ucfirst(note_convention(intval($new_convention)))."’</font>. If necessary, change it in the settings file.</div>";
+	echo "<div class=\"warning\">👉 Current note convention for this data will now be <span class=\"red-text\">‘".ucfirst(note_convention(intval($new_convention)))."’</span>. If necessary, change it in the settings file.</div>";
 	}
 
 if(isset($_POST['delete_chan'])) {
@@ -1077,7 +1077,7 @@ if(isset($_POST['apply_velocity_change'])) {
 		$_POST['thistext'] = $data;
 		$need_to_save = TRUE;
 		}
-	else echo "<p><font color=\"red\">➡ Modified values of velocity “".$_POST['change_velocity_average']."” and “".$_POST['change_velocity_max']."” are missing or out of range!</font></p>";
+	else echo "<p><span class=\"red-text\">➡ Modified values of velocity “".$_POST['change_velocity_average']."” and “".$_POST['change_velocity_max']."” are missing or out of range!</span></p>";
 	}
 
 if(isset($_POST['apply_volume_change'])) {
@@ -1127,7 +1127,7 @@ if(isset($_POST['apply_volume_change'])) {
 		$_POST['thistext'] = $data;
 		$need_to_save = TRUE;
 		}
-	else echo "<p><font color=\"red\">➡ Modified values of volume “".$_POST['change_volume_average']."” and “".$_POST['change_volume_max']."” are missing or out of range!</font></p>";
+	else echo "<p><span class=\"red-text\">➡ Modified values of volume “".$_POST['change_volume_average']."” and “".$_POST['change_volume_max']."” are missing or out of range!</span></p>";
 	}
 	
 if(isset($_POST['apply_changes_instructions'])) {
@@ -1244,10 +1244,10 @@ if(!isset($_POST['analyze_tonal'])) {
 		$p_clock = $q_clock = 1;
 		$nature_of_time = STRIATED;
 		if($time_structure <> '')
-			echo "⏱ Metronome (time base) is not specified by a ‘-se’ file. It will be set to <font color=\"red\">60</font> beats per minute. Time structure may be changed in data.<br />";
+			echo "⏱ Metronome (time base) is not specified by a ‘-se’ file. It will be set to <span class=\"red-text\">60</span> beats per minute. Time structure may be changed in data.<br />";
 		else
-			echo "⏱ Metronome (time base) is not specified by a ‘-se’ file. It will be set to <font color=\"red\">60</font> beats per minute.<br />";
-		echo "•&nbsp;Time resolution = <font color=\"red\">".$time_resolution."</font> milliseconds (by default)<br />";
+			echo "⏱ Metronome (time base) is not specified by a ‘-se’ file. It will be set to <span class=\"red-text\">60</span> beats per minute.<br />";
+		echo "•&nbsp;Time resolution = <span class=\"red-text\">".$time_resolution."</span> milliseconds (by default)<br />";
 		echo "•&nbsp;No quantization<br />";
 		}
 	else {
@@ -1257,30 +1257,30 @@ if(!isset($_POST['analyze_tonal'])) {
 			}
 		else $metronome_settings = 0;
 		if($metronome > 0 AND $metronome <> $metronome_settings) {
-			echo "➡&nbsp;Metronome = <font color=\"red\">".$metronome_settings."</font> beats/mn as per<br /><span class=\"green-text\">‘".$settings_file."’</span> but it may be changed in data.<br />";
+			echo "➡&nbsp;Metronome = <span class=\"red-text\">".$metronome_settings."</span> beats/mn as per<br /><span class=\"green-text\">‘".$settings_file."’</span> but it may be changed in data.<br />";
 			}
 		if($metronome_settings > 0) $metronome = $metronome_settings;
 		if($metronome <> intval($metronome)) $metronome = sprintf("%.3f",$metronome);
 		$nature_of_time = $nature_of_time_settings;
 		if($metronome > 0.) {
-			echo "⏱ Metronome = <font color=\"red\">".$metronome."</font> beats/mn by default as per <span class=\"green-text\">‘".$settings_file."’</span><br />";
+			echo "⏱ Metronome = <span class=\"red-text\">".$metronome."</span> beats/mn by default as per <span class=\"green-text\">‘".$settings_file."’</span><br />";
 			}
-		echo "•&nbsp;Time resolution = <font color=\"red\">".$time_resolution."</font> milliseconds as per <span class=\"green-text\">‘".$settings_file."’</span><br />";
+		echo "•&nbsp;Time resolution = <span class=\"red-text\">".$time_resolution."</span> milliseconds as per <span class=\"green-text\">‘".$settings_file."’</span><br />";
 		if($quantize) {
-			echo "•&nbsp;Quantization = <font color=\"red\">".$quantization."</font> milliseconds as per <span class=\"green-text\">‘".$settings_file."’</span>";
-			if($time_resolution > $quantization) echo "&nbsp;<font color=\"red\">➡</font>&nbsp;may be raised to <font color=\"red\">".$time_resolution."</font>&nbsp;ms…";
+			echo "•&nbsp;Quantization = <span class=\"red-text\">".$quantization."</span> milliseconds as per <span class=\"green-text\">‘".$settings_file."’</span>";
+			if($time_resolution > $quantization) echo "&nbsp;<span class=\"red-text\">➡</span>&nbsp;may be raised to <span class=\"red-text\">".$time_resolution."</span>&nbsp;ms…";
 			echo "<br />";
 			}
 		else echo "•&nbsp;No quantization<br />";
 		}
-	echo "•&nbsp;Time structure is <font color=\"red\">".nature_of_time($nature_of_time)."</font> by default but it may be changed in data<br />";
+	echo "•&nbsp;Time structure is <span class=\"red-text\">".nature_of_time($nature_of_time)."</span> by default but it may be changed in data<br />";
 	if($max_time_computing > 0) {
-		echo "• Max console computation time has been set to <font color=\"red\">".$max_time_computing."</font> seconds by <span class=\"green-text\">‘".$settings_file."’</span>";
-		if($max_time_computing < 30) echo "&nbsp;<font color=\"red\">➡</font>&nbsp;probably too small!";
+		echo "• Max console computation time has been set to <span class=\"red-text\">".$max_time_computing."</span> seconds by <span class=\"green-text\">‘".$settings_file."’</span>";
+		if($max_time_computing < 30) echo "&nbsp;<span class=\"red-text\">➡</span>&nbsp;probably too small!";
 		echo "<br />";
 		}
-	if($note_convention <> '') echo "• Note convention is <font color=\"red\">‘".ucfirst(note_convention(intval($note_convention)))."’</font> as per <span class=\"green-text\">‘".$settings_file."’</span>";
-	else echo "• Note convention is <font color=\"red\">‘English’</font> by default";
+	if($note_convention <> '') echo "• Note convention is <span class=\"red-text\">‘".ucfirst(note_convention(intval($note_convention)))."’</span> as per <span class=\"green-text\">‘".$settings_file."’</span>";
+	else echo "• Note convention is <span class=\"red-text\">‘English’</span> by default";
 	echo "</div><br />";
 	}
 
@@ -1290,7 +1290,7 @@ $output = $bp_application_path.SLASH.$output_folder;
 do $output = str_replace(SLASH.SLASH,SLASH,$output,$count);
 while($count > 0);
 if(!file_exists($output)) {
-    echo "<p><font color=\"red\">Created folder:</font><span class=\"green-text\"> ".$output."</span><br />";
+    echo "<p><span class=\"red-text\">Created folder:</span><span class=\"green-text\"> ".$output."</span><br />";
    	if(!mkdir($output,0775, true))
         error_log("Failed to create directory '{$temp_dir}' with error: " . error_get_last()['message']);
 	else
@@ -1373,35 +1373,35 @@ if(!isset($_POST['analyze_tonal'])) {
 $link_options = '';
 if($grammar_file <> '') {
 	if(!file_exists($dir.$grammar_file)) {
-		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING:</font> <span class=\"green-text\">".$grammar_file."</span> not found<br />";
+		$error_mssg .= "<span class=\"red-text blinking\">WARNING:</span> <span class=\"green-text\">".$grammar_file."</span> not found<br />";
 		$error = TRUE;
 		}
 	else $link_options .= "&grammar=".urlencode($dir.$grammar_file);
 	}
 if($alphabet_file <> '') {
 	if(!file_exists($dir.$alphabet_file)) {
-		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING:</font> <span class=\"green-text\">".$alphabet_file."</span> not found<br />";
+		$error_mssg .= "<span class=\"red-text blinking\">WARNING:</span> <span class=\"green-text\">".$alphabet_file."</span> not found<br />";
 		$error = TRUE;
 		}
 	else $link_options .= "&alphabet=".urlencode($dir.$alphabet_file);
 	}
 if($settings_file <> '') {
 	if(!file_exists($dir.$settings_file)) {
-		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING:</font> <span class=\"green-text\">".$settings_file."</span> not found<br />";
+		$error_mssg .= "<span class=\"red-text blinking\">WARNING:</span> <span class=\"green-text\">".$settings_file."</span> not found<br />";
 		$error = TRUE;
 		}
 	else $link_options .= "&settings=".urlencode($dir.$settings_file);
 	}
 if($objects_file <> '') {
 	if(!file_exists($dir.$objects_file)) {
-		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING:</font> <span class=\"green-text\">".$objects_file."</span> not found<br />";
+		$error_mssg .= "<span class=\"red-text blinking\">WARNING:</span> <span class=\"green-text\">".$objects_file."</span> not found<br />";
 		$error = TRUE;
 		}
 	else $link_options .= "&objects=".urlencode($dir.$objects_file);
 	}
 if($csound_file <> '') {
 	if(!file_exists($dir_csound_resources.$csound_file)) {
-		$error_mssg .= "<font color=\"red\" class=\"blinking\">WARNING:</font> <span class=\"green-text\">".$csound_file."</span> not found<br />";
+		$error_mssg .= "<span class=\"red-text blinking\">WARNING:</span> <span class=\"green-text\">".$csound_file."</span> not found<br />";
 		$error = TRUE;
 		}
 	else {
@@ -1411,7 +1411,7 @@ if($csound_file <> '') {
 	}
 if($tonality_file <> '') {
 	if(!file_exists($dir_tonality_resources.$tonality_file)) {
-		$error_mssg .= "<font color=\"red\">WARNING: ".$dir_tonality_resources.$tonality_file." not found.</font><br />";
+		$error_mssg .= "<span class=\"red-text\">WARNING: ".$dir_tonality_resources.$tonality_file." not found.</span><br />";
 		$error = TRUE;
 		}
 	else {
@@ -1426,7 +1426,7 @@ if($error_mssg <> '') {
 	}
 
 if(intval($note_convention) <> intval($new_convention) AND $new_convention <> '')
-	echo "<p><font color=\"red\">➡</font> WARNING: Note convention should be set to <font color=\"red\">‘".ucfirst(note_convention(intval($new_convention)))."’</font> in the <span class=\"green-text\">‘".$settings_file."’</span> settings file</p>";
+	echo "<p><span class=\"red-text\">➡</span> WARNING: Note convention should be set to <span class=\"red-text\">‘".ucfirst(note_convention(intval($new_convention)))."’</span> in the <span class=\"green-text\">‘".$settings_file."’</span> settings file</p>";
 
 if(!isset($_POST['analyze_tonal'])) {
 	echo $save_warning;
@@ -1535,14 +1535,14 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 		$new_settings_file = str_replace("-da.",'',$filename);
 		$new_settings_file = str_replace(".bpda",'',$new_settings_file);
 		$new_settings_file = "-se.".$new_settings_file;
-		echo "<p>&nbsp;</p><p style=\"background-color:white; color:black\"><font color=\"red\">➡</font> <input class=\"save big\" onclick=\"window.open('settings_list.php?dir=".urlencode($dir)."&thispage=".urlencode($url_this_page)."','settingsfiles','width=400,height=400,left=100'); return false;\" type=\"submit\" title=\"Display settings file\" value=\"CHOOSE\"> a settings file or <input class=\"edit big\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"create_settings_file\" formaction=\"".$url_this_page."\" value=\"CREATE\"> a new file named <input type=\"text\" name=\"new_settings_file\" size=\"25\" value=\"".$new_settings_file."\"></p>";
+		echo "<p>&nbsp;</p><p style=\"background-color:white; color:black\"><span class=\"red-text\">➡</span> <input class=\"save big\" onclick=\"window.open('settings_list.php?dir=".urlencode($dir)."&thispage=".urlencode($url_this_page)."','settingsfiles','width=400,height=400,left=100'); return false;\" type=\"submit\" title=\"Display settings file\" value=\"CHOOSE\"> a settings file or <input class=\"edit big\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"create_settings_file\" formaction=\"".$url_this_page."\" value=\"CREATE\"> a new file named <input type=\"text\" name=\"new_settings_file\" size=\"25\" value=\"".$new_settings_file."\"></p>";
 		}
 	else 
 		echo "<p><input class=\"edit\" onclick=\"window.open('settings_list.php?dir=".urlencode($dir)."&thispage=".urlencode($url_this_page)."','settingsfiles','width=400,height=400,left=100'); return false;\" type=\"submit\" title=\"Display settings file\" value=\"CHOOSE\"> a different settings file</p>";
 	echo "<table class=\"thinborder\">";
 	echo "<tr>";
 	echo "<td style=\"vertical-align:middle; white-space:nowrap;\"><input class=\"edit\" type=\"submit\" onmouseover=\"checksaved();\" name=\"change_convention\" formaction=\"".$url_this_page."#topchanges\" value=\"APPLY NOTE CONVENTION to this data\"> ➡</td>";
-	echo "<td style=\"vertical-align:middle; white-space:nowrap;\">";
+	echo "<td style=\"vertical-align:middle; white-space:nowrap; padding-bottom:6px;\">";
 	echo "<input type=\"hidden\" name=\"old_convention\" value=\"".$note_convention."\">";
 	echo "<input type=\"radio\" name=\"new_convention\" value=\"0\">English<br />";
 	echo "<input type=\"radio\" name=\"new_convention\" value=\"1\">Italian/Spanish/French<br />";
@@ -1551,7 +1551,7 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 	echo "</tr>";
 	echo "<tr><td colspan=2 style=\"padding:6px;\">";
 	if($note_convention <> '') {
-		echo "<p>Current note convention for this data is:<br /><font color=\"red\"><b>".ucfirst(note_convention(intval($note_convention)))."</b></font> as per <span class=\"green-text\">‘".$settings_file."’</span><br />You will need to change it after applying a different convention.</p>";
+		echo "<p>Current note convention for this data is:<br /><span class=\"red-text\"><b>".ucfirst(note_convention(intval($note_convention)))."</b></span> as per <span class=\"green-text\">‘".$settings_file."’</span><br />You will need to change it after applying a different convention.</p>";
 		}
 	echo "</td></tr></table><br />";
 	$found_chan = substr_count($content,"_chan(");
@@ -1614,7 +1614,7 @@ if($imax > 0 AND (substr_count($content,'{') > 0 OR substr_count($content,"-da."
 		echo "<h3 style=\"text-align:center;\">Tonal analysis: “".$filename."”</h3>";
 	else echo "<h3>Tonal analysis: “".$filename."”</h3>";
 	$tonal_analysis_possible = !($note_convention > 2);
-	if(!$tonal_analysis_possible) echo "<p><font color=\"red\">➡ Tonal analysis is only possible with names of notes in English, Italian/Spanish/French or Indian conventions.</font></p>";
+	if(!$tonal_analysis_possible) echo "<p><span class=\"red-text\">➡ Tonal analysis is only possible with names of notes in English, Italian/Spanish/French or Indian conventions.</span></p>";
 	if(isset($_POST['analyze_tonal']) OR isset($_POST['save_tonal_settings']) OR isset($_POST['reset_tonal_settings'])) {
 		tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_folder,$note_convention);
 		}
@@ -1624,7 +1624,7 @@ if($imax > 0 AND (substr_count($content,'{') > 0 OR substr_count($content,"-da."
 		if(!$tonal_analysis_possible) echo " disabled";
 		echo ">";
 		echo "Melodic and harmonic tonal intervals of (all) item(s)<br /><i>ignoring channels, instruments, periods, sound-objects and random performance controls.</i></p>";
-		if($tonality_file <> '') echo "<div style=\"padding:6px;\"><font color=\"red\">➡</font> It may be necessary to <a class=\"linkdotted\" target=\"_blank\" href=\"tonality.php?file=".urlencode($tonality_resources.SLASH.$tonality_file)."\">open</a> the ‘<span class=\"green-text\">".$tonality_file."</span>’ tonality resource file, allowing access to its tonal scale definitions.</div>";
+		if($tonality_file <> '') echo "<div style=\"padding:6px;\"><span class=\"red-text\">➡</span> It may be necessary to <a class=\"linkdotted\" target=\"_blank\" href=\"tonality.php?file=".urlencode($tonality_resources.SLASH.$tonality_file)."\">open</a> the ‘<span class=\"green-text\">".$tonality_file."</span>’ tonality resource file, allowing access to its tonal scale definitions.</div>";
 		echo "</form>";
 	//	echo "<hr>";
 		}
@@ -1643,12 +1643,12 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 		echo "<input type=\"hidden\" name=\"file_format\" value=\"".$file_format."\">";
 		echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
 		echo "<tr><td colspan=\"2\" style=\"vertical-align:middle; padding:6px;\">";
-		echo "<input type=\"submit\" onclick=\"clearsave();\" style=\"background-color:AquaMarine;\" formaction=\"".$url_this_page."#topedit\" name=\"explode\" value=\"EXPLODE\">&nbsp;<font color=\"red\">➡ </font>split {…}&nbsp;expressions (measures)";
+		echo "<input type=\"submit\" onclick=\"clearsave();\" style=\"background-color:AquaMarine;\" formaction=\"".$url_this_page."#topedit\" name=\"explode\" value=\"EXPLODE\">&nbsp;<span class=\"red-text\">➡ </span>split {…}&nbsp;expressions (measures)";
 		echo "<div style=\"float:right;\"><input class=\"produce\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_grammar."','".$window_name_grammar."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"create_grammar\" title=\"Create grammar using items on this page\" value=\"CREATE GRAMMAR\"></div>";
 		echo "</td></tr>";
 		if($imax > 0) {
 			echo "<tr><td colspan=\"2\" style=\"vertical-align:middle; padding:6px;\">";
-			echo "<input type=\"submit\" onclick=\"clearsave();\" style=\"background-color:AquaMarine;\" formaction=\"".$url_this_page."#topedit\" name=\"implode\" value=\"IMPLODE\">&nbsp;<font color=\"red\">➡ </font>merge {…}&nbsp;expressions (measures)";
+			echo "<input type=\"submit\" onclick=\"clearsave();\" style=\"background-color:AquaMarine;\" formaction=\"".$url_this_page."#topedit\" name=\"implode\" value=\"IMPLODE\">&nbsp;<span class=\"red-text\">➡ </span>merge {…}&nbsp;expressions (measures)";
 			echo "</td></tr>";
 			}
 		echo "</form>";
@@ -1708,8 +1708,8 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 	//	echo "<small>".urldecode($link__chunked)."</small><br />";
 		$n1 = substr_count($line_recoded,'{');
 		$n2 = substr_count($line_recoded,'}');
-		if($n1 > $n2) $error_mssg .= "• <font color=\"red\">This score contains ".($n1-$n2)." extra ‘{'</font><br />";
-		if($n2 > $n1) $error_mssg .= "• <font color=\"red\">This score contains ".($n2-$n1)." extra ‘}'</font><br />";
+		if($n1 > $n2) $error_mssg .= "• <span class=\"red-text\">This score contains ".($n1-$n2)." extra ‘{'</span><br />";
+		if($n2 > $n1) $error_mssg .= "• <span class=\"red-text\">This score contains ".($n2-$n1)." extra ‘}'</span><br />";
 		if($file_format == "rtmidi" AND file_exists($refresh_file)) $refresh_instruction = "document.getElementById('refresh').style.display = 'inline';";
 		else $refresh_instruction = '';
 	//	echo "<p>@@@".$link_play."</p>";
@@ -1882,9 +1882,9 @@ function create_chunks($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxc
 					$current_legato = $i_layer = array();
 					$current_legato[0] = $i_layer[0] = $layer = 0;
 					if($label == "chunk" AND abs($tie) > 0)
-						$tie_mssg .=  "• <font color=\"red\">".$tie." unbound tie(s) in chunk #".$chunk_number."</font><br />";
+						$tie_mssg .=  "• <span class=\"red-text\">".$tie." unbound tie(s) in chunk #".$chunk_number."</span><br />";
 					if($label == "chunk" AND !$ok_legato)
-						$tie_mssg .=  "• <font color=\"red\">legato(s) may be truncated after chunk #".$chunk_number."</font><br />"; 
+						$tie_mssg .=  "• <span class=\"red-text\">legato(s) may be truncated after chunk #".$chunk_number."</span><br />"; 
 					$line_chunked .= "\n";
 					$tie = $n = 0;
 					if($test_legato) echo " => ".$label." #".$chunk_number;
@@ -1898,7 +1898,7 @@ function create_chunks($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxc
 			}
 		}
 	if($chunked) {
-		if($total_ties > 0) $tie_mssg .=  " <i>total ".$total_ties." tied notes</i><br /><font color=\"#007BFF\">";
+		if($total_ties > 0) $tie_mssg .=  " <i>total ".$total_ties." tied notes</i><br />";
 		$data_chunked = $temp_dir.$temp_folder.SLASH.$i_item."-".$label.".bpda";
 	//	echo $data_chunked."<br />";
 		$handle = fopen($data_chunked,"w");
@@ -1923,7 +1923,7 @@ function save($this_file,$filename,$top_header,$save_content) {
     if(file_exists($this_file)) {
         $backup_file = $this_file."_bak";
         if(!copy($this_file, $backup_file))
-            echo "<p>👉 <font color=\"red\">Failed to create backup of the file.</p>";
+            echo "<p>👉 <span class=\"red-text\">Failed to create backup of the file.</span></p>";
 		}
 	$handle = @fopen($this_file, "w");
 	if($handle) {
@@ -1933,7 +1933,7 @@ function save($this_file,$filename,$top_header,$save_content) {
 		fclose($handle);
 		}
 	else {
-		echo "<div style=\"background-color:white; color:black; padding: 1em; border-radius: 6px;\"><p>👉 <font color=\"red\"><b>WARNING</b>: Some files have been imported and cannot be modified.</font></p><p><b>Linux user?</b> Open your terminal and type: <span class=\"green-text\">sudo /opt/lampp/htdocs/bolprocessor/change_permissions.sh</span><br />(Your password will be required...)</p>";
+		echo "<div style=\"background-color:white; color:black; padding: 1em; border-radius: 6px;\"><p>👉 <span class=\"red-text\"><b>WARNING</b>: Some files have been imported and cannot be modified.</span></p><p><b>Linux user?</b> Open your terminal and type: <span class=\"green-text\">sudo /opt/lampp/htdocs/bolprocessor/change_permissions.sh</span><br />(Your password will be required...)</p>";
 		echo "</div>"; 
 		}
 	return;

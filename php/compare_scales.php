@@ -58,12 +58,12 @@ foreach($dircontent as $scale_file) {
 				$table2 = explode(' ',$line);
 				$this_num_grades = $table2[4];
 				if($this_num_grades <> $num_grades) {
-					echo "<font color=\"red\">➡</font> Ignored because it has ".$this_num_grades." grades. Only ".$num_grades." allowed.<br />";
+					echo "<span class=\"red-text\">➡</span> Ignored because it has ".$this_num_grades." grades. Only ".$num_grades." allowed.<br />";
 					$ignore = TRUE;
 					}
 				else {
 					if(count($table2) < ($num_grades + 9)) {
-						echo "<font color=\"red\">➡</font> Ignored because this line is incomplete: ".$line."<br />";
+						echo "<span class=\"red-text\">➡</span> Ignored because this line is incomplete: ".$line."<br />";
 						$ignore = TRUE;
 						}
 					else {
@@ -137,8 +137,8 @@ for($j = 0; $j < $num_scales; $j++) {
 			while($grade_shift >= $num_grades) $grade_shift -= $num_grades;
 			if($number_fifth_shift > ($num_grades / 2)) $number_fifth_shift -= $num_grades;
 			if($number_fifth_shift >= 0) $number_fifth_shift = "+".$number_fifth_shift;
-	//		echo "<td>".round($best_match['dist'],1)." c <font color=\"red\">".$note[$i][$grade_shift]."</font> (".$number_fifth_shift.")</td>";
-			echo "<td>".round($best_match['dist'],1)." ¢ <font color=\"red\">".$note[$i][$grade_shift]."</font></td>";
+	//		echo "<td>".round($best_match['dist'],1)." c <span class=\"red-text\">".$note[$i][$grade_shift]."</span> (".$number_fifth_shift.")</td>";
+			echo "<td>".round($best_match['dist'],1)." ¢ <span class=\"red-text\">".$note[$i][$grade_shift]."</span></td>";
 			}
 		}
 	echo "</tr>";

@@ -30,7 +30,7 @@ if($test) echo "folder_this_instrument = ".$folder_this_instrument."<br />";
 
 // echo "&nbsp;Instrument file: <span class=\"green-text\">".$instrument_file."</span>";
 echo link_to_help();
-echo "<h2>Csound instrument <big><span class=\"green-text\">_ins(".$instrument_index.")</span> <font color=\"red\">".$instrument_name."</font></big></h2>";
+echo "<h2>Csound instrument <big><span class=\"green-text\">_ins(".$instrument_index.")</span> <span class=\"red-text\">".$instrument_name."</span></big></h2>";
 
 $argmax_file = $folder_this_instrument.SLASH."argmax.php";
 		
@@ -52,7 +52,7 @@ if(isset($_POST['create_parameter'])) {
 	$new_parameter = str_replace('-','_',$new_parameter);
 	$new_parameter = str_replace('"','',$new_parameter);
 	if(isset($exists_name[$new_parameter])) {
-		echo "<p><font color=\"red\">A parameter with the same name “<span class=\"green-text\">".$new_parameter."</span>” already exists!</font></p>";
+		echo "<p><span class=\"red-text\">A parameter with the same name “<span class=\"green-text\">".$new_parameter."</span>” already exists!</span></p>";
 		}
 	else {
 		if($new_parameter <> '') {
@@ -69,14 +69,14 @@ if(isset($_POST['create_parameter'])) {
 
 if(isset($_POST['delete_parameter'])) {
 	$parameter_name = $_POST['parameter_name'];
-	echo "<p><font color=\"red\">Deleted </font><span class=\"green-text\"><big>“".$parameter_name."”</big></span>…</p>";
+	echo "<p><span class=\"red-text\">Deleted </span><span class=\"green-text\"><big>“".$parameter_name."”</big></span>…</p>";
 	$this_parameter_file = $folder_this_instrument.SLASH.$parameter_name.".txt";
 //	echo $this_parameter_file."<br />";
 	rename($this_parameter_file,$this_parameter_file.".old");
 	}
 
 if(isset($_POST['restore'])) {
-	echo "<p><font color=\"red\">Restoring: </font>";
+	echo "<p><span class=\"red-text\">Restoring: </span>";
 	$dircontent = scandir($folder_this_instrument);
 	foreach($dircontent as $oldfile) {
 		if($oldfile == '.' OR $oldfile == ".." OR $oldfile == ".DS_Store") continue;
@@ -93,7 +93,7 @@ if(isset($_POST['restore'])) {
 
 if(isset($_POST['saveinstrument'])) {
 	$csfilename = $_POST['csfilename'];
-	echo "<p id=\"timespan\"><font color=\"red\">Saving this instrument…</font>";
+	echo "<p id=\"timespan\"><span class=\"red-text\">Saving this instrument…</span>";
 	echo $instrument_file."<br />";
 	$handle = fopen($instrument_file,"w");
 	$file_header = $top_header."\n// Csound instrument saved as \"".$instrument_name."\". Date: ".gmdate('Y-m-d H:i:s');
@@ -445,7 +445,7 @@ foreach($dir_instrument as $thisparameter) {
 if($n > 0) {
 	echo "<table class=\"thicktable\">";
 	echo "<tr>";
-	echo "<td colspan=\"3\"><font color=\"red\">➡</font> Click the blue button to edit…</td>";
+	echo "<td colspan=\"3\"><span class=\"red-text\">➡</span> Click the blue button to edit…</td>";
 	echo "</tr>";
 	foreach($dir_instrument as $thisparameter) {
 		if($thisparameter == '.' OR $thisparameter == ".." OR $thisparameter == ".DS_Store" OR $thisparameter == '') continue;

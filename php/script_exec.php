@@ -118,7 +118,7 @@ function run_script($dir,$dirPath,$this_script_file,$script_variables,$note_conv
 				}
 			$message = '';
 			if(!$no_error) {
-				$message .= "<p><font color=\"red\">➡ </font>This process:<br /><small>";
+				$message .= "<p><span class=\"red-text\">➡ </span>This process:<br /><small>";
 				for($k=0; $k < $n_messages; $k++) {
 					$message .= "&nbsp;&nbsp;&nbsp;".$mssg[$k]."<br />";
 					}
@@ -162,11 +162,11 @@ function run_script($dir,$dirPath,$this_script_file,$script_variables,$note_conv
 				@unlink($trace_file);
 				@unlink($trace_done_file);
 				if($no_error AND $output_format == "csound") {
-					echo "<p><font color=\"red\">➡ </font> Read the <a onclick=\"window.open('".nice_url($output_file)."','".$output_format."','width=600,height=400,left=300'); return false;\" href=\"".nice_url($output_file)."\">output file</a></p>";
+					echo "<p><span class=\"red-text\">➡ </span> Read the <a onclick=\"window.open('".nice_url($output_file)."','".$output_format."','width=600,height=400,left=300'); return false;\" href=\"".nice_url($output_file)."\">output file</a></p>";
 					}
 				$message = '';
 				if(!$no_error) {
-					$message .= "<p><font color=\"red\">➡ </font>This process:<br /><small>";
+					$message .= "<p><span class=\"red-text\">➡ </span>This process:<br /><small>";
 					for($k=0; $k < $n_messages; $k++) {
 						$message .= "&nbsp;&nbsp;&nbsp;".$mssg[$k]."<br />";
 						}

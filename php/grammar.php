@@ -66,7 +66,7 @@ if(isset($_POST['use_convention'])) {
 	$new_convention = use_convention($this_file);
 	$no_save_midiresources = TRUE;
 	$need_to_save = TRUE;
-	echo "<div class=\"warning\">👉 Current note convention for this grammar will now be <font color=\"red\">‘".ucfirst(note_convention(intval($new_convention)))."’</font>. If necessary, change it in the settings file.</div>";
+	echo "<div class=\"warning\">👉 Current note convention for this grammar will now be <span class=\"red-text\">‘".ucfirst(note_convention(intval($new_convention)))."’</span>. If necessary, change it in the settings file.</div>";
 	}
 
 if(isset($_POST['delete_chan'])) {
@@ -187,7 +187,7 @@ $output = $bp_application_path.SLASH.$output_folder;
 do $output = str_replace(SLASH.SLASH,SLASH,$output,$count);
 while($count > 0);
 if(!file_exists($output)) {
-	echo "<p><font color=\"red\">Created folder:</font><span class=\"green-text\"> ".$output."</span><br />";
+	echo "<p><span class=\"red-text\">Created folder:</span><span class=\"green-text\"> ".$output."</span><br />";
 	if(!mkdir($output,0775, true))
 		error_log("Failed to create directory '{$temp_dir}' with error: " . error_get_last()['message']);
 	else
@@ -244,7 +244,7 @@ if(isset($_POST['compilegrammar'])) {
 		}
 	if($tonality_file <> '') {
 		if(!file_exists($dir_tonality_resources.$tonality_file)) {
-			$error_mssg .= "<font color=\"red\">WARNING: ".$dir_tonality_resources.$tonality_file." not found.</font><br />";
+			$error_mssg .= "<span class=\"red-text\">WARNING: ".$dir_tonality_resources.$tonality_file." not found.</span><br />";
 			$error = TRUE;
 			}
 		else $command .= " -to ".$dir_tonality_resources.$tonality_file;
@@ -259,9 +259,9 @@ if(isset($_POST['compilegrammar'])) {
 		if($trace_content !== false && strlen($trace_content) > 10)
 			$trace_link = clean_up_file_to_html($dir.$tracefile);
 		}
-	if($trace_link <> '') echo "<p><big>👉 <font color=\"red\">Errors found! Open the </font> <a onclick=\"window.open('".nice_url($trace_link)."','trace','width=800,height=800'); return false;\" href=\"".nice_url($trace_link)."\">trace file</a>!</big></p>";
+	if($trace_link <> '') echo "<p><big>👉 <span class=\"red-text\">Errors found! Open the </span> <a onclick=\"window.open('".nice_url($trace_link)."','trace','width=800,height=800'); return false;\" href=\"".nice_url($trace_link)."\">trace file</a>!</big></p>";
 	//	}
-	else echo "<p><font color=\"red\">➡</font> <span class=\"green-text\">No error.</span></p>";
+	else echo "<p><span class=\"red-text\">➡</span> <span class=\"green-text\">No error.</span></p>";
 	@unlink($dir.$tracefile);
 	reformat_grammar(FALSE,$this_file);
 	}
@@ -405,7 +405,7 @@ $link_produce = "produce.php?instruction=".$action."&grammar=".urlencode($this_f
 $error_mssg = '';
 if($alphabet_file <> '') {
 	if(!file_exists($dir.$alphabet_file)) {
-		$error_mssg .= "<font color=\"red\">WARNING: ".$dir.$alphabet_file." not found.</font><br />";
+		$error_mssg .= "<span class=\"red-text\">WARNING: ".$dir.$alphabet_file." not found.</span><br />";
 		$error = TRUE;
 		}
 	else $link_produce .= "&alphabet=".urlencode($dir.$alphabet_file);
@@ -413,7 +413,7 @@ if($alphabet_file <> '') {
 if($settings_file <> '') {
 	if(!file_exists($dir.$settings_file)) {
 		$url_settings = "settings.php?file=".urlencode($dir_base.$settings_file);
-		$error_mssg .= "<font color=\"red\">WARNING: ".$dir_base.$settings_file." not found.</font>";
+		$error_mssg .= "<span class=\"red-text\">WARNING: ".$dir_base.$settings_file." not found.</span>";
 		$error_mssg .= "&nbsp;<input class=\"save\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".nice_url($url_settings)."','".$settings_file."','width=800,height=800,left=100'); return false;\" value=\"CREATE IT\"><br />";
 		$error = TRUE;
 		}
@@ -421,21 +421,21 @@ if($settings_file <> '') {
 	}
 if($objects_file <> '') {
 	if(!file_exists($dir.$objects_file)) {
-		$error_mssg .= "<font color=\"red\">WARNING: ".$dir.$objects_file." not found.</font><br />";
+		$error_mssg .= "<span class=\"red-text\">WARNING: ".$dir.$objects_file." not found.</span><br />";
 		$error = TRUE;
 		}
 	else $link_produce .= "&objects=".urlencode($dir.$objects_file);
 	}
 if($csound_file <> '') {
 	if(!file_exists($dir_csound_resources.$csound_file)) {
-		$error_mssg .= "<font color=\"red\">WARNING: ".$dir_csound_resources.$csound_file." not found.</font><br />";
+		$error_mssg .= "<span class=\"red-text\">WARNING: ".$dir_csound_resources.$csound_file." not found.</span><br />";
 		$error = TRUE;
 		}
 	else $link_produce .= "&csound_file=".urlencode($csound_file);
 	}
 if($tonality_file <> '') {
 	if(!file_exists($dir_tonality_resources.$tonality_file)) {
-		$error_mssg .= "<font color=\"red\">WARNING: ".$dir_tonality_resources.$tonality_file." not found.</font><br />";
+		$error_mssg .= "<span class=\"red-text\">WARNING: ".$dir_tonality_resources.$tonality_file." not found.</span><br />";
 		$error = TRUE;
 		}
 	else $link_produce .= "&tonality_file=".urlencode($tonality_file);
@@ -504,20 +504,20 @@ if($settings_file == '' OR !file_exists($dir.$settings_file)) {
 		$q_clock = $q_clock / $gcd;
 		if(intval($metronome) == $metronome) $metronome = intval($metronome);
 		else $metronome = sprintf("%.3f",$metronome);
-		echo "<p>⏱ Time base: <font color=\"red\">".$p_clock."</font> ticks in <font color=\"red\">".$q_clock."</font> seconds (metronome = <font color=\"red\">".$metronome."</font> beats/mn)<br />";
+		echo "<p>⏱ Time base: <span class=\"red-text\">".$p_clock."</span> ticks in <span class=\"red-text\">".$q_clock."</span> seconds (metronome = <span class=\"red-text\">".$metronome."</span> beats/mn)<br />";
 		if(!is_numeric($nature_of_time)) $nature_of_time = STRIATED;
 		}
 	else {
 		$metronome =  60;
 		$p_clock = $q_clock = 1;
 		if($time_structure <> '')
-			echo "<p>⏱ Metronome (time base) is not properly specified. It will be set to <font color=\"red\">60</font> beats per minute. Time structure is <font color=\"red\">".$time_structure."</font> as indicated in data.</p>";
+			echo "<p>⏱ Metronome (time base) is not properly specified. It will be set to <span class=\"red-text\">60</span> beats per minute. Time structure is <span class=\"red-text\">".$time_structure."</span> as indicated in data.</p>";
 		else {
 			$nature_of_time = STRIATED;
-			echo "<p>⏱ Metronome (time base) and structure of time are neither specified in grammar nor set up by a ‘-se’ file.<br />Therefore metronome will be set to <font color=\"red\">60</font> beats per minute and time structure to <font color=\"red\">STRIATED</font>.</p>";
+			echo "<p>⏱ Metronome (time base) and structure of time are neither specified in grammar nor set up by a ‘-se’ file.<br />Therefore metronome will be set to <span class=\"red-text\">60</span> beats per minute and time structure to <span class=\"red-text\">STRIATED</span>.</p>";
 			}
 		}
-	echo "•&nbsp;Time resolution = <font color=\"red\">".$time_resolution."</font> milliseconds (by default)<br />";
+	echo "•&nbsp;Time resolution = <span class=\"red-text\">".$time_resolution."</span> milliseconds (by default)<br />";
 	echo "•&nbsp;No quantization<br />";
 	}
 else {
@@ -526,7 +526,7 @@ else {
 		}
 	else $metronome_settings = 0;
 	if($metronome > 0 AND $metronome <> $metronome_settings) {
-		echo "⚠️&nbsp;Conflict: metronome is ".$metronome_settings." beats/mn as per <span class=\"green-text\">‘".$settings_file."’</span><br />&nbsp;&nbsp;and ".$metronome." beats/mn in grammar. We'll use <font color=\"red\">".$metronome."</font> beats/mn<br />";
+		echo "⚠️&nbsp;Conflict: metronome is ".$metronome_settings." beats/mn as per <span class=\"green-text\">‘".$settings_file."’</span><br />&nbsp;&nbsp;and ".$metronome." beats/mn in grammar. We'll use <span class=\"red-text\">".$metronome."</span> beats/mn<br />";
 		}
 	if(!is_numeric($metronome)) $metronome = $metronome_settings;
 	if($metronome <> intval($metronome)) $metronome = sprintf("%.3f",$metronome);
@@ -535,32 +535,32 @@ else {
 		}
 	if(!is_numeric($nature_of_time)) $nature_of_time = $nature_of_time_settings;
 	if($metronome > 0. AND $nature_of_time == STRIATED) {
-		echo "⏱ Metronome = <font color=\"red\">".$metronome."</font> beats/mn<br />";
+		echo "⏱ Metronome = <span class=\"red-text\">".$metronome."</span> beats/mn<br />";
 		}
-	echo "•&nbsp;Time resolution = <font color=\"red\">".$time_resolution."</font> milliseconds as per <span class=\"green-text\">‘".$settings_file."’</span><br />";
+	echo "•&nbsp;Time resolution = <span class=\"red-text\">".$time_resolution."</span> milliseconds as per <span class=\"green-text\">‘".$settings_file."’</span><br />";
 	if($quantize) {
-		echo "•&nbsp;Quantization = <font color=\"red\">".$quantization."</font> milliseconds as per <span class=\"green-text\">‘".$settings_file."’</span>";
-		if($time_resolution > $quantization) echo "&nbsp;<font color=\"red\">➡</font>&nbsp;may be raised to <font color=\"red\">".$time_resolution."</font>&nbsp;ms…";
+		echo "•&nbsp;Quantization = <span class=\"red-text\">".$quantization."</span> milliseconds as per <span class=\"green-text\">‘".$settings_file."’</span>";
+		if($time_resolution > $quantization) echo "&nbsp;<span class=\"red-text\">➡</span>&nbsp;may be raised to <span class=\"red-text\">".$time_resolution."</span>&nbsp;ms…";
 		echo "<br />";
 		}
 	else echo "•&nbsp;No quantization<br />";
 	}
-if($nature_of_time == STRIATED) echo "•&nbsp;Time is <font color=\"red\">".nature_of_time($nature_of_time)."</font><br />";
-else echo "•&nbsp;Time is <font color=\"red\">".nature_of_time($nature_of_time)."</font> (no fixed tempo)<br />";
+if($nature_of_time == STRIATED) echo "•&nbsp;Time is <span class=\"red-text\">".nature_of_time($nature_of_time)."</span><br />";
+else echo "•&nbsp;Time is <span class=\"red-text\">".nature_of_time($nature_of_time)."</span> (no fixed tempo)<br />";
 if($non_stop_improvize > 0) {
-	echo "• <font color=\"red\">Non-stop improvize</font> as set by <span class=\"green-text\">‘".$settings_file."’</span>";
+	echo "• <span class=\"red-text\">Non-stop improvize</span> as set by <span class=\"green-text\">‘".$settings_file."’</span>";
 	if($file_format <> "rtmidi") echo ": <i>only ".$max_items." variations will be produced</i>";
 	echo "<br />";
 	}
-if($diapason <> 440) echo "• <font color=\"red\">Diapason</font> (A4 frequency) = <font color=\"red\">".$diapason."</font> Hz as set by <span class=\"green-text\">‘".$settings_file."’</span><br />";
+if($diapason <> 440) echo "• <span class=\"red-text\">Diapason</span> (A4 frequency) = <span class=\"red-text\">".$diapason."</span> Hz as set by <span class=\"green-text\">‘".$settings_file."’</span><br />";
 if($C4key <> 60) {
-	echo "• <font color=\"red\">C4 key number</font> = <font color=\"red\">".$C4key."</font> as set by <span class=\"green-text\">‘".$settings_file."’</span>";
+	echo "• <span class=\"red-text\">C4 key number</span> = <span class=\"red-text\">".$C4key."</span> as set by <span class=\"green-text\">‘".$settings_file."’</span>";
 	if($file_format == "csound") echo " ➡ this has no incidence on Csound scores";
 	echo "<br />";
 	}
 if($found_elsewhere AND $objects_file <> '') echo "• Sound-object prototype file = <span class=\"green-text\">‘".$objects_file."’</span> found in <span class=\"green-text\">‘".$alphabet_file."’</span><br />";
-if($note_convention <> '') echo "• Note convention is <font color=\"red\">‘".ucfirst(note_convention(intval($note_convention)))."’</font> as per <span class=\"green-text\">‘".$settings_file."’</span><br />";
-else echo "• Note convention is <font color=\"red\">‘English’</font> by default<br />";
+if($note_convention <> '') echo "• Note convention is <span class=\"red-text\">‘".ucfirst(note_convention(intval($note_convention)))."’</span> as per <span class=\"green-text\">‘".$settings_file."’</span><br />";
+else echo "• Note convention is <span class=\"red-text\">‘English’</span> by default<br />";
 if($produce_all_items == 1) {
 	echo "• Produce all items has been set ON by <span class=\"green-text\">‘".$settings_file."’</span>";
 	if($file_format <> "rtmidi") echo ": <i>only ".$max_items." variations will be produced</i>";
@@ -570,13 +570,13 @@ else if($show_production == 1) echo "• Show production has been set ON by <spa
 if($trace_production == 1) echo "• Trace production has been set ON by <span class=\"green-text\">‘".$settings_file."’</span><br />";
 if($settings_file <> '' AND file_exists($dir.$settings_file) AND isset($random_seed) AND $non_stop_improvize > 0) {
 	if($random_seed > 0)
-		echo "• Random seed has been set to <font color=\"red\">".$random_seed."</font> by <span class=\"green-text\">‘".$settings_file."’</span> ➡ Series will be repeated.<br />";
+		echo "• Random seed has been set to <span class=\"red-text\">".$random_seed."</span> by <span class=\"green-text\">‘".$settings_file."’</span> ➡ Series will be repeated.<br />";
 	else
 		echo "• Random seed is ‘no seed’ as per <span class=\"green-text\">‘".$settings_file."’</span> ➡ Series will vary.<br />";
 	}
 if($max_time_computing > 0) {
-	echo "• Max console computation time has been set to <font color=\"red\">".$max_time_computing."</font> seconds by <span class=\"green-text\">‘".$settings_file."’</span>";
-	if($max_time_computing < 30) echo "&nbsp;<font color=\"red\">➡</font>&nbsp;probably too small!";
+	echo "• Max console computation time has been set to <span class=\"red-text\">".$max_time_computing."</span> seconds by <span class=\"green-text\">‘".$settings_file."’</span>";
+	if($max_time_computing < 30) echo "&nbsp;<span class=\"red-text\">➡</span>&nbsp;probably too small!";
 	echo "<br />";
 	}
 if($file_format == "csound") {
@@ -591,32 +591,32 @@ if($file_format == "csound") {
 	check_function_tables($dir,$csound_file);
 	if($csound_is_responsive) {
 		if($found_orchestra_in_instruments AND file_exists($dir_csound_resources.$csound_orchestra)) {
-			echo "• <font color=\"red\">Csound scores</font> will be produced and converted to sound files (including scales) using orchestra ‘<span class=\"green-text\">".$csound_orchestra."</span>’ as specified in <span class=\"green-text\">‘".$csound_file."’</span>";
-			if($found_orchestra_in_settings AND file_exists($dir_csound_resources.$csound_default_orchestra) AND $csound_orchestra <> $csound_default_orchestra) echo "<br />&nbsp;&nbsp;<font color=\"red\">➡</font> Orchestra ‘<span class=\"green-text\">".$csound_default_orchestra."</span>’ specified in <span class=\"green-text\">‘".$settings_file."’</span> will be ignored</font>";
+			echo "• <span class=\"red-text\">Csound scores</span> will be produced and converted to sound files (including scales) using orchestra ‘<span class=\"green-text\">".$csound_orchestra."</span>’ as specified in <span class=\"green-text\">‘".$csound_file."’</span>";
+			if($found_orchestra_in_settings AND file_exists($dir_csound_resources.$csound_default_orchestra) AND $csound_orchestra <> $csound_default_orchestra) echo "<br />&nbsp;&nbsp;<span class=\"red-text\">➡</span> Orchestra ‘<span class=\"green-text\">".$csound_default_orchestra."</span>’ specified in <span class=\"green-text\">‘".$settings_file."’</span> will be ignored</font>";
 			}
 		else if($found_orchestra_in_instruments AND !$found_orchestra_in_settings AND $csound_orchestra <> '') {
-			echo "<font color=\"red\">➡</font> Csound scores will be produced, yet conversion to sound files will not be possible because orchestra ‘<span class=\"green-text\">".$csound_orchestra."</span>’ specified in ‘<span class=\"green-text\">".$csound_file."</span>’ was not found in the Csound resources folder";
+			echo "<span class=\"red-text\">➡</span> Csound scores will be produced, yet conversion to sound files will not be possible because orchestra ‘<span class=\"green-text\">".$csound_orchestra."</span>’ specified in ‘<span class=\"green-text\">".$csound_file."</span>’ was not found in the Csound resources folder";
 			$csound_orchestra = '';
 			}
 		else if($csound_default_orchestra <> '' AND file_exists($dir_csound_resources.$csound_default_orchestra)) {
 			$csound_orchestra = $csound_default_orchestra;
-			echo "• <font color=\"red\">Csound scores</font> will be produced and converted to sound files (including scales) using orchestra ‘<span class=\"green-text\">".$csound_default_orchestra."</span>’</font>";
+			echo "• <span class=\"red-text\">Csound scores</span> will be produced and converted to sound files (including scales) using orchestra ‘<span class=\"green-text\">".$csound_default_orchestra."</span>’</font>";
 			}
 		else if($csound_default_orchestra <> '') {
-			echo "<font color=\"red\">➡</font> Csound scores will be produced yet not converted to sound files by orchestra ‘<span class=\"green-text\">".$csound_default_orchestra."</span>’ as specified in ‘<span class=\"green-text\">".$settings_file."</span>’ because this file was not found in the Csound resources folder";
+			echo "<span class=\"red-text\">➡</span> Csound scores will be produced yet not converted to sound files by orchestra ‘<span class=\"green-text\">".$csound_default_orchestra."</span>’ as specified in ‘<span class=\"green-text\">".$settings_file."</span>’ because this file was not found in the Csound resources folder";
 			$csound_orchestra = '';
 			}
 		else if(file_exists($dir_csound_resources."0-default.orc")) {
 			$csound_orchestra = "0-default.orc";
-			echo "• <font color=\"red\">Csound scores</font> will be produced and converted to sound files using default orchestra file ‘<span class=\"green-text\">".$csound_orchestra."</span>’";
+			echo "• <span class=\"red-text\">Csound scores</span> will be produced and converted to sound files using default orchestra file ‘<span class=\"green-text\">".$csound_orchestra."</span>’";
 			}
 		else {
-			echo "<font color=\"red\">➡</font> Csound scores will be produced yet not converted to sound files</font> because default orchestra file ‘<span class=\"green-text\">0-default.orc</span>’ was not found in the Csound resources folder";
+			echo "<span class=\"red-text\">➡</span> Csound scores will be produced yet not converted to sound files</font> because default orchestra file ‘<span class=\"green-text\">0-default.orc</span>’ was not found in the Csound resources folder";
 			$csound_orchestra = '';
 			}
 		if(file_exists($dir_csound_resources.$csound_orchestra)) $link_produce .= "&csound_orchestra=".urlencode($csound_orchestra);
 		}
-	else echo "<font color=\"red\">➡</font> Csound scores will be produced yet not converted to sound files because Csound is not installed or not responding";
+	else echo "<span class=\"red-text\">➡</span> Csound scores will be produced yet not converted to sound files because Csound is not installed or not responding";
 	echo "<br />";
 	}
 echo "</div>";
@@ -754,16 +754,16 @@ echo "<br />";
 $error_mssg = '';
 $n1 = substr_count($expression,'{');
 $n2 = substr_count($expression,'}');
-if($n1 > $n2) $error_mssg .= "<font color=\"red\">This expression contains ".($n1-$n2)." extra ‘{'</font>";
-if($n2 > $n1) $error_mssg .= "<font color=\"red\">This expression contains ".($n2-$n1)." extra ‘}'</font>";
+if($n1 > $n2) $error_mssg .= "<span class=\"red-text\">This expression contains ".($n1-$n2)." extra ‘{'</span>";
+if($n2 > $n1) $error_mssg .= "<span class=\"red-text\">This expression contains ".($n2-$n1)." extra ‘}'</span>";
 if($error_mssg <> '') echo "<p>".$error_mssg."</p>";
 if(isset($_POST['saveexpression'])) {
 	if($expression == '') {
-		echo "<p id=\"timespan\"><font color=\"red\">➡ Cannot play empty expression…</font></p>";
+		echo "<p id=\"timespan\"><span class=\"red-text\">➡ Cannot play empty expression…</span></p>";
 		}
 	else {
 		$expression = recode_entities($expression);
-		echo "<p id=\"timespan\"><font color=\"red\">➡ Saving:</font> <span class=\"green-text\"><big>".$recoded_expression."</big></span></p>";
+		echo "<p id=\"timespan\"><span class=\"red-text\">➡ Saving:</span> <span class=\"green-text\"><big>".$recoded_expression."</big></span></p>";
 	//	$result_file = $output.SLASH.$output_file;
 		$handle = fopen($data_expression,"w");
 		fwrite($handle,$expression."\n");
@@ -788,14 +788,14 @@ if(!$hide) {
 	echo "<tr>";
 	echo "<td style=\"vertical-align:middle; white-space:nowrap;\">";
 	echo "<input class=\"edit\" type=\"submit\" onclick=\"if(checksaved()) {this.form.target='_self';return true;} else return false;\" name=\"change_convention\" formaction=\"".$url_this_page."#topchanges\" value=\"APPLY NOTE CONVENTION to this data\"> ➡</td>";
-	echo "<td style=\"vertical-align:middle; white-space:nowrap; padding-bottom:4px;\">";
+	echo "<td style=\"vertical-align:middle; white-space:nowrap; padding-bottom:6px;\">";
 	echo "<input type=\"radio\" name=\"new_convention\" value=\"0\">English<br />";
 	echo "<input type=\"radio\" name=\"new_convention\" value=\"1\">Italian/Spanish/French<br />";
 	echo "<input type=\"radio\" name=\"new_convention\" value=\"2\">Indian<br />";
 	echo "</td>";
 	echo "</tr><tr><td colspan=2>";
 	if($note_convention <> '') {
-		echo "<p>Current note convention for this grammar is:<br /><font color=\"red\"><b>".ucfirst(note_convention(intval($note_convention)))."’</font> as per <span class=\"green-text\">‘".$settings_file."</b></span><br />You will need to change it after applying a different convention.</p>";
+		echo "<p>Current note convention for this grammar is:<br /><span class=\"red-text\"><b>".ucfirst(note_convention(intval($note_convention)))."’</span> as per <span class=\"green-text\">‘".$settings_file."</b></span><br />You will need to change it after applying a different convention.</p>";
 		}
 	echo "</td></tr></table>";
 	$found_chan = substr_count($content,"_chan(");
@@ -825,7 +825,7 @@ function save($this_file,$filename,$top_header,$save_content) {
     if(file_exists($this_file)) {
         $backup_file = $this_file."_bak";
         if(!copy($this_file, $backup_file))
-            echo "<p>👉 <font color=\"red\">Failed to create backup of the file.</p>";
+            echo "<p>👉 <span class=\"red-text\">Failed to create backup of the file.</span></p>";
 		}
 	$handle = @fopen($this_file, "w");
 	if($handle) {
@@ -834,7 +834,7 @@ function save($this_file,$filename,$top_header,$save_content) {
 		fwrite($handle, $save_content);
 		fclose($handle);
 		}
-	else echo "<div style=\"padding: 1em; border-radius: 6px;\"><p>👉 <font color=\"red\"><b>WARNING</b>: Some files have been imported and cannot be modified.</font></p><p><b>Linux user?</b> Open your terminal and type: <span class=\"green-text\">sudo /opt/lampp/htdocs/bolprocessor/change_permissions.sh</span><br />(Your password will be required...)</p></div>";
+	else echo "<div style=\"padding: 1em; border-radius: 6px;\"><p>👉 <span class=\"red-text\"><b>WARNING</b>: Some files have been imported and cannot be modified.</span></p><p><b>Linux user?</b> Open your terminal and type: <span class=\"green-text\">sudo /opt/lampp/htdocs/bolprocessor/change_permissions.sh</span><br />(Your password will be required...)</p></div>";
 	return;
 	}
 ?>

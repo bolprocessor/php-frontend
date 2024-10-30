@@ -17,7 +17,7 @@ display_darklight();
 echo "<p><small>Current directory = <a class=\"linkdotted\" href=\"index.php?path=".urlencode($current_directory)."\">".$dir."</a></small></p>";
 echo link_to_help();
 	
-echo "<h2>Csound orchestra file <big>“<font color=\"MediumTurquoise\">".$filename."</font>”</big></h2>";
+echo "<h2>Csound orchestra file <big>“<span class=\"turquoise-text\">".$filename."</span>”</big></h2>";
 
 if(isset($_POST['savethisfile'])) {
 	$content = $_POST['thistext'];

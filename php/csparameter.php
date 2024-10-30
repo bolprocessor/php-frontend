@@ -27,12 +27,12 @@ if($test) echo "parameter_name = ".$parameter_name."<br />";
 
 echo "<p>Folder of this instrument: <span class=\"green-text\">".$folder_this_instrument."</span>";
 echo link_to_help();
-echo "<h2>Csound parameter <big>“<font color=\"MediumTurquoise\">".$parameter_name."</font>”</big></h2>";
+echo "<h2>Csound parameter <big>“<span class=\"turquoise-text\">".$parameter_name."</span>”</big></h2>";
 echo "<p>This parameter belongs to <big>_ins(".$instrument_index.") “<span class=\"green-text\">".$instrument_name."</span>”</big> in file “<span class=\"green-text\">".$csfilename."</span>”</p>";
 
 if(isset($_POST['saveparameter'])) {
 //	echo "parameter_name = ".$parameter_name."<br />";
-	echo "<p id=\"timespan\"><font color=\"red\">Saving this parameter…</font>";
+	echo "<p id=\"timespan\"><span class=\"red-text\">Saving this parameter…</span>";
 	$parameter_file = $folder_this_instrument.SLASH.$parameter_name.".txt";
 	$handle = fopen($parameter_file,"w");
 //	$handle = fopen("essai.txt","w");
