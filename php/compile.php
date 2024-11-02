@@ -3,6 +3,9 @@ set_time_limit(0);
 $filename = "Compilation";
 require_once("_basic_tasks.php");
 $user_os = getOS();
+
+echo "<script type='text/javascript' src='https://www.midijs.net/lib/midi.js'></script>";
+
 echo "<p style=\"text-align:center; width:90%;\">System = ".$user_os."</p>";
 if(!file_exists("../source")) {
 	echo "<p>The ‘source’ folder is missing or misplaced. Follow instructions on page bolprocessor.org/check-bp3/ and check your installation!</p>";
@@ -20,7 +23,8 @@ if(windows_system()) {
 	$command = $command_show = escapeshellcmd($command);
 	$command = preg_replace("'(?<!^) '","^ ",$command);
 	}
-echo "<link rel=\"stylesheet\" href=\"bp-light.css\" />\n";
+
+// echo "<link rel=\"stylesheet\" href=\"bp-light.css\" />\n";
 echo "<p id=\"refresh\" style=\"text-align:center; width:90%;\"><big>----------- Compiling BP3 as ‘<span class=\"green-text\">".$console."</span>’. It will take a minute or two. -----------</big></p>"; // "refresh" is the id used for flashing. This is why we read "bp-light.css"
 echo "<p style=\"text-align:center; width:90%;\">Running: <span class=\"green-text\">".$command_show."</span></p>";
 

@@ -805,7 +805,7 @@ function add_help_links($line) {
 					$l1 = substr($line,0,$pos1);
 					$l2 = substr($line,$pos1,strlen($token));
 					$l3 = substr($line,$pos2,strlen($line) - $pos2);
-					$insert = "<a class=\"blue-text\" onclick=\"window.open('".nice_url($html_help_file)."#".$i."','show_help','width=800,height=300'); return false;\" href=\"".nice_url($html_help_file)."#".$i."\">";
+					$insert = "<a class=\"darkblue-text\" onclick=\"window.open('".nice_url($html_help_file)."#".$i."','show_help','width=800,height=300'); return false;\" href=\"".nice_url($html_help_file)."#".$i."\">";
 					$line = $l1.$insert.$l2."</a>".$l3;
 					$posdone = $pos1 + strlen($insert);
 					$done[$posdone] = TRUE;
@@ -2520,7 +2520,7 @@ function display_darklight() {
 	global $bp_application_path;
 	echo "<div background-color:transparent; style=\"display:flex; align-items:center; float:right;\">";
 //	echo "<img id=\"darkModeToggle\" title=\"Bulb Png PNGs by Vecteezy\" src=\"pict/bulb.png\" style=\"width:30px; cursor: pointer;\"/>";
-	echo "<div id=\"darkModeToggle\" class=\"myswitch\"/></div>";
+	echo "<div title=\"Switch on/off the light\" id=\"darkModeToggle\" class=\"myswitch\"/></div>";
 	echo "</div>";
 	}
 
@@ -2535,17 +2535,17 @@ function display_console_state() {
 		$panicfile = str_replace(SLASH,'/',$panicfile);
 		if(isset($filename) AND $filename <> "Compilation" AND $filename <> "Produce" AND  $filename <> "Bol Processor" AND $url_this_page <> "index.php") {
 			echo "<div style=\"display:flex; justify-content:flex-end; align-items:center; background-color:transparent;\">";
-			if($file_format == "rtmidi") echo "<button type=\"button\" class=\"produce\" style=\"font-size: small;\" onclick=\"createFile('".$panicfile."');\">PANIC!</button>";
+			if($file_format == "rtmidi") echo "<button type=\"button\" class=\"produce\" style=\"font-size: small;\" title=\"Stop all sound production!\" onclick=\"createFile('".$panicfile."');\">PANIC!</button>";
 			echo "&nbsp;&nbsp;";
 		//	echo "<img title=\"Bulb Png PNGs by Vecteezy\" src=\"pict/bulb.png\" style=\"width:30px; cursor: pointer;\"/>";
-			echo "<div id=\"darkModeToggle\" class=\"myswitch\"/></div>";
+			echo "<div title=\"Switch on/off the light\" id=\"darkModeToggle\" class=\"myswitch\"/></div>";
 			echo "</div>\n";
 			}
 		else {
 			echo "<div style=\"display:flex; justify-content:flex-end; align-items:center; cursor:pointer; background-color:transparent;\">";
 		//	echo "dark&nbsp;/&nbsp;light&nbsp;&nbsp;";
 		//	echo "<img title=\"Bulb Png PNGs by Vecteezy\" src=\"pict/bulb.png\"  style=\"width:40px;\"/>";
-			echo "<div id=\"darkModeToggle\" class=\"myswitch\"/></div>";
+			echo "<div title=\"Switch on/off the light\" id=\"darkModeToggle\" class=\"myswitch\"/></div>";
 			echo "</div>\n";
 			}
 		}
@@ -2604,7 +2604,7 @@ function check_gcc() {
 	}
 
 function link_to_tonality() {
-	echo "<p class=\"thinborder\" style=\"background-color:azure; color:black; padding:4px; border-radius:6px; line-height:2;\">&nbsp;🎶&nbsp;&nbsp;Using microtonality?<br />&nbsp;👉&nbsp;&nbsp;<a class=\"blue-text\" target=\"_blank\" href=\"index.php?path=tonality_resources\">TONALITY resource folder</a></p>";
+	echo "<p class=\"thinborder\" style=\"background-color:azure; color:black; padding:4px; border-radius:6px; line-height:2;\">&nbsp;🎶&nbsp;&nbsp;Using microtonality?<br />&nbsp;👉&nbsp;&nbsp;<a class=\"darkblue-text\" target=\"_blank\" href=\"index.php?path=tonality_resources\">TONALITY resource folder</a></p>";
 	}
 
 function check_csound() {
@@ -2647,7 +2647,7 @@ function check_csound() {
 		echo "<p class=\"thinborder\" style=\"vertical-align:middle; background-color:azure; color:black; padding-top:4px; padding-left:4px; padding-right:4px; padding-bottom:12px; border-radius:6px;\"><img src=\"pict/logo_csound.png\" width=\"90px;\" style=\"vertical-align:middle;\" />".$version."is responding<br />";
 		$result = TRUE;
 		}
-	if($path <> $csound_resources) echo "&nbsp;👉&nbsp;&nbsp;<a class=\"blue-text\" target=\"_blank\" href=\"index.php?path=csound_resources\">CSOUND resource folder</a><br />";
+	if($path <> $csound_resources) echo "&nbsp;👉&nbsp;&nbsp;<a class=\"darkblue-text\" target=\"_blank\" href=\"index.php?path=csound_resources\">CSOUND resource folder</a><br />";
 	echo "</p>";
 	return $result;
 	}
@@ -2783,10 +2783,10 @@ function show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,
 			if($csound_file == '') {
 				$content = add_instruction($new_csound_file,$content);
 				$csound_file = $new_csound_file;
-				echo "👉&nbsp;&nbsp;Found mention of <class=\"blue-text\">‘".$csound_file."’</span> in sound-object file  <br /><class=\"blue-text\">‘".$objects_file."’</span>. This indication has been added to the project.<br /><span class=\"red-text\">You need to</span> <input class=\"save big\" type=\"submit\" onclick=\"clearsave();\" name=\"savethisfile\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".$filename."’\">";
+				echo "👉&nbsp;&nbsp;Found mention of <class=\"darkblue-text\">‘".$csound_file."’</span> in sound-object file  <br /><class=\"darkblue-text\">‘".$objects_file."’</span>. This indication has been added to the project.<br /><span class=\"red-text\">You need to</span> <input class=\"save big\" type=\"submit\" onclick=\"clearsave();\" name=\"savethisfile\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".$filename."’\">";
 				}
 			else {
-				echo "👉&nbsp;&nbsp;<span class=\"red-text\">WARNING:</span> File <class=\"blue-text\">‘".$objects_file."’</span> indicates that the Csound instruments file <class=\"blue-text\">‘".$new_csound_file."’</span> should be associated.<br />This project selects <class=\"blue-text\">‘".$csound_file."’</span> instead, <span class=\"red-text\">which we will use.</span><br />➡ Your can edit <class=\"blue-text\">‘".$objects_file."’</span> to solve the inconsistency.";
+				echo "👉&nbsp;&nbsp;<span class=\"red-text\">WARNING:</span> File <class=\"darkblue-text\">‘".$objects_file."’</span> indicates that the Csound instruments file <class=\"darkblue-text\">‘".$new_csound_file."’</span> should be associated.<br />This project selects <class=\"darkblue-text\">‘".$csound_file."’</span> instead, <span class=\"red-text\">which we will use.</span><br />➡ Your can edit <class=\"darkblue-text\">‘".$objects_file."’</span> to solve the inconsistency.";
 				}
 			echo "</div>";
 			}
@@ -2798,10 +2798,10 @@ function show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,
 			if($tonality_file == '') {
 				$content = add_instruction($tonality_file_in_csound,$content);
 				$tonality_file = $tonality_file_in_csound;
-				echo "👉&nbsp;&nbsp;File <class=\"blue-text\">‘".$csound_file."’</span> indicates that tonality file <class=\"blue-text\">‘".$tonality_file_in_csound."’</span><br />should be associated. This indication has been added to the project.<br /><span class=\"red-text\">You need to</span> <input class=\"save big\" type=\"submit\" onclick=\"clearsave();\" name=\"savethisfile\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".$filename."’\">";
+				echo "👉&nbsp;&nbsp;File <class=\"darkblue-text\">‘".$csound_file."’</span> indicates that tonality file <class=\"darkblue-text\">‘".$tonality_file_in_csound."’</span><br />should be associated. This indication has been added to the project.<br /><span class=\"red-text\">You need to</span> <input class=\"save big\" type=\"submit\" onclick=\"clearsave();\" name=\"savethisfile\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".$filename."’\">";
 				}
 			else {
-				echo "👉&nbsp;&nbsp;<span class=\"red-text\">WARNING:</span> File <class=\"blue-text\">‘".$csound_file."’</span> indicates that tonality file<br /><class=\"blue-text\">‘".$tonality_file_in_csound."’</span> should be associated.<br />This project selects <class=\"blue-text\">‘".$tonality_file."’</span> instead, <span class=\"red-text\">which we will use.</span><br />Your can edit <class=\"blue-text\">‘".$csound_file."’</span> to solve the inconsistency.";
+				echo "👉&nbsp;&nbsp;<span class=\"red-text\">WARNING:</span> File <class=\"darkblue-text\">‘".$csound_file."’</span> indicates that tonality file<br /><class=\"darkblue-text\">‘".$tonality_file_in_csound."’</span> should be associated.<br />This project selects <class=\"darkblue-text\">‘".$tonality_file."’</span> instead, <span class=\"red-text\">which we will use.</span><br />Your can edit <class=\"darkblue-text\">‘".$csound_file."’</span> to solve the inconsistency.";
 				}
 			echo "</div>";
 			}

@@ -1684,7 +1684,7 @@ if(isset($_POST['change_convention']) AND isset($_POST['new_convention'])) {
 	}
 	
 if($done AND !$warned_ratios) {
-	echo "<hr><table class=\"thinborder\">";
+	echo "<table class=\"thinborder\">";
 	echo "<tr>";
 	echo "<td style=\"vertical-align:middle; white-space:nowrap;\"><input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"change_convention\" formaction=\"".$link_edit."?scalefilename=".urlencode($filename)."#topconvention\" value=\"CHANGE NOTE CONVENTION\"> ➡</td>";
 	echo "<td style=\"vertical-align:middle; white-space:nowrap; padding-bottom:6px;\">";
@@ -1696,7 +1696,7 @@ if($done AND !$warned_ratios) {
 	echo "</tr>";
 	echo "</table>";
 	
-	echo "<hr><table>";
+	echo "<table>";
 	echo "<tr>";
 	echo "<td><input class=\"produce\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"interpolate\" value=\"INTERPOLATE\"></td><td>➡ Replace missing ratio values with equal intervals (local temperament)</td>";
 	echo "</tr>";

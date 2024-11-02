@@ -5,11 +5,12 @@ if(isset($_GET['title'])) $this_title = urldecode($_GET['title']);
 else $this_title = '';
 
 echo "<head>";
-echo "<link rel=\"stylesheet\" href=\"bp-light.css\" />\n";
+echo "<script type='text/javascript' src='https://www.midijs.net/lib/midi.js'></script>";
+echo "<script src=\"darkmode.js\"></script>";
+echo "<link rel=\"stylesheet\" href=\"bp.css\" />\n";
 echo "</head>";
 echo "<body>\n";
 
-echo "<script type='text/javascript' src='https://www.midijs.net/lib/midi.js'></script>";
 
 set_time_limit(0);
 
@@ -567,7 +568,7 @@ foreach($dircontent as $thisfile) {
 	if($HeightMax < $window_height) $window_height = $HeightMax + 60;
 	$window_width = 1200;
 	if($WidthMax < $window_width) $window_width = $WidthMax +  20;
-	echo "<div style=\"border:2px solid gray; background-color:azure; color:black; width:8em;  padding:2px; text-align:center; border-radius: 6px;\"><a class=\"blue-text\" onclick=\"window.open('".nice_url($link)."','".$title1."','width=".$window_width.",height=".$window_height.",left=".$left."'); return false;\" href=\"".$link."\">Image ".$number."</a><br />".$image_time;
+	echo "<div style=\"border:2px solid gray; background-color:azure; color:black; width:8em;  padding:2px; text-align:center; border-radius: 6px;\"><a class=\"darkblue-text\" onclick=\"window.open('".nice_url($link)."','".$title1."','width=".$window_width.",height=".$window_height.",left=".$left."'); return false;\" href=\"".$link."\">Image ".$number."</a><br />".$image_time;
 	if(check_image($link) <> '') {
 		$bad_image = TRUE;
 		echo " <span class=\"red-text\"><b>*</b></span>";

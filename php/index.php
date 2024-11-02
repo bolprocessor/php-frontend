@@ -493,8 +493,8 @@ if(!is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"t
 		if(($n1 = display_directory(TRUE,$dir,"grammar")) > 0 OR $show_grammar) {
 			echo "<h4>Grammar project(s)</h4>";
 			if($show_grammar) {
-				echo "<p style=\"background-color:snow; color:black; padding:6px; border-radius: 0.5em;\">Last visited: <a class=\"blue-text\" target=\"_blank\" href=\"".nice_url($last_grammar_page)."\">".$last_grammar_name."</a>";
-				if(isset($last_grammar_directory) AND $folder <> $last_grammar_directory) echo "<br />in workspace</font> <a class=\"blue-text\" href=\"index.php?path=".$last_grammar_directory."\">".$last_grammar_directory."</a></p>";
+				echo "<p style=\"background-color:snow; color:black; padding:6px; border-radius: 0.5em;\">Last visited: <a class=\"darkblue-text\" target=\"_blank\" href=\"".nice_url($last_grammar_page)."\">".$last_grammar_name."</a>";
+				if(isset($last_grammar_directory) AND $folder <> $last_grammar_directory) echo "<br />in workspace</font> <a class=\"darkblue-text\" href=\"index.php?path=".$last_grammar_directory."\">".$last_grammar_directory."</a></p>";
 				}
 			}
 		echo "</th>";
@@ -502,8 +502,8 @@ if(!is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"t
 		if(($n2 = display_directory(TRUE,$dir,"data")) > 0 OR $show_data) {
 			echo "<h4>Data project(s)</h4>";
 			if($show_data) {
-				echo "<p style=\"background-color:snow; color:black; padding:6px; border-radius: 0.5em;\">Last visited: <a class=\"blue-text\" target=\"_blank\" href=\"".nice_url($last_data_page)."\">".$last_data_name."</a>";
-				if(isset($last_data_directory) AND $folder <> $last_data_directory) echo "<br />in workspace</font> <a class=\"blue-text\" href=\"index.php?path=".$last_data_directory."\">".$last_data_directory."</a></p>";
+				echo "<p style=\"background-color:snow; color:black; padding:6px; border-radius: 0.5em;\">Last visited: <a class=\"darkblue-text\" target=\"_blank\" href=\"".nice_url($last_data_page)."\">".$last_data_name."</a>";
+				if(isset($last_data_directory) AND $folder <> $last_data_directory) echo "<br />in workspace</font> <a class=\"darkblue-text\" href=\"index.php?path=".$last_data_directory."\">".$last_data_directory."</a></p>";
 				}
 			}
 		echo "</th>";

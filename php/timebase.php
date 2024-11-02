@@ -17,8 +17,10 @@ require_once("_header.php");
 display_darklight();
 
 echo "<script type='text/javascript' src='https://www.midijs.net/lib/midi.js'></script>";
-echo "<p>";
-echo "&nbsp;&nbsp;Workspace = <a href=\"index.php?path=".urlencode($current_directory)."\">".$current_directory."</a></p>";
+
+$url = "index.php?path=".urlencode($current_directory);
+echo "<p>Workspace = <input title=\"List this workspace\" class=\"edit\" name=\"workspace\" type=\"submit\" onclick=\"window.open('".$url."','_self');\" value=\"".$current_directory."\">";
+
 echo link_to_help();
 
 $temp_folder = str_replace(' ','_',$filename)."_".my_session_id()."_temp";

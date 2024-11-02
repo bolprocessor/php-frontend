@@ -16,8 +16,9 @@ save_settings("last_directory",$current_directory);
 require_once("_header.php");
 display_darklight();
 
-echo "<p>";
-echo "&nbsp;&nbsp;Workspace = <a href=\"index.php?path=".urlencode($current_directory)."\">".$current_directory."</a></p>";
+$url = "index.php?path=".urlencode($current_directory);
+echo "<p>Workspace = <input title=\"List this workspace\" class=\"edit\" name=\"workspace\" type=\"submit\" onclick=\"window.open('".$url."','_self');\" value=\"".$current_directory."\">";
+
 echo link_to_help();
 
 echo "<h2>Keyboard file “".$filename."”</h2>";

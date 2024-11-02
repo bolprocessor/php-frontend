@@ -493,6 +493,7 @@ body.light-mode #showhide {
 body.light-mode .myswitch {
 	background-image: url("pict/night.png");
 	background-repeat: no-repeat;
+	background-color: transparent;
 	cursor: pointer;
 	width: 30px;
 	height: 23px;

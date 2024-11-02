@@ -57,7 +57,7 @@ $temp_midi_ressources = $temp_dir."trace_".my_session_id()."_".$filename."_";
 
 echo "<p>";
 $url = "index.php?path=".urlencode($current_directory);
-echo "&nbsp;Workspace = <input class=\"edit\" name=\"workspace\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$url."','_self');\" value=\"".$current_directory."\">";
+echo "&nbsp;Workspace = <input title=\"List this workspace\" class=\"edit\" name=\"workspace\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$url."','_self');\" value=\"".$current_directory."\">";
 
 $hide = $need_to_save = FALSE;
 $no_save_midiresources = FALSE;

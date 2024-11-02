@@ -757,7 +757,7 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 				fwrite($handle_csv,"\n");
 				if($batch_item_name[$i_batch] <> '') $line_title = $batch_item_name[$i_batch];
 				else $line_title = "#".$batch_item[$i_batch];
-				fwrite($handle_html,"<td class=\"middle\" claa=\"blue-text\" style=\"white-space:nowrap;\">".$line_title."&nbsp;</td>");
+				fwrite($handle_html,"<td class=\"middle\" style=\"white-space:nowrap;\">".$line_title."&nbsp;</td>");
 				fwrite($handle_csv,str_replace("-da.","da.",$line_title));
 				for($j_batch = 0; $j_batch < count($column_name); $j_batch++) {
 					if(isset($rank[$batch_item[$i_batch]][$column_name[$j_batch]])) {
@@ -771,7 +771,7 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 						fwrite($handle_csv,",");
 						}
 					}
-				fwrite($handle_html,"<td  class=\"blue-text\" style=\"white-space:nowrap;\">".$remark[$i_batch]."</td>\n");
+				fwrite($handle_html,"<td style=\"white-space:nowrap;\">".$remark[$i_batch]."</td>\n");
 				fwrite($handle_csv,",".$remark[$i_batch]);
 				fwrite($handle_html,"</tr>\n");
 				fwrite($handle_csv,"\n");
@@ -791,7 +791,7 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 			fwrite($handle_csv,",");
 			fwrite($handle_html,"</tr>\n");
 			fwrite($handle_csv,"\n");
-			fwrite($handle_html,"<td class=\"blue-text\" style=\"white-space:nowrap;\">Average score</td>");
+			fwrite($handle_html,"<td class=\"darkblue-text\" style=\"white-space:nowrap;\">Average score</td>");
 			fwrite($handle_csv,"Average score");
 			$imax = count($batch_item);
 			for($j_batch = 0; $j_batch < count($column_name); $j_batch++) {
@@ -838,7 +838,7 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 			for($i_batch = 0; $i_batch < count($batch_item); $i_batch++) {
 				if($batch_item_name[$i_batch] <> '') $line_title = $batch_item_name[$i_batch];
 				else $line_title = "#".$batch_item[$i_batch];
-				$abstract_table .= "<tr><td class=\"blue-text\" style=\"white-space:nowrap;\">".$line_title."</td>";
+				$abstract_table .= "<tr><td style=\"white-space:nowrap;\">".$line_title."</td>";
 				$best_choice = '';
 				for($j_batch = 0; $j_batch < count($column_name); $j_batch++) {
 					if(isset($rank[$batch_item[$i_batch]][$column_name[$j_batch]])) {
@@ -1571,9 +1571,9 @@ function show_relations_on_image($i_item,$matching_list,$mode,$direction,$scalen
 		if($float OR $mode == "harmonic") echo " float:".$side.";";
 		echo "\">SHOW IMAGE (".$mode.")<br />";
 		if($scalename <> '') echo "‘<span class=\"red-text\">".$scalename."</span>’<br />";
-		echo "<a class=\"blue-text\" onclick=\"window.open('".nice_url($link_full)."','".$image_name_full."','width=".$image_width.",height=".$image_height.",left=".$left_position."'); return false;\" href=\"".nice_url($link_full)."\">full</a>";
-		echo "&nbsp;-&nbsp;<a class=\"blue-text\" onclick=\"window.open('".nice_url($link_only)."','".$image_name_only."','width=".$image_width.",height=".$image_height.",left=".$left_position."'); return false;\" href=\"".nice_url($link_only)."\">only scale</a>";
-		echo "&nbsp;-&nbsp;<a class=\"blue-text\" onclick=\"window.open('".nice_url($link_reduced)."','".$image_name_reduced."','width=".$image_width.",height=".$image_height.",left=".$left_position."'); return false;\" href=\"".nice_url($link_reduced)."\">only links</a>";
+		echo "<a class=\"darkblue-text\" onclick=\"window.open('".nice_url($link_full)."','".$image_name_full."','width=".$image_width.",height=".$image_height.",left=".$left_position."'); return false;\" href=\"".nice_url($link_full)."\">full</a>";
+		echo "&nbsp;-&nbsp;<a class=\"darkblue-text\" onclick=\"window.open('".nice_url($link_only)."','".$image_name_only."','width=".$image_width.",height=".$image_height.",left=".$left_position."'); return false;\" href=\"".nice_url($link_only)."\">only scale</a>";
+		echo "&nbsp;-&nbsp;<a class=\"darkblue-text\" onclick=\"window.open('".nice_url($link_reduced)."','".$image_name_reduced."','width=".$image_width.",height=".$image_height.",left=".$left_position."'); return false;\" href=\"".nice_url($link_reduced)."\">only links</a>";
 		$said = FALSE;
 		// $done = array();
 		$h = 0;

@@ -22,8 +22,8 @@ save_settings("last_directory",$current_directory);
 require_once("_header.php");
 display_darklight();
 
-echo "<p>";
-echo "&nbsp;&nbsp;Workspace = <a href=\"index.php?path=".urlencode($current_directory)."\">".$current_directory;
+$url = "index.php?path=".urlencode($current_directory);
+echo "<p>Workspace = <input title=\"List this workspace\" class=\"edit\" name=\"workspace\" type=\"submit\" onclick=\"window.open('".$url."','_self');\" value=\"".$current_directory."\">";
 echo "</a>   <span id='message2' style=\"margin-bottom:1em;\"></span>";
 echo "</p>";
 echo link_to_help();
@@ -673,7 +673,7 @@ for($j = 0; $j < $number_instruments; $j++) {
 			$parameter_file = $folder_this_instrument."/".$filename_this_parameter.".txt";
 			$handle_parameter = fopen($parameter_file,"w");
 			}
-		if($verbose) echo "<br /><span class=\"blue-text\">Instrument paramlist name = “".$Instrument_paramlist_name."”<br />";
+		if($verbose) echo "<br /><span class=\"darkblue-text\">Instrument paramlist name = “".$Instrument_paramlist_name."”<br />";
 		if(!$empty_parameter) fwrite($handle_parameter,$Instrument_paramlist_name."\n");
 		// Line 687
 		$Instrument_paramlist_comment = preg_replace("/<\/?html>/u",'',$table[++$i]);

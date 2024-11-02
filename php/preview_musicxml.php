@@ -152,7 +152,7 @@ while(!feof($file)) {
 	if($found) continue;
 	$couleur = '';
 	if(is_integer(strpos($line,"<step>")) OR is_integer(strpos($line,"<octave>")) OR is_integer(strpos($line,"<alter>")) OR is_integer(strpos($line,"<rest/>"))) $couleur = "red-text";
-	if(is_integer(strpos($line,"<duration>"))OR is_integer(strpos($line,"<grace/>"))) $couleur = "blue-text";
+	if(is_integer(strpos($line,"<duration>"))OR is_integer(strpos($line,"<grace/>"))) $couleur = "darkblue-text";
 	if($couleur <> '') $line_print = "<span class=\"".$couleur."\">".$line_print."</span>";
 //	$couleur = '';
 	if($no_filter AND $this_measure == '') echo $line_print."<br />";
