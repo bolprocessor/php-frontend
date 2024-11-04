@@ -7,10 +7,9 @@ else $this_title = '';
 echo "<head>";
 echo "<script type='text/javascript' src='https://www.midijs.net/lib/midi.js'></script>";
 echo "<script src=\"darkmode.js\"></script>";
-echo "<link rel=\"stylesheet\" href=\"bp.css\" />\n";
+echo "<link rel=\"stylesheet\" href=\"bp-light.css\" />\n";
 echo "</head>";
 echo "<body>\n";
-
 
 set_time_limit(0);
 
@@ -363,7 +362,8 @@ if($instruction <> "help") {
 			}
 		}
     $stopfile = str_replace(SLASH,'/',$stopfile);
-	echo "<p id=\"wait\" style=\"text-align:center; background-color:yellow; color:black;\"><br /><big><b><span class=\"blinking\">… Bol Processor console is working …</span></b></big><br />(Don't close this window!)<br /><br /><button type=\"button\" class=\"produce\" onclick=\"createFile('".$stopfile."');\">Click to STOP</button><br /><br /></p>\n";
+	echo "<p id=\"wait\" style=\"text-align:center; background-color:yellow; color:black;\"><br /><big><b><span class=\"blinking\">… Bol Processor console is working …</span></b></big><br />(Don't close this window!)<br /><br />";
+	echo "<button type=\"button\" class=\"produce\" onclick=\"createFile('".$stopfile."');\">Click to STOP</button><br /><br /></p>\n";
 	}
 echo str_repeat(' ', 1024);  // send extra spaces to fill browser buffer, useful for Windows
 ob_flush();
@@ -404,9 +404,11 @@ session_abort();
 $o = send_to_console($command);
 // if($pid > 0) echo "<small>The pid was <span class=\"red-text\">".$pid."</span></small><br />";
 echo "<hr style=\"border: 1px solid black;\">";
-// sleep(1);
 session_reset();
-// sleep(1);
+
+echo "<link rel=\"stylesheet\" href=\"bp.css?v=".time()."\" />\n";
+// The "v=" forces this stylesheet to replace the previous one
+
 $n_messages = count($o);
 $no_error = FALSE;
 for($i = 0; $i < $n_messages; $i++) {
@@ -527,7 +529,6 @@ foreach($dircontent as $thisfile) {
 		}
 	if(!$found) continue;
 //	echo "<p>FOUND: ".$thisfile."</p>";
-//	echo "<td style=\"background-color:white; border-radius: 6px; border: 4px solid Gold; vertical-align:middle; text-align: center; padding:8px; margin:0px;\>";
 	echo "<td style=\"border-radius: 6px; border: 4px solid Gold; background-color:azure; color:black;vertical-align:middle; text-align: center; padding:8px; margin:0px;\>";
 	$number_and_time = str_replace(".html",'',$table[$i + 1]);
 	$table_number = explode('-',$number_and_time);

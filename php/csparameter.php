@@ -58,6 +58,9 @@ if(isset($_POST['saveparameter'])) {
 	fclose($handle);
 	$argmax_file = $folder_this_instrument.SLASH."argmax.php";
 	set_argmax_argument($argmax_file,$parameter_name,$argmax);
+	$file_changed = $temp_dir.$temp_folder.SLASH."_changed";
+	$handle = fopen($file_changed,"w");
+	if($handle) fclose($handle);
 	}
 
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";

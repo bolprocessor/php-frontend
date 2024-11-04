@@ -232,7 +232,7 @@ if(isset($_POST['saveinstrument'])) {
 		}
 	fclose($handle);
 	set_argmax_argument($argmax_file,$instrument_name,$argmax);
-	$file_changed = $temp_dir.$temp_folder.SLASH."_changed"; // 2024-08-10
+	$file_changed = $temp_dir.$temp_folder.SLASH."_changed";
 	$handle = fopen($file_changed,"w");
 	if($handle) fclose($handle);
 	}

@@ -1,10 +1,9 @@
 /* This CSS is used when the light mode is forced, e.g. produce.php */
 
 body {
-	margin-left:12px;
-	margin-right:12px;
-	margin-top:12px;
-	font-size: 16px;
+	margin-left: 2em;
+	margin-right: 2em;
+	margin-top: 2em;
 	background-color:GhostWhite;
 	color: black;
 	}
@@ -12,19 +11,16 @@ body {
 div {
     background-color: white;
     color: black;
-    transition: background-color 0.3s, color 0.3s;
 	}
 
 table {
     background-color: white;
     color: black;
-    transition: background-color 0.3s, color 0.3s;
 	}
 
 td {
     background-color: white;
     color: black;
-    transition: background-color 0.3s, color 0.3s;
 	}
 
 .green-text {
@@ -54,12 +50,11 @@ textarea {
 
 .tonalnotes {
     color: darkmagenta;
-}
+	}
 
 tr {
     background-color: white;
     color: black;
-    transition: background-color 0.3s, color 0.3s;
 	}
 
 a:link {
@@ -79,8 +74,8 @@ a:hover img#darkModeToggle + * {
 	}
 
 table {
-	padding: 4px;
-	border-spacing: 4px;
+	padding: 0.4em;
+	border-spacing: 0.4em;
 	text-align: left;
 	}
 
@@ -95,7 +90,7 @@ th {
 	padding-bottom: 0.5em;
 	padding-left: 1em;
 	padding-right: 1em;
-	border-radius: 6px;
+	border-radius: 0.5em;
 	background-color:gold;
 	color: black;
 	vertical-align: top;
@@ -103,10 +98,10 @@ th {
 	}
 
 .no-border-spacing {
-	border-collapse: collapse; /* Ensures there's no space between cells */		
+	border-collapse: collapse;
 	}
 .no-border-spacing, .no-border-spacing th, .no-border-spacing td {
-	border: none; /* Removes borders */
+	border: none;
 	}
 
 .gauche {
@@ -128,7 +123,7 @@ th {
 
 p {
 	text-align:left;
-	padding:0px;
+	padding: 0px;
 	}
 
 .shadow {
@@ -141,10 +136,10 @@ p {
 td {
 	text-align:left;
 	vertical-align:top;
-	padding-left:6px;
-	padding-right:6px;
-	padding-top:4px;
-	padding-bottom:0px;
+	padding-left: 0.5em;
+	padding-right: 0.5em;
+	padding-top: 0.5em;
+	padding-bottom: 0em;
 	background-color:white;
 	}
 
@@ -160,24 +155,24 @@ input[type=text] {
 
 .thinborder {
 	border:1px solid grey;
-	border-radius: 12px;
+	border-radius: 1em;
 	}
 
 .save {
 	background-color: yellow;
-	border-radius: 6px;
+	border-radius: 0.5em;
 	}
 
 .edit {
 	color:DarkBlue;
 	background-color:Azure; 
-	border-radius: 6px;
+	border-radius: 0.5em;
 	}
 
 .produce {
 	color:DarkBlue;
 	background-color:Aquamarine;
-	border-radius: 6px;
+	border-radius: 0.5em;
 	}
 
 .produce:hover {
@@ -204,11 +199,10 @@ input[type=text] {
 	padding:1em;
 	width:500px;
 	box-shadow: 2px 2px 2px 2px gold;
-	border-radius: 6px;
+	border-radius: 0.5em;
 	}
 
 input[type=submit] {
-	border-radius: 6px;
 	margin: 2px;
 	}
 input[type=submit]:hover {

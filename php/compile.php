@@ -1,19 +1,23 @@
 <?php
-set_time_limit(0);
 $filename = "Compilation";
 require_once("_basic_tasks.php");
+echo "<head>";
+echo "<script type='text/javascript' src='https://www.midijs.net/lib/midi.js'></script>";
+echo "<script src=\"darkmode.js\"></script>";
+echo "</head>";
+echo "<body>";
+
+set_time_limit(0);
 $user_os = getOS();
 
-echo "<script type='text/javascript' src='https://www.midijs.net/lib/midi.js'></script>";
-
 echo "<p style=\"text-align:center; width:90%;\">System = ".$user_os."</p>";
-if(!file_exists("../source")) {
+if(!file_exists($bp_application_path."source")) {
 	echo "<p>The ‘source’ folder is missing or misplaced. Follow instructions on page bolprocessor.org/check-bp3/ and check your installation!</p>";
 	echo "<p><a href=\"index.php\">Return to Bol Processor home page</a></p>";
 	die(); 
 	}
 echo "<p style=\"text-align:center; width:90%;\">Wait before closing this page…</p>";
-if(file_exists("../".$console)) @unlink("../".$console);
+if(file_exists($bp_application_path.$console)) @unlink($bp_application_path.$console);
 $this_file = "bp_compile_result.txt";
 if(file_exists($this_file)) @unlink($this_file);
 $command_show = $command = "make clean && make 2>bp_compile_result.txt";
@@ -23,22 +27,21 @@ if(windows_system()) {
 	$command = $command_show = escapeshellcmd($command);
 	$command = preg_replace("'(?<!^) '","^ ",$command);
 	}
-
-// echo "<link rel=\"stylesheet\" href=\"bp-light.css\" />\n";
-echo "<p id=\"refresh\" style=\"text-align:center; width:90%;\"><big>----------- Compiling BP3 as ‘<span class=\"green-text\">".$console."</span>’. It will take a minute or two. -----------</big></p>"; // "refresh" is the id used for flashing. This is why we read "bp-light.css"
+echo "<p id=\"refresh\" style=\"text-align:center; background-color:yellow; width:90%;\"><big>----------- Compiling BP3 as ‘<span class=\"green-text\">".$console."</span>’. It will take a minute or two. -----------</big></p>";
 echo "<p style=\"text-align:center; width:90%;\">Running: <span class=\"green-text\">".$command_show."</span></p>";
 
-require_once("_header.php");
-// display_darklight();
-
+echo "<link rel=\"stylesheet\" href=\"bp-light.css?v=".time()."\" />\n";
+// The "v=" forces this stylesheet to replace the previous one
 echo str_repeat(' ',1024);  // send extra spaces to fill browser buffer
 ob_flush();
 flush();
-sleep(1);
 chdir('..');
 $last_line = exec($command,$output,$return_var);
 chdir("php");
 if(file_exists($this_file)) chmod($this_file,0777);
+
+echo "<link rel=\"stylesheet\" href=\"bp.css?v=".time()."\" />\n";
+// The "v=" forces this stylesheet to replace the previous one
 echo "<div style=\"padding: 1em; border-radius: 1em;\">";
 if($return_var <> 0) {
 	echo "<p style=\"text-align:center;  width:90%;\">Compilation failed… Check the “source/BP3” folder!</p>";
@@ -67,4 +70,5 @@ if($return_var <> 0) {
 	}
 echo "<p style=\"text-align:center; width:90%;\"><big>👉&nbsp;&nbsp;<a href=\"\" onclick=\"window.close();\">Now click to close this page</a></big></p>";
 echo "</div>";
+echo "</body>";
 ?>

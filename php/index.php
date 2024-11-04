@@ -9,7 +9,7 @@ display_console_state();
 
 echo "<p>";
 echo "<table class=\"thinborder\"><tr>";
-echo "<td style=\"padding:1em; white-space:nowrap; text-align:center; vertical-align:middle;\">";
+echo "<td style=\"padding:1em; white-space:nowrap; text-align:center; vertical-align:middle; border-radius:1em;\">";
 
 $test = FALSE;
 if($path <> '') {
@@ -32,7 +32,7 @@ if($path <> '') {
 	}
 else {
 	echo "<h2>Welcome to Bol Processor ‘BP3’</h2>";
-	echo "<span class=\"night\"><a style=\"border-bottom:none;\" target=\"blank\" title=\"depositphotos\" href=\"https://depositphotos.com/photo/halloween-pumpkin-1189743.html\"><img src=\"pict/pumpkin.png\" width=\"100px;\"/></a></span>";
+	echo "<span class=\"night\"><img title=\"Asad Ali Khan (binkar)\" src=\"pict/Asad-Ali-binkar.png\" width=\"120px;\"/></span>";
 	echo "<span class=\"day\"><a style=\"border-bottom:none;\" target=\"blank\" title=\"Sunbeam Vectors by Vecteezy\" href=\"https://www.vecteezy.com/free-vector/sunbeam\"><img src=\"pict/sun.png\" width=\"100px;\"/></a></span>";
 	echo "</td>";
 	echo "<td style=\"padding:1em; border-radius:1em; vertical-align:middle;\">";
@@ -464,11 +464,11 @@ if($path <> '') {
 		echo "&nbsp;<input class=\"save\" style=\"margin-top:1em;\" title=\"Move folders or files\" type=\"submit\" name=\"move_files\" value=\"MOVE\">";
 		}
 	if(!$rename_files AND !$delete_files AND !$move_files AND $path == $trash_folder) {
-		echo "<br /><br />🗑&nbsp;<input style=\"background-color:red; color:white;\" title=\"Empty trash\" type=\"submit\" name=\"empty_trash\" value=\"EMPTY THIS TRASH\"> 👉 can't be reversed!<br /><br />";
+		echo "<br /><br />🗑&nbsp;<input style=\"background-color:red; color:white;\" title=\"Empty trash\" type=\"submit\" name=\"empty_trash\" value=\"EMPTY THIS TRASH\"> 👉 can't be reversed!";
 		}
-	if(!$show_dependencies AND !$delete_files AND !$move_files AND $path <> $trash_folder AND !is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"tonality_resources"))) echo "<br /><input class=\"edit\" title=\"Show dependencies of files (links to other files)\" type=\"submit\" name=\"show_dependencies\" value=\"SHOW DEPENDENCIES\"> (links between files)<br /><br />";
-	else if($show_dependencies) echo "<br /><br /><input class=\"cancel\" type=\"submit\" value=\"HIDE DEPENDENCIES\"><br /><br />";
-//	echo "</div>";
+	if(!$show_dependencies AND !$delete_files AND !$move_files AND $path <> $trash_folder AND !is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"tonality_resources"))) echo "<br /><input class=\"edit\" title=\"Show dependencies of files (links to other files)\" type=\"submit\" name=\"show_dependencies\" value=\"SHOW DEPENDENCIES\"> (links between files)";
+	else if($show_dependencies) echo "<br /><br /><input class=\"cancel\" type=\"submit\" value=\"HIDE DEPENDENCIES\">";
+	echo "<br /><br />";
 	}
 
 display_directory(FALSE,$dir,"directory");

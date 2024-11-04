@@ -705,7 +705,7 @@ function compile_help($text_help_file,$html_help_file) {
 		$content = str_replace("  ","&nbsp;&nbsp;",$content); // Remove tabulations
 		$table = explode("###",$content);
 		$handle = fopen($html_help_file,"w");
-		$file_header .= "<p style=\"color:MediumTurquoise;\">".$table[0]."</p>";
+		$file_header .= "<p style=\"color:black;\">".$table[0]."</p>";
 		$im = count($table);
 		for($i = 1; $i < $im; $i++) {
 			$table2 = explode("<br />",$table[$i]);
@@ -730,7 +730,7 @@ function compile_help($text_help_file,$html_help_file) {
 				$table_of_contents .= "</tr><tr>";
 				}
 			if(isset($title[$i]) AND $title[$i] <> '') {
-				$table_of_contents .= "<td><small><a href=\"#".$i."\">".$title[$i]."</a></small></td>";
+				$table_of_contents .= "<td><small><a style=\"color:darkblue;\" href=\"#".$i."\">".$title[$i]."</a></small></td>";
 				$col++;
 				$token = preg_replace("/\s?\[.*$/u",'',$title[$i]);
 				$token = preg_replace("/\s?\(.*$/u",'',$token);
@@ -748,7 +748,7 @@ function compile_help($text_help_file,$html_help_file) {
 		fwrite($handle,$table_header."\n");
 		for($i = 1; $i < $im; $i++) {
 			if(!isset($title[$i])) continue;
-			fwrite($handle,"<h4 style=\"color:MediumTurquoise;\" id=\"".$i."\"><a href=\"#toc\">⇪</a> ".$title[$i]."</h4>\n");
+			fwrite($handle,"<h4 style=\"color:darkblue;\" id=\"".$i."\"><a href=\"#toc\">⇪</a> ".$title[$i]."</h4>\n");
 			fwrite($handle,$item[$i]."\n");
 			}
 		fwrite($handle,"</body>");
@@ -760,7 +760,7 @@ function compile_help($text_help_file,$html_help_file) {
 function link_to_help() {
 	global $html_help_file;
 	$console_link = "produce.php?instruction=help";
-	$link = "<p>👉 Display <a class=\"linkdotted\" href=\"".nice_url($console_link)."\" onclick=\"window.open('".$console_link."','help','width=800,height=800,left=200'); return false;\">console's instructions</a> or the <a class=\"linkdotted\" onclick=\"window.open('".nice_url($html_help_file)."','Help','width=800,height=500'); return false;\" href=\"".nice_url($html_help_file)."\">complete help file</a></p>";
+	$link = "<p>👉 Display <a class=\"linkdotted\" href=\"".nice_url($console_link)."\" onclick=\"window.open('".$console_link."','help','width=800,height=800,left=200'); return false;\">console's instructions</a> or the <a class=\"linkdotted\" onclick=\"window.open('".nice_url($html_help_file)."','Help','width=800,height=500'); return false;\" href=\"".nice_url($html_help_file)."\">complete BP3 help file</a></p>";
 	return $link;
 	}
 
@@ -2518,7 +2518,7 @@ function delete_settings_entry($entry) {
 
 function display_darklight() {
 	global $bp_application_path;
-	echo "<div background-color:transparent; style=\"display:flex; align-items:center; float:right;\">";
+	echo "<div style=\"background-color:transparent; display:flex; align-items:center; float:right;\">";
 //	echo "<img id=\"darkModeToggle\" title=\"Bulb Png PNGs by Vecteezy\" src=\"pict/bulb.png\" style=\"width:30px; cursor: pointer;\"/>";
 	echo "<div title=\"Switch on/off the light\" id=\"darkModeToggle\" class=\"myswitch\"/></div>";
 	echo "</div>";
@@ -2537,14 +2537,11 @@ function display_console_state() {
 			echo "<div style=\"display:flex; justify-content:flex-end; align-items:center; background-color:transparent;\">";
 			if($file_format == "rtmidi") echo "<button type=\"button\" class=\"produce\" style=\"font-size: small;\" title=\"Stop all sound production!\" onclick=\"createFile('".$panicfile."');\">PANIC!</button>";
 			echo "&nbsp;&nbsp;";
-		//	echo "<img title=\"Bulb Png PNGs by Vecteezy\" src=\"pict/bulb.png\" style=\"width:30px; cursor: pointer;\"/>";
 			echo "<div title=\"Switch on/off the light\" id=\"darkModeToggle\" class=\"myswitch\"/></div>";
 			echo "</div>\n";
 			}
 		else {
 			echo "<div style=\"display:flex; justify-content:flex-end; align-items:center; cursor:pointer; background-color:transparent;\">";
-		//	echo "dark&nbsp;/&nbsp;light&nbsp;&nbsp;";
-		//	echo "<img title=\"Bulb Png PNGs by Vecteezy\" src=\"pict/bulb.png\"  style=\"width:40px;\"/>";
 			echo "<div title=\"Switch on/off the light\" id=\"darkModeToggle\" class=\"myswitch\"/></div>";
 			echo "</div>\n";
 			}
