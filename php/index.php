@@ -2,6 +2,10 @@
 require_once("_basic_tasks.php");
 if($path <> '') $filename = $path;
 else $filename = "Bol Processor";
+if(isset($_POST['change_skin']) AND $_POST['change_skin'] >= 0) {
+	$skin = $_POST['change_skin'];
+	save_settings("skin",$skin);
+	}
 require_once("_header.php");
 $url_this_page = $this_page = "index.php";
 
@@ -47,12 +51,29 @@ else {
 $folder = str_replace($bp_application_path,'',$dir);
 
 echo link_to_help();
+if($path == '') {
+	echo "<div class=\"thinborder\" style=\"float:right; padding:1em; text-align:center;\">";
+	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+	echo "<p>Select a skin:</p>";
+	echo "<p><input type=\"radio\" name=\"change_skin\" value=\"0\"";
+	if($skin == 0) echo " checked";
+	echo ">None<br />";
+	echo "<input type=\"radio\" name=\"change_skin\" value=\"1\"";
+	if($skin == 1) echo " checked";
+	echo ">Blue<br />";
+	echo "<input type=\"radio\" name=\"change_skin\" value=\"2\"";
+	if($skin == 2) echo " checked";
+	echo ">Red<br />";
+	echo "<input type=\"radio\" name=\"change_skin\" value=\"3\"";
+	if($skin == 3) echo " checked";
+	echo ">Green</p>";
+	echo "<p><input type=\"submit\" class=\"edit\" formaction=\"".$url_this_page."#top_analysis\" value=\"CHANGE\"></p>";
+	echo "</form>";
+	echo "</div>";
+	}
 
 if($test) echo "dir = ".$dir."<br />";
 if($test) echo "url_this_page = ".$url_this_page."<br />";
-
-// $name = "-ho.trial.mohanam ";
-// echo "name = ".$name.", newname = ".new_name($name)."<br />";
 
 $new_file = '';
 if(isset($_POST['create_folder'])) {
@@ -286,8 +307,8 @@ if($path == $trash_folder AND isset($_POST['empty_trash'])) {
 
 if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension <> "temp" AND !$delete_files AND !$rename_files AND !$move_files) {
 	echo "<div style=\"float:right; padding:6px; background-color:transparent;\">";
-	check_csound();
-	if(!is_integer(strpos($path,$tonality_resources))) link_to_tonality();
+	if($path <> '') check_csound();
+	if(!is_integer(strpos($path,$tonality_resources)) AND $path <> '') link_to_tonality();
 	if($path == $tonality_resources) {
 		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		echo "<p style=\"text-align:left;\">";
@@ -301,7 +322,8 @@ if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension 
 		echo "</form>";
 		}
 	if($path <> $csound_resources AND $path <> $tonality_resources) {
-		echo "<br /><button class=\"produce big\" onclick=\"togglecreate(); return false;\">CREATE FILES AND FOLDERS</button>";
+		if($path <> '') echo "<br /><button class=\"produce big\" onclick=\"togglecreate(); return false;\">CREATE FILES AND FOLDERS</button>";
+		else echo "<br /><button class=\"produce big\" onclick=\"togglecreate(); return false;\">CREATE FOLDERS</button>";
 		echo "<div id=\"create\" style=\"padding:6px; background-color:transparent;\">";
 		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		echo "<p style=\"text-align:left;\">";

@@ -408,6 +408,7 @@ session_reset();
 
 echo "<link rel=\"stylesheet\" href=\"bp.css?v=".time()."\" />\n";
 // The "v=" forces this stylesheet to replace the previous one
+echo "<link rel=\"stylesheet\" href=\"skin".$skin.".css\" />\n";
 
 $n_messages = count($o);
 $no_error = FALSE;

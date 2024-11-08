@@ -126,7 +126,7 @@ h4 {
     color: blue;
 	font-size: 120%;
     }
-
+/*
 body.light-mode textarea {
 	overflow: visible;
 	overflow-x: hidden;
@@ -139,12 +139,12 @@ body.light-mode textarea {
 textarea {
 	overflow: visible;
 	overflow-x: hidden;
-	background-color: black;
+	background-color: rgb(1, 1, 88);
 	color: GhostWhite;
 	line-height: 1.6;
 	padding: 0.5em;
 	white-space: pre-wrap;
-	}
+	} */
 
 body.light-mode .tonalnotes {
     color: darkmagenta;
@@ -306,11 +306,12 @@ input[type=text] {
 	}
 
 body.light-mode .thinborder {
-	border:1px solid grey;
+	border:1px solid black;
 	border-radius: 1em;
 	}
 .thinborder {
-	border:1px solid grey;
+	border: 1px solid grey;
+	background-color: rgb(1, 1, 88);
 	border-radius: 1em;
 	}
 

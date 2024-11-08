@@ -42,6 +42,7 @@ if(file_exists($this_file)) chmod($this_file,0777);
 
 echo "<link rel=\"stylesheet\" href=\"bp.css?v=".time()."\" />\n";
 // The "v=" forces this stylesheet to replace the previous one
+echo "<link rel=\"stylesheet\" href=\"skin".$skin.".css\" />\n";
 echo "<div style=\"padding: 1em; border-radius: 1em;\">";
 if($return_var <> 0) {
 	echo "<p style=\"text-align:center;  width:90%;\">Compilation failed… Check the “source/BP3” folder!</p>";

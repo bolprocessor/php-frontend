@@ -30,6 +30,8 @@ if (!file_exists($file_path)) {
     else chmod($file_path,$permissions);
     }
 
+$skin = 1; // Blue by default
+
 require_once("_settings.php");
 $bp_application_path = "..".SLASH;
 $url_this_page = "_basic_tasks.php";
