@@ -37,7 +37,8 @@ if($path <> '') {
 else {
 	echo "<h2>Welcome to Bol Processor ‘BP3’</h2>";
 	echo "<span class=\"night\"><img title=\"Asad Ali Khan (binkar)\" src=\"pict/Asad-Ali-binkar.png\" width=\"120px;\"/></span>";
-	echo "<span class=\"day\"><a style=\"border-bottom:none;\" target=\"blank\" title=\"Sunbeam Vectors by Vecteezy\" href=\"https://www.vecteezy.com/free-vector/sunbeam\"><img src=\"pict/sun.png\" width=\"100px;\"/></a></span>";
+	// echo "<span class=\"day\"><a style=\"border-bottom:none;\" target=\"blank\" title=\"Sunbeam Vectors by Vecteezy\" href=\"https://www.vecteezy.com/free-vector/sunbeam\"><img src=\"pict/sun.png\" width=\"100px;\"/></a></span>";
+	echo "<span class=\"day\"><img src=\"pict/playing-piano.png\" width=\"120px;\"/></span>";
 	echo "</td>";
 	echo "<td style=\"padding:1em; border-radius:1em; vertical-align:middle;\">";
 	echo "<p class=\"big\" style=\"text-align:center;\">This interface is running<br />the multi-platform console<br /><br /><a target=\"_blank\" class=\"linkdotted\" href=\"https://bp3.tech\">https://bp3.tech</a></p>";
@@ -52,7 +53,7 @@ $folder = str_replace($bp_application_path,'',$dir);
 
 echo link_to_help();
 if($path == '') {
-	echo "<div class=\"thinborder\" style=\"float:right; padding:1em; text-align:center;\">";
+	echo "<div class=\"thinborder\" style=\"float:right; padding:1em; margin-left:3em; text-align:center;\">";
 	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 	echo "<p>Select a skin:</p>";
 	echo "<p><input type=\"radio\" name=\"change_skin\" value=\"0\"";
@@ -66,7 +67,10 @@ if($path == '') {
 	echo ">Red<br />";
 	echo "<input type=\"radio\" name=\"change_skin\" value=\"3\"";
 	if($skin == 3) echo " checked";
-	echo ">Green</p>";
+	echo ">Green<br />";
+	echo "<input type=\"radio\" name=\"change_skin\" value=\"4\"";
+	if($skin == 4) echo " checked";
+	echo ">Gold</p>";
 	echo "<p><input type=\"submit\" class=\"edit\" formaction=\"".$url_this_page."#top_analysis\" value=\"CHANGE\"></p>";
 	echo "</form>";
 	echo "</div>";

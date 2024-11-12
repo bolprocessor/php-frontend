@@ -1,0 +1,31 @@
+body.light-mode textarea {
+	overflow: visible;
+	overflow-x: hidden;
+	background-color: cornsilk;
+	color: black;
+	line-height: 1.5;
+	padding: 0.5em;
+	white-space: pre-wrap;
+	}
+textarea {
+	overflow: visible;
+	overflow-x: hidden;
+	background-color: cornsilk;
+	color: black;
+	line-height: 1.6;
+	padding: 0.5em;
+	white-space: pre-wrap;
+	}
+
+body.light-mode .thinborder {
+	border:1px solid black;
+	background-color: gold;
+	border-radius: 1em;
+	}
+.thinborder {
+	border: 1px solid grey;
+	background-color: gold;
+	color: black;
+/*	background-color: rgb(223, 190, 2); */
+	border-radius: 1em;
+	}
