@@ -20,10 +20,8 @@ textarea {
 body.light-mode .thinborder {
 	border:1px solid black;
 	background-color: azure;
-	border-radius: 1em;
 	}
 .thinborder {
 	border: 1px solid grey;
 	background-color: rgb(1, 1, 88);
-	border-radius: 1em;
 	}

@@ -8,15 +8,19 @@ document.addEventListener("DOMContentLoaded", function () {
         bodyElement.classList.add("light-mode");
     }
 
-    // Toggle between dark and light mode when button is clicked
-    toggleButton.addEventListener("click", function () {
-        bodyElement.classList.toggle("light-mode");
+    // Check if toggleButton exists before adding an event listener
+    if (toggleButton) {
+        toggleButton.addEventListener("click", function () {
+            bodyElement.classList.toggle("light-mode");
 
-        // Save preference in localStorage
-        if (bodyElement.classList.contains("light-mode")) {
-            localStorage.setItem("lightMode", "enabled");
-        } else {
-            localStorage.removeItem("lightMode");
-        }
-    });
+            // Save preference in localStorage
+            if (bodyElement.classList.contains("light-mode")) {
+                localStorage.setItem("lightMode", "enabled");
+            } else {
+                localStorage.removeItem("lightMode");
+            }
+        });
+    } else {
+        console.warn("darkModeToggle button not found in the DOM.");
+    }
 });

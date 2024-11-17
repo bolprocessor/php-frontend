@@ -17,12 +17,10 @@ textarea {
 	white-space: pre-wrap;
 	}
 
-body.light-mode .thinborder {
+/* body.light-mode .thinborder {
 	border:1px solid black;
-	border-radius: 1em;
 	}
 .thinborder {
 	border: 1px solid grey;
 	background-color: black;
-	border-radius: 1em;
-	}
+	} */

@@ -2,7 +2,7 @@
 $filename = "Compilation";
 require_once("_basic_tasks.php");
 echo "<head>";
-echo "<script type='text/javascript' src='https://www.midijs.net/lib/midi.js'></script>";
+echo "<script src=\"https://cdn.jsdelivr.net/combine/npm/tone@14.7.58,npm/@magenta/music@1.23.1/es6/core.js,npm/focus-visible@5,npm/html-midi-player@1.4.0\"></script>";
 echo "<script src=\"darkmode.js\"></script>";
 echo "</head>";
 echo "<body>";
@@ -35,11 +35,11 @@ echo "<link rel=\"stylesheet\" href=\"bp-light.css?v=".time()."\" />\n";
 echo str_repeat(' ',1024);  // send extra spaces to fill browser buffer
 ob_flush();
 flush();
+$old_dir = getcwd();
 chdir('..');
 $last_line = exec($command,$output,$return_var);
-chdir("php");
+chdir($old_dir);
 if(file_exists($this_file)) chmod($this_file,0777);
-
 echo "<link rel=\"stylesheet\" href=\"bp.css?v=".time()."\" />\n";
 // The "v=" forces this stylesheet to replace the previous one
 echo "<link rel=\"stylesheet\" href=\"skin".$skin.".css\" />\n";

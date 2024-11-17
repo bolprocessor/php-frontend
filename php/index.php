@@ -9,14 +9,11 @@ if(isset($_POST['change_skin']) AND $_POST['change_skin'] >= 0) {
 require_once("_header.php");
 $url_this_page = $this_page = "index.php";
 
-display_console_state();
-
-echo "<p>";
-echo "<table class=\"thinborder\"><tr>";
-echo "<td style=\"padding:1em; white-space:nowrap; text-align:center; vertical-align:middle; border-radius:1em;\">";
 
 $test = FALSE;
 if($path <> '') {
+	display_darklight();
+	select_a_skin($url_this_page,$path,$skin);
 	echo "<h2>Bol Processor ‘BP3’</h2>";
 	$url_this_page .= "?path=".urlencode($path);
 	$dir = $bp_application_path.$path;
@@ -32,17 +29,19 @@ if($path <> '') {
 	if($upper_dir == '') $upper_link = $this_page;
 	else $upper_link = $this_page."?path=".urlencode($upper_dir);
 	if($test) echo "link = ".$upper_link."<br />";
-	echo "</td></tr></table>";
 	}
 else {
-	echo "<h2>Welcome to Bol Processor ‘BP3’</h2>";
+	display_console_state();
+	echo "<table class=\"thinborder\"><tr>";
+	echo "<td style=\"padding:1em; white-space:nowrap; text-align:center; vertical-align:middle; border-radius:1em;\">";
+	echo "<h2><i>Welcome to</i></h2><h2>Bol Processor ‘BP3’</h2>";
 	echo "<span class=\"night\"><img title=\"Asad Ali Khan (binkar)\" src=\"pict/Asad-Ali-binkar.png\" width=\"120px;\"/></span>";
 	// echo "<span class=\"day\"><a style=\"border-bottom:none;\" target=\"blank\" title=\"Sunbeam Vectors by Vecteezy\" href=\"https://www.vecteezy.com/free-vector/sunbeam\"><img src=\"pict/sun.png\" width=\"100px;\"/></a></span>";
 	echo "<span class=\"day\"><img src=\"pict/playing-piano.png\" width=\"120px;\"/></span>";
 	echo "</td>";
-	echo "<td style=\"padding:1em; border-radius:1em; vertical-align:middle;\">";
-	echo "<p class=\"big\" style=\"text-align:center;\">This interface is running<br />the multi-platform console<br /><br /><a target=\"_blank\" class=\"linkdotted\" href=\"https://bp3.tech\">https://bp3.tech</a></p>";
-	echo "<p>👉&nbsp;Read the <a class=\"linkdotted\" class=\"linkdotted\" href=\"https://raw.githubusercontent.com/bolprocessor/bolprocessor/graphics-for-BP3/BP3-changes.txt\" target=\"_blank\">history of changes</a></p>";
+	echo "<td class=\"big\" style=\"padding:1em; border-radius:1em; vertical-align:middle;\">";
+	echo "<p style=\"text-align:center;\">This interface is running<br />the multi-platform console.</p><p style=\"text-align:center;\"><a target=\"_blank\" class=\"linkdotted\" href=\"https://bp3.tech\">https://bp3.tech</a></p>";
+	echo "<p style=\"text-align:center;\">👉&nbsp;Read the <a class=\"linkdotted\" class=\"linkdotted\" href=\"https://raw.githubusercontent.com/bolprocessor/bolprocessor/graphics-for-BP3/BP3-changes.txt\" target=\"_blank\">history of changes</a></p>";
 	echo "</td>";
 	echo "</tr>";
 	echo "</table>";
@@ -53,28 +52,9 @@ $folder = str_replace($bp_application_path,'',$dir);
 
 echo link_to_help();
 if($path == '') {
-	echo "<div class=\"thinborder\" style=\"float:right; padding:1em; margin-left:3em; text-align:center;\">";
-	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-	echo "<p>Select a skin:</p>";
-	echo "<p><input type=\"radio\" name=\"change_skin\" value=\"0\"";
-	if($skin == 0) echo " checked";
-	echo ">None<br />";
-	echo "<input type=\"radio\" name=\"change_skin\" value=\"1\"";
-	if($skin == 1) echo " checked";
-	echo ">Blue<br />";
-	echo "<input type=\"radio\" name=\"change_skin\" value=\"2\"";
-	if($skin == 2) echo " checked";
-	echo ">Red<br />";
-	echo "<input type=\"radio\" name=\"change_skin\" value=\"3\"";
-	if($skin == 3) echo " checked";
-	echo ">Green<br />";
-	echo "<input type=\"radio\" name=\"change_skin\" value=\"4\"";
-	if($skin == 4) echo " checked";
-	echo ">Gold</p>";
-	echo "<p><input type=\"submit\" class=\"edit\" formaction=\"".$url_this_page."#top_analysis\" value=\"CHANGE\"></p>";
-	echo "</form>";
-	echo "</div>";
-	}
+	select_a_skin($url_this_page,$path,$skin);
+ 	}
+
 
 if($test) echo "dir = ".$dir."<br />";
 if($test) echo "url_this_page = ".$url_this_page."<br />";
@@ -326,8 +306,8 @@ if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension 
 		echo "</form>";
 		}
 	if($path <> $csound_resources AND $path <> $tonality_resources) {
-		if($path <> '') echo "<br /><button class=\"produce big\" onclick=\"togglecreate(); return false;\">CREATE FILES AND FOLDERS</button>";
-		else echo "<br /><button class=\"produce big\" onclick=\"togglecreate(); return false;\">CREATE FOLDERS</button>";
+		if($path <> '') echo "<br /><button class=\"save big\" onclick=\"togglecreate(); return false;\">CREATE FILES AND FOLDERS</button>";
+		else echo "<br /><button class=\"save big\" onclick=\"togglecreate(); return false;\">CREATE FOLDERS</button>";
 		echo "<div id=\"create\" style=\"padding:6px; background-color:transparent;\">";
 		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		echo "<p style=\"text-align:left;\">";
@@ -498,7 +478,7 @@ if($path <> '') {
 	}
 
 display_directory(FALSE,$dir,"directory");
-if($path <> $trash_folder) echo "▶︎&nbsp;<a target=\"_blank\" href=\"index.php?path=".$trash_folder."\">TRASH  🗑</a><br />";
+if($path <> $trash_folder) echo "▶︎&nbsp;🗑&nbsp;<a target=\"_blank\" href=\"index.php?path=".$trash_folder."\">TRASH</a><br />";
 echo "<br />";
 
 echo "<table class=\"thinborder\">";
@@ -624,7 +604,7 @@ function display_directory($test,$dir,$filter) {
 		if(is_integer($pos=strpos($thisfile,"License")) AND $pos == 0) continue;
 		if(is_integer($pos=stripos($thisfile,"ReadMe")) AND $pos == 0) continue;
 		if(is_integer($pos=stripos($thisfile,"linux-scripts")) AND $pos == 0) continue; 
-		if($thisfile == "DerivedData" OR $thisfile == "resources" OR $thisfile == "scripts" OR $thisfile == "source" OR $thisfile == "temp_bolprocessor" OR $thisfile == "Makefile" OR $thisfile == "my_output" OR $thisfile == "php" OR $thisfile == "-se.startup" OR $thisfile == "LICENSE" OR $thisfile == "HowToBuild.txt" OR $thisfile == "BP3-To-Do.txt" OR $thisfile == "Bugs.txt" OR $thisfile == "ChangeLog" OR $thisfile == "Credits.txt" OR $thisfile == "HowToMakeARelease.txt" OR $thisfile == "y2k" OR $thisfile == "bp_compile_result.txt" OR $thisfile == "test.php") continue;
+		if($thisfile == "DerivedData" OR $thisfile == "resources" OR $thisfile == "scripts" OR $thisfile == "source" OR $thisfile == "temp_bolprocessor" OR $thisfile == "Makefile" OR $thisfile == "my_output" OR $thisfile == "php" OR $thisfile == "www" OR $thisfile == "-se.startup" OR $thisfile == "LICENSE" OR $thisfile == "HowToBuild.txt" OR $thisfile == "BP3-To-Do.txt" OR $thisfile == "Bugs.txt" OR $thisfile == "ChangeLog" OR $thisfile == "Credits.txt" OR $thisfile == "HowToMakeARelease.txt" OR $thisfile == "y2k" OR $thisfile == "bp_compile_result.txt" OR $thisfile == "test.php") continue;
 		if($test) {
 			if(($new_name = new_name($thisfile)) <> $thisfile) rename($dir.SLASH.$thisfile,$dir.SLASH.$new_name);
 			}

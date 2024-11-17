@@ -2520,7 +2520,7 @@ function delete_settings_entry($entry) {
 
 function display_darklight() {
 	global $bp_application_path;
-	echo "<div style=\"background-color:transparent; display:flex; align-items:center; float:right;\">";
+	echo "<div style=\"background-color:transparent; display:flex; align-items:center; margin-left:1em;float:right;\">";
 //	echo "<img id=\"darkModeToggle\" title=\"Bulb Png PNGs by Vecteezy\" src=\"pict/bulb.png\" style=\"width:30px; cursor: pointer;\"/>";
 	echo "<div title=\"Switch on/off the light\" id=\"darkModeToggle\" class=\"myswitch\"/></div>";
 	echo "</div>";
@@ -2652,11 +2652,11 @@ function check_csound() {
 	}
 
 function is_connected() {
-	$connected = @fsockopen("www.midijs.net",80);
+	$connected = @fsockopen("cdn.jsdelivr.net",80);
 	if($connected) {
-	fclose($connected);
-	return TRUE;
-	}
+		fclose($connected);
+		return TRUE;
+		}
 	else return FALSE;
 	}
 
@@ -3441,9 +3441,10 @@ function hidden_directory($name) {
 		case "pictures":
 		case "portmidi":
 		case "php":
+		case "www":
 		case "source":
 		case "midi_resources":
-//		case "tonality_resources":
+		case "tonality_resources":
 		case "temp_bolprocessor":
 			return TRUE;
 		}
@@ -4339,16 +4340,11 @@ function make_links_clickable($text) {
 
 function midifile_player($midi_file_link, $filename, $width) {
 	global $bp_application_path;
-	$text = "<p class=\"shadow\" style=\"width:".$width."em;\">";
-	$text .= "<img src=\"".$bp_application_path."php/pict/loudspeaker.png\" width=\"70px;\" style=\"vertical-align:middle;\" />";
-	$text .= "<a href=\"#nowhere\" onClick=\"MIDIjs.play('".$midi_file_link."');\">";
-	$text .= "<span class=\"darkblue-text\">";
-	if($filename == '')
-		$text .= "Play MIDI file</a>";
-	else
-		$text .= "Play “</span><span style=\"color:seagreen;\">".$filename."”</span><span class=\"darkblue-text\"> MIDI file</a>";
-	$text .= "</span> (<a href=\"#nowhere\" class=\"darkblue-text\" onClick=\"MIDIjs.stop();\">Stop playing</a>)";
-	$text .= "&nbsp;or <a class=\"darkblue-text\" href=\"".nice_url($midi_file_link)."\" download>download it</a></p>";
+	if($filename == '') $filename = "MIDIfile";
+	$text = "<div style=\"float:right; background-color:transparent;\">👉&nbsp;<a href=\"".nice_url($midi_file_link)."\" download>Download&nbsp;MIDI&nbsp;file</a><p style=\"text-align:right;\"><small>(<a target=\"_blank\" href=\"https://github.com/cifkao/html-midi-player/\">Visit html-midi-player</a>)</small></p></div>";
+	$text .= "<p class=\"shadow\" style=\"width:".$width."em;\">";
+	$text .= "<midi-player src=\"".nice_url($midi_file_link)."\" sound-font visualizer=\"#myPianoRollVisualizer\"></midi-player>";
+	$text .= "</p>";
 	return $text;
 	}
 
@@ -4687,5 +4683,30 @@ function use_convention($this_file) {
 	// This '@' is required to avoid confusion between "re" in Indian and Italian/Spanish/French conventions
 	$_POST['thistext'] = $newcontent;
 	return $new_convention;
+	}
+
+function select_a_skin($url_this_page,$path,$skin) {
+	echo "<div class=\"thinborder\" style=\"float:right; padding:0.5em; margin-left:3em; text-align:center;\">";
+	echo "<form method=\"post\" action=\"".$url_this_page."?path=".$path."\" enctype=\"multipart/form-data\">";
+	echo "<p>Select a skin:</p>";
+	echo "<p><input type=\"radio\" name=\"change_skin\" value=\"0\"";
+	if($skin == 0) echo " checked";
+	echo ">None<br />";
+	echo "<input type=\"radio\" name=\"change_skin\" value=\"1\"";
+	if($skin == 1) echo " checked";
+	echo ">Blue<br />";
+	echo "<input type=\"radio\" name=\"change_skin\" value=\"2\"";
+	if($skin == 2) echo " checked";
+	echo ">Red<br />";
+	echo "<input type=\"radio\" name=\"change_skin\" value=\"3\"";
+	if($skin == 3) echo " checked";
+	echo ">Green<br />";
+	echo "<input type=\"radio\" name=\"change_skin\" value=\"4\"";
+	if($skin == 4) echo " checked";
+	echo ">Gold</p>";
+	echo "<p><input type=\"submit\" class=\"edit\"  value=\"CHANGE\"></p>";
+	echo "</form>";
+	echo "</div>";
+	return;
 	}
 ?>

@@ -5,7 +5,7 @@ if(isset($_GET['title'])) $this_title = urldecode($_GET['title']);
 else $this_title = '';
 
 echo "<head>";
-echo "<script type='text/javascript' src='https://www.midijs.net/lib/midi.js'></script>";
+echo "<script src=\"https://cdn.jsdelivr.net/combine/npm/tone@14.7.58,npm/@magenta/music@1.23.1/es6/core.js,npm/focus-visible@5,npm/html-midi-player@1.4.0\"></script>";
 echo "<script src=\"darkmode.js\"></script>";
 echo "<link rel=\"stylesheet\" href=\"bp-light.css\" />\n";
 echo "</head>";
@@ -20,7 +20,7 @@ if(!file_exists($bp_application_path.$console)) {
 	if(file_exists($source))
 		echo "<p style=\"text-align:center; width:90%;\">The source files of BP3 have been found. You can recompile “bp”, then try again.<br /><br /><big>👉&nbsp;&nbsp;<a href=\"".$application_path."php/compile.php?return=produce.php\">Run the compiler</a></big></p>";
 	else
-		echo "<p style=\"text-align:center; width:90%;\">Source files (the “source” folder) have not been found.<br />Visit <a target=\"_blank\" class=\"linkdotted\"href=\"https://bolprocessor.org/check-bp3/#install\">https://bolprocessor.org/check-bp3/</a> and follow instructions!</p>";
+		echo "<p style=\"text-align:center; width:90%;\">Source files (the “source” folder) have not been found.<br />Visit <a target=\"_blank\" class=\"linkdotted\"  href=\"https://bolprocessor.org/check-bp3/#install\">https://bolprocessor.org/check-bp3/</a> and follow instructions!</p>";
 	die();
 	}
 $bad_image = FALSE;
@@ -500,11 +500,11 @@ if($file_format == "midi") {
 	if(file_exists($midi_file_link) AND filesize($midi_file_link) > 59) {
 //		echo "midi_file_link = ".$midi_file_link."<br />";
 		if(!is_connected() AND $file_format == "midi") {
-			echo "<p style=\"color:red;\">➡ Cannot find the MIDI file player “midijs.net”… Are you connected to Internet?</p>";
+			echo "<p style=\"color:red;\">➡ Cannot find the MIDI file player “cdn.jsdelivr.net”… Are you connected to the Internet?</p>";
 			echo "<p><a href=\"".nice_url($midi_file_link)."\" download>Download the MIDI file</a></p>";
 			}
 		else {
-			$midi_file_link_url = str_replace(SLASH,'/',$midi_file_link);
+			$midi_file_link_url = nice_url($midi_file_link);
 			echo midifile_player($midi_file_link_url,'',25);
 			}
 		}
@@ -570,7 +570,7 @@ foreach($dircontent as $thisfile) {
 	if($HeightMax < $window_height) $window_height = $HeightMax + 60;
 	$window_width = 1200;
 	if($WidthMax < $window_width) $window_width = $WidthMax +  20;
-	echo "<div style=\"border:2px solid gray; background-color:azure; color:black; width:8em;  padding:2px; text-align:center; border-radius: 6px;\"><a class=\"darkblue-text\" onclick=\"window.open('".nice_url($link)."','".$title1."','width=".$window_width.",height=".$window_height.",left=".$left."'); return false;\" href=\"".$link."\">Image ".$number."</a><br />".$image_time;
+	echo "<div style=\"border:2px solid gray; background-color:azure; color:black; width:8em;  padding:2px; text-align:center; border-radius: 6px;\"><a class=\"darkblue-text\" onclick=\"window.open('".nice_url($link)."','".$title1."','width=".$window_width.",height=".$window_height.",left=".$left."'); return false;\" href=\"".nice_url($link)."\">Image ".$number."</a><br />".$image_time;
 	if(check_image($link) <> '') {
 		$bad_image = TRUE;
 		echo " <span class=\"red-text\"><b>*</b></span>";
@@ -658,6 +658,7 @@ if($no_error AND $file_format == "csound") {
 					$audio_tag .= "Your browser does not support the audio tag.";
 					$audio_tag .= "</audio>";
 					echo $audio_tag;
+			//		echo $sound_file_link."<br />";
 					echo "<p><a target=\"_blank\" href=\"".nice_url($sound_file_link)."\" download>Download this sound file</a> (<span class=\"green-text\">".nice_url($sound_file_link)."</span>)</p>";
 					echo "<p><span class=\"red-text\">➡</span> If you hear garbage sound or silence it may be due to a mismatch between Csound score and orchestra<br />&nbsp;&nbsp;&nbsp;or some overflow in Csound…</p>";
 					}
@@ -683,7 +684,9 @@ else {
 		$header .= "<meta content=\"text/html; charset=utf-8\" http-equiv=\"Content-Type\" />\n";
 		$header .= "<link rel=\"stylesheet\" href=\"".$bp_application_path."php/bp-light.css\" />\n";
 		$header .= "<title>".$result_file."</title>\n";
-		$header .= "<script type='text/javascript' src='https://www.midijs.net/lib/midi.js'></script>\n";
+		https://cdn.jsdelivr.net
+	//	$header .= "<script type='text/javascript' src='https://www.midijs.net/lib/midi.js'></script>\n";
+		$header .= "<script src=\"https://cdn.jsdelivr.net/combine/npm/tone@14.7.58,npm/@magenta/music@1.23.1/es6/core.js,npm/focus-visible@5,npm/html-midi-player@1.4.0\"></script>";
 		$header .= "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js\"></script>\n";
 		$header .= "</head><body>\n";
 		fwrite($handle,$header."\n");
@@ -721,7 +724,7 @@ if($n_messages > 0) {
 		if(is_integer($pos=strpos($mssg,"=&gt; "))) {
 			$warnings++;
 			$mssg = str_replace("=&gt; ",'',$mssg);
-			$mssg = "<span class=\"red-text\">".$mssg."</span>";
+			$mssg = "<font color=\"red\">".$mssg."</font>";
 			}
    //     if(windows_system())
             $mssg = preg_replace("/(C:.+)$/u","<font color=#007BFF><small>$1</small></font>",$mssg);
@@ -735,7 +738,7 @@ if($n_messages > 0) {
 	if($handle) {
 		$window_name = $grammar_name."_".rand(0,99)."_result";
 		if($bad_image) echo "<p>(<span class=\"red-text\"><b>*</b></span>) Syntax error in image: negative argument</p>";
-		echo "<p style=\"font-size:larger;\"><input class=\"save big\" onclick=\"window.open('".nice_url($result_file)."','".$window_name."','width=800,height=600,left=100'); return false;\" type=\"submit\" value=\"Show all ".$n_messages." lines\">";
+		echo "<p style=\"font-size:larger;\"><input class=\"save big\" onclick=\"window.open('".nice_url($result_file)."','".$window_name."','width=600,height=600,left=100'); return false;\" type=\"submit\" value=\"Show all ".$n_messages." lines\">";
 		if($warnings == 1) echo " <span class=\"blinking\">=> ".$warnings." warning</span>";
 		if($warnings > 1) echo " <span class=\"blinking\">=> ".$warnings." warnings</span>";
 		}

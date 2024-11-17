@@ -20,12 +20,9 @@ textarea {
 body.light-mode .thinborder {
 	border:1px solid black;
 	background-color: gold;
-	border-radius: 1em;
 	}
 .thinborder {
 	border: 1px solid grey;
 	background-color: gold;
 	color: black;
-/*	background-color: rgb(223, 190, 2); */
-	border-radius: 1em;
 	}

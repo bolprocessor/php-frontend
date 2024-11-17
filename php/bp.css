@@ -1,14 +1,14 @@
 body.light-mode {
-	margin-left:1em;
-	margin-right:1em;
-	margin-top:1em;
+	margin-left: 1rem;
+	margin-right: 1rem;
+	margin-top: 1rem;
 	background-color:GhostWhite;
 	color: black;
 	}
 body {
-	margin-left:1em;
-	margin-right:1em;
-	margin-top:1em;
+	margin-left: 1rem;
+	margin-right: 1rem;
+	margin-top: 1rem;
 	background-color: black;
 	color: GhostWhite;
 	}
@@ -36,20 +36,20 @@ body.light-mode td {
     color: black;
 	text-align:left;
 	vertical-align:top;
-	padding-left:6px;
-	padding-right:6px;
-	padding-top:4px;
-	padding-bottom:0px;
+	padding-left: 0.5em;
+	padding-right: 0.5em;
+	padding-top: 0.4em;
+	padding-bottom: 0px;
 	}
 td {
     background-color: black; 
     color: GhostWhite;
 	text-align:left;
 	vertical-align:top;
-	padding-left:6px;
-	padding-right:6px;
-	padding-top:4px;
-	padding-bottom:0px;
+	padding-left: 0.5em;
+	padding-right: 0.5em;
+	padding-top: 0.4em;
+	padding-bottom: 0px;
 	}
 
 body.light-mode .green-text {
@@ -126,25 +126,6 @@ h4 {
     color: blue;
 	font-size: 120%;
     }
-/*
-body.light-mode textarea {
-	overflow: visible;
-	overflow-x: hidden;
-	background-color: white;
-	color: black;
-	line-height: 1.5;
-	padding: 0.5em;
-	white-space: pre-wrap;
-	}
-textarea {
-	overflow: visible;
-	overflow-x: hidden;
-	background-color: rgb(1, 1, 88);
-	color: GhostWhite;
-	line-height: 1.6;
-	padding: 0.5em;
-	white-space: pre-wrap;
-	} */
 
 body.light-mode .tonalnotes {
     color: darkmagenta;
@@ -214,8 +195,8 @@ body.light-mode .middle {
 	}
 
 table {
-	padding: 0.4em;
-	border-spacing: 0.4em;
+	padding: 0.2em;
+	border-spacing: 0.2em;
 	text-align: left;
 	}
 
@@ -307,12 +288,13 @@ input[type=text] {
 
 body.light-mode .thinborder {
 	border:1px solid black;
-	border-radius: 1em;
+	border-radius: 0.5em;
 	}
 .thinborder {
 	border: 1px solid grey;
-	background-color: rgb(1, 1, 88);
-	border-radius: 1em;
+/*	background-color: rgb(1, 1, 88); */
+	background-color: black;
+	border-radius: 0.5em;
 	}
 
 body.light-mode .save {
@@ -325,24 +307,24 @@ body.light-mode .save {
 	}
 
 body.light-mode .edit {
-	color:DarkBlue;
+	color: DarkBlue;
 	background-color:Azure; 
 	border-radius: 0.5em;
 	}
 .edit {
-	color:DarkBlue;
+	color: DarkBlue;
 	background-color:Azure; 
 	border-radius: 0.5em;
 	}
 
 body.light-mode .produce {
-	color:DarkBlue;
-	background-color:Aquamarine;
+	color: DarkBlue;
+	background-color: Aquamarine;
 	border-radius: 0.5em;
 	}
 .produce {
-	color:DarkBlue;
-	background-color:Aquamarine;
+	color: DarkBlue;
+	background-color: Aquamarine;
 	border-radius: 0.5em;
 	}
 
@@ -383,15 +365,15 @@ body.light-mode .big {
 	}
 
 body.light-mode .warning {
-	background-color:cornsilk;
+	background-color: cornsilk;
 	padding: 0.5em;
 	width: 500px;
 	box-shadow: 2px 2px 2px 2px gold;
 	border-radius: 0.5em;
 	}
 .warning {
-	background-color:cornsilk;
-	color: black;
+	background-color: cornsilk;
+	color:  black;
 	padding: 0.5em;
 	width:  500px;
 	box-shadow: 2px 2px 2px 2px gold;
