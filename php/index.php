@@ -9,6 +9,42 @@ if(isset($_POST['change_skin']) AND $_POST['change_skin'] >= 0) {
 require_once("_header.php");
 $url_this_page = $this_page = "index.php";
 
+if($path <> '' AND $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $targetDirectory = $bp_application_path.$path;
+    if(isset($_FILES['files'])) {
+        foreach($_FILES['files']['tmp_name'] as $key => $tmpName) {
+            if ($_FILES['files']['error'][$key] === UPLOAD_ERR_OK) {
+                $fileName = basename($_FILES['files']['name'][$key]);
+                $destination = $targetDirectory.SLASH.$fileName;
+				$type_of_file = type_of_file($fileName);
+				if($type_of_file['type'] == '') {
+					echo "File '$fileName' ignored (not for Bol Processor)<br>";
+					unlink($tmpName);
+					}
+				else {
+					if(move_uploaded_file($tmpName,$destination)) {
+						chmod($destination,$permissions);
+						echo "File '$fileName' imported successfully.<br>";
+						}
+					else echo "Failed to import file '$fileName'.<br>";
+					}
+				}
+			}
+		}
+    // Process uploaded folders NOT IMPLEMENTED
+    if(isset($_FILES['folders'])) {
+        foreach($_FILES['folders']['tmp_name'] as $key => $tmpName) {
+            if ($_FILES['folders']['error'][$key] === UPLOAD_ERR_OK) {
+                $fileName = basename($_FILES['folders']['name'][$key]);
+                $destination = $targetDirectory.SLASH.$fileName;
+                if(move_uploaded_file($tmpName,$destination))
+                    echo "Folder '$fileName' imported successfully.<br>";
+               	else
+                    echo "Failed to import folder '$fileName'.<br>";
+				}
+			}
+		}	
+	}
 
 $test = FALSE;
 if($path <> '') {
@@ -281,7 +317,8 @@ echo "</form>";
 
 echo "<script>\n";
 echo "window.onload = function() {
-    settogglecreate(); 
+    settogglecreate();
+    settoggleimport(); 
 	};\n";
 echo "</script>\n";
 
@@ -305,13 +342,23 @@ if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension 
 		echo "</p>";
 		echo "</form>";
 		}
+	if($path <> '') {
+		echo "<button class=\"save big\" onclick=\"toggleimport(); return false;\">IMPORT DATA TO THIS WORKSPACE</button><br />";
+		echo "<div id=\"import\" style=\"padding:6px; background-color:transparent;\">";
+		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+		echo "<input type=\"file\" name=\"files[]\" id=\"files\" multiple>";
+    //    echo "<input type=\"file\" name=\"folders[]\" id=\"folders\" webkitdirectory directory>";
+		echo "<input class=\"save\" type=\"submit\" value=\"<-- IMPORT\"><br />";
+		echo "</form>";
+		echo "</div>";
+		}
 	if($path <> $csound_resources AND $path <> $tonality_resources) {
 		if($path <> '') echo "<br /><button class=\"save big\" onclick=\"togglecreate(); return false;\">CREATE FILES AND FOLDERS</button>";
 		else echo "<br /><button class=\"save big\" onclick=\"togglecreate(); return false;\">CREATE FOLDERS</button>";
 		echo "<div id=\"create\" style=\"padding:6px; background-color:transparent;\">";
 		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		echo "<p style=\"text-align:left;\">";
-		echo "<input class=\"save\"  type=\"submit\" name=\"create_folder\" value=\"CREATE NEW FOLDER IN THIS WORKSPACE\"><br />named:&nbsp;";
+		echo "<input class=\"save\" type=\"submit\" name=\"create_folder\" value=\"CREATE NEW FOLDER IN THIS WORKSPACE\"><br />named:&nbsp;";
 		echo "<input type=\"text\" name=\"foldername\" size=\"20\" style=\"background-color:CornSilk;\" value=\"\">";
 		echo "</p>";
 		echo "</form>";

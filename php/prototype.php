@@ -1978,7 +1978,7 @@ if(!$no_midi AND file_exists($midi_text)) {
 	if(file_exists($midi_file_link)) {
 		echo "</tr><tr>";
 		echo "<td colspan=\"3\" style=\"padding-bottom:1em;\">";
-		echo midifile_player($midi_file_link,'',25);
+		echo midifile_player($midi_file_link,'',25,0);
 		echo "</td>";
 		}
 	echo "</tr></table>";

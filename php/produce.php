@@ -505,7 +505,7 @@ if($file_format == "midi") {
 			}
 		else {
 			$midi_file_link_url = nice_url($midi_file_link);
-			echo midifile_player($midi_file_link_url,'',25);
+			echo midifile_player($midi_file_link_url,'',25,0);
 			}
 		}
 	}
@@ -705,7 +705,7 @@ else {
 			}
 		if(file_exists($project_name.".mid") AND filesize($project_name.".mid") > 59) {
             $midi_url = str_replace(SLASH,'/',$project_name.".mid");
-			$audio_tag = midifile_player($midi_url,'',25);
+			$audio_tag = midifile_player($midi_url,'',25,0);
 			fwrite($handle,$audio_tag."\n");
 			}
 		if(file_exists($project_name.".html")) {

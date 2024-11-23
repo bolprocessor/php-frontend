@@ -390,6 +390,17 @@ echo "function togglecreate() {
       if(z) {
         z.className=(z.className=='hidden')?'unhidden':'hidden'; }
     }\n";
+
+echo "function settoggleimport() {
+      var z = document.getElementById(\"import\");
+      if(z) {
+        z.className='hidden'; }
+      }\n";
+echo "function toggleimport() {
+      var z = document.getElementById(\"import\");
+      if(z) {
+        z.className=(z.className=='hidden')?'unhidden':'hidden'; }
+    }\n";
 echo "</script>\n";
 
 echo "<script>\n";
@@ -4338,13 +4349,15 @@ function make_links_clickable($text) {
     return $text_with_links;
 	}
 
-function midifile_player($midi_file_link, $filename, $width) {
-	global $bp_application_path;
-	if($filename == '') $filename = "MIDIfile";
-	$text = "<div style=\"float:right; background-color:transparent;\">👉&nbsp;<a href=\"".nice_url($midi_file_link)."\" download>Download&nbsp;MIDI&nbsp;file</a><p style=\"text-align:right;\"><small>(<a target=\"_blank\" href=\"https://github.com/cifkao/html-midi-player/\">Visit html-midi-player</a>)</small></p></div>";
-	$text .= "<p class=\"shadow\" style=\"width:".$width."em;\">";
-	$text .= "<midi-player src=\"".nice_url($midi_file_link)."\" sound-font visualizer=\"#myPianoRollVisualizer\"></midi-player>";
-	$text .= "</p>";
+function midifile_player($midi_file_link, $filename, $width, $piano_roll) {
+	$text = "<table><tr>";
+	$text .= "<td style=\"padding-right:2em; padding-bottom:1em;\"><p class=\"shadow\" style=\"width:".$width."em;\">";
+	$text .= "<midi-player src=\"".nice_url($midi_file_link)."\" sound-font=\"https://storage.googleapis.com/magentadata/js/soundfonts/sgm_plus\" visualizer=\"#myVisualizer\"></midi-player>";
+	if($piano_roll) $text .= "<midi-visualizer type=\"piano-roll\" id=\"myVisualizer\"></midi-visualizer>";
+	$text .= "</p></td>";
+	if($filename <> '') $text .= "<td style=\"vertical-align:middle;\">".$filename."</td>";
+	$text .= "<td style=\"text-align:right;\">👉&nbsp;<a href=\"".nice_url($midi_file_link)."\" download>Download&nbsp;MIDI&nbsp;file</a><p style=\"text-align:right;\"><small>(<a target=\"_blank\" href=\"https://github.com/cifkao/html-midi-player/\">Visit html-midi-player</a>)</small></p></td>";
+	$text .= "</tr></table>";
 	return $text;
 	}
 
