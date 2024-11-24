@@ -788,15 +788,13 @@ if(!$hide) {
 	echo "<tr>";
 	echo "<td style=\"vertical-align:middle; white-space:nowrap;\">";
 	echo "<input class=\"edit\" type=\"submit\" onclick=\"if(checksaved()) {this.form.target='_self';return true;} else return false;\" name=\"change_convention\" formaction=\"".$url_this_page."#topchanges\" value=\"APPLY NOTE CONVENTION to this data\"> ➡</td>";
-	echo "<td style=\"vertical-align:middle; white-space:nowrap; padding-bottom:6px;\">";
+	echo "<td style=\"vertical-align:middle; white-space:nowrap;\">";
 	echo "<input type=\"radio\" name=\"new_convention\" value=\"0\">English<br />";
 	echo "<input type=\"radio\" name=\"new_convention\" value=\"1\">Italian/Spanish/French<br />";
 	echo "<input type=\"radio\" name=\"new_convention\" value=\"2\">Indian<br />";
 	echo "</td>";
 	echo "</tr><tr><td colspan=2>";
-	if($note_convention <> '') {
-		echo "<p>Current note convention for this grammar is:<br /><span class=\"red-text\"><b>".ucfirst(note_convention(intval($note_convention)))."’</span> as per <span class=\"green-text\">‘".$settings_file."</b></span><br />You will need to change it after applying a different convention.</p>";
-		}
+	show_note_convention_form("grammar",$note_convention,$settings_file);
 	echo "</td></tr></table>";
 	$found_chan = substr_count($content,"_chan(");
 	$found_ins = substr_count($content,"_ins(");

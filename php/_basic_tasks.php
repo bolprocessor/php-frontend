@@ -580,82 +580,84 @@ function display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,
 				}
 			}
 		}
-	echo "<table style=\"padding:0px; border-spacing:2px; background-color:transparent;\" cellpadding=\"0px;\"><tr style=\"background-color:transparent;\">";
+	echo "<table style=\"padding:0px; border-spacing:2px; background-color:transparent;\" cellpadding=\"0px;\"><tr>";
 	if($error) {
 		echo "<td style=\"vertical-align:middle;\"><big><span class=\"red-text blinking\">➡</span></big></td>";
 		}
 	if($alphabet_file <> '') {
 		$url_this_page = "alphabet.php?file=".urlencode($dir.$alphabet_file);
 		if($test) echo "url_this_page = ".$url_this_page."<br />";
-		echo "<td style=\"background-color:transparent;\">";
+		echo "<td>";
 		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" onclick=\"window.open('".$url_this_page."','".$alphabet_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".begin_with(20,$alphabet_file)."’\">";
 		echo "</td>";
 		}
 	if($grammar_file <> '') {
 		$url_this_page = "grammar.php?file=".urlencode($dir.$grammar_file);
 		if($test) echo "url_this_page = ".$url_this_page."<br />";
-		echo "<td style=\"background-color:transparent;\"><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+		echo "<td><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		echo "<input class=\"edit\" type=\"submit\" name=\"opengrammar\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".begin_with(20,$grammar_file)."’\">&nbsp;";
 		echo "</td></form>";
 		}
 	if($objects_file <> '') {
 		$url_this_page = "objects.php?file=".urlencode($dir.$objects_file);
-		echo "<td style=\"background-color:transparent;\"><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+		echo "<td><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		echo "<input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".begin_with(20,$objects_file)."’\">&nbsp;";
 		echo "</td></form>";
 		}
 	if($csound_file <> '') {
 		$url_this_page = "csound.php?file=".urlencode($csound_resources.SLASH.$csound_file);
-		echo "<td style=\"background-color:transparent;\"><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+//		echo "url_this_page = ".$url_this_page."<br />";
+		echo "<td>";
+		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		echo "<input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".begin_with(20,$csound_file)."’\">&nbsp;";
 		echo "</td></form>";
 		}
 	if($tonality_file <> '') {
 		$url_this_page = "tonality.php?file=".urlencode($tonality_resources.SLASH.$tonality_file);
-		echo "<td style=\"background-color:transparent;\"><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+		echo "<td><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		echo "<input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".begin_with(20,$tonality_file)."’\">&nbsp;";
 		echo "</td></form>";
 		}
 	if($settings_file <> '') {
 		$url_this_page = "settings.php?file=".urlencode($dir.$settings_file);
 		if($test) echo "url_this_page = ".$url_this_page."<br />";
-		echo "<td style=\"background-color:transparent;\">";
+		echo "<td>";
 		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$settings_file."','width=1000,height=800,left=100'); return false;\" value=\"EDIT ‘".begin_with(20,$settings_file)."’\">";
 		echo "</td>";
 		}
 	if($orchestra_file <> '') {
 		$url_this_page = "orchestra.php?file=".urlencode($dir.$orchestra_file);
-		echo "<td style=\"background-color:transparent;\">";
+		echo "<td>";
 		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$orchestra_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".begin_with(20,$orchestra_file)."’\">";
 		echo "</td>";
 		}
 	if($interaction_file <> '') {
 		$url_this_page = "interaction.php?file=".urlencode($dir.$interaction_file);
-		echo "<td style=\"background-color:transparent;\">";
+		echo "<td>";
 		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$interaction_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".begin_with(20,$interaction_file)."’\">";
 		echo "</td>";
 		}
 	if($midisetup_file <> '') {
 		$url_this_page = "midisetup.php?file=".urlencode($dir.$midisetup_file);
-		echo "<td style=\"background-color:transparent;\">";
+		echo "<td>";
 		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$midisetup_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".begin_with(20,$midisetup_file)."’\">";
 		echo "</td>";
 		}
 	if($timebase_file <> '') {
 		$url_this_page = "timebase.php?file=".urlencode($dir.$timebase_file);
-		echo "<td style=\"background-color:transparent;\">";
+		echo "<td>";
 		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$timebase_file."','width=1000,height=900,left=50'); return false;\" value=\"EDIT ‘".begin_with(20,$timebase_file)."’\">";
 		echo "</td>";
 		}
 	if($keyboard_file <> '') {
 		$url_this_page = "keyboard.php?file=".urlencode($dir.$keyboard_file);
-		echo "<td style=\"background-color:transparent;\">";
+		echo "<td>";
 		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$keyboard_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".begin_with(20,$keyboard_file)."’\">";
 		echo "</td>";
 		}
 	if($glossary_file <> '') {
 		$url_this_page = "glossary.php?file=".urlencode($dir.$glossary_file);
-		echo "<td style=\"background-color:transparent;\">";
+		echo "<td>";
 		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$glossary_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".begin_with(20,$glossary_file)."’\">";
 		echo "</td>";
 		}
@@ -4720,6 +4722,15 @@ function select_a_skin($url_this_page,$path,$skin) {
 	echo "<p><input type=\"submit\" class=\"edit\"  value=\"CHANGE\"></p>";
 	echo "</form>";
 	echo "</div>";
+	return;
+	}
+
+function show_note_convention_form($type,$note_convention,$settings_file) {
+	$this_convention = "English";
+	if($note_convention <> '') $this_convention = $note_convention;
+	echo "<p>Current note convention for this ".$type." is:<br /><span class=\"red-text\"><b>".ucfirst(note_convention(intval($this_convention)))."</b></span>";
+	if($note_convention <> '') echo " as per <span class=\"green-text\">‘".$settings_file."’</span><br />You will need to change it after applying a different convention.</p>";
+	else echo " (but the ‘settings’ file wasn't found)</p>";
 	return;
 	}
 ?>

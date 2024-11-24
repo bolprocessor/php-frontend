@@ -36,20 +36,14 @@ body.light-mode td {
     color: black;
 	text-align:left;
 	vertical-align:top;
-	padding-left: 0.5em;
-	padding-right: 0.5em;
-	padding-top: 0.4em;
-	padding-bottom: 0px;
+	padding: 0.4em;
 	}
 td {
     background-color: black; 
     color: GhostWhite;
 	text-align:left;
 	vertical-align:top;
-	padding-left: 0.5em;
-	padding-right: 0.5em;
-	padding-top: 0.4em;
-	padding-bottom: 0px;
+	padding: 0.4em;
 	}
 
 body.light-mode .green-text {
@@ -195,8 +189,8 @@ body.light-mode .middle {
 	}
 
 table {
-	padding: 0.2em;
-	border-spacing: 0.2em;
+	padding: 0px;
+	border-spacing: 3px;
 	text-align: left;
 	}
 
@@ -286,14 +280,12 @@ input[type=text] {
 	color:black;
 	}
 
-body.light-mode .thinborder {
-	border:1px solid black;
+body.light-mode .thinborder, .thinborder2 {
+	border: 1px solid black;
 	border-radius: 0.5em;
 	}
-.thinborder {
+.thinborder, .thinborder2 {
 	border: 1px solid grey;
-/*	background-color: rgb(1, 1, 88); */
-	background-color: black;
 	border-radius: 0.5em;
 	}
 

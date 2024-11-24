@@ -1237,7 +1237,8 @@ if($settings_file <> '' AND file_exists($dir.$settings_file)) {
 if($quantization == 0) $quantize = FALSE;
 
 if(!isset($_POST['analyze_tonal'])) {
-	echo "<div style=\"padding:1em; width:690px;\" class=\"thinborder\">";
+	echo "<div style=\"padding:1em; width:690px;\" class=\"thinborder2\">";
+//	echo "<table><tr><td>";
 	if($settings_file == '' OR !file_exists($dir.$settings_file)) {
 		$time_resolution = 10; //  10 milliseconds by default
 		$metronome =  60;
@@ -1280,7 +1281,11 @@ if(!isset($_POST['analyze_tonal'])) {
 		echo "<br />";
 		}
 	if($note_convention <> '') echo "• Note convention is <span class=\"red-text\">‘".ucfirst(note_convention(intval($note_convention)))."’</span> as per <span class=\"green-text\">‘".$settings_file."’</span>";
-	else echo "• Note convention is <span class=\"red-text\">‘English’</span> by default";
+	else {
+		echo "• Note convention is <span class=\"red-text\">‘English’</span> by default";
+		}
+	
+//	echo "</td></tr></table>";
 	echo "</div><br />";
 	}
 
@@ -1448,8 +1453,9 @@ if(!isset($_POST['analyze_tonal'])) {
 	echo "<br /><textarea id=\"textArea\" name=\"thistext\" onchange=\"tellsave()\" rows=\"40\" style=\"width:750px;\">".$content."</textarea><br /><br />";
 
 	echo "<div style=\"float:right; background-color:transparent;\"><input class=\"save big\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".begin_with(20,$filename)."’\"></div>";
-
+	echo "</form>";
 	display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,$objects_file,$csound_file,$tonality_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
+	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 	}
 
 $hide = FALSE;
@@ -1542,17 +1548,15 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 	echo "<table class=\"thinborder\">";
 	echo "<tr>";
 	echo "<td style=\"vertical-align:middle; white-space:nowrap;\"><input class=\"edit\" type=\"submit\" onmouseover=\"checksaved();\" name=\"change_convention\" formaction=\"".$url_this_page."#topchanges\" value=\"APPLY NOTE CONVENTION to this data\"> ➡</td>";
-	echo "<td style=\"vertical-align:middle; white-space:nowrap; padding-bottom:6px;\">";
+	echo "<td style=\"vertical-align:middle; white-space:nowrap;\">";
 	echo "<input type=\"hidden\" name=\"old_convention\" value=\"".$note_convention."\">";
 	echo "<input type=\"radio\" name=\"new_convention\" value=\"0\">English<br />";
 	echo "<input type=\"radio\" name=\"new_convention\" value=\"1\">Italian/Spanish/French<br />";
 	echo "<input type=\"radio\" name=\"new_convention\" value=\"2\">Indian<br />";
 	echo "</td>";
 	echo "</tr>";
-	echo "<tr><td colspan=2 style=\"padding:6px;\">";
-	if($note_convention <> '') {
-		echo "<p>Current note convention for this data is:<br /><span class=\"red-text\"><b>".ucfirst(note_convention(intval($note_convention)))."</b></span> as per <span class=\"green-text\">‘".$settings_file."’</span><br />You will need to change it after applying a different convention.</p>";
-		}
+	echo "<tr><td colspan=2>";
+	show_note_convention_form("data",$note_convention,$settings_file);
 	echo "</td></tr></table><br />";
 	$found_chan = substr_count($content,"_chan(");
 	$found_ins = substr_count($content,"_ins(");

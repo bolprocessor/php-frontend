@@ -910,7 +910,7 @@ if($max_scales > 0) {
 		}
 	echo "&nbsp;<input class=\"save\" type=\"submit\" name=\"reassign_keys\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#topscales\" value=\"REASSIGN KEYS\">";
 	echo "</p>";
-	echo "<ol style=\"padding-top:6px; padding-bottom:6px; padding-right:6px;\" class=\"thinborder\">";
+	echo "<ol style=\"padding-top:6px; padding-bottom:6px; padding-right:6px;\">";
 	$table_names = $p_interval = $q_interval = $cent_position = $ratio_interval = array();
 	for($i_scale = 1, $k = 0; $i_scale <= $max_scales; $i_scale++) {
 		$link_edit = "scale.php";
@@ -1145,7 +1145,7 @@ echo $dir."<br />";
 		}
 		
 	echo "<h3>Scale intervals (only labeled notes)</h3>";
-	echo "<ol style=\"padding-top:6px; padding-bottom:6px; padding-right:6px;\" class=\"thinborder\">";
+	echo "<ol style=\"padding-top:6px; padding-bottom:6px; padding-right:6px;\">";
 	for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
 		if(isset($scale_fraction[$i_scale]) AND isset($table_names[$i_scale])) {
 			$kmaxi = count($p_interval[$i_scale]);

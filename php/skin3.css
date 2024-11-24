@@ -10,18 +10,29 @@ body.light-mode textarea {
 textarea {
 	overflow: visible;
 	overflow-x: hidden;
-	background-color: rgb(2, 82, 82);
-	color: GhostWhite;
+	background-color: HoneyDew;
+	color: black;
 	line-height: 1.6;
 	padding: 0.5em;
 	white-space: pre-wrap;
 	}
 
 body.light-mode .thinborder {
-	border:1px solid black;
+	border:1px solid rgb(2, 82, 82);
 	background-color: HoneyDew;
 	}
 .thinborder {
-	border: 1px solid grey;
+	border: 1px solid rgb(2, 82, 82);
 	background-color: rgb(2, 82, 82);
+	}
+
+body.light-mode .thinborder2 {
+	background-color: transparent;
+	border: 1px solid rgb(2, 82, 82);
+	box-shadow: inset 0 0 0 3px HoneyDew;
+	}
+.thinborder2 {
+	background-color: transparent;
+	border: 1px solid rgb(2, 82, 82);
+	box-shadow: inset 0 0 0 3px rgb(2, 82, 82);
 	}
