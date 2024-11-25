@@ -50,8 +50,6 @@ function run_script($dir,$dirPath,$this_script_file,$script_variables,$note_conv
 	$settings = '';
 	
 	for($i = 0; $i < $imax; $i++) {
-		/* ob_flush();
-		flush(); */
 		@unlink($panicfile);
 		$line = trim($table[$i]);
 		$line = preg_replace("/^\/\/.*/u",'',$line);
@@ -102,7 +100,7 @@ function run_script($dir,$dirPath,$this_script_file,$script_variables,$note_conv
 			$command .= " --traceout ".$tracefile;
 			echo "<p style=\"color:red;\">".$command."</p>";
 			echo str_repeat(' ', 1024);  // send extra spaces to fill browser buffer
-			ob_flush();
+			if(ob_get_level() > 0) ob_flush();
 			flush();
 			// session_abort();
 			$o = send_to_console($command);
@@ -145,7 +143,7 @@ function run_script($dir,$dirPath,$this_script_file,$script_variables,$note_conv
 				$command .= " --traceout ".$trace_file;
 				echo "<p style=\"color:red;\">".$command."</p>";
 				echo str_repeat(' ', 1024);  // send extra spaces to fill browser buffer
-				ob_flush();
+				if(ob_get_level() > 0) ob_flush();
 				flush();
 				// session_abort();
 				$o = send_to_console($command);

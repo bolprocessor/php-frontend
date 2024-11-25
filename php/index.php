@@ -355,7 +355,7 @@ if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension 
 	if($path <> $csound_resources AND $path <> $tonality_resources) {
 		if($path <> '') echo "<br /><button class=\"save big\" onclick=\"togglecreate(); return false;\">CREATE FILES AND FOLDERS</button>";
 		else echo "<br /><button class=\"save big\" onclick=\"togglecreate(); return false;\">CREATE FOLDERS</button>";
-		echo "<div id=\"create\" style=\"padding:6px; background-color:transparent;\">";
+		echo "<div id=\"create\" style=\"background-color:transparent;\">";
 		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		echo "<p style=\"text-align:left;\">";
 		echo "<input class=\"save\" type=\"submit\" name=\"create_folder\" value=\"CREATE NEW FOLDER IN THIS WORKSPACE\"><br />named:&nbsp;";

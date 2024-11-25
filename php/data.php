@@ -1238,7 +1238,6 @@ if($quantization == 0) $quantize = FALSE;
 
 if(!isset($_POST['analyze_tonal'])) {
 	echo "<div style=\"padding:1em; width:690px;\" class=\"thinborder2\">";
-//	echo "<table><tr><td>";
 	if($settings_file == '' OR !file_exists($dir.$settings_file)) {
 		$time_resolution = 10; //  10 milliseconds by default
 		$metronome =  60;
@@ -1284,8 +1283,6 @@ if(!isset($_POST['analyze_tonal'])) {
 	else {
 		echo "• Note convention is <span class=\"red-text\">‘English’</span> by default";
 		}
-	
-//	echo "</td></tr></table>";
 	echo "</div><br />";
 	}
 
@@ -1453,9 +1450,7 @@ if(!isset($_POST['analyze_tonal'])) {
 	echo "<br /><textarea id=\"textArea\" name=\"thistext\" onchange=\"tellsave()\" rows=\"40\" style=\"width:750px;\">".$content."</textarea><br /><br />";
 
 	echo "<div style=\"float:right; background-color:transparent;\"><input class=\"save big\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".begin_with(20,$filename)."’\"></div>";
-	echo "</form>";
 	display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,$objects_file,$csound_file,$tonality_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
-	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 	}
 
 $hide = FALSE;

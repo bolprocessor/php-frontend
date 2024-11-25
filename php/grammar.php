@@ -17,6 +17,7 @@ $textarea_rows = 20;
 $save_warning = '';
 
 if($test) echo "grammar_file = ".$this_file."<br />";
+// echo "skin = ".$skin."<br />";
 
 $temp_folder = str_replace(' ','_',$filename)."_".my_session_id()."_temp";
 if(!file_exists($temp_dir.$temp_folder)) {
@@ -492,7 +493,7 @@ if($templates) {
 	$window_name = window_name($filename);
 	echo "<input class=\"edit\" onclick=\"if(checksaved()) window.open('".$link_produce_templates."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"CHECK TEMPLATES\"><br /><br />";
 	}
-echo "<div style=\"padding:1em; width:690px;\" class=\"thinborder\">";
+echo "<div style=\"padding:1em; width:690px;\" class=\"thinborder2\">";
 if($settings_file <> '' AND file_exists($dir.$settings_file)) echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".nice_url($url_settings)."','".$settings_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$settings_file."’\">";
 if($settings_file == '' OR !file_exists($dir.$settings_file)) {
 	$time_resolution = 10; //  10 milliseconds by default
@@ -671,7 +672,6 @@ $link_test = $link_produce."&test";
 $display_command_title = "DisplayCommand".$filename;
 echo "&nbsp;<input class=\"edit\" onclick=\"window.open('".nice_url($link_test)."','".$display_command_title."','width=1000,height=200,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Display command line\">";
 echo "</div>";
-echo "</form>";
 display_more_buttons(FALSE,$content,$url_this_page,$dir,'',$objects_file,$csound_file,$tonality_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
 
 $variable = array();
@@ -698,7 +698,7 @@ for($i = 0; $i < $imax; $i++) {
 		$variable[$word] = TRUE;
 		}
 	}
-echo "<form method=\"post\" action=\"".$url_this_page."#expression\" enctype=\"multipart/form-data\">";
+// echo "<form method=\"post\" action=\"".$url_this_page."#expression\" enctype=\"multipart/form-data\">";
 $action = "play";
 $link_produce = "produce.php?instruction=".$action."&grammar=".urlencode($this_file);
 if($file_format == "csound") {

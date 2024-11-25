@@ -47,7 +47,7 @@ echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/fo
 
 echo "<p style=\"text-align:left;\"><input class=\"save\" type=\"submit\" onclick=\"clearsave();\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></p>";
 echo "<textarea name=\"thistext\" onchange=\"tellsave()\" rows=\"40\" style=\"width:700px;\">".$content."</textarea>";
-echo "</form>";
 
 display_more_buttons(FALSE,$content,$url_this_page,$dir,$grammar_file,$objects_file,$csound_file,$tonality_file,$alphabet_file,$settings_file,$orchestra_file,'',$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
+echo "</form>";
 ?>

@@ -63,6 +63,7 @@ else $tonality_file = '';
 if(isset($_GET['item'])) $item = $_GET['item'];
 else $item = 0;
 
+// ob_start();
 $check_command_line = FALSE;
 $sound_file_link = $result_file = $tracefile = '';
 $project_fullname = '';
@@ -365,8 +366,8 @@ if($instruction <> "help") {
 	echo "<p id=\"wait\" style=\"text-align:center; background-color:yellow; color:black;\"><br /><big><b><span class=\"blinking\">… Bol Processor console is working …</span></b></big><br />(Don't close this window!)<br /><br />";
 	echo "<button type=\"button\" class=\"produce\" onclick=\"createFile('".$stopfile."');\">Click to STOP</button><br /><br /></p>\n";
 	}
-echo str_repeat(' ', 1024);  // send extra spaces to fill browser buffer, useful for Windows
-ob_flush();
+echo str_repeat(' ', 10240);  // send extra spaces to fill browser buffer, useful for Windows
+if(ob_get_level() > 0) ob_flush();
 flush();
 
 if(isset($data_path) AND $data_path <> '') {

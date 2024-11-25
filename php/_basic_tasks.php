@@ -2,7 +2,7 @@
 session_start();
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+error_reporting(E_ALL & ~E_NOTICE);
 ini_set('output_buffering', 'off');
 ini_set('zlib.output_compression', 0);
 require('midi.class.php');
@@ -571,12 +571,13 @@ function display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,
 				echo $entries."<br />";
 				}
 			else {
-				echo "<div style=\"float:right; margin-top:36px; background-color:transparent;\">";
-				echo "<form method=\"post\" id=\"thisone\" action=\"".$url_this_page."#help_entries\" enctype=\"multipart/form-data\">";
+				echo "<div id=\"thisone\" style=\"float:right; margin-top:36px; background-color:transparent;\">";
+	//			echo "<form method=\"post\"  action=\"".$url_this_page."#help_entries\" enctype=\"multipart/form-data\">";
 				echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
 				echo "<input type=\"hidden\" name=\"file_format\" value=\"".$file_format."\">";
-				echo "<input class=\"edit\" type=\"submit\" onmouseover=\"checksaved();\" name=\"show_help_entries\" value=\"SHOW HELP ENTRIES\">";
-				echo "</form></div>";
+				echo "<input class=\"edit\" type=\"submit\" onmouseover=\"checksaved();\" formaction=\"".$url_this_page."#help_entries\" name=\"show_help_entries\" value=\"SHOW HELP ENTRIES\">";
+	//			echo "</form>";
+				echo "</div>";
 				}
 			}
 		}
@@ -594,29 +595,27 @@ function display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,
 	if($grammar_file <> '') {
 		$url_this_page = "grammar.php?file=".urlencode($dir.$grammar_file);
 		if($test) echo "url_this_page = ".$url_this_page."<br />";
-		echo "<td><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-		echo "<input class=\"edit\" type=\"submit\" name=\"opengrammar\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".begin_with(20,$grammar_file)."’\">&nbsp;";
-		echo "</td></form>";
+		echo "<td>";
+		echo "<input class=\"edit\" type=\"submit\" name=\"opengrammar\" onclick=\"this.form.target='_blank';return true;\" formaction=\"".$url_this_page."\" value=\"EDIT ‘".begin_with(20,$grammar_file)."’\">&nbsp;";
+		echo "</td>";
 		}
 	if($objects_file <> '') {
 		$url_this_page = "objects.php?file=".urlencode($dir.$objects_file);
-		echo "<td><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-		echo "<input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".begin_with(20,$objects_file)."’\">&nbsp;";
-		echo "</td></form>";
+		echo "<td>";
+		echo "<input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" formaction=\"".$url_this_page."\" value=\"EDIT ‘".begin_with(20,$objects_file)."’\">&nbsp;";
+		echo "</td>";
 		}
 	if($csound_file <> '') {
 		$url_this_page = "csound.php?file=".urlencode($csound_resources.SLASH.$csound_file);
-//		echo "url_this_page = ".$url_this_page."<br />";
 		echo "<td>";
-		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-		echo "<input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".begin_with(20,$csound_file)."’\">&nbsp;";
-		echo "</td></form>";
+		echo "<input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" formaction=\"".$url_this_page."\" value=\"EDIT ‘".begin_with(20,$csound_file)."’\">&nbsp;";
+		echo "</td>";
 		}
 	if($tonality_file <> '') {
 		$url_this_page = "tonality.php?file=".urlencode($tonality_resources.SLASH.$tonality_file);
-		echo "<td><form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-		echo "<input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".begin_with(20,$tonality_file)."’\">&nbsp;";
-		echo "</td></form>";
+		echo "<td>";
+		echo "<input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" formaction=\"".$url_this_page."\" value=\"EDIT ‘".begin_with(20,$tonality_file)."’\">&nbsp;";
+		echo "</td>";
 		}
 	if($settings_file <> '') {
 		$url_this_page = "settings.php?file=".urlencode($dir.$settings_file);
@@ -858,7 +857,7 @@ function gcd_array($array,$a = 0) {
 	}
 
 function clean_up_encoding($create_bullets,$convert,$text) {
-	if($convert) $text = mb_convert_encoding($text, "UTF-8", mb_detect_encoding($text, "UTF-8, ISO-8859-1, ISO-8859-15", true));
+//	if($convert) $text = mb_convert_encoding($text, "UTF-8", mb_detect_encoding($text, "UTF-8, ISO-8859-1, ISO-8859-15", true));
 	$text = str_replace("¥","•",$text);
 	$text = str_replace("Ô","‘",$text);
 	$text = str_replace("Õ","’",$text);

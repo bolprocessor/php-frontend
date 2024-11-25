@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const userPreference = localStorage.getItem("lightMode");
     if (userPreference === "enabled") {
         bodyElement.classList.add("light-mode");
-    }
+        }
 
     // Check if toggleButton exists before adding an event listener
     if (toggleButton) {
@@ -16,11 +16,8 @@ document.addEventListener("DOMContentLoaded", function () {
             // Save preference in localStorage
             if (bodyElement.classList.contains("light-mode")) {
                 localStorage.setItem("lightMode", "enabled");
-            } else {
-                localStorage.removeItem("lightMode");
-            }
-        });
-    } else {
-        console.warn("darkModeToggle button not found in the DOM.");
-    }
-});
+                 }
+            else localStorage.removeItem("lightMode");
+            });
+        }
+    });

@@ -36,14 +36,14 @@ body.light-mode td {
     color: black;
 	text-align:left;
 	vertical-align:top;
-	padding: 0.4em;
+	padding: 0.5em;
 	}
 td {
     background-color: black; 
     color: GhostWhite;
 	text-align:left;
 	vertical-align:top;
-	padding: 0.4em;
+	padding: 0.5em;
 	}
 
 body.light-mode .green-text {

@@ -9,6 +9,7 @@ echo "<body>";
 
 set_time_limit(0);
 $user_os = getOS();
+// ob_start();
 
 echo "<p style=\"text-align:center; width:90%;\">System = ".$user_os."</p>";
 if(!file_exists($bp_application_path."source")) {
@@ -32,8 +33,8 @@ echo "<p style=\"text-align:center; width:90%;\">Running: <span class=\"green-te
 
 echo "<link rel=\"stylesheet\" href=\"bp-light.css?v=".time()."\" />\n";
 // The "v=" forces this stylesheet to replace the previous one
-echo str_repeat(' ',1024);  // send extra spaces to fill browser buffer
-ob_flush();
+echo str_repeat(' ',10240);  // send extra spaces to fill browser buffer
+if(ob_get_level() > 0) ob_flush();
 flush();
 $old_dir = getcwd();
 chdir('..');
