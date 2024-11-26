@@ -191,7 +191,7 @@ foreach($dircontent as $thisfile) {
 	//		echo $thisfile." id = ".$id." session = ".my_session_id()."<br />";
 			if($id <> my_session_id()) {
 	//		if(($extension == "txt" OR $extension == "html" OR $extension == "bpda") AND $id <> my_session_id()) {
-				unlink($temp_dir.$thisfile);
+				@unlink($temp_dir.$thisfile);
 				continue;
 				}
 			}
@@ -1019,11 +1019,11 @@ function my_rmdir($src) {
         if(($file <> '.' ) && ($file <> '..')) {
             $full = $src.SLASH.$file;
             if(is_dir($full)) my_rmdir($full);
-            else unlink($full);
+            else @unlink($full);
             }
         }
     closedir($dir);
-    rmdir($src);
+    @rmdir($src);
     return;
 	}
 

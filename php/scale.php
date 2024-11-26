@@ -172,16 +172,17 @@ if($need_to_save OR isset($_POST['interpolate']) OR isset($_POST['savethisfile']
 		$clean_scale_name = str_replace("/","_",$clean_scale_name);
 		$file_link = $dir_scales.$clean_scale_name.".txt";
 		}
-	$numgrades_fullscale = $_POST['numgrades'];
+	$numgrades_fullscale = trim($_POST['numgrades']);
+	if($numgrades_fullscale == '') $numgrades_fullscale = 12;
 	$interval = trim($_POST['interval']);
 	if($interval == '') $interval = 2;
 	$cents = round(cents($interval),1);
-	if(isset($_POST['interval_cents'])) {
+	if(isset($_POST['interval_cents']) AND trim($_POST['interval_cents']) <> '') {
 		$new_cents = round($_POST['interval_cents'],1);
 		if($new_cents > 1 AND $new_cents <> $cents)
 			$interval = exp($new_cents / 1200 * log(2));
 		}
-	$new_basekey = abs(intval($_POST['basekey']));
+	$new_basekey = abs(intval(trim($_POST['basekey'])));
 	if($new_basekey > 0) $basekey = $new_basekey; // 2024-08-22
 	$basefreq = $_POST['basefreq'];
 	$baseoctave = intval($_POST['baseoctave']);

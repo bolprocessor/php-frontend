@@ -99,7 +99,7 @@ function run_script($dir,$dirPath,$this_script_file,$script_variables,$note_conv
 			$command .= " --rtmidi ";
 			$command .= " --traceout ".$tracefile;
 			echo "<p style=\"color:red;\">".$command."</p>";
-			echo str_repeat(' ', 1024);  // send extra spaces to fill browser buffer
+			echo str_repeat(' ', 10240);  // send extra spaces to fill browser buffer
 			if(ob_get_level() > 0) ob_flush();
 			flush();
 			// session_abort();
@@ -142,7 +142,7 @@ function run_script($dir,$dirPath,$this_script_file,$script_variables,$note_conv
 				else $command .= " --rtmidi ";
 				$command .= " --traceout ".$trace_file;
 				echo "<p style=\"color:red;\">".$command."</p>";
-				echo str_repeat(' ', 1024);  // send extra spaces to fill browser buffer
+				echo str_repeat(' ', 10240);  // send extra spaces to fill browser buffer
 				if(ob_get_level() > 0) ob_flush();
 				flush();
 				// session_abort();
