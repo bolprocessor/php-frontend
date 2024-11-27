@@ -88,8 +88,9 @@ if(isset($_POST['saveparameters'])) {
 		if($i == 44) { // Max computation time
 			$newvalue = intval($value);
 			if($newvalue < 1) $newvalue = 15;
+			if($newvalue > 3600) $newvalue = 3600;
 			if(strcmp($newvalue,$value) <> 0)
-				echo "<p>👉 <span class=\"red-text\">Max computation time must be a positive integer: “</span><span class=\"green-text\">".$value."</span><span class=\"red-text\">” has been replaced with “</span><span class=\"green-text\">".$newvalue."</span><span class=\"red-text\">”.</span></p>";
+				echo "<p>👉 <span class=\"red-text\">Max computation time must be a positive integer, max 3600 seconds: “</span><span class=\"green-text\">".$value."</span><span class=\"red-text\">” has been replaced with “</span><span class=\"green-text\">".$newvalue."</span><span class=\"red-text\">”.</span></p>";
 			$value = $newvalue;
 			}
 		if($i == 45) { // Seed for randomization
@@ -163,7 +164,7 @@ if(isset($_POST['saveparameters'])) {
 		if($i == 71) $value = 39;
 		if($i == 110 AND (!is_numeric($value) OR intval($value) <> $value OR $value <= 10 OR $value > 127)) {
 			$newvalue = 60;
-			echo "<p>👉 <span class=\"red-text\">“Block frequency of key” must be an integer from 0 to 127: “</span><span class=\"green-text\">".$value."</span><span class=\"red-text\">” has been replaced with “</span><span class=\"green-text\">".$newvalue."</span><span class=\"red-text\">” (C4).</span></p>";
+			echo "<p>👉 <span class=\"red-text\">“Default block key” must be an integer from 10 to 127: “</span><span class=\"green-text\">".$value."</span><span class=\"red-text\">” has been replaced with “</span><span class=\"green-text\">".$newvalue."</span><span class=\"red-text\">” (C4).</span></p>";
 			$value = $newvalue;
 			}
 		if($i > 71 AND $i < 110) $value = 10;

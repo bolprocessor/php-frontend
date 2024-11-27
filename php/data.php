@@ -1224,7 +1224,7 @@ if($settings_file <> '' AND file_exists($dir.$settings_file)) {
 	$q_clock = get_setting("q_clock",$settings_file);
 	$max_time_computing = get_setting("max_time_computing",$settings_file);
 	$produce_all_items = get_setting("produce_all_items",$settings_file);
-	$random_seed = get_setting("random_seed",$settings_file);
+//	$random_seed = get_setting("random_seed",$settings_file);
 	$diapason = get_setting("diapason",$settings_file);
 	$C4key = get_setting("C4key",$settings_file);
 	$csound_default_orchestra = get_setting("csound_default_orchestra",$settings_file);
@@ -1276,7 +1276,11 @@ if(!isset($_POST['analyze_tonal'])) {
 	echo "•&nbsp;Time structure is <span class=\"red-text\">".nature_of_time($nature_of_time)."</span> by default but it may be changed in data<br />";
 	if($max_time_computing > 0) {
 		echo "• Max console computation time has been set to <span class=\"red-text\">".$max_time_computing."</span> seconds by <span class=\"green-text\">‘".$settings_file."’</span>";
-		if($max_time_computing < 30) echo "&nbsp;<span class=\"red-text\">➡</span>&nbsp;probably too small!";
+		if($max_time_computing < 10) echo "&nbsp;<span class=\"red-text\">➡</span>&nbsp;probably too small!";
+		if($max_time_computing > 3600) {
+			echo "<br /><span class=\"red-text\">➡</span>&nbsp;reduced to <span class=\"red-text\">3600</span> seconds";
+			$max_time_computing = 3600;
+			}
 		echo "<br />";
 		}
 	if($note_convention <> '') echo "• Note convention is <span class=\"red-text\">‘".ucfirst(note_convention(intval($note_convention)))."’</span> as per <span class=\"green-text\">‘".$settings_file."’</span>";
@@ -1302,7 +1306,10 @@ $default_output_name = str_replace("-da.",'',$filename);
 $default_output_name = str_replace(".bpda",'',$default_output_name);
 $file_format = $default_output_format;
 if(isset($data_file_format[$filename])) $file_format = $data_file_format[$filename];
-if(isset($_POST['file_format'])) $file_format = $_POST['file_format'];
+if(isset($_POST['file_format'])) {
+	$file_format = $_POST['file_format'];
+//	echo "<p>@@ file_format = ".$file_format.", filename = ".$filename."</p>";
+	}
 save_settings2("data_file_format",$filename,$file_format); // To _settings.php
 $output_file = $default_output_name;
 if(isset($_POST['output_file'])) {
@@ -1363,7 +1370,7 @@ if(!isset($_POST['analyze_tonal'])) {
 		if($file_format == "csound") echo " checked";
 		echo ">Csound score";
 		}
-	echo "<br /><br />&nbsp;&nbsp;&nbsp;<input class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#tonal\" name=\"savethisfile\" value=\"SAVE format\">";
+	echo "<br /><input class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#tonal\" name=\"savethisfile\" value=\"SAVE format\">";
 	if($file_format == "rtmidi") echo "&nbsp;<input id=\"refresh\" class=\"save\" style=\"display:none;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"reload\" value=\"REFRESH\">";
 	echo "</p>";
 	echo "</td>";

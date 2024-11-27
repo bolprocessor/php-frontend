@@ -175,7 +175,7 @@ if($need_to_save OR isset($_POST['interpolate']) OR isset($_POST['savethisfile']
 	$numgrades_fullscale = trim($_POST['numgrades']);
 	if($numgrades_fullscale == '') $numgrades_fullscale = 12;
 	$interval = trim($_POST['interval']);
-	if($interval == '') $interval = 2;
+	if(!is_numeric($interval) OR $interval == '') $interval = 2;
 	$cents = round(cents($interval),1);
 	if(isset($_POST['interval_cents']) AND trim($_POST['interval_cents']) <> '') {
 		$new_cents = round($_POST['interval_cents'],1);
@@ -1040,7 +1040,7 @@ if($scale_fraction <> '') {
 		$q[$i / 2] = $table[$i+1];
 		}
 	}
-
+if(!is_numeric($interval) OR $interval == '') $interval = 2;
 $pmax = intval($interval * 10000);
 $qmax = 10000;
 $gcd = gcd($pmax,$qmax);

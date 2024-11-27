@@ -135,14 +135,19 @@ if(isset($_POST['savemidiport'])) {
 	@unlink($refresh_file);
 	}
 
+if(isset($_POST['new_file_format'])) {
+	$file_format = $_POST['new_file_format'];
+//	echo "<p>@@ file_format = ".$file_format.", filename = ".$filename."</p>";
+	}
+save_settings2("grammar_file_format",$filename,$file_format); // To _settings.php
 if($need_to_save OR isset($_POST['savethisfile']) OR isset($_POST['compilegrammar'])) {
 	if(isset($_POST['savethisfile'])) $save_warning = "<span id=\"timespan\" style=\"color:red; float:right; background-color:white; padding:6px; border-radius:6px;\">&nbsp;…&nbsp;Saved “".$filename."” file…</span>";
 	$content = $_POST['thistext'];
 	if(isset($_POST['alphabet_file'])) $alphabet_file = $_POST['alphabet_file'];
 	else $alphabet_file = '';
 	if(isset($_POST['note_convention'])) $note_convention = $_POST['note_convention'];
-	if(isset($_POST['random_seed'])) $random_seed = $_POST['random_seed'];
-	else $random_seed = 0;
+//	if(isset($_POST['random_seed'])) $random_seed = $_POST['random_seed'];
+//	else $random_seed = 0;
 	$content = recode_entities($content);
 	$content = preg_replace("/ +/u",' ',$content);
 	save($this_file,$filename,$top_header,$content);
@@ -157,8 +162,6 @@ if($need_to_save OR isset($_POST['savethisfile']) OR isset($_POST['compilegramma
 else read_midiressources($filename);
 
 
-if(isset($_POST['file_format'])) $file_format = $_POST['file_format'];
-save_settings2("grammar_file_format",$filename,$file_format); // To _settings.php
 $output_file = trim(str_replace(".bpda",'',$output_file));
 $output_file = trim(str_replace(".sco",'',$output_file));
 $output_file = trim(str_replace(".mid",'',$output_file));
@@ -267,12 +270,12 @@ if(isset($_POST['compilegrammar'])) {
 	reformat_grammar(FALSE,$this_file);
 	}
 else {
-	if(isset($_POST['random_seed'])) $random_seed = $_POST['random_seed'];
-	else $random_seed = 0;
+/*	if(isset($_POST['random_seed'])) $random_seed = $_POST['random_seed'];
+	else $random_seed = 0; */
 	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 	echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
-	echo "<input type=\"hidden\" name=\"file_format\" value=\"".$file_format."\">";
-	echo "<input type=\"hidden\" name=\"random_seed\" value=\"".$random_seed."\">";
+	// echo "<input type=\"hidden\" name=\"file_format\" value=\"".$file_format."\">";
+//	echo "<input type=\"hidden\" name=\"random_seed\" value=\"".$random_seed."\">";
 	echo "Location of output files: <span class=\"green-text\">".$bp_application_path."</span>";
 	echo "<input type=\"text\" name=\"output_folder\" size=\"15\" value=\"".$output_folder."\">";
 	echo "&nbsp;<input class=\"save\" type=\"submit\" onclick=\"clearsave();\" name=\"change_output_folder\" value=\"SAVE THIS LOCATION\"><br />➡ global setting for all projects in this session<br /><i>Folder will be created if necessary…</i>";
@@ -333,7 +336,7 @@ if($settings_file <> '' AND file_exists($dir.$settings_file)) {
 	$max_time_computing = get_setting("max_time_computing",$settings_file);
 	$produce_all_items = get_setting("produce_all_items",$settings_file);
 //	if($produce_all_items) $show_production = TRUE;
-	$random_seed = get_setting("random_seed",$settings_file);
+//	$random_seed = get_setting("random_seed",$settings_file);
 	$diapason = get_setting("diapason",$settings_file);
 	$C4key = get_setting("C4key",$settings_file);
 	$csound_default_orchestra = get_setting("csound_default_orchestra",$settings_file);
@@ -378,6 +381,33 @@ if($file_format == '') {
 	$file_format = "rtmidi";
 	save_settings2("grammar_file_format",$filename,$file_format);
 	}
+echo "<input type=\"radio\" id=\"rtmidi\" name=\"new_file_format\" value=\"rtmidi\"";
+if($file_format == "rtmidi") echo " checked";
+echo ">Real-time MIDI";
+echo "<br /><input type=\"radio\" id=\"data\" name=\"new_file_format\" value=\"data\"";
+if($file_format == "data") echo " checked";
+echo ">BP data file";
+echo "<br /><input type=\"radio\" id=\"midi\" name=\"new_file_format\" value=\"midi\"";
+if($file_format == "midi") echo " checked";
+echo ">MIDI file";
+if(file_exists("csound_version.txt")) {
+	echo "<br /><input type=\"radio\" id=\"csound\" name=\"new_file_format\" value=\"csound\"";
+	if($file_format == "csound") echo " checked";
+	echo ">Csound score";
+	}
+
+
+echo "<br /><input class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savethisfile\" value=\"SAVE format\">";
+// echo "<br /><input class=\"save\" type=\"submit\" value=\"SAVE format\">";
+// echo "<br /><br />&nbsp;&nbsp;&nbsp;<input class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savethisfile\" value=\"SAVE format\">";
+if($file_format == "rtmidi") echo "<br />&nbsp;&nbsp;&nbsp;<input id=\"refresh\" class=\"save\" style=\"display:none;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"reload\" value=\"REFRESH\">&nbsp;";
+
+
+
+/* if($file_format == '') {
+	$file_format = "rtmidi";
+	save_settings2("grammar_file_format",$filename,$file_format);
+	}
 echo "<input type=\"radio\" name=\"file_format\" value=\"rtmidi\"";
 if($file_format == "rtmidi") echo " checked";
 echo ">Real-time MIDI";
@@ -394,7 +424,9 @@ if(file_exists("csound_version.txt")) {
 	}
 echo "<br />&nbsp;&nbsp;&nbsp;";
 if($file_format == "rtmidi") echo "<input id=\"refresh\" class=\"save\" style=\"display:none;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"reload\" value=\"REFRESH\">&nbsp;";
-echo "<input class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savethisfile\" value=\"SAVE format\">";
+echo "<input class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savethisfile\" value=\"SAVE format\">"; */
+
+
 echo "</td>";
 echo "<input type=\"hidden\" name=\"settings_file\" value=\"".$settings_file."\">";
 echo "<input type=\"hidden\" name=\"csound_file\" value=\"".$csound_file."\">";
@@ -569,15 +601,19 @@ if($produce_all_items == 1) {
 	}
 else if($show_production == 1) echo "• Show production has been set ON by <span class=\"green-text\">‘".$settings_file."’</span><br />";
 if($trace_production == 1) echo "• Trace production has been set ON by <span class=\"green-text\">‘".$settings_file."’</span><br />";
-if($settings_file <> '' AND file_exists($dir.$settings_file) AND isset($random_seed) AND $non_stop_improvize > 0) {
+/* if($settings_file <> '' AND file_exists($dir.$settings_file) AND isset($random_seed) AND $non_stop_improvize > 0) {
 	if($random_seed > 0)
 		echo "• Random seed has been set to <span class=\"red-text\">".$random_seed."</span> by <span class=\"green-text\">‘".$settings_file."’</span> ➡ Series will be repeated.<br />";
 	else
 		echo "• Random seed is ‘no seed’ as per <span class=\"green-text\">‘".$settings_file."’</span> ➡ Series will vary.<br />";
-	}
+	} */
 if($max_time_computing > 0) {
 	echo "• Max console computation time has been set to <span class=\"red-text\">".$max_time_computing."</span> seconds by <span class=\"green-text\">‘".$settings_file."’</span>";
-	if($max_time_computing < 30) echo "&nbsp;<span class=\"red-text\">➡</span>&nbsp;probably too small!";
+	if($max_time_computing < 10) echo "&nbsp;<span class=\"red-text\">➡</span>&nbsp;probably too small!";
+	if($max_time_computing > 3600) {
+		echo "<br /><span class=\"red-text\">➡</span>&nbsp;reduced to <span class=\"red-text\">3600</span> seconds";
+		$max_time_computing = 3600;
+		}
 	echo "<br />";
 	}
 if($file_format == "csound") {
