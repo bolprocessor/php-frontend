@@ -1306,8 +1306,8 @@ $default_output_name = str_replace("-da.",'',$filename);
 $default_output_name = str_replace(".bpda",'',$default_output_name);
 $file_format = $default_output_format;
 if(isset($data_file_format[$filename])) $file_format = $data_file_format[$filename];
-if(isset($_POST['file_format'])) {
-	$file_format = $_POST['file_format'];
+if(isset($_POST['new_file_format'])) {
+	$file_format = $_POST['new_file_format'];
 //	echo "<p>@@ file_format = ".$file_format.", filename = ".$filename."</p>";
 	}
 save_settings2("data_file_format",$filename,$file_format); // To _settings.php
@@ -1356,22 +1356,9 @@ if(!isset($_POST['analyze_tonal'])) {
 		display_midi_ports($filename);
 		}
 	read_midiressources($filename);
-	// if($file_format == "rtmidi") echo " 👉 Delete the name if you change a number!";
 	echo "</td>";
 	echo "<td><p style=\"text-align:left;\">";
-	echo "<input type=\"radio\" name=\"file_format\" value=\"rtmidi\"";
-	if($file_format == "rtmidi") echo " checked";
-	echo ">Real-time MIDI";
-	echo "<br /><input type=\"radio\" name=\"file_format\" value=\"midi\"";
-	if($file_format == "midi") echo " checked";
-	echo ">MIDI file";
-	if(file_exists("csound_version.txt")) {
-		echo "<br /><input type=\"radio\" name=\"file_format\" value=\"csound\"";
-		if($file_format == "csound") echo " checked";
-		echo ">Csound score";
-		}
-	echo "<br /><input class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#tonal\" name=\"savethisfile\" value=\"SAVE format\">";
-	if($file_format == "rtmidi") echo "&nbsp;<input id=\"refresh\" class=\"save\" style=\"display:none;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"reload\" value=\"REFRESH\">";
+	show_file_format_choice("data",$file_format,$url_this_page);
 	echo "</p>";
 	echo "</td>";
 	// if($file_format == "rtmidi") filter_form();

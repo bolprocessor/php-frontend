@@ -3446,6 +3446,8 @@ function score_sort($a, $b) {
 
 function hidden_directory($name) {
 	switch($name) {
+		case "macos-scripts":
+		case "windows-scripts":
 		case "csound_resources":
 		case "docs-developer":
 		case "docs-release":
@@ -4730,6 +4732,28 @@ function show_note_convention_form($type,$note_convention,$settings_file) {
 	echo "<p>Current note convention for this ".$type." is:<br /><span class=\"red-text\"><b>".ucfirst(note_convention(intval($this_convention)))."</b></span>";
 	if($note_convention <> '') echo " as per <span class=\"green-text\">‘".$settings_file."’</span><br />You will need to change it after applying a different convention.</p>";
 	else echo " (but the ‘settings’ file wasn't found)</p>";
+	return;
+	}
+
+function show_file_format_choice($type,$file_format,$url_this_page) {
+	echo "<input type=\"radio\" name=\"new_file_format\" value=\"rtmidi\"";
+	if($file_format == "rtmidi") echo " checked";
+	echo ">Real-time MIDI";
+	if($type == "grammar") {
+		echo "<br /><input type=\"radio\" id=\"data\" name=\"new_file_format\" value=\"data\"";
+		if($file_format == "data") echo " checked";
+		echo ">BP data file";
+		}
+	echo "<br /><input type=\"radio\" name=\"new_file_format\" value=\"midi\"";
+	if($file_format == "midi") echo " checked";
+	echo ">MIDI file";
+	if(file_exists("csound_version.txt")) {
+		echo "<br /><input type=\"radio\" name=\"new_file_format\" value=\"csound\"";
+		if($file_format == "csound") echo " checked";
+		echo ">Csound score";
+		}
+	echo "<br /><input class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#tonal\" name=\"savethisfile\" value=\"SAVE format\">";
+	if($file_format == "rtmidi") echo "&nbsp;<input id=\"refresh\" class=\"save\" style=\"display:none;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"reload\" value=\"REFRESH\">";
 	return;
 	}
 ?>

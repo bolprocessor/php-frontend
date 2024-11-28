@@ -294,6 +294,7 @@ if(isset($_POST['create_script'])) {
 $delete_files = isset($_POST['delete_files']);
 $rename_files = isset($_POST['rename_files']);
 $move_files = isset($_POST['move_files']);
+$download_files = isset($_POST['download_files']);
 
 $show_dependencies = isset($_POST['show_dependencies']);
 $trash_backups = isset($_POST['trash_backups']);
@@ -312,6 +313,7 @@ $link_list = "file_list.php?dir=".$dir;
 if($path <> '' AND $path <> $trash_folder) {
 	echo "<p><input class=\"edit\" onclick=\"window.open('".nice_url($link_list)."','listfiles','width=300,height=600,left=100'); return false;\" type=\"submit\" name=\"\" value=\"COPY list of files\">&nbsp;";
 	if(countBakFiles($dir) > 0) echo "<input style=\"background-color:red; color:white;\" type=\"submit\" name=\"trash_backups\" title=\"Delete '_bak' files\" value=\"MOVE '_bak' files to TRASH\"></p>";
+	if($download_files) echo "<input class=\"cancel\" type=\"submit\" name=\"\" value=\"CANCEL DOWNLOAD\">";
 	}
 echo "</form>";
 
@@ -326,7 +328,7 @@ if($path == $trash_folder AND isset($_POST['empty_trash'])) {
 	if(emptydirectory($bp_application_path.$trash_folder)) echo "<p id=\"refresh\"><span class=\"red-text\">Trash is empty!</span></p>";
 	}
 
-if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension <> "temp" AND !$delete_files AND !$rename_files AND !$move_files) {
+if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension <> "temp" AND !$delete_files AND !$rename_files AND !$move_files AND !$download_files) {
 	echo "<div style=\"float:right; padding:6px; background-color:transparent;\">";
 	if($path <> '') check_csound();
 	if(!is_integer(strpos($path,$tonality_resources)) AND $path <> '') link_to_tonality();
@@ -504,22 +506,24 @@ if($move_files) {
 		}
 	}
 
-// if($path <> '' AND !is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"tonality_resources"))) {
+if(!$delete_files AND !$rename_files AND !$move_files AND !$download_files AND $path <> $trash_folder) {
+	if($path <> '') echo "<input class=\"save\" style=\"margin-top:1em;\" title=\"Delete folders or files\" type=\"submit\" name=\"delete_files\" value=\"DELETE\">";
+	else  echo "<input class=\"save\" style=\"margin-top:1em;\" title=\"Delete folders or files\" type=\"submit\" name=\"delete_files\" value=\"DELETE FOLDERS\"><br /><br />";
+	}
 if($path <> '') {
-//	echo "<div style=\"width:30%;\">";
-	if(!$delete_files AND !$rename_files AND !$move_files AND $path <> $trash_folder) {
-		echo "<input class=\"save\" style=\"margin-top:1em;\" title=\"Delete folders or files\" type=\"submit\" name=\"delete_files\" value=\"DELETE\">";
-		}
-	if(!$rename_files AND !$delete_files AND !$move_files) {
+	if(!$rename_files AND !$delete_files AND !$move_files AND !$download_files) {
 		echo "&nbsp;<input class=\"save\"style=\"margin-top:1em;\" title=\"Rename folders or files\" type=\"submit\" name=\"rename_files\" value=\"RENAME OR COPY\">";
 		}
-	if(!$rename_files AND !$delete_files AND !$move_files) {
+	if(!$rename_files AND !$delete_files AND !$move_files AND !$download_files) {
 		echo "&nbsp;<input class=\"save\" style=\"margin-top:1em;\" title=\"Move folders or files\" type=\"submit\" name=\"move_files\" value=\"MOVE\">";
 		}
-	if(!$rename_files AND !$delete_files AND !$move_files AND $path == $trash_folder) {
+	if(!$rename_files AND !$delete_files AND !$move_files AND !$download_files) {
+		echo "&nbsp;<input class=\"save\" style=\"margin-top:1em;\" title=\"Download files\" type=\"submit\" name=\"download_files\" value=\"DOWNLOAD\">";
+		}
+	if(!$rename_files AND !$delete_files AND !$move_files AND !$download_files AND $path == $trash_folder) {
 		echo "<br /><br />🗑&nbsp;<input style=\"background-color:red; color:white;\" title=\"Empty trash\" type=\"submit\" name=\"empty_trash\" value=\"EMPTY THIS TRASH\"> 👉 can't be reversed!";
 		}
-	if(!$show_dependencies AND !$delete_files AND !$move_files AND $path <> $trash_folder AND !is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"tonality_resources"))) echo "<br /><input class=\"edit\" title=\"Show dependencies of files (links to other files)\" type=\"submit\" name=\"show_dependencies\" value=\"SHOW DEPENDENCIES\"> (links between files)";
+	if(!$show_dependencies AND !$delete_files AND !$move_files AND !$download_files AND $path <> $trash_folder AND !is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"tonality_resources"))) echo "<br /><input class=\"edit\" title=\"Show dependencies of files (links to other files)\" type=\"submit\" name=\"show_dependencies\" value=\"SHOW DEPENDENCIES\"> (links between files)";
 	else if($show_dependencies) echo "<br /><br /><input class=\"cancel\" type=\"submit\" value=\"HIDE DEPENDENCIES\">";
 	echo "<br /><br />";
 	}
@@ -640,7 +644,7 @@ echo "</table>";
 echo "</form>";
 
 function display_directory($test,$dir,$filter) {
-	global $path,$move_files,$move_checked_files,$new_file,$csound_resources,$tonality_resources,$delete_checked_files,$rename_checked_files,$delete_files,$rename_files,$show_dependencies,$trash_backups,$trash_folder,$this_page,$url_this_page,$dir_trash_folder,$bp_application_path,$dest_folder,$done,$seen,$dir_csound_resources,$dir_tonality_resources,$last_grammar_name,$last_data_name;
+	global $path,$move_files,$move_checked_files,$new_file,$csound_resources,$tonality_resources,$delete_checked_files,$rename_checked_files,$delete_files,$download_files,$rename_files,$show_dependencies,$trash_backups,$trash_folder,$this_page,$url_this_page,$dir_trash_folder,$bp_application_path,$dest_folder,$done,$seen,$dir_csound_resources,$dir_tonality_resources,$last_grammar_name,$last_data_name;
 
 	$dircontent = scandir($dir);
 	$i_file = $files_shown = 0;
@@ -801,6 +805,8 @@ function display_directory($test,$dir,$filter) {
 		//		if(!$test) echo $check_box;
 				
 				if(!$test AND $delete_files AND !do_not_delete($thisfile)) echo "<input type=\"checkbox\" name=\"delete_".$i_file."\"> ";
+				$link = $dir.SLASH.$thisfile;
+				if(!$test AND $download_files AND $type <> '' AND !$this_is_directory) echo "<a href=\"".$link."\" title=\"Download this file\" download=\"".$thisfile."\">⬇️</a> ";
 				if($type <> '') {
 					$files_shown++;
 					}
@@ -875,6 +881,9 @@ function folder_list($dir,$list,$path) {
 
 function do_not_delete($thisfile) {
 	if($thisfile == "scale_images") return TRUE;
+	if($thisfile == "ctests") return TRUE;
+	if($thisfile == "macos-scripts") return TRUE;
+	if($thisfile == "windows-scripts") return TRUE;
 	return FALSE;
 	}
 

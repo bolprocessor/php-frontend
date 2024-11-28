@@ -137,7 +137,6 @@ if(isset($_POST['savemidiport'])) {
 
 if(isset($_POST['new_file_format'])) {
 	$file_format = $_POST['new_file_format'];
-//	echo "<p>@@ file_format = ".$file_format.", filename = ".$filename."</p>";
 	}
 save_settings2("grammar_file_format",$filename,$file_format); // To _settings.php
 if($need_to_save OR isset($_POST['savethisfile']) OR isset($_POST['compilegrammar'])) {
@@ -381,52 +380,7 @@ if($file_format == '') {
 	$file_format = "rtmidi";
 	save_settings2("grammar_file_format",$filename,$file_format);
 	}
-echo "<input type=\"radio\" id=\"rtmidi\" name=\"new_file_format\" value=\"rtmidi\"";
-if($file_format == "rtmidi") echo " checked";
-echo ">Real-time MIDI";
-echo "<br /><input type=\"radio\" id=\"data\" name=\"new_file_format\" value=\"data\"";
-if($file_format == "data") echo " checked";
-echo ">BP data file";
-echo "<br /><input type=\"radio\" id=\"midi\" name=\"new_file_format\" value=\"midi\"";
-if($file_format == "midi") echo " checked";
-echo ">MIDI file";
-if(file_exists("csound_version.txt")) {
-	echo "<br /><input type=\"radio\" id=\"csound\" name=\"new_file_format\" value=\"csound\"";
-	if($file_format == "csound") echo " checked";
-	echo ">Csound score";
-	}
-
-
-echo "<br /><input class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savethisfile\" value=\"SAVE format\">";
-// echo "<br /><input class=\"save\" type=\"submit\" value=\"SAVE format\">";
-// echo "<br /><br />&nbsp;&nbsp;&nbsp;<input class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savethisfile\" value=\"SAVE format\">";
-if($file_format == "rtmidi") echo "<br />&nbsp;&nbsp;&nbsp;<input id=\"refresh\" class=\"save\" style=\"display:none;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"reload\" value=\"REFRESH\">&nbsp;";
-
-
-
-/* if($file_format == '') {
-	$file_format = "rtmidi";
-	save_settings2("grammar_file_format",$filename,$file_format);
-	}
-echo "<input type=\"radio\" name=\"file_format\" value=\"rtmidi\"";
-if($file_format == "rtmidi") echo " checked";
-echo ">Real-time MIDI";
-echo "<br /><input type=\"radio\" name=\"file_format\" value=\"data\"";
-if($file_format == "data") echo " checked";
-echo ">BP data file";
-echo "<br /><input type=\"radio\" name=\"file_format\" value=\"midi\"";
-if($file_format == "midi") echo " checked";
-echo ">MIDI file";
-if(file_exists("csound_version.txt")) {
-	echo "<br /><input type=\"radio\" name=\"file_format\" value=\"csound\"";
-	if($file_format == "csound") echo " checked";
-	echo ">Csound score";
-	}
-echo "<br />&nbsp;&nbsp;&nbsp;";
-if($file_format == "rtmidi") echo "<input id=\"refresh\" class=\"save\" style=\"display:none;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"reload\" value=\"REFRESH\">&nbsp;";
-echo "<input class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"savethisfile\" value=\"SAVE format\">"; */
-
-
+show_file_format_choice("grammar",$file_format,$url_this_page);
 echo "</td>";
 echo "<input type=\"hidden\" name=\"settings_file\" value=\"".$settings_file."\">";
 echo "<input type=\"hidden\" name=\"csound_file\" value=\"".$csound_file."\">";
