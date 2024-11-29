@@ -3448,6 +3448,7 @@ function hidden_directory($name) {
 	switch($name) {
 		case "macos-scripts":
 		case "windows-scripts":
+		case "linux-scripts":
 		case "csound_resources":
 		case "docs-developer":
 		case "docs-release":

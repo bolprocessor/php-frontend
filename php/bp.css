@@ -298,6 +298,18 @@ body.light-mode .save {
 	border-radius: 0.5em;
 	}
 
+body.light-mode .trash {
+	background-color: red;
+	color: white;
+	border-radius: 0.5em;
+	}
+.trash {
+	background-color: red;
+	color: white;
+	border-radius: 0.5em;
+	}
+
+
 body.light-mode .edit {
 	color: DarkBlue;
 	background-color:Azure; 

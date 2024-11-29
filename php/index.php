@@ -312,7 +312,7 @@ echo "</p>";
 $link_list = "file_list.php?dir=".$dir;
 if($path <> '' AND $path <> $trash_folder) {
 	echo "<p><input class=\"edit\" onclick=\"window.open('".nice_url($link_list)."','listfiles','width=300,height=600,left=100'); return false;\" type=\"submit\" name=\"\" value=\"COPY list of files\">&nbsp;";
-	if(countBakFiles($dir) > 0) echo "<input style=\"background-color:red; color:white;\" type=\"submit\" name=\"trash_backups\" title=\"Delete '_bak' files\" value=\"MOVE '_bak' files to TRASH\"></p>";
+	if(countBakFiles($dir) > 0) echo "<input class=\"trash\" type=\"submit\" name=\"trash_backups\" title=\"Delete '_bak' files\" value=\"MOVE '_bak' files to TRASH\"></p>";
 	if($download_files) echo "<input class=\"cancel\" type=\"submit\" name=\"\" value=\"CANCEL DOWNLOAD\">";
 	}
 echo "</form>";
@@ -345,17 +345,17 @@ if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension 
 		echo "</form>";
 		}
 	if($path <> '') {
-		echo "<button class=\"save big\" onclick=\"toggleimport(); return false;\">IMPORT DATA TO THIS WORKSPACE</button><br />";
+		echo "<button class=\"save big\" onclick=\"toggleimport(); return false;\">UPLOAD FILES</button><br />";
 		echo "<div id=\"import\" style=\"padding:6px; background-color:transparent;\">";
 		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		echo "<input type=\"file\" name=\"files[]\" id=\"files\" multiple>";
     //    echo "<input type=\"file\" name=\"folders[]\" id=\"folders\" webkitdirectory directory>";
-		echo "<input class=\"save\" type=\"submit\" value=\"<-- IMPORT\"><br />";
+		echo "<input class=\"save\" type=\"submit\" value=\"<-- UPLOAD\"><br />";
 		echo "</form>";
 		echo "</div>";
 		}
 	if($path <> $csound_resources AND $path <> $tonality_resources) {
-		if($path <> '') echo "<br /><button class=\"save big\" onclick=\"togglecreate(); return false;\">CREATE FILES AND FOLDERS</button>";
+		if($path <> '') echo "<br /><button class=\"save big\" onclick=\"togglecreate(); return false;\">CREATE FILES OR FOLDERS</button>";
 		else echo "<br /><button class=\"save big\" onclick=\"togglecreate(); return false;\">CREATE FOLDERS</button>";
 		echo "<div id=\"create\" style=\"background-color:transparent;\">";
 		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
@@ -518,7 +518,7 @@ if($path <> '') {
 		echo "&nbsp;<input class=\"save\" style=\"margin-top:1em;\" title=\"Move folders or files\" type=\"submit\" name=\"move_files\" value=\"MOVE\">";
 		}
 	if(!$rename_files AND !$delete_files AND !$move_files AND !$download_files) {
-		echo "&nbsp;<input class=\"save\" style=\"margin-top:1em;\" title=\"Download files\" type=\"submit\" name=\"download_files\" value=\"DOWNLOAD\">";
+		echo "&nbsp;<input class=\"save\" style=\"margin-top:1em;\" title=\"Download files\" type=\"submit\" name=\"download_files\" value=\"DOWNLOAD FILES\">";
 		}
 	if(!$rename_files AND !$delete_files AND !$move_files AND !$download_files AND $path == $trash_folder) {
 		echo "<br /><br />🗑&nbsp;<input style=\"background-color:red; color:white;\" title=\"Empty trash\" type=\"submit\" name=\"empty_trash\" value=\"EMPTY THIS TRASH\"> 👉 can't be reversed!";
