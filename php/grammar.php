@@ -375,12 +375,12 @@ else {
 read_midiressources($filename);
 // if($file_format == "rtmidi") echo " 👉 Delete the name if you change a number!";
 echo "</td>";
-echo "<td>";
+echo "<td style=\"vertical-align:middle;\">";
 if($file_format == '') {
 	$file_format = "rtmidi";
 	save_settings2("grammar_file_format",$filename,$file_format);
 	}
-show_file_format_choice("grammar",$file_format,$url_this_page);
+show_file_format_choice("grammar",$file_format,$url_this_page,$filename);
 echo "</td>";
 echo "<input type=\"hidden\" name=\"settings_file\" value=\"".$settings_file."\">";
 echo "<input type=\"hidden\" name=\"csound_file\" value=\"".$csound_file."\">";

@@ -4736,7 +4736,8 @@ function show_note_convention_form($type,$note_convention,$settings_file) {
 	return;
 	}
 
-function show_file_format_choice($type,$file_format,$url_this_page) {
+function show_file_format_choice($type,$file_format,$url_this_page,$filename) {
+	global $temp_midi_ressources,$dir_midi_resources;
 	echo "<input type=\"radio\" name=\"new_file_format\" value=\"rtmidi\"";
 	if($file_format == "rtmidi") echo " checked";
 	echo ">Real-time MIDI";
@@ -4754,7 +4755,23 @@ function show_file_format_choice($type,$file_format,$url_this_page) {
 		echo ">Csound score";
 		}
 	echo "<br /><input class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#tonal\" name=\"savethisfile\" value=\"SAVE format\">";
-	if($file_format == "rtmidi") echo "&nbsp;<input id=\"refresh\" class=\"save\" style=\"display:none;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"reload\" value=\"REFRESH\">";
+	if($file_format == "rtmidi") {
+		$file1 = $temp_midi_ressources."midiport";
+		$file2 = $dir_midi_resources.$filename."_midiport";
+		if(areFilesDifferent($file1,$file2)) {
+			save_midiressources($filename);
+			echo "<br /><i><span id=\"refresh\">MIDI ports updated</span></i>";
+	//		echo "<br /><input id=\"refresh\" class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"reload\" value=\"REFRESH\">";
+			}
+		}
 	return;
+	}
+
+function areFilesDifferent($file1,$file2) {
+    // Check if both files exist
+    if (!file_exists($file1) || !file_exists($file2)) return TRUE;
+    $content1 = file_get_contents($file1);
+    $content2 = file_get_contents($file2);
+    return $content1 !== $content2;
 	}
 ?>

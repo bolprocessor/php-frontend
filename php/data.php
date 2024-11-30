@@ -1357,8 +1357,8 @@ if(!isset($_POST['analyze_tonal'])) {
 		}
 	read_midiressources($filename);
 	echo "</td>";
-	echo "<td><p style=\"text-align:left;\">";
-	show_file_format_choice("data",$file_format,$url_this_page);
+	echo "<td style=\"vertical-align:middle;\"><p style=\"text-align:left;\">";
+	show_file_format_choice("data",$file_format,$url_this_page,$filename);
 	echo "</p>";
 	echo "</td>";
 	// if($file_format == "rtmidi") filter_form();

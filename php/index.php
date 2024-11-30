@@ -655,7 +655,7 @@ function display_directory($test,$dir,$filter) {
 		if(is_integer($pos=strpos($thisfile,"License")) AND $pos == 0) continue;
 		if(is_integer($pos=stripos($thisfile,"ReadMe")) AND $pos == 0) continue;
 		if(is_integer($pos=stripos($thisfile,"linux-scripts")) AND $pos == 0) continue; 
-		if($thisfile == "DerivedData" OR $thisfile == "resources" OR $thisfile == "scripts" OR $thisfile == "source" OR $thisfile == "temp_bolprocessor" OR $thisfile == "Makefile" OR $thisfile == "my_output" OR $thisfile == "php" OR $thisfile == "www" OR $thisfile == "-se.startup" OR $thisfile == "LICENSE" OR $thisfile == "HowToBuild.txt" OR $thisfile == "BP3-To-Do.txt" OR $thisfile == "Bugs.txt" OR $thisfile == "ChangeLog" OR $thisfile == "Credits.txt" OR $thisfile == "HowToMakeARelease.txt" OR $thisfile == "y2k" OR $thisfile == "bp_compile_result.txt" OR $thisfile == "test.php") continue;
+		if($thisfile == "resources" OR $thisfile == "source" OR $thisfile == "temp_bolprocessor" OR $thisfile == "Makefile" OR $thisfile == "my_output" OR $thisfile == "php" OR $thisfile == "www" OR $thisfile == "License.txt" OR $thisfile == "BP3-To-Do.txt" OR $thisfile == "Credits.txt" OR $thisfile == "bp_compile_result.txt" OR $thisfile == "test.php") continue;
 		if($test) {
 			if(($new_name = new_name($thisfile)) <> $thisfile) rename($dir.SLASH.$thisfile,$dir.SLASH.$new_name);
 			}
@@ -804,7 +804,7 @@ function display_directory($test,$dir,$filter) {
 
 		//		if(!$test) echo $check_box;
 				
-				if(!$test AND $delete_files AND !do_not_delete($thisfile)) echo "<input type=\"checkbox\" name=\"delete_".$i_file."\"> ";
+				if(!$test AND $delete_files AND $type <> '' AND !do_not_delete($thisfile)) echo "<input type=\"checkbox\" name=\"delete_".$i_file."\"> ";
 				$link = $dir.SLASH.$thisfile;
 				if(!$test AND $download_files AND $type <> '' AND !$this_is_directory) echo "<a href=\"".$link."\" title=\"Download this file\" download=\"".$thisfile."\">⬇️</a> ";
 				if($type <> '') {
@@ -855,7 +855,7 @@ function display_directory($test,$dir,$filter) {
 	if(!$test AND $move_files)
 		echo "<p style=\"margin-left:6px;\"><span class=\"red-text\"><big>↑</big></span>&nbsp;<input class=\"save\" type=\"submit\" name=\"move_checked_files\" value=\"MOVE CHECKED FILES/FOLDERS\">&nbsp;&nbsp;<input class=\"cancel\" type=\"submit\" name=\"cancel\" value=\"CANCEL\"></p>";
 	if(!$test AND $delete_files)
-		echo "<p style=\"margin-left:6px;\"><span class=\"red-text\"><big>↑</big></span>&nbsp;<input class=\"save\" type=\"submit\" name=\"delete_checked_files\" value=\"DELETE CHECKED FILES/FOLDERS\"> <span class=\"red-text\">➡</span> can be reversed <input class=\"cancel\" type=\"submit\" name=\"cancel\" value=\"CANCEL\"></p>";
+		echo "<p style=\"margin-left:6px;\"><span class=\"red-text\"><big>↑</big></span>&nbsp;<input class=\"save\" type=\"submit\" name=\"delete_checked_files\" value=\"DELETE CHECKED FILES/FOLDERS\"><br /><span class=\"red-text\">➡</span> can be reversed <input class=\"cancel\" type=\"submit\" name=\"cancel\" value=\"CANCEL\"></p>";
 	if(!$test AND $rename_files)
 		echo "<p style=\"margin-left:6px;\"><span class=\"red-text\"><big>↑</big></span>&nbsp;<input class=\"save\" type=\"submit\" name=\"rename_checked_files\" value=\"RENAME OR COPY CHECKED FILES/FOLDERS\">&nbsp;&nbsp;<input class=\"cancel\" type=\"submit\" name=\"cancel\" value=\"CANCEL\"></p>";
 	return $files_shown;
