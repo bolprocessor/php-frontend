@@ -535,6 +535,7 @@ else {
 if($nature_of_time == STRIATED) echo "•&nbsp;Time is <span class=\"red-text\">".nature_of_time($nature_of_time)."</span><br />";
 else echo "•&nbsp;Time is <span class=\"red-text\">".nature_of_time($nature_of_time)."</span> (no fixed tempo)<br />";
 if($non_stop_improvize > 0) {
+	if($max_items == 0) $max_items = 20;
 	echo "• <span class=\"red-text\">Non-stop improvize</span> as set by <span class=\"green-text\">‘".$settings_file."’</span>";
 	if($file_format <> "rtmidi") echo ": <i>only ".$max_items." variations will be produced</i>";
 	echo "<br />";

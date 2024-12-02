@@ -2118,8 +2118,8 @@ function is_variable($note_convention,$word) {
 	if($word == '') return $word;
 	$word = str_replace(')','',$word);
 	$word = str_replace('(','',$word);
-	if($word == '') return $word;
-	if($word[0] == '|' AND $word[count($word) - 1] == '|') {
+	if(trim($word) == '') return $word;
+	if($word[0] == '|' AND $word[strlen($word) - 1] == '|') {
 		$word = str_replace('|','',$word);
 		return $word;
 		}
@@ -3768,9 +3768,17 @@ function save_midiressources($filename) {
 			$MIDIchannelFilter[$i]  .= isset($_POST[$varName]) ? '1' : '0';
 			}
 //		echo "<br />channelFilters[".$i."] = ".$MIDIchannelFilter[$i] ."<br />";
+		if($MIDIchannelFilter[$i] == "0000000000000000") {
+			$MIDIchannelFilter[$i] = "1000000000000000";
+			echo "<p id=\"refresh\" class=\"red-text warning\">👉  Warning: At least, channel 1 has been set on in the filter of MIDI output ".$MIDIoutput[$i]."</p>";
+			}
 		for($part = 1; $part <= 12; $part++) {
 			$varName = "part_out_".$i."_".$part;
 			$MIDIpartFilter[$i]  .= isset($_POST[$varName]) ? '1' : '0';
+			}
+		if($MIDIpartFilter[$i] == "000000000000") {
+			$MIDIpartFilter[$i] = "100000000000";
+			echo "<p id=\"refresh\"  class=\"red-text warning\">👉  Warning: At least, part 1 has been set on in the filter of MIDI output ".$MIDIoutput[$i]."</p>";
 			}
 		}
 	$acceptFilters = $passFilters = array();
@@ -3852,11 +3860,13 @@ function save_midiressources($filename) {
 		// Pad the binary strings to ensure they are 18 digits long
 		$outFilters[$i] = str_pad($outFilters[$i], 18, '0', STR_PAD_LEFT);
 		if($NoteOffFilter_out <> $NoteOnFilter_out)
-			echo "<p id=\"refresh\" style=\"color:red;\">👉  Warning: NoteOn and NoteOff should have the same status in the filter of MIDI output ".$MIDIoutput[$i]."</p>";
+			echo "<p id=\"refresh\" class=\"red-text warning\">👉  Warning: NoteOn and NoteOff should have the same status in the filter of MIDI output ".$MIDIoutput[$i]."</p>";
 		if($SystemExclusiveFilter_out <> $EndSysExFilter_out)
 			echo "<p id=\"refresh\" style=\"color:red;\">👉  Warning: SystemExclusive and EndSysEx should have the same status in the filter of MIDI output ".$MIDIoutput[$i]."</p>";
-	/*		if($StartFilter_out <> $ContinueFilter_out)
-				echo "<p id=\"refresh\" style=\"color:red;\">👉  Warning: Start and Continue should have the same status in the filter of MIDI output ".$MIDIoutput[$i]."</p>"; */
+		if($outFilters[$i] == "000000000000000000") {
+			$outFilters[$i] = "110000000000000000";
+			echo "<p id=\"refresh\" class=\"red-text warning\">👉  Warning: At least, NoteOn and NoteOff have been set on in the filter of MIDI output ".$MIDIoutput[$i]."</p>";
+			}
 		}
 	save_midiport($temp_midi_ressources."midiport",$acceptFilters,$passFilters,$outFilters);
 	save_midiport($dir_midi_resources.$filename."_midiport",$acceptFilters,$passFilters,$outFilters);

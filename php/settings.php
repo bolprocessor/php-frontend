@@ -67,7 +67,10 @@ if(isset($_POST['saveparameters'])) {
 		if($i == 10) $improvize = $value;
 		if($i == 11) { // Max items produced
 			$newvalue = intval($value);
-			if($newvalue < 2) $newvalue = 20;
+			if($newvalue < 1) {
+				echo "<p>👉 <span class=\"red-text\">Max items produced must be positive. It has been set to 20.</span></p>";
+				$newvalue = 20;
+				}
 			$value = $newvalue;
 			}
 		if($i == 13) { // Produce all items
