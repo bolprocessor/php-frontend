@@ -3649,16 +3649,20 @@ function read_midiport($thefile) {
 	return $result;
 	}
 
-function read_midiressources() {
-	global $filename, $temp_midi_ressources, $MIDIacceptFilter, $MIDIpassFilter;
+function read_midiressources($filename) {
+	global $temp_midi_ressources, $MIDIacceptFilter, $MIDIpassFilter;
 	global $dir_midi_resources,$MIDIinput,$MIDIoutput,$MIDIinputname,$MIDIoutputname,$MIDIinputcomment,$MIDIoutputcomment,$NumberMIDIinputs;
 	
 	// First try to read  in the "temp" folder
+//	echo "@@ try temp_midi_ressources<br />";
 	$result = read_midiport($temp_midi_ressources."midiport");
 	// Then try the "midi_ressources" folder, which is permanent
-	if(!$result['found'])
-		$result = read_midiport($dir_midi_resources.$filename."_midiport");
 	if(!$result['found']) {
+	//	echo "@@ try dir_midi_resources<br />";
+		$result = read_midiport($dir_midi_resources.$filename."_midiport");
+		}
+	if(!$result['found']) {
+	//	echo "@@ not found<br />";
 		$NumberMIDIinputs = 0;
 		$MIDIinput[0] = 1;
 		$MIDIoutput[0] = 0;
@@ -3749,7 +3753,7 @@ function get_parameter($param) {
 	return 0;
 	}
 
-function save_midiressources($filename) {
+function save_midiressources($filename,$warn) {
 	global $MIDIinput, $MIDIoutput, $MIDIinputname, $MIDIoutputname, $MIDIinputcomment, $MIDIoutputcomment; // These are tables!
 	global $dir_midi_resources, $temp_midi_ressources, $NumberMIDIinputs, $NumberMIDIoutputs, $MIDIchannelFilter, $MIDIpartFilter;
 	global $temp_dir;
@@ -3767,10 +3771,9 @@ function save_midiressources($filename) {
 			$varName = "channel_out_".$i."_".$channel;
 			$MIDIchannelFilter[$i]  .= isset($_POST[$varName]) ? '1' : '0';
 			}
-//		echo "<br />channelFilters[".$i."] = ".$MIDIchannelFilter[$i] ."<br />";
 		if($MIDIchannelFilter[$i] == "0000000000000000") {
 			$MIDIchannelFilter[$i] = "1000000000000000";
-			echo "<p id=\"refresh\" class=\"red-text warning\">👉  Warning: At least, channel 1 has been set on in the filter of MIDI output ".$MIDIoutput[$i]."</p>";
+			if($warn) echo "<p class=\"red-text warning\">👉 Channel 1 has been set on in the filter of MIDI output ".$MIDIoutput[$i]."</p>";
 			}
 		for($part = 1; $part <= 12; $part++) {
 			$varName = "part_out_".$i."_".$part;
@@ -3778,7 +3781,7 @@ function save_midiressources($filename) {
 			}
 		if($MIDIpartFilter[$i] == "000000000000") {
 			$MIDIpartFilter[$i] = "100000000000";
-			echo "<p id=\"refresh\"  class=\"red-text warning\">👉  Warning: At least, part 1 has been set on in the filter of MIDI output ".$MIDIoutput[$i]."</p>";
+			if($warn) echo "<p class=\"red-text warning\">👉 Part 1 has been set on in the filter of MIDI output ".$MIDIoutput[$i]."</p>";
 			}
 		}
 	$acceptFilters = $passFilters = array();
@@ -3860,12 +3863,12 @@ function save_midiressources($filename) {
 		// Pad the binary strings to ensure they are 18 digits long
 		$outFilters[$i] = str_pad($outFilters[$i], 18, '0', STR_PAD_LEFT);
 		if($NoteOffFilter_out <> $NoteOnFilter_out)
-			echo "<p id=\"refresh\" class=\"red-text warning\">👉  Warning: NoteOn and NoteOff should have the same status in the filter of MIDI output ".$MIDIoutput[$i]."</p>";
+			if($warn) echo "<p class=\"red-text warning\">👉 NoteOn and NoteOff should have the same status in the filter of MIDI output ".$MIDIoutput[$i]."</p>";
 		if($SystemExclusiveFilter_out <> $EndSysExFilter_out)
-			echo "<p id=\"refresh\" style=\"color:red;\">👉  Warning: SystemExclusive and EndSysEx should have the same status in the filter of MIDI output ".$MIDIoutput[$i]."</p>";
+			if($warn) echo "<p style=\"color:red;\">👉 SystemExclusive and EndSysEx should have the same status in the filter of MIDI output ".$MIDIoutput[$i]."</p>";
 		if($outFilters[$i] == "000000000000000000") {
 			$outFilters[$i] = "110000000000000000";
-			echo "<p id=\"refresh\" class=\"red-text warning\">👉  Warning: At least, NoteOn and NoteOff have been set on in the filter of MIDI output ".$MIDIoutput[$i]."</p>";
+			if($warn) echo "<p class=\"red-text warning\">👉 NoteOn and NoteOff have been set on in the filter of MIDI output ".$MIDIoutput[$i]."</p>";
 			}
 		}
 	save_midiport($temp_midi_ressources."midiport",$acceptFilters,$passFilters,$outFilters);
@@ -4769,8 +4772,8 @@ function show_file_format_choice($type,$file_format,$url_this_page,$filename) {
 		$file1 = $temp_midi_ressources."midiport";
 		$file2 = $dir_midi_resources.$filename."_midiport";
 		if(areFilesDifferent($file1,$file2)) {
-			save_midiressources($filename);
-			echo "<br /><i><span id=\"refresh\">MIDI ports updated</span></i>";
+		/*	copy($file1,$file2);
+			echo "<br /><i><span id=\"refresh\">MIDI ports updated</span></i>"; */
 	//		echo "<br /><input id=\"refresh\" class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"reload\" value=\"REFRESH\">";
 			}
 		}
@@ -4783,5 +4786,16 @@ function areFilesDifferent($file1,$file2) {
     $content1 = file_get_contents($file1);
     $content2 = file_get_contents($file2);
     return $content1 !== $content2;
+	}
+
+function store_midiressources($filename) {
+	global $temp_midi_ressources, $dir_midi_resources;
+	$file1 = $temp_midi_ressources."midiport";
+	$file2 = $dir_midi_resources.$filename."_midiport";
+	if(areFilesDifferent($file1,$file2)) {
+		copy($file1,$file2);
+//		echo "<br /><i><span id=\"refresh\">MIDI ports updated</span></i>";
+		}
+	return;
 	}
 ?>

@@ -130,13 +130,15 @@ if(isset($_POST['apply_changes_instructions'])) {
 
 $refresh_file = $temp_dir."trace_".my_session_id()."_".$filename."_midiport_refresh";
 if(isset($_POST['savemidiport'])) {
-	save_midiressources($filename);
+	save_midiressources($filename,TRUE);
 	$save_warning = "<span id=\"timespan\" style=\"color:red; float:right; background-color:white; padding:6px; border-radius:6px;\">&nbsp;…&nbsp;Saved “".$filename."_midiport” file…</span>";
 	@unlink($refresh_file);
 	}
 
 if(isset($_POST['new_file_format'])) {
 	$file_format = $_POST['new_file_format'];
+	if($file_format == "rtmidi") read_midiressources($filename);
+	$no_save_midiresources = TRUE;
 	}
 save_settings2("grammar_file_format",$filename,$file_format); // To _settings.php
 if($need_to_save OR isset($_POST['savethisfile']) OR isset($_POST['compilegrammar'])) {
@@ -153,9 +155,10 @@ if($need_to_save OR isset($_POST['savethisfile']) OR isset($_POST['compilegramma
 	if($file_format == "rtmidi" AND !$no_save_midiresources) {
 		if(file_exists($refresh_file)) {
 			read_midiressources($filename);
+			store_midiressources($filename);
 			@unlink($refresh_file);
 			}
-		else save_midiressources($filename);
+		else save_midiressources($filename,FALSE);
 		}
 	}
 else read_midiressources($filename);
