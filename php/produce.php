@@ -165,14 +165,19 @@ echo "</div>";
     $trace_link = str_replace(SLASH,'/',$trace_link);
  //   $tracefile = str_replace(SLASH,'/',$tracefile);
 //	echo "<p>Trace file = ".$tracefile."</p>";
-
 	$midiport = str_replace(".txt","_midiport",$tracefile);
 //	echo "<p>midiport file = ".$midiport."</p>";
 	if($file_format == "rtmidi" AND !file_exists($midiport)) {
-		echo "<p style=\"text-align:center;\"><big>You first need to save the project or MIDI ports</big></p>";
-		echo "<p style=\"text-align:center; width:90%;\"><big>👉&nbsp;&nbsp;<a href=\"\" onclick=\"window.close();\">Close this page</a></big></p>";
-		echo "</div>";
-		die();
+		$file1 = $midiport;
+		$file2 = $dir_midi_resources.$project_fullname."_midiport";
+	//	echo "<p>file2 = ".$file2."</p>";
+		if(file_exists($file2)) copy($file2,$file1);
+		else {
+			echo "<p style=\"text-align:center;\"><big>You first need to SAVE MIDI ports</big></p>";
+			echo "<p style=\"text-align:center; width:90%;\"><big>👉&nbsp;&nbsp;<a href=\"\" onclick=\"window.close();\">Close this page</a></big></p>";
+			echo "</div>";
+			die();
+			}
 		}
 	$midifile = $project_name.".mid";
 	if(file_exists($midifile)) {
@@ -196,7 +201,7 @@ echo "</div>";
 	@unlink($trace_csound);
 	$trace_csound = '';
 	
-	/* echo "application_path = ".$application_path."<br />";
+	/* echo "<br />@@@@application_path = ".$application_path."<br />";
 	echo "console = ".$console."<br />"; */
 	$command = $application_path.$console." ".$instruction;
 	

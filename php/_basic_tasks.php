@@ -4790,8 +4790,8 @@ function areFilesDifferent($file1,$file2) {
 
 function store_midiressources($filename) {
 	global $temp_midi_ressources, $dir_midi_resources;
-	$file1 = $temp_midi_ressources."midiport";
-	$file2 = $dir_midi_resources.$filename."_midiport";
+	$file1 = $temp_midi_ressources."midiport";	// The temporary file
+	$file2 = $dir_midi_resources.$filename."_midiport"; // The storage
 	if(areFilesDifferent($file1,$file2)) {
 		copy($file1,$file2);
 //		echo "<br /><i><span id=\"refresh\">MIDI ports updated</span></i>";
