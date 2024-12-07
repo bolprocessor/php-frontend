@@ -2533,7 +2533,6 @@ function delete_settings_entry($entry) {
 function display_darklight() {
 	global $bp_application_path;
 	echo "<div style=\"background-color:transparent; display:flex; align-items:center; margin-left:1em;float:right;\">";
-//	echo "<img id=\"darkModeToggle\" title=\"Bulb Png PNGs by Vecteezy\" src=\"pict/bulb.png\" style=\"width:30px; cursor: pointer;\"/>";
 	echo "<div title=\"Switch on/off the light\" id=\"darkModeToggle\" class=\"myswitch\"/></div>";
 	echo "</div>";
 	}
@@ -2541,7 +2540,7 @@ function display_darklight() {
 function display_console_state() {
 	global $bp_application_path, $absolute_application_path, $panicfile, $filename, $url_this_page, $console, $file_format;
 	 echo "<div style=\"display:flex; align-items:center; float:right; padding:6px; background-color:transparent;\">";
-	 echo "<a target=\"_blank\" href=\"".$bp_application_path."/php\"><img src=\"pict/BP3-logo.png\" style=\"width:70px; margin-bottom:12px;\"/></a>";
+	 echo "<a target=\"_blank\" href=\"".$bp_application_path."php\"><img src=\"pict/BP3-logo.png\" style=\"width:70px; margin-bottom:12px;\"/></a>";
 	 echo "<span style=\"margin-left: 1em;\">";
 	 $output = check_console();
 	 if($output <> '') {
@@ -2826,7 +2825,7 @@ function show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,
 				echo "<div id=\"scales\"  style=\"border-radius: 15px; padding:6px;\"><br />";
 				}
 			else {
-				echo "<p style=\"margin-bottom:0px;\">Tonal resource file <span class=\"green-text\">‘".$tonality_file."’</span> contains the definition of this tonal scale:";
+				echo "<p style=\"margin-bottom:0px;\">Tonal resource file <span class=\"green-text\">‘".$tonality_file."’</span> contains the definition of tonal scale(s):";
 				echo "<div>";
 				}
 			echo "<ul style=\"margin-top:0px; margin-bottom:0px\">";
@@ -2900,6 +2899,7 @@ function list_of_tonal_scales($tonality_file) {
 				$dir_image = $dir_scale_images.$clean_name_of_file.".png";
 				if(file_exists($dir_image)) {
 					$k++; if($k > 10) $k = 0;
+			//		echo "dir_image = ".$dir_image."<br />";
 					$clean_name_of_file = str_replace("#","_",$name_of_file);
 					$list[$j] .= " <span class=\"red-text\">➡</span>&nbsp;".popup_link($clean_name_of_file,"image",500,410,(100 * $k),$dir_image);
 					}
@@ -4751,32 +4751,23 @@ function show_note_convention_form($type,$note_convention,$settings_file) {
 
 function show_file_format_choice($type,$file_format,$url_this_page,$filename) {
 	global $temp_midi_ressources,$dir_midi_resources;
-	echo "<input type=\"radio\" name=\"new_file_format\" value=\"rtmidi\"";
+	echo "<input type=\"radio\" style=\"margin-bottom:0.5em;\" name=\"new_file_format\" value=\"rtmidi\"";
 	if($file_format == "rtmidi") echo " checked";
 	echo ">Real-time MIDI";
 	if($type == "grammar") {
-		echo "<br /><input type=\"radio\" id=\"data\" name=\"new_file_format\" value=\"data\"";
+		echo "<br /><input type=\"radio\" style=\"margin-bottom:0.5em;\" name=\"new_file_format\" value=\"data\"";
 		if($file_format == "data") echo " checked";
 		echo ">BP data file";
 		}
-	echo "<br /><input type=\"radio\" name=\"new_file_format\" value=\"midi\"";
+	echo "<br /><input type=\"radio\" style=\"margin-bottom:0.5em;\" name=\"new_file_format\" value=\"midi\"";
 	if($file_format == "midi") echo " checked";
 	echo ">MIDI file";
 	if(file_exists("csound_version.txt")) {
-		echo "<br /><input type=\"radio\" name=\"new_file_format\" value=\"csound\"";
+		echo "<br /><input type=\"radio\" style=\"margin-bottom:0.5em;\" name=\"new_file_format\" value=\"csound\"";
 		if($file_format == "csound") echo " checked";
 		echo ">Csound score";
 		}
 	echo "<br /><input class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#tonal\" name=\"savethisfile\" value=\"SAVE format\">";
-	if($file_format == "rtmidi") {
-		$file1 = $temp_midi_ressources."midiport";
-		$file2 = $dir_midi_resources.$filename."_midiport";
-		if(areFilesDifferent($file1,$file2)) {
-		/*	copy($file1,$file2);
-			echo "<br /><i><span id=\"refresh\">MIDI ports updated</span></i>"; */
-	//		echo "<br /><input id=\"refresh\" class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."\" name=\"reload\" value=\"REFRESH\">";
-			}
-		}
 	return;
 	}
 
@@ -4794,7 +4785,6 @@ function store_midiressources($filename) {
 	$file2 = $dir_midi_resources.$filename."_midiport"; // The storage
 	if(areFilesDifferent($file1,$file2)) {
 		copy($file1,$file2);
-//		echo "<br /><i><span id=\"refresh\">MIDI ports updated</span></i>";
 		}
 	return;
 	}
