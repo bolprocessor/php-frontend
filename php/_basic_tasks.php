@@ -2822,10 +2822,10 @@ function show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,
 			if($max_scales > 1)  {
 				$i = 0;
 				echo "<p id=\"tonal\" style=\"margin-bottom:0px;\">Tonality resource file <span class=\"green-text\">‘".$tonality_file."’</span> contains definitions of tonal scales&nbsp;<span class=\"red-text\">➡</span>&nbsp;<button style=\"background-color:aquamarine; border-radius: 6px; font-size:large;\" onclick=\"togglescales(); return false;\">Show/hide tonal scales</button>";
-				echo "<div id=\"scales\"  style=\"border-radius: 15px; padding:6px;\"><br />";
+				echo "<div id=\"scales\" style=\"border-radius: 15px; padding:6px;\"><br />";
 				}
 			else {
-				echo "<p style=\"margin-bottom:0px;\">Tonal resource file <span class=\"green-text\">‘".$tonality_file."’</span> contains the definition of tonal scale(s):";
+				echo "<p style=\"margin-bottom:0px;\">Tonal resource file <span class=\"green-text\">‘".$tonality_file."’</span> contains the definition of a tonal scale:";
 				echo "<div>";
 				}
 			echo "<ul style=\"margin-top:0px; margin-bottom:0px\">";

@@ -267,11 +267,11 @@ p {
 
 body.light-mode .disabled {
     opacity: 0.6;
-    cursor: auto !important;
+    cursor: not-allowed !important;
 	}
 .disabled {
     opacity: 0.6;
-    cursor: auto !important;
+    cursor: not-allowed !important;
 	}
 
 input[type=text] {
