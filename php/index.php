@@ -657,7 +657,7 @@ function display_directory($test,$dir,$filter) {
 		if(is_integer($pos=stripos($thisfile,"linux-scripts")) AND $pos == 0) continue; 
 		if($thisfile == "resources" OR $thisfile == "source" OR $thisfile == "temp_bolprocessor" OR $thisfile == "Makefile" OR $thisfile == "my_output" OR $thisfile == "php" OR $thisfile == "www" OR $thisfile == "License.txt" OR $thisfile == "BP3-To-Do.txt" OR $thisfile == "Credits.txt" OR $thisfile == "bp_compile_result.txt" OR $thisfile == "test.php") continue;
 		if($test) {
-			if(($new_name = new_name($thisfile)) <> $thisfile) rename($dir.SLASH.$thisfile,$dir.SLASH.$new_name);
+			if(($new_name = new_name($thisfile,"file")) <> $thisfile) rename($dir.SLASH.$thisfile,$dir.SLASH.$new_name);
 			}
 		if($move_files) $check_box = "<input type=\"checkbox\" name=\"move_".$i_file."\"> ";
 		else $check_box = '';

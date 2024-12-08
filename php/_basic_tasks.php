@@ -472,7 +472,7 @@ function extract_data($compact,$content) {
 			if($i > 1 OR $line == '') $header = FALSE;
 			continue;
 			}
-		if(($new_name = new_name($line)) <> $line) {
+		if(($new_name = new_name($line,"instruction")) <> $line) {
 			$line = $new_name; // Convert old prefixes/prefixes to new ones
 	/*		if(!$said) {
 				echo "line = ".$line."<br />";
@@ -1850,7 +1850,7 @@ function old_name($name) {
 	return $name;
 	}
 
-function new_name($name) {
+function new_name($name,$type) {
 	$table = explode('.',$name);
 	$newprefix = $newsuffix = '';
 	switch(trim($table[0])) {
@@ -1859,6 +1859,9 @@ function new_name($name) {
 			break;
 		case "-mi":
 			$newprefix = "-so";
+			break;
+		case "-or":  // Obsolete "orchestra"
+			if($type == "instruction") return '';
 			break;
 		}
 	if($newprefix <> '') {
