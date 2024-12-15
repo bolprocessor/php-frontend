@@ -954,54 +954,6 @@ function clean_up_file($file) { // NOT USED
 	return $file;
 	}
 
-function get_setting($parameter,$settings_file) {
-	global $dir;
-	$bp_parameter_names = @file_get_contents("settings_names.txt",TRUE);
-	if($bp_parameter_names == FALSE) return "error reading settings_names.txt";
-	$table = explode(chr(10),$bp_parameter_names);
-	$imax = count($table);
-	$imax_parameters = 0;
-	for($i = 0; $i < $imax; $i++) {
-		$line = trim($table[$i]);
-		if($line == "-- end --") break;
-		$imax_parameters++;
-		$table2 = explode(chr(9),$line);
-		$r = str_replace(chr(9),".",$line);
-		if(count($table2) < 3) echo "ERR: ".$table2[0]."<br />";
-		$parameter_name[$i] = $table2[0];
-		$parameter_unit[$i] = $table2[1];
-		$parameter_edit[$i] = $table2[2];
-		if(count($table2) > 3 AND $table2[3] > 0)
-			$parameter_yesno[$i] = TRUE;
-		else $parameter_yesno[$i] = FALSE;
-		}
-	$content = @file_get_contents($dir.$settings_file,TRUE);
-	if($content == FALSE) return "error reading ".$dir.$settings_file;
-	$extract_data = extract_data(TRUE,$content);
-	$content = $extract_data['content'];
-	$table = explode(chr(10),$content);
-	$i = -1;
-	if($parameter == "note_convention") $i = 47;
-	if($parameter == "nature_of_time") $i = 6;
-	if($parameter == "show_production") $i = 14;
-	if($parameter == "trace_production") $i = 17;
-	if($parameter == "produce_all_items") $i = 13;
-	if($parameter == "random_seed") $i = 45;
-	if($parameter == "non_stop_improvize") $i = 10;
-	if($parameter == "max_items") $i = 11;
-	if($parameter == "p_clock") $i = 7;
-	if($parameter == "q_clock") $i = 8;
-	if($parameter == "max_time_computing") $i = 44;
-	if($parameter == "diapason") $i = 63;
-	if($parameter == "C4key") $i = 62;
-	if($parameter == "csound_default_orchestra") $i = 1;
-	if($parameter == "quantization") $i = 2;
-	if($parameter == "quantize") $i = 5;
-	if($parameter == "time_resolution") $i = 3;
-	if($i <> -1) return $table[$i];
-	else return '';
-	}
-
 function note_convention($i) {
 	switch($i) {
 		case 0: $c = "english"; break;
@@ -4094,7 +4046,6 @@ function display_midi_ports($filename) {
 			echo "<p id=\"timespan2\" style=\"color:red;\">You can't have more than 32 inputs!</p>";
 			}
 		else {
-		//	echo "<p id=\"timespan2\" style=\"color:red;\">Created an input!</p>";
 			$MIDIinput[$NumberMIDIinputs] = -1;
 			$MIDIinputname[$NumberMIDIinputs] = "new input";
 			$MIDIinputcomment[$NumberMIDIinputs] = "";
@@ -4106,7 +4057,6 @@ function display_midi_ports($filename) {
 			echo "<p id=\"timespan2\" style=\"color:red;\">You can't have more than 32 inputs!</p>";
 			}
 		else {
-		//	echo "<p id=\"timespan2\" style=\"color:red;\">Created an output!</p>";
 			$MIDIoutput[$NumberMIDIoutputs] = -1;
 			$MIDIoutputname[$NumberMIDIoutputs] = "new output";
 			$MIDIoutputcomment[$NumberMIDIoutputs] = "";
@@ -4790,5 +4740,68 @@ function store_midiressources($filename) {
 		copy($file1,$file2);
 		}
 	return;
+	}
+
+function convert_to_json($dir,$settings_file) {
+	// Convert an old settings file to JSON format
+	global $top_header;
+	if(!file_exists($dir.$settings_file)) return;
+	$content = @file_get_contents($dir.$settings_file,TRUE);
+	if($content[0] == '{') return;
+	echo "<p>👉 Settings file has been converted to JSON format</p>";
+	$bp_parameter_names = @file_get_contents("settings_names.txt",TRUE);
+	if($bp_parameter_names === FALSE) echo "<p style=\"color:red;\">ERROR reading ‘settings_names.txt’</p>";
+	$table = explode(chr(10),$bp_parameter_names);
+	$imax = count($table);
+	$imax_parameters = 0;
+	for($i = 0; $i < $imax; $i++) {
+		$line = trim($table[$i]);
+		if($line == "-- end --") break;
+		$imax_parameters++;
+		$table2 = explode(chr(9),$line);
+		if(count($table2) < 3) echo "ERROR: ".$table2[0]."<br />";
+		$parameter_name[$i] = $table2[0];
+		$parameter_unit[$i] = $table2[1];
+		$parameter_edit[$i] = $table2[2];
+		if(count($table2) > 3 AND $table2[3] > 0)
+			$parameter_yesno[$i] = 1;
+		else $parameter_yesno[$i] = 0;
+		}
+	$extract_data = extract_data(TRUE,$content);
+	$content = $extract_data['content'];
+	$table = explode(chr(10),$content);
+	$imax_file = count($table);
+	echo "<p class=\"green-text\">".$imax_file." parameters</p>";
+	$imax = $imax_file; $start = TRUE;
+	if($imax_file < $imax_parameters) $imax = $imax_parameters;
+	$settings = array();
+	$file_header = $top_header."\n// Settings file saved as \"".$settings_file."\". Date: ".gmdate('Y-m-d H:i:s');
+	$settings['header'] = str_replace('"',"'",$file_header);
+	for($i = $j = 0; $i < $imax; $i++) {
+		$value = trim($table[$i]);
+		if($start AND !ctype_digit($value)) {
+			echo "Skipping old header = “".$value."”<br />";
+			$j++;
+			continue; // Eliminate old versions of headers
+			}
+		$start = FALSE;
+		if(!isset($parameter_edit[$i]) OR !$parameter_edit[$i]) {
+			$j++;
+			continue;
+			}
+		$the_name = str_replace(' ','_',$parameter_name[$i]);
+		$settings[$the_name]['value'] = $value;
+		$settings[$the_name]['unit'] = $parameter_unit[$i];
+		$settings[$the_name]['boolean'] = $parameter_yesno[$i];
+		}
+	$settings = recursive_strval($settings);
+	$jsonData = json_encode($settings,JSON_PRETTY_PRINT);
+    file_put_contents($dir.$settings_file,$jsonData);
+	return;
+	}
+
+function recursive_strval($data) {
+    if(is_array($data)) return array_map('recursive_strval',$data);
+    return strval($data);
 	}
 ?>

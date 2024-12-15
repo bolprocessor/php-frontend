@@ -1,5 +1,5 @@
 Port		0	
-Csound orchestra	By default: "0-default.orc"	1	
+Csound orchestra	By default: "0-default.orc"	0	
 Quantization	ms (deft 10)	1
 Time resolution	ms (deft 10)	1
 Sync delay	ms after "wait" (deft 380)	1
@@ -18,7 +18,7 @@ Trace microtonality		1	1
 Trace production		1	1
 Choose candidate rule	(not implemented)	1	1
 Display final score	Bol Processor score	1	1
-Show graphics	ObjectGraph OR PianoRoll, see below	1	1
+Show graphics	Object graph or Pianoroll, see below	1	1
 Allow randomize		1	1
 Time setting display		1	1
 Time setting step	(not implemented)	1	1
@@ -108,7 +108,7 @@ Font size		0
 Font size		0
 Font size		0
 Font size		0
-Default block key for scale in Csound	(0..127) e.g. 60 for 'C4' or 69 for 'A4'	1
+Default block key	(0..127) e.g. 60 for 'C4' or 69 for 'A4'	1
 MIDI output filter	(will be explained later)	0
 B# instead of C		1	1
 Db instead of C#		1	1

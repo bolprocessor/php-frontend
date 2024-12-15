@@ -328,7 +328,25 @@ $diapason = 440; $C4key = 60;
 $dir_base = str_replace($bp_application_path,'',$dir);
 $found_orchestra_in_settings = $quantize = FALSE;
 if($settings_file <> '' AND file_exists($dir.$settings_file)) {
-	$show_production = get_setting("show_production",$settings_file);
+	convert_to_json($dir,$settings_file);
+	$content_json = @file_get_contents($dir.$settings_file,TRUE);
+	$settings = json_decode($content_json,TRUE);
+	$show_production = $settings['Display_production']['value'];
+	$trace_production = $settings['Trace_production']['value'];
+	$note_convention = $settings['Note_convention']['value'];
+	$non_stop_improvize = $settings['Non-stop_improvize']['value'];
+	$max_items = $settings['Max_items_produced']['value'];
+	$p_clock = $settings['Pclock']['value'];
+	$q_clock = $settings['Qclock']['value'];
+	$max_time_computing = $settings['Max_computation_time']['value'];
+	$produce_all_items = $settings['Produce_all_items']['value'];
+	$diapason = $settings['A4_frequency_(diapason)']['value'];
+	$C4key = $settings['C4_(middle_C)_key_number']['value'];
+	$time_resolution = $settings['Time_resolution']['value'];
+	$quantization = $settings['Quantization']['value'];
+	$quantize = $settings['Quantize']['value'];
+	$nature_of_time_settings = $settings['Striated_time']['value'];
+/*	$show_production = get_setting("show_production",$settings_file);
 	$trace_production = get_setting("trace_production",$settings_file);
 	$note_convention = get_setting("note_convention",$settings_file);
 	$non_stop_improvize = get_setting("non_stop_improvize",$settings_file);
@@ -337,16 +355,13 @@ if($settings_file <> '' AND file_exists($dir.$settings_file)) {
 	$q_clock = get_setting("q_clock",$settings_file);
 	$max_time_computing = get_setting("max_time_computing",$settings_file);
 	$produce_all_items = get_setting("produce_all_items",$settings_file);
-//	if($produce_all_items) $show_production = TRUE;
-//	$random_seed = get_setting("random_seed",$settings_file);
 	$diapason = get_setting("diapason",$settings_file);
 	$C4key = get_setting("C4key",$settings_file);
 	$csound_default_orchestra = get_setting("csound_default_orchestra",$settings_file);
 	$time_resolution = get_setting("time_resolution",$settings_file);
 	$quantization = get_setting("quantization",$settings_file);
 	$quantize = get_setting("quantize",$settings_file);
-	$nature_of_time_settings = get_setting("nature_of_time",$settings_file);
-	if($csound_default_orchestra <> '') $found_orchestra_in_settings = TRUE;
+	$nature_of_time_settings = get_setting("nature_of_time",$settings_file); */
 	}
 
 if($test) echo "url_this_page = ".$url_this_page."<br />";
