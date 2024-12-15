@@ -368,8 +368,13 @@ if($instruction <> "help") {
 			}
 		}
     $stopfile = str_replace(SLASH,'/',$stopfile);
+    $pausefile = str_replace(SLASH,'/',$pausefile);
+    $continuefile = str_replace(SLASH,'/',$continuefile);
 	echo "<p id=\"wait\" style=\"text-align:center; background-color:yellow; color:black;\"><br /><big><b><span class=\"blinking\">… Bol Processor console is working …</span></b></big><br />(Don't close this window!)<br /><br />";
-	echo "<button type=\"button\" class=\"produce\" onclick=\"createFile('".$stopfile."');\">Click to STOP</button><br /><br /></p>\n";
+	echo "<button type=\"button\" class=\"produce\" onclick=\"createFile('".$stopfile."');\">Click to STOP</button>";
+	echo "&nbsp;<button type=\"button\" class=\"produce\" onclick=\"createFile('".$pausefile."');\">Pause</button>";
+	echo "&nbsp;<button type=\"button\" class=\"produce\" onclick=\"createFile('".$continuefile."');\">Continue</button>";
+	echo "<br /><br /></p>\n";
 	}
 echo str_repeat(' ', 10240);  // send extra spaces to fill browser buffer, useful for Windows
 if(ob_get_level() > 0) ob_flush();
@@ -404,7 +409,7 @@ if(isset($data_path) AND $data_path <> '') {
 		echo "</b></p>";
 		}
 	}
-@unlink($stopfile); @unlink($panicfile);
+@unlink($stopfile); @unlink($panicfile); @unlink($pausefile); @unlink($continuefile);
 session_abort();
 // $command = "ASAN_OPTIONS=detect_leaks=0 ".$command; // This is for debugging
 $o = send_to_console($command);
@@ -677,6 +682,7 @@ if($no_error AND $file_format == "csound") {
 $handle = FALSE;
 $terminated = FALSE;
 if(file_exists($stopfile) OR file_exists($panicfile)) $terminated = TRUE;
+@unlink($pausefile); @unlink($continuefile);
 if($terminated) echo "<p style=\"color:red;\"><big>👉 The performance has been interrupted</big></p>";
 if($n_messages > 6000) echo "<p><span class=\"red-text\">➡</span> Too many messages produced! (".$n_messages.")</p>";
 else {

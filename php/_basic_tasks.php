@@ -116,6 +116,8 @@ $temp_dir .= SLASH;
 if(!file_exists($temp_dir."messages")) mkdir($temp_dir."messages",$permissions,true);
 umask($oldmask);
 $panicfile = $temp_dir."messages".SLASH."_panic";
+$pausefile = $temp_dir."messages".SLASH."_pause";
+$continuefile = $temp_dir."messages".SLASH."_continue";
 $temp_dir_abs = $temp_dir;
 if(windows_system()) $temp_dir_abs = str_replace("..".SLASH,$absolute_application_path,$temp_dir);
 
