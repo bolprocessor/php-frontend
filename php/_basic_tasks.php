@@ -4829,8 +4829,14 @@ function convert_to_json($dir,$settings_file) {
 			$j++;
 			continue;
 			}
-		$the_token = $token[$parameter_name[$i]];
-		$settings[$the_token]['name'] = $parameter_name[$i];
+		$key = $parameter_name[$i];
+		if($key == "Csound trace") $key = "Trace Csound";
+		if($key == "Ignore constraints") $key = "Ignore constraints in time setting";
+		if($key == "GraphicScaleP") $key = "Graphic scale P";
+		if($key == "GraphicScaleQ") $key = "Graphic scale Q";
+		if($key == "SamplingRate") $key = "Sampling rate";
+		$the_token = $token[$key];
+		$settings[$the_token]['name'] = $key;
 		$settings[$the_token]['value'] = $value;
 		$settings[$the_token]['unit'] = $parameter_unit[$i];
 		$settings[$the_token]['boolean'] = $parameter_yesno[$i];
