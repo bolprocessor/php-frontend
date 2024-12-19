@@ -311,7 +311,7 @@ if($time_structure == "smooth") $nature_of_time = SMOOTH;
 $templates = $extract_data['templates'];
 $found_elsewhere = FALSE;
 if($alphabet_file <> '' AND $objects_file == '') {
-	$objects_file = get_name_mi_file($dir.$alphabet_file);
+	$objects_file = get_name_so_file($dir.$alphabet_file);
 	if($objects_file <> '') $found_elsewhere = TRUE;
 	}
 $found_orchestra_in_instruments = FALSE;
@@ -326,42 +326,29 @@ $show_production = $trace_production = $note_convention = $non_stop_improvize = 
 $csound_default_orchestra = '';
 $diapason = 440; $C4key = 60;
 $dir_base = str_replace($bp_application_path,'',$dir);
-$found_orchestra_in_settings = $quantize = FALSE;
+$found_orchestra_in_settings = $quantize = $play_each_sub = FALSE;
 if($settings_file <> '' AND file_exists($dir.$settings_file)) {
 	convert_to_json($dir,$settings_file);
 	$content_json = @file_get_contents($dir.$settings_file,TRUE);
 	$settings = json_decode($content_json,TRUE);
-	$show_production = $settings['Display_production']['value'];
-	$trace_production = $settings['Trace_production']['value'];
-	$note_convention = $settings['Note_convention']['value'];
-	$non_stop_improvize = $settings['Non-stop_improvize']['value'];
-	$max_items = $settings['Max_items_produced']['value'];
+	
+	$show_production = $settings['DisplayProduce']['value'];
+	$trace_production = $settings['TraceProduce']['value'];
+	$play_each_sub = $settings['UseEachSub']['value'];
+	$max_items = $settings['MaxItemsProduce']['value'];
 	$p_clock = $settings['Pclock']['value'];
 	$q_clock = $settings['Qclock']['value'];
-	$max_time_computing = $settings['Max_computation_time']['value'];
-	$produce_all_items = $settings['Produce_all_items']['value'];
-	$diapason = $settings['A4_frequency_(diapason)']['value'];
-	$C4key = $settings['C4_(middle_C)_key_number']['value'];
-	$time_resolution = $settings['Time_resolution']['value'];
+	$max_time_computing = $settings['MaxConsoleTime']['value'];
+	$produce_all_items = $settings['AllItems']['value'];
+	$diapason = $settings['A4freq']['value'];
+	$C4key = $settings['C4key']['value'];
+	$time_resolution = $settings['Time_res']['value'];
 	$quantization = $settings['Quantization']['value'];
 	$quantize = $settings['Quantize']['value'];
-	$nature_of_time_settings = $settings['Striated_time']['value'];
-/*	$show_production = get_setting("show_production",$settings_file);
-	$trace_production = get_setting("trace_production",$settings_file);
-	$note_convention = get_setting("note_convention",$settings_file);
-	$non_stop_improvize = get_setting("non_stop_improvize",$settings_file);
-	$max_items = get_setting("max_items",$settings_file);
-	$p_clock = get_setting("p_clock",$settings_file);
-	$q_clock = get_setting("q_clock",$settings_file);
-	$max_time_computing = get_setting("max_time_computing",$settings_file);
-	$produce_all_items = get_setting("produce_all_items",$settings_file);
-	$diapason = get_setting("diapason",$settings_file);
-	$C4key = get_setting("C4key",$settings_file);
-	$csound_default_orchestra = get_setting("csound_default_orchestra",$settings_file);
-	$time_resolution = get_setting("time_resolution",$settings_file);
-	$quantization = get_setting("quantization",$settings_file);
-	$quantize = get_setting("quantize",$settings_file);
-	$nature_of_time_settings = get_setting("nature_of_time",$settings_file); */
+	$nature_of_time_settings = $settings['Nature_of_time']['value'];
+
+	$note_convention = $settings['NoteConvention']['value'];
+	$non_stop_improvize = $settings['Improvize']['value'];
 	}
 
 if($test) echo "url_this_page = ".$url_this_page."<br />";
@@ -550,28 +537,24 @@ if($non_stop_improvize > 0) {
 	if($file_format <> "rtmidi") echo ": <i>only ".$max_items." variations will be produced</i>";
 	echo "<br />";
 	}
+if($play_each_sub > 0) {
+	echo "• <span class=\"red-text\">Play each substitution</span> (SUB grammar) as set by <span class=\"green-text\">‘".$settings_file."’</span>";
+	echo "<br />";
+	}
 if($diapason <> 440) echo "• <span class=\"red-text\">Diapason</span> (A4 frequency) = <span class=\"red-text\">".$diapason."</span> Hz as set by <span class=\"green-text\">‘".$settings_file."’</span><br />";
 if($C4key <> 60) {
 	echo "• <span class=\"red-text\">C4 key number</span> = <span class=\"red-text\">".$C4key."</span> as set by <span class=\"green-text\">‘".$settings_file."’</span>";
 	if($file_format == "csound") echo " ➡ this has no incidence on Csound scores";
 	echo "<br />";
 	}
-if($found_elsewhere AND $objects_file <> '') echo "• Sound-object prototype file = <span class=\"green-text\">‘".$objects_file."’</span> found in <span class=\"green-text\">‘".$alphabet_file."’</span><br />";
-if($note_convention <> '') echo "• Note convention is <span class=\"red-text\">‘".ucfirst(note_convention(intval($note_convention)))."’</span> as per <span class=\"green-text\">‘".$settings_file."’</span><br />";
-else echo "• Note convention is <span class=\"red-text\">‘English’</span> by default<br />";
+if($found_elsewhere AND $objects_file <> '') echo "• <span class=\"red-text\">Sound-object prototype</span> file = <span class=\"green-text\">‘".$objects_file."’</span> found in <span class=\"green-text\">‘".$alphabet_file."’</span><br />";
 if($produce_all_items == 1) {
-	echo "• Produce all items has been set ON by <span class=\"green-text\">‘".$settings_file."’</span>";
+	echo "• <span class=\"red-text\">Produce all items</span> has been set ON by <span class=\"green-text\">‘".$settings_file."’</span>";
 	if($file_format <> "rtmidi") echo ": <i>only ".$max_items." variations will be produced</i>";
 	echo "<br />";
 	}
-else if($show_production == 1) echo "• Show production has been set ON by <span class=\"green-text\">‘".$settings_file."’</span><br />";
-if($trace_production == 1) echo "• Trace production has been set ON by <span class=\"green-text\">‘".$settings_file."’</span><br />";
-/* if($settings_file <> '' AND file_exists($dir.$settings_file) AND isset($random_seed) AND $non_stop_improvize > 0) {
-	if($random_seed > 0)
-		echo "• Random seed has been set to <span class=\"red-text\">".$random_seed."</span> by <span class=\"green-text\">‘".$settings_file."’</span> ➡ Series will be repeated.<br />";
-	else
-		echo "• Random seed is ‘no seed’ as per <span class=\"green-text\">‘".$settings_file."’</span> ➡ Series will vary.<br />";
-	} */
+else if($show_production == 1) echo "• <span class=\"red-text\">Show production</span> has been set ON by <span class=\"green-text\">‘".$settings_file."’</span><br />";
+if($trace_production == 1) echo "• <span class=\"red-text\">Trace production</span> has been set ON by <span class=\"green-text\">‘".$settings_file."’</span><br />";
 if($max_time_computing > 0) {
 	echo "• Max console computation time has been set to <span class=\"red-text\">".$max_time_computing."</span> seconds by <span class=\"green-text\">‘".$settings_file."’</span>";
 	if($max_time_computing < 10) echo "&nbsp;<span class=\"red-text\">➡</span>&nbsp;probably too small!";
@@ -581,6 +564,8 @@ if($max_time_computing > 0) {
 		}
 	echo "<br />";
 	}
+if($note_convention <> '') echo "• Note convention is <span class=\"red-text\">‘".strtoupper(note_convention(intval($note_convention)))."’</span> as per <span class=\"green-text\">‘".$settings_file."’</span><br />";
+else echo "• Note convention is <span class=\"red-text\">‘ENGLISH’</span> by default<br />";
 if($file_format == "csound") {
 	if($csound_orchestra <> '' AND file_exists($dir.$csound_orchestra)) {
 		rename($dir.$csound_orchestra,$dir_csound_resources.$csound_orchestra);

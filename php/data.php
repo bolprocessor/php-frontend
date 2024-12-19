@@ -121,10 +121,6 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$declarations .= $tonality_file."\n";
 			$content = str_replace($tonality_file,'',$content);
 			}
-		if($objects_file <> '') {
-			$declarations .= $objects_file."\n";
-			$content = str_replace($objects_file,'',$content);
-			}
 		$_POST['thistext'] = $content;
 		if(!$reload_musicxml) {
 			$tmpFile = $_FILES['music_xml_import']['tmp_name'];
@@ -1191,7 +1187,7 @@ if($time_structure == "smooth") $nature_of_time = SMOOTH;
 $templates = $extract_data['templates'];
 $found_elsewhere = FALSE;
 if($alphabet_file <> '' AND $objects_file == '') {
-	$objects_file = get_name_mi_file($dir.$alphabet_file);
+	$objects_file = get_name_so_file($dir.$alphabet_file);
 	if($objects_file <> '') $found_elsewhere = TRUE;
 	}
 $found_orchestra_in_instruments = FALSE;
@@ -1220,37 +1216,24 @@ if($settings_file <> '' AND file_exists($dir.$settings_file)) {
 	convert_to_json($dir,$settings_file);
 	$content_json = @file_get_contents($dir.$settings_file,TRUE);
 	$settings = json_decode($content_json,TRUE);
-	$show_production = $settings['Display_production']['value'];
-	$trace_production = $settings['Trace_production']['value'];
-	$note_convention = $settings['Note_convention']['value'];
-	$non_stop_improvize = $settings['Non-stop_improvize']['value'];
+
+	$show_production = $settings['DisplayProduce']['value'];
+	$trace_production = $settings['TraceProduce']['value'];
+	$note_convention = $settings['NoteConvention']['value'];
+	$non_stop_improvize = $settings['Improvize']['value'];
+	$max_items = $settings['MaxItemsProduce']['value'];
 	$p_clock = $settings['Pclock']['value'];
 	$q_clock = $settings['Qclock']['value'];
-	$max_time_computing = $settings['Max_computation_time']['value'];
-	$produce_all_items = $settings['Produce_all_items']['value'];
-	$diapason = $settings['A4_frequency_(diapason)']['value'];
-	$C4key = $settings['C4_(middle_C)_key_number']['value'];
-	$time_resolution = $settings['Time_resolution']['value'];
+	$max_time_computing = $settings['MaxConsoleTime']['value'];
+	$produce_all_items = $settings['AllItems']['value'];
+	$diapason = $settings['A4freq']['value'];
+	$C4key = $settings['C4key']['value'];
+	$time_resolution = $settings['Time_res']['value'];
 	$quantization = $settings['Quantization']['value'];
 	$quantize = $settings['Quantize']['value'];
-	$nature_of_time_settings = $settings['Striated_time']['value'];
-/*	$show_production = get_setting("show_production",$settings_file);
-	$trace_production = get_setting("trace_production",$settings_file);
-	$note_convention = get_setting("note_convention",$settings_file);
-	$non_stop_improvize = get_setting("non_stop_improvize",$settings_file);
-	$p_clock = get_setting("p_clock",$settings_file);
-	$q_clock = get_setting("q_clock",$settings_file);
-	$max_time_computing = get_setting("max_time_computing",$settings_file);
-	$produce_all_items = get_setting("produce_all_items",$settings_file);
-	$diapason = get_setting("diapason",$settings_file);
-	$C4key = get_setting("C4key",$settings_file);
-	$csound_default_orchestra = get_setting("csound_default_orchestra",$settings_file);
-	$time_resolution = get_setting("time_resolution",$settings_file);
-	$quantization = get_setting("quantization",$settings_file);
-	$quantize = get_setting("quantize",$settings_file);
-	$nature_of_time_settings = get_setting("nature_of_time",$settings_file); */
+	$nature_of_time_settings = $settings['Nature_of_time']['value'];
 	}
-if($quantization == 0) $quantize = FALSE;
+// if($quantization == 0) $quantize = FALSE;
 
 if(!isset($_POST['analyze_tonal'])) {
 	echo "<div style=\"padding:1em; width:690px;\" class=\"thinborder2\">";
@@ -1299,9 +1282,10 @@ if(!isset($_POST['analyze_tonal'])) {
 			}
 		echo "<br />";
 		}
-	if($note_convention <> '') echo "• Note convention is <span class=\"red-text\">‘".ucfirst(note_convention(intval($note_convention)))."’</span> as per <span class=\"green-text\">‘".$settings_file."’</span>";
+	if($found_elsewhere AND $objects_file <> '') echo "• <span class=\"red-text\">Sound-object prototype</span> file = <span class=\"green-text\">‘".$objects_file."’</span> found in <span class=\"green-text\">‘".$alphabet_file."’</span><br />";
+	if($note_convention <> '') echo "• Note convention is <span class=\"red-text\">‘".strtoupper(note_convention(intval($note_convention)))."’</span> as per <span class=\"green-text\">‘".$settings_file."’</span>";
 	else {
-		echo "• Note convention is <span class=\"red-text\">‘English’</span> by default";
+		echo "• Note convention is <span class=\"red-text\">‘ENGLISH’</span> by default";
 		}
 	echo "</div><br />";
 	}

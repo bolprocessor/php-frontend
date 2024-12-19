@@ -1,0 +1,128 @@
+Port		0	
+Csound orchestra	By default: "0-default.orc"	0	
+Quantization	ms (deft 10)	1
+Time resolution	ms (deft 10)	1
+Sync delay	ms after "wait" (deft 380)	1
+Quantize		1	1
+Striated time	(otherwise smooth)	1	1
+Pclock	Pclock/Qclock is the period of metronome (seconds)	1
+Qclock		1
+Jbutt (28 radio button settings)		0
+Non-stop improvize		1	1
+Max items produced	Except in real-time MIDI (deft 20)	1	
+Play each substitution		1	1
+Produce all items		1	1
+Display production		1	1
+Step-by-step produce	(not implemented)	1	1
+Trace microtonality		1	1
+Trace production		1	1
+Choose candidate rule	(not implemented)	1	1
+Display final score	Bol Processor score	1	1
+Show graphics	Object graph or Pianoroll, see below	1	1
+Allow randomize		1	1
+Time setting display		1	1
+Time setting step	(not implemented)	1	1
+Time setting trace		1	1
+Csound trace		1	1
+Use MIDI in/out		0	1
+Reset Notes	Send AllNotesOff, pedals off and reset pitchbend at the end of item	1	1
+Compute while playing		1	1
+Trace MIDI interactions		1	1
+Reset rule weights		1	1
+Reset rule flags	/this is a flag/	1	1
+Reset controllers	volume, panoramic, pressure, pitchbend, modulation	1	1
+Ignore constraints		1	1
+Write MIDI files		0	1
+Show messages		0	1
+Write Csound scores		0	1
+Opcode OMS (obsolete)		0	1
+Split terminal symbols		1	1
+Split |variables|		1	1
+Use text color		0	1
+Default buffer size	symbols	1
+Use color in graphics		0	1
+Use buffer limit		0	1
+Max computation time	seconds. Time for console's work (0 = no limit) Except in Improvize mode	1		
+Seed for randomization	Positive integer, or 0 if cards need to be shuffled	1
+Use keyboard tokens		0	1
+Note convention	0 = English: C, D, E...<br />1 = Italian/Spanish/French: do, re, mi...<br />2 = Indian: sa, re, ga...<br />3 = Keys<br />4 = Only from tonal scales(s)	1
+StartFromOne		0	1
+Smart cursor		0
+GraphicScaleP		1
+GraphicScaleQ		1
+MIDI input ID	(not used)	0
+MIDI output ID	(not used)	0
+Display bullets "&bull;"		0	1
+Play metronome ticks		0
+File save mode	0 = Prompt for changing filename<br />1 = Save each item to a new file<br />2 = Store all items to same file	0
+File write mode	0 = Write item immediately<br />1 = Write item after playing on MIDI	0
+MIDI file format	(0, 1 or 2)	0
+Csound file format	0 = MacOS<br />1 = Windows<br />2 = Unix	0
+ProgNrFrom		0
+Fade-out time	seconds (end of MIDI files and Csound scores)	1
+C4 (middle C) key number	(0..127) usually 60	1
+A4 frequency (diapason)	Hz (usually 440)	1
+Strike again NoteOn's	Keep checked unless you know why! (Read https://bp3.tech/csound-checkup/)	1	1
+Default volume	(1..127)	1
+Volume controller	(0..127) usually 7	1
+Default velocity	(1..127)	1
+Default panoramic	(0..127)	1
+Panoramic controller	(0..127) usually 10	1
+SamplingRate	samples per second, usually 50	1
+WMAX (39 windows)		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Font size		0
+Default block key	(0..127) e.g. 60 for 'C4' or 69 for 'A4'	1
+MIDI output filter	(will be explained later)	0
+B# instead of C		1	1
+Db instead of C#		1	1
+NameChoice		0	1
+Eb instead of D#		1	1
+Fb instead of E		1	1
+E# instead of F		1	1
+Gb instead of F#		1	1
+NameChoice		0	1
+Ab instead of G#		1	1
+NameChoice		0	1
+Bb instead of A#		1	1
+Cb instead of B		1	1
+MIDI input filter	(will be explained later)	0
+ShowObjectGraph		1	1
+ShowPianoRoll		1	1
+-- end --

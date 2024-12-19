@@ -2265,7 +2265,7 @@ function get_orchestra_filename($csound_file) {
 	return $csound_orchestra;
 	}
 
-function get_name_mi_file($this_file) {
+function get_name_so_file($this_file) {
 	$objects_file = '';
 	$content = @file_get_contents($this_file,TRUE);
 	if($content != FALSE) {
@@ -4747,17 +4747,55 @@ function store_midiressources($filename) {
 function convert_to_json($dir,$settings_file) {
 	// Convert an old settings file to JSON format
 	global $top_header;
-	if(!file_exists($dir.$settings_file)) return;
+	if(!file_exists($dir.$settings_file)) {
+		echo "<p>👉 Not found “".$dir.$settings_file."”</p>";
+		return;
+		}
 	$content = @file_get_contents($dir.$settings_file,TRUE);
-	if($content[0] == '{') return;
+	$token = get_settings_tokens();
+	if(count($token) == 0) return;
+	if($content[0] == '{') {
+		$settings = json_decode($content,TRUE);
+		if(!isset($settings['Time_res'])) {
+			echo "<p>👉 Converting an old JSON file</p>";
+			$new_settings = array();
+			foreach ($settings as $key => $item) {
+				if($key == "Csound trace") $key = "Trace Csound";
+				if($key == "Ignore constraints") $key = "Ignore constraints in time setting";
+				if($key == "GraphicScaleP") $key = "Graphic scale P";
+				if($key == "GraphicScaleQ") $key = "Graphic scale Q";
+				if($key == "SamplingRate") $key = "Sampling rate";
+				if(isset($token[str_replace('_',' ',$key)])) {
+					$newKey = $token[str_replace('_',' ',$key)]; // picked up from external function
+					if (is_array($item)) {
+						$new_settings[$newKey] = [
+							'name' => $key,
+							'value' => $item['value'],
+							'unit' => $item['unit'],
+							'boolean' => $item['boolean'],
+						];
+						}
+					else $new_settings[$newKey] = $item;
+					}
+				else if($key == "header") $new_settings[$key] = $item;
+				}
+			$new_settings = json_encode($new_settings,JSON_PRETTY_PRINT);
+			file_put_contents($dir.$settings_file,$new_settings);
+			}
+		return;
+		}
 	echo "<p>👉 Settings file has been converted to JSON format</p>";
-	$bp_parameter_names = @file_get_contents("settings_names.txt",TRUE);
-	if($bp_parameter_names === FALSE) echo "<p style=\"color:red;\">ERROR reading ‘settings_names.txt’</p>";
+	$bp_parameter_names = @file_get_contents("settings_names_old.txt",TRUE);
+	if($bp_parameter_names === FALSE) {
+		echo "<p style=\"color:red;\">ERROR reading ‘settings_names_old.txt’</p>";
+		return;
+		}
 	$table = explode(chr(10),$bp_parameter_names);
 	$imax = count($table);
 	$imax_parameters = 0;
 	for($i = 0; $i < $imax; $i++) {
 		$line = trim($table[$i]);
+		$line = str_replace('"','',$line);
 		if($line == "-- end --") break;
 		$imax_parameters++;
 		$table2 = explode(chr(9),$line);
@@ -4791,15 +4829,37 @@ function convert_to_json($dir,$settings_file) {
 			$j++;
 			continue;
 			}
-		$the_name = str_replace(' ','_',$parameter_name[$i]);
-		$settings[$the_name]['value'] = $value;
-		$settings[$the_name]['unit'] = $parameter_unit[$i];
-		$settings[$the_name]['boolean'] = $parameter_yesno[$i];
+		$the_token = $token[$parameter_name[$i]];
+		$settings[$the_token]['name'] = $parameter_name[$i];
+		$settings[$the_token]['value'] = $value;
+		$settings[$the_token]['unit'] = $parameter_unit[$i];
+		$settings[$the_token]['boolean'] = $parameter_yesno[$i];
 		}
 	$settings = recursive_strval($settings);
 	$jsonData = json_encode($settings,JSON_PRETTY_PRINT);
     file_put_contents($dir.$settings_file,$jsonData);
 	return;
+	}
+
+function get_settings_tokens() {
+	$token = array();
+	$bp_parameter_names = @file_get_contents("settings_names.tab",TRUE);
+	if($bp_parameter_names === FALSE) {
+		echo "<p style=\"color:red;\">ERROR reading ‘settings_names.tab’</p>";
+		return $token;
+		}
+	$table = explode(chr(10),$bp_parameter_names);
+	$imax = count($table);
+	for($i = 0; $i < $imax; $i++) {
+		$line = trim($table[$i]);
+		$line = str_replace('"','',$line);
+		if($line == "-- end --") break;
+		$table2 = explode(chr(9),$line);
+		if(count($table2) < 2  OR trim($table2[1]) == '') continue;
+		$token[$table2[1]] = $table2[0];
+	//	echo $token[$table2[1]]." => “".$table2[1]."”<br />";
+		}
+	return $token;
 	}
 
 function recursive_strval($data) {
