@@ -4759,25 +4759,25 @@ function convert_to_json($dir,$settings_file) {
 		if(!isset($settings['Time_res'])) {
 			echo "<p>👉 Converting an old JSON file</p>";
 			$new_settings = array();
-			foreach ($settings as $key => $item) {
-				if($key == "Csound trace") $key = "Trace Csound";
-				if($key == "Ignore constraints") $key = "Ignore constraints in time setting";
-				if($key == "GraphicScaleP") $key = "Graphic scale P";
-				if($key == "GraphicScaleQ") $key = "Graphic scale Q";
-				if($key == "SamplingRate") $key = "Sampling rate";
-				if(isset($token[str_replace('_',' ',$key)])) {
-					$newKey = $token[str_replace('_',' ',$key)]; // picked up from external function
-					if (is_array($item)) {
+			foreach ($settings as $name => $item) {
+				if($name == "Csound trace") $name = "Trace Csound";
+				if($name == "Ignore constraints") $name = "Ignore constraints in time setting";
+				if($name == "GraphicScaleP") $name = "Graphic scale P";
+				if($name == "GraphicScaleQ") $name = "Graphic scale Q";
+				if($name == "SamplingRate") $name = "Sampling rate";
+				if(isset($token[str_replace('_',' ',$name)])) {
+					$newKey = $token[str_replace('_',' ',$name)];
+					if(is_array($item)) {
 						$new_settings[$newKey] = [
-							'name' => $key,
+							'name' => $name,
 							'value' => $item['value'],
 							'unit' => $item['unit'],
 							'boolean' => $item['boolean'],
-						];
+							];
 						}
-					else $new_settings[$newKey] = $item;
+					else $new_settings[$newKey] = $item; // Never happens
 					}
-				else if($key == "header") $new_settings[$key] = $item;
+				else if($name == "header") $new_settings[$name] = $item;
 				}
 			$new_settings = json_encode($new_settings,JSON_PRETTY_PRINT);
 			file_put_contents($dir.$settings_file,$new_settings);
@@ -4829,14 +4829,14 @@ function convert_to_json($dir,$settings_file) {
 			$j++;
 			continue;
 			}
-		$key = $parameter_name[$i];
-		if($key == "Csound trace") $key = "Trace Csound";
-		if($key == "Ignore constraints") $key = "Ignore constraints in time setting";
-		if($key == "GraphicScaleP") $key = "Graphic scale P";
-		if($key == "GraphicScaleQ") $key = "Graphic scale Q";
-		if($key == "SamplingRate") $key = "Sampling rate";
-		$the_token = $token[$key];
-		$settings[$the_token]['name'] = $key;
+		$name = $parameter_name[$i];
+		if($name == "Csound trace") $name = "Trace Csound";
+		if($name == "Ignore constraints") $name = "Ignore constraints in time setting";
+		if($name == "GraphicScaleP") $name = "Graphic scale P";
+		if($name == "GraphicScaleQ") $name = "Graphic scale Q";
+		if($name == "SamplingRate") $name = "Sampling rate";
+		$the_token = $token[$name];
+		$settings[$the_token]['name'] = $name;
 		$settings[$the_token]['value'] = $value;
 		$settings[$the_token]['unit'] = $parameter_unit[$i];
 		$settings[$the_token]['boolean'] = $parameter_yesno[$i];

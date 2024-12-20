@@ -266,7 +266,7 @@ for($i = 0; $i < $imax; $i++) {
 		}
 	if($name == "Default_block_key_for_scale_in_Csound") $name = "Default_block_key";
 	echo "<tr>";
-	echo "<td>";
+	echo "<td style=\"vertical-align:top;\">";
 	if($param == "ShowObjectGraph") $name = "Show object graph";
 	if($param == "ShowPianoRoll") $name = "Show pianoroll";
 	echo "<input type=\"hidden\" name=\"param_".$i."\" value=\"".$param."\">";
@@ -275,19 +275,19 @@ for($i = 0; $i < $imax; $i++) {
 	echo "<input type=\"hidden\" name=\"unit_".$i."\" value=\"".$unit."\">";
 	echo str_replace('_',' ',$name);
 	echo "</td>";
-	echo "<td>";
+	echo "<td style=\"vertical-align:top;\">";
 	if($boolean) {
 		echo "<input type=\"checkbox\" name=\"parameter_".$i."\"";
 		if($value > 0) echo " checked";
 		echo ">";
 		}
 	else {
-		echo "&nbsp;<input type=\"text\" name=\"parameter_".$i."\" size=\"20\" style=\"background-color:CornSilk; border: none;\" value=\"";
+		echo "&nbsp;<input type=\"text\" name=\"parameter_".$i."\" size=\"15\" style=\"background-color:CornSilk; border: none;\" value=\"";
 		echo $value;
 		echo "\">";
 		}
 	echo "</td>";
-	echo "<td>";
+	echo "<td style=\"vertical-align:top;\">";
 	if($param == "Nature_of_time") {
 		if($value > 0) echo "Time is <span class=\"red-text\">STRIATED</span>";
 		else echo "Time is <span class=\"red-text\">SMOOTH</span>";

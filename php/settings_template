@@ -1,21 +1,9 @@
 {
-    "header": "\/\/ Bol Processor BP3\n\/\/ Settings file template",
+    "header": "\/\/ Bol Processor BP3\n\/\/ Settings file saved as '-se.Visser2'. Date: 2024-12-20 08:01:33",
     "Quantization": {
         "name": "Quantization",
         "value": "10",
         "unit": "ms (deft 10)",
-        "boolean": "0"
-    },
-    "Time_res": {
-        "name": "Time_resolution",
-        "value": "10",
-        "unit": "ms (deft 10)",
-        "boolean": "0"
-    },
-    "MIDIsyncDelay": {
-        "name": "Sync_delay",
-        "value": "380",
-        "unit": "ms after \"wait\" (deft 380)",
         "boolean": "0"
     },
     "Quantize": {
@@ -24,10 +12,22 @@
         "unit": "",
         "boolean": "1"
     },
+    "Time_res": {
+        "name": "Time resolution",
+        "value": "10",
+        "unit": "ms (deft 10)",
+        "boolean": "0"
+    },
+    "MIDIsyncDelay": {
+        "name": "Sync delay",
+        "value": "380",
+        "unit": "ms after wait (deft 380)",
+        "boolean": "0"
+    },
     "Nature_of_time": {
-        "name": "Striated_time",
+        "name": "Striated time",
         "value": "1",
-        "unit": "(otherwise smooth)",
+        "unit": "",
         "boolean": "1"
     },
     "Pclock": {
@@ -42,292 +42,322 @@
         "unit": "",
         "boolean": "0"
     },
-    "Improvize": {
-        "name": "Non-stop_improvize",
+    "NoteConvention": {
+        "name": "Note convention",
         "value": "0",
-        "unit": "",
-        "boolean": "1"
-    },
-    "MaxItemsProduce": {
-        "name": "Max_items_produced",
-        "value": "20",
-        "unit": "Except in real-time MIDI (deft 20)",
+        "unit": "0 = English: C, D, E...<br \/>1 = Italian\/Spanish\/French: do, re, mi...<br \/>2 = Indian: sa, re, ga...<br \/>3 = Keys<br \/>4 = Only from tonal scales(s)",
         "boolean": "0"
     },
-    "UseEachSub": {
-        "name": "Play_each_substitution",
-        "value": "0",
+    "B#_instead_of_C": {
+        "name": "B# instead of C",
+        "value": " ",
         "unit": "",
         "boolean": "1"
     },
-    "AllItems": {
-        "name": "Produce_all_items",
-        "value": "0",
+    "Db_instead_of_C#": {
+        "name": "Db instead of C#",
+        "value": " ",
         "unit": "",
         "boolean": "1"
     },
-    "DisplayProduce": {
-        "name": "Display_production",
-        "value": "0",
+    "Eb_instead_of_D#": {
+        "name": "Eb instead of D#",
+        "value": "1",
         "unit": "",
         "boolean": "1"
     },
-    "StepProduce": {
-        "name": "Step-by-step_produce",
-        "value": "0",
-        "unit": "(not implemented)",
+    "Fb_instead_of_E": {
+        "name": "Fb instead of E",
+        "value": " ",
+        "unit": "",
+        "boolean": "1"
+    },
+    "E#_instead_of_F": {
+        "name": "E# instead of F",
+        "value": " ",
+        "unit": "",
+        "boolean": "1"
+    },
+    "Gb_instead_of_F#": {
+        "name": "Gb instead of F#",
+        "value": " ",
+        "unit": "",
+        "boolean": "1"
+    },
+    "Ab_instead_of_G#": {
+        "name": "Ab instead of G#",
+        "value": " ",
+        "unit": "",
+        "boolean": "1"
+    },
+    "Bb_instead_of_A#": {
+        "name": "Bb instead of A#",
+        "value": "1",
+        "unit": "",
+        "boolean": "1"
+    },
+    "Cb_instead_of_B": {
+        "name": "Cb instead of B",
+        "value": " ",
+        "unit": "",
         "boolean": "1"
     },
     "TraceMicrotonality": {
-        "name": "Trace_microtonality",
-        "value": "0",
+        "name": "Trace microtonality",
+        "value": " ",
         "unit": "",
-        "boolean": "1"
-    },
-    "TraceProduce": {
-        "name": "Trace_production",
-        "value": "0",
-        "unit": "",
-        "boolean": "1"
-    },
-    "PlanProduce": {
-        "name": "Choose_candidate_rule",
-        "value": "0",
-        "unit": "(not implemented)",
         "boolean": "1"
     },
     "DisplayItems": {
-        "name": "Display_final_score",
-        "value": "0",
+        "name": "Display final score",
+        "value": " ",
         "unit": "Bol Processor score",
         "boolean": "1"
     },
     "ShowGraphic": {
-        "name": "Show_graphics",
-        "value": "0",
-        "unit": "ObjectGraph OR PianoRoll, see below",
+        "name": "Show graphics",
+        "value": "1",
+        "unit": "Object graph or Pianoroll, see below",
         "boolean": "1"
     },
-    "AllowRandomize": {
-        "name": "Allow_randomize",
-        "value": "0",
+    "ShowObjectGraph": {
+        "name": "Show object graph",
+        "value": "1",
         "unit": "",
         "boolean": "1"
     },
-    "DisplayTimeSet": {
-        "name": "Time_setting_display",
-        "value": "0",
+    "ShowPianoRoll": {
+        "name": "Show pianoroll",
+        "value": "1",
         "unit": "",
         "boolean": "1"
     },
-    "StepTimeSet": {
-        "name": "Time_setting_step",
-        "value": "0",
-        "unit": "(not implemented)",
-        "boolean": "1"
-    },
-    "TraceTimeSet": {
-        "name": "Time_setting_trace",
-        "value": "0",
+    "GraphicScaleP": {
+        "name": "Graphic scale P",
+        "value": "1",
         "unit": "",
-        "boolean": "1"
-    },
-    "": {
-        "name": "Default_block_key_for_scale_in_Csound",
-        "value": "60",
-        "unit": "(0..127) e.g. 60 for 'C4' or 69 for 'A4'",
         "boolean": "0"
     },
-    "ResetNotes": {
-        "name": "Reset_Notes",
-        "value": "1",
-        "unit": "Send AllNotesOff, pedals off and reset pitchbend at the end of item",
-        "boolean": "1"
-    },
-    "ComputeWhilePlay": {
-        "name": "Compute_while_playing",
-        "value": "0",
-        "unit": "",
-        "boolean": "1"
-    },
-    "TraceMIDIinteraction": {
-        "name": "Trace_MIDI_interactions",
-        "value": "0",
-        "unit": "",
-        "boolean": "1"
-    },
-    "ResetWeights": {
-        "name": "Reset_rule_weights",
+    "GraphicScaleQ": {
+        "name": "Graphic scale Q",
         "value": "1",
         "unit": "",
-        "boolean": "1"
+        "boolean": "0"
     },
-    "ResetFlags": {
-        "name": "Reset_rule_flags",
-        "value": "1",
-        "unit": "\/this is a flag\/",
-        "boolean": "1"
-    },
-    "ResetControllers": {
-        "name": "Reset_controllers",
-        "value": "1",
-        "unit": "volume, panoramic, pressure, pitchbend, modulation",
+    "DisplayProduce": {
+        "name": "Display production",
+        "value": " ",
+        "unit": "",
         "boolean": "1"
     },
     "SplitTimeObjects": {
-        "name": "Split_terminal_symbols",
+        "name": "Split terminal symbols",
         "value": "1",
         "unit": "",
         "boolean": "1"
     },
     "SplitVariables": {
-        "name": "Split_|variables|",
-        "value": "0",
+        "name": "Split |variables|",
+        "value": " ",
         "unit": "",
         "boolean": "1"
     },
+    "CsoundTrace": {
+        "name": "Trace Csound",
+        "value": " ",
+        "unit": "",
+        "boolean": "1"
+    },
+    "Improvize": {
+        "name": "Non-stop improvize",
+        "value": " ",
+        "unit": "",
+        "boolean": "1"
+    },
+    "MaxItemsProduce": {
+        "name": "Max items produced",
+        "value": " ",
+        "unit": "Except in real-time MIDI (deft 20)",
+        "boolean": "0"
+    },
+    "AllItems": {
+        "name": "Produce all items",
+        "value": " ",
+        "unit": "",
+        "boolean": "1"
+    },
+    "UseEachSub": {
+        "name": "Play each substitution",
+        "value": " ",
+        "unit": "",
+        "boolean": "1"
+    },
+    "StepProduce": {
+        "name": "Step-by-step produce",
+        "value": " ",
+        "unit": "(not implemented)",
+        "boolean": "1"
+    },
+    "TraceProduce": {
+        "name": "Trace production",
+        "value": " ",
+        "unit": "",
+        "boolean": "1"
+    },
+    "PlanProduce": {
+        "name": "Choose candidate rule",
+        "value": " ",
+        "unit": "(not implemented)",
+        "boolean": "1"
+    },
     "DeftBufferSize": {
-        "name": "Default_buffer_size",
+        "name": "Default buffer size",
         "value": "1000",
         "unit": "symbols",
         "boolean": "0"
     },
     "MaxConsoleTime": {
-        "name": "Max_computation_time",
+        "name": "Max computation time",
         "value": "60",
         "unit": "seconds. Time for console's work (0 = no limit) Except in Improvize mode",
         "boolean": "0"
     },
+    "ComputeWhilePlay": {
+        "name": "Compute while playing",
+        "value": "1",
+        "unit": "(not implemented)",
+        "boolean": "1"
+    },
+    "AllowRandomize": {
+        "name": "Allow randomize",
+        "value": "1",
+        "unit": "",
+        "boolean": "1"
+    },
     "Seed": {
-        "name": "Seed_for_randomization",
+        "name": "Seed for randomization",
         "value": "0",
         "unit": "Positive integer, or 0 if cards need to be shuffled",
         "boolean": "0"
     },
-    "NoteConvention": {
-        "name": "Note_convention",
-        "value": "0",
-        "unit": "0 = English: C, D, E...<br \/>1 = Italian\/Spanish\/French: do, re, mi...<br \/>2 = Indian: sa, re, ga...<br \/>3 = Keys<br \/>4 = Only from tonal scales(s)",
-        "boolean": "0"
+    "ResetNotes": {
+        "name": "Reset Notes",
+        "value": "1",
+        "unit": "Send AllNotesOff, pedals off and reset pitchbend at the end of item",
+        "boolean": "1"
+    },
+    "ResetWeights": {
+        "name": "Reset rule weights",
+        "value": "1",
+        "unit": "",
+        "boolean": "1"
+    },
+    "ResetFlags": {
+        "name": "Reset rule flags",
+        "value": "1",
+        "unit": "\/this is a flag\/",
+        "boolean": "1"
+    },
+    "ResetControllers": {
+        "name": "Reset controllers",
+        "value": "1",
+        "unit": "volume, panoramic, pressure, pitchbend, modulation",
+        "boolean": "1"
     },
     "EndFadeOut": {
-        "name": "Fade-out_time",
-        "value": "2.00",
+        "name": "Fade-out time",
+        "value": "2",
         "unit": "seconds (end of MIDI files and Csound scores)",
         "boolean": "0"
     },
+    "NoConstraint": {
+        "name": "Ignore constraints in time setting",
+        "value": " ",
+        "unit": "",
+        "boolean": "1"
+    },
+    "DisplayTimeSet": {
+        "name": "Time setting display",
+        "value": " ",
+        "unit": "",
+        "boolean": "1"
+    },
+    "TraceTimeSet": {
+        "name": "Time setting trace",
+        "value": " ",
+        "unit": "",
+        "boolean": "1"
+    },
+    "StepTimeSet": {
+        "name": "Time setting step",
+        "value": " ",
+        "unit": "(not implemented)",
+        "boolean": "1"
+    },
+    "TraceMIDIinteraction": {
+        "name": "Trace MIDI interactions",
+        "value": "1",
+        "unit": "",
+        "boolean": "1"
+    },
+    "SamplingRate": {
+        "name": "Sampling rate",
+        "value": "50",
+        "unit": "samples per second, usually 50",
+        "boolean": "0"
+    },
     "C4key": {
-        "name": "C4_(middle_C)_key_number",
+        "name": "C4 (middle C) key number",
         "value": "60",
         "unit": "(0..127) usually 60",
         "boolean": "0"
     },
     "A4freq": {
-        "name": "A4_frequency_(diapason)",
-        "value": "440.0000",
+        "name": "A4 frequency (diapason)",
+        "value": "440",
         "unit": "Hz (usually 440)",
         "boolean": "0"
     },
     "StrikeAgainDefault": {
-        "name": "Strike_again_NoteOn's",
+        "name": "Strike again NoteOn's",
         "value": "1",
-        "unit": "Keep checked unless you know why! (Read https:\/\/bp3.tech\/csound-checkup\/)",
+        "unit": "Keep checked unless you know why!<br>(Read https:\/\/bp3.tech\/csound-checkup\/)",
         "boolean": "1"
     },
     "DeftVolume": {
-        "name": "Default_volume",
+        "name": "Default volume",
         "value": "90",
         "unit": "(1..127)",
         "boolean": "0"
     },
     "VolumeController": {
-        "name": "Volume_controller",
+        "name": "Volume controller",
         "value": "7",
         "unit": "(0..127) usually 7",
         "boolean": "0"
     },
     "DeftVelocity": {
-        "name": "Default_velocity",
+        "name": "Default velocity",
         "value": "64",
         "unit": "(1..127)",
         "boolean": "0"
     },
     "DeftPanoramic": {
-        "name": "Default_panoramic",
+        "name": "Default panoramic",
         "value": "64",
         "unit": "(0..127)",
         "boolean": "0"
     },
     "PanoramicController": {
-        "name": "Panoramic_controller",
+        "name": "Panoramic controller",
         "value": "10",
         "unit": "(0..127) usually 10",
         "boolean": "0"
     },
-    "B#_instead_of_C": {
-        "name": "B#_instead_of_C",
-        "value": "0",
-        "unit": "",
-        "boolean": "1"
-    },
-    "Db_instead_of_C#": {
-        "name": "Db_instead_of_C#",
-        "value": "0",
-        "unit": "",
-        "boolean": "1"
-    },
-    "Eb_instead_of_D#": {
-        "name": "Eb_instead_of_D#",
-        "value": "0",
-        "unit": "",
-        "boolean": "1"
-    },
-    "Fb_instead_of_E": {
-        "name": "Fb_instead_of_E",
-        "value": "0",
-        "unit": "",
-        "boolean": "1"
-    },
-    "E#_instead_of_F": {
-        "name": "E#_instead_of_F",
-        "value": "0",
-        "unit": "",
-        "boolean": "1"
-    },
-    "Gb_instead_of_F#": {
-        "name": "Gb_instead_of_F#",
-        "value": "0",
-        "unit": "",
-        "boolean": "1"
-    },
-    "Ab_instead_of_G#": {
-        "name": "Ab_instead_of_G#",
-        "value": "0",
-        "unit": "",
-        "boolean": "1"
-    },
-    "Bb_instead_of_A#": {
-        "name": "Bb_instead_of_A#",
-        "value": "0",
-        "unit": "",
-        "boolean": "1"
-    },
-    "Cb_instead_of_B": {
-        "name": "Cb_instead_of_B",
-        "value": "0",
-        "unit": "",
-        "boolean": "1"
-    },
-    "ShowObjectGraph": {
-        "name": "ShowObjectGraph",
-        "value": "0",
-        "unit": "",
-        "boolean": "1"
-    },
-    "ShowPianoRoll": {
-        "name": "ShowPianoRoll",
-        "value": "0",
-        "unit": "",
-        "boolean": "1"
+    "DefaultBlockKey": {
+        "name": "Default block key",
+        "value": "60",
+        "unit": "(0..127) e.g. 60 for 'C4' or 69 for 'A4'",
+        "boolean": "0"
     }
 }
