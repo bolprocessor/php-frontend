@@ -1437,7 +1437,7 @@ if(!isset($_POST['analyze_tonal'])) {
 
 	find_replace_form();
 
-	echo "<div style=\"float:right; vertical-align:middle; background-color:transparent;\">Import MusicXML: <input style=\"color:red;\"  onclick=\"if(!checksaved()) return false;\" type=\"file\" name=\"music_xml_import\">&nbsp;<input type=\"submit\" onclick=\"if(!checksaved()) return false;\" class=\"produce\" value=\"← IMPORT\"></div>";
+	echo "<div style=\"float:right; vertical-align:middle; background-color:transparent;\">Import MusicXML: <input style=\"color:red;\"  onclick=\"if(!checksaved()) return false;\" type=\"file\" name=\"music_xml_import\">&nbsp;<input type=\"submit\" onclick=\"if(!checksaved()) return false;\" class=\"save\" value=\"← IMPORT\"></div>";
 
 	echo "<div style=\"text-align:left; background-color:transparent;\"><input id=\"saveButton\" class=\"save big\"  type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".begin_with(20,$filename)."’\"></div>";
 

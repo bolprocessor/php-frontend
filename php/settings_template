@@ -195,7 +195,7 @@
     "StepProduce": {
         "name": "Step-by-step produce",
         "value": " ",
-        "unit": "(not implemented)",
+        "unit": "",
         "boolean": "1"
     },
     "TraceProduce": {
@@ -207,7 +207,7 @@
     "PlanProduce": {
         "name": "Choose candidate rule",
         "value": " ",
-        "unit": "(not implemented)",
+        "unit": "",
         "boolean": "1"
     },
     "DeftBufferSize": {
@@ -225,8 +225,14 @@
     "ComputeWhilePlay": {
         "name": "Compute while playing",
         "value": "1",
-        "unit": "(not implemented)",
+        "unit": "",
         "boolean": "1"
+    },
+    "AdvanceTime": {
+        "name": "Max advance time",
+        "value": "0",
+        "unit": "seconds",
+        "boolean": "0"
     },
     "AllowRandomize": {
         "name": "Allow randomize",
@@ -291,7 +297,7 @@
     "StepTimeSet": {
         "name": "Time setting step",
         "value": " ",
-        "unit": "(not implemented)",
+        "unit": "",
         "boolean": "1"
     },
     "TraceMIDIinteraction": {
@@ -353,6 +359,12 @@
         "value": "10",
         "unit": "(0..127) usually 10",
         "boolean": "0"
+    },
+    "StopPauseContinue": {
+        "name": "Accept Stop\/Pause\/Continue",
+        "value": "1",
+        "unit": "",
+        "boolean": "1"
     },
     "DefaultBlockKey": {
         "name": "Default block key",

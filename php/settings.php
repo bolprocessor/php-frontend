@@ -269,6 +269,7 @@ for($i = 0; $i < $imax; $i++) {
 	echo "<td style=\"vertical-align:top;\">";
 	if($param == "ShowObjectGraph") $name = "Show object graph";
 	if($param == "ShowPianoRoll") $name = "Show pianoroll";
+	if($boolean == '') $boolean = 0;
 	echo "<input type=\"hidden\" name=\"param_".$i."\" value=\"".$param."\">";
 	echo "<input type=\"hidden\" name=\"name_".$i."\" value=\"".$name."\">";
 	echo "<input type=\"hidden\" name=\"boolean_".$i."\" value=\"".$boolean."\">";
