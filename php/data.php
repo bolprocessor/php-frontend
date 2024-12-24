@@ -1283,9 +1283,9 @@ if(!isset($_POST['analyze_tonal'])) {
 		echo "<br />";
 		}
 	if($found_elsewhere AND $objects_file <> '') echo "• <span class=\"red-text\">Sound-object prototype</span> file = <span class=\"green-text\">‘".$objects_file."’</span> found in <span class=\"green-text\">‘".$alphabet_file."’</span><br />";
-	if($note_convention <> '') echo "• Note convention is <span class=\"red-text\">‘".strtoupper(note_convention(intval($note_convention)))."’</span> as per <span class=\"green-text\">‘".$settings_file."’</span>";
+	if($note_convention <> '') echo "• Note convention is <span class=\"red-text\">".strtoupper(note_convention(intval($note_convention)))."’</span> as per <span class=\"green-text\">".$settings_file."’</span>";
 	else {
-		echo "• Note convention is <span class=\"red-text\">‘ENGLISH’</span> by default";
+		echo "• Note convention is <span class=\"red-text\">ENGLISH</span> by default";
 		}
 	echo "</div><br />";
 	}

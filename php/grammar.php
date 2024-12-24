@@ -564,8 +564,8 @@ if($max_time_computing > 0) {
 		}
 	echo "<br />";
 	}
-if($note_convention <> '') echo "• Note convention is <span class=\"red-text\">‘".strtoupper(note_convention(intval($note_convention)))."’</span> as per <span class=\"green-text\">‘".$settings_file."’</span><br />";
-else echo "• Note convention is <span class=\"red-text\">‘ENGLISH’</span> by default<br />";
+if($note_convention <> '') echo "• Note convention is <span class=\"red-text\">".strtoupper(note_convention(intval($note_convention)))."</span> as per <span class=\"green-text\">‘".$settings_file."’</span><br />";
+else echo "• Note convention is <span class=\"red-text\">ENGLISH</span> by default<br />";
 if($file_format == "csound") {
 	if($csound_orchestra <> '' AND file_exists($dir.$csound_orchestra)) {
 		rename($dir.$csound_orchestra,$dir_csound_resources.$csound_orchestra);

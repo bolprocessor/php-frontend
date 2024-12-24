@@ -41,7 +41,7 @@
 "DeftBufferSize"	"Default buffer size"	"symbols"	"0"	"1000"
 "MaxConsoleTime"	"Max computation time"	"seconds. Time for console's work (0 = no limit) Except in Improvize mode"	"0"	"60"
 "ComputeWhilePlay"	"Compute while playing"	"true by default"	"1"	"1"
-"AdvanceTime"	"Max advance time"	"seconds (if not compute while playing)"	"0"	"0.5"
+"AdvanceTime"	"Max advance time"	"seconds (if not compute while playing)"	"0"	"10.5"
 "AllowRandomize"	"Allow randomize"		"1"	"1"
 "Seed"	"Seed for randomization"	"Positive integer, or 0 if cards need to be shuffled"	"0"	"0"
 "ResetNotes"	"Reset Notes"	"Send AllNotesOff, pedals off and reset pitchbend at the end of item"	"1"	"1"

@@ -290,7 +290,7 @@ for($i = 0; $i < $imax; $i++) {
 		echo ">";
 		}
 	else {
-		echo "&nbsp;<input type=\"text\" name=\"parameter_".$i."\" size=\"15\" style=\"background-color:CornSilk; border: none;\" value=\"";
+		echo "<input type=\"text\" name=\"parameter_".$i."\" size=\"15\" style=\"background-color:CornSilk; border: none;\" value=\"";
 		echo $value;
 		echo "\">";
 		}
