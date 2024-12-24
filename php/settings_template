@@ -230,7 +230,7 @@
     },
     "AdvanceTime": {
         "name": "Max advance time",
-        "value": "0",
+        "value": "0.5",
         "unit": "seconds",
         "boolean": "0"
     },

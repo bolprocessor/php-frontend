@@ -176,7 +176,14 @@ if(isset($_POST['saveparameters'])) {
 				$warning .= "<p>👉 <span class=\"red-text\">“Default block key” must be an integer from 10 to 127: “</span><span class=\"green-text\">".$value."</span><span class=\"red-text\">” has been replaced with “</span><span class=\"green-text\">".$newvalue."</span><span class=\"red-text\">” (C4)</span></p>";
 				$value = $newvalue;
 				}
+			if($param == "ComputeWhilePlay") $ComputeWhilePlay = $value;
+			if($param == "AdvanceTime" AND $value < 0) {
+				$newvalue = abs($value);
+				$warning .= "<p>👉 <span class=\"red-text\">Advance time cannot be negative: “</span><span class=\"green-text\">".$value."</span><span class=\"red-text\">” has been replaced with </span><span class=\"green-text\">".$newvalue."</span></p>";
+				$value = $newvalue;
+				}
 			if($param == "ShowObjectGraph") $showObjectGraph = $value;
+
 			if(($param == "ShowObjectGraph") AND !$showgraphics AND $value == 1) {
 				$newvalue = 0;
 				$warning .= "<p>👉 <span class=\"red-text\">As Show Graphics is not set, Show ObjectGraph has been turned off</span></p>";

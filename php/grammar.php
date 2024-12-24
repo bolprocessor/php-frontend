@@ -380,7 +380,7 @@ else {
 read_midiressources($filename);
 // if($file_format == "rtmidi") echo " 👉 Delete the name if you change a number!";
 echo "</td>";
-echo "<td style=\"vertical-align:middle;\">";
+echo "<td id=\"topmidiports\" style=\"vertical-align:middle;\">";
 if($file_format == '') {
 	$file_format = "rtmidi";
 	save_settings2("grammar_file_format",$filename,$file_format);

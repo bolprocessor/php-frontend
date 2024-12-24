@@ -372,8 +372,10 @@ if($instruction <> "help") {
     $continuefile = str_replace(SLASH,'/',$continuefile);
 	echo "<p id=\"wait\" style=\"text-align:center; background-color:yellow; color:black;\"><br /><big><b><span class=\"blinking\">… Bol Processor console is working …</span></b></big><br />(Don't close this window!)<br /><br />";
 	echo "<button type=\"button\" class=\"produce\" onclick=\"createFile('".$stopfile."');\">Click to STOP</button>";
-	echo "&nbsp;<button type=\"button\" class=\"produce\" onclick=\"createFile('".$pausefile."');\">Pause</button>";
-	echo "&nbsp;<button type=\"button\" class=\"produce\" onclick=\"createFile('".$continuefile."');\">Continue</button>";
+	if($file_format == "rtmidi") {
+		echo "&nbsp;<button type=\"button\" class=\"produce\" onclick=\"createFile('".$pausefile."');\">Pause</button>";
+		echo "&nbsp;<button type=\"button\" class=\"produce\" onclick=\"createFile('".$continuefile."');\">Continue</button>";
+		}
 	echo "<br /><br /></p>\n";
 	}
 echo str_repeat(' ', 10240);  // send extra spaces to fill browser buffer, useful for Windows

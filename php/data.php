@@ -1359,7 +1359,7 @@ if(!isset($_POST['analyze_tonal'])) {
 		}
 	read_midiressources($filename);
 	echo "</td>";
-	echo "<td style=\"vertical-align:middle;\"><p style=\"text-align:left;\">";
+	echo "<td id=\"topmidiports\" style=\"vertical-align:middle;\"><p style=\"text-align:left;\">";
 	show_file_format_choice("data",$file_format,$url_this_page,$filename);
 	echo "</p>";
 	echo "</td>";

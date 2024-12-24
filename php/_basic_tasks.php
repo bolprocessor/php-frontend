@@ -3905,7 +3905,7 @@ function filter_form_output($i) {
 	global $NoteOffFilter_out, $NoteOnFilter_out, $KeyPressureFilter_out, $ControlChangeFilter_out, $ProgramChangeFilter_out, $ChannelPressureFilter_out, $PitchBendFilter_out, $SystemExclusiveFilter_out, $TimeCodeFilter_out, $SongPositionFilter_out, $SongSelectFilter_out, $TuneRequestFilter_out, $EndSysExFilter_out, $TimingClockFilter_out, $StartFilter_out, $ContinueFilter_out, $ActiveSensingFilter_out, $SystemResetFilter_out;
 	global $url_this_page, $MIDIoutput;
 	echo "<div id=\"showhide_output".$i."\" style=\"width:300px;\">";
-	echo "<input class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#tonal\" name=\"savemidiport\" value=\"SAVE MIDI ports\">";
+	echo "<input class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topmidiports\" name=\"savemidiport\" value=\"SAVE MIDI ports\">";
 	echo "<h3 style=\"margin-left:12px;\"><b>Filter for MIDI output ".$MIDIoutput[$i]."</b></h3>";
 	echo "<table class=\"thinborder\">";
 	echo "<tr>";
@@ -3981,6 +3981,7 @@ function filter_buttons_out($i,$param) {
 	if(!isset($$tablename[$i])) $$tablename[$i] = 1;
 	echo "<tr>";
 	echo "<td style=\"font-size:small;\">";
+	if($param == "Start") $param = "Start-Stop";
 	echo $param;
 	echo "</td>";
 	echo "<td style=\"font-size:small; white-space:nowrap;\">";
@@ -4001,6 +4002,7 @@ function filter_buttons_in($i,$param) {
 	if(!isset($$tablename[$i])) $$tablename[$i] = 1;
 	echo "<tr>";
 	echo "<td style=\"font-size:small;\">";
+	if($param == "Start") $param = "Start-Stop";
 	echo $param;
 	echo "</td>";
 	echo "<td style=\"font-size:small; white-space:nowrap;\">";
@@ -4722,7 +4724,7 @@ function show_file_format_choice($type,$file_format,$url_this_page,$filename) {
 		if($file_format == "csound") echo " checked";
 		echo ">Csound score";
 		}
-	echo "<br /><input class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#tonal\" name=\"savethisfile\" value=\"SAVE format\">";
+	echo "<br /><input class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topmidiports\" name=\"savethisfile\" value=\"SAVE format\">";
 	return;
 	}
 
