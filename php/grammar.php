@@ -792,7 +792,7 @@ if(!$hide) {
 echo "</form>";
 echo "<script>\n";
 echo "window.onload = function() {
-    toggleAllDisplays($NumberMIDIinputs); settogglesearch(); settogglescales();
+    toggleAllDisplays($NumberMIDIinputs); toggleAllDisplays($NumberMIDIoutputs); settogglesearch(); settogglescales();
 	};\n";
 echo "</script>\n";
 echo "</body>";
@@ -807,8 +807,8 @@ function save($this_file,$filename,$top_header,$save_content) {
 		}
 	$handle = @fopen($this_file, "w");
 	if($handle) {
-		$file_header = $top_header . "\n// Grammar saved as \"" . $filename . "\". Date: " . gmdate('Y-m-d H:i:s');
-		fwrite($handle, $file_header . "\n");
+		$file_header = $top_header."\n// Grammar saved as \"" .$filename."\". Date: ".gmdate('Y-m-d H:i:s');
+		fwrite($handle, $file_header."\n");
 		fwrite($handle, $save_content);
 		fclose($handle);
 		}
