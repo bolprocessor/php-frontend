@@ -751,7 +751,7 @@ $n2 = substr_count($expression,'}');
 if($n1 > $n2) $error_mssg .= "<span class=\"red-text\">This expression contains ".($n1-$n2)." extra ‘{'</span>";
 if($n2 > $n1) $error_mssg .= "<span class=\"red-text\">This expression contains ".($n2-$n1)." extra ‘}'</span>";
 if($error_mssg <> '') echo "<p>".$error_mssg."</p>";
-echo "<input  type=\"submit\" onclick=\"clearsave();\" name=\"saveexpression\" formaction=\"".$url_this_page."#expression\" class=\"save\" value=\"SAVE EXPRESSION\">&nbsp;then&nbsp;<input onclick=\"window.open('".nice_url($link_play_expression)."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" value=\"PRODUCE ITEM\"";
+echo "<input type=\"submit\" onclick=\"clearsave();\" name=\"saveexpression\" formaction=\"".$url_this_page."#expression\" class=\"save\" value=\"SAVE EXPRESSION\">&nbsp;then&nbsp;<input onclick=\"window.open('".nice_url($link_play_expression)."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" value=\"PRODUCE ITEM\"";
 if(!file_exists($data_expression) OR trim($recoded_expression) == '') echo " disabled class=\"edit disabled\" style=\"box-shadow: none;\"";
 else echo " class=\"produce\"";
 echo "><br /><br />";

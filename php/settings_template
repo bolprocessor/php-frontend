@@ -371,5 +371,11 @@
         "value": "60",
         "unit": "(0..127) e.g. 60 for 'C4' or 69 for 'A4'",
         "boolean": "0"
+    },
+    "MinPeriod": {
+        "name": "Minimum period",
+        "value": "200",
+        "unit": "ms (deft 200, by default 2 times the Quantization)",
+        "boolean": "0"
     }
 }

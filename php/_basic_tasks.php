@@ -18,6 +18,7 @@ $test = FALSE;
 // $test = TRUE;
 
 $permissions = 0775;
+$today_date = date("Y-m-d");
 
 $file_path = '_settings.php';
 if (!file_exists($file_path)) {

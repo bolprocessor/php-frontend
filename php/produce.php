@@ -686,6 +686,12 @@ $terminated = FALSE;
 if(file_exists($stopfile) OR file_exists($panicfile)) $terminated = TRUE;
 @unlink($pausefile); @unlink($continuefile);
 if($terminated) echo "<p style=\"color:red;\"><big>👉 The performance has been interrupted</big></p>";
+
+$capture_file = $temp_dir_abs."trace_".my_session_id()."_".$project_fullname."_capture";
+if(file_exists($capture_file)) {
+	echo "<p>👉 Reload the <span class=\"green-text\">".$project_fullname."</span> project to see <span class=\"red-text\">captured MIDI events</span> at the end of the data…</p>";
+	}
+
 if($n_messages > 6000) echo "<p><span class=\"red-text\">➡</span> Too many messages produced! (".$n_messages.")</p>";
 else {
 	if($result_file <> '') $handle = fopen($result_file,"w");

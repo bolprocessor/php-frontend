@@ -34,7 +34,11 @@ if(isset($_POST['saveparameters'])) {
         	$i = $matches[1]; // Extract the numeric index
 			$name = trim($_POST['name_'.$i]);
 			$boolean = trim($_POST['boolean_'.$i]);
-			if($boolean) $value = isset($_POST['parameter_'.$i]);
+			if($boolean) {
+				$value = isset($_POST['parameter_'.$i]);
+				if($value) $value = 1;
+				else $value = 0;
+				}
 			else $value = trim($_POST['parameter_'.$i]);
 			$unit = trim($_POST['unit_'.$i]);
 			switch($param) {
@@ -57,6 +61,7 @@ if(isset($_POST['saveparameters'])) {
 				case "PanoramicController":
 				case "SamplingRate":
 				case "DefaultBlockKey":
+				case "MinPeriod":
 					$value = abs(intval($value));
 					break;
 				}
@@ -69,6 +74,11 @@ if(isset($_POST['saveparameters'])) {
 			if($param == "Quantize" AND $value == 1 AND $quantization == 0) {
 				$newvalue = 0;
 				$warning .= "<p>👉 <span class=\"red-text\">Quantize has been turned off because Quantization = 0</span></p>";
+				$value = $newvalue;
+				}
+			if($param == "MinPeriod" AND $quantization > 0 AND $value < (2 * $quantization)) {
+				$newvalue = 2 * $quantization;
+				$warning .= "<p>👉 <span class=\"red-text\">The minimum period for captured MIDI events should be at least 2 times the Quantization. It has been set to ".$newvalue." ms.</span></p>";
 				$value = $newvalue;
 				}
 			if($param == "Time_res" AND $value < 1) {

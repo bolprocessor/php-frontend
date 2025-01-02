@@ -20,13 +20,51 @@ $current_directory = str_replace(SLASH.$filename,'',$file);
 $current_directory = str_replace(SLASH,'/',$current_directory);
 save_settings("last_data_directory",$current_directory);
 
+if(isset($_POST['delete_file'])) {
+	$file_link = $_POST['file_link'];
+	@unlink($file_link);
+	$trashed = TRUE;
+	}
+else $trashed = FALSE;
+if($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if(isset($_FILES['uploaded_file']) AND $_FILES['uploaded_file']['error'] === UPLOAD_ERR_OK) {
+		$destinationPath = $_POST['file_link'];
+        $fileTmpPath = $_FILES['uploaded_file']['tmp_name'];
+        $fileName = $_FILES['uploaded_file']['name'];
+        $fileSize = $_FILES['uploaded_file']['size'];
+        $fileType = $_FILES['uploaded_file']['type'];
+        if(move_uploaded_file($fileTmpPath,$destinationPath)) {
+			chmod($destinationPath,$permissions);
+            echo "<p>👉 File uploaded successfully to: <span class=\"green-text\">".$destinationPath."</span></p>";
+        	}
+		else echo "<p class=\"red-text\">👉 Error moving the uploaded file</p>";
+    	}
+	else if(!$trashed AND isset($_FILES['uploaded_file']['error'])) echo "<p class=\"red-text\">👉 Error: ".$_FILES['uploaded_file']['error'].". Probably no file has been chosen…</p>";
+	}
+
 if(isset($_POST['reload'])) {
     $refresh_file = $temp_dir."trace_".my_session_id()."_".$filename."_midiport_refresh";
 	@unlink($refresh_file);
     header("Location: ".$url_this_page);
     exit();	
 	}
-
+if(isset($_POST['download_file'])) {
+	$file_name = $_POST['file_name'];
+	$file_link = $_POST['file_link'];
+	if(file_exists($file_link)) {
+		header('Content-Description: File Transfer');
+		header('Content-Type: application/octet-stream');
+		header('Content-Disposition: attachment; filename="'.$file_name.'"');
+		header('Expires: 0');
+		header('Cache-Control: must-revalidate');
+		header('Pragma: public');
+		header('Content-Length: '.filesize($file_link));
+		ob_clean(); // This avoids downloading the header of this page.
+    	flush();
+		readfile($file_link);
+		exit;
+		}
+	}
 require_once("_header.php");
 
 if(isset($_POST['stop_analysis'])) unset($_POST['analyze_tonal']);
@@ -53,6 +91,7 @@ if(!file_exists($temp_dir.$temp_folder)) {
 	mkdir($temp_dir.$temp_folder);
 	}
 $music_xml_file = $temp_dir.$temp_folder.SLASH."temp.musicxml";
+$capture_file = $temp_dir."trace_".my_session_id()."_".$filename."_capture";
 $more_data = ''; $dynamic_control = array();
 $link_edit = "data.php";
 
@@ -1206,10 +1245,12 @@ echo "<input type=\"hidden\" name=\"grammar_file\" value=\"".$grammar_file."\">"
 echo "<input type=\"hidden\" name=\"objects_file\" value=\"".$objects_file."\">";
 echo "<input type=\"hidden\" name=\"new_convention\" value=\"".$new_convention."\">";
 $show_production = $trace_production = $non_stop_improvize = $p_clock = $q_clock = $striated_time = $max_time_computing = $produce_all_items = $random_seed = $quantization = $time_resolution = 0;
+$compute_while_playing = TRUE;
 $note_convention = '';
 $csound_default_orchestra = '';
 $diapason = 440; $C4key = 60;
 $found_orchestra_in_settings = $quantize = FALSE;
+$minimum_period = 200; // milliseconds
 $dir_base = str_replace($bp_application_path,'',$dir);
 $url_settings = "settings.php?file=".urlencode($dir_base.$settings_file);
 if($settings_file <> '' AND file_exists($dir.$settings_file)) {
@@ -1226,12 +1267,16 @@ if($settings_file <> '' AND file_exists($dir.$settings_file)) {
 	$q_clock = $settings['Qclock']['value'];
 	$max_time_computing = $settings['MaxConsoleTime']['value'];
 	$produce_all_items = $settings['AllItems']['value'];
+	$compute_while_playing = $settings['ComputeWhilePlay']['value'];
+	if(trim($compute_while_playing) == '') $compute_while_playing = FALSE;
+	$advance_time = $settings['AdvanceTime']['value'];
 	$diapason = $settings['A4freq']['value'];
 	$C4key = $settings['C4key']['value'];
 	$time_resolution = $settings['Time_res']['value'];
 	$quantization = $settings['Quantization']['value'];
 	$quantize = $settings['Quantize']['value'];
 	$nature_of_time_settings = $settings['Nature_of_time']['value'];
+	if(isset($settings['MinPeriod']['value'])) $minimum_period = intval($settings['MinPeriod']['value']);
 	}
 // if($quantization == 0) $quantize = FALSE;
 
@@ -1280,6 +1325,11 @@ if(!isset($_POST['analyze_tonal'])) {
 			echo "<br /><span class=\"red-text\">➡</span>&nbsp;reduced to <span class=\"red-text\">3600</span> seconds";
 			$max_time_computing = 3600;
 			}
+		echo "<br />";
+		}
+	if(!$compute_while_playing) {
+		echo "• <span class=\"red-text\">Warning:</span> Compute while playing is <span class=\"red-text\">OFF</span> and Advance time = <span class=\"red-text\">".$advance_time."</span> seconds";
+		if($advance_time < 1) echo " (<span class=\"red-text\">maybe too small</span>)";
 		echo "<br />";
 		}
 	if($found_elsewhere AND $objects_file <> '') echo "• <span class=\"red-text\">Sound-object prototype</span> file = <span class=\"green-text\">‘".$objects_file."’</span> found in <span class=\"green-text\">‘".$alphabet_file."’</span><br />";
@@ -1428,11 +1478,27 @@ if(intval($note_convention) <> intval($new_convention) AND $new_convention <> ''
 
 if(!isset($_POST['analyze_tonal'])) {
 	echo $save_warning;
-	if($file_format <> "rtmidi") {
-		echo "<p>&nbsp;</p>";
+	if($file_format <> "rtmidi") echo "<p>&nbsp;</p>";
+	echo "<input type=\"hidden\" name=\"file_link\" value=\"".$capture_file."\">";
+	if(file_exists($capture_file) AND is_capture_file($capture_file)) {
+		$link_analyse = "capture_analysis.php?data=".urlencode($capture_file)."&quantization=".$quantization."&minimum_period=".$minimum_period;
+		$window_name = "capture_analysis";
+		echo "<p>👉 A well-formed captured MIDI data file is in place<br />";
+		echo "<input class=\"produce\" type=\"submit\" name=\"analyse_capture\" onclick=\"event.preventDefault(); window.open('".$link_analyse."','".$window_name."','width=800,height=800,left=200'); return false;\" value=\"ANALYSE CAPTURED MIDI DATA\">";
+		$capture_file_name = "capture_".$today_date.".txt";
+		echo "<input type=\"hidden\" name=\"file_name\" value=\"".$capture_file_name."\">";
+		echo "&nbsp;<—&nbsp;<input type=\"submit\" name=\"download_file\" value=\"DOWNLOAD DATA\" class=\"save\">";
+		echo "&nbsp;<—&nbsp;<input type=\"submit\" name=\"delete_file\" value=\"DELETE DATA\" class=\"trash\">";
+		echo "<br />";
+		}
+	else {
+		echo "<p><input type=\"file\" name=\"uploaded_file\" id=\"uploaded_file\">";
+		echo "<input class=\"save\" type=\"submit\" value=\"<-- UPLOAD CAPTURED MIDI DATA\"><br />";
+		if(file_exists($capture_file)) echo "<span class=\"red-text\">👉 The current file of captured MIDI data is badly formed</span></p>";
+		else echo "</p>";
 		}
 	echo "<p><button class=\"edit big\"\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button></p>";
-	echo "<br /><br /><table border=\"0\" style=\"background-color:transparent;\"><tr style=\"background-color:transparent;\">";
+	echo "<br /><table border=\"0\" style=\"background-color:transparent;\"><tr style=\"background-color:transparent;\">";
 	echo "<td style=\"background-color:transparent;\">";
 
 	find_replace_form();
@@ -1909,6 +1975,20 @@ function create_chunks($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxc
 	$segment['tonal_scale'] = $tonal_scale;
 	$segment['initial_tempo'] = $initial_tempo;
 	return $segment;
+	}
+
+function is_capture_file($capture_file) {
+	$file = fopen($capture_file,'r');
+    if($file) {
+        $line = fgets($file); // names of parameters
+        $table = explode("\t",$line);
+        $max_args = count($table);
+        if($max_args < 5) return FALSE;
+		if($table[0] <> "time") return FALSE;
+		if($table[1] <> "note") return FALSE;
+		 return TRUE;
+		}
+	else return FALSE;
 	}
 
 function save($this_file,$filename,$top_header,$save_content) {
