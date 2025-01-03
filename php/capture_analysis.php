@@ -9,14 +9,15 @@ else {
     }
 $quantization = $_GET['quantization'];
 $minimum_period = $_GET['minimum_period'];
+$trace_capture_analysis = $_GET['trace_capture_analysis'];
 
 require_once("_header.php");
 display_darklight();
 
 echo "<p>👉 Analysing captured events…</p>";
-$captured_events = process_captured_events($capture_file,$quantization,$minimum_period);
+$captured_events = process_captured_events($capture_file,$quantization,$minimum_period,$trace_capture_analysis);
 
-function process_captured_events($capture_file,$quantization,$minimum_period) {
+function process_captured_events($capture_file,$quantization,$minimum_period,$trace) {
     $bigtest = TRUE;
     $captured_events = '';
     $file = fopen($capture_file,'r');
@@ -28,21 +29,21 @@ function process_captured_events($capture_file,$quantization,$minimum_period) {
         if($max_args < 2) return '';
         for($i = 0; $i < $max_args; $i++) {
             $arg[$i] = $table[$i];
-            echo $arg[$i]." <font color=\"red\">|</font> "; // names of parameters
+            if($trace) echo $arg[$i]." <font color=\"red\">|</font> "; // names of parameters
             }
-        echo "<p></p>";
+        if($trace) echo "<p></p>";
         $i_event = $lastNoteOnTime = 0; $lastNoteOnCaptured = '';
         $fixed = FALSE;
         while(!feof($file)) {
             $line = trim(fgets($file));
             if($line == '') continue;
             $table = explode("\t",$line);
-            if($bigtest AND $table[4] > 0) echo "<font color=\"green\">";
+            if($bigtest AND $table[4] > 0 AND $trace) echo "<font color=\"green\">";
             for($i = 0; $i < $max_args; $i++) {
                 $event[$i_event][$arg[$i]] = $table[$i];
-                if($bigtest) echo $event[$i_event][$arg[$i]]." ";
+                if($bigtest AND $trace) echo $event[$i_event][$arg[$i]]." ";
                 }
-            if($bigtest AND $table[4] > 0) echo "</font>";
+            if($bigtest AND $table[4] > 0 AND $trace) echo "</font>";
             if($event[$i_event]['source'] > 0 AND $event[$i_event]['event'] == "NoteOn") {
                 $lastNoteOnCaptured = $event[$i_event]['note'];
                 $lastNoteOnTime = $event[$i_event]['time'];
@@ -51,24 +52,24 @@ function process_captured_events($capture_file,$quantization,$minimum_period) {
             if($event[$i_event]['source'] > 0 AND $event[$i_event]['event'] == "NoteOff" AND $event[$i_event]['note'] == $lastNoteOnCaptured) {
                 $lastNoteOnCaptured = '';
                 if($event[$i_event]['time'] < $lastNoteOnTime) {
-                    if($bigtest) echo " *** fixed";
-                    else echo $event[$i_event]['note']." ".$event[$i_event]['event']." fixed from ".$event[$i_event]['time']." to ".$lastNoteOnTime."<br />";
+                    if($bigtest AND $trace) echo " *** fixed";
+                    else if($trace) echo $event[$i_event]['note']." ".$event[$i_event]['event']." fixed from ".$event[$i_event]['time']." to ".$lastNoteOnTime."<br />";
                     $event[$i_event]['time'] = $lastNoteOnTime;
                     $fixed = TRUE;
                     }
                 }
             $i_event++;
-            if($bigtest) echo "<br />";
+            if($bigtest AND $trace) echo "<br />";
             }
-        if($bigtest) echo "-----<br />";
+        if($bigtest AND $trace) echo "-----<br />";
         if($lastNoteOnCaptured <> '') {
-            echo "<i>".$event[$lastNoteOnIndex]['time']." ".$event[$lastNoteOnIndex]['note']." ".$event[$lastNoteOnIndex]['event']." suppressed</i><br />";
+            if($trace) echo "<i>".$event[$lastNoteOnIndex]['time']." ".$event[$lastNoteOnIndex]['note']." ".$event[$lastNoteOnIndex]['event']." suppressed</i><br />";
             unset($event[$lastNoteOnIndex]);
             $event = array_values($event);
             $fixed = TRUE;
             }
         fclose($file);
-        if($fixed) echo "-----";
+        if($fixed AND $trace) echo "-----";
         usort($event,function($a, $b) {
             // Ensure both 'time' values exist and compare them numerically
             $timeA = $a['time'] ?? null;
@@ -76,30 +77,30 @@ function process_captured_events($capture_file,$quantization,$minimum_period) {
             if ($timeA === null || $timeB === null) return 0;
             return $timeA <=> $timeB; // Numeric comparison for ascending order
             });
-        echo "<p><i>After sorting events:</i></p>";
-        displayEvents($event,$arg);
-        echo "<br />";
+        if($trace) echo "<p><i>After sorting events:</i></p>";
+        if($trace) displayEvents($event,$arg);
+        if($trace) echo "<br />";
         $minPeriod = $minimum_period; // Minimum expected period (milliseconds)
         if($minPeriod == 0) {
             $minPeriod = 2 * $quantization;
-            echo "Minimum period = ".$minPeriod." ms (2 times the quantization)<br />";
+            if($trace) echo "Minimum period = ".$minPeriod." ms (2 times the quantization)<br />";
             }
         else if($minPeriod < (2 * $quantization)) {
             $minPeriod = 2 * $quantization;
-            echo "Minimum period (".$minimum_period." ms) was too small. It has been set to ".$minPeriod." ms, i.e. 2 times the quantization (".$quantization." ms)<br />";
+            if($trace) echo "Minimum period (".$minimum_period." ms) was too small. It has been set to ".$minPeriod." ms, i.e. 2 times the quantization (".$quantization." ms)<br />";
             }
-        else echo "Minimum period = ".$minPeriod." ms (as found in the settings)<br />";
+        else if($trace) echo "Minimum period = ".$minPeriod." ms (as found in the settings)<br />";
         $step = 1;     // Step size for period testing (milliseconds)
-        $period = calculatePeriod($event,$minPeriod,$step,FALSE);
-        echo "The most likely period is ".$period." milliseconds<br />";
-        echo "<p><i>After adjusting to the ".$period." ms period:</i></p>";
+        $period = calculatePeriod($event,$minPeriod,$step,$trace);
+        if($trace) echo "The most likely period is ".$period." milliseconds<br />";
+        if($trace) echo "<p><i>After adjusting to the ".$period." ms period:</i></p>";
         $object = adjustToPeriod($event,$period);
         displayObjects($object);
         }
     return $captured_events;
     }
 
-function calculatePeriod($events,$minPeriod,$step,$test) {
+function calculatePeriod($events,$minPeriod,$step,$trace) {
     // Extract event times
     $times = array_map(function($event) {
 		$the_time = $event['time'];
@@ -116,13 +117,13 @@ function calculatePeriod($events,$minPeriod,$step,$test) {
 		$deltas[] = $the_delta;
     	}
 	$maxPeriod = $deltamin;
-	echo "Maximum period = ".$maxPeriod." ms<br />";
-	echo "Maximum time of captured flow = ".$maxtime." ms<br />";
+	if($trace) echo "Maximum period = ".$maxPeriod." ms<br />";
+	if($trace) echo "Maximum time of captured flow = ".$maxtime." ms<br />";
     $bestPeriod = 0;
     $bestScore = PHP_FLOAT_MIN;
     for($period = $minPeriod; $period <= $maxPeriod; $period += $step) {
 		$score = scorePeriod($deltas,$period);
-		if($test) echo $period." --> ".round($score,2)."<br />";
+	//	if($trace) echo $period." --> ".round($score,2)."<br />";
         if($score > $bestScore) {
             $bestScore = $score;
             $bestPeriod = $period;

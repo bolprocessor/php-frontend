@@ -39,7 +39,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
         	}
 		else echo "<p class=\"red-text\">👉 Error moving the uploaded file</p>";
     	}
-	else if(!$trashed AND isset($_FILES['uploaded_file']['error'])) echo "<p class=\"red-text\">👉 Error: ".$_FILES['uploaded_file']['error'].". Probably no file has been chosen…</p>";
+	else if(!$trashed AND isset($_POST['upload_capture_file'])) echo "<p class=\"red-text\">👉 No file of captured MIDI data has been chosen…</p>";
 	}
 
 if(isset($_POST['reload'])) {
@@ -1250,14 +1250,15 @@ $note_convention = '';
 $csound_default_orchestra = '';
 $diapason = 440; $C4key = 60;
 $found_orchestra_in_settings = $quantize = FALSE;
+$trace_capture_analysis = TRUE;
 $minimum_period = 200; // milliseconds
+$advance_time = 10; // seconds
 $dir_base = str_replace($bp_application_path,'',$dir);
 $url_settings = "settings.php?file=".urlencode($dir_base.$settings_file);
 if($settings_file <> '' AND file_exists($dir.$settings_file)) {
 	convert_to_json($dir,$settings_file);
 	$content_json = @file_get_contents($dir.$settings_file,TRUE);
 	$settings = json_decode($content_json,TRUE);
-
 	$show_production = $settings['DisplayProduce']['value'];
 	$trace_production = $settings['TraceProduce']['value'];
 	$note_convention = $settings['NoteConvention']['value'];
@@ -1267,9 +1268,11 @@ if($settings_file <> '' AND file_exists($dir.$settings_file)) {
 	$q_clock = $settings['Qclock']['value'];
 	$max_time_computing = $settings['MaxConsoleTime']['value'];
 	$produce_all_items = $settings['AllItems']['value'];
-	$compute_while_playing = $settings['ComputeWhilePlay']['value'];
+	if(isset($settings['ComputeWhilePlay']['value'])) $compute_while_playing = $settings['ComputeWhilePlay']['value'];
+	else $compute_while_playing = TRUE;
 	if(trim($compute_while_playing) == '') $compute_while_playing = FALSE;
-	$advance_time = $settings['AdvanceTime']['value'];
+	if(isset($settings['AdvanceTime']['value'])) $advance_time = $settings['AdvanceTime']['value'];
+	else $compute_while_playing = TRUE;
 	$diapason = $settings['A4freq']['value'];
 	$C4key = $settings['C4key']['value'];
 	$time_resolution = $settings['Time_res']['value'];
@@ -1277,6 +1280,7 @@ if($settings_file <> '' AND file_exists($dir.$settings_file)) {
 	$quantize = $settings['Quantize']['value'];
 	$nature_of_time_settings = $settings['Nature_of_time']['value'];
 	if(isset($settings['MinPeriod']['value'])) $minimum_period = intval($settings['MinPeriod']['value']);
+	if(isset($settings['TraceCaptureAnalysis']['value'])) $trace_capture_analysis = intval($settings['TraceCaptureAnalysis']['value']);
 	}
 // if($quantization == 0) $quantize = FALSE;
 
@@ -1481,7 +1485,7 @@ if(!isset($_POST['analyze_tonal'])) {
 	if($file_format <> "rtmidi") echo "<p>&nbsp;</p>";
 	echo "<input type=\"hidden\" name=\"file_link\" value=\"".$capture_file."\">";
 	if(file_exists($capture_file) AND is_capture_file($capture_file)) {
-		$link_analyse = "capture_analysis.php?data=".urlencode($capture_file)."&quantization=".$quantization."&minimum_period=".$minimum_period;
+		$link_analyse = "capture_analysis.php?data=".urlencode($capture_file)."&quantization=".$quantization."&minimum_period=".$minimum_period."&trace_capture_analysis=".$trace_capture_analysis;
 		$window_name = "capture_analysis";
 		echo "<p>👉 A well-formed captured MIDI data file is in place<br />";
 		echo "<input class=\"produce\" type=\"submit\" name=\"analyse_capture\" onclick=\"event.preventDefault(); window.open('".$link_analyse."','".$window_name."','width=800,height=800,left=200'); return false;\" value=\"ANALYSE CAPTURED MIDI DATA\">";
@@ -1493,7 +1497,7 @@ if(!isset($_POST['analyze_tonal'])) {
 		}
 	else {
 		echo "<p><input type=\"file\" name=\"uploaded_file\" id=\"uploaded_file\">";
-		echo "<input class=\"save\" type=\"submit\" value=\"<-- UPLOAD CAPTURED MIDI DATA\"><br />";
+		echo "<input class=\"save\" name=\"upload_capture_file\" type=\"submit\" value=\"<-- UPLOAD CAPTURED MIDI DATA\"><br />";
 		if(file_exists($capture_file)) echo "<span class=\"red-text\">👉 The current file of captured MIDI data is badly formed</span></p>";
 		else echo "</p>";
 		}
@@ -1503,7 +1507,7 @@ if(!isset($_POST['analyze_tonal'])) {
 
 	find_replace_form();
 
-	echo "<div style=\"float:right; vertical-align:middle; background-color:transparent;\">Import MusicXML: <input style=\"color:red;\"  onclick=\"if(!checksaved()) return false;\" type=\"file\" name=\"music_xml_import\">&nbsp;<input type=\"submit\" onclick=\"if(!checksaved()) return false;\" class=\"save\" value=\"← IMPORT\"></div>";
+	echo "<div style=\"float:right; vertical-align:middle; background-color:transparent;\">Import MusicXML: <input   onclick=\"if(!checksaved()) return false;\" type=\"file\" name=\"music_xml_import\">&nbsp;<input type=\"submit\" onclick=\"if(!checksaved()) return false;\" class=\"save\" value=\"← IMPORT\"></div>";
 
 	echo "<div style=\"text-align:left; background-color:transparent;\"><input id=\"saveButton\" class=\"save big\"  type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".begin_with(20,$filename)."’\"></div>";
 

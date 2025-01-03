@@ -377,5 +377,11 @@
         "value": "200",
         "unit": "ms (deft 200, by default 2 times the Quantization)",
         "boolean": "0"
+    },
+    "TraceCaptureAnalysis": {
+        "name": "Trace this analysis",
+        "value": "1",
+        "unit": "",
+        "boolean": "1"
     }
 }

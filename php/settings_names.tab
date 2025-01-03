@@ -70,4 +70,5 @@
 "DefaultBlockKey"	"Default block key"	"(0..127) e.g. 60 for 'C4' or 69 for 'A4'"	"0"	"60"
 "PROCESSING CAPTURED MIDI EVENTS"				
 "MinPeriod"	"Minimum period"	"ms (deft 200, by default 2 times the Quantization)<br>This is used for positioning sound-objects"	"0"	"200"
+"TraceCaptureAnalysis"	"Trace this analysis"		"1"	"1"
 "-- end --"				

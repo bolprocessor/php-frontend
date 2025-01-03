@@ -278,6 +278,7 @@ for($i = 0; $i < $imax; $i++) {
 		//	$name = $param;
 			$table3[$i] = $value = $settings[$param];
 			$boolean = $settings[$param]['boolean'];
+			if($param == "ComputeWhilePlay") $value = 1;
 			$new = FALSE;
 			}
 		}
