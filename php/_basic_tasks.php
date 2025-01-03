@@ -4844,6 +4844,8 @@ function convert_to_json($dir,$settings_file) {
 		$settings[$the_token]['unit'] = $parameter_unit[$i];
 		$settings[$the_token]['boolean'] = $parameter_yesno[$i];
 		}
+	$settings['ComputeWhilePlay']['value'] = 1;
+	$settings['AdvanceTime']['value'] = 10.5;
 	$settings = recursive_strval($settings);
 	$jsonData = json_encode($settings,JSON_PRETTY_PRINT);
     file_put_contents($dir.$settings_file,$jsonData);
