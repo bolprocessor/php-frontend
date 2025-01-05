@@ -2522,8 +2522,9 @@ function display_console_state() {
 		if(check_installation()) {
 			$link = "compile.php";
 			echo "Source files of BP3 have been found. You can (re)compile it.<br />";
-			if(!check_gcc()) if(windows_system()) echo "👉&nbsp;&nbsp;However, ‘gcc’ is not responding.<br />You first need to <a class=\"linkdotted\" target=\"_blank\" href=\"https://bolprocessor.org/install-mingw/\">install and set up MinGW</a>.";
-				else echo "👉&nbsp;&nbsp;However, ‘gcc’ is not responding. You need to install<br />the <a class=\"linkdotted\" target=\"_blank\" href=\"https://www.cnet.com/tech/computing/install-command-line-developer-tools-in-os-x/\">command line developer tools</a> or <a class=\"linkdotted\" target=\"_blanl\" href=\"https://developer.apple.com/support/xcode/\">Xcode</a>.";
+			if(!check_gcc())
+				if(windows_system()) echo "👉&nbsp;&nbsp;However, ‘gcc’ is not responding.<br />You first need to <a class=\"linkdotted\" target=\"_blank\" href=\"https://bolprocessor.org/install-mingw/\">install and set up MinGW</a>.";
+				else echo "👉&nbsp;&nbsp;However, ‘gcc’ is not responding. You will get it with <a class=\"linkdotted\" target=\"_blanl\" href=\"https://apps.apple.com/us/app/xcode/id497799835\">Xcode</a>.";
 			else echo "👉&nbsp;&nbsp;<a onclick=\"window.open('".nice_url($link)."','trace','width=800,height=800'); return false;\"  href=\"".nice_url($link)."\">Click to run the compiler</a>, then <a href=\"".$url_this_page."\">reload this page</a>.";
 			}
 		else

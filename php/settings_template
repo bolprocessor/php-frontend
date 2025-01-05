@@ -375,7 +375,7 @@
     "MinPeriod": {
         "name": "Minimum period",
         "value": "200",
-        "unit": "ms (deft 200, by default 2 times the Quantization)",
+        "unit": "ms (deft 200, at least 2 times the Quantization)",
         "boolean": "0"
     },
     "TraceCaptureAnalysis": {

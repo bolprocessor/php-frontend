@@ -178,7 +178,7 @@ while(TRUE) {
 $t = 0;
 if($n < 10) {
 	while(TRUE) {
-		imageline($im,$margin_left+($alpha*$t),110,$margin_left+($alpha*$t),115,$black);
+		imageline($im,$margin_left+intval($alpha*$t),110,$margin_left+intval($alpha*$t),115,$black);
 		$t += 100;
 		if($t > $max_duration) break;
 		}
@@ -187,13 +187,13 @@ imagestring($im,10,$margin_left-2,92,"0",$black);
 
 // Write time unit
 if($max_duration > 100000)
-	imagestring($im,10,$margin_left-2+($alpha*10000),92,"100 s",$black);
+	imagestring($im,10,$margin_left-2+intval($alpha*10000),92,"100 s",$black);
 if($max_duration > 10000)
-	imagestring($im,10,$margin_left-2+($alpha*10000),92,"10 s",$black);
+	imagestring($im,10,$margin_left-2+intval($alpha*10000),92,"10 s",$black);
 else if($max_duration > 1000)
-	imagestring($im,10,$margin_left-2+($alpha*1000),92,"1.00 s",$black);
+	imagestring($im,10,$margin_left-2+intval($alpha*1000),92,"1.00 s",$black);
 else if($max_duration > 100)
-	imagestring($im,10,$margin_left-2+($alpha*100),92,"100 ms",$black);
+	imagestring($im,10,$margin_left-2+intval($alpha*100),92,"100 ms",$black);
 
 // Display beats
 if($Tref > 0 AND $Tref <= $max_duration) {
@@ -413,6 +413,11 @@ function arrow($im,$x1,$y1,$x2,$y2,$alength,$awidth,$relocate,$color) {
     $x4 = $dx - $y2o * $k;
     $y4 = $dy - $x2o * $k;
     if(!$relocate) imagefilledrectangle($im,$x1-1,$y1,$x1+1,$y2-2,$color);
-    imagefilledpolygon($im, array($x2, $y2, $x3, $y3, $x4, $y4), 3, $color);
+
+	if (version_compare(PHP_VERSION, '8.1.0', '>='))
+		// For PHP 8.1 and newer
+		imagefilledpolygon($im, array($x2, $y2, $x3, $y3, $x4, $y4),$color);
+	else
+    	imagefilledpolygon($im, array($x2, $y2, $x3, $y3, $x4, $y4),3,$color);
 	}
 ?>

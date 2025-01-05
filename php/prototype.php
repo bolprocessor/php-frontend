@@ -1586,7 +1586,7 @@ if($change_beats OR isset($_POST['adjust_duration'])) {
 	$Duration = $NewDuration;
 	}
 
-if(isset($_POST['CroppedDuration'])) {
+if(isset($_POST['CroppedDuration']) AND trim($_POST['CroppedDuration']) <> '') {
 	$CroppedDuration = round($_POST['CroppedDuration']);
 	if($CroppedDuration > 0) {
 		$new_midi_code = $OnKey = array();
