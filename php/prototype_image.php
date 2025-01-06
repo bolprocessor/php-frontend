@@ -3,7 +3,7 @@ header("Content-type: image/png");
 $save_codes_dir = urldecode($_GET['save_codes_dir']);
 $image_file = $save_codes_dir."/image.php";
 require_once($image_file);
-
+error_reporting(0);
 
 if($pivbeg == 1) $pivot_pos = 0;
 if($pivcent == 1) $pivot_pos = $Duration / 2;

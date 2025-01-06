@@ -1,4 +1,5 @@
 <?php
+error_reporting(0);
 $save_codes_dir = urldecode($_GET['save_codes_dir']);
 $dir_scale_images = urldecode($_GET['dir_scale_images']);
 if(isset($_GET['csound_source'])) $csound_source = urldecode($_GET['csound_source']);
@@ -38,7 +39,7 @@ $lemonchiffon = imagecolorallocate($im,255,250,205);
 $lightcyan = imagecolorallocate($im,224,255,255);
 $papayawhip = imagecolorallocate($im,255,239,213);
 
-imagefilledrectangle($im,0,0,$image_width,$image_height,$white);
+imagefilledrectangle($im,0,0,intval($image_width),intval($image_height),$white);
 
 $text = "Scale \"".$filename."\"";
 imagestring($im,10,$margin_left,10,$text,$black);
@@ -72,7 +73,7 @@ if(!$no_intervals AND isset($p_addpos)) {
 	$y_text = $y1 - imagefontheight(10) / 2;
 	imagelinethick($im,$x1,$y1,$x2,$y1,$black,2);
 	$x1 = $x2 + 15;
-	if($i > 0) imagestring($im,10,$x1,$y_text,$text,$black);
+	if($i > 0) imagestring($im,10,intval($x1),intval($y_text),$text,$black);
 	}
 
 for($j = $numgrades_with_labels = 0; $j < $numgrades_fullscale; $j++) {
@@ -313,19 +314,19 @@ if(!$no_marks) {
 	$y_text = $y1 + 5;
 	imagelinethick($im,$x1,$y1,$x2,$y2,$blue,3);
 	$text = "Pythagorean position";
-	imagestring($im,10,$x_text,$y_text,$text,$blue);
+	imagestring($im,10,intval($x_text),intval($y_text),$text,$blue);
 	$y1 = $y2 + 25;
 	$y2 = $y1 + 25;
 	$y_text = $y1 + 5;
 	imagelinethick($im,$x1,$y1,$x2,$y2,$green,3);
 	$text = "Harmonic position";
-	imagestring($im,10,$x_text,$y_text,$text,$green);
+	imagestring($im,10,intval($x_text),intval($y_text),$text,$green);
 	$y1 += 40;
 	}
 else $y1 += 95;
 $x1 -= 50;
 $text = "- Created by the Bol Processor -";
-imagestring($im,10,$x1,$y1,$text,$black);
+imagestring($im,10,intval($x1),intval($y1),$text,$black);
 
 imagepng($im);
 $clean_name_of_file = str_replace("#","_",$filename);
@@ -376,7 +377,7 @@ function imagelinethick($image,$x1,$y1,$x2,$y2,$color,$thick) {
     return imageline($image, $x1, $y1, $x2, $y2, $color);
     */
     if($thick == 1) {
-        return imageline($image, $x1, $y1, $x2, $y2, $color);
+        return imageline($image, intval($x1), intval($y1), intval($x2), intval($y2), $color);
     	}
     $t = $thick / 2 - 0.5;
     if($x1 == $x2 || $y1 == $y2) {
@@ -409,7 +410,7 @@ function imagelinedotted($im, $x1, $y1, $x2, $y2, $dist, $col) {
         array_push($style, $transp); // Generate style array - loop needed for customisable distance between the dots
     	}
    	imagesetstyle($im, $style);
-    return (integer) imageline($im, $x1, $y1, $x2, $y2, IMG_COLOR_STYLED);
+    return (integer) imageline($im, intval($x1), intval($y1), intval($x2), intval($y2), IMG_COLOR_STYLED);
     imagesetstyle($im, array($col)); // Reset style - just in case...
 	}
 
@@ -438,7 +439,7 @@ function cents($ratio) {
 function imagesmoothline($image,$x1,$y1,$x2,$y2,$color) {
 	$colors = imagecolorsforindex($image,$color);
 	if($x1 == $x2) {
-		imageline($image, $x1, $y1, $x2, $y2, $color); // Vertical line
+		imageline($image,intval($x1), intval($y1), intval($x2), intval($y2), $color); // Vertical line
 		}
 	else {
 		$m = ($y2 - $y1) / ($x2 - $x1);
@@ -502,7 +503,7 @@ function whitespaces_imagestring($image,$font,$x,$y,$string, $color) { // Not us
         $exploded_wrapped_string = explode("\n", wordwrap(str_replace("\t", "    ", $exploded_string[$i]), $max_characters, "\n"));
         $j_count = count($exploded_wrapped_string);
         for($j = 0; $j < $j_count; $j++) {
-            imagestring($image, $font, $x, $next_offset_y, $exploded_wrapped_string[$j], $color);
+            imagestring($image, $font,intval($x),intval($next_offset_y), $exploded_wrapped_string[$j], $color);
             $next_offset_y += $font_height;
 
             if($next_offset_y >= $image_height - $y) {
