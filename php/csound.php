@@ -147,7 +147,7 @@ if(isset($_POST['copy_this_scale'])) {
 			else {
 				echo "<p>Copied <span class=\"green-text\">‘".$scalefilename."’</span> ";
 				echo "to: <span class=\"green-text\">‘".$new_scale_file."’</span></p>";
-				$content = file_get_contents($dir_scales.$scalefilename.".txt",TRUE);
+				$content = file_get_contents($dir_scales.$scalefilename.".txt");
 				$table = explode("\n",$content);
 				$im = count($table);
 				$handle = fopen($dir_scales.$new_scale_file,"w");
@@ -181,7 +181,7 @@ if(isset($_POST['copy_this_scale'])) {
 					}
 				sleep(1);
 				}
-			$content = file_get_contents($dir.$destination,TRUE);
+			$content = file_get_contents($dir.$destination);
 			if(!$content) echo "<p><span class=\"red-text\">For an unknown reason the destination file </span> <span class=\"green-text\">‘".$file_lock."’</span> is empty</p>";
 			else {
 				$file_lock2 = $dir.$destination."_lock2";
@@ -210,7 +210,7 @@ if(isset($_POST['copy_this_scale'])) {
 								if($extension <> "txt") continue;
 								$this_scale_name = str_replace(".txt",'',$this_scale);
 								if($this_scale_name == $scalefilename) {
-									$content_scale = file_get_contents($folder_scales.SLASH.$this_scale,TRUE);
+									$content_scale = file_get_contents($folder_scales.SLASH.$this_scale);
 									$table3 = explode(chr(10),$content_scale);
 									for($j = 0; $j < count($table3); $j++) {
 										$line3 = trim($table3[$j]);
@@ -302,7 +302,7 @@ foreach($dircontent as $oldfile) {
 	$table = explode(".",$oldfile);
 	$extension = end($table);
 	if($extension == "old" OR $extension == "txt") {
-		$content = @file_get_contents($temp_dir.$temp_folder.SLASH.$oldfile,TRUE);
+		$content = @file_get_contents($temp_dir.$temp_folder.SLASH.$oldfile);
 		$table = explode(chr(10),$content);
 		$index_this_instrument = $table[5];
 		if($index_this_instrument > $index_max) $index_max = $index_this_instrument;
@@ -325,7 +325,7 @@ if(isset($_POST['create_instrument'])) {
 	else if($new_instrument <> '') {
 		$new_instrument_file = $temp_dir.$temp_folder.SLASH.$new_instrument.".txt";
 		$template = "instrument_template";
-		$template_content = @file_get_contents($template,TRUE);
+		$template_content = @file_get_contents($template);
 		$template_content = str_replace("[[index]]",$new_index,$template_content);
 		$handle = fopen($new_instrument_file,"w");
 		$file_header = $top_header."\n// Object prototype saved as \"".$new_instrument."\". Date: ".gmdate('Y-m-d H:i:s');
@@ -359,7 +359,7 @@ if(isset($_POST['duplicate_instrument'])) {
 			$new_index = $number_instruments + 1;
 			$number_instruments++;
 			$_POST['number_instruments'] = $number_instruments;
-			$content = @file_get_contents($this_instrument_file,TRUE);
+			$content = @file_get_contents($this_instrument_file);
 			$table = explode(chr(10),$content);
 			$im = count($table);
 			$handle = fopen($copy_instrument_file,"w");
@@ -402,7 +402,7 @@ $content = @file_get_contents($this_file);
 if($content === FALSE) ask_create_new_file($url_this_page,$filename);
 if(strlen(trim($content)) == 0) {
 	$template = "csound_template";
-	$content = @file_get_contents($template,TRUE);
+	$content = @file_get_contents($template);
 	}
 $extract_data = extract_data(FALSE,$content);
 echo "<p class=\"green-text\">".$extract_data['headers']."</p>";

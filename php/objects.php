@@ -20,7 +20,7 @@ if(isset($_POST['createcsoundinstruments'])) {
 	$CsoundInstruments_filename = $_POST['CsoundInstruments_filename'];
 	$handle = fopen($dir.$CsoundInstruments_filename,"w");
 	$template = "csound_template";
-	$template_content = @file_get_contents($template,TRUE);
+	$template_content = @file_get_contents($template);
 	fwrite($handle,$template_content."\n");
 	fclose($handle);
 	$path = str_replace($bp_application_path,'',$dir);
@@ -55,7 +55,7 @@ if(isset($_POST['create_object'])) {
 	$new_object = str_replace('"','',$new_object);
 	if($new_object <> '') {
 		$template = "object_template";
-		$template_content = @file_get_contents($template,TRUE);
+		$template_content = @file_get_contents($template);
 		$new_object_file = $temp_dir.$temp_folder.SLASH.$new_object.".txt";
 		$handle = fopen($new_object_file,"w");
 		$file_header = $top_header."\n// Object prototype saved as \"".$new_object."\". Date: ".gmdate('Y-m-d H:i:s');
@@ -177,11 +177,12 @@ if(isset($_POST['savethisfile']) OR isset($_POST['create_object']) OR isset($_PO
 	}
 
 try_create_new_file($this_file,$filename);
-$content = @file_get_contents($this_file,TRUE);
+$content = @file_get_contents($this_file);
 if($content === FALSE) ask_create_new_file($url_this_page,$filename);
+$content = mb_convert_encoding($content,'UTF-8','UTF-8');
 if(strlen(trim($content)) == 0) {
 	$template = "prototypes_template";
-	$content = @file_get_contents($template,TRUE);
+	$content = @file_get_contents($template);
 	}
 $objects_file = $grammar_file = $csound_file = $tonality_file = $alphabet_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = '';
 $extract_data = extract_data(TRUE,$content);

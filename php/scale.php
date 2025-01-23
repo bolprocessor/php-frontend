@@ -14,7 +14,7 @@ else {
 if(isset($_POST['download_scala'])) {
 	$dir_scales = $_POST['dir_scales'];
 	$file = $dir_scales.$filename.".scl";
-	$content = @file_get_contents($file,TRUE);
+	$content = @file_get_contents($file);
     header('Content-Description: File Transfer');
     header('Content-Type: text/plain');
     header('Content-Disposition: attachment; filename="'.basename($file).'"');
@@ -28,7 +28,7 @@ if(isset($_POST['download_scala'])) {
 if(isset($_POST['download_kbm'])) {
 	$dir_scales = $_POST['dir_scales'];
 	$file = $dir_scales.$filename.".kbm";
-	$content = @file_get_contents($file,TRUE);
+	$content = @file_get_contents($file);
     header('Content-Description: File Transfer');
     header('Content-Type: text/plain');
     header('Content-Disposition: attachment; filename="'.basename($file).'"');

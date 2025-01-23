@@ -137,9 +137,15 @@ if(isset($_POST['changestatus'])) {
 	fclose($handle);
 	}
 try_create_new_file($this_file,$filename);
-$content = @file_get_contents($this_file,TRUE);
+$content = @file_get_contents($this_file);
 if($content === FALSE) ask_create_new_file($url_this_page,$filename);
-if(trim($content) == '') $content = @file_get_contents("timebase_template",TRUE);
+$content = mb_convert_encoding($content,'UTF-8','UTF-8');
+if(trim($content) == '') $content = @file_get_contents("timebase_template");
+if($content === FALSE) {
+	echo "<p>👉 “timebase_template” is missing in the “php” folder</p>";
+	die();
+	}
+$content = mb_convert_encoding($content,'UTF-8','UTF-8');
 $extract_data = extract_data(TRUE,$content);
 echo "<p class=\"green-text\">".$extract_data['headers']."</p>";
 $content = $extract_data['content'];
@@ -244,7 +250,7 @@ if(file_exists($midi_import_mf2t)) {
 	if(isset($_POST['activate_'.$i_midifile])) $mute[$i_midifile] = FALSE;
 	echo "<input type=\"hidden\" name=\"mute_".$i_midifile."\" value=\"".$mute[$i_midifile]."\">";
 	// We reconstruct the imported MIDI file so that bugs are fixed…
-	$mf2t_content = @file_get_contents($midi_import_mf2t,TRUE);
+	$mf2t_content = @file_get_contents($midi_import_mf2t);
 	$duration_of_midifile = duration_of_midifile($mf2t_content);
 	$beats_of_midifile = round(($duration_of_midifile * $p_clock / $q_clock / 1000),2);
 	echo "<tr id=\"midi\">";
@@ -446,7 +452,7 @@ fclose($handle);
 
 $midi_file = $temp_dir.$temp_folder.SLASH."midicodes.mid";
 
-$mf2t_content = @file_get_contents($mf2t,TRUE);
+$mf2t_content = @file_get_contents($mf2t);
 $midi = new Midi();
 $midi->importTxt($mf2t_content);
 $midi->saveMidFile($midi_file);

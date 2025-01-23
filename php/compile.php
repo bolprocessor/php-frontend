@@ -48,7 +48,7 @@ echo "<div style=\"padding: 1em; border-radius: 1em;\">";
 if($return_var <> 0) {
 	echo "<p style=\"text-align:center;  width:90%;\">Compilation failed… Check the “source/BP3” folder!</p>";
 	if(file_exists($this_file)) {
-		$content = trim(@file_get_contents($this_file,TRUE));
+		$content = trim(@file_get_contents($this_file));
 		echo "<p style=\"color:red; text-align:center; width:90%;\"><big>Compilation Errors:</big></p>";
 		echo "<pre style=\"color:red; text-align:left; width:90%; margin:auto;\">".htmlspecialchars($content)."</pre>";
 		}

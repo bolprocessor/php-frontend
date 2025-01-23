@@ -58,7 +58,8 @@ if(isset($_POST['create_parameter'])) {
 		if($new_parameter <> '') {
 			$new_parameter_file = $folder_this_instrument.SLASH.$new_parameter.".txt";
 			$template = "parameter_template";
-			$template_content = @file_get_contents($template,TRUE);
+			$template_content = @file_get_contents($template);
+			$template_content = mb_convert_encoding($template_content,'UTF-8','UTF-8');
 			$template_content = str_replace("[name]",$new_parameter,$template_content);
 			$handle = fopen($new_parameter_file,"w");
 			fwrite($handle,$template_content."\n");
@@ -237,7 +238,7 @@ if(isset($_POST['saveinstrument'])) {
 	if($handle) fclose($handle);
 	}
 
-$content = file_get_contents($instrument_file,TRUE);
+$content = file_get_contents($instrument_file);
 $extract_data = extract_data(TRUE,$content);
 $content = $extract_data['content'];
 
@@ -453,7 +454,7 @@ if($n > 0) {
 		$extension = end($table);
 		if($extension <> "txt") continue;
 		$parameter_name = str_replace(".txt",'',$thisparameter);
-		$content = file_get_contents($folder_this_instrument.SLASH.$thisparameter,TRUE);
+		$content = file_get_contents($folder_this_instrument.SLASH.$thisparameter);
 		$table = explode(chr(10),$content);
 		$comment = $table[1];
 		echo "<tr>";

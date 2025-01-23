@@ -47,7 +47,8 @@ if(isset($_POST['addinstruction'])) {
 		if($status <> 1) continue;
 		if($i == $index) {
 			$entry = $instruction." ".$script_more[$instruction];
-			$content = @file_get_contents($this_file,TRUE);
+			$content = @file_get_contents($this_file);
+			$content = mb_convert_encoding($content,'UTF-8','UTF-8');
 			$extract_data = extract_data(TRUE,$content);
 			$content = $extract_data['content'];
 			$content .= "\n".$entry;
@@ -78,7 +79,8 @@ if($need_to_save OR isset($_POST['savethisfile']) OR isset($_POST['checkscript']
 
 if(isset($_POST['checkscript'])) {
 	echo "<p><b>Checked script:</b></p>";
-	$content = @file_get_contents($this_file,TRUE);
+	$content = @file_get_contents($this_file);
+	$content = mb_convert_encoding($content,'UTF-8','UTF-8');
 	$extract_data = extract_data(TRUE,$content);
 	$content = $extract_data['content'];
 	$table = explode(chr(10),$content);
@@ -115,7 +117,7 @@ if(isset($_POST['checkscript'])) {
 
 if(!isset($_POST['running'])) {
 	try_create_new_file($this_file,$filename);
-	$content = @file_get_contents($this_file,TRUE);
+	$content = @file_get_contents($this_file);
 	if($content === FALSE) ask_create_new_file($url_this_page,$filename);
 	$extract_data = extract_data(TRUE,$content);
 	echo "<p class=\"green-text\">".$extract_data['headers']."</p>";

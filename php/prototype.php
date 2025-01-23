@@ -451,9 +451,10 @@ echo "<p><span class=\"red-text\">➡</span> Don’t close the “<span class=\"
 echo "</div>";
 
 $content = @file_get_contents($object_file,TRUE);
-if($content == '') {
+if(trim($content) == '') {
 	exit("This prototype no longer exists.");
 	}
+$content = mb_convert_encoding($content,'UTF-8','UTF-8');
 $extract_data = extract_data(TRUE,$content);
 $source_file = $extract_data['objects'];
 echo "<p class=\"green-text\">".$extract_data['headers']."<br />// Source: ".$source_file."</p>";
@@ -477,7 +478,7 @@ $object_comment = $clean_line;
 
 $no_midi = TRUE;
 if(file_exists($midi_bytes)) {
-	$all_bytes = @file_get_contents($midi_bytes,TRUE);
+	$all_bytes = @file_get_contents($midi_bytes);
 	if(strlen(trim($all_bytes)) > 0) $no_midi = FALSE;
 	}
 
@@ -1237,7 +1238,7 @@ if(isset($_POST['cancel'])) {
 
 $no_midi = TRUE;
 if(file_exists($midi_bytes)) {
-	$all_bytes = @file_get_contents($midi_bytes,TRUE);
+	$all_bytes = @file_get_contents($midi_bytes);
 	if(strlen(trim($all_bytes)) > 0) $no_midi = FALSE;
 	}
 
@@ -1247,7 +1248,7 @@ if(count($midi_text_bytes) > 0) {
 	$no_midi = FALSE;
 	}
 else if(!$no_midi) {
-	$all_bytes = @file_get_contents($midi_bytes,TRUE);
+	$all_bytes = @file_get_contents($midi_bytes);
 	$table_bytes = explode(chr(10),$all_bytes);
 	$midi_text_bytes = array();
 	for($k = 1; $k < count($table_bytes); $k++) {
@@ -1942,7 +1943,7 @@ store($h_image,"time_max_midi",$time_max_midi);
 echo "<input type=\"hidden\" name=\"jmax\" value=\"".$j."\">";
 if(!$no_midi) {
 	echo "<p>MIDI CODES</p>";
-	$mf2t_content = @file_get_contents($mf2t,TRUE);
+	$mf2t_content = @file_get_contents($mf2t);
 	if($mf2t_content) {
 		$size_mf2t = strlen($mf2t_content);
 		if($size_mf2t < 1000000) {
@@ -2034,7 +2035,7 @@ echo "</form>";
 
 echo "<hr>";
 echo "<p id=\"csound\">CSOUND</p>";
-$csound_score = @file_get_contents($csound_file,TRUE);
+$csound_score = @file_get_contents($csound_file);
 $csound_score = fix_csound_score($csound_score,$csound_file,$temp_dir,$temp_folder);
 $csound_period = 0;
 $time_max_csound = 0;

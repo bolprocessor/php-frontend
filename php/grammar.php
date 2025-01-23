@@ -286,8 +286,10 @@ else {
 
 if($test) echo "grammar_file = ".$this_file."<br />";
 
-$content = @file_get_contents($this_file,TRUE);
+try_create_new_file($this_file,$filename);
+$content = @file_get_contents($this_file);
 if($content === FALSE) ask_create_new_file($url_this_page,$filename);
+$content = mb_convert_encoding($content,'UTF-8','UTF-8');
 $metronome = 0;
 $nature_of_time = $objects_file = $csound_file = $tonality_file = $alphabet_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = '';
 $extract_data = extract_data(TRUE,$content);
@@ -329,26 +331,34 @@ $dir_base = str_replace($bp_application_path,'',$dir);
 $found_orchestra_in_settings = $quantize = $play_each_sub = FALSE;
 if($settings_file <> '' AND file_exists($dir.$settings_file)) {
 	convert_to_json($dir,$settings_file);
-	$content_json = @file_get_contents($dir.$settings_file,TRUE);
-	$settings = json_decode($content_json,TRUE);
-	
-	$show_production = $settings['DisplayProduce']['value'];
-	$trace_production = $settings['TraceProduce']['value'];
-	$play_each_sub = $settings['UseEachSub']['value'];
-	$max_items = $settings['MaxItemsProduce']['value'];
-	$p_clock = $settings['Pclock']['value'];
-	$q_clock = $settings['Qclock']['value'];
-	$max_time_computing = $settings['MaxConsoleTime']['value'];
-	$produce_all_items = $settings['AllItems']['value'];
-	$diapason = $settings['A4freq']['value'];
-	$C4key = $settings['C4key']['value'];
-	$time_resolution = $settings['Time_res']['value'];
-	$quantization = $settings['Quantization']['value'];
-	$quantize = $settings['Quantize']['value'];
-	$nature_of_time_settings = $settings['Nature_of_time']['value'];
-
-	$note_convention = $settings['NoteConvention']['value'];
-	$non_stop_improvize = $settings['Improvize']['value'];
+	if(!$bad_settings) {
+		$content_json = @file_get_contents($dir.$settings_file,TRUE);
+		$settings = json_decode($content_json,TRUE);
+		$show_production = $settings['DisplayProduce']['value'];
+		$trace_production = $settings['TraceProduce']['value'];
+		$play_each_sub = $settings['UseEachSub']['value'];
+		$max_items = $settings['MaxItemsProduce']['value'];
+		$p_clock = $settings['Pclock']['value'];
+		$q_clock = $settings['Qclock']['value'];
+		$max_time_computing = $settings['MaxConsoleTime']['value'];
+		$produce_all_items = $settings['AllItems']['value'];
+		$diapason = $settings['A4freq']['value'];
+		$C4key = $settings['C4key']['value'];
+		$time_resolution = $settings['Time_res']['value'];
+		$quantization = $settings['Quantization']['value'];
+		$quantize = $settings['Quantize']['value'];
+		$nature_of_time_settings = $settings['Nature_of_time']['value'];
+		$note_convention = $settings['NoteConvention']['value'];
+		$non_stop_improvize = $settings['Improvize']['value'];
+		}
+	else {
+		$time_resolution = 10;
+		$quantization = 10;
+		$quantize = TRUE;
+		$nature_of_time_settings = STRIATED;
+		$p_clock = $q_clock = 1;
+		$non_stop_improvize = FALSE;
+		}
 	}
 
 if($test) echo "url_this_page = ".$url_this_page."<br />";
@@ -627,7 +637,7 @@ if((file_exists($output.SLASH.$default_output_name.".wav") OR file_exists($outpu
 	echo "&nbsp;&nbsp;&nbsp;<input class=\"edit\" style=\"font-size:large;\" onclick=\"window.open('".nice_url($result_file)."','result','width=800,height=600,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Show latests results\">";
 	}
 echo "&nbsp;<input class=\"edit big\" type=\"submit\" onclick=\"clearsave();\" name=\"compilegrammar\" value=\"COMPILE GRAMMAR\">";
-echo "&nbsp;<input onclick=\"event.preventDefault(); if(checksaved()) {window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)";
+echo "&nbsp;<input onclick=\"if(checksaved()) {window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)";
 if($error) {
 	echo " - disabled because of missing files\"";
 	echo " class=\"edit big disabled\" style=\"box-shadow: none;\" disabled ";
@@ -642,7 +652,7 @@ if($error) echo "<p>".$error_mssg."</p>";
 $table = explode(chr(10),$content);
 $imax = count($table);
 if($imax > $textarea_rows) $textarea_rows = $imax + 5;
-echo "<textarea name=\"thistext\" onchange=\"tellsave()\" rows=\"".$textarea_rows."\" style=\"width:90%;\">".$content."</textarea>";
+echo "<textarea id=\"textArea\" name=\"thistext\" onchange=\"tellsave()\" rows=\"".$textarea_rows."\" style=\"width:90%;\">".$content."</textarea>";
 
 echo "<p style=\"float:right; margin-right:100px;\"><input class=\"save big\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".begin_with(20,$filename)."’\"></p>";
 echo "<div style=\"background-color:transparent;\">";

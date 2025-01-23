@@ -82,6 +82,7 @@ $test_musicxml = FALSE;
 $no_chunk_real_time_midi = FALSE;
 $save_warning = '';
 $new_convention = '';
+$this_score = array();
 
 echo "<h2>Data project “".$filename."”</h2>";
 save_settings("last_data_name",$filename);
@@ -164,7 +165,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 		if(!$reload_musicxml) {
 			$tmpFile = $_FILES['music_xml_import']['tmp_name'];
 			move_uploaded_file($tmpFile,$music_xml_file) or die('Problem uploading this MusicXML file');
-			@chmod($music_xml_file,0666);
+			chmod($music_xml_file,0666);
 			$table = explode('.',$upload_filename);
 			$extension = end($table);
 			}
@@ -187,7 +188,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$trace_tempo = isset($_POST['trace_tempo']);
 			$trace_ornamentations = isset($_POST['trace_ornamentations']);
 			echo "<input type=\"hidden\" name=\"tempo_option\" value=\"".$tempo_option."\">";
-			$ignore_channels = isset($_POST['ignore_channels']);
+			$create_channels = isset($_POST['create_channels']);
 			if($reload_musicxml) $include_breaths = isset($_POST['include_breaths']);
 			if($reload_musicxml) $include_measures = isset($_POST['include_measures']);
 			if($reload_musicxml) $include_parts = isset($_POST['include_parts']);
@@ -277,13 +278,23 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			if(($change_metronome_min >= $change_metronome_max OR $change_metronome_average <= $change_metronome_min OR $change_metronome_average >= $change_metronome_max) AND ($change_metronome_max > 0 OR $change_metronome_average > 0))
 				$error_change_metronome .= "<span class=\"red-text\">ERROR changing metronome: values are not compatible</span><br />";
 			if($error_change_metronome <> '') $change_metronome_average = $change_metronome_min = $change_metronome_max = 0;
-			$file = fopen($music_xml_file,"r");
+			$xml_content = @file_get_contents($music_xml_file);
+    		$xml_content = str_replace("\r","\n",$xml_content);
+    	//	$xml_content = str_replace("\n\n","\n",$xml_content);
+			$xml_content = mb_convert_encoding($xml_content,'UTF-8','UTF-8');
+			$xml_table = explode(chr(10),$xml_content);
 			$print_info = FALSE;
 			$new_section = FALSE;
 			$beat_unit = "quarter";
 			$fifths = $mode = array();
-			while(!feof($file)) {
-				$line = fgets($file);
+			$jmax = count($xml_table);
+			if($jmax == 0) {
+				echo "<p>👉 <span class=\"red-text\">ERROR: this MusicXML file is unreadable or empty</span></p>";
+				goto ENDLOADXML;
+				}
+			for($j = 0; $j < $jmax; $j++) {
+				$line = $xml_table[$j];
+				if(trim($line) == '') continue;
 				if(is_integer($pos=strpos($line,"<score-partwise")) AND $pos == 0) {
 					$partwise = TRUE;
 					continue;
@@ -327,7 +338,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 					if($select_part[$score_part] OR !$reload_musicxml) {
 					//	echo "Converting score part = ‘".$score_part."’<br />";
 						$subtitle_part .= "// Score part ‘".$score_part."’: instrument = ".$instrument_name[$score_part];
-						if(!$ignore_channels AND isset($midi_channel[$score_part]) AND $midi_channel[$score_part] <> '') {
+						if($create_channels AND isset($midi_channel[$score_part]) AND $midi_channel[$score_part] <> '') {
 							$subtitle_part .= " — MIDI channel ".$midi_channel[$score_part];
 							}
 						$subtitle_part .= "\n";
@@ -455,7 +466,6 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 					$this_score[$section][$i_measure][$part][] = $line;
 					}
 				}
-			fclose($file);
 			$i_section =  0;
 			foreach($this_score as $section => $the_section) {
 			//	echo "section = ".$section."<br />";
@@ -491,7 +501,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 					if($apply_rndvel[$i])
 						$list_settings .= "// Velocity randomisation = ".$rndvel[$i]." in part ‘".$part_label[$i]."’\n";
 					}
-				if($ignore_channels) $list_settings .= "// Ignoring MIDI channels\n";
+				if($create_channels) $list_settings .= "// Created MIDI channels\n";
 				if($ignore_dynamics) $list_settings .= "// Ignoring dynamics\n";
 				if($found_breath AND !$include_breaths) $list_settings .= "// Ignoring breaths\n";
 				if($found_trill)
@@ -540,7 +550,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				if(isset($_POST[$index])) $accept_pedal[$i] = $_POST[$index];
 				else $accept_pedal[$i] = FALSE;
 				}
-			$convert_score = convert_musicxml($this_score,$repeat_section,$divisions,$fifths,$mode,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$ignore_channels,$include_breaths,$include_slurs,$include_measures,$ignore_fermata,$ignore_mordents,$chromatic_mordents,$ignore_turns,$chromatic_turns,$ignore_trills,$chromatic_trills,$ignore_arpeggios,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections,$trace_tempo,$trace_ornamentations,$breath_length,$breath_tag,$trace_measures,$measures,$accept_signs,$include_parts,$number_parts,$apply_rndtime,$rndtime,$apply_rndvel,$rndvel,$extend_last_measure,$number_measures,$accept_pedal);
+			$convert_score = convert_musicxml($this_score,$repeat_section,$divisions,$fifths,$mode,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$create_channels,$include_breaths,$include_slurs,$include_measures,$ignore_fermata,$ignore_mordents,$chromatic_mordents,$ignore_turns,$chromatic_turns,$ignore_trills,$chromatic_trills,$ignore_arpeggios,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections,$trace_tempo,$trace_ornamentations,$breath_length,$breath_tag,$trace_measures,$measures,$accept_signs,$include_parts,$number_parts,$apply_rndtime,$rndtime,$apply_rndvel,$rndvel,$extend_last_measure,$number_measures,$accept_pedal);
 			$data .= $convert_score['data'];
 			$report = $convert_score['report'];
 			$data = preg_replace("/\s+/u"," ",$data);
@@ -603,11 +613,17 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				echo "<hr>";
 				}
 			if($number_parts > 1) echo $message_top;
-			else if(!$reload_musicxml) $ignore_channels = TRUE;
+			else if(!$reload_musicxml) $create_channels = FALSE;
 			echo $message_options;
-			echo "<input type=\"checkbox\" name=\"ignore_channels\"";
-			if($ignore_channels) echo " checked";
-			echo ">&nbsp;Ignore MIDI channels<br />";
+			echo "<input type=\"checkbox\" name=\"create_channels\"";
+			if($create_channels) echo " checked";
+			echo ">&nbsp;Interpret parts as MIDI channels<br />";
+			if($number_parts > 1) {
+				echo "<input type=\"checkbox\" name=\"include_parts\"";
+				if($include_parts) echo " checked";
+				echo ">&nbsp;Include “_part()” instructions<br />";
+				}
+			else $include_parts = FALSE;
 			if($reload_musicxml) {
 				$current_metronome_min = $convert_score['metronome_min'];
 				$current_metronome_max = $convert_score['metronome_max'];
@@ -797,12 +813,6 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			echo "<input type=\"checkbox\" name=\"include_measures\"";
 			if($include_measures) echo " checked";
 			echo ">&nbsp;Insert measure numbers [—n—]<br />";
-			if($number_parts > 1) {
-				echo "<input type=\"checkbox\" name=\"include_parts\"";
-				if($include_parts) echo " checked";
-				echo ">&nbsp;Insert labels of score parts<br />";
-				}
-			else $include_parts = FALSE;
 			echo "<hr>";
 			echo "<input type=\"checkbox\" name=\"trace_ornamentations\"";
 			if($trace_ornamentations) echo " checked";
@@ -828,6 +838,10 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			echo "</div>";
 			if($found_pedal_command AND $reload_musicxml) {
 				for($i = 0; $i < $number_parts; $i++) {
+					if(!isset($switch_controler[$i]) OR !isset($switch_channel[$i])) {
+					//	echo "<p>Switch error ".$i."</p>";
+						continue;
+						}
 					$more_data = str_replace("_switch_on_part(".($i + 1).")"," _switchon(".$switch_controler[$i].",".$switch_channel[$i].") ",$more_data);
 					$more_data = str_replace("_switch_off_part(".($i + 1).")"," _switchoff(".$switch_controler[$i].",".$switch_channel[$i].") ",$more_data);
 					}
@@ -837,6 +851,8 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			}
 		}
 	}
+
+ENDLOADXML:
 unset($_FILES['music_xml_import']);
 
 if(isset($_POST['explode'])) {
@@ -1200,8 +1216,9 @@ if($need_to_save OR isset($_POST['savethisfile'])) {
 else read_midiressources($filename);
 
 try_create_new_file($this_file,$filename);
-$content = @file_get_contents($this_file,TRUE);
+$content = @file_get_contents($this_file);
 if($content === FALSE) ask_create_new_file($url_this_page,$filename);
+$content = mb_convert_encoding($content,'UTF-8','UTF-8');
 
 $metronome = 0;
 $nature_of_time = $time_structure = $objects_file = $csound_file = $tonality_file = $tonality_file = $alphabet_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = '';
@@ -1257,30 +1274,40 @@ $dir_base = str_replace($bp_application_path,'',$dir);
 $url_settings = "settings.php?file=".urlencode($dir_base.$settings_file);
 if($settings_file <> '' AND file_exists($dir.$settings_file)) {
 	convert_to_json($dir,$settings_file);
-	$content_json = @file_get_contents($dir.$settings_file,TRUE);
-	$settings = json_decode($content_json,TRUE);
-	$show_production = $settings['DisplayProduce']['value'];
-	$trace_production = $settings['TraceProduce']['value'];
-	$note_convention = $settings['NoteConvention']['value'];
-	$non_stop_improvize = $settings['Improvize']['value'];
-	$max_items = $settings['MaxItemsProduce']['value'];
-	$p_clock = $settings['Pclock']['value'];
-	$q_clock = $settings['Qclock']['value'];
-	$max_time_computing = $settings['MaxConsoleTime']['value'];
-	$produce_all_items = $settings['AllItems']['value'];
-	if(isset($settings['ComputeWhilePlay']['value'])) $compute_while_playing = $settings['ComputeWhilePlay']['value'];
-	else $compute_while_playing = TRUE;
-	if(trim($compute_while_playing) == '') $compute_while_playing = FALSE;
-	if(isset($settings['AdvanceTime']['value'])) $advance_time = $settings['AdvanceTime']['value'];
-	else $compute_while_playing = TRUE;
-	$diapason = $settings['A4freq']['value'];
-	$C4key = $settings['C4key']['value'];
-	$time_resolution = $settings['Time_res']['value'];
-	$quantization = $settings['Quantization']['value'];
-	$quantize = $settings['Quantize']['value'];
-	$nature_of_time_settings = $settings['Nature_of_time']['value'];
-	if(isset($settings['MinPeriod']['value'])) $minimum_period = intval($settings['MinPeriod']['value']);
-	if(isset($settings['TraceCaptureAnalysis']['value'])) $trace_capture_analysis = intval($settings['TraceCaptureAnalysis']['value']);
+	if(!$bad_settings) {
+		$content_json = @file_get_contents($dir.$settings_file,TRUE);
+		$settings = json_decode($content_json,TRUE);
+		$show_production = $settings['DisplayProduce']['value'];
+		$trace_production = $settings['TraceProduce']['value'];
+		$note_convention = $settings['NoteConvention']['value'];
+		$non_stop_improvize = $settings['Improvize']['value'];
+		$max_items = $settings['MaxItemsProduce']['value'];
+		$p_clock = $settings['Pclock']['value'];
+		$q_clock = $settings['Qclock']['value'];
+		$max_time_computing = $settings['MaxConsoleTime']['value'];
+		$produce_all_items = $settings['AllItems']['value'];
+		if(isset($settings['ComputeWhilePlay']['value'])) $compute_while_playing = $settings['ComputeWhilePlay']['value'];
+		else $compute_while_playing = TRUE;
+		if(trim($compute_while_playing) == '') $compute_while_playing = FALSE;
+		if(isset($settings['AdvanceTime']['value'])) $advance_time = $settings['AdvanceTime']['value'];
+		else $compute_while_playing = TRUE;
+		$diapason = $settings['A4freq']['value'];
+		$C4key = $settings['C4key']['value'];
+		$time_resolution = $settings['Time_res']['value'];
+		$quantization = $settings['Quantization']['value'];
+		$quantize = $settings['Quantize']['value'];
+		$nature_of_time_settings = $settings['Nature_of_time']['value'];
+		if(isset($settings['MinPeriod']['value'])) $minimum_period = intval($settings['MinPeriod']['value']);
+		if(isset($settings['TraceCaptureAnalysis']['value'])) $trace_capture_analysis = intval($settings['TraceCaptureAnalysis']['value']);
+		}
+	else {
+		$time_resolution = 10;
+		$quantization = 10;
+		$quantize = TRUE;
+		$nature_of_time_settings = STRIATED;
+		$p_clock = $q_clock = 1;
+		$non_stop_improvize = FALSE;
+		}
 	}
 // if($quantization == 0) $quantize = FALSE;
 
@@ -1305,17 +1332,24 @@ if(!isset($_POST['analyze_tonal'])) {
 			}
 		else $metronome_settings = 0;
 		if($metronome > 0 AND $metronome <> $metronome_settings) {
-			echo "➡&nbsp;Metronome = <span class=\"red-text\">".$metronome_settings."</span> beats/mn as per<br /><span class=\"green-text\">‘".$settings_file."’</span> but it may be changed in data.<br />";
+			echo "➡&nbsp;Metronome = <span class=\"red-text\">".$metronome_settings."</span> beats/mn";
+			if(!$bad_settings) echo " as per<br /><span class=\"green-text\">‘".$settings_file."’</span> but it may be changed in data.";
+			echo "<br />";
 			}
 		if($metronome_settings > 0) $metronome = $metronome_settings;
 		if($metronome <> intval($metronome)) $metronome = sprintf("%.3f",$metronome);
 		$nature_of_time = $nature_of_time_settings;
 		if($metronome > 0.) {
-			echo "⏱ Metronome = <span class=\"red-text\">".$metronome."</span> beats/mn by default as per <span class=\"green-text\">‘".$settings_file."’</span><br />";
+			echo "⏱ Metronome = <span class=\"red-text\">".$metronome."</span> beats/mn";
+			if(!$bad_settings) echo " as per <span class=\"green-text\">‘".$settings_file."’</span>";
+			echo "<br />";
 			}
-		echo "•&nbsp;Time resolution = <span class=\"red-text\">".$time_resolution."</span> milliseconds as per <span class=\"green-text\">‘".$settings_file."’</span><br />";
+		echo "•&nbsp;Time resolution = <span class=\"red-text\">".$time_resolution."</span> milliseconds";
+			if(!$bad_settings) echo " as per <span class=\"green-text\">‘".$settings_file."’</span>";
+			echo "<br />";
 		if($quantize) {
-			echo "•&nbsp;Quantization = <span class=\"red-text\">".$quantization."</span> milliseconds as per <span class=\"green-text\">‘".$settings_file."’</span>";
+			echo "•&nbsp;Quantization = <span class=\"red-text\">".$quantization."</span> milliseconds";
+			if(!$bad_settings) echo " as per <span class=\"green-text\">‘".$settings_file."’</span>";
 			if($time_resolution > $quantization) echo "&nbsp;<span class=\"red-text\">➡</span>&nbsp;may be raised to <span class=\"red-text\">".$time_resolution."</span>&nbsp;ms…";
 			echo "<br />";
 			}
@@ -1497,7 +1531,7 @@ if(!isset($_POST['analyze_tonal'])) {
 		}
 	else {
 		echo "<p><input type=\"file\" name=\"uploaded_file\" id=\"uploaded_file\">";
-		echo "<input class=\"save\" name=\"upload_capture_file\" type=\"submit\" value=\"<-- UPLOAD CAPTURED MIDI DATA\"><br />";
+		echo "<input class=\"save\" name=\"upload_capture_file\" type=\"submit\" value=\"<-- IMPORT CAPTURED MIDI DATA\"><br />";
 		if(file_exists($capture_file)) echo "<span class=\"red-text\">👉 The current file of captured MIDI data is badly formed</span></p>";
 		else echo "</p>";
 		}
@@ -1514,8 +1548,8 @@ if(!isset($_POST['analyze_tonal'])) {
 	$content = do_replace($content);
 
 	echo "<br /><textarea id=\"textArea\" name=\"thistext\" onchange=\"tellsave()\" rows=\"40\" style=\"width:750px;\">".$content."</textarea><br /><br />";
-
-	echo "<div style=\"float:right; background-color:transparent;\"><input class=\"save big\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".begin_with(20,$filename)."’\"></div>";
+//event.preventDefault(); 
+	echo "<div style=\"float:right; background-color:transparent;\"><input class=\"save big\" type=\"submit\" formaction=\"".$url_this_page."#textArea\"  onclick=\"clearsave();\" name=\"savethisfile\" value=\"SAVE ‘".begin_with(20,$filename)."’\"></div>";
 	display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,$objects_file,$csound_file,$tonality_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
 	}
 

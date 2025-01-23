@@ -390,7 +390,7 @@ if(ob_get_level() > 0) ob_flush();
 flush();
 
 if(isset($data_path) AND $data_path <> '') {
-	$content = @file_get_contents($data_path,TRUE);
+	$content = @file_get_contents($data_path);
 	if($content <> FALSE) {
 		if($instruction == "play") echo "<p><b>Playing";
 		if($instruction == "play-all") echo "<p><b>Playing chunks";
@@ -558,7 +558,7 @@ foreach($dircontent as $thisfile) {
 	if(count($table_number) > 1) $image_time = $table_number[1]."s";
 //		if($image_time == "0.00s") $image_time = '';
 //		$number = intval($number_and_time);
-	$content = @file_get_contents($temp_dir_abs.$thisfile,TRUE);
+	$content = @file_get_contents($temp_dir_abs.$thisfile);
 	$table2 = explode(chr(10),$content);
 	$imax = count($table2);
 	$table3 = array();
@@ -783,7 +783,8 @@ echo "</p>";
 
 function check_image($link) {
 	$result = '';
-	$content = @file_get_contents($link,TRUE);
+	$content = @file_get_contents($link);
+	$content = mb_convert_encoding($content,'UTF-8','UTF-8');
 	if($content) {
 		$content = str_replace(chr(13).chr(10),chr(10),$content);
 		$content = str_replace(chr(13),chr(10),$content);

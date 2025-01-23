@@ -168,10 +168,12 @@ a:hover img#darkModeToggle + * {
 
 body.light-mode .linkdotted {
 	border-bottom: 2px dotted royalblue;
+	color: royalblue;
 	}
 .linkdotted {
 	border-bottom: none;
 	border-bottom: 1px dotted aqua;
+	color: aqua;
 	}
 
 body.light-mode .morespace {

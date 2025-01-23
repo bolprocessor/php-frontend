@@ -2,7 +2,9 @@
 session_start();
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
-error_reporting(E_ALL & ~E_NOTICE);
+// error_reporting(E_ALL);
+error_reporting(0);
+// error_reporting(E_ALL & ~E_NOTICE);
 ini_set('output_buffering', 'off');
 ini_set('zlib.output_compression', 0);
 require('midi.class.php');
@@ -12,6 +14,7 @@ define('MAXFILESIZE',50000000);
 define('SLASH',DIRECTORY_SEPARATOR);
 define('STRIATED',1);
 define('SMOOTH',0);
+define('MAXPARTS',30);
 // ini_set("auto_detect_line_endings",true);
 
 $test = FALSE;
@@ -25,7 +28,7 @@ if (!file_exists($file_path)) {
     // Create the file and write the PHP tags
     $file_content = "<?php\n\n?>";
     // Write the content to the file
-    if (file_put_contents($file_path, $file_content) == false) {
+    if (my_file_put_contents($file_path, $file_content) == false) {
          echo "Failed to create the file '_settings.php'."; die();
         }
     else chmod($file_path,$permissions);
@@ -104,6 +107,8 @@ $max_term_in_fraction = 32768; // Used to simplify fractions when importing Musi
 
 $number_fields_csound_instrument = 67; // Never change this!
 $number_midi_parameters_csound_instrument = 6; // Never change this!
+
+$bad_settings = FALSE;
 
 $oldmask = umask(0);
 $temp_dir = $bp_application_path."temp_bolprocessor";
@@ -700,7 +705,8 @@ function compile_help($text_help_file,$html_help_file) {
 		echo "<p style=\"color:MediumTurquoise;\">Warning: “".$html_help_file."” has not yet been reconstructed.</p>";
 		return '';
 		}
-	$content = @file_get_contents($text_help_file,TRUE);
+	$content = @file_get_contents($text_help_file);
+	$content = mb_convert_encoding($content,'UTF-8','UTF-8');
 	if($content) {
 		$file_header = "<!DOCTYPE HTML>\n";
 		$file_header .= "<html lang=\"en\">";
@@ -871,7 +877,22 @@ function clean_up_encoding($create_bullets,$convert,$text) {
 	$text = str_replace("¤","•",$text);
 	$text = str_replace("â¢","•",$text);
 	if($create_bullets) $text = preg_replace("/\s\\.$/u"," •",$text);
-	if($create_bullets) $text = preg_replace("/\s\\.([^0-9])/u"," •$1",$text);
+//	if($create_bullets) $text = preg_replace("/\s\\.([^0-9])/u"," •$1",$text);
+	if ($create_bullets) {
+		$text = $text ?? '';
+		$text = preg_replace_callback(
+			"/\s\\.$/u",
+			function ($matches) {
+				return " •";
+			},
+			$text
+		);
+		$text = preg_replace_callback(
+			"/\s\\.([^0-9])/u",
+			function ($matches) {
+				return " •" . $matches[1];
+				},$text);
+		}
 	$text = str_replace("²","≤",$text);
 	$text = str_replace("³","≥",$text);
 	return $text;
@@ -914,7 +935,8 @@ function clean_up_file_to_html($file) {
 		return '';
 		}
 	$file_html = str_replace(".txt",".html",$file);
-	$text = @file_get_contents($file,TRUE);
+	$text = @file_get_contents($file);
+	$text = mb_convert_encoding($text,'UTF-8','UTF-8');
 	$text = str_replace(chr(13).chr(10),chr(10),$text);
 	$text = str_replace(chr(13),chr(10),$text);
 	$text = str_replace(chr(9),' ',$text);
@@ -942,7 +964,8 @@ function clean_up_file($file) { // NOT USED
 	//	echo "<p style=\"color:red;\">ERROR file not found: ".$file."</p>";
 		return '';
 		}
-	$text = @file_get_contents($file,TRUE);
+	$text = @file_get_contents($file);
+	$text = mb_convert_encoding($text,'UTF-8','UTF-8');
 	$text = str_replace(chr(13).chr(10),chr(10),$text);
 	$text = str_replace(chr(13),chr(10),$text);
 	$text = str_replace(chr(9),' ',$text);
@@ -1021,7 +1044,7 @@ function SaveObjectPrototypes($verbose,$dir,$filename,$temp_folder,$force) {
 		if($extension <> "txt") continue;
 		$object_label = str_replace(".".$extension,'',$thisfile);
 		if($verbose) echo $object_label." ";
-		$content = file_get_contents($temp_dir.$temp_folder.SLASH.$thisfile,TRUE);
+		$content = file_get_contents($temp_dir.$temp_folder.SLASH.$thisfile);
 		$extract_data = extract_data(TRUE,$content);
 		$headers = $extract_data['headers'];
 		if(!is_integer($pos=strpos($headers,"//"))) continue;
@@ -1045,7 +1068,8 @@ function SaveObjectPrototypes($verbose,$dir,$filename,$temp_folder,$force) {
 			}
 		fwrite($handle,"_beginCsoundScore_\n");
 		$csound_file = $save_codes_dir."/csound.txt";
-		$csound_score = @file_get_contents($csound_file,TRUE);
+		$csound_score = @file_get_contents($csound_file);
+		$csound_score = mb_convert_encoding($csound_score,'UTF-8','UTF-8');
 		$table2 = explode(chr(10),$csound_score);
 		$csound_score = "<HTML>";
 		for($k = 0; $k < count($table2); $k++) {
@@ -1057,7 +1081,7 @@ function SaveObjectPrototypes($verbose,$dir,$filename,$temp_folder,$force) {
 		fwrite($handle,$csound_score."\n");
 		fwrite($handle,"_endCsoundScore_\n");
 		// We fetch MIDI codes from a separate "midibytes.txt" file
-		$all_bytes = @file_get_contents($midi_bytes,TRUE);
+		$all_bytes = @file_get_contents($midi_bytes);
 		$table_bytes = explode(chr(10),$all_bytes);
 		$found = FALSE;
 		for($j = 0; $j < count($table_bytes); $j++) {
@@ -1135,7 +1159,7 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder,$force) {
 		if($extension <> "txt") continue;
 		$instrument_label = str_replace(".".$extension,'',$thisfile);
 		if($verbose) echo $instrument_label." ";
-		$content = file_get_contents($temp_dir.$temp_folder.SLASH.$thisfile,TRUE);
+		$content = file_get_contents($temp_dir.$temp_folder.SLASH.$thisfile);
 		$extract_data = extract_data(FALSE,$content);
 		$headers = $extract_data['headers'];
 		if(!is_integer($pos=strpos($headers,"//"))) continue;
@@ -1165,7 +1189,7 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder,$force) {
 			$table = explode(".",$thisparameter);
 			$extension = end($table);
 			if($extension <> "txt") continue;
-			$content_parameter = file_get_contents($folder_this_instrument.SLASH.$thisparameter,TRUE);
+			$content_parameter = file_get_contents($folder_this_instrument.SLASH.$thisparameter);
 			$table = explode(chr(10),$content_parameter);
 			for($i = 0; $i < count($table); $i++) {
 				$line = trim($table[$i]);
@@ -1196,7 +1220,7 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder,$force) {
 		$table = explode(".",$this_scale);
 		$extension = end($table);
 		if($extension <> "txt") continue;
-		$content_scale = file_get_contents($folder_scales.SLASH.$this_scale,TRUE);
+		$content_scale = file_get_contents($folder_scales.SLASH.$this_scale);
 		$table = explode(chr(10),$content_scale);
 		for($i = 0; $i < count($table); $i++) {
 			$line = trim($table[$i]);
@@ -1214,7 +1238,8 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder,$force) {
 	
 function reformat_grammar($verbose,$this_file) {
 	if(!file_exists($this_file)) return;
-	$content = @file_get_contents($this_file,TRUE);
+	$content = @file_get_contents($this_file);
+	$content = mb_convert_encoding($content,'UTF-8','UTF-8');
 	$new_content = $content;
 	$i_gram = $irul = 1;
 	$section_headers = array("RND","ORD","LIN","SUB","SUB1","TEM","POSLONG","LEFT","RIGHT","INIT:","TIMEPATTERNS:","DATA:","COMMENTS:");
@@ -1311,7 +1336,7 @@ function SaveTonality($verbose,$dir,$filename,$temp_folder,$force) {
 		$table = explode(".",$this_scale);
 		$extension = end($table);
 		if($extension <> "txt") continue;
-		$content_scale = file_get_contents($folder_scales.SLASH.$this_scale,TRUE);
+		$content_scale = file_get_contents($folder_scales.SLASH.$this_scale);
 		$table = explode(chr(10),$content_scale);
 		for($i = 0; $i < count($table); $i++) {
 			$line = trim($table[$i]);
@@ -1458,7 +1483,7 @@ function fix_mf2t_file($file,$tracknames) {
 	$header = "<br /><span style=\"color:red;\">Fixed imported MIDI file:</span><ul>";
 	$message = '';
 	$said = $content = FALSE;
-	if(file_exists($file)) $content = @file_get_contents($file,TRUE);
+	if(file_exists($file)) $content = @file_get_contents($file);
 	if(!$content) {
 		$message .= "<br /><span class=\"red-text\">Cannot find or open:</span> <span class=\"green-text\">".$file."</span>";
 		return $message;
@@ -1518,7 +1543,7 @@ function fix_mf2t_file($file,$tracknames) {
 	}
 
 function fix_number_bytes($midi_bytes) {
-	$content = @file_get_contents($midi_bytes,TRUE);
+	$content = @file_get_contents($midi_bytes);
 	if($content) {
 		$table = explode(chr(10),$content);
 		$newtable = array();
@@ -1718,7 +1743,7 @@ function change_occurrences_name_in_files($dir,$old_name,$new_name) {
 		$type = $type_of_file['type'];
 		if($type <> "grammar" AND $type <> "data" AND $type <> "alphabet" AND $type <> "objects")
 			continue;
-		$content = file_get_contents($dir.SLASH.$thisfile,TRUE);
+		$content = file_get_contents($dir.SLASH.$thisfile);
 		$table = explode(chr(10),$content);
 		$imax = count($table);
 		$found = FALSE;
@@ -1756,7 +1781,7 @@ function find_dependencies($dir,$name) {
 		$type = $type_of_file['type'];
 		if($type <> "grammar" AND $type <> "data" AND $type <> "alphabet" AND $type <> "objects")
 			continue;
-		$content = file_get_contents($dir.SLASH.$thisfile,TRUE);
+		$content = file_get_contents($dir.SLASH.$thisfile);
 		$table = explode(chr(10),$content);
 		$imax = count($table);
 		for($i = 0; $i < $imax; $i++) {
@@ -2253,7 +2278,8 @@ function windows_command($command) {
 
 function get_orchestra_filename($csound_file) {
 	$csound_orchestra = '';
-	$content = @file_get_contents($csound_file,TRUE);
+	$content = @file_get_contents($csound_file);
+	$content = mb_convert_encoding($content,'UTF-8','UTF-8');
 	if($content != FALSE) {
 		$extract_data = extract_data(FALSE,$content);
 		$content = $extract_data['content'];
@@ -2268,7 +2294,8 @@ function get_orchestra_filename($csound_file) {
 
 function get_name_so_file($this_file) {
 	$objects_file = '';
-	$content = @file_get_contents($this_file,TRUE);
+	$content = @file_get_contents($this_file);
+	$content = mb_convert_encoding($content,'UTF-8','UTF-8');
 	if($content != FALSE) {
 		$extract_data = extract_data(TRUE,$content);
 		$objects_file = $extract_data['objects'];
@@ -2318,8 +2345,9 @@ function copyemz($file1,$file2){
 function save_settings($variable,$value) {
 	$value = str_replace(SLASH,'/',$value);
 	$settings_file = "_settings.php";
-	$content = @file_get_contents($settings_file,TRUE);
+	$content = @file_get_contents($settings_file);
 	if($content <> FALSE) {
+		$content = mb_convert_encoding($content,'UTF-8','UTF-8');
 		$table = explode(chr(10),$content);
 		$imax = count($table);
 		$new_table = array();
@@ -2356,9 +2384,10 @@ function save_settings($variable,$value) {
 function save_settings2($variable,$index,$value) {
 	$value = str_replace(SLASH,'/',$value);
 	$settings_file = "_settings.php";
-	$content = @file_get_contents($settings_file,TRUE);
+	$content = @file_get_contents($settings_file);
 	if(!is_integer($index)) $index = '"'.$index.'"';
 	if($content <> FALSE) {
+		$content = mb_convert_encoding($content,'UTF-8','UTF-8');
 		$table = explode(chr(10),$content);
 		$imax = count($table);
 		$new_table = array();
@@ -2395,10 +2424,11 @@ function save_settings2($variable,$index,$value) {
 function save_settings3($variable,$index1,$index2,$value) {
 	$value = str_replace(SLASH,'/',$value);
 	$settings_file = "_settings.php";
-	$content = @file_get_contents($settings_file,TRUE);
+	$content = @file_get_contents($settings_file);
 	if(!is_integer($index1)) $index1 = '"'.$index1.'"';
 	if(!is_integer($index2)) $index2 = '"'.$index2.'"';
 	if($content <> FALSE) {
+		$content = mb_convert_encoding($content,'UTF-8','UTF-8');
 		$table = explode(chr(10),$content);
 		$imax = count($table);
 		$new_table = array();
@@ -2434,8 +2464,9 @@ function save_settings3($variable,$index1,$index2,$value) {
  	
  function delete_settings($file) {
 	$settings_file = "_settings.php";
-	$content = @file_get_contents($settings_file,TRUE);
+	$content = @file_get_contents($settings_file);
  	if($content != FALSE) {
+		$content = mb_convert_encoding($content,'UTF-8','UTF-8');
 		$table = explode(chr(10),$content);
 		$imax = count($table);
 		$new_table = array();
@@ -2462,8 +2493,9 @@ function save_settings3($variable,$index1,$index2,$value) {
 
 function delete_settings_entry($entry) {
 	$settings_file = "_settings.php";
-	$content = @file_get_contents($settings_file,TRUE);
+	$content = @file_get_contents($settings_file);
  	if($content != FALSE) {
+		$content = mb_convert_encoding($content,'UTF-8','UTF-8');
 		$table = explode(chr(10),$content);
 		$imax = count($table);
 		$new_table = array();
@@ -2603,7 +2635,8 @@ function check_csound() {
 	else {
 		$version = '';
 		if(file_exists($this_file)) {
-			$content = @file_get_contents($this_file,TRUE);
+			$content = @file_get_contents($this_file);
+			$content = mb_convert_encoding($content,'UTF-8','UTF-8');
 			$table = explode(chr(10),$content);
 			$imax = count($table);
 			for($i = 0; $i < $imax; $i++) {
@@ -2649,8 +2682,9 @@ function relocate_function_table($dir,$line) {
 
 function check_function_tables($dir,$csound_file) {
 	if($csound_file == '') return;
-	$content = @file_get_contents($dir.$csound_file,TRUE);
-	if($content == '') return;
+	$content = @file_get_contents($dir.$csound_file);
+	$content = mb_convert_encoding($content,'UTF-8','UTF-8');
+	if(trim($content) == '') return;
 	$table = explode(chr(10),$content);
 	$imax = count($table);
 	$found = FALSE;
@@ -2709,7 +2743,8 @@ function add_instruction($instruction,$content) {
 function get_tonality_file($csound_instruments_file) {
 	$tonality_filename = '';
 	if(!file_exists($csound_instruments_file)) return $tonality_filename;
-	$content = @file_get_contents($csound_instruments_file,TRUE);
+	$content = @file_get_contents($csound_instruments_file);
+	$content = mb_convert_encoding($content,'UTF-8','UTF-8');
 	$table = explode(chr(10),$content);
 	$imax = count($table);
 	for($i = 0; $i < $imax; $i++) {
@@ -2730,7 +2765,8 @@ function get_tonality_file($csound_instruments_file) {
 function get_csound_file($objects_file) {
 	$csound_file = '';
 	if(!file_exists($objects_file)) return $csound_file;
-	$content = @file_get_contents($objects_file,TRUE);
+	$content = @file_get_contents($objects_file);
+	$content = mb_convert_encoding($content,'UTF-8','UTF-8');
 	$table = explode(chr(10),$content);
 	$imax = count($table);
 	for($i = 0; $i < $imax; $i++) {
@@ -2835,7 +2871,8 @@ function list_of_tonal_scales($tonality_file) {
 	global $dir_scale_images;
 	$list = array();
 	if(!file_exists($tonality_file)) return $list;
-	$content = @file_get_contents($tonality_file,TRUE);
+	$content = @file_get_contents($tonality_file);
+	$content = mb_convert_encoding($content,'UTF-8','UTF-8');
 	$table = explode(chr(10),$content);
 	$imax = count($table);
 	$found = FALSE;
@@ -2873,7 +2910,8 @@ function list_of_instruments($csound_instruments_file) {
 	$list_of_instruments['list'] = $list_of_instruments['index'] = $list_of_instruments['param'] = array();
 //	echo "csound_instruments_file = ".$csound_instruments_file."<br />";
 	if(!file_exists($csound_instruments_file)) return $list_of_instruments;
-	$content = @file_get_contents($csound_instruments_file,TRUE);
+	$content = @file_get_contents($csound_instruments_file);
+	$content = mb_convert_encoding($content,'UTF-8','UTF-8');
 	$extract_data = extract_data(FALSE,$content);
 	$content = $extract_data['content'];
 	$content_no_br = str_replace("<br>",chr(10),$content);
@@ -3337,7 +3375,8 @@ function quadratic_mapping($x1,$x2,$x3,$y1,$y2,$y3) {
 
 function create_grammar($data_path) {
 	$grammar = '';
-	$content = @file_get_contents($data_path,TRUE);
+	$content = @file_get_contents($data_path);
+	$content = mb_convert_encoding($content,'UTF-8','UTF-8');
 	$extract_data = extract_data(TRUE,$content);
 	$content = $extract_data['content'];
 	$table = explode(chr(10),$content );
@@ -3697,7 +3736,7 @@ function convert_midi_channel_filter_to_params($i) {
 	for($channel = 1; $channel <= 16; $channel++) {
 		$channel_pass[$i][$channel] = $MIDIchannelFilter[$i][$channel - 1];
 		}
-	for($part = 1; $part <= 12; $part++) {
+	for($part = 1; $part <= MAXPARTS; $part++) {
 		if(isset($MIDIpartFilter[$i][$part - 1])) $part_pass[$i][$part] = $MIDIpartFilter[$i][$part - 1];
 		else $part_pass[$i][$part] = 1;
 		}
@@ -3734,12 +3773,12 @@ function save_midiressources($filename,$warn) {
 			$MIDIchannelFilter[$i] = "1000000000000000";
 			if($warn) echo "<p class=\"red-text warning\">👉 Channel 1 has been set on in the filter of MIDI output ".$MIDIoutput[$i]."</p>";
 			}
-		for($part = 1; $part <= 12; $part++) {
+		for($part = 1; $part <= MAXPARTS; $part++) {
 			$varName = "part_out_".$i."_".$part;
 			$MIDIpartFilter[$i]  .= isset($_POST[$varName]) ? '1' : '0';
 			}
-		if($MIDIpartFilter[$i] == "000000000000") {
-			$MIDIpartFilter[$i] = "100000000000";
+		if($MIDIpartFilter[$i] == "000000000000000000000000000000") {
+			$MIDIpartFilter[$i] = "100000000000000000000000000000";
 			if($warn) echo "<p class=\"red-text warning\">👉 Part 1 has been set on in the filter of MIDI output ".$MIDIoutput[$i]."</p>";
 			}
 		}
@@ -3949,7 +3988,7 @@ function filter_form_output($i) {
 	echo "</td>";
 	echo "<td style=\"white-space:nowrap;\">";
 	echo "<p>Parts</p>";
-	for($part = 1; $part <=  12; $part++) {
+	for($part = 1; $part <=  MAXPARTS; $part++) {
 		filter_part($i,$part);
 		}
 	echo "</td>";
@@ -4126,7 +4165,8 @@ function create_variables($script_variables) {
     $h_variables = fopen($script_variables,'w');
     fwrite($h_variables,"<?php\n");
     $script_status = $script_more = array();
-    $content = @file_get_contents("script-instructions.txt",TRUE);
+    $content = @file_get_contents("script-instructions.txt");
+	$content = mb_convert_encoding($content,'UTF-8','UTF-8');
     if($content) {
         $table = explode(chr(10),$content);
         $imax = count($table);
@@ -4182,7 +4222,7 @@ function update_scale_with_kbm($scl_name,$scale_file,$kbm_content) {
 		$scale_file = $dir_scales.$scl_name.".txt";
 		$need_to_save = TRUE;
 		}
-	$scale_content = file_get_contents($scale_file,TRUE);
+	$scale_content = file_get_contents($scale_file);
 	$table_scl = explode(chr(10),$scale_content);
 	$imax = count($table_scl);
 	$scale_file = "temp_scale_file.txt";
@@ -4332,7 +4372,7 @@ function midifile_player($midi_file_link, $filename, $width, $piano_roll) {
 	if($piano_roll) $text .= "<midi-visualizer type=\"piano-roll\" id=\"myVisualizer\"></midi-visualizer>";
 	$text .= "</p></td>";
 	if($filename <> '') $text .= "<td style=\"vertical-align:middle;\">".$filename."</td>";
-	$text .= "<td style=\"text-align:right;\">👉&nbsp;<a href=\"".nice_url($midi_file_link)."\" download>Download&nbsp;MIDI&nbsp;file</a><p style=\"text-align:right;\"><small>(<a target=\"_blank\" href=\"https://github.com/cifkao/html-midi-player/\">Visit html-midi-player</a>)</small></p></td>";
+	$text .= "<td style=\"text-align:right;\"><a href=\"".nice_url($midi_file_link)."\" download>Download&nbsp;MIDI&nbsp;file</a><br /><small>This player does not support<br />volume, pitchbend, pan, etc.<br /><a target=\"_blank\" href=\"https://github.com/cifkao/html-midi-player/\">Visit html-midi-player</a></small></td>";
 	$text .= "</tr></table>";
 	return $text;
 	}
@@ -4644,7 +4684,8 @@ function use_convention($this_file) {
 	if($old_convention <> '' AND $old_convention <> 1 AND $new_convention == 1) {
 		$change_octave = -1;
 		}
-	$content = @file_get_contents($this_file,TRUE);
+	$content = @file_get_contents($this_file);
+	$content = mb_convert_encoding($content,'UTF-8','UTF-8');
 	$extract_data = extract_data(TRUE,$content);
 	$newcontent = $extract_data['content'];
 	mb_internal_encoding("UTF-8");  // Set internal character encoding to UTF-8
@@ -4755,7 +4796,8 @@ function convert_to_json($dir,$settings_file) {
 		echo "<p>👉 Not found “".$dir.$settings_file."”</p>";
 		return;
 		}
-	$content = @file_get_contents($dir.$settings_file,TRUE);
+	$content = @file_get_contents($dir.$settings_file);
+	$content = mb_convert_encoding($content,'UTF-8','UTF-8');
 	$token = get_settings_tokens();
 	if(count($token) == 0) return;
 	if($content[0] == '{') {
@@ -4784,16 +4826,17 @@ function convert_to_json($dir,$settings_file) {
 				else if($name == "header") $new_settings[$name] = $item;
 				}
 			$new_settings = json_encode($new_settings,JSON_PRETTY_PRINT);
-			file_put_contents($dir.$settings_file,$new_settings);
+			my_file_put_contents($dir.$settings_file,$new_settings);
 			}
 		return;
 		}
-	echo "<p>👉 Settings file has been converted to JSON format</p>";
-	$bp_parameter_names = @file_get_contents("settings_names_old.txt",TRUE);
+	echo "<p>👉 Settings file will be converted to JSON format</p>";
+	$bp_parameter_names = @file_get_contents("settings_names_old.txt");
 	if($bp_parameter_names === FALSE) {
 		echo "<p style=\"color:red;\">ERROR reading ‘settings_names_old.txt’</p>";
 		return;
 		}
+	$bp_parameter_names = mb_convert_encoding($bp_parameter_names,'UTF-8','UTF-8');
 	$table = explode(chr(10),$bp_parameter_names);
 	$imax = count($table);
 	$imax_parameters = 0;
@@ -4845,21 +4888,62 @@ function convert_to_json($dir,$settings_file) {
 		$settings[$the_token]['unit'] = $parameter_unit[$i];
 		$settings[$the_token]['boolean'] = $parameter_yesno[$i];
 		}
+	$settings['ComputeWhilePlay']['name'] = "Compute while playing";
 	$settings['ComputeWhilePlay']['value'] = 1;
-	$settings['AdvanceTime']['value'] = 10.5;
+	$settings['ComputeWhilePlay']['unit'] = "";
+	$settings['ComputeWhilePlay']['boolean'] = 1;
+	$settings['MaxConsoleTime']['value'] = "60";
+	$settings['MIDIsyncDelay']['value'] = "380";
+	$settings['DefaultBlockKey']['value'] = "60";
+	$settings['MaxItemsProduce']['value'] = "20";
+	$settings['Time_res']['value'] = "10";
+	$settings['Quantization']['value'] = "10";
+	$settings['Quantize']['value'] = "1";
+	$settings['Nature_of_time']['value'] = "1";
+	$settings['DeftBufferSize']['value'] = "1000";
+	$settings['NoConstraint']['value'] = "0";
+	$settings['DisplayTimeSet']['value'] = "0";
+	$settings['TraceTimeSet']['value'] = "0";
+	$settings['TraceMIDIinteraction']['value'] = "0";
+	$settings['StrikeAgainDefault']['value'] = "1";
+	$settings['SamplingRate']['value'] = "50";
+	$settings['C4key']['value'] = "60";
+	$settings['DefaultBlockKey']['value'] = "60";
+	$settings['A4freq']['value'] = "440";
+	$settings['DeftVolume']['value'] = "64";
+	$settings['VolumeController']['value'] = "7";
+	$settings['DeftVelocity']['value'] = "64";
+	$settings['DeftPanoramic']['value'] = "64";
+	$settings['PanoramicController']['value'] = "10";
+	$settings['B#_instead_of_C']['value'] = "0";
+	$settings['Db_instead_of_C#']['value'] = "0";
+	$settings['Eb_instead_of_D#']['value'] = "0";
+	$settings['Fb_instead_of_E']['value'] = "0";
+	$settings['E#_instead_of_F']['value'] = "0";
+	$settings['Gb_instead_of_F#']['value'] = "0";
+	$settings['Ab_instead_of_G#']['value'] = "0";
+	$settings['Bb_instead_of_A#']['value'] = "0";
+	$settings['Cb_instead_of_B']['value'] = "0";
+	$settings['SplitTimeObjects']['value'] = "1";
+	$settings['SplitVariables']['value'] = "0";
+	$settings['CsoundTrace']['value'] = "0";
+	$settings['AllowRandomize']['value'] = "1";
+	$settings['Seed']['value'] = "0";
+	$settings['ResetNotes']['value'] = "1";
 	$settings = recursive_strval($settings);
 	$jsonData = json_encode($settings,JSON_PRETTY_PRINT);
-    file_put_contents($dir.$settings_file,$jsonData);
+    my_file_put_contents($dir.$settings_file,$jsonData);
 	return;
 	}
 
 function get_settings_tokens() {
 	$token = array();
-	$bp_parameter_names = @file_get_contents("settings_names.tab",TRUE);
+	$bp_parameter_names = @file_get_contents("settings_names.tab");
 	if($bp_parameter_names === FALSE) {
 		echo "<p style=\"color:red;\">ERROR reading ‘settings_names.tab’</p>";
 		return $token;
 		}
+	$bp_parameter_names = mb_convert_encoding($bp_parameter_names,'UTF-8','UTF-8');
 	$table = explode(chr(10),$bp_parameter_names);
 	$imax = count($table);
 	for($i = 0; $i < $imax; $i++) {
@@ -4877,5 +4961,31 @@ function get_settings_tokens() {
 function recursive_strval($data) {
     if(is_array($data)) return array_map('recursive_strval',$data);
     return strval($data);
+	}
+
+function my_file_put_contents($path,$content) {
+	global $dir, $bad_settings;
+	if(is_writable($path)) {
+		file_put_contents($path,$content);
+		return;
+		}
+	else {
+		@chmod($path,0777);
+	/*	$userId = posix_geteuid();
+		$userInfo = posix_getpwuid($userId); */
+		if(is_writable($path)) {
+			file_put_contents($path,$content);
+			return OK;
+			}
+		echo "<p>👉&nbsp;Failed to change the permissions of file <span class=\"green-text\">".$path."</span>. You should export this file in the index of the current workspace and upload it again.<p />";
+	//	die();
+		$thisfile = str_replace($dir,'',$path);
+		$type_of_file = type_of_file($thisfile);
+		if($type_of_file['type'] == "settings") {
+			$bad_settings = TRUE;
+			}
+		return;
+		}
+	return;
 	}
 ?>

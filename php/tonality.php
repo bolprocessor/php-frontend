@@ -130,7 +130,7 @@ if(isset($_POST['create_scale'])) {
 			$error_create = "<p><span class=\"red-text\">ERROR: This name</span> <span class=\"green-text\">‘".$new_scale_name."’</span> <span class=\"red-text\">already exists";
 			$source = $dir_scales.$clean_name_of_file."-source.txt";
 			if(file_exists($source)) {
-				$content_source = trim(@file_get_contents($source,TRUE));
+				$content_source = trim(@file_get_contents($source));
 				$error_create .= "in </span><span class=\"green-text\">‘<a target=\"_blank\" href=\"tonality.php?file=".urlencode($tonality_resources.SLASH.$content_source)."\">".$content_source."</a>’</span> ";
 				}
 			echo "</span></p>";
@@ -379,10 +379,11 @@ else if(!$duplicated_scale) @unlink($lock3);
 
 try_create_new_file($this_file,$filename);
 $content = @file_get_contents($this_file);
+$content = mb_convert_encoding($content,'UTF-8','UTF-8');
 if($content === FALSE) ask_create_new_file($url_this_page,$filename);
 if(strlen(trim($content)) == 0) {
 	$template = "tonality_template";
-	$content = @file_get_contents($template,TRUE);
+	$content = @file_get_contents($template);
 	}
 $extract_data = extract_data(FALSE,$content);
 echo "<p class=\"green-text\">".$extract_data['headers']."</p>";
@@ -1275,7 +1276,7 @@ function create_from_scl($scale_name,$scala_filename,$content) {
 		$source = $dir_scales.$clean_name_of_file."-source.txt";
 	//	$scala_error .= "@ source = ".$source."<br />";
 		if(file_exists($source)) {
-			$content_source = trim(@file_get_contents($source,TRUE));
+			$content_source = trim(@file_get_contents($source));
 			$scala_error .= " in </font><span class=\"green-text\">‘<a target=\"_blank\" href=\"tonality.php?file=".urlencode($tonality_resources.SLASH.$content_source)."\">".$content_source."</a>’</span>";
 			}
 		return $scala_error;

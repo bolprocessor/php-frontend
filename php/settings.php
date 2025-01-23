@@ -219,29 +219,30 @@ if(isset($_POST['saveparameters'])) {
 		}
 	$settings = recursive_strval($settings);
 	$jsonData = json_encode($settings,JSON_PRETTY_PRINT);
-    file_put_contents($this_file,$jsonData);
+    my_file_put_contents($this_file,$jsonData);
 	echo $warning;
 	$warning_bottom = $warning;
 	}
 
 try_create_new_file($this_file,$filename);
-$content = @file_get_contents($this_file,TRUE);
+$content = @file_get_contents($this_file);
 if($content === FALSE) ask_create_new_file($url_this_page,$filename);
-// convert_to_json('',"settings_template");
+$content = mb_convert_encoding($content,'UTF-8','UTF-8');
 if(trim($content) == '') {
 	$template = "settings_template";
-	$content = @file_get_contents($template,TRUE);
+	$content = @file_get_contents($template);
 	}
 else {
 	convert_to_json($dir,$filename);
-	$content = @file_get_contents($this_file,TRUE);
+	$content = @file_get_contents($this_file);
 	}
 $settings = json_decode($content,TRUE);
+if($bad_settings) die();
 echo "<p class=\"green-text\">".str_replace("\n","<br />",$settings['header'])."</p>";
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 echo "<p style=\"text-align:left;\"><input class=\"save\" type=\"submit\" name=\"saveparameters\" value=\"SAVE TO ‘".$filename."’\"></p>";
 echo "<table class=\"thinborder\" style=\"border-spacing: 2px;\" cellpadding=\"2px;\">";
-$bp_parameter_names = @file_get_contents("settings_names.tab",TRUE);
+$bp_parameter_names = @file_get_contents("settings_names.tab");
 if($bp_parameter_names === FALSE) {
 	echo "<p style=\"color:red;\">ERROR reading ‘settings_names.tab’</p>";
 	die();
@@ -270,6 +271,7 @@ for($i = 0; $i < $imax; $i++) {
 	else {
 		if(isset($settings[$param]['value'])) {
 		//	$name = $settings[$param]['name'];
+		//	echo $settings[$param]['value']."<br />";
 			$table3[$i] = $value = $settings[$param]['value'];
 			$boolean = $settings[$param]['boolean'];
 			}

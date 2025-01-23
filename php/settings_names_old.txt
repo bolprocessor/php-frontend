@@ -23,7 +23,7 @@ Allow randomize		1	1
 Time setting display		1	1
 Time setting step	(not implemented)	1	1
 Time setting trace		1	1
-Csound trace		1	1
+Trace Csound		1	1
 Use MIDI in/out		0	1
 Reset Notes	Send AllNotesOff, pedals off and reset pitchbend at the end of item	1	1
 Compute while playing		1	1
@@ -31,7 +31,7 @@ Trace MIDI interactions		1	1
 Reset rule weights		1	1
 Reset rule flags	/this is a flag/	1	1
 Reset controllers	volume, panoramic, pressure, pitchbend, modulation	1	1
-Ignore constraints		1	1
+Ignore constraints in time setting		1	1
 Write MIDI files		0	1
 Show messages		0	1
 Write Csound scores		0	1
@@ -48,8 +48,8 @@ Use keyboard tokens		0	1
 Note convention	0 = English: C, D, E...<br />1 = Italian/Spanish/French: do, re, mi...<br />2 = Indian: sa, re, ga...<br />3 = Keys<br />4 = Only from tonal scales(s)	1
 StartFromOne		0	1
 Smart cursor		0
-GraphicScaleP		1
-GraphicScaleQ		1
+Graphic scale P		1
+Graphic scale Q		1
 MIDI input ID	(not used)	0
 MIDI output ID	(not used)	0
 Display bullets "&bull;"		0	1
@@ -68,7 +68,7 @@ Volume controller	(0..127) usually 7	1
 Default velocity	(1..127)	1
 Default panoramic	(0..127)	1
 Panoramic controller	(0..127) usually 10	1
-SamplingRate	samples per second, usually 50	1
+Sampling rate	samples per second, usually 50	1
 WMAX (39 windows)		0
 Font size		0
 Font size		0
@@ -123,6 +123,6 @@ NameChoice		0	1
 Bb instead of A#		1	1
 Cb instead of B		1	1
 MIDI input filter	(will be explained later)	0
-ShowObjectGraph		1	1
-ShowPianoRoll		1	1
+Show object graph		1	1
+Show pianoroll		1	1
 -- end --

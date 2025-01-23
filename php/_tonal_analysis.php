@@ -41,7 +41,7 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 	echo "<center><table class=\"thicktable\">";
 	echo "<tr><th colspan=\"6\" style=\"text-align:center;\">Intervals checked in the analysis</tr>";
 	echo "<tr><td colspan=\"6\" style=\"white-space:nowrap; padding:6px; text-align:center;\">";
-	echo "<i>Checking additional ratios such as the harmonic minor third (frequency ratio 6/5) may be advised</i>";
+	echo "<i>Checking more ratios, such as the harmonic minor third (6/5), may be advised</i>";
 	echo "</td></tr>";
 	echo "<tr><th colspan=\"2\" style=\"text-align:center;\">Ascending melodic</th><th colspan=\"2\" style=\"text-align:center;\">Descending melodic</th><th colspan=\"2\" style=\"text-align:center;\">Harmonic</th></tr>";
 	echo "<tr>";
@@ -331,7 +331,8 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 						echo "➡ Item in file “<span class=\"green-text\">".$data_file."</span>”<br />";
 						$table3 = explode('/',$data_file);
 						$item_name = end($table3);
-						$content2 = @file_get_contents($data_file,TRUE);
+						$content2 = @file_get_contents($data_file);
+						$content2 = mb_convert_encoding($content2,'UTF-8','UTF-8');
 						$extract_data = extract_data(TRUE,$content2);
 						$newcontent = $extract_data['content'];
 						$table2 = explode(chr(10),$newcontent);
@@ -390,7 +391,8 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 			if($tonal_scale <> '' AND !$compare_scales) echo "<p>Checking against tonal scale ‘<span class=\"green-text\">".$tonal_scale."</span>’ defined in the <a target=\"_blank\" href=\"index.php?path=tonality_resources\"> tonality resource</a> folder</p>";
 			$tie_mssg = $segment['tie_mssg'];
 			$data_chunked = $segment['data_chunked']; 
-			$content_slice = @file_get_contents($data_chunked,TRUE);
+			$content_slice = @file_get_contents($data_chunked);
+			$content_slice = mb_convert_encoding($content_slice,'UTF-8','UTF-8');
 			$table_slice = explode("[slice]",$content_slice);
 			$i_slice_max = count($table_slice);
 			if($i_slice_max == 0) continue;
@@ -532,7 +534,8 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 							if(isset($scale_known[$scale_name])) continue;
 							$found_scale = TRUE;
 							$good_scale = FALSE;
-							$content_scale = @file_get_contents($scale_folder.$scale_textfile,TRUE);
+							$content_scale = @file_get_contents($scale_folder.$scale_textfile);
+							$content_scale = mb_convert_encoding($content_scale,'UTF-8','UTF-8');
 							$table_scale = explode(chr(10),$content_scale);
 							// Find real name of scale, e.g. "F#maj" in file "F_maj.txt"
 							$new_name = str_replace('"','',trim($table_scale[0]));
@@ -1348,7 +1351,8 @@ function show_relations_on_image($i_item,$matching_list,$mode,$direction,$scalen
 		$scalename = "equal-tempered";
 		}
 	$found = FALSE;
-	$content = @file_get_contents($scale_textfile,TRUE);
+	$content = @file_get_contents($scale_textfile);
+	$content = mb_convert_encoding($content,'UTF-8','UTF-8');
 	$table = explode(chr(10),$content);
 	$ratio = array();
 	for($i = 0; $i < count($table); $i++) {

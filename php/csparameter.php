@@ -73,7 +73,7 @@ echo "<input type=\"hidden\" name=\"csfilename\" value=\"".$csfilename."\">";
 
 echo "<p style=\"text-align:left;\"><input class=\"save\" type=\"submit\" name=\"saveparameter\" value=\"SAVE THIS PARAMETER\"></p>";
 
-$content = file_get_contents($parameter_file,TRUE);
+$content = file_get_contents($parameter_file);
 $table = explode(chr(10),$content);
 $comment = $table[1];
 echo "<p>Comment: <input type=\"text\" name=\"comment\" size=\"90\" value=\"".$comment."\"></p>";

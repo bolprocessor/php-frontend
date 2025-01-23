@@ -18,11 +18,16 @@ else $music_xml_file = '';
 $defaults = $credit = $part_list = $print = $notations = $system = $staff = FALSE;
 $couleur = $this_measure = '';
 $forget_words = array("staff","accidental","stem","staves","words","/words","notations","slur","/measure","print","/print","pitch","/pitch","offset");
-$file = fopen($music_xml_file,"r");
 $arrow = "<span class=\"red-text\">➡</span>&nbsp;";
 if($no_filter) echo "<span class=\"orange-text\">";
-while(!feof($file)) {
-	$line = fgets($file);
+$xml_content = @file_get_contents($music_xml_file);
+$xml_content = str_replace("\r","\n",$xml_content);
+$xml_content = mb_convert_encoding($xml_content,'UTF-8','UTF-8');
+$xml_table = explode(chr(10),$xml_content);
+$jmax = count($xml_table);
+for($j = 0; $j < $jmax; $j++) {
+	$line = $xml_table[$j];
+	if(trim($line) == '') continue;
 	$line_print = htmlentities($line);
 	if($no_filter AND is_integer($pos=strpos($line,"<identification"))) echo "</span><span class=\"green-text\">";
 	if($no_filter AND is_integer($pos=strpos($line,"</identification"))) {

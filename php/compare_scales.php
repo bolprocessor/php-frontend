@@ -31,7 +31,7 @@ foreach($dircontent as $scale_file) {
 	$scale_name = str_replace(".txt",'',$scale_file);
 	if(isset($_POST['compare_'.str_replace(' ','_',$scale_name)])) {
 		$name[$i_scale] = $scale_name;
-		$content = file_get_contents($dir_scales.$scale_file,TRUE);
+		$content = file_get_contents($dir_scales.$scale_file);
 		$table = explode(chr(10),$content);
 		$imax = count($table);
 		$dir_image = $dir_scale_images.$scale_name.".png";

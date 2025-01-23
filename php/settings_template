@@ -126,6 +126,12 @@
         "unit": "",
         "boolean": "1"
     },
+    "ShowAllObjects": {
+        "name": "Show all objects",
+        "value": "0",
+        "unit": "including inaudible ones (for geeks)",
+        "boolean": "1"
+    },
     "ShowPianoRoll": {
         "name": "Show pianoroll",
         "value": "1",
@@ -304,6 +310,12 @@
         "name": "Trace MIDI interactions",
         "value": "1",
         "unit": "",
+        "boolean": "1"
+    },
+    "TraceNoteOn": {
+        "name": "Trace NoteOn\/NoteOff",
+        "value": "0",
+        "unit": "(only for short items)",
         "boolean": "1"
     },
     "SamplingRate": {

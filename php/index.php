@@ -130,7 +130,7 @@ if(isset($_POST['create_grammar'])) {
 		else {
 			$handle = fopen($dir.SLASH.$filename,"w");
 			$template = "grammar_template";
-			$template_content = @file_get_contents($template,TRUE);
+			$template_content = @file_get_contents($template);
 			fwrite($handle,$template_content."\n");
 			fclose($handle);
 			}
@@ -150,7 +150,7 @@ if(isset($_POST['create_data'])) {
 		else {
 			$handle = fopen($dir.SLASH.$filename,"w");
 			$template = "data_template";
-			$template_content = @file_get_contents($template,TRUE);
+			$template_content = @file_get_contents($template);
 			fwrite($handle,$template_content."\n");
 			fclose($handle);
 			}
@@ -170,7 +170,7 @@ if(isset($_POST['create_alphabet'])) {
 		else {
 			$handle = fopen($dir.SLASH.$filename,"w");
 			$template = "alphabet_template";
-			$template_content = @file_get_contents($template,TRUE);
+			$template_content = @file_get_contents($template);
 			fwrite($handle,$template_content."\n");
 			fclose($handle);
 			}
@@ -190,7 +190,7 @@ if(isset($_POST['create_timebase'])) {
 		else {
 			$handle = fopen($dir.SLASH.$filename,"w");
 			$template = "timebase_template";
-			$template_content = @file_get_contents($template,TRUE);
+			$template_content = @file_get_contents($template);
 			fwrite($handle,$template_content."\n");
 			fclose($handle);
 			}
@@ -210,7 +210,7 @@ if(isset($_POST['create_prototypes'])) {
 		else {
 			$handle = fopen($dir.SLASH.$filename,"w");
 			$template = "prototypes_template";
-			$template_content = @file_get_contents($template,TRUE);
+			$template_content = @file_get_contents($template);
 			fwrite($handle,$template_content."\n");
 			fclose($handle);
 			}
@@ -230,7 +230,7 @@ if(isset($_POST['create_csound'])) {
 		else {
 			$handle = fopen($dir.SLASH.$filename,"w");
 			$template = "csound_template";
-			$template_content = @file_get_contents($template,TRUE);
+			$template_content = @file_get_contents($template);
 			fwrite($handle,$template_content."\n");
 			fclose($handle);
 			}
@@ -250,7 +250,7 @@ if(isset($_POST['create_tonality'])) {
 		else {
 			$handle = fopen($dir.SLASH.$filename,"w");
 			$template = "tonality_template";
-			$template_content = @file_get_contents($template,TRUE);
+			$template_content = @file_get_contents($template);
 			fwrite($handle,$template_content."\n");
 			fclose($handle);
 			}
@@ -345,12 +345,12 @@ if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension 
 		echo "</form>";
 		}
 	if($path <> '') {
-		echo "<button class=\"save big\" onclick=\"toggleimport(); return false;\">UPLOAD FILES</button><br />";
+		echo "<button class=\"save big\" onclick=\"toggleimport(); return false;\">IMPORT FILES</button><br />";
 		echo "<div id=\"import\" style=\"padding:6px; background-color:transparent;\">";
 		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		echo "<input type=\"file\" name=\"files[]\" id=\"files\" multiple>";
     //    echo "<input type=\"file\" name=\"folders[]\" id=\"folders\" webkitdirectory directory>";
-		echo "<input class=\"save\" type=\"submit\" value=\"<-- UPLOAD\"><br />";
+		echo "<input class=\"save\" type=\"submit\" value=\"<-- IMPORT\"><br />";
 		echo "</form>";
 		echo "</div>";
 		}
