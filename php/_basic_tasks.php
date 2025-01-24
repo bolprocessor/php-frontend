@@ -1,9 +1,9 @@
 <?php
 session_start();
-ini_set('display_errors', 1);
+/* ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-// error_reporting(0);
+error_reporting(E_ALL); */
+error_reporting(0);
 // error_reporting(E_ALL & ~E_NOTICE);
 ini_set('output_buffering', 'off');
 ini_set('zlib.output_compression', 0);
@@ -15,7 +15,6 @@ define('SLASH',DIRECTORY_SEPARATOR);
 define('STRIATED',1);
 define('SMOOTH',0);
 define('MAXPARTS',30);
-// ini_set("auto_detect_line_endings",true);
 
 $test = FALSE;
 // $test = TRUE;
@@ -24,11 +23,11 @@ $permissions = 0775;
 $today_date = date("Y-m-d");
 
 $file_path = "_settings.php";
-if (!file_exists($file_path)) {
+if(!file_exists($file_path)) {
     // Create the file and write the PHP tags
     $file_content = "<?php\n\n?>";
     // Write the content to the file
-    if(my_file_put_contents($file_path, $file_content) == false) {
+    if(my_file_put_contents($file_path, $file_content) == FALSE) {
         echo "Failed to create the file '_settings.php'.";
 		die();
         }
@@ -4968,7 +4967,7 @@ function my_file_put_contents($path,$content) {
 	global $dir, $bad_settings;
 	$bad_settings = FALSE;
 	$result = @file_put_contents($path,$content);
-	if($result === false) {
+	if($result === FALSE) {
 		$error = error_get_last();
 		echo "<p>Failed to write to the file: ".$path;
 		echo "<br />Error: ".$error['message']."</p>";
@@ -4977,28 +4976,8 @@ function my_file_put_contents($path,$content) {
 		if($type_of_file['type'] == "settings") {
 			$bad_settings = TRUE;
 			}
+		return FALSE;
 		}
-	return;
-/*
-	if(is_writable($path)) {
-		file_put_contents($path,$content);
-		return;
-		}
-	else {
-		@chmod($path,0777);
-		if(is_writable($path)) {
-			file_put_contents($path,$content);
-			return OK;
-			}
-		echo "<p>👉&nbsp;Failed to change the permissions of file <span class=\"green-text\">".$path."</span>. You should export this file in the index of the current workspace and upload it again.<p />";
-	//	die();
-		$thisfile = str_replace($dir,'',$path);
-		$type_of_file = type_of_file($thisfile);
-		if($type_of_file['type'] == "settings") {
-			$bad_settings = TRUE;
-			}
-		return;
-		}
-	return; */
+	return TRUE;
 	}
 ?>
