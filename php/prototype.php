@@ -20,7 +20,8 @@ $this_title = $expression = $object_name;
 require_once("_header.php");
 display_darklight();
 
-echo "<script src=\"https://cdn.jsdelivr.net/combine/npm/tone@14.7.58,npm/@magenta/music@1.23.1/es6/core.js,npm/focus-visible@5,npm/html-midi-player@1.4.0\"></script>";
+if($midi_player == "MIDIjs") echo "<script type='text/javascript' src='https://www.midijs.net/lib/midi.js'></script>";
+else if($midi_player == "html-midi-player") echo "<script src=\"https://cdn.jsdelivr.net/combine/npm/tone@14.7.58,npm/@magenta/music@1.23.1/es6/core.js,npm/focus-visible@5,npm/html-midi-player@1.4.0\"></script>";
 
 $object_foldername = clean_folder_name($object_name);
 

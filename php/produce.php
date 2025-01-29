@@ -5,7 +5,8 @@ if(isset($_GET['title'])) $this_title = urldecode($_GET['title']);
 else $this_title = '';
 
 echo "<head>";
-echo "<script src=\"https://cdn.jsdelivr.net/combine/npm/tone@14.7.58,npm/@magenta/music@1.23.1/es6/core.js,npm/focus-visible@5,npm/html-midi-player@1.4.0\"></script>";
+if($midi_player == "MIDIjs") echo "<script type='text/javascript' src='https://www.midijs.net/lib/midi.js'></script>";
+else if($midi_player == "html-midi-player") echo "<script src=\"https://cdn.jsdelivr.net/combine/npm/tone@14.7.58,npm/@magenta/music@1.23.1/es6/core.js,npm/focus-visible@5,npm/html-midi-player@1.4.0\"></script>";
 echo "<script src=\"darkmode.js\"></script>";
 echo "<link rel=\"stylesheet\" href=\"bp-light.css\" />\n";
 echo "</head>";
@@ -711,8 +712,7 @@ else {
 		$header .= "<meta content=\"text/html; charset=utf-8\" http-equiv=\"Content-Type\" />\n";
 		$header .= "<link rel=\"stylesheet\" href=\"".$bp_application_path."php/bp-light.css\" />\n";
 		$header .= "<title>".$result_file."</title>\n";
-		https://cdn.jsdelivr.net
-	//	$header .= "<script type='text/javascript' src='https://www.midijs.net/lib/midi.js'></script>\n";
+		$header .= "<script type='text/javascript' src='https://www.midijs.net/lib/midi.js'></script>\n";
 		$header .= "<script src=\"https://cdn.jsdelivr.net/combine/npm/tone@14.7.58,npm/@magenta/music@1.23.1/es6/core.js,npm/focus-visible@5,npm/html-midi-player@1.4.0\"></script>";
 		$header .= "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js\"></script>\n";
 		$header .= "</head><body>\n";

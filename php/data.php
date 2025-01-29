@@ -1215,7 +1215,14 @@ if($need_to_save OR isset($_POST['savethisfile'])) {
 	}
 else read_midiressources($filename);
 
+$upload_message = upload_replacement();
+if($upload_message <> '') $need_to_save = FALSE;
+$undo_upload_message = undo_upload();
+
 try_create_new_file($this_file,$filename);
+/* echo "this_file = ".$this_file." permissions = ".$permissions."<br >";
+chmod($this_file,"0775"); 
+exec("chmod 755 ".$this_file); */
 $content = @file_get_contents($this_file);
 if($content === FALSE) ask_create_new_file($url_this_page,$filename);
 $content = mb_convert_encoding($content,'UTF-8','UTF-8');
@@ -1535,11 +1542,13 @@ if(!isset($_POST['analyze_tonal'])) {
 		if(file_exists($capture_file)) echo "<span class=\"red-text\">👉 The current file of captured MIDI data is badly formed</span></p>";
 		else echo "</p>";
 		}
-	echo "<p><button class=\"edit big\"\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button></p>";
+	echo "<p><button class=\"save\"\" onclick=\"toggledownload(); return false;\">DOWNLOAD / UPLOAD</button>&nbsp;<button class=\"edit\"\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button></p>";
+
+	download_form($dir,$filename,"data"); find_replace_form();
+	echo $upload_message; echo $undo_upload_message;
+
 	echo "<br /><table border=\"0\" style=\"background-color:transparent;\"><tr style=\"background-color:transparent;\">";
 	echo "<td style=\"background-color:transparent;\">";
-
-	find_replace_form();
 
 	echo "<div style=\"float:right; vertical-align:middle; background-color:transparent;\">Import MusicXML: <input   onclick=\"if(!checksaved()) return false;\" type=\"file\" name=\"music_xml_import\">&nbsp;<input type=\"submit\" onclick=\"if(!checksaved()) return false;\" class=\"save\" value=\"← IMPORT\"></div>";
 
@@ -1836,18 +1845,9 @@ echo "</tr>";
 echo "</table>";
 echo "<script>\n";
 echo "window.onload = function() {
-    toggleAllDisplays($NumberMIDIinputs); toggleAllDisplays($NumberMIDIoutputs); settogglesearch(); settogglescales();
+    toggleAllDisplays($NumberMIDIinputs); toggleAllDisplays($NumberMIDIoutputs); settogglesearch(); settoggledownload(); settogglescales();
 	};\n";
 echo "</script>\n";
-/* echo "<pre>";  // Preformatted tag to display output neatly
-    // Execute a shell command to list MIDI devices
-    // Using `system_profiler` to get audio device information which includes MIDI
-    system("system_profiler SPAudioDataType | grep MIDI");
-    echo "</pre>";
-echo "<pre>";
-// send_to_console("python3 midi_list.py");
-system("python3 midi_list.py");
-echo "</pre>"; */
 echo "</body></html>";
 
 function create_chunks($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxchunk_size,$measure_min,$measure_max,$label) {

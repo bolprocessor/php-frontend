@@ -286,6 +286,10 @@ else {
 
 if($test) echo "grammar_file = ".$this_file."<br />";
 
+$upload_message = upload_replacement();
+if($upload_message <> '') $need_to_save = FALSE;
+$undo_upload_message = undo_upload();
+
 try_create_new_file($this_file,$filename);
 $content = @file_get_contents($this_file);
 if($content === FALSE) ask_create_new_file($url_this_page,$filename);
@@ -629,9 +633,11 @@ echo "<input type=\"hidden\" name=\"alphabet_file\" value=\"".$alphabet_file."\"
 
 echo "<span  id=\"topedit\">&nbsp;</span>";
 echo $save_warning;
-echo "<br /><button class=\"edit big\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button><p></p>";
+echo "<br /><button class=\"save\"\" onclick=\"toggledownload(); return false;\">DOWNLOAD / UPLOAD</button>&nbsp;<button class=\"edit\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button><p></p>";
 
-find_replace_form();
+download_form($dir,$filename,"grammar"); find_replace_form();
+	echo $upload_message; echo $undo_upload_message;
+
 echo "<p><input class=\"save big\" type=\"submit\" id=\"saveButton\" onclick=\"clearsave();\" name=\"savethisfile\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".begin_with(20,$filename)."’\">";
 if((file_exists($output.SLASH.$default_output_name.".wav") OR file_exists($output.SLASH.$default_output_name.".mid") OR file_exists($output.SLASH.$default_output_name.".html") OR file_exists($output.SLASH.$default_output_name.".sco")) AND file_exists($result_file)) {
 	echo "&nbsp;&nbsp;&nbsp;<input class=\"edit\" style=\"font-size:large;\" onclick=\"window.open('".nice_url($result_file)."','result','width=800,height=600,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Show latests results\">";
@@ -802,7 +808,7 @@ if(!$hide) {
 echo "</form>";
 echo "<script>\n";
 echo "window.onload = function() {
-    toggleAllDisplays($NumberMIDIinputs); toggleAllDisplays($NumberMIDIoutputs); settogglesearch(); settogglescales();
+    toggleAllDisplays($NumberMIDIinputs); toggleAllDisplays($NumberMIDIoutputs); settogglesearch(); settoggledownload(); settogglescales();
 	};\n";
 echo "</script>\n";
 echo "</body>";

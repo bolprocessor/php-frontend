@@ -2,7 +2,6 @@
 $filename = "Compilation";
 require_once("_basic_tasks.php");
 echo "<head>";
-echo "<script src=\"https://cdn.jsdelivr.net/combine/npm/tone@14.7.58,npm/@magenta/music@1.23.1/es6/core.js,npm/focus-visible@5,npm/html-midi-player@1.4.0\"></script>";
 echo "<script src=\"darkmode.js\"></script>";
 echo "</head>";
 echo "<body>";

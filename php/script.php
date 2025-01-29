@@ -176,7 +176,7 @@ if(isset($_POST['listinstructions'])) {
 
 echo "<script>\n";
 echo "window.onload = function() {
-	settogglesearch();
+	settogglesearch(); settoggledownload();
 	};\n";
 echo "</script>\n";
 echo "</body>";

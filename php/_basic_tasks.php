@@ -35,6 +35,8 @@ if(!file_exists($file_path)) {
     }
 
 $skin = 1; // Blue by default
+$midi_player = "MIDIjs";
+// $midi_player = "html-midi-player";
 
 require_once("_settings.php");
 $bp_application_path = "..".SLASH;
@@ -375,6 +377,17 @@ echo "function togglesearch() {
       var z = document.getElementById(\"search\");
       if(z) {
         z.className=(z.className=='hidden')?'unhidden':'hidden'; }
+    }\n";
+
+echo "function settoggledownload() {
+      var z = document.getElementById(\"download\");
+      if(z) {
+        z.className='hidden'; }
+      }\n";
+echo "function toggledownload() {
+      var z = document.getElementById(\"download\");
+      if(z) {
+		z.className=(z.className=='hidden')?'unhidden':'hidden'; }
     }\n";
 
 echo "function settogglescales() {
@@ -3515,6 +3528,57 @@ function find_replace_form() {
 	return;
 	}
 
+function download_form($dir,$thisfile,$type) {
+	echo "<span id=\"download\">";
+	echo "<div class=\"thinborder\"  style=\"width:50%; padding-left:0.5em;\">";
+	$link = $dir.$thisfile;
+	echo "<input type=\"hidden\" name=\"file_link\" value=\"".$link."\">";
+	echo "<input type=\"hidden\" name=\"type_link\" value=\"".$type."\">";
+	echo "<a href=\"".$link."\" title=\"Click to download!\" download=\"".$thisfile."\">⬇️ Download this ".$type." file</a>";
+	echo "<p>&nbsp;&nbsp;&nbsp;<input type=\"file\" onclick=\"if(!checksaved()) return false;\" name=\"uploaded_replacement\" id=\"uploaded_replacement\">";
+	echo "<input class=\"save\" name=\"upload_replacement\" onclick=\"if(!checksaved()) return false;\" type=\"submit\" value=\"<-- UPLOAD FILE TO REPLACE THIS ".strtoupper($type)."\"></p>";
+	echo "</div>";
+	echo "</span>";
+	return;
+	}
+
+function upload_replacement() {
+	global $permissions;
+	$upload_message = '';
+	if($_SERVER['REQUEST_METHOD'] === 'POST') {
+		if(isset($_FILES['uploaded_replacement']) AND $_FILES['uploaded_replacement']['error'] === UPLOAD_ERR_OK) {
+			$file_link = $_POST['file_link'];
+			$type_link = $_POST['type_link'];
+			$backup_file = $file_link."_bak";
+       		copy($file_link,$backup_file);
+			echo "<input type=\"hidden\" name=\"file_link\" value=\"".$file_link."\">";
+			$fileTmpPath = $_FILES['uploaded_replacement']['tmp_name'];
+			$fileName = $_FILES['uploaded_replacement']['name'];
+			$fileSize = $_FILES['uploaded_replacement']['size'];
+			$fileType = $_FILES['uploaded_replacement']['type'];
+			if(move_uploaded_file($fileTmpPath,$file_link)) {
+				chmod($file_link,$permissions);
+				$upload_message .= "<p>👉 Replacement ".$type_link." file uploaded successfully: <span class=\"green-text\">".$file_link."</span>&nbsp;<input class=\"save\" name=\"undo_upload\" type=\"submit\" value=\"<-- UNDO THIS REPLACEMENT\"></p>";
+				}
+			else $upload_message .= "<p class=\"red-text\">👉 Error moving the uploaded file</p>";
+			}
+		else if(isset($_POST['upload_replacement'])) $upload_message .= "<p class=\"red-text\">👉 No file has been chosen…</p>";
+		}
+	return $upload_message;
+	}
+
+function undo_upload() {
+	$undo_message = '';
+	if(isset($_POST['undo_upload'])) {
+		$file_link = $_POST['file_link'];
+		$backup_file = $file_link."_bak";
+		if(!copy($backup_file,$file_link))
+			$undo_message = "<p>👉 <span class=\"red-text\">Failed to find a backup of the file.</span></p>";
+		else $undo_message = "<p>👉 The previous version has been restored&nbsp;😀</p>";
+		}
+	return $undo_message;
+	}
+
 function do_replace($content) {
 	if(isset($_POST['replace'])) {
 		$text = $_POST['thistext'] ?? '';
@@ -3878,6 +3942,7 @@ function save_midiressources($filename,$warn) {
 function save_midiport($thisfilename,$acceptFilters,$passFilters,$outFilters) {
 	global $MIDIinput, $MIDIoutput, $MIDIinputname, $MIDIinputcomment, $MIDIoutputname, $MIDIoutputcomment; // These are tables!
 	global $NumberMIDIinputs, $NumberMIDIoutputs, $MIDIchannelFilter, $MIDIpartFilter;
+	global $permissions;
 	$file = fopen($thisfilename,'w');
 	if($file) {
 		for($i = 0; $i < $NumberMIDIoutputs; $i++) {
@@ -3900,7 +3965,7 @@ function save_midiport($thisfilename,$acceptFilters,$passFilters,$outFilters) {
 			if(isset($passFilters[$i])) fwrite($file,"MIDIpassFilter\t".$i."\t".$passFilters[$i]."\n");
 			}
 		fclose($file);
-		chmod($thisfilename,0775);
+		chmod($thisfilename,$permissions);
 		return true;
 		}
 	return false;
@@ -4365,14 +4430,27 @@ function make_links_clickable($text) {
     return $text_with_links;
 	}
 
+
 function midifile_player($midi_file_link, $filename, $width, $piano_roll) {
+	global $bp_application_path,$midi_player;
 	$text = "<table><tr>";
 	$text .= "<td style=\"padding-right:2em; padding-bottom:1em;\"><p class=\"shadow\" style=\"width:".$width."em;\">";
-	$text .= "<midi-player src=\"".nice_url($midi_file_link)."\" sound-font=\"https://storage.googleapis.com/magentadata/js/soundfonts/sgm_plus\" visualizer=\"#myVisualizer\"></midi-player>";
-	if($piano_roll) $text .= "<midi-visualizer type=\"piano-roll\" id=\"myVisualizer\"></midi-visualizer>";
-	$text .= "</p></td>";
+	if($midi_player == "MIDIjs") {
+		$text .= "<p class=\"shadow\" style=\"width:25em;\"><a style=\"color:#007BFF;\" href=\"#midi\" onClick=\"MIDIjs.play('".nice_url($midi_file_link)."');\"><img src=\"".$bp_application_path."php/pict/loudspeaker.png\" width=\"70px;\" style=\"vertical-align:middle;\" />PLAY</a>";
+		$text .= " (<a style=\"color:#007BFF;\" href=\"#midi\" onClick=\"MIDIjs.pause();\">Pause</a>) ";
+		$text .= " <a style=\"color:#007BFF;\" href=\"#midi\" onClick=\"MIDIjs.resume();\">Resume</a>";
+		$text .= " (<a style=\"color:#007BFF;\" href=\"#midi\" onClick=\"MIDIjs.stop();\">STOP</a>)</p>";
+		}
+	else if($midi_player == "html-midi-player") {
+		$text .= "<midi-player src=\"".nice_url($midi_file_link)."\" sound-font=\"https://storage.googleapis.com/magentadata/js/soundfonts/sgm_plus\" visualizer=\"#myVisualizer\"></midi-player>";
+		if($piano_roll) $text .= "<midi-visualizer type=\"piano-roll\" id=\"myVisualizer\"></midi-visualizer>";
+		}
+	$text .= "</td>";
 	if($filename <> '') $text .= "<td style=\"vertical-align:middle;\">".$filename."</td>";
-	$text .= "<td style=\"text-align:right;\"><a href=\"".nice_url($midi_file_link)."\" download>Download&nbsp;MIDI&nbsp;file</a><br /><small>This player does not support<br />volume, pitchbend, pan, etc.<br /><a target=\"_blank\" href=\"https://github.com/cifkao/html-midi-player/\">Visit html-midi-player</a></small></td>";
+	if($midi_player == "html-midi-player")
+		$text .= "<td style=\"text-align:right;\"><a href=\"".nice_url($midi_file_link)."\" download>Download&nbsp;MIDI&nbsp;file</a><br /><small>This player does not support<br />volume, pitchbend, pan, etc.<br /><a target=\"_blank\" href=\"https://github.com/cifkao/html-midi-player/\">Visit html-midi-player</a></small></td>";
+	else if($midi_player == "MIDIjs")
+		$text .= "<td style=\"text-align:right; vertical-align:middle;\"><a href=\"".nice_url($midi_file_link)."\" download>Download&nbsp;MIDI&nbsp;file</a></td>";
 	$text .= "</tr></table>";
 	return $text;
 	}
