@@ -1542,7 +1542,7 @@ if(!isset($_POST['analyze_tonal'])) {
 		if(file_exists($capture_file)) echo "<span class=\"red-text\">👉 The current file of captured MIDI data is badly formed</span></p>";
 		else echo "</p>";
 		}
-	echo "<p><button class=\"save\"\" onclick=\"toggledownload(); return false;\">DOWNLOAD / UPLOAD</button>&nbsp;<button class=\"edit\"\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button></p>";
+	echo "<p id=\"downloadupload\"><button class=\"save\"\" onclick=\"toggledownload(); return false;\">DOWNLOAD / UPLOAD</button>&nbsp;<button class=\"edit\"\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button></p>";
 
 	download_form($dir,$filename,"data"); find_replace_form();
 	echo $upload_message; echo $undo_upload_message;

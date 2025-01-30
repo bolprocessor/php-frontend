@@ -28,6 +28,7 @@ $temp_folder = str_replace(' ','_',$filename)."_".my_session_id()."_temp";
 // echo "temp_folder = ".$temp_folder."<br />";
 if(!file_exists($temp_dir.$temp_folder)) {
 	mkdir($temp_dir.$temp_folder);
+	chmod($temp_dir,$permissions);
 	}
 
 echo "<h2>Time base file “".$filename."”</h2>";

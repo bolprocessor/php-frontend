@@ -633,7 +633,7 @@ echo "<input type=\"hidden\" name=\"alphabet_file\" value=\"".$alphabet_file."\"
 
 echo "<span  id=\"topedit\">&nbsp;</span>";
 echo $save_warning;
-echo "<br /><button class=\"save\"\" onclick=\"toggledownload(); return false;\">DOWNLOAD / UPLOAD</button>&nbsp;<button class=\"edit\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button><p></p>";
+echo "<br /><button id=\"downloadupload\" class=\"save\" onclick=\"toggledownload(); return false;\">DOWNLOAD / UPLOAD</button>&nbsp;<button class=\"edit\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button><p></p>";
 
 download_form($dir,$filename,"grammar"); find_replace_form();
 	echo $upload_message; echo $undo_upload_message;

@@ -7,7 +7,7 @@ error_reporting(0);
 // error_reporting(E_ALL & ~E_NOTICE);
 ini_set('output_buffering', 'off');
 ini_set('zlib.output_compression', 0);
-require('midi.class.php');
+require('midi.class.php'); // $$$ Probably not used, needs to be checked.
 // Source: https://github.com/robbie-cao/midi-class-php
 
 define('MAXFILESIZE',50000000);
@@ -3529,21 +3529,22 @@ function find_replace_form() {
 	}
 
 function download_form($dir,$thisfile,$type) {
+	global $url_this_page;
 	echo "<span id=\"download\">";
-	echo "<div class=\"thinborder\"  style=\"width:50%; padding-left:0.5em;\">";
+	echo "<div class=\"thinborder\" style=\"width:50%; padding:0.5em; text-align:center;\">";
 	$link = $dir.$thisfile;
 	echo "<input type=\"hidden\" name=\"file_link\" value=\"".$link."\">";
 	echo "<input type=\"hidden\" name=\"type_link\" value=\"".$type."\">";
-	echo "<a href=\"".$link."\" title=\"Click to download!\" download=\"".$thisfile."\">⬇️ Download this ".$type." file</a>";
+	echo "<big><a href=\"".$link."\" title=\"Click to download!\" download=\"".$thisfile."\">⬇️ Download this ".$type." file&nbsp;⬇️</a></big>";
 	echo "<p>&nbsp;&nbsp;&nbsp;<input type=\"file\" onclick=\"if(!checksaved()) return false;\" name=\"uploaded_replacement\" id=\"uploaded_replacement\">";
-	echo "<input class=\"save\" name=\"upload_replacement\" onclick=\"if(!checksaved()) return false;\" type=\"submit\" value=\"<-- UPLOAD FILE TO REPLACE THIS ".strtoupper($type)."\"></p>";
+	echo "<input class=\"save\" name=\"upload_replacement\" formaction=\"".$url_this_page."#downloadupload\" onclick=\"if(!checksaved()) return false;\" type=\"submit\" value=\"<-- UPLOAD FILE TO REPLACE THIS ".strtoupper($type)."\"></p>";
 	echo "</div>";
 	echo "</span>";
 	return;
 	}
 
 function upload_replacement() {
-	global $permissions;
+	global $permissions,$url_this_page;
 	$upload_message = '';
 	if($_SERVER['REQUEST_METHOD'] === 'POST') {
 		if(isset($_FILES['uploaded_replacement']) AND $_FILES['uploaded_replacement']['error'] === UPLOAD_ERR_OK) {
@@ -3558,7 +3559,7 @@ function upload_replacement() {
 			$fileType = $_FILES['uploaded_replacement']['type'];
 			if(move_uploaded_file($fileTmpPath,$file_link)) {
 				chmod($file_link,$permissions);
-				$upload_message .= "<p>👉 Replacement ".$type_link." file uploaded successfully: <span class=\"green-text\">".$file_link."</span>&nbsp;<input class=\"save\" name=\"undo_upload\" type=\"submit\" value=\"<-- UNDO THIS REPLACEMENT\"></p>";
+				$upload_message .= "<p>👉 Replacement ".$type_link." file uploaded successfully: <span class=\"green-text\">".$file_link."</span>&nbsp;<input class=\"save\" formaction=\"".$url_this_page."#downloadupload\" name=\"undo_upload\" type=\"submit\" value=\"<-- UNDO THIS REPLACEMENT\"></p>";
 				}
 			else $upload_message .= "<p class=\"red-text\">👉 Error moving the uploaded file</p>";
 			}
