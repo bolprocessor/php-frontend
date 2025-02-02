@@ -1,9 +1,9 @@
 <?php
 session_start();
-/* ini_set('display_errors', 1);
+ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
-error_reporting(E_ALL); */
-error_reporting(0);
+error_reporting(E_ALL);
+// error_reporting(0);
 // error_reporting(E_ALL & ~E_NOTICE);
 ini_set('output_buffering', 'off');
 ini_set('zlib.output_compression', 0);
@@ -434,8 +434,22 @@ echo "function clearFields(inputId, nameId, commentId) {
     document.getElementsByName(inputId)[0].value = \"\";
     document.getElementsByName(nameId)[0].value = \"\";
     document.getElementsByName(commentId)[0].value = \"\";\n";
-echo "}
-</script>";
+echo "} </script>";
+
+echo "<script>
+	async function selectFolder() {
+		try {
+			const folderHandle = await window.showDirectoryPicker();
+			const folderPath = folderHandle.name;
+
+			document.getElementById('folderPath').value = folderPath;
+			console.log(\"Selected Folder: \", folderPath);
+		} catch (error) {
+			console.error(\"Error selecting folder:\", error);
+		}
+	}";
+echo "</script>";
+
 
 // --------- FUNCTIONS ------------
 
@@ -695,6 +709,7 @@ function ask_create_new_file($url_this_page,$filename) {
 	}
 
 function try_create_new_file($file,$filename) {
+	global $permissions;
 	if(isset($_POST['dontcreate'])) {
 		echo "<p style=\"color:red;\" class=\"blinking\">No file created. You can close this tab…</p>";
 		die();
@@ -703,11 +718,12 @@ function try_create_new_file($file,$filename) {
 		echo "<p style=\"color:red;\" class=\"blinking\">Creating ‘".$filename."’. Don’t forget to SAVE it!</p>";
 		$handle = fopen($file,"w");
 		fclose($handle);
+		chmod($file,$permissions);
 		}
 	}
 
 function compile_help($text_help_file,$html_help_file) {
-	global $filename;
+	global $filename,$permissions;
 //	echo "text_help_file = ".$text_help_file."<br />";
 //	echo "html_help_file = ".$html_help_file."<br />";
 	$help = array();
@@ -789,6 +805,7 @@ function compile_help($text_help_file,$html_help_file) {
 			}
 		fwrite($handle,"</body>");
 		fclose($handle);
+		chmod($html_help_file,$permissions);
 		}
 	return $help;
 	}
@@ -889,6 +906,17 @@ function clean_up_encoding($create_bullets,$convert,$text) {
 	$text = str_replace("Â","¬",$text);
 	$text = str_replace("¤","•",$text);
 	$text = str_replace("â¢","•",$text);
+	$text = preg_replace('/-se\s+/','-se.',$text);
+	$text = preg_replace('/-al\s+/','-al.',$text);
+	$text = preg_replace('/-gr\s+/','-gr.',$text);
+	$text = preg_replace('/-so\s+/','-so.',$text);
+	$text = preg_replace('/-to\s+/','-to.',$text);
+	$text = preg_replace('/-cs\s+/','-cs.',$text);
+	$text = preg_replace('/-tb\s+/','-tb.',$text);
+	$text = preg_replace('/-or\s+/','-or.',$text);
+	$text = preg_replace('/-in\s+/','-in.',$text);
+	$text = preg_replace('/-md\s+/','-md.',$text);
+	$text = preg_replace('/-gl\s+/','-gl.',$text);
 	if($create_bullets) $text = preg_replace("/\s\\.$/u"," •",$text);
 //	if($create_bullets) $text = preg_replace("/\s\\.([^0-9])/u"," •$1",$text);
 	if ($create_bullets) {
@@ -943,6 +971,7 @@ function decode_entities($text) {
 	}
 
 function clean_up_file_to_html($file) {
+	global $permissions;
 	if(!file_exists($file)) {
 	//	echo "<p style=\"color:red;\">ERROR file not found: ".$file."</p>";
 		return '';
@@ -969,6 +998,7 @@ function clean_up_file_to_html($file) {
 	fwrite($handle,$text."\n");
 	fwrite($handle,"</body>\n");
 	fclose($handle);
+	chmod($file_html,$permissions);
 	return $file_html;
 	}
 
@@ -1019,7 +1049,7 @@ function my_rmdir($src) {
 	}
 
 function SaveObjectPrototypes($verbose,$dir,$filename,$temp_folder,$force) {
-	global $top_header,$test,$temp_dir,$csound_resources;
+	global $top_header,$test,$temp_dir,$csound_resources,$permissions;
 	$file_lock = $filename."_lock";
 	$time_start = time();
 	$time_end = $time_start + 3;
@@ -1114,6 +1144,7 @@ function SaveObjectPrototypes($verbose,$dir,$filename,$temp_folder,$force) {
 	fwrite($handle,"<HTML>".$comment_on_file."</HTML>\n");
 	fwrite($handle,"_endSoundObjectFile_\n");
 	fclose($handle);
+	chmod($dir.$filename,$permissions);
 	if($verbose) echo "</font></p><hr>";
 //	sleep(1);
 	unlink($dir.$file_lock);
@@ -1121,7 +1152,7 @@ function SaveObjectPrototypes($verbose,$dir,$filename,$temp_folder,$force) {
 	}
 
 function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder,$force) {
-	global $top_header, $test, $temp_dir;
+	global $top_header, $test, $temp_dir, $permissions;
 //	$verbose = TRUE;
 	if($verbose) echo "dir = ".$dir."<br />";
 	if($verbose) echo "filename = ".$filename."<br />";
@@ -1245,6 +1276,7 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder,$force) {
 	$tonality_filename = $_POST['tonality_filename'];
 	fwrite($handle,$tonality_filename."\n");
 	fclose($handle);
+	chmod($dir.$filename,$permissions);
 	unlink($dir.$file_lock);
 	return $warn_not_empty;
 	}
@@ -1309,7 +1341,7 @@ function reformat_grammar($verbose,$this_file) {
 	}
 
 function SaveTonality($verbose,$dir,$filename,$temp_folder,$force) {
-	global $top_header, $test, $temp_dir;
+	global $top_header, $test, $temp_dir, $permissions;
 	$verbose = FALSE;
 	if($verbose) echo "<br />dir = ".$dir."<br />";
 	if($verbose) echo "filename = ".$filename."<br />";
@@ -1358,6 +1390,7 @@ function SaveTonality($verbose,$dir,$filename,$temp_folder,$force) {
 		}
 	fwrite($handle,"_end tables\n");
 	fclose($handle);
+	chmod($dir.$filename,$permissions);
 	unlink($file_lock);
 	return "saved";
 	}
@@ -1670,6 +1703,7 @@ function fix_new_name($name) {
 	}
 
 function type_of_file($thisfile) {
+	$thisfile = str_replace("_bak",'',$thisfile);
 	$table = explode(".",$thisfile);
 	$prefix = $table[0];
 //	if(strlen($prefix) <> 3 OR (!is_integer($pos=strpos($prefix,"-") AND !is_integer($pos=strpos($prefix,"+")))) OR $pos <> 0)
@@ -2356,6 +2390,7 @@ function copyemz($file1,$file2){
     }
     
 function save_settings($variable,$value) {
+	global $permissions;
 	$value = str_replace(SLASH,'/',$value);
 	$settings_file = "_settings.php";
 	$content = @file_get_contents($settings_file);
@@ -2389,12 +2424,14 @@ function save_settings($variable,$value) {
 		$line = str_replace('§','?',$line);
 		fwrite($handle,$line);
 		fclose($handle);
+		chmod($settings_file,$permissions);
 		}
 	else echo "<p><span class=\"red-text\">File ‘_settings.php’ could nor be opened!</span></p>";
  	return;
  	}
 
 function save_settings2($variable,$index,$value) {
+	global $permissions;
 	$value = str_replace(SLASH,'/',$value);
 	$settings_file = "_settings.php";
 	$content = @file_get_contents($settings_file);
@@ -2429,12 +2466,14 @@ function save_settings2($variable,$index,$value) {
 		$line = str_replace('§','?',$line);
 		fwrite($handle,$line);
 		fclose($handle);
+		chmod($settings_file,$permissions);
 		}
 	else echo "<p><span class=\"red-text\">File ‘_settings.php’ could nor be opened!</span></p>";
 	return;
 	}
 
 function save_settings3($variable,$index1,$index2,$value) {
+	global $permissions;
 	$value = str_replace(SLASH,'/',$value);
 	$settings_file = "_settings.php";
 	$content = @file_get_contents($settings_file);
@@ -2470,12 +2509,14 @@ function save_settings3($variable,$index1,$index2,$value) {
 		$line = str_replace('§','?',$line);
 		fwrite($handle,$line);
 		fclose($handle);
+		chmod($settings_file,$permissions);
 		}
 	else echo "<p><span class=\"red-text\">File ‘_settings.php’ could nor be opened!</span></p>";
 	return;
 	}
  	
  function delete_settings($file) {
+	global $permissions;
 	$settings_file = "_settings.php";
 	$content = @file_get_contents($settings_file);
  	if($content != FALSE) {
@@ -2500,11 +2541,13 @@ function save_settings3($variable,$index1,$index2,$value) {
 		$line = str_replace('§','?',$line);
 		fwrite($handle,$line);
 		fclose($handle);
+		chmod($settings_file,$permissions);
  		}
  	return;
  	}
 
 function delete_settings_entry($entry) {
+	global $permissions;
 	$settings_file = "_settings.php";
 	$content = @file_get_contents($settings_file);
  	if($content != FALSE) {
@@ -2529,6 +2572,7 @@ function delete_settings_entry($entry) {
 		$line = str_replace('§','?',$line);
 		fwrite($handle,$line);
 		fclose($handle);
+		chmod($settings_file,$permissions);
  		}
  	return;
  	}
@@ -3528,49 +3572,117 @@ function find_replace_form() {
 	return;
 	}
 
-function download_form($dir,$thisfile,$type) {
+function download_upload_project_form($dir,$thisfile,$type,$settings_file) {
 	global $url_this_page;
 	echo "<span id=\"download\">";
 	echo "<div class=\"thinborder\" style=\"width:50%; padding:0.5em; text-align:center;\">";
-	$link = $dir.$thisfile;
-	echo "<input type=\"hidden\" name=\"file_link\" value=\"".$link."\">";
+	$link_file = $dir.$thisfile;
+	$link_settings = $dir.$settings_file;
+	echo "<input type=\"hidden\" name=\"file_link\" value=\"".$link_file."\">";
 	echo "<input type=\"hidden\" name=\"type_link\" value=\"".$type."\">";
-	echo "<big><a href=\"".$link."\" title=\"Click to download!\" download=\"".$thisfile."\">⬇️ Download this ".$type." file&nbsp;⬇️</a></big>";
+	echo "<big>Download the <a href=\"".$link_file."\" title=\"Click to download!\" download=\"".$thisfile."\">".$thisfile."&nbsp;⬇️</a> ".$type." file";
+	if($settings_file <> '') echo " or the <a href=\"".$link_settings."\" title=\"Click to download!\" download=\"".$settings_file."\">".$settings_file."&nbsp;⬇️</a> settings file";
+	echo "</big>";
 	echo "<p>&nbsp;&nbsp;&nbsp;<input type=\"file\" onclick=\"if(!checksaved()) return false;\" name=\"uploaded_replacement\" id=\"uploaded_replacement\">";
-	echo "<input class=\"save\" name=\"upload_replacement\" formaction=\"".$url_this_page."#downloadupload\" onclick=\"if(!checksaved()) return false;\" type=\"submit\" value=\"<-- UPLOAD FILE TO REPLACE THIS ".strtoupper($type)."\"></p>";
+	echo "<input class=\"save\" name=\"upload_project\" formaction=\"".$url_this_page."#downloadupload\" onclick=\"if(!checksaved()) return false;\" type=\"submit\" value=\"<-- UPLOAD PROJECT TO REPLACE THIS ".strtoupper($type)."\"></p>";
 	echo "</div>";
 	echo "</span>";
 	return;
 	}
 
-function upload_replacement() {
+function upload_related_form($dir,$file,$type) {
+	global $bp_application_path,$url_this_page;
+	$dir_base = str_replace($bp_application_path,'',$dir);
+	$result = '';
+	$url = $type.".php?file=".urlencode($dir_base.$file);
+	$result .= "<br /><span class=\"red-text\">WARNING:</span> <span class=\"green-text\">".$dir_base.$file."</span> not found.";
+	$result .= "&nbsp;<input class=\"save\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".nice_url($url)."','".$file."','width=800,height=800,left=100'); return false;\" value=\"CREATE IT\">";
+	$result .= "<input type=\"hidden\" id=\"expectedFileName\" name=\"expectedFileName\" value=\"".$file."\">";
+    $result .= "<br />… or select this file: <span class=\"green-text\">".$file."</span>";
+	$result .= "&nbsp;&nbsp;<label class=\"custom-file-button\">Search";
+    $result .= "&nbsp;&nbsp;<input type=\"file\" id=\"fileInput\" name=\"uploaded_file\" class=\"hidden-file-input\">";
+	$result .= "</label>";
+	$result .= "<span id=\"fileName\">(no file chosen)</span>";
+    $result .= "&nbsp;and&nbsp;<input class=\"save\" name=\"submit_upload\" type=\"submit\" value=\"UPLOAD\">&nbsp;it";
+	return $result;
+	}
+
+function upload_related($dir) {
+	global $_FILES, $permissions;
+	$result = '';
+	if(isset($_POST['submit_upload']) AND $_SERVER['REQUEST_METHOD'] === 'POST' AND isset($_FILES['uploaded_file'])) {
+		$expectedFileName = $_POST['expectedFileName'];
+		$uploadedFileName = $_FILES['uploaded_file']['name'];
+		if($uploadedFileName !== $expectedFileName)
+			$result .= "<br />👉 <span class=\"red-text\">Incorrect file</span> <span class=\"green-text\">".$uploadedFileName."</span>.</span> Please select <span class=\"green-text\">".$expectedFileName."</span>";
+		else {
+			$uploadDir = $dir; // Define your upload directory
+			$uploadPath = $uploadDir.SLASH.basename($uploadedFileName);
+			if (move_uploaded_file($_FILES['uploaded_file']['tmp_name'], $uploadPath)) {
+				chmod($uploadPath,$permissions);
+				$result .= "<br />👉 File uploaded successfully: <span class=\"green-text\">".$uploadedFileName."</span>";
+				}
+			else $result .= "<p>👉 <span class=\"red-text\">Error uploading file</span></p>";
+			}
+		}
+	return $result;
+	}
+
+function footer() {
+	echo "<script>"; // Script used for uploading attached files
+	echo "document.getElementById(\"fileInput\").addEventListener(\"change\", function() {
+	let fileNameSpan = document.getElementById(\"fileName\");
+		if (this.files.length > 0) {
+			fileNameSpan.innerHTML = '<span class=\"green-text\">' + this.files[0].name + '</span>';
+			}
+		else {
+			fileNameSpan.textContent = \"(no file)\";
+			}
+	});";
+	echo "</script>";
+	return;
+	}
+
+function upload_project($type) {
 	global $permissions,$url_this_page;
 	$upload_message = '';
-	if($_SERVER['REQUEST_METHOD'] === 'POST') {
-		if(isset($_FILES['uploaded_replacement']) AND $_FILES['uploaded_replacement']['error'] === UPLOAD_ERR_OK) {
-			$file_link = $_POST['file_link'];
-			$type_link = $_POST['type_link'];
-			$backup_file = $file_link."_bak";
-       		copy($file_link,$backup_file);
-			echo "<input type=\"hidden\" name=\"file_link\" value=\"".$file_link."\">";
-			$fileTmpPath = $_FILES['uploaded_replacement']['tmp_name'];
-			$fileName = $_FILES['uploaded_replacement']['name'];
-			$fileSize = $_FILES['uploaded_replacement']['size'];
-			$fileType = $_FILES['uploaded_replacement']['type'];
-			if(move_uploaded_file($fileTmpPath,$file_link)) {
-				chmod($file_link,$permissions);
-				$upload_message .= "<p>👉 Replacement ".$type_link." file uploaded successfully: <span class=\"green-text\">".$file_link."</span>&nbsp;<input class=\"save\" formaction=\"".$url_this_page."#downloadupload\" name=\"undo_upload\" type=\"submit\" value=\"<-- UNDO THIS REPLACEMENT\"></p>";
+	if(!isset($_POST['upload_project'])) return '';
+	if($_SERVER['REQUEST_METHOD'] === 'POST' AND isset($_FILES['uploaded_replacement'])) {
+		$fileName = $_FILES['uploaded_replacement']['name'];
+		$type_of_file = type_of_file($fileName);
+		if($type == $type_of_file['type']) {
+			if($_FILES['uploaded_replacement']['error'] === UPLOAD_ERR_OK) {
+				$file_link = $_POST['file_link'];
+				$type_link = $_POST['type_link'];
+				$backup_file = $file_link."_bak";
+				copy($file_link,$backup_file);
+				echo "<input type=\"hidden\" name=\"file_link\" value=\"".$file_link."\">";
+				$fileTmpPath = $_FILES['uploaded_replacement']['tmp_name'];
+				$fileName = $_FILES['uploaded_replacement']['name'];
+				$fileSize = $_FILES['uploaded_replacement']['size'];
+				$fileType = $_FILES['uploaded_replacement']['type'];
+				if(move_uploaded_file($fileTmpPath,$file_link)) {
+					chmod($file_link,$permissions);
+					$upload_message .= "<p>👉 Replacement ".$type_link." file uploaded successfully: <span class=\"green-text\">".$file_link."</span>&nbsp;<input class=\"save\" formaction=\"".$url_this_page."#downloadupload\" name=\"undo_upload_project\" type=\"submit\" value=\"<-- UNDO THIS REPLACEMENT\"></p>";
+					}
+				else $upload_message .= "<p class=\"red-text\">👉 Error moving the uploaded file</p>";
 				}
-			else $upload_message .= "<p class=\"red-text\">👉 Error moving the uploaded file</p>";
 			}
-		else if(isset($_POST['upload_replacement'])) $upload_message .= "<p class=\"red-text\">👉 No file has been chosen…</p>";
+		else {
+			if($fileName <> '') $upload_message .= "<p class=\"red-text\">👉 The <span class=\"green-text\">".$fileName."</span> file you selected is not of “".$type."” type</p>";
+			else $upload_message .= "<p class=\"red-text\">👉 No file has been chosen…</p>";
+			}
 		}
+	else {
+		$upload_message .= "<p class=\"red-text\">👉 2No file has been chosen…</p>";
+		}	
+	unset($_POST['upload_project']);
 	return $upload_message;
 	}
 
-function undo_upload() {
+function undo_upload_project() {
 	$undo_message = '';
-	if(isset($_POST['undo_upload'])) {
+	if(isset($_POST['undo_upload_project'])) {
 		$file_link = $_POST['file_link'];
 		$backup_file = $file_link."_bak";
 		if(!copy($backup_file,$file_link))
@@ -4228,6 +4340,7 @@ function my_session_id() {
     }
 
 function create_variables($script_variables) {
+	global $permissions;
     $h_variables = fopen($script_variables,'w');
     fwrite($h_variables,"<?php\n");
     $script_status = $script_more = array();
@@ -4256,6 +4369,7 @@ function create_variables($script_variables) {
     $line = str_replace('§','?',$line);
     fwrite($h_variables,$line);
     fclose($h_variables);
+	chmod($script_variables,$permissions);
     return;
     }
 
@@ -4413,7 +4527,6 @@ function update_scale_with_kbm($scl_name,$scale_file,$kbm_content) {
 			}
 		fwrite($handle,$line."\n");
 		}
-
 	fclose($handle);
 	$file_changed = $dir_scales."_changed";
 	$handle = fopen($file_changed,"w");

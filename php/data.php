@@ -1,4 +1,25 @@
 <?php
+if(isset($_POST['download_capture_file'])) {
+	$capture_file_name = $_POST['capture_file_name'];
+	$capture_file = $_POST['capture_file'];
+	if(headers_sent()) die("Headers already sent. Cannot start file download.");
+	if(file_exists($capture_file)) {
+		header('Content-Description: File Transfer');
+		header('Content-Type: application/octet-stream');
+		header('Content-Type: text/plain');
+		header('Content-Disposition: attachment; filename="'.basename($capture_file_name).'"');
+		header('Expires: 0');
+		header('Cache-Control: must-revalidate');
+		header('Pragma: public');
+		header('Content-Length: '.filesize($capture_file));
+		if(ob_get_level())
+			ob_end_clean();  // This avoids downloading the header of this page.
+		ob_clean();
+    	flush();
+		readfile($capture_file);
+		exit;
+		}
+	}
 require_once("_basic_tasks.php");
 require_once("_musicxml.php");
 require_once("_tonal_analysis.php");
@@ -20,22 +41,22 @@ $current_directory = str_replace(SLASH.$filename,'',$file);
 $current_directory = str_replace(SLASH,'/',$current_directory);
 save_settings("last_data_directory",$current_directory);
 
-if(isset($_POST['delete_file'])) {
-	$file_link = $_POST['file_link'];
-	@unlink($file_link);
+if(isset($_POST['delete_capture_file'])) {
+	$capture_file = $_POST['capture_file'];
+	@unlink($capture_file);
 	$trashed = TRUE;
 	}
 else $trashed = FALSE;
 if($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if(isset($_FILES['uploaded_file']) AND $_FILES['uploaded_file']['error'] === UPLOAD_ERR_OK) {
-		$destinationPath = $_POST['file_link'];
-        $fileTmpPath = $_FILES['uploaded_file']['tmp_name'];
-        $fileName = $_FILES['uploaded_file']['name'];
-        $fileSize = $_FILES['uploaded_file']['size'];
-        $fileType = $_FILES['uploaded_file']['type'];
-        if(move_uploaded_file($fileTmpPath,$destinationPath)) {
-			chmod($destinationPath,$permissions);
-            echo "<p>👉 File uploaded successfully to: <span class=\"green-text\">".$destinationPath."</span></p>";
+    if(isset($_FILES['uploaded_capture_file']) AND $_FILES['uploaded_capture_file']['error'] === UPLOAD_ERR_OK) {
+		$capture_file = $_POST['capture_file'];
+        $fileTmpPath = $_FILES['uploaded_capture_file']['tmp_name'];
+        $fileName = $_FILES['uploaded_capture_file']['name'];
+        $fileSize = $_FILES['uploaded_capture_file']['size'];
+        $fileType = $_FILES['uploaded_capture_file']['type'];
+    	if(move_uploaded_file($fileTmpPath,$capture_file)) {
+			chmod($capture_file,$permissions);
+            echo "<p>👉 File uploaded successfully: <span class=\"green-text\">".$fileName."</span></p>";
         	}
 		else echo "<p class=\"red-text\">👉 Error moving the uploaded file</p>";
     	}
@@ -47,23 +68,6 @@ if(isset($_POST['reload'])) {
 	@unlink($refresh_file);
     header("Location: ".$url_this_page);
     exit();	
-	}
-if(isset($_POST['download_file'])) {
-	$file_name = $_POST['file_name'];
-	$file_link = $_POST['file_link'];
-	if(file_exists($file_link)) {
-		header('Content-Description: File Transfer');
-		header('Content-Type: application/octet-stream');
-		header('Content-Disposition: attachment; filename="'.$file_name.'"');
-		header('Expires: 0');
-		header('Cache-Control: must-revalidate');
-		header('Pragma: public');
-		header('Content-Length: '.filesize($file_link));
-		ob_clean(); // This avoids downloading the header of this page.
-    	flush();
-		readfile($file_link);
-		exit;
-		}
 	}
 require_once("_header.php");
 
@@ -102,6 +106,7 @@ $objects_file = $csound_file = $tonality_file = $alphabet_file = $grammar_file =
 
 if(isset($_POST['alphabet_file'])) $alphabet_file = $_POST['alphabet_file'];
 if(isset($_POST['grammar_file'])) $grammar_file = $_POST['grammar_file'];
+if(isset($_POST['timebase_file'])) $timebase_file = $_POST['timebase_file'];
 if(isset($_POST['settings_file'])) $settings_file = $_POST['settings_file'];
 if(isset($_POST['csound_file'])) $csound_file = $_POST['csound_file'];
 if(isset($_POST['tonality_file'])) $tonality_file = $_POST['tonality_file'];
@@ -160,6 +165,10 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 		if($tonality_file <> '') {
 			$declarations .= $tonality_file."\n";
 			$content = str_replace($tonality_file,'',$content);
+			}
+		if($timebase_file <> '') {
+			$declarations .= $timebase_file."\n";
+			$content = str_replace($timebase_file,'',$content);
 			}
 		$_POST['thistext'] = $content;
 		if(!$reload_musicxml) {
@@ -983,7 +992,7 @@ if(isset($_GET['newsettings'])) {
 	$_POST['thistext'] = $settings_file."\n\n".$newcontent;
 	$no_save_midiresources = TRUE;
 	$need_to_save = TRUE;
-	$error_mssg .= "<span class=\"red-text blinking\">WARNING: this is a new tag/window. Close the previous one to avoid mixing versions!</span><br />";
+	$error_mssg .= "<br /><span class=\"red-text blinking\">WARNING: this is a new tag/window. Close the previous one to avoid mixing versions!</span><br />";
 	$error = TRUE;
 	}
 
@@ -1215,9 +1224,9 @@ if($need_to_save OR isset($_POST['savethisfile'])) {
 	}
 else read_midiressources($filename);
 
-$upload_message = upload_replacement();
+$upload_message = upload_project("data");
 if($upload_message <> '') $need_to_save = FALSE;
-$undo_upload_message = undo_upload();
+$undo_upload_project_message = undo_upload_project();
 
 try_create_new_file($this_file,$filename);
 /* echo "this_file = ".$this_file." permissions = ".$permissions."<br >";
@@ -1351,9 +1360,11 @@ if(!isset($_POST['analyze_tonal'])) {
 			if(!$bad_settings) echo " as per <span class=\"green-text\">‘".$settings_file."’</span>";
 			echo "<br />";
 			}
-		echo "•&nbsp;Time resolution = <span class=\"red-text\">".$time_resolution."</span> milliseconds";
+		if($time_resolution > 0) {
+			echo "•&nbsp;Time resolution = <span class=\"red-text\">".$time_resolution."</span> milliseconds";
 			if(!$bad_settings) echo " as per <span class=\"green-text\">‘".$settings_file."’</span>";
 			echo "<br />";
+			}
 		if($quantize) {
 			echo "•&nbsp;Quantization = <span class=\"red-text\">".$quantization."</span> milliseconds";
 			if(!$bad_settings) echo " as per <span class=\"green-text\">‘".$settings_file."’</span>";
@@ -1463,38 +1474,51 @@ if(!isset($_POST['analyze_tonal'])) {
 	echo "</table>";
 	}
 
-$link_options = '';
+$result_upload = upload_related($dir);
+if($result_upload <> '') echo "<p>".$result_upload."</p>";
+
+$link_options = ''; $upload_mssg = '';
+
+// Only one warning generated by calls to upload_related_form() is displayed, because the 'fileInput' identifier must be unique
+
 if($grammar_file <> '') {
 	if(!file_exists($dir.$grammar_file)) {
-		$error_mssg .= "<span class=\"red-text blinking\">WARNING:</span> <span class=\"green-text\">".$grammar_file."</span> not found<br />";
+		$upload_mssg = upload_related_form($dir,$grammar_file,"grammar");
 		$error = TRUE;
 		}
 	else $link_options .= "&grammar=".urlencode($dir.$grammar_file);
 	}
 if($alphabet_file <> '') {
 	if(!file_exists($dir.$alphabet_file)) {
-		$error_mssg .= "<span class=\"red-text blinking\">WARNING:</span> <span class=\"green-text\">".$alphabet_file."</span> not found<br />";
+		$upload_mssg = upload_related_form($dir,$alphabet_file,"alphabet");
 		$error = TRUE;
 		}
 	else $link_options .= "&alphabet=".urlencode($dir.$alphabet_file);
 	}
 if($settings_file <> '') {
 	if(!file_exists($dir.$settings_file)) {
-		$error_mssg .= "<span class=\"red-text blinking\">WARNING:</span> <span class=\"green-text\">".$settings_file."</span> not found<br />";
+		$upload_mssg = upload_related_form($dir,$settings_file,"settings");
 		$error = TRUE;
 		}
 	else $link_options .= "&settings=".urlencode($dir.$settings_file);
 	}
 if($objects_file <> '') {
 	if(!file_exists($dir.$objects_file)) {
-		$error_mssg .= "<span class=\"red-text blinking\">WARNING:</span> <span class=\"green-text\">".$objects_file."</span> not found<br />";
+		$upload_mssg = upload_related_form($dir,$objects_file,"objects");
 		$error = TRUE;
 		}
 	else $link_options .= "&objects=".urlencode($dir.$objects_file);
 	}
+if($timebase_file <> '') {
+	if(!file_exists($dir.$timebase_file)) {
+		$upload_mssg = upload_related_form($dir,$timebase_file,"timebase");
+		$error = TRUE;
+		}
+	else $link_options .= "&timebase=".urlencode($dir.$timebase_file);
+	}
 if($csound_file <> '') {
 	if(!file_exists($dir_csound_resources.$csound_file)) {
-		$error_mssg .= "<span class=\"red-text blinking\">WARNING:</span> <span class=\"green-text\">".$csound_file."</span> not found<br />";
+		$upload_mssg .= "<br /><span class=\"red-text blinking\">WARNING:</span> <span class=\"green-text\">".$csound_file."</span> not found<br />";
 		$error = TRUE;
 		}
 	else {
@@ -1504,7 +1528,7 @@ if($csound_file <> '') {
 	}
 if($tonality_file <> '') {
 	if(!file_exists($dir_tonality_resources.$tonality_file)) {
-		$error_mssg .= "<span class=\"red-text\">WARNING: ".$dir_tonality_resources.$tonality_file." not found.</span><br />";
+		$upload_mssg .= "<br /><span class=\"red-text\">WARNING: ".$dir_tonality_resources.$tonality_file." not found</span><br />";
 		$error = TRUE;
 		}
 	else {
@@ -1517,35 +1541,42 @@ $link_options .= "&here=".urlencode($dir.$filename);
 if($error_mssg <> '') {
 	echo "<p>".$error_mssg."</p>";
 	}
+if($upload_mssg <> '') {
+	echo "<p>".$upload_mssg."</p>";
+	}
 
 if(intval($note_convention) <> intval($new_convention) AND $new_convention <> '')
 	echo "<p><span class=\"red-text\">➡</span> WARNING: Note convention should be set to <span class=\"red-text\">‘".ucfirst(note_convention(intval($new_convention)))."’</span> in the <span class=\"green-text\">‘".$settings_file."’</span> settings file</p>";
 
 if(!isset($_POST['analyze_tonal'])) {
 	echo $save_warning;
-	if($file_format <> "rtmidi") echo "<p>&nbsp;</p>";
-	echo "<input type=\"hidden\" name=\"file_link\" value=\"".$capture_file."\">";
-	if(file_exists($capture_file) AND is_capture_file($capture_file)) {
-		$link_analyse = "capture_analysis.php?data=".urlencode($capture_file)."&quantization=".$quantization."&minimum_period=".$minimum_period."&trace_capture_analysis=".$trace_capture_analysis;
-		$window_name = "capture_analysis";
-		echo "<p>👉 A well-formed captured MIDI data file is in place<br />";
-		echo "<input class=\"produce\" type=\"submit\" name=\"analyse_capture\" onclick=\"event.preventDefault(); window.open('".$link_analyse."','".$window_name."','width=800,height=800,left=200'); return false;\" value=\"ANALYSE CAPTURED MIDI DATA\">";
-		$capture_file_name = "capture_".$today_date.".txt";
-		echo "<input type=\"hidden\" name=\"file_name\" value=\"".$capture_file_name."\">";
-		echo "&nbsp;<—&nbsp;<input type=\"submit\" name=\"download_file\" value=\"DOWNLOAD DATA\" class=\"save\">";
-		echo "&nbsp;<—&nbsp;<input type=\"submit\" name=\"delete_file\" value=\"DELETE DATA\" class=\"trash\">";
-		echo "<br />";
-		}
+	if($file_format == "csound") echo "<p>&nbsp;</p>";
 	else {
-		echo "<p><input type=\"file\" name=\"uploaded_file\" id=\"uploaded_file\">";
-		echo "<input class=\"save\" name=\"upload_capture_file\" type=\"submit\" value=\"<-- IMPORT CAPTURED MIDI DATA\"><br />";
-		if(file_exists($capture_file)) echo "<span class=\"red-text\">👉 The current file of captured MIDI data is badly formed</span></p>";
-		else echo "</p>";
+		echo "<br /><div class=\"thinborder\" style=\"width:50%; padding:0.5em; text-align:center;\">";
+		echo "<input type=\"hidden\" name=\"capture_file\" value=\"".$capture_file."\">";
+		if(file_exists($capture_file) AND is_capture_file($capture_file)) {
+			$link_analyse = "capture_analysis.php?data=".urlencode($capture_file)."&quantization=".$quantization."&minimum_period=".$minimum_period."&trace_capture_analysis=".$trace_capture_analysis;
+			$window_name = "capture_analysis";
+			$capture_file_name = "capture_".$today_date.".txt";
+			echo "<p>👉 A well-formed captured MIDI data file is in place: <span class=\"green-text\">".$capture_file_name."</span><br />";
+			echo "<input class=\"produce\" type=\"submit\" name=\"analyse_capture\" onclick=\"event.preventDefault(); window.open('".$link_analyse."','".$window_name."','width=800,height=800,left=200'); return false;\" value=\"ANALYSE CAPTURED MIDI DATA\">";
+			echo "<input type=\"hidden\" name=\"capture_file_name\" value=\"".$capture_file_name."\">";
+			echo "&nbsp;<—&nbsp;<input type=\"submit\" name=\"download_capture_file\" value=\"DOWNLOAD\" class=\"save\">";
+			echo "&nbsp;<—&nbsp;<input type=\"submit\" name=\"delete_capture_file\" value=\"DELETE\" class=\"trash\">";
+			echo "<br />";
+			}
+		else {
+			echo "<p><input type=\"file\" name=\"uploaded_capture_file\" id=\"uploaded_capture_file\">";
+			echo "<input class=\"save\" name=\"upload_capture_file\" type=\"submit\" value=\"<-- IMPORT CAPTURED MIDI DATA\"><br />";
+			if(file_exists($capture_file)) echo "<span class=\"red-text\">👉 The current file of captured MIDI data is badly formed</span></p>";
+			else echo "</p>";
+			}
+		echo "</div>";
 		}
 	echo "<p id=\"downloadupload\"><button class=\"save\"\" onclick=\"toggledownload(); return false;\">DOWNLOAD / UPLOAD</button>&nbsp;<button class=\"edit\"\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button></p>";
 
-	download_form($dir,$filename,"data"); find_replace_form();
-	echo $upload_message; echo $undo_upload_message;
+	download_upload_project_form($dir,$filename,"data",$settings_file); find_replace_form();
+	echo $upload_message; echo $undo_upload_project_message;
 
 	echo "<br /><table border=\"0\" style=\"background-color:transparent;\"><tr style=\"background-color:transparent;\">";
 	echo "<td style=\"background-color:transparent;\">";
@@ -1557,7 +1588,6 @@ if(!isset($_POST['analyze_tonal'])) {
 	$content = do_replace($content);
 
 	echo "<br /><textarea id=\"textArea\" name=\"thistext\" onchange=\"tellsave()\" rows=\"40\" style=\"width:750px;\">".$content."</textarea><br /><br />";
-//event.preventDefault(); 
 	echo "<div style=\"float:right; background-color:transparent;\"><input class=\"save big\" type=\"submit\" formaction=\"".$url_this_page."#textArea\"  onclick=\"clearsave();\" name=\"savethisfile\" value=\"SAVE ‘".begin_with(20,$filename)."’\"></div>";
 	display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,$objects_file,$csound_file,$tonality_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
 	}
@@ -1848,9 +1878,12 @@ echo "window.onload = function() {
     toggleAllDisplays($NumberMIDIinputs); toggleAllDisplays($NumberMIDIoutputs); settogglesearch(); settoggledownload(); settogglescales();
 	};\n";
 echo "</script>\n";
+
+footer();
 echo "</body></html>";
 
 function create_chunks($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxchunk_size,$measure_min,$measure_max,$label) {
+	global $permissions;
 // echo "@@@ measure_min = ".$measure_min."<br />";
 // echo "@@@ measure_max = ".$measure_max."<br />";
 	$test_legato = FALSE;
@@ -1927,6 +1960,7 @@ function create_chunks($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxc
 	$handle = fopen($data,"w");
 	fwrite($handle,$line_recoded."\n");
 	fclose($handle);
+	chmod($data,$permissions);
 	$chunked = FALSE;
 	$tie = $n = $brackets = $total_ties = 0;
 	$line_chunked = ''; $first = TRUE; $chunk_number = 1;
@@ -2001,6 +2035,7 @@ function create_chunks($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxc
 		$handle = fopen($data_chunked,"w");
 		fwrite($handle,$line_chunked."\n");
 		fclose($handle);
+		chmod($data_chunked,$permissions);
 		}
 	else $data_chunked = '';
 	$segment['data'] = $data;
@@ -2030,11 +2065,13 @@ function is_capture_file($capture_file) {
 	}
 
 function save($this_file,$filename,$top_header,$save_content) {
+	global $permissions;
 	if(trim($save_content) == '') return;
     if(file_exists($this_file)) {
         $backup_file = $this_file."_bak";
-        if(!copy($this_file, $backup_file))
+        if(!copy($this_file,$backup_file))
             echo "<p>👉 <span class=\"red-text\">Failed to create backup of the file.</span></p>";
+		else chmod($backup_file,$permissions);
 		}
 	$handle = @fopen($this_file, "w");
 	if($handle) {
@@ -2042,6 +2079,7 @@ function save($this_file,$filename,$top_header,$save_content) {
 		fwrite($handle, $file_header."\n");
 		fwrite($handle, $save_content);
 		fclose($handle);
+		chmod($this_file,$permissions);
 		}
 	else {
 		echo "<div style=\"background-color:white; color:black; padding: 1em; border-radius: 6px;\"><p>👉 <span class=\"red-text\"><b>WARNING</b>: Some files have been imported and cannot be modified.</span></p><p><b>Linux user?</b> Open your terminal and type: <span class=\"green-text\">sudo /opt/lampp/htdocs/bolprocessor/change_permissions.sh</span><br />(Your password will be required...)</p>";

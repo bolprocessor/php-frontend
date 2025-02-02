@@ -769,8 +769,11 @@ if($n_messages > 0) {
 		if($warnings == 1) echo " <span class=\"blinking\">=> ".$warnings." warning</span>";
 		if($warnings > 1) echo " <span class=\"blinking\">=> ".$warnings." warnings</span>";
 		}
-	if($handle) fwrite($handle,"</body>\n");
-	if($handle) fclose($handle);
+	if($handle) {
+		fwrite($handle,"</body>\n");
+		fclose($handle);
+		chmod($result_file,$permissions);
+		}
 	}
 else echo "<p>No message produced…";
 if($trace_csound <> '' AND file_exists($trace_csound)) {

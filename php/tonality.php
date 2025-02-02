@@ -147,6 +147,7 @@ if(isset($_POST['create_scale'])) {
 			$any_comment = "<html>This is an equal-tempered scale for BP3.<br />Created ".date('Y-m-d H:i:s')."<br /></html>";
 			fwrite($handle,$any_comment."\n");
 			fclose($handle);
+			chmod($dir_scales.$new_scale_file,$permissions);
 			$need_to_save = TRUE;
 			}
 		}
@@ -230,6 +231,7 @@ if(isset($_POST['copy_this_scale'])) {
 						fwrite($handle,$line."\n");
 						}
 					fclose($handle);
+					chmod($dir_scales.$new_scale_file,$permissions);
 					$file_lock = $dir.$filename."_lock3";
 					$handle_lock = fopen($file_lock,"w");
 					fwrite($handle_lock,"lock\n");
@@ -299,6 +301,7 @@ if(isset($_POST['copy_this_scale'])) {
 			//		echo $line."<br />";
 					}
 				fclose($handle);
+				chmod($dir.$destination,$permissions);
 			//	unlink($file_lock3);
 				if(!$can_copy) {
 					echo "<p><span class=\"red-text\">A scale with the same name</span> <span class=\"green-text\">‘".$scalefilename."’</span> <span class=\"red-text\">already exists in</span> <span class=\"green-text\">‘".$destination."’</span><span class=\"red-text\">. You need to delete it before copying this version</span></p>";
@@ -486,6 +489,7 @@ for($i = 1; $i < $imax_file; $i++) {
 		if($done_table) {
 			fwrite($handle,$line."\n");
 			fclose($handle);
+			chmod($table_name,$permissions);
 			$scale_comment[$i_scale] = $line;
 			}
 		continue;
@@ -529,6 +533,7 @@ for($i = 1; $i < $imax_file; $i++) {
 		if(!file_exists($table_name)) {
 			$handle = fopen($table_name,"w");
 			fclose($handle);
+			chmod($table_name,$permissions);
 			}
 		$handle = fopen($table_name,"w");
 		fwrite($handle,"\"".$scale_name[$i_scale]."\"\n");
@@ -639,6 +644,7 @@ if($max_scales > 0) {
 				fwrite($handle,$line."\n");
 				}
 			fclose($handle);
+			chmod($dir_scales.$this_file,$permissions);
 			}
 		echo "</span></b><br />";
 		echo "<p><span class=\"red-text\">➡ Click SAVE ‘".$filename."’ to display fixed scales</span></p>";
@@ -697,6 +703,7 @@ if($max_scales > 0) {
 					fwrite($handle,$line."\n");
 					}
 				fclose($handle);
+				chmod($dir_scales.$some_scale,$permissions);
 				}
 			}
 		}
@@ -801,6 +808,7 @@ if($max_scales > 0) {
 					fwrite($handle,$line."\n");
 					}
 				fclose($handle);
+				chmod($dir_scales.$some_scale,$permissions);
 				}
 			}
 		unlink($file_lock);
@@ -1089,6 +1097,7 @@ if($max_scales > 0) {
 			//	echo $line."<br />";
 				}
 			fclose($handle);
+			chmod($dir.$destination,$permissions);
 			$file_lock3 = $dir.$destination."_lock3";
 			$handle_lock3 = fopen($file_lock3,"w");
 			fwrite($handle_lock3,"lock\n");
@@ -1240,6 +1249,7 @@ for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
 			if($handle) {
 				fwrite($handle,$text);
 				fclose($handle);
+				chmod($file,$permissions);
 				}
 			chdir($olddir);
 			break;
@@ -1259,7 +1269,7 @@ echo "</body></html>";
 // ============ FUNCTIONS ============
 
 function create_from_scl($scale_name,$scala_filename,$content) {
-	global $dir_scales, $dir_scales,$tonality_resources,$need_to_save;
+	global $dir_scales, $dir_scales,$tonality_resources,$need_to_save,$permissions;
 	$scala_error = '';
 	$new_scale_name = preg_replace("/\s+/u",' ',$scale_name);
 	$clean_name_of_file = str_replace("#","_",$new_scale_name);
@@ -1394,6 +1404,7 @@ function create_from_scl($scale_name,$scala_filename,$content) {
 		$full_comment = "<html>".$comment."<br />This scale has been imported from a SCALA file ‘".$scala_filename."’<br />Created ".date('Y-m-d H:i:s')."<br /></html>";
 		fwrite($handle,$full_comment."\n");
 		fclose($handle);
+		chmod($dir_scales.$new_scale_file,$permissions);
 		$file_changed = $dir_scales."_changed";
 		$handle = fopen($file_changed,"w");
 		if($handle) fclose($handle);

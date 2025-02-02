@@ -197,6 +197,7 @@ function list_script_instructions($script_status,$script_more) {
 	}
 
 function save($this_file,$filename,$top_header,$save_content) {
+	global $permissions;
 	if(trim($save_content) == '') return;
 	$handle = fopen($this_file, "w");
 	if($handle) {
@@ -204,6 +205,7 @@ function save($this_file,$filename,$top_header,$save_content) {
 		fwrite($handle, $file_header . "\n");
 		fwrite($handle, $save_content);
 		fclose($handle);
+		chmod($this_file,$permissions);
 		}
 	return;
 	}

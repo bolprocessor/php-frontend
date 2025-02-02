@@ -64,6 +64,7 @@ if(isset($_POST['create_parameter'])) {
 			$handle = fopen($new_parameter_file,"w");
 			fwrite($handle,$template_content."\n");
 			fclose($handle);
+			chmod($new_parameter_file,$permissions);
 			}
 		}
 	}
@@ -232,6 +233,7 @@ if(isset($_POST['saveinstrument'])) {
 		fwrite($handle,$param."\n");
 		}
 	fclose($handle);
+	chmod($instrument_file,$permissions);
 	set_argmax_argument($argmax_file,$instrument_name,$argmax);
 	$file_changed = $temp_dir.$temp_folder.SLASH."_changed";
 	$handle = fopen($file_changed,"w");

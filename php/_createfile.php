@@ -11,7 +11,7 @@ else $pid = ''; */
 if(!empty($path_to_file)) {
 	$handle = fopen($path_to_file,'w');
 	if(!empty($pid)) my_file_put_contents($path_to_file,"pid = ".$pid);
-	else my_file_put_contents($path_to_file,"ok"); // Probably better not to create empty files
+	else file_put_contents($path_to_file,"ok"); // Probably better not to create empty files
 	fclose($handle);
 	chmod($path_to_file,0777);
 	exec('sync'); // This makes it easier for the console to find the file, see the stop() function in ConsoleMain.c

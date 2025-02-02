@@ -13,6 +13,7 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 	global $max_term_in_fraction,$dir_scale_images,$current_directory,$dir,$filename;
 	global $p_tonal_default_up,$q_tonal_default_up,$p_tonal_default_down,$q_tonal_default_down,$p_tonal_default_harmonic,$q_tonal_default_harmonic,$weight_tonal_default_up,$weight_tonal_default_down,$weight_tonal_default_harmonic,$width_tonal_default_up,$width_tonal_default_down,$width_tonal_default_harmonic,$weight_tonal_melodic_up,$weight_tonal_melodic_down,$weight_tonal_harmonic,$max_distance_tonal,$ratio_melodic_tonal,$min_duration_tonal,$max_gap_tonal,$compare_scales_tonal,$tonality_resources;
 	global $Englishnote,$Frenchnote,$Indiannote;
+	global $permissions;
 	set_time_limit(50000);
 	$test_tonal = FALSE;
 	$test_intervals = TRUE;
@@ -864,6 +865,9 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 			fclose($handle_html);
 			fclose($handle_csv);
 			fclose($handle_abstract);
+			chmod($batch_html_link,$permissions);
+			chmod($batch_csv_link,$permissions);
+			chmod($batch_abstract_link,$permissions);
 			$link = str_replace(SLASH,'/',$batch_html_link);
 			echo "<p style=\"text-align:center;\"><input class=\"shadow edit big\" onclick=\"window.open('".nice_url($link)."','batch','width=1200,height=500,left=0'); return false;\" type=\"submit\" name=\"produce\" value=\"SHOW ALL RESULTS\"></p>";
 			}

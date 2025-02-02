@@ -32,6 +32,7 @@ if(isset($_POST['savethisfile'])) {
 	fwrite($handle,$file_header."\n");
 	fwrite($handle,$content);
 	fclose($handle);
+	chmod($this_file,$permissions);
 	}
 
 try_create_new_file($this_file,$filename);

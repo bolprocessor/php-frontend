@@ -24,6 +24,7 @@ if(isset($_POST['savethisfile'])) {
 	$handle = fopen($this_file,"w");
 	fwrite($handle,$content);
 	fclose($handle);
+	chmod($this_file,$permissions);
 	echo "<span id=\"timespan\" style=\"color:red; float:right; background-color:white; padding:6px; border-radius:6px;\">Saved “".$this_file."” file…</span>";
 	}
 

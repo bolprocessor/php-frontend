@@ -491,6 +491,29 @@ body.light-mode .myswitch {
 	position: relative;
 	}
 
+.hidden-file-input {
+	display: none;
+	}
+
+/* Custom file input button */
+.custom-file-button {
+	display: inline-block;
+	background-color: yellow;
+	cursor: pointer;
+	padding-left:6px;
+	border-radius: 0.5em;
+	text-align: center;
+	color:black;
+	border: 1px solid black;
+	}
+.custom-file-button:hover {
+	box-shadow: -2px -2px Aqua;
+    }
+#fileName {
+	margin-left: 10px;
+	font-size: 14px;
+    }
+
 @media only screen and (min-device-width : 320px) and (max-device-width : 1024px) {
 	.bouton {	
 		font-size: small !important;

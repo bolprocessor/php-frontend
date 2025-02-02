@@ -220,6 +220,7 @@ if(isset($_POST['saveparameters'])) {
 	$settings = recursive_strval($settings);
 	$jsonData = json_encode($settings,JSON_PRETTY_PRINT);
     my_file_put_contents($this_file,$jsonData);
+	chmod($this_file,$permissions);
 	echo $warning;
 	$warning_bottom = $warning;
 	}

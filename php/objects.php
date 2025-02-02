@@ -23,6 +23,7 @@ if(isset($_POST['createcsoundinstruments'])) {
 	$template_content = @file_get_contents($template);
 	fwrite($handle,$template_content."\n");
 	fclose($handle);
+	chmod($dir.$CsoundInstruments_filename,$permissions);
 	$path = str_replace($bp_application_path,'',$dir);
 	$url = "csound.php?file=".urlencode($path.$CsoundInstruments_filename);
 	header("Location: ".$url); 
@@ -63,6 +64,7 @@ if(isset($_POST['create_object'])) {
 		fwrite($handle,$filename."\n");
 		fwrite($handle,$template_content."\n");
 		fclose($handle);
+		chmod($new_object_file,$permissions);
 		$handle = fopen($temp_dir.$temp_folder.SLASH."_changed",'w');
 		fclose($handle);
 		}
@@ -245,13 +247,13 @@ for($i = 0; $i < count($table); $i++) {
 		$clean_line = str_ireplace("<HTML>",'',$line);
 		$clean_line = str_ireplace("</HTML>",'',$clean_line);
 		$object_name[$iobj] = trim($clean_line);
-		
 		$object_da[$iobj] = $temp_dir.$temp_folder.SLASH.$object_name[$iobj].".bpda";
 		$handle_da = fopen($object_da[$iobj],"w");
 		$file_header = $top_header."\n// Data saved as \"".$object_name[$iobj].".bpda\". Date: ".gmdate('Y-m-d H:i:s');
 	//	fwrite($handle_da,$file_header."\n");
 		fwrite($handle_da,$object_name[$iobj]."\n");
 		fclose($handle_da);
+		chmod($object_da[$iobj],$permissions);
 		$object_file[$iobj] = $temp_dir.$temp_folder.SLASH.$object_name[$iobj].".txt";
 		$object_foldername = clean_folder_name($object_name[$iobj]);
 		$save_codes_dir = $temp_dir.$temp_folder.SLASH.$object_foldername."_codes";
@@ -260,7 +262,6 @@ for($i = 0; $i < count($table); $i++) {
 		$handle_object = fopen($object_file[$iobj],"w");
 		$midi_bytes = $save_codes_dir."/midibytes.txt";
 		$handle_bytes = fopen($midi_bytes,"w");
-		
 		$csound_file_this_object = $save_codes_dir."/csound.txt";
 		$handle_csound = fopen($csound_file_this_object,"w");
 		
@@ -313,6 +314,8 @@ for($i = 0; $i < count($table); $i++) {
 		$object_comment[$iobj] = $clean_line;
 		fclose($handle_bytes);
 		fclose($handle_csound);
+		chmod($midi_bytes,$permissions);
+		chmod($csound_file_this_object,$permissions);
 		}
 	}
 $maxsounds = $iobj + 1;
@@ -392,6 +395,7 @@ if($iobj >= 0) {
 		}
 	echo "</table>";
 	fclose($handle);
+	chmod($temp_alphabet_file,$permissions);
 	}
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 display_more_buttons(FALSE,$content,$url_this_page,$dir,$grammar_file,'',$csound_file,$tonality_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);

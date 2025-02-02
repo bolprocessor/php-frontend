@@ -114,13 +114,56 @@ if(isset($_POST['create_folder'])) {
 		}
 	}
 
+/*
+if(isset($_POST['create_link'])) {
+	unset($_POST['create_link']);
+	$targetFolder = $_POST['folderPath'];
+    $linkName = $_POST['linkName'];
+    if(empty($targetFolder) || empty($linkName))
+        echo "<p>Error: Please select a folder and enter a link name</p>";
+	else {
+//		$linkName = escapeshellarg($linkName);
+		echo "linkName = ".$linkName."<br >";
+		echo "targetFolder = ".$targetFolder."<br >";
+		$workspace = getcwd();
+		$linkPath = realpath($workspace.SLASH.$linkName);
+		$targetPath = realpath($workspace.SLASH.$targetFolder);
+		echo "linkPath = ".$linkPath."<br >";
+		echo "targetPath = ".$targetPath."<br >";
+
+		// Check if the target folder exists
+		if (!$targetPath || !is_dir($targetPath)) {
+    		echo "<p>Error: Target folder '$targetFolder' does not exist or is invalid</p>";
+			}
+		if (is_link($linkPath) || file_exists($linkPath)) {
+			unlink($linkPath);
+			}
+
+		// Detect OS
+		if (windows_system()) {
+			// Windows (Requires Admin Privileges)
+			$command = "mklink /D $linkPath $targetPath";
+			$cmd = "cmd.exe /c \"$command\"";
+			}
+		else {
+			// macOS / Linux
+			$command = "ln -s $targetPath $linkPath";
+			$cmd = "/bin/bash -c \"$command\"";
+			}
+		$output = shell_exec($cmd);
+		// Check success
+		if(is_link($linkPath) || file_exists($linkPath))
+			echo "<p>Symlink created successfully: $linkPath -> $target</p>";
+		else echo "<p>Error creating symlink. Ensure you have the necessary permissions</p>";
+		}
+	} */
+
 if(isset($_POST['create_grammar'])) {
 	$type = $_POST['type'];
 	$name_mode = $_POST['name_mode'];
 	$filename = trim($_POST['filename']);
-	$filename = good_name($type,$filename,$name_mode);
-	if($test) echo "filename = ".$filename."<br />";
 	if($filename <> '') {
+		$filename = good_name($type,$filename,$name_mode);
 		$new_file = $filename;
 		if($test) echo "newfile = ".$new_file."<br />";
 		if(file_exists($dir.SLASH.$filename)) {
@@ -133,6 +176,7 @@ if(isset($_POST['create_grammar'])) {
 			$template_content = @file_get_contents($template);
 			fwrite($handle,$template_content."\n");
 			fclose($handle);
+			chmod($dir.SLASH.$filename,$permissions);
 			}
 		}
 	}
@@ -140,8 +184,8 @@ if(isset($_POST['create_data'])) {
 	$type = $_POST['type'];
 	$name_mode = $_POST['name_mode'];
 	$filename = trim($_POST['filename']);
-	$filename = good_name($type,$filename,$name_mode);
 	if($filename <> '') {
+		$filename = good_name($type,$filename,$name_mode);
 		$new_file = $filename;
 		if(file_exists($dir.SLASH.$filename)) {
 			echo "<p><span class=\"red-text\">This file already exists:</span> <span class=\"red-text\">".$filename."</span></p>";
@@ -153,6 +197,7 @@ if(isset($_POST['create_data'])) {
 			$template_content = @file_get_contents($template);
 			fwrite($handle,$template_content."\n");
 			fclose($handle);
+			chmod($dir.SLASH.$filename,$permissions);
 			}
 		}
 	}
@@ -160,8 +205,8 @@ if(isset($_POST['create_alphabet'])) {
 	$type = $_POST['type'];
 	$name_mode = $_POST['name_mode'];
 	$filename = trim($_POST['filename']);
-	$filename = good_name($type,$filename,$name_mode);
 	if($filename <> '') {
+		$filename = good_name($type,$filename,$name_mode);
 		$new_file = $filename;
 		if(file_exists($dir.SLASH.$filename)) {
 			echo "<p><span class=\"red-text\">This file already exists:</span> <span class=\"red-text\">".$filename."</span></p>";
@@ -173,6 +218,7 @@ if(isset($_POST['create_alphabet'])) {
 			$template_content = @file_get_contents($template);
 			fwrite($handle,$template_content."\n");
 			fclose($handle);
+			chmod($dir.SLASH.$filename,$permissions);
 			}
 		}
 	}
@@ -180,8 +226,8 @@ if(isset($_POST['create_timebase'])) {
 	$type = $_POST['type'];
 	$name_mode = $_POST['name_mode'];
 	$filename = trim($_POST['filename']);
-	$filename = good_name($type,$filename,$name_mode);
 	if($filename <> '') {
+		$filename = good_name($type,$filename,$name_mode);
 		$new_file = $filename;
 		if(file_exists($dir.SLASH.$filename)) {
 			echo "<p><span class=\"red-text\">This file already exists:</span> <span class=\"red-text\">".$filename."</span></p>";
@@ -193,6 +239,7 @@ if(isset($_POST['create_timebase'])) {
 			$template_content = @file_get_contents($template);
 			fwrite($handle,$template_content."\n");
 			fclose($handle);
+			chmod($dir.SLASH.$filename,$permissions);
 			}
 		}
 	}
@@ -200,8 +247,8 @@ if(isset($_POST['create_prototypes'])) {
 	$type = $_POST['type'];
 	$name_mode = $_POST['name_mode'];
 	$filename = trim($_POST['filename']);
-	$filename = good_name($type,$filename,$name_mode);
 	if($filename <> '') {
+		$filename = good_name($type,$filename,$name_mode);
 		$new_file = $filename;
 		if(file_exists($dir.SLASH.$filename)) {
 			echo "<p><span class=\"red-text\">This file already exists:</span> <span class=\"red-text\">".$filename."</span></p>";
@@ -213,6 +260,7 @@ if(isset($_POST['create_prototypes'])) {
 			$template_content = @file_get_contents($template);
 			fwrite($handle,$template_content."\n");
 			fclose($handle);
+			chmod($dir.SLASH.$filename,$permissions);
 			}
 		}
 	}
@@ -233,6 +281,7 @@ if(isset($_POST['create_csound'])) {
 			$template_content = @file_get_contents($template);
 			fwrite($handle,$template_content."\n");
 			fclose($handle);
+			chmod($dir.SLASH.$filename,$permissions);
 			}
 		}
 	}
@@ -253,6 +302,7 @@ if(isset($_POST['create_tonality'])) {
 			$template_content = @file_get_contents($template);
 			fwrite($handle,$template_content."\n");
 			fclose($handle);
+			chmod($dir.SLASH.$filename,$permissions);
 			}
 		}
 	}
@@ -268,6 +318,7 @@ if(isset($_POST['create_csound_orchestra'])) {
 		else {
 			$handle = fopen($dir.SLASH.$filename,"w");
 			fclose($handle);
+			chmod($dir.SLASH.$filename,$permissions);
 			}
 		}
 	}
@@ -275,10 +326,8 @@ if(isset($_POST['create_script'])) {
 	$type = $_POST['type'];
 	$name_mode = $_POST['name_mode'];
 	$filename = trim($_POST['filename']);
-	echo $filename."<br />";
-	$filename = good_name($type,$filename,$name_mode);
-	echo $filename."<br />";
 	if($filename <> '') {
+		$filename = good_name($type,$filename,$name_mode);
 		$new_file = $filename;
 		if(file_exists($dir.SLASH.$filename)) {
 			echo "<p><span class=\"red-text\">This file already exists:</span> <span class=\"red-text\">".$filename."</span></p>";
@@ -287,6 +336,7 @@ if(isset($_POST['create_script'])) {
 		else {
 			$handle = fopen($dir.SLASH.$filename,"w");
 			fclose($handle);
+			chmod($dir.SLASH.$filename,$permissions);
 			}
 		}
 	}
@@ -361,8 +411,16 @@ if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension 
 		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		echo "<p style=\"text-align:left;\">";
 		echo "<input class=\"save\" type=\"submit\" name=\"create_folder\" value=\"CREATE NEW FOLDER IN THIS WORKSPACE\"><br />named:&nbsp;";
-		echo "<input type=\"text\" name=\"foldername\" size=\"20\" style=\"background-color:CornSilk;\" value=\"\">";
+		echo "<input type=\"text\" name=\"foldername\" size=\"15\" style=\"background-color:CornSilk;\" value=\"\">";
 		echo "</p>";
+	/*	echo "<p style=\"text-align:left;\">";
+		echo "<input class=\"save\" onclick=\"selectFolder()\" type=\"submit\" name=\"create_link\" value=\"CREATE LINK TO FOLDER OUTSIDE THIS WORKSPACE\"><br />";
+		echo "<label for=\"folderPath\">Selected folder: </label>";
+        echo "<input type=\"text\" id=\"folderPath\" name=\"folderPath\" readonly required placeholder=\"Selected folder path will appear here\">";
+	//	echo "<input type=\"file\" id=\"folderInput\" webkitdirectory directory onchange=\"getFolderPath()\">";
+        echo "<br /><label for=\"linkName\">Symbolic link name: </label>";
+        echo "<input type=\"text\" name=\"linkName\" size=\"15\" required>";
+		echo "</p>"; */
 		echo "</form>";
 		if($path <> '') {
 			echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";

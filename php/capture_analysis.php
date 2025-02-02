@@ -18,6 +18,7 @@ echo "<p>👉 Analysing captured events…</p>";
 $captured_events = process_captured_events($capture_file,$quantization,$minimum_period,$trace_capture_analysis);
 
 function process_captured_events($capture_file,$quantization,$minimum_period,$trace) {
+    global $permissions;
     $bigtest = TRUE;
     $captured_events = '';
     $file = fopen($capture_file,'r');
@@ -69,6 +70,7 @@ function process_captured_events($capture_file,$quantization,$minimum_period,$tr
             $fixed = TRUE;
             }
         fclose($file);
+        chmod($capture_file,$permissions);
         if($fixed AND $trace) echo "-----";
         usort($event,function($a, $b) {
             // Ensure both 'time' values exist and compare them numerically
