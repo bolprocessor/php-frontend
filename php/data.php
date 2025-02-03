@@ -1552,7 +1552,7 @@ if(!isset($_POST['analyze_tonal'])) {
 	echo $save_warning;
 	if($file_format == "csound") echo "<p>&nbsp;</p>";
 	else {
-		echo "<br /><div class=\"thinborder\" style=\"width:50%; padding:0.5em; text-align:center;\">";
+		echo "<br /><div class=\"thinborder\" style=\"width:50%; padding-left:0.5em;\">";
 		echo "<input type=\"hidden\" name=\"capture_file\" value=\"".$capture_file."\">";
 		if(file_exists($capture_file) AND is_capture_file($capture_file)) {
 			$link_analyse = "capture_analysis.php?data=".urlencode($capture_file)."&quantization=".$quantization."&minimum_period=".$minimum_period."&trace_capture_analysis=".$trace_capture_analysis;
@@ -1567,9 +1567,12 @@ if(!isset($_POST['analyze_tonal'])) {
 			}
 		else {
 			echo "<p><input type=\"file\" name=\"uploaded_capture_file\" id=\"uploaded_capture_file\">";
-			echo "<input class=\"save\" name=\"upload_capture_file\" type=\"submit\" value=\"<-- IMPORT CAPTURED MIDI DATA\"><br />";
-			if(file_exists($capture_file)) echo "<span class=\"red-text\">👉 The current file of captured MIDI data is badly formed</span></p>";
-			else echo "</p>";
+			echo "<input class=\"save\" name=\"upload_capture_file\" type=\"submit\" value=\"<-- IMPORT CAPTURED MIDI DATA\">";
+			if(file_exists($capture_file)) {
+				echo "&nbsp;<—&nbsp;<input type=\"submit\" name=\"delete_capture_file\" value=\"DELETE\" class=\"trash\">";
+				echo "<br /><span class=\"red-text\">👉 The current file of captured MIDI data is badly formed</span>";
+				}
+			echo "</p>";
 			}
 		echo "</div>";
 		}

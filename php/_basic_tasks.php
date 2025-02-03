@@ -3575,14 +3575,13 @@ function find_replace_form() {
 function download_upload_project_form($dir,$thisfile,$type,$settings_file) {
 	global $url_this_page;
 	echo "<span id=\"download\">";
-	echo "<div class=\"thinborder\" style=\"width:50%; padding:0.5em; text-align:center;\">";
+	echo "<div class=\"thinborder\" style=\"width:50%; padding:0.3em; text-align:center;\">";
 	$link_file = $dir.$thisfile;
 	$link_settings = $dir.$settings_file;
 	echo "<input type=\"hidden\" name=\"file_link\" value=\"".$link_file."\">";
 	echo "<input type=\"hidden\" name=\"type_link\" value=\"".$type."\">";
-	echo "<big>Download the <a href=\"".$link_file."\" title=\"Click to download!\" download=\"".$thisfile."\">".$thisfile."&nbsp;⬇️</a> ".$type." file";
+	echo "Download the <a href=\"".$link_file."\" title=\"Click to download!\" download=\"".$thisfile."\">".$thisfile."&nbsp;⬇️</a> ".$type." file";
 	if($settings_file <> '') echo " or the <a href=\"".$link_settings."\" title=\"Click to download!\" download=\"".$settings_file."\">".$settings_file."&nbsp;⬇️</a> settings file";
-	echo "</big>";
 	echo "<p>&nbsp;&nbsp;&nbsp;<input type=\"file\" onclick=\"if(!checksaved()) return false;\" name=\"uploaded_replacement\" id=\"uploaded_replacement\">";
 	echo "<input class=\"save\" name=\"upload_project\" formaction=\"".$url_this_page."#downloadupload\" onclick=\"if(!checksaved()) return false;\" type=\"submit\" value=\"<-- UPLOAD PROJECT TO REPLACE THIS ".strtoupper($type)."\"></p>";
 	echo "</div>";

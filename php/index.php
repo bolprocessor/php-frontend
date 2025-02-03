@@ -8,6 +8,7 @@ if(isset($_POST['change_skin']) AND $_POST['change_skin'] >= 0) {
 	}
 require_once("_header.php");
 $url_this_page = $this_page = "index.php";
+$error_opening = FALSE;
 
 if($path <> '' AND $_SERVER['REQUEST_METHOD'] === 'POST') {
     $targetDirectory = $bp_application_path.$path;
@@ -704,7 +705,24 @@ echo "</form>";
 function display_directory($test,$dir,$filter) {
 	global $path,$move_files,$move_checked_files,$new_file,$csound_resources,$tonality_resources,$delete_checked_files,$rename_checked_files,$delete_files,$download_files,$rename_files,$show_dependencies,$trash_backups,$trash_folder,$this_page,$url_this_page,$dir_trash_folder,$bp_application_path,$dest_folder,$done,$seen,$dir_csound_resources,$dir_tonality_resources,$last_grammar_name,$last_data_name;
 
-	$dircontent = scandir($dir);
+	global $absolute_application_path, $error_opening;
+	
+	$dir = preg_replace('/'.preg_quote(SLASH,'/').'+$/','',$dir);
+	$target_path = $dir;
+	if(is_link($dir)) { // Dealing with a symbolic link
+		$dir = str_replace($bp_application_path,$absolute_application_path,$dir);
+		$target_path = readlink($dir);
+		}
+	if($target_path <> '') $dircontent = @scandir($target_path);
+	else $dircontent = array();
+	if(!$dircontent) {
+		if(!$error_opening) {
+			if(file_exists($target_path)) echo "<p><span class=\"red-text\">Error opening a workspace</span> (<span class=\"green-text\">".$target_path."</span>) because of access limitations</p>";
+			else echo "<p><span class=\"red-text\">Error opening a workspace</span> (<span class=\"green-text\">".$target_path."</span>) that does not exist</p>";
+			$error_opening = TRUE;
+			}
+		return;
+		}
 	$i_file = $files_shown = 0;
 	foreach($dircontent as $thisfile) { 
 		$i_file++;
@@ -720,6 +738,11 @@ function display_directory($test,$dir,$filter) {
 		if($move_files) $check_box = "<input type=\"checkbox\" name=\"move_".$i_file."\"> ";
 		else $check_box = '';
 		$this_file_moved = FALSE;
+		$absolute_path = str_replace($bp_application_path,$absolute_application_path,$dir.SLASH.$thisfile);
+		$this_is_a_link = is_link($absolute_path);
+
+	//	echo $dir.SLASH.$thisfile."<br>";
+
 		if($trash_backups AND is_integer($pos=strpos($thisfile,"_bak"))) {
 			$source_file = $bp_application_path.$path.SLASH.$thisfile;
 			rename($source_file,$dir_trash_folder.$thisfile);
@@ -764,7 +787,7 @@ function display_directory($test,$dir,$filter) {
 		$table = explode("_",$thisfile);
 		$prefix = $table[0];
 		if($prefix == "trace") continue;
-		if(is_dir($dir.SLASH.$thisfile)) {
+		if(is_dir($dir.SLASH.$thisfile) OR $this_is_a_link) {
 			$type = "directory";
 			$name_mode = $prefix = $extension = '';
 			}
@@ -854,14 +877,11 @@ function display_directory($test,$dir,$filter) {
 						}
 					}
 				$this_is_directory = is_dir($dir.SLASH.$thisfile);
-				if(!$test AND $this_is_directory) {
+				if(!$test AND ($this_is_directory OR $this_is_a_link)) {
 					if(hidden_directory($thisfile)) continue;
 					echo "▶︎ ";
 					}
 				else if($thisfile == "bp" OR $thisfile == "bp.exe" OR $thisfile == "bp3") continue;
-
-		//		if(!$test) echo $check_box;
-				
 				if(!$test AND $delete_files AND $type <> '' AND !do_not_delete($thisfile)) echo "<input type=\"checkbox\" name=\"delete_".$i_file."\"> ";
 				$link = $dir.SLASH.$thisfile;
 				if(!$test AND $download_files AND $type <> '' AND !$this_is_directory) echo "<a href=\"".$link."\" title=\"Download this file\" download=\"".$thisfile."\">⬇️</a> ";
@@ -869,7 +889,7 @@ function display_directory($test,$dir,$filter) {
 					$files_shown++;
 					}
 				if(!$test AND $type <> '' AND !$this_file_moved) {
-					if($this_is_directory) {
+					if($this_is_directory OR $this_is_a_link) {
 						$table = explode('_',$thisfile);
 						$extension = end($table);
 						if($path == '') $link = $this_page."?path=".urlencode($thisfile);
@@ -888,12 +908,13 @@ function display_directory($test,$dir,$filter) {
 					if($link <> '') echo "</a>";
 					if($this_is_directory) echo "</b>";
 					echo "&nbsp;";
+					if($this_is_a_link) echo "(link)";
 					if($renamed) echo "(<span class=\"red-text\">renamed</span>)&nbsp;";
 					if($rename_files) {
 						echo "&nbsp;➡&nbsp;&nbsp;<input type=\"text\" style=\"border:2px; solid #dadada; border-bottom-style: groove; text-align:left;\" name=\"new_name_".$i_file."\" size=\"30\" value=\"\">";
 						echo "<input type=\"checkbox\" name=\"copy_".$i_file."\">&nbsp;➡&nbsp;make a copy";
 						}
-					else if(!$this_is_directory) {
+					else if(!$this_is_directory AND !$this_is_a_link) {
 						$time_saved = filemtime($dir.SLASH.$thisfile);
 						echo "&nbsp;<small>&nbsp;".gmdate('Y-m-d H\hi',$time_saved)."</small>";
 						}
@@ -946,15 +967,26 @@ function do_not_delete($thisfile) {
 	}
 
 function countBakFiles($directory = '.') {
+	global $bp_application_path, $absolute_application_path, $error_opening;
     $count = 0;
-    if (is_dir($directory)) {
-        if ($handle = opendir($directory)) {
-            while (false !== ($file = readdir($handle))) {
-                if (is_file($directory . '/' . $file) && preg_match('/_bak$/', $file)) {
-                    $count++;
-					}
+	$target_path = $directory;
+	if(is_link($directory)) { // Dealing with a symbolic link
+		$directory = str_replace($bp_application_path,$absolute_application_path,$directory);
+		$target_path = readlink($directory);
+		}
+	if($handle = @opendir($target_path)) {
+		while(false !== ($file = readdir($handle))) {
+			if (is_file($target_path . '/' . $file) && preg_match('/_bak$/', $file)) {
+				$count++;
 				}
-            closedir($handle);
+			}
+		closedir($handle);
+		}
+	else {
+		if(!$error_opening) {
+			if(file_exists($target_path)) echo "<p><span class=\"red-text\">Error opening a workspace</span> (<span class=\"green-text\">".$target_path."</span>) because of access limitations</p>";
+			else echo "<p><span class=\"red-text\">Error opening a workspace</span> (<span class=\"green-text\">".$target_path."</span>) that does not exist</p>";
+			$error_opening = TRUE;
 			}
 		}
     return $count;
