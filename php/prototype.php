@@ -3,6 +3,7 @@ require_once("_basic_tasks.php");
 
 $url_this_page = "prototype.php";
 
+$error_post = '';
 if(isset($_POST['object_name'])) {
 	$object_name = $_POST['object_name'];
 	$temp_folder = $_POST['temp_folder'];
@@ -12,13 +13,25 @@ if(isset($_POST['object_name'])) {
 	$CsoundInstruments_file = $_POST['CsoundInstruments_file'];
 	}
 else {
-	"Sound-object prototype's name is not known. First open the ‘-mi’ file!";
-	die();
+	$error_post = "<p>POST not received!</p>";
+	if(isset($_GET['object_name'])) {
+		$object_name = $_GET['object_name'];
+		$temp_folder = $_GET['temp_folder'];
+		$object_file = $_GET['object_file'];
+		$prototypes_file = $_GET['prototypes_file'];
+		$prototypes_name = $_GET['prototypes_name'];
+		$CsoundInstruments_file = $_GET['CsoundInstruments_file'];
+		}
+	else {
+		"Sound-object prototype's name is not known. First open the ‘-mi’ file!";
+		die();
+		}
 	}
 $this_title = $expression = $object_name;
 
 require_once("_header.php");
 display_darklight();
+echo $error_post;
 
 if($midi_player == "MIDIjs") echo "<script type='text/javascript' src='https://www.midijs.net/lib/midi.js'></script>";
 else if($midi_player == "html-midi-player") echo "<script src=\"https://cdn.jsdelivr.net/combine/npm/tone@14.7.58,npm/@magenta/music@1.23.1/es6/core.js,npm/focus-visible@5,npm/html-midi-player@1.4.0\"></script>";
@@ -451,6 +464,7 @@ echo "<div class=\"thinborder\" style=\"float:right; padding-right:6px; padding-
 echo "<p><span class=\"red-text\">➡</span> Don’t close the “<span class=\"green-text\">".$prototypes_name."</span>” page while editing this prototype!</p>";
 echo "</div>";
 
+echo "object_file = ".$object_file."<br />";
 $content = @file_get_contents($object_file,TRUE);
 if(trim($content) == '') {
 	exit("This prototype no longer exists.");

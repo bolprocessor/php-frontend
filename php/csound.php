@@ -46,220 +46,6 @@ $need_to_save = FALSE;
 if(isset($_POST['max_scales'])) $max_scales = $_POST['max_scales'];
 else $max_scales = 0;
 
-/* $error_create = '';
-if(isset($_POST['create_scale'])) {
-	$new_scale_name = trim($_POST['scale_name']);
-	$new_scale_name = preg_replace("/\s+/u",' ',$new_scale_name);
-	if($new_scale_name <> '') {
-		$clean_name_of_file = str_replace("#","_",$new_scale_name);
-		$clean_name_of_file = str_replace("/","_",$clean_name_of_file);
-		$new_scale_file = $clean_name_of_file.".txt";
-		$old_scale_file = $clean_name_of_file.".old";
-		$result1 = check_duplicate_name($dir_scale_images,$clean_name_of_file.".png");
-		$result2 = check_duplicate_name($dir_scale_images,$clean_name_of_file."-source.txt");
-		$result3 = check_duplicate_name($dir_scales,$new_scale_file);
-		$result4 = check_duplicate_name($dir_scales,$old_scale_file);
-		if($result1 OR $result2 OR $result3 OR $result4) {
-			$error_create = "<p><span class=\"red-text\">ERROR: This name</span> <span class=\"green-text\">‘".$new_scale_name."’</span> <font color=\"red\">already exists";
-			$source_image = $dir_scale_images.$clean_name_of_file."-source.txt";
-			if(file_exists($source_image)) {
-				$content_source = trim(@file_get_contents($source_image,TRUE));
-				$error_create .= "in </span><font color=\"#007BFF\">‘<a target=\"_blank\" href=\"csound.php?file=".urlencode($csound_resources.SLASH.$content_source)."\">".$content_source."</a>’";
-				}
-			echo "</span></p>";
-			}
-		else {
-			$handle = fopen($dir_scales.$new_scale_file,"w");
-			fwrite($handle,"\"".$new_scale_name."\"\n");
-			$any_names = "/• • • • • • • • • • • • •/";
-			fwrite($handle,$any_names."\n");
-			$any_fractions = "[1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1]";
-			fwrite($handle,$any_fractions."\n");
-			$any_scale = "f2 0 128 -51 12 2 261.63 60 1 1.059 1.122 1.189 1.26 1.335 1.414 1.498 1.587 1.682 1.782 1.888 2";
-			fwrite($handle,$any_scale."\n");
-			$any_comment = "<html>This is an equal-tempered scale for BP3.<br />Created ".date('Y-m-d H:i:s')."<br /></html>";
-			fwrite($handle,$any_comment."\n");
-			fclose($handle);
-			$need_to_save = TRUE;
-			}
-		}
-	}
-	
-if(isset($_POST['undelete_scales'])) {
-	$dircontent = scandir($dir_scales);
-	foreach($dircontent as $some_scale) {
-		if($some_scale == '.' OR $some_scale == ".." OR $some_scale == ".DS_Store") continue;
-		$table = explode(".",$some_scale);
-		$extension = end($table);
-		if($extension == "old") {
-			$some_scale = str_replace(".old",'',$some_scale);
-			$file_link = $dir_scales.$some_scale.".old";
-			$new_file_link = $dir_scales.$some_scale.".txt";
-			rename($file_link,$new_file_link);
-			$need_to_save = TRUE;
-			}
-		}
-	}
-	
-if(isset($_POST['empty_trash'])) {
-	$dircontent = scandir($dir_scales);
-	foreach($dircontent as $some_scale) {
-		if($some_scale == '.' OR $some_scale == ".." OR $some_scale == ".DS_Store") continue;
-		$table = explode(".",$some_scale);
-		$extension = end($table);
-		if($extension == "old") unlink($dir_scales.$some_scale);
-		}
-	}
-
-for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
-	if(isset($_POST['delete_scale_'.$i_scale])) {
-		$scalefilename = urldecode($_GET['scalefilename']);
-		$clean_name_of_file = str_replace("#","_",$scalefilename);
-		$clean_name_of_file = str_replace("/","_",$clean_name_of_file);
-		$file_link = $dir_scales.$clean_name_of_file.".txt";
-		$new_file_link = $dir_scales.$clean_name_of_file.".old";
-		rename($file_link,$new_file_link);
-		@unlink($dir_scale_images.$clean_name_of_file.".png");
-		@unlink($dir_scale_images.$clean_name_of_file."-source.txt");
-		$need_to_save = TRUE;
-		}
-	}
-if(isset($_GET['scalefilename'])) $scalefilename = urldecode($_GET['scalefilename']);
-
-$duplicated_scale = FALSE;
-if(isset($_POST['copy_this_scale'])) {
-	if(isset($_POST['file_choice']) OR (isset($_POST['duplicate_name']) AND ($new_scale_name = trim($_POST['duplicate_name']) <> ''))) {
-		if(isset($_POST['file_choice'])) $destination = $_POST['file_choice'];
-		else $destination = $filename;
-		echo "<hr>";
-		if($destination == $filename) {
-			$new_scale_name = trim($_POST['duplicate_name']);
-			$new_scale_name = preg_replace("/\s+/u",' ',$new_scale_name);
-			$clean_name_of_file = str_replace("#","_",$new_scale_name);
-			$clean_name_of_file = str_replace("/","_",$clean_name_of_file);
-			$new_scale_file = $clean_name_of_file.".txt";
-			$old_scale_file = $clean_name_of_file.".old";
-			$result1 = check_duplicate_name($dir_scales,$new_scale_file);
-			$result2 = check_duplicate_name($dir_scales,$old_scale_file);
-			if($result1 OR $result2) {
-				echo "<p><span class=\"red-text\">WARNING</span>: This name <span class=\"green-text\">‘".$new_scale_name."’</span> already exists</p>";
-				}
-			else {
-				echo "<p>Copied <span class=\"green-text\">‘".$scalefilename."’</span> ";
-				echo "to: <span class=\"green-text\">‘".$new_scale_file."’</span></p>";
-				$content = file_get_contents($dir_scales.$scalefilename.".txt");
-				$table = explode("\n",$content);
-				$im = count($table);
-				$handle = fopen($dir_scales.$new_scale_file,"w");
-				fwrite($handle,"\"".$new_scale_name."\"\n");
-				for($i = 1; $i < $im; $i++) {
-					$line = trim($table[$i]);
-					if($line == '') continue;
-					if($line[0] == "\"") continue;
-					fwrite($handle,$line."\n");
-					}
-				fclose($handle);
-				$file_lock = $dir.$filename."_lock2";
-				$handle_lock = fopen($file_lock,"w");
-				fwrite($handle_lock,"lock\n");
-				fclose($handle_lock);
-				echo "<p><span class=\"red-text\">Please SAVE THIS PAGE</span> to refresh the display!</p>";
-				$duplicated_scale = TRUE;
-				}
-			}
-		else {
-			echo "<p><span class=\"red-text\">Copying</span> <span class=\"green-text\">‘".$scalefilename."’</span> <span class=\"red-text\">to </span><span class=\"green-text\">‘".$destination."’</span></p>";
-			echo "<p><span class=\"red-text\">➡</span> <a target=\"_blank\" href=\"csound.php?file=".urlencode($csound_resources.SLASH.$destination)."\">Edit ‘".$destination."’</a></p>";
-			$file_lock = $dir.$destination."_lock";
-			$time_start = time();
-			$time_end = $time_start + 10;
-			while(TRUE) {
-				if(!file_exists($file_lock)) break;
-				if(time() > $time_end) {
-					echo "<p><span class=\"red-text\">For an unknown reason the destination file is blocked by a trace file</span> <span class=\"green-text\">‘".$file_lock."’</span>. You should delete it by hand!</p>";
-					break;
-					}
-				sleep(1);
-				}
-			$content = file_get_contents($dir.$destination);
-			if(!$content) echo "<p><span class=\"red-text\">For an unknown reason the destination file </span> <span class=\"green-text\">‘".$file_lock."’</span> is empty</p>";
-			else {
-				$file_lock2 = $dir.$destination."_lock2";
-				$handle = fopen($file_lock2,"w");
-				fclose($handle);
-				$table = explode("\n",$content);
-				$handle = fopen($dir.$destination,"w");
-				$found_scale = FALSE; $can_copy = TRUE;
-				for($i = 0; $i < count($table); $i++) {
-					$line = trim($table[$i]);
-					if($found_scale AND $line <> '' AND $line[0] == "\"") {
-						$some_scale = trim(str_replace("\"",'',$line));
-						if($some_scale == $scalefilename) $can_copy = FALSE;
-						}
-					if($line == "_begin tables") $found_scale = TRUE;
-					if($line == "_end tables") {
-						if($can_copy) {
-							$folder_scales = $temp_dir.$temp_folder.SLASH."scales";
-						//	echo $folder_scales."<br />";
-							$dir_scale = scandir($folder_scales);
-							foreach($dir_scale as $this_scale) {
-						//		echo "this_scale = ".$this_scale."<br />";
-								if($this_scale == '.' OR $this_scale == ".." OR $this_scale == ".DS_Store") continue;
-								$table2 = explode(".",$this_scale);
-								$extension = end($table2);
-								if($extension <> "txt") continue;
-								$this_scale_name = str_replace(".txt",'',$this_scale);
-								if($this_scale_name == $scalefilename) {
-									$content_scale = file_get_contents($folder_scales.SLASH.$this_scale);
-									$table3 = explode(chr(10),$content_scale);
-									for($j = 0; $j < count($table3); $j++) {
-										$line3 = trim($table3[$j]);
-									//	echo $line3."<br />";
-										if($line3 <> '') fwrite($handle,$line3."\n");
-										}
-									}
-								}
-							}
-						}
-					fwrite($handle,$line."\n");
-			//		echo $line."<br />";
-					}
-				fclose($handle);
-			//	unlink($file_lock2);
-				if(!$can_copy) {
-					echo "<p><span class=\"red-text\">A scale with the same name</span> <span class=\"green-text\">‘".$scalefilename."’</span> <span class=\"red-text\">already exists in</span> <span class=\"green-text\">‘".$destination."’</span><span class=\"red-text\">. You need to delete it before copying this version</span></p>";
-					}
-				}
-			}
-		echo "<hr>";
-		}
-	}
-for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
-	if(isset($_POST['copy_scale_'.$i_scale])) {
-		echo "<p><span class=\"red-text\">➡ The destination file should be closed to make sure that the export takes place</span></p>";
-		echo "<form method=\"post\" action=\"".$url_this_page."&scalefilename=".urlencode($scalefilename)."\" enctype=\"multipart/form-data\">";
-		echo "<input class=\"cancel\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\">&nbsp;<input type=\"submit\" style=\"background-color:aquamarine; font-size:large;\" name=\"\" onclick=\"this.form.target='_self';return true;\" value=\"Click to copy scale ‘".$scalefilename."’ to:\"><br />";
-		echo "<blockquote>";
-		echo "<input type=\"hidden\" name=\"copy_this_scale\" value=\"1\">";
-		$dircontent = scandir($dir);
-		$folder = str_replace($bp_application_path,'',$dir);
-		foreach($dircontent as $thisfile) {
-			$prefix = substr($thisfile,0,3);
-			$table = explode(".",$thisfile);
-			$extension = end($table);
-			if(($prefix <> "-cs" AND $extension <> "bpcs") OR is_integer(strpos($thisfile,"_lock"))) continue;
-			echo "<input type=\"radio\" name=\"file_choice\" value=\"".$thisfile."\">".$thisfile;
-			if($thisfile == $filename) {
-				echo " <span class=\"red-text\">(self)</span> <input type=\"submit\" style=\"background-color:aquamarine; \" name=\"\" onclick=\"this.form.target='_self';return true;\" value=\"DUPLICATE ‘".$scalefilename."’\"> under name: <input type=\"text\" name=\"duplicate_name\" size=\"40\" value=\"\">";
-				}
-			echo "<br />";
-			}
-		echo "</blockquote>";
-		echo "</form>";
-		echo "<hr>";
-		}
-	} */
-
 if(isset($_POST['delete_instrument'])) {
 	$instrument = $_POST['instrument_name'];
 	$number_channels = $_POST['number_channels'];
@@ -909,19 +695,18 @@ if($number_instruments > 0) {
 	$done_index = array();
 	for($j = 0; $j < $number_instruments; $j++) {
 		echo "<tr class=\"middle\">";
-		echo "<form method=\"post\" action=\"csinstrument.php\" enctype=\"multipart/form-data\">";
 		echo "<td class=\"middle\" style=\"white-space:nowrap\">";
-		echo "<input type=\"hidden\" name=\"tonality_filename\" value=\"".$tonality_filename."\">";
-		echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";
-		echo "<input type=\"hidden\" name=\"instrument_file\" value=\"".$instrument_file[$j]."\">";
-		
 		$this_index = $name_index[$CsoundInstrumentName[$j]];
 		if(isset($done_index[$this_index])) {
 			$this_index = $number_instruments;
 			while(isset($done_index[$this_index])) $this_index++;
 			}
 		$done_index[$this_index] = TRUE;
+		echo "<form method=\"post\" action=\"csinstrument.php?instrument_name=".urlencode($CsoundInstrumentName[$j])."&tonality_filename=".urlencode($tonality_filename)."&instrument_index=".urlencode($this_index)."&instrument_file=".urlencode($instrument_file[$j])."&temp_folder=".urlencode($temp_folder)."\" enctype=\"multipart/form-data\">";
+		echo "<input type=\"hidden\" name=\"tonality_filename\" value=\"".$tonality_filename."\">";
 		echo "<input type=\"hidden\" name=\"instrument_index\" value=\"".$this_index."\">";
+		echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";
+		echo "<input type=\"hidden\" name=\"instrument_file\" value=\"".$instrument_file[$j]."\">";
 		echo "<p><big>_ins(".$this_index.")</big> ";
 		echo "<input class=\"edit big\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" name=\"instrument_name\" value=\"".$CsoundInstrumentName[$j]."\">";
 		$folder_this_instrument = $temp_dir.$temp_folder.SLASH.$CsoundInstrumentName[$j];

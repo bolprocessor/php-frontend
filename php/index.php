@@ -79,6 +79,7 @@ else {
 	echo "<td class=\"big\" style=\"padding:1em; border-radius:1em; vertical-align:middle;\">";
 	echo "<p style=\"text-align:center;\">This interface is running<br />the multi-platform console.</p><p style=\"text-align:center;\"><a target=\"_blank\" class=\"linkdotted\" href=\"https://bp3.tech\">https://bp3.tech</a></p>";
 	echo "<p style=\"text-align:center;\">👉&nbsp;Read the <a class=\"linkdotted\" class=\"linkdotted\" href=\"https://raw.githubusercontent.com/bolprocessor/bolprocessor/graphics-for-BP3/BP3-changes.txt\" target=\"_blank\">history of changes</a></p>";
+	echo "<p style=\"text-align:center;\">PHP <a target=\"_blank\" href=\"phpinfo.php\">".phpversion()."</a></p>";
 	echo "</td>";
 	echo "</tr>";
 	echo "</table>";
@@ -740,6 +741,9 @@ function display_directory($test,$dir,$filter) {
 		$this_file_moved = FALSE;
 		$absolute_path = str_replace($bp_application_path,$absolute_application_path,$dir.SLASH.$thisfile);
 		$this_is_a_link = is_link($absolute_path);
+		$this_is_an_alias = FALSE;
+		if(mac_system() AND !$this_is_a_link) $this_is_an_alias = is_macos_alias($absolute_path);
+		if($this_is_an_alias) $this_is_a_link = TRUE;
 
 	//	echo $dir.SLASH.$thisfile."<br>";
 
@@ -908,7 +912,8 @@ function display_directory($test,$dir,$filter) {
 					if($link <> '') echo "</a>";
 					if($this_is_directory) echo "</b>";
 					echo "&nbsp;";
-					if($this_is_a_link) echo "(link)";
+					if($this_is_an_alias) echo "(alias)";
+					else if($this_is_a_link) echo "(link)";
 					if($renamed) echo "(<span class=\"red-text\">renamed</span>)&nbsp;";
 					if($rename_files) {
 						echo "&nbsp;➡&nbsp;&nbsp;<input type=\"text\" style=\"border:2px; solid #dadada; border-bottom-style: groove; text-align:left;\" name=\"new_name_".$i_file."\" size=\"30\" value=\"\">";

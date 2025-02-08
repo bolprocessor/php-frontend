@@ -500,7 +500,7 @@ if($templates) {
 	echo "<input class=\"edit\" onclick=\"if(checksaved()) window.open('".$link_produce_templates."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"CHECK TEMPLATES\"><br /><br />";
 	}
 echo "<div style=\"padding:1em; width:690px;\" class=\"thinborder2\">";
-if($settings_file <> '' AND file_exists($dir.$settings_file)) echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".nice_url($url_settings)."','".$settings_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".$settings_file."’\">";
+if($settings_file <> '' AND file_exists($dir.$settings_file)) echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".nice_url($url_settings)."','".$settings_file."','width=800,height=800,left=100'); c\" value=\"EDIT ‘".$settings_file."’\">";
 if($settings_file == '' OR !file_exists($dir.$settings_file)) {
 	$time_resolution = 10; //  10 milliseconds by default
 	if($metronome > 0) {
@@ -538,7 +538,7 @@ else {
 	if(!is_numeric($metronome)) $metronome = $metronome_settings;
 	if($metronome <> intval($metronome)) $metronome = sprintf("%.3f",$metronome);
 	if(($nature_of_time_settings <> $nature_of_time) AND (is_numeric($nature_of_time))) {
-		echo "⚠️&nbsp;Conflict: time structure is ".nature_of_time($nature_of_time_settings)." as per <span class=\"green-text\">‘".$settings_file."’</span><br />&nbsp;&nbsp;and ".nature_of_time($nature_of_time)." in grammar. We'll use ".nature_of_time($nature_of_time)."<br />";
+		echo "⚠️&nbsp;Conflict: time structure is ".nature_of_time($nature_of_time_settings)." as per <span class=\"green-text\">‘".$settings_file."’</span><br />&nbsp;&nbsp;and ".nature_of_time($nature_of_time)." in grammar. We'll use <span class=\"red-text\">".nature_of_time($nature_of_time)."</span><br />";
 		}
 	if(!is_numeric($nature_of_time)) $nature_of_time = $nature_of_time_settings;
 	if($metronome > 0. AND $nature_of_time == STRIATED) {

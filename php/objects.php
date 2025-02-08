@@ -46,6 +46,7 @@ if($test) echo "dir = ".$dir."<br />";
 $temp_folder = str_replace(' ','_',$filename)."_".my_session_id()."_temp";
 if(!file_exists($temp_dir.$temp_folder)) {
 	mkdir($temp_dir.$temp_folder);
+	chmod($temp_dir.$temp_folder,$permissions);
 	}
 
 if(isset($_POST['create_object'])) {
@@ -255,9 +256,13 @@ for($i = 0; $i < count($table); $i++) {
 		fclose($handle_da);
 		chmod($object_da[$iobj],$permissions);
 		$object_file[$iobj] = $temp_dir.$temp_folder.SLASH.$object_name[$iobj].".txt";
+		// echo "object_file[] = ".$object_file[$iobj]."</p>";
 		$object_foldername = clean_folder_name($object_name[$iobj]);
 		$save_codes_dir = $temp_dir.$temp_folder.SLASH.$object_foldername."_codes";
-		if(!is_dir($save_codes_dir)) mkdir($save_codes_dir);
+		if(!is_dir($save_codes_dir)) {
+			mkdir($save_codes_dir);
+			chmod($save_codes_dir,$permissions);
+			}
 		if($handle_object) fclose($handle_object);
 		$handle_object = fopen($object_file[$iobj],"w");
 		$midi_bytes = $save_codes_dir."/midibytes.txt";
@@ -334,9 +339,9 @@ echo "</form>";
 if($CsoundInstruments_filename <> '') {
 	$CsoundInstruments_file = $dir_csound_resources.$CsoundInstruments_filename;
 	if($CsoundInstruments_filename <> '' AND file_exists($CsoundInstruments_file)) {
-		$url_csound_page = "csound.php?file=".urlencode($csound_resources.SLASH.$csound_file);
+		$url_csound_page = "csound.php?file=".urlencode($csound_resources.SLASH.$CsoundInstruments_file);
 		echo "<td><form method=\"post\" action=\"".$url_csound_page."\" enctype=\"multipart/form-data\">";
-		echo "<input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$csound_file."’\">&nbsp;";
+		echo "<input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$CsoundInstruments_file."’\">&nbsp;";
 		echo "</td></form>";
 		}
 	}
@@ -354,7 +359,7 @@ if($iobj >= 0) {
 	echo "<table class=\"thicktable\">";
 	for($i = 0; $i <= $iobj; $i++) {
 		echo "<tr>";
-		echo "<form method=\"post\" action=\"prototype.php\" enctype=\"multipart/form-data\">";
+		echo "<form method=\"post\" action=\"prototype.php?temp_folder=".urlencode($temp_folder)."&object_file=".urlencode($object_file[$i])."&prototypes_file=".urlencode($dir.$filename)."&prototypes_name=".urlencode($filename)."&CsoundInstruments_file=".urlencode($CsoundInstruments_file)."&object_name=".urlencode($object_name[$i])."\" enctype=\"multipart/form-data\">";
 		echo "<td style=\"padding:4px; vertical-align:middle;\">";
 		echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";
 		echo "<input type=\"hidden\" name=\"object_file\" value=\"".$object_file[$i]."\">";

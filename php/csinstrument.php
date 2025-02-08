@@ -3,21 +3,31 @@ require_once("_basic_tasks.php");
 
 $url_this_page = "csinstrument.php";
 // $test = TRUE;
-
+$error_post = '';
 if(isset($_POST['instrument_name'])) {
 	$instrument_name = $_POST['instrument_name'];
 	$temp_folder = $_POST['temp_folder'];
 	$instrument_file = $_POST['instrument_file'];
 	$instrument_index = $_POST['instrument_index'];
 	}
-else {
-	echo "Csound instrument's name is not known. First open the ‘-cs’ file!"; die();
+else { // May happen with Chromium
+	$error_post = "<p>POST not received!</p>";
+	if(isset($_GET['instrument_name'])) {  // 2025-02-07
+		$instrument_name = urldecode($_GET['instrument_name']);
+		$temp_folder = urldecode($_GET['temp_folder']);
+		$instrument_file = urldecode($_GET['instrument_file']);
+		$instrument_index = urldecode($_GET['instrument_index']);
+		}
+	else {
+		echo "Csound instrument's name is not known. First open the ‘-cs’ file!"; die();
+		}
 	}
 
 $this_title = $instrument_name;
 $instrument_name = str_replace(' ','_',$instrument_name);
 require_once("_header.php");
 display_darklight();
+echo $error_post;
 
 $instrument_folder_name = str_replace('-','_',$instrument_name);
 
@@ -460,7 +470,7 @@ if($n > 0) {
 		$table = explode(chr(10),$content);
 		$comment = $table[1];
 		echo "<tr>";
-		echo "<form method=\"post\" action=\"csparameter.php\" enctype=\"multipart/form-data\">";
+		echo "<form method=\"post\" action=\"csparameter.php?parameter_name=".urlencode($parameter_name)."&temp_folder=".urlencode($temp_folder)."&folder_this_instrument=".urlencode($folder_this_instrument)."&instrument_name=".urlencode($instrument_name)."&instrument_index=".urlencode($instrument_index)."&csfilename=".urlencode($csfilename)."\" enctype=\"multipart/form-data\">";
 		echo "<td class=\"middle\" style=\"padding:5px;\">";
 		echo "<input type=\"hidden\" name=\"instrument_name\" value=\"".$instrument_name."\">";
 		echo "<input type=\"hidden\" name=\"instrument_index\" value=\"".$instrument_index."\">";

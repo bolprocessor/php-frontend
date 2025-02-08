@@ -4,6 +4,7 @@ require_once("_basic_tasks.php");
 $url_this_page = "csparameter.php";
 // $test = TRUE;
 
+$error_post = '',
 if(isset($_POST['parameter_name'])) {
 	$parameter_name = $_POST['parameter_name'];
 	$temp_folder = $_POST['temp_folder'];
@@ -12,12 +13,25 @@ if(isset($_POST['parameter_name'])) {
 	$instrument_index = $_POST['instrument_index'];
 	$csfilename = $_POST['csfilename'];
 	}
-else {
-	"Csound parameter's name is not known. First open the ‘-cs’ file!"; die();
+else { // May happen with Chromium
+	$error_post = "<p>POST not received!</p>";
+	if(isset($_GET['parameter_name'])) {  // 2025-02-07
+		$parameter_name = $_GET['parameter_name'];
+		$temp_folder = $_GET['temp_folder'];
+		$folder_this_instrument = $_GET['folder_this_instrument'];
+		$instrument_name = $_GET['instrument_name'];
+		$instrument_index = $_GET['instrument_index'];
+		$csfilename = $_GET['csfilename'];
+		}
+	else {
+		"Csound parameter's name is not known. First open the ‘-cs’ file!";
+		die();
+		}
 	}
 $this_title = $parameter_name;
 require_once("_header.php");
 display_darklight();
+echo $error_post;
 
 if($test) echo "folder_this_instrument = ".$folder_this_instrument."<br />";
 if($test) echo "temp_dir = ".$temp_dir."<br />";

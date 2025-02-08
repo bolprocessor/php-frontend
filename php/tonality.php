@@ -925,7 +925,7 @@ if($max_scales > 0) {
 	for($i_scale = 1, $k = 0; $i_scale <= $max_scales; $i_scale++) {
 		$link_edit = "scale.php";
 		echo "<li class=\"morespace\" id=\"".$i_scale."\"><span class=\"turquoise-text\"><b>".$scale_name[$i_scale]."</b></span> ";
-		echo "➡ <input type=\"submit\" class=\"edit\" name=\"edit_scale\" formaction=\"".$link_edit."?scalefilename=".urlencode($scale_name[$i_scale])."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT\">";
+		echo "➡ <input type=\"submit\" class=\"edit\" name=\"edit_scale\" formaction=\"".$link_edit."?scalefilename=".urlencode($scale_name[$i_scale])."&dir_scales=".urlencode($dir_scales)."&tonality_source=".urlencode($filename)."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT\">"; // 2025-02-07
 		echo "&nbsp;<input type=\"submit\" class=\"save\" name=\"delete_scale_".$i_scale."\" formaction=\"".$url_this_page."&scalefilename=".urlencode($scale_name[$i_scale])."\" onclick=\"this.form.target='_self';return true;\" value=\"DELETE scale (can be reversed)\">";
 		echo "&nbsp;<input type=\"submit\" class=\"save\" name=\"copy_scale_".$i_scale."\" formaction=\"".$url_this_page."&scalefilename=".urlencode($scale_name[$i_scale])."\" onclick=\"this.form.target='_self';return true;\" value=\"COPY/DUPLICATE scale\">";
 		$scala_file = $dir_scales.$scale_name[$i_scale].".scl";

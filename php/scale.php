@@ -5,11 +5,17 @@ else {
 	echo "Scale name is not known. Call it from the ‘-to’ file!";
 	die();
 	}
+$post_error = '';
 if(isset($_POST['dir_scales']))
 	$dir_scales = $_POST['dir_scales'];
-else {
-	echo "=> Tonal resource file is not known. First open the ‘-to’ file containing ‘".$filename."’<br />=> You will find a link to it in the <a href=\"index.php?path=tonality_resources\">tonality_resources folder</a>";
-	die();
+else { // May happen with Chromium
+	$post_error = "<p>POST not received!</p>";
+	if(isset($_GET['dir_scales']))
+		$dir_scales = urldecode($_GET['dir_scales']); // 2025-02-07
+	else {
+		echo "=> Tonal resource file is not known. First open the ‘-to’ file containing ‘".$filename."’<br />=> You will find a link to it in the <a href=\"index.php?path=tonality_resources\">tonality_resources folder</a>";
+		die();
+		}
 	}
 if(isset($_POST['download_scala'])) {
 	$dir_scales = $_POST['dir_scales'];
@@ -47,6 +53,7 @@ $need_to_save = FALSE;
 
 require_once("_header.php");
 display_darklight();
+echo $post_error;
 
 $clean_filename = str_replace("#","_",$filename);
 $clean_filename = str_replace("/","_",$clean_filename);
@@ -57,7 +64,9 @@ if(!file_exists($file_link)) {
 	}
 
 if(isset($_POST['csound_source'])) $tonality_source = $_POST['csound_source'];
+else if(isset($_GET['csound_source'])) $tonality_source = $_GET['csound_source']; // 2024-02-07
 else if(isset($_POST['tonality_source'])) $tonality_source = $_POST['tonality_source'];
+else if(isset($_GET['tonality_source'])) $tonality_source = $_GET['tonality_source'];
 else {
 	echo "‘tonality_source’ is not known. It should be set in the ‘-to’ file.";
 	die();

@@ -528,6 +528,12 @@ function extract_data($compact,$content) {
 			if($time_structure == "striated" OR $time_structure == "smooth")
 				$extract_data['time_structure'] = $time_structure;
 			}
+		if(is_integer($pos=strpos($line,"_smooth")) AND $pos == 0) {
+			$extract_data['time_structure'] = "smooth";
+			}
+		if(is_integer($pos=strpos($line,"_striated")) AND $pos == 0) {
+			$extract_data['time_structure'] = "_striated";
+			}
 		if(is_integer($pos=strpos($line,"-gr")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
 			$extract_data['grammar'] = fix_file_name($line,"ho");
 		else if(is_integer($pos=strpos($line,"-ho")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
@@ -1655,12 +1661,16 @@ function metronome($p,$q) {
 	}
 	
 function rcopy($src,$dst) {
+	global $permissions;
 	if(file_exists($dst)) my_rmdir($dst);
 	if(is_dir($src)) {
-		mkdir($dst);
+		mkdir($dst,$permissions,true);
 		$files = scandir($src);
-		foreach($files as $file)
-			if($file <> "." AND $file <> "..") rcopy("$src/$file","$dst/$file");
+		foreach($files as $file) {
+			$source = $src.SLASH.$file;
+			$destination = $dst.SLASH.$file;
+			if($file <> "." AND $file <> "..") rcopy($source,$destination);
+			}
 		}
 	else if(file_exists($src)) copy($src,$dst);
 	return;
@@ -2282,6 +2292,13 @@ function windows_system() {
 	$os_platform = getOS();
 	if(PHP_OS == "WINNT" OR is_integer(strpos($os_platform,"Windows"))) return TRUE;
 	return FALSE;
+	}
+
+function is_macos_alias($file) {
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $mime = $finfo->file($file);
+//	echo "mime = ".$mime." =>   ".$file."<br />";
+    return $mime === 'application/octet-stream'; // macOS Alias MIME type
 	}
 	
 function send_to_console($command) {
@@ -3583,7 +3600,7 @@ function download_upload_project_form($dir,$thisfile,$type,$settings_file) {
 	echo "Download the <a href=\"".$link_file."\" title=\"Click to download!\" download=\"".$thisfile."\">".$thisfile."&nbsp;⬇️</a> ".$type." file";
 	if($settings_file <> '') echo " or the <a href=\"".$link_settings."\" title=\"Click to download!\" download=\"".$settings_file."\">".$settings_file."&nbsp;⬇️</a> settings file";
 	echo "<p>&nbsp;&nbsp;&nbsp;<input type=\"file\" onclick=\"if(!checksaved()) return false;\" name=\"uploaded_replacement\" id=\"uploaded_replacement\">";
-	echo "<input class=\"save\" name=\"upload_project\" formaction=\"".$url_this_page."#downloadupload\" onclick=\"if(!checksaved()) return false;\" type=\"submit\" value=\"<-- UPLOAD PROJECT TO REPLACE THIS ".strtoupper($type)."\"></p>";
+	echo "<input class=\"save\" name=\"upload_project\" formaction=\"".$url_this_page."#downloadupload\" onclick=\"if(!checksaved()) return false;\" type=\"submit\" value=\"<-- UPLOAD TO REPLACE ".strtoupper($type)."\"></p>";
 	echo "</div>";
 	echo "</span>";
 	return;
