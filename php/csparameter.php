@@ -4,7 +4,7 @@ require_once("_basic_tasks.php");
 $url_this_page = "csparameter.php";
 // $test = TRUE;
 
-$error_post = '',
+$error_post = '';
 if(isset($_POST['parameter_name'])) {
 	$parameter_name = $_POST['parameter_name'];
 	$temp_folder = $_POST['temp_folder'];
