@@ -48,7 +48,7 @@ if(isset($_POST['addinstruction'])) {
 		if($i == $index) {
 			$entry = $instruction." ".$script_more[$instruction];
 			$content = @file_get_contents($this_file);
-			$content = mb_convert_encoding($content,'UTF-8','UTF-8');
+			if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 			$extract_data = extract_data(TRUE,$content);
 			$content = $extract_data['content'];
 			$content .= "\n".$entry;
@@ -80,7 +80,7 @@ if($need_to_save OR isset($_POST['savethisfile']) OR isset($_POST['checkscript']
 if(isset($_POST['checkscript'])) {
 	echo "<p><b>Checked script:</b></p>";
 	$content = @file_get_contents($this_file);
-	$content = mb_convert_encoding($content,'UTF-8','UTF-8');
+	if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 	$extract_data = extract_data(TRUE,$content);
 	$content = $extract_data['content'];
 	$table = explode(chr(10),$content);

@@ -141,13 +141,13 @@ if(isset($_POST['changestatus'])) {
 try_create_new_file($this_file,$filename);
 $content = @file_get_contents($this_file);
 if($content === FALSE) ask_create_new_file($url_this_page,$filename);
-$content = mb_convert_encoding($content,'UTF-8','UTF-8');
+if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 if(trim($content) == '') $content = @file_get_contents("timebase_template");
 if($content === FALSE) {
 	echo "<p>👉 “timebase_template” is missing in the “php” folder</p>";
 	die();
 	}
-$content = mb_convert_encoding($content,'UTF-8','UTF-8');
+if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 $extract_data = extract_data(TRUE,$content);
 echo "<p class=\"green-text\">".$extract_data['headers']."</p>";
 $content = $extract_data['content'];

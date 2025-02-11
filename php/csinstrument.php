@@ -69,7 +69,7 @@ if(isset($_POST['create_parameter'])) {
 			$new_parameter_file = $folder_this_instrument.SLASH.$new_parameter.".txt";
 			$template = "parameter_template";
 			$template_content = @file_get_contents($template);
-			$template_content = mb_convert_encoding($template_content,'UTF-8','UTF-8');
+			if(MB_CONVERT_OK) $template_content = mb_convert_encoding($template_content,'UTF-8','UTF-8');
 			$template_content = str_replace("[name]",$new_parameter,$template_content);
 			$handle = fopen($new_parameter_file,"w");
 			fwrite($handle,$template_content."\n");

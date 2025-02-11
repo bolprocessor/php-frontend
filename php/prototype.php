@@ -469,7 +469,7 @@ $content = @file_get_contents($object_file,TRUE);
 if(trim($content) == '') {
 	exit("This prototype no longer exists.");
 	}
-$content = mb_convert_encoding($content,'UTF-8','UTF-8');
+if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 $extract_data = extract_data(TRUE,$content);
 $source_file = $extract_data['objects'];
 echo "<p class=\"green-text\">".$extract_data['headers']."<br />// Source: ".$source_file."</p>";

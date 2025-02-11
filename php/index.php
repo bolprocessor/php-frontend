@@ -73,14 +73,26 @@ else {
 	echo "<td style=\"padding:1em; white-space:nowrap; text-align:center; vertical-align:middle; border-radius:1em;\">";
 	echo "<h2><i>Welcome to</i></h2><h2>Bol Processor ‘BP3’</h2>";
 	echo "<span class=\"night\"><img title=\"Asad Ali Khan (binkar)\" src=\"pict/Asad-Ali-binkar.png\" width=\"120px;\"/></span>";
-	// echo "<span class=\"day\"><a style=\"border-bottom:none;\" target=\"blank\" title=\"Sunbeam Vectors by Vecteezy\" href=\"https://www.vecteezy.com/free-vector/sunbeam\"><img src=\"pict/sun.png\" width=\"100px;\"/></a></span>";
 	echo "<span class=\"day\"><img src=\"pict/playing-piano.png\" width=\"120px;\"/></span>";
 	echo "</td>";
 	echo "<td class=\"big\" style=\"padding:1em; border-radius:1em; vertical-align:middle;\">";
-	echo "<p style=\"text-align:center;\">This interface is running<br />the multi-platform console.</p><p style=\"text-align:center;\"><a target=\"_blank\" class=\"linkdotted\" href=\"https://bp3.tech\">https://bp3.tech</a></p>";
+	if(isset($_SERVER["PHPDESKTOP_VERSION"])) {
+		echo "<p style=\"text-align:center;\">Installation in <a target=\"_blank\" href=\"https://github.com/cztomczak/phpdesktop\">PHP Desktop</a> v".$_SERVER["PHPDESKTOP_VERSION"]."</p>";
+		}
+	echo "<p style=\"text-align:center;\">This interface is running<br />the Bol Processor console</p><p style=\"text-align:center;\"><a target=\"_blank\" class=\"linkdotted\" href=\"https://bp3.tech\">https://bp3.tech</a></p>";
 	echo "<p style=\"text-align:center;\">👉&nbsp;Read the <a class=\"linkdotted\" class=\"linkdotted\" href=\"https://raw.githubusercontent.com/bolprocessor/bolprocessor/graphics-for-BP3/BP3-changes.txt\" target=\"_blank\">history of changes</a></p>";
-	echo "<p style=\"text-align:center;\">PHP <a target=\"_blank\" href=\"phpinfo.php\">".phpversion()."</a></p>";
-	echo "</td>";
+	echo "<small><p style=\"text-align:center;\">Architecture: ".$architecture;
+	if($architecture == "i386" OR $architecture == "armv7l")
+		echo "<br />👉&nbsp;<span class=\"red-text\">not suitable for this installation!</span></p>";
+	else {
+		echo "<br />for <a target=\"_blank\" href=\"phpinfo.php\">PHP ".phpversion()."</a>";
+		if(MB_CONVERT_OK) echo "<br />with UTF multibyte conversion";
+			else echo "<br />👉&nbsp;<span class=\"red-text\">without UTF multibyte conversion!</span>";
+		if(!MULTIBYTE_EREG_OK) echo "<br />👉&nbsp;<span class=\"red-text\">without UTF multibyte replacing!</span>";
+		if(!GD_AVAILABLE) echo "<br />👉&nbsp;<span class=\"red-text\">without GD graphics!</span>";
+		echo "</p>";
+		}
+	echo "</small></td>";
 	echo "</tr>";
 	echo "</table>";
 	$dir = $bp_application_path;
@@ -350,6 +362,9 @@ $download_files = isset($_POST['download_files']);
 
 $show_dependencies = isset($_POST['show_dependencies']);
 $trash_backups = isset($_POST['trash_backups']);
+
+// if(MB_CONVERT_OK) echo "<p>MB_CONVERT_OK</p>";
+
 if($folder <> '')
 	echo "<h3>Content of workspace: <span class=\"red-text\">".str_replace(SLASH,'/',$folder)."</span></h3>";
 $table = explode('_',$folder);

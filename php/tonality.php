@@ -382,7 +382,7 @@ else if(!$duplicated_scale) @unlink($lock3);
 
 try_create_new_file($this_file,$filename);
 $content = @file_get_contents($this_file);
-$content = mb_convert_encoding($content,'UTF-8','UTF-8');
+if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 if($content === FALSE) ask_create_new_file($url_this_page,$filename);
 if(strlen(trim($content)) == 0) {
 	$template = "tonality_template";

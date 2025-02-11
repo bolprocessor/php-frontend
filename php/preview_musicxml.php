@@ -22,7 +22,7 @@ $arrow = "<span class=\"red-text\">➡</span>&nbsp;";
 if($no_filter) echo "<span class=\"orange-text\">";
 $xml_content = @file_get_contents($music_xml_file);
 $xml_content = str_replace("\r","\n",$xml_content);
-$xml_content = mb_convert_encoding($xml_content,'UTF-8','UTF-8');
+if(MB_CONVERT_OK) $xml_content = mb_convert_encoding($xml_content,'UTF-8','UTF-8');
 $xml_table = explode(chr(10),$xml_content);
 $jmax = count($xml_table);
 for($j = 0; $j < $jmax; $j++) {

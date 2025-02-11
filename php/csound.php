@@ -140,12 +140,17 @@ if(isset($_POST['duplicate_instrument'])) {
 			fclose($handle_lock);
 			$copy_instrument_file = $temp_dir.$temp_folder.SLASH.$copy_instrument.".txt";
 			$this_instrument_file = $temp_dir.$temp_folder.SLASH.$instrument.".txt";
+			$this_instrument_dir = $temp_dir.$temp_folder.SLASH.$instrument;
+			$copy_instrument_dir = $temp_dir.$temp_folder.SLASH.$copy_instrument;
 			@unlink($temp_dir.$temp_folder.SLASH.$copy_instrument.".txt.old");
 			$number_instruments = $_POST['number_instruments'];
 			$new_index = $number_instruments + 1;
 			$number_instruments++;
 			$_POST['number_instruments'] = $number_instruments;
 			$content = @file_get_contents($this_instrument_file);
+		//	echo "this_instrument_file = ".$this_instrument_file."<br />";
+		//	echo "copy_instrument_file = ".$copy_instrument_file."<br />";
+			rcopy($this_instrument_dir,$copy_instrument_dir);
 			$table = explode(chr(10),$content);
 			$im = count($table);
 			$handle = fopen($copy_instrument_file,"w");
@@ -155,6 +160,26 @@ if(isset($_POST['duplicate_instrument'])) {
 				if($i == 5) $line = $new_index;
 				fwrite($handle,$line."\n");
 				}
+		//	echo "this_instrument_dir = ".$this_instrument_dir."<br />";
+	/*		if(is_dir($this_instrument_dir)) {
+				echo "this_instrument_dir = ".$this_instrument_dir."<br />";
+				$files = scandir($this_instrument_dir);
+				$files = array_diff($files,array('.','..'));
+				foreach($files as $parameter_file) {
+					if(pathinfo($file,PATHINFO_EXTENSION) === 'txt') {
+						echo "parameter_file = ".$parameter_file."<br />";
+					//	$parameter = str_replace(".txt",'',$parameter_file);
+						$content_parameter = @file_get_contents($parameter_file);
+						echo $content_parameter."<br />";
+						$table_parameter = explode(chr(10),$content_parameter);
+						$im = count($table_parameter);
+						for($i = 0; $i < $im; $i++) {
+							$line = trim($table_parameter[$i]);
+							fwrite($handle,$line."\n");
+							}
+						}
+					}
+				} */
 			fclose($handle);
 			unlink($file_lock);
 			$need_to_save = TRUE;
@@ -228,7 +253,7 @@ if($CsoundOrchestraName == '') {
 	$warn_not_empty = TRUE;
 	}
 echo "Csound orchestra file = <input type=\"text\" name=\"CsoundOrchestraName\" size=\"30\" value=\"".$CsoundOrchestraName."\">";
-$link = "file_list.php?dir=".$dir_csound_resources."&extension=orc";
+$link = "file_list.php?dir=".urlencode($dir_csound_resources)."&extension=orc";
 echo "<input class=\"save\" type=\"submit\" name=\"savealldata\" onclick=\"this.form.target='_self';return true;\" value=\"SAVE\">";
 echo " <input class=\"edit\" onclick=\"window.open('".$link."','listorchestra','width=200,height=300,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"which one?\">";
 	echo " ➡ ";

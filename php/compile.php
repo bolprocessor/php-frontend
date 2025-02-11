@@ -69,7 +69,8 @@ if($return_var <> 0) {
 		echo "<div class=\"edit\" style=\"padding:12px; width:90%; margin: auto;\"><p style=\"text-align:center; width: 90%;\">Since this compilation failed (because the “make” command did not work)<br />please check compiling instructions on the page: <a target=\"_blank\" class=\"linkdotted\" href=\"https://bolprocessor.org/check-bp3/#compile-bp-and-check-its-operation\">Compile ‘".$console."’ and check its operation</a></p><p style=\"text-align:center; width: 90%;\">Send a message to <a href=\"mailto:contact@bolprocessor.org\">contact@bolprocessor.org</a> in case of trouble</p></div>";
 		}
 	}
-echo "<p style=\"text-align:center; width:90%;\"><big>👉&nbsp;&nbsp;<a href=\"#\" onclick=\"if (window.opener) { window.close(); } return false;\">Click to close this page</a></big></p>";
+// echo "<p style=\"text-align:center; width:90%;\"><big>👉&nbsp;&nbsp;<a href=\"#\" onclick=\"if (window.opener) { window.close(); } return false;\">Click to close this page</a></big></p>";
+echo "<p style=\"text-align:center; width:90%;\"><big>👉&nbsp;&nbsp;<a href=\"#\" onclick=\"window.close(); return false;\">Click to close this page</a></big></p>";
 echo "</div>";
 echo "</body>";
 ?>

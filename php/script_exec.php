@@ -43,7 +43,7 @@ function run_script($dir,$dirPath,$this_script_file,$script_variables,$note_conv
 	require_once("_settings.php");
 	$temp_folder = urldecode($_GET['temp_folder']);
 	$content = @file_get_contents($dir.$this_script_file);
-	$content = mb_convert_encoding($content,'UTF-8','UTF-8');
+	if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 	$extract_data = extract_data(TRUE,$content);
 	$content = $extract_data['content'];
 	$table = explode(chr(10),$content);

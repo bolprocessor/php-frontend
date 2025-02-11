@@ -293,7 +293,7 @@ $undo_upload_project_message = undo_upload_project();
 try_create_new_file($this_file,$filename);
 $content = @file_get_contents($this_file);
 if($content === FALSE) ask_create_new_file($url_this_page,$filename);
-$content = mb_convert_encoding($content,'UTF-8','UTF-8');
+if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 $metronome = 0;
 $nature_of_time = $objects_file = $csound_file = $tonality_file = $alphabet_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = '';
 $nature_of_time_settings = STRIATED;
@@ -524,7 +524,7 @@ if($settings_file == '' OR !file_exists($dir.$settings_file)) {
 			echo "<p>⏱ Metronome (time base) and structure of time are neither specified in grammar nor set up by a ‘-se’ file.<br />Therefore metronome will be set to <span class=\"red-text\">60</span> beats per minute and time structure to <span class=\"red-text\">STRIATED</span>.</p>";
 			}
 		}
-	echo "•&nbsp;Time resolution = <span class=\"red-text\">".$time_resolution."</span> milliseconds (by default)<br />";
+	echo "•&nbsp;Time resolution = <span class=\"red-text\">".$time_resolution."</span> millisecond(s) (by default)<br />";
 	echo "•&nbsp;No quantization<br />";
 	}
 else {
@@ -544,9 +544,9 @@ else {
 	if($metronome > 0. AND $nature_of_time == STRIATED) {
 		echo "⏱ Metronome = <span class=\"red-text\">".$metronome."</span> beats/mn<br />";
 		}
-	if($time_resolution > 0) echo "•&nbsp;Time resolution = <span class=\"red-text\">".$time_resolution."</span> milliseconds as per <span class=\"green-text\">‘".$settings_file."’</span><br />";
+	if($time_resolution > 0) echo "•&nbsp;Time resolution = <span class=\"red-text\">".$time_resolution."</span> millisecond(s) as per <span class=\"green-text\">‘".$settings_file."’</span><br />";
 	if($quantize) {
-		echo "•&nbsp;Quantization = <span class=\"red-text\">".$quantization."</span> milliseconds as per <span class=\"green-text\">‘".$settings_file."’</span>";
+		echo "•&nbsp;Quantization = <span class=\"red-text\">".$quantization."</span> millisecond(s) as per <span class=\"green-text\">‘".$settings_file."’</span>";
 		if($time_resolution > $quantization) echo "&nbsp;<span class=\"red-text\">➡</span>&nbsp;may be raised to <span class=\"red-text\">".$time_resolution."</span>&nbsp;ms…";
 		echo "<br />";
 		}
@@ -578,7 +578,7 @@ if($produce_all_items == 1) {
 	}
 else if($show_production == 1) echo "• <span class=\"red-text\">Show production</span> has been set ON by <span class=\"green-text\">‘".$settings_file."’</span><br />";
 if($trace_production == 1) echo "• <span class=\"red-text\">Trace production</span> has been set ON by <span class=\"green-text\">‘".$settings_file."’</span><br />";
-if($max_time_computing > 0) {
+/* if($max_time_computing > 0) {
 	echo "• Max console computation time has been set to <span class=\"red-text\">".$max_time_computing."</span> seconds by <span class=\"green-text\">‘".$settings_file."’</span>";
 	if($max_time_computing < 10) echo "&nbsp;<span class=\"red-text\">➡</span>&nbsp;probably too small!";
 	if($max_time_computing > 3600) {
@@ -586,7 +586,7 @@ if($max_time_computing > 0) {
 		$max_time_computing = 3600;
 		}
 	echo "<br />";
-	}
+	} */
 if($settings_file <> '' AND file_exists($dir.$settings_file) AND $note_convention <> '') echo "• Note convention is <span class=\"red-text\">".strtoupper(note_convention(intval($note_convention)))."</span> as per <span class=\"green-text\">‘".$settings_file."’</span><br />";
 else echo "• Note convention is <span class=\"red-text\">ENGLISH</span> by default<br />";
 if($file_format == "csound") {
@@ -836,7 +836,7 @@ function save($this_file,$filename,$top_header,$save_content) {
         $backup_file = $this_file."_bak";
         if(!copy($this_file, $backup_file))
             echo "<p>👉 <span class=\"red-text\">Failed to create backup of the file.</span></p>";
-		else chmod($backup_file,$permissions);
+		else @chmod($backup_file,$permissions);
 		}
 	$handle = @fopen($this_file, "w");
 	if($handle) {
@@ -844,7 +844,7 @@ function save($this_file,$filename,$top_header,$save_content) {
 		fwrite($handle, $file_header."\n");
 		fwrite($handle, $save_content);
 		fclose($handle);
-		chmod($this_file,$permissions);
+		@chmod($this_file,$permissions);
 		}
 	else echo "<div style=\"padding: 1em; border-radius: 6px;\"><p>👉 <span class=\"red-text\"><b>WARNING</b>: Some files have been imported and cannot be modified.</span></p><p><b>Linux user?</b> Open your terminal and type: <span class=\"green-text\">sudo /opt/lampp/htdocs/bolprocessor/change_permissions.sh</span><br />(Your password will be required...)</p></div>";
 	return;

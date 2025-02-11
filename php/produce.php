@@ -787,7 +787,7 @@ echo "</p>";
 function check_image($link) {
 	$result = '';
 	$content = @file_get_contents($link);
-	$content = mb_convert_encoding($content,'UTF-8','UTF-8');
+	if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 	if($content) {
 		$content = str_replace(chr(13).chr(10),chr(10),$content);
 		$content = str_replace(chr(13),chr(10),$content);

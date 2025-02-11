@@ -290,7 +290,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$xml_content = @file_get_contents($music_xml_file);
     		$xml_content = str_replace("\r","\n",$xml_content);
     	//	$xml_content = str_replace("\n\n","\n",$xml_content);
-			$xml_content = mb_convert_encoding($xml_content,'UTF-8','UTF-8');
+			if(MB_CONVERT_OK) $xml_content = mb_convert_encoding($xml_content,'UTF-8','UTF-8');
 			$xml_table = explode(chr(10),$xml_content);
 			$print_info = FALSE;
 			$new_section = FALSE;
@@ -788,7 +788,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				if($apply_rndtime[$i]) echo " checked";
 				$index = "rndtime_".$i;
 				if(!isset($rndtime[$i])) $rndtime[$i] = 20;
-				echo ">&nbsp;<input type=\"text\" style=\"border:none; text-align:center;\" name=\"rndtime_".$i."\" size=\"3\" value=\"".$rndtime[$i]."\"> milliseconds";
+				echo ">&nbsp;<input type=\"text\" style=\"border:none; text-align:center;\" name=\"rndtime_".$i."\" size=\"3\" value=\"".$rndtime[$i]."\"> millisecond(s)";
 				if($number_parts > 1) echo " in part ‘".$part_label[$i]."’";
 				echo "<br />";
 				}
@@ -1234,7 +1234,7 @@ chmod($this_file,"0775");
 exec("chmod 755 ".$this_file); */
 $content = @file_get_contents($this_file);
 if($content === FALSE) ask_create_new_file($url_this_page,$filename);
-$content = mb_convert_encoding($content,'UTF-8','UTF-8');
+if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 
 $metronome = 0;
 $nature_of_time = $time_structure = $objects_file = $csound_file = $tonality_file = $tonality_file = $alphabet_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = '';
@@ -1338,7 +1338,7 @@ if(!isset($_POST['analyze_tonal'])) {
 			echo "⏱ Metronome (time base) is not specified by a ‘-se’ file. It will be set to <span class=\"red-text\">60</span> beats per minute. Time structure may be changed in data.<br />";
 		else
 			echo "⏱ Metronome (time base) is not specified by a ‘-se’ file. It will be set to <span class=\"red-text\">60</span> beats per minute.<br />";
-		echo "•&nbsp;Time resolution = <span class=\"red-text\">".$time_resolution."</span> milliseconds (by default)<br />";
+		echo "•&nbsp;Time resolution = <span class=\"red-text\">".$time_resolution."</span> millisecond(s) (by default)<br />";
 		echo "•&nbsp;No quantization<br />";
 		}
 	else {
@@ -1361,12 +1361,12 @@ if(!isset($_POST['analyze_tonal'])) {
 			echo "<br />";
 			}
 		if($time_resolution > 0) {
-			echo "•&nbsp;Time resolution = <span class=\"red-text\">".$time_resolution."</span> milliseconds";
+			echo "•&nbsp;Time resolution = <span class=\"red-text\">".$time_resolution."</span> millisecond(s)";
 			if(!$bad_settings) echo " as per <span class=\"green-text\">‘".$settings_file."’</span>";
 			echo "<br />";
 			}
 		if($quantize) {
-			echo "•&nbsp;Quantization = <span class=\"red-text\">".$quantization."</span> milliseconds";
+			echo "•&nbsp;Quantization = <span class=\"red-text\">".$quantization."</span> millisecond(s)";
 			if(!$bad_settings) echo " as per <span class=\"green-text\">‘".$settings_file."’</span>";
 			if($time_resolution > $quantization) echo "&nbsp;<span class=\"red-text\">➡</span>&nbsp;may be raised to <span class=\"red-text\">".$time_resolution."</span>&nbsp;ms…";
 			echo "<br />";
@@ -1374,7 +1374,7 @@ if(!isset($_POST['analyze_tonal'])) {
 		else echo "•&nbsp;No quantization<br />";
 		}
 	echo "•&nbsp;Time structure is <span class=\"red-text\">".nature_of_time($nature_of_time)."</span> by default but it may be changed in data<br />";
-	if($max_time_computing > 0) {
+	/* if($max_time_computing > 0) {
 		echo "• Max console computation time has been set to <span class=\"red-text\">".$max_time_computing."</span> seconds by <span class=\"green-text\">‘".$settings_file."’</span>";
 		if($max_time_computing < 10) echo "&nbsp;<span class=\"red-text\">➡</span>&nbsp;probably too small!";
 		if($max_time_computing > 3600) {
@@ -1382,7 +1382,7 @@ if(!isset($_POST['analyze_tonal'])) {
 			$max_time_computing = 3600;
 			}
 		echo "<br />";
-		}
+		} */
 	if(!$compute_while_playing) {
 		echo "• <span class=\"red-text\">Warning:</span> Compute while playing is <span class=\"red-text\">OFF</span> and Advance time = <span class=\"red-text\">".$advance_time."</span> seconds";
 		if($advance_time < 1) echo " (<span class=\"red-text\">maybe too small</span>)";
@@ -2074,7 +2074,7 @@ function save($this_file,$filename,$top_header,$save_content) {
         $backup_file = $this_file."_bak";
         if(!copy($this_file,$backup_file))
             echo "<p>👉 <span class=\"red-text\">Failed to create backup of the file.</span></p>";
-		else chmod($backup_file,$permissions);
+		else @chmod($backup_file,$permissions);
 		}
 	$handle = @fopen($this_file, "w");
 	if($handle) {
@@ -2082,7 +2082,7 @@ function save($this_file,$filename,$top_header,$save_content) {
 		fwrite($handle, $file_header."\n");
 		fwrite($handle, $save_content);
 		fclose($handle);
-		chmod($this_file,$permissions);
+		@chmod($this_file,$permissions);
 		}
 	else {
 		echo "<div style=\"background-color:white; color:black; padding: 1em; border-radius: 6px;\"><p>👉 <span class=\"red-text\"><b>WARNING</b>: Some files have been imported and cannot be modified.</span></p><p><b>Linux user?</b> Open your terminal and type: <span class=\"green-text\">sudo /opt/lampp/htdocs/bolprocessor/change_permissions.sh</span><br />(Your password will be required...)</p>";

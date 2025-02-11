@@ -1610,7 +1610,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 	unset($the_section);
 	if(isset($score_part) AND isset($fifths[$score_part])) $current_fifths = $fifths[$score_part];
 	else $current_fifths = 0;
-	// $data = mb_convert_encoding($data,'UTF-8','UTF-8');
+	// if(MB_CONVERT_OK) $data = mb_convert_encoding($data,'UTF-8','UTF-8');
 	if($found_mordent OR $found_turn OR $found_trill OR $found_turn)
 		$data = process_ornamentation($data,$current_fifths,$trace_ornamentations);
 	$data = str_replace("_pedalstart_","_switch_on_part(".$i_part.") ",$data);

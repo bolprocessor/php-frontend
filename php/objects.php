@@ -182,7 +182,7 @@ if(isset($_POST['savethisfile']) OR isset($_POST['create_object']) OR isset($_PO
 try_create_new_file($this_file,$filename);
 $content = @file_get_contents($this_file);
 if($content === FALSE) ask_create_new_file($url_this_page,$filename);
-$content = mb_convert_encoding($content,'UTF-8','UTF-8');
+if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 if(strlen(trim($content)) == 0) {
 	$template = "prototypes_template";
 	$content = @file_get_contents($template);

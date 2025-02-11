@@ -333,7 +333,7 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 						$table3 = explode('/',$data_file);
 						$item_name = end($table3);
 						$content2 = @file_get_contents($data_file);
-						$content2 = mb_convert_encoding($content2,'UTF-8','UTF-8');
+						if(MB_CONVERT_OK) $content2 = mb_convert_encoding($content2,'UTF-8','UTF-8');
 						$extract_data = extract_data(TRUE,$content2);
 						$newcontent = $extract_data['content'];
 						$table2 = explode(chr(10),$newcontent);
@@ -393,7 +393,7 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 			$tie_mssg = $segment['tie_mssg'];
 			$data_chunked = $segment['data_chunked']; 
 			$content_slice = @file_get_contents($data_chunked);
-			$content_slice = mb_convert_encoding($content_slice,'UTF-8','UTF-8');
+			if(MB_CONVERT_OK) $content_slice = mb_convert_encoding($content_slice,'UTF-8','UTF-8');
 			$table_slice = explode("[slice]",$content_slice);
 			$i_slice_max = count($table_slice);
 			if($i_slice_max == 0) continue;
@@ -536,7 +536,7 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 							$found_scale = TRUE;
 							$good_scale = FALSE;
 							$content_scale = @file_get_contents($scale_folder.$scale_textfile);
-							$content_scale = mb_convert_encoding($content_scale,'UTF-8','UTF-8');
+							if(MB_CONVERT_OK) $content_scale = mb_convert_encoding($content_scale,'UTF-8','UTF-8');
 							$table_scale = explode(chr(10),$content_scale);
 							// Find real name of scale, e.g. "F#maj" in file "F_maj.txt"
 							$new_name = str_replace('"','',trim($table_scale[0]));
@@ -1356,7 +1356,7 @@ function show_relations_on_image($i_item,$matching_list,$mode,$direction,$scalen
 		}
 	$found = FALSE;
 	$content = @file_get_contents($scale_textfile);
-	$content = mb_convert_encoding($content,'UTF-8','UTF-8');
+	if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 	$table = explode(chr(10),$content);
 	$ratio = array();
 	for($i = 0; $i < count($table); $i++) {

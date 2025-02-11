@@ -7,6 +7,7 @@ error_reporting(E_ALL);
 // error_reporting(E_ALL & ~E_NOTICE);
 ini_set('output_buffering', 'off');
 ini_set('zlib.output_compression', 0);
+ini_set("pcre.jit", "0"); // 2025-02-11
 require('midi.class.php'); // $$$ Probably not used, needs to be checked.
 // Source: https://github.com/robbie-cao/midi-class-php
 
@@ -15,6 +16,12 @@ define('SLASH',DIRECTORY_SEPARATOR);
 define('STRIATED',1);
 define('SMOOTH',0);
 define('MAXPARTS',30);
+define('MB_CONVERT_OK',function_exists('mb_convert_encoding'));
+define('MULTIBYTE_INTERNAL_OK', function_exists('mb_internal_encoding'));
+define('MULTIBYTE_EREG_OK', function_exists('mb_ereg_replace'));
+define('GD_AVAILABLE',function_exists('gd_info'));
+
+$architecture = php_uname("m");
 
 $test = FALSE;
 // $test = TRUE;
@@ -741,7 +748,7 @@ function compile_help($text_help_file,$html_help_file) {
 		return '';
 		}
 	$content = @file_get_contents($text_help_file);
-	$content = mb_convert_encoding($content,'UTF-8','UTF-8');
+	if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 	if($content) {
 		$file_header = "<!DOCTYPE HTML>\n";
 		$file_header .= "<html lang=\"en\">";
@@ -902,7 +909,6 @@ function gcd_array($array,$a = 0) {
 	}
 
 function clean_up_encoding($create_bullets,$convert,$text) {
-//	if($convert) $text = mb_convert_encoding($text, "UTF-8", mb_detect_encoding($text, "UTF-8, ISO-8859-1, ISO-8859-15", true));
 	$text = str_replace("¥","•",$text);
 	$text = str_replace("Ô","‘",$text);
 	$text = str_replace("Õ","’",$text);
@@ -984,7 +990,7 @@ function clean_up_file_to_html($file) {
 		}
 	$file_html = str_replace(".txt",".html",$file);
 	$text = @file_get_contents($file);
-	$text = mb_convert_encoding($text,'UTF-8','UTF-8');
+	if(MB_CONVERT_OK) $text = mb_convert_encoding($text,'UTF-8','UTF-8');
 	$text = str_replace(chr(13).chr(10),chr(10),$text);
 	$text = str_replace(chr(13),chr(10),$text);
 	$text = str_replace(chr(9),' ',$text);
@@ -1014,7 +1020,7 @@ function clean_up_file($file) { // NOT USED
 		return '';
 		}
 	$text = @file_get_contents($file);
-	$text = mb_convert_encoding($text,'UTF-8','UTF-8');
+	if(MB_CONVERT_OK) $text = mb_convert_encoding($text,'UTF-8','UTF-8');
 	$text = str_replace(chr(13).chr(10),chr(10),$text);
 	$text = str_replace(chr(13),chr(10),$text);
 	$text = str_replace(chr(9),' ',$text);
@@ -1118,7 +1124,7 @@ function SaveObjectPrototypes($verbose,$dir,$filename,$temp_folder,$force) {
 		fwrite($handle,"_beginCsoundScore_\n");
 		$csound_file = $save_codes_dir."/csound.txt";
 		$csound_score = @file_get_contents($csound_file);
-		$csound_score = mb_convert_encoding($csound_score,'UTF-8','UTF-8');
+		if(MB_CONVERT_OK) $csound_score = mb_convert_encoding($csound_score,'UTF-8','UTF-8');
 		$table2 = explode(chr(10),$csound_score);
 		$csound_score = "<HTML>";
 		for($k = 0; $k < count($table2); $k++) {
@@ -1290,7 +1296,7 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder,$force) {
 function reformat_grammar($verbose,$this_file) {
 	if(!file_exists($this_file)) return;
 	$content = @file_get_contents($this_file);
-	$content = mb_convert_encoding($content,'UTF-8','UTF-8');
+	if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 	$new_content = $content;
 	$i_gram = $irul = 1;
 	$section_headers = array("RND","ORD","LIN","SUB","SUB1","TEM","POSLONG","LEFT","RIGHT","INIT:","TIMEPATTERNS:","DATA:","COMMENTS:");
@@ -2295,10 +2301,25 @@ function windows_system() {
 	}
 
 function is_macos_alias($file) {
+	// Check that file is an alias pointing to a folder
+	if(!file_exists($file)) return FALSE;
     $finfo = new finfo(FILEINFO_MIME_TYPE);
     $mime = $finfo->file($file);
 //	echo "mime = ".$mime." =>   ".$file."<br />";
-    return $mime === 'application/octet-stream'; // macOS Alias MIME type
+	if ($mime !== 'application/octet-stream') return FALSE;
+	$xattrList = shell_exec("xattr -l " . escapeshellarg($file));
+    if($xattrList && strpos($xattrList,'com.apple.FinderInfo') !== false) {
+        // Check if it points to a folder
+        $finderInfo = shell_exec("xattr -p com.apple.FinderInfo ".escapeshellarg($file));
+        if($finderInfo !== false) {
+            $flags = substr($finderInfo, 8, 2); // Get the relevant alias flags
+            $flagsInt = hexdec(bin2hex($flags));
+            if($flagsInt & 0x8000) { // 0x8000 means "alias points to a folder"
+                return true;
+            	}
+        	}
+		}
+	return FALSE;
 	}
 	
 function send_to_console($command) {
@@ -2343,7 +2364,7 @@ function windows_command($command) {
 function get_orchestra_filename($csound_file) {
 	$csound_orchestra = '';
 	$content = @file_get_contents($csound_file);
-	$content = mb_convert_encoding($content,'UTF-8','UTF-8');
+	if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 	if($content != FALSE) {
 		$extract_data = extract_data(FALSE,$content);
 		$content = $extract_data['content'];
@@ -2359,7 +2380,7 @@ function get_orchestra_filename($csound_file) {
 function get_name_so_file($this_file) {
 	$objects_file = '';
 	$content = @file_get_contents($this_file);
-	$content = mb_convert_encoding($content,'UTF-8','UTF-8');
+	if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 	if($content != FALSE) {
 		$extract_data = extract_data(TRUE,$content);
 		$objects_file = $extract_data['objects'];
@@ -2412,7 +2433,7 @@ function save_settings($variable,$value) {
 	$settings_file = "_settings.php";
 	$content = @file_get_contents($settings_file);
 	if($content <> FALSE) {
-		$content = mb_convert_encoding($content,'UTF-8','UTF-8');
+		if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 		$table = explode(chr(10),$content);
 		$imax = count($table);
 		$new_table = array();
@@ -2454,7 +2475,7 @@ function save_settings2($variable,$index,$value) {
 	$content = @file_get_contents($settings_file);
 	if(!is_integer($index)) $index = '"'.$index.'"';
 	if($content <> FALSE) {
-		$content = mb_convert_encoding($content,'UTF-8','UTF-8');
+		if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 		$table = explode(chr(10),$content);
 		$imax = count($table);
 		$new_table = array();
@@ -2497,7 +2518,7 @@ function save_settings3($variable,$index1,$index2,$value) {
 	if(!is_integer($index1)) $index1 = '"'.$index1.'"';
 	if(!is_integer($index2)) $index2 = '"'.$index2.'"';
 	if($content <> FALSE) {
-		$content = mb_convert_encoding($content,'UTF-8','UTF-8');
+		if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 		$table = explode(chr(10),$content);
 		$imax = count($table);
 		$new_table = array();
@@ -2537,7 +2558,7 @@ function save_settings3($variable,$index1,$index2,$value) {
 	$settings_file = "_settings.php";
 	$content = @file_get_contents($settings_file);
  	if($content != FALSE) {
-		$content = mb_convert_encoding($content,'UTF-8','UTF-8');
+		if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 		$table = explode(chr(10),$content);
 		$imax = count($table);
 		$new_table = array();
@@ -2568,7 +2589,7 @@ function delete_settings_entry($entry) {
 	$settings_file = "_settings.php";
 	$content = @file_get_contents($settings_file);
  	if($content != FALSE) {
-		$content = mb_convert_encoding($content,'UTF-8','UTF-8');
+		if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 		$table = explode(chr(10),$content);
 		$imax = count($table);
 		$new_table = array();
@@ -2710,7 +2731,7 @@ function check_csound() {
 		$version = '';
 		if(file_exists($this_file)) {
 			$content = @file_get_contents($this_file);
-			$content = mb_convert_encoding($content,'UTF-8','UTF-8');
+			if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 			$table = explode(chr(10),$content);
 			$imax = count($table);
 			for($i = 0; $i < $imax; $i++) {
@@ -2757,7 +2778,7 @@ function relocate_function_table($dir,$line) {
 function check_function_tables($dir,$csound_file) {
 	if($csound_file == '') return;
 	$content = @file_get_contents($dir.$csound_file);
-	$content = mb_convert_encoding($content,'UTF-8','UTF-8');
+	if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 	if(trim($content) == '') return;
 	$table = explode(chr(10),$content);
 	$imax = count($table);
@@ -2818,7 +2839,7 @@ function get_tonality_file($csound_instruments_file) {
 	$tonality_filename = '';
 	if(!file_exists($csound_instruments_file)) return $tonality_filename;
 	$content = @file_get_contents($csound_instruments_file);
-	$content = mb_convert_encoding($content,'UTF-8','UTF-8');
+	if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 	$table = explode(chr(10),$content);
 	$imax = count($table);
 	for($i = 0; $i < $imax; $i++) {
@@ -2840,7 +2861,7 @@ function get_csound_file($objects_file) {
 	$csound_file = '';
 	if(!file_exists($objects_file)) return $csound_file;
 	$content = @file_get_contents($objects_file);
-	$content = mb_convert_encoding($content,'UTF-8','UTF-8');
+	if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 	$table = explode(chr(10),$content);
 	$imax = count($table);
 	for($i = 0; $i < $imax; $i++) {
@@ -2946,7 +2967,7 @@ function list_of_tonal_scales($tonality_file) {
 	$list = array();
 	if(!file_exists($tonality_file)) return $list;
 	$content = @file_get_contents($tonality_file);
-	$content = mb_convert_encoding($content,'UTF-8','UTF-8');
+	if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 	$table = explode(chr(10),$content);
 	$imax = count($table);
 	$found = FALSE;
@@ -2985,7 +3006,7 @@ function list_of_instruments($csound_instruments_file) {
 //	echo "csound_instruments_file = ".$csound_instruments_file."<br />";
 	if(!file_exists($csound_instruments_file)) return $list_of_instruments;
 	$content = @file_get_contents($csound_instruments_file);
-	$content = mb_convert_encoding($content,'UTF-8','UTF-8');
+	if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 	$extract_data = extract_data(FALSE,$content);
 	$content = $extract_data['content'];
 	$content_no_br = str_replace("<br>",chr(10),$content);
@@ -3450,7 +3471,7 @@ function quadratic_mapping($x1,$x2,$x3,$y1,$y2,$y3) {
 function create_grammar($data_path) {
 	$grammar = '';
 	$content = @file_get_contents($data_path);
-	$content = mb_convert_encoding($content,'UTF-8','UTF-8');
+	if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 	$extract_data = extract_data(TRUE,$content);
 	$content = $extract_data['content'];
 	$table = explode(chr(10),$content );
@@ -4361,7 +4382,7 @@ function create_variables($script_variables) {
     fwrite($h_variables,"<?php\n");
     $script_status = $script_more = array();
     $content = @file_get_contents("script-instructions.txt");
-	$content = mb_convert_encoding($content,'UTF-8','UTF-8');
+	if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
     if($content) {
         $table = explode(chr(10),$content);
         $imax = count($table);
@@ -4893,34 +4914,40 @@ function use_convention($this_file) {
 		$change_octave = -1;
 		}
 	$content = @file_get_contents($this_file);
-	$content = mb_convert_encoding($content,'UTF-8','UTF-8');
+	if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 	$extract_data = extract_data(TRUE,$content);
 	$newcontent = $extract_data['content'];
-	mb_internal_encoding("UTF-8");  // Set internal character encoding to UTF-8
-	$newcontent = mb_ereg_replace("\n","<br>", $newcontent);
+	if(MULTIBYTE_INTERNAL_OK) mb_internal_encoding("UTF-8");  // Set internal character encoding to UTF-8
+	$newcontent = my_mb_ereg_replace("\n","<br>", $newcontent);
 	for($i = 0; $i < 12; $i++) {
 		$new_note = $_POST['new_note_'.$i];
 		if($new_convention <> 1) {
 			$bass_octave = "00"; $new_octave = 0;
-			$newcontent = mb_ereg_replace($Frenchnote[$i].$bass_octave,$new_note."@".$new_octave,$newcontent);
-			$newcontent = mb_ereg_replace($AltFrenchnote[$i].$bass_octave,$new_note."@".$new_octave,$newcontent);
+			$newcontent = my_mb_ereg_replace($Frenchnote[$i].$bass_octave,$new_note."@".$new_octave,$newcontent);
+			$newcontent = my_mb_ereg_replace($AltFrenchnote[$i].$bass_octave,$new_note."@".$new_octave,$newcontent);
 			}
 		for($octave = 15; $octave >= 0; $octave--) {
 			$new_octave = $octave + $change_octave;
 			if($new_octave < 0) $new_octave = "00";
-			if($new_convention <> 0) $newcontent = mb_ereg_replace($Englishnote[$i].$octave,$new_note."@".$new_octave,$newcontent);
-			if($new_convention <> 0) $newcontent = mb_ereg_replace($AltEnglishnote[$i].$octave,$new_note."@".$new_octave,$newcontent);
-			if($new_convention <> 1) $newcontent = mb_ereg_replace($Frenchnote[$i].$octave,$new_note."@".$new_octave,$newcontent);
-			if($new_convention <> 1) $newcontent = mb_ereg_replace($AltFrenchnote[$i].$octave,$new_note."@".$new_octave,$newcontent);
-			if($new_convention <> 2) $newcontent = mb_ereg_replace($Indiannote[$i].$octave,$new_note."@".$new_octave,$newcontent);
-			if($new_convention <> 2) $newcontent = mb_ereg_replace($AltIndiannote[$i].$octave,$new_note."@".$new_octave,$newcontent);
+			if($new_convention <> 0) $newcontent = my_mb_ereg_replace($Englishnote[$i].$octave,$new_note."@".$new_octave,$newcontent);
+			if($new_convention <> 0) $newcontent = my_mb_ereg_replace($AltEnglishnote[$i].$octave,$new_note."@".$new_octave,$newcontent);
+			if($new_convention <> 1) $newcontent = my_mb_ereg_replace($Frenchnote[$i].$octave,$new_note."@".$new_octave,$newcontent);
+			if($new_convention <> 1) $newcontent = my_mb_ereg_replace($AltFrenchnote[$i].$octave,$new_note."@".$new_octave,$newcontent);
+			if($new_convention <> 2) $newcontent = my_mb_ereg_replace($Indiannote[$i].$octave,$new_note."@".$new_octave,$newcontent);
+			if($new_convention <> 2) $newcontent = my_mb_ereg_replace($AltIndiannote[$i].$octave,$new_note."@".$new_octave,$newcontent);
 			}
 		}
-	$newcontent = mb_ereg_replace("<br>","\n",$newcontent);
-	$newcontent = mb_ereg_replace("@",'',$newcontent);
+	$newcontent = my_mb_ereg_replace("<br>","\n",$newcontent);
+	$newcontent = my_mb_ereg_replace("@",'',$newcontent);
 	// This '@' is required to avoid confusion between "re" in Indian and Italian/Spanish/French conventions
 	$_POST['thistext'] = $newcontent;
 	return $new_convention;
+	}
+
+function my_mb_ereg_replace($a,$b,$text) {
+	if(MULTIBYTE_EREG_OK) $result = mb_ereg_replace($a,$b,$text);
+	else $result = str_replace($a,$b,$text);
+	return $result;
 	}
 
 function select_a_skin($url_this_page,$path,$skin) {
@@ -5005,7 +5032,7 @@ function convert_to_json($dir,$settings_file) {
 		return;
 		}
 	$content = @file_get_contents($dir.$settings_file);
-	$content = mb_convert_encoding($content,'UTF-8','UTF-8');
+	if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 	$token = get_settings_tokens();
 	if(count($token) == 0) return;
 	if($content[0] == '{') {
@@ -5044,7 +5071,7 @@ function convert_to_json($dir,$settings_file) {
 		echo "<p style=\"color:red;\">ERROR reading ‘settings_names_old.txt’</p>";
 		return;
 		}
-	$bp_parameter_names = mb_convert_encoding($bp_parameter_names,'UTF-8','UTF-8');
+	if(MB_CONVERT_OK) $bp_parameter_names = mb_convert_encoding($bp_parameter_names,'UTF-8','UTF-8');
 	$table = explode(chr(10),$bp_parameter_names);
 	$imax = count($table);
 	$imax_parameters = 0;
@@ -5151,7 +5178,7 @@ function get_settings_tokens() {
 		echo "<p style=\"color:red;\">ERROR reading ‘settings_names.tab’</p>";
 		return $token;
 		}
-	$bp_parameter_names = mb_convert_encoding($bp_parameter_names,'UTF-8','UTF-8');
+	if(MB_CONVERT_OK) $bp_parameter_names = mb_convert_encoding($bp_parameter_names,'UTF-8','UTF-8');
 	$table = explode(chr(10),$bp_parameter_names);
 	$imax = count($table);
 	for($i = 0; $i < $imax; $i++) {
