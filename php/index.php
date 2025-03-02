@@ -83,13 +83,13 @@ else {
 	echo "<p style=\"text-align:center;\">👉&nbsp;Read the <a class=\"linkdotted\" class=\"linkdotted\" href=\"https://raw.githubusercontent.com/bolprocessor/bolprocessor/graphics-for-BP3/BP3-changes.txt\" target=\"_blank\">history of changes</a></p>";
 	echo "<small><p style=\"text-align:center;\">Architecture: ".$architecture;
 	if($architecture == "i386" OR $architecture == "armv7l")
-		echo "<br />👉&nbsp;<span class=\"red-text\">not suitable for this installation!</span></p>";
+		echo "<br />⚠️&nbsp;<span class=\"red-text\">not suitable for this installation!</span></p>";
 	else {
 		echo "<br />for <a target=\"_blank\" href=\"phpinfo.php\">PHP ".phpversion()."</a>";
 		if(MB_CONVERT_OK) echo "<br />with UTF multibyte conversion";
-			else echo "<br />👉&nbsp;<span class=\"red-text\">without UTF multibyte conversion!</span>";
-		if(!MULTIBYTE_EREG_OK) echo "<br />👉&nbsp;<span class=\"red-text\">without UTF multibyte replacing!</span>";
-		if(!GD_AVAILABLE) echo "<br />👉&nbsp;<span class=\"red-text\">without GD graphics!</span>";
+			else echo "<br />⚠️&nbsp;<span class=\"red-text\">without UTF multibyte conversion!</span>";
+		if(!MULTIBYTE_EREG_OK) echo "<br />⚠️&nbsp;<span class=\"red-text\">without UTF multibyte replacing!</span>";
+		if(!GD_AVAILABLE) echo "<br />⚠️&nbsp;<span class=\"red-text\">without GD graphics!</span>";
 		echo "</p>";
 		}
 	echo "</small></td>";

@@ -5,9 +5,9 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 // error_reporting(0);
 // error_reporting(E_ALL & ~E_NOTICE);
-ini_set('output_buffering', 'off');
-ini_set('zlib.output_compression', 0);
-ini_set("pcre.jit", "0"); // 2025-02-11
+// ini_set('output_buffering','off');
+// ini_set('zlib.output_compression', 0);
+// ini_set("pcre.jit", "0"); 2025-02-11
 require('midi.class.php'); // $$$ Probably not used, needs to be checked.
 // Source: https://github.com/robbie-cao/midi-class-php
 
@@ -2462,7 +2462,7 @@ function save_settings($variable,$value) {
 		$line = str_replace('§','?',$line);
 		fwrite($handle,$line);
 		fclose($handle);
-		chmod($settings_file,$permissions);
+	//	chmod($settings_file,$permissions);
 		}
 	else echo "<p><span class=\"red-text\">File ‘_settings.php’ could nor be opened!</span></p>";
  	return;
@@ -2504,7 +2504,7 @@ function save_settings2($variable,$index,$value) {
 		$line = str_replace('§','?',$line);
 		fwrite($handle,$line);
 		fclose($handle);
-		chmod($settings_file,$permissions);
+	//	chmod($settings_file,$permissions);
 		}
 	else echo "<p><span class=\"red-text\">File ‘_settings.php’ could nor be opened!</span></p>";
 	return;
@@ -2547,7 +2547,7 @@ function save_settings3($variable,$index1,$index2,$value) {
 		$line = str_replace('§','?',$line);
 		fwrite($handle,$line);
 		fclose($handle);
-		chmod($settings_file,$permissions);
+	//	chmod($settings_file,$permissions);
 		}
 	else echo "<p><span class=\"red-text\">File ‘_settings.php’ could nor be opened!</span></p>";
 	return;
@@ -2579,7 +2579,7 @@ function save_settings3($variable,$index1,$index2,$value) {
 		$line = str_replace('§','?',$line);
 		fwrite($handle,$line);
 		fclose($handle);
-		chmod($settings_file,$permissions);
+	//	chmod($settings_file,$permissions);
  		}
  	return;
  	}
@@ -2610,7 +2610,7 @@ function delete_settings_entry($entry) {
 		$line = str_replace('§','?',$line);
 		fwrite($handle,$line);
 		fclose($handle);
-		chmod($settings_file,$permissions);
+	//	chmod($settings_file,$permissions);
  		}
  	return;
  	}
