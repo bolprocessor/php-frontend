@@ -36,7 +36,7 @@ if(isset($_POST['savethisfile'])) {
 		chmod($this_file,$permissions);
 		$file_path = $temp_dir.$tracelive_folder.SLASH."_saved_alphabet";
 		file_put_contents($file_path,$this_file);
-		chmod($file_path,$permissions);
+		@chmod($file_path,$permissions);
 		}
 	}
 

@@ -150,7 +150,7 @@ if($need_to_save OR isset($_POST['savethisfile']) OR isset($_POST['compilegramma
 	if(isset($_POST['settings_file']) OR isset($settings_file)) {
 		if(isset($_POST['settings_file'])) $settings_file = $_POST['settings_file'];
 		file_put_contents($file_path,$dir.$settings_file);
-		chmod($file_path,$permissions);
+		@chmod($file_path,$permissions);
 		}
 	else @unlink($file_path);
 	$content = recode_entities($content);
@@ -158,12 +158,12 @@ if($need_to_save OR isset($_POST['savethisfile']) OR isset($_POST['compilegramma
 	save($this_file,$filename,$top_header,$content);
 	$file_path = $temp_dir.$tracelive_folder.SLASH."_saved_grammar";
 	file_put_contents($file_path,$dir.$filename);
-	chmod($file_path,$permissions);
+	@chmod($file_path,$permissions);
 	$file_path = $temp_dir.$tracelive_folder.SLASH."_saved_alphabet";
 	if(isset($_POST['alphabet_file']) AND $_POST['alphabet_file'] <> '') {
 		$alphabet_file = $_POST['alphabet_file'];
 		file_put_contents($file_path,$dir.$alphabet_file);
-		chmod($file_path,$permissions);
+		@chmod($file_path,$permissions);
 		}
 	else @unlink($file_path);
 	if($file_format == "rtmidi" AND !$no_save_midiresources) {

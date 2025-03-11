@@ -25,7 +25,7 @@ $warning_bottom = $saved_warning_bottom = '';
 if(isset($_POST['saveparameters'])) {
 	$file_path = $temp_dir.$tracelive_folder.SLASH."_saved_settings";
 	file_put_contents($file_path,$dir.$filename);
-//	chmod($file_path,$permissions);
+	@chmod($file_path,$permissions);
 	$saved_warning_top = "<p id=\"timespan2\"><span class=\"red-text\">➡</span> Saved parameters… <span class=\"red-text\">Don't forget to save again related grammar or data!</span></p>";
 	$saved_warning_bottom = "<p id=\"timespan3\"><span class=\"red-text\">➡</span> Saved parameters… <span class=\"red-text\">Don't forget to save again related grammar or data!</span></p>";
 	echo $saved_warning_top;
