@@ -20,10 +20,7 @@ if($test) echo "grammar_file = ".$this_file."<br />";
 // echo "skin = ".$skin."<br />";
 
 $temp_folder = str_replace(' ','_',$filename)."_".my_session_id()."_temp";
-if(!file_exists($temp_dir.$temp_folder)) {
-	mkdir($temp_dir.$temp_folder);
-	}
-	
+if(!file_exists($temp_dir.$temp_folder)) mkdir($temp_dir.$temp_folder,0777,TRUE);
 $default_output_name = str_replace("-gr.",'',$filename);
 $default_output_name = str_replace(".bpgr",'',$default_output_name);
 $output_file = $default_output_name;
@@ -149,9 +146,26 @@ if($need_to_save OR isset($_POST['savethisfile']) OR isset($_POST['compilegramma
 	if(isset($_POST['note_convention'])) $note_convention = $_POST['note_convention'];
 //	if(isset($_POST['random_seed'])) $random_seed = $_POST['random_seed'];
 //	else $random_seed = 0;
+	$file_path = $temp_dir.$tracelive_folder.SLASH."_saved_settings";
+	if(isset($_POST['settings_file']) OR isset($settings_file)) {
+		if(isset($_POST['settings_file'])) $settings_file = $_POST['settings_file'];
+		file_put_contents($file_path,$dir.$settings_file);
+		chmod($file_path,$permissions);
+		}
+	else @unlink($file_path);
 	$content = recode_entities($content);
 	$content = preg_replace("/ +/u",' ',$content);
 	save($this_file,$filename,$top_header,$content);
+	$file_path = $temp_dir.$tracelive_folder.SLASH."_saved_grammar";
+	file_put_contents($file_path,$dir.$filename);
+	chmod($file_path,$permissions);
+	$file_path = $temp_dir.$tracelive_folder.SLASH."_saved_alphabet";
+	if(isset($_POST['alphabet_file']) AND $_POST['alphabet_file'] <> '') {
+		$alphabet_file = $_POST['alphabet_file'];
+		file_put_contents($file_path,$dir.$alphabet_file);
+		chmod($file_path,$permissions);
+		}
+	else @unlink($file_path);
 	if($file_format == "rtmidi" AND !$no_save_midiresources) {
 		if(file_exists($refresh_file)) {
 			read_midiressources($filename);
@@ -329,7 +343,7 @@ if($csound_file <> '') {
 	if($csound_orchestra <> '') $found_orchestra_in_instruments = TRUE;
 	}
 else $csound_orchestra = '';
-$show_production = $trace_production = $note_convention = $non_stop_improvize = $p_clock = $q_clock = $striated_time = $max_time_computing = $produce_all_items = $random_seed = $quantization = $time_resolution = 0;
+$show_production = $trace_production = $note_convention = $non_stop_improvize = $p_clock = $q_clock = $striated_time = $max_time_computing = $produce_all_items = $random_seed = $quantization = $time_resolution = $live_grammar = $live_settings = 0;
 $csound_default_orchestra = '';
 $diapason = 440; $C4key = 60;
 $dir_base = str_replace($bp_application_path,'',$dir);
@@ -355,6 +369,8 @@ if($settings_file <> '' AND file_exists($dir.$settings_file)) {
 		$nature_of_time_settings = $settings['Nature_of_time']['value'];
 		$note_convention = $settings['NoteConvention']['value'];
 		$non_stop_improvize = $settings['Improvize']['value'];
+		if(isset($settings['LiveGrammar'])) $live_grammar = $settings['LiveGrammar']['value'];
+		if(isset($settings['LiveSettings'])) $live_settings = $settings['LiveSettings']['value'];
 		}
 	else {
 		$time_resolution = 10;
@@ -367,6 +383,13 @@ if($settings_file <> '' AND file_exists($dir.$settings_file)) {
 	}
 
 if($test) echo "url_this_page = ".$url_this_page."<br />";
+
+if($live_grammar) {
+	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+echo "<p style=\"text-align:left;\">";
+	echo "<input class=\"edit\" type=\"submit\" name=\"\" value=\"REFRESH THIS PAGE\"> <i>if grammar changed elsewhere</i>";
+	echo "</form>";
+	}
 
 $csound_is_responsive = FALSE;
 echo "<div style=\"float:right; padding:6px; background-color:transparent;\">";
@@ -408,7 +431,8 @@ echo "<input type=\"hidden\" name=\"tonality_file\" value=\"".$tonality_file."\"
 $error = FALSE;
 if($produce_all_items > 0) $action = "produce-all";
 else $action = "produce";
-$link_produce = "produce.php?instruction=".$action."&grammar=".urlencode($this_file);
+// $link_produce = "produce.php?instruction=".$action."&grammar=".urlencode($this_file);
+$link_produce = "produce.php?instruction=".$action."&grammar=".urlencode($this_file)."&keepalive=1";
 
 $upload_mssg = '';
 $result_upload = upload_related($dir);
@@ -466,7 +490,7 @@ if($csound_orchestra <> '') {
 	check_function_tables($dir,$csound_file);
 	if(file_exists($dir_csound_resources.$csound_orchestra)) $link_produce .= "&csound_orchestra=".urlencode($csound_orchestra);
 	}
-$url_settings = "settings.php?file=".urlencode($dir_base.$settings_file);
+$url_settings = "settings.php?file=".urlencode($dir_base.$settings_file)."&source=".urlencode(str_replace(' ','_',$filename));
 if($file_format == "csound") {
 	$cs = $output_file;
 	$output_file = str_replace(".sco",'',$output_file);
@@ -493,7 +517,8 @@ echo "</table>";
 echo "<br />";
 if($templates) {
 	$action = "templates";
-	$link_produce_templates = "produce.php?instruction=".$action."&grammar=".urlencode($this_file);
+//	$link_produce_templates = "produce.php?instruction=".$action."&grammar=".urlencode($this_file);
+	$link_produce_templates = "produce.php?instruction=".$action."&grammar=".urlencode($this_file)."&keepalive=1";
 //	$link_produce_templates .= "&trace_production=1";
 	$link_produce_templates .= "&here=".urlencode($here);
 	$window_name = window_name($filename);
@@ -589,6 +614,8 @@ if($trace_production == 1) echo "• <span class=\"red-text\">Trace production</
 	} */
 if($settings_file <> '' AND file_exists($dir.$settings_file) AND $note_convention <> '') echo "• Note convention is <span class=\"red-text\">".strtoupper(note_convention(intval($note_convention)))."</span> as per <span class=\"green-text\">‘".$settings_file."’</span><br />";
 else echo "• Note convention is <span class=\"red-text\">ENGLISH</span> by default<br />";
+if($live_grammar) echo "• <span class=\"red-text\">Live grammar</span> is set as per <span class=\"green-text\">‘".$settings_file."’</span><br />";
+if($live_settings) echo "• <span class=\"red-text\">Live settings</span> is set as per <span class=\"green-text\">‘".$settings_file."’</span><br />";
 if($file_format == "csound") {
 	if($csound_orchestra <> '' AND file_exists($dir.$csound_orchestra)) {
 		rename($dir.$csound_orchestra,$dir_csound_resources.$csound_orchestra);
@@ -712,7 +739,8 @@ for($i = 0; $i < $imax; $i++) {
 	}
 // echo "<form method=\"post\" action=\"".$url_this_page."#expression\" enctype=\"multipart/form-data\">";
 $action = "play";
-$link_produce = "produce.php?instruction=".$action."&grammar=".urlencode($this_file);
+// $link_produce = "produce.php?instruction=".$action."&grammar=".urlencode($this_file);
+$link_produce = "produce.php?instruction=".$action."&grammar=".urlencode($this_file)."&keepalive=1";
 if($file_format == "csound") {
 	$cs = $output_file;
 	$output_file = str_replace(".sco",'',$output_file);

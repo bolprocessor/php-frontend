@@ -4,6 +4,8 @@ require_once("_basic_tasks.php");
 if(isset($_GET['file'])) $file = urldecode($_GET['file']);
 else $file = '';
 if($file == '') die();
+if(isset($_GET['source'])) $source = urldecode($_GET['source']);
+else $source = '';
 $url_this_page = "settings.php?file=".urlencode($file);
 $table = explode(SLASH,$file);
 $filename = end($table);
@@ -19,9 +21,11 @@ echo link_to_help();
 echo "<h2>Settings “".$filename."”</h2>";
 
 $token = get_settings_tokens();
-
 $warning_bottom = $saved_warning_bottom = '';
 if(isset($_POST['saveparameters'])) {
+	$file_path = $temp_dir.$tracelive_folder.SLASH."_saved_settings";
+	file_put_contents($file_path,$dir.$filename);
+//	chmod($file_path,$permissions);
 	$saved_warning_top = "<p id=\"timespan2\"><span class=\"red-text\">➡</span> Saved parameters… <span class=\"red-text\">Don't forget to save again related grammar or data!</span></p>";
 	$saved_warning_bottom = "<p id=\"timespan3\"><span class=\"red-text\">➡</span> Saved parameters… <span class=\"red-text\">Don't forget to save again related grammar or data!</span></p>";
 	echo $saved_warning_top;
@@ -220,7 +224,7 @@ if(isset($_POST['saveparameters'])) {
 	$settings = recursive_strval($settings);
 	$jsonData = json_encode($settings,JSON_PRETTY_PRINT);
     my_file_put_contents($this_file,$jsonData);
-	chmod($this_file,$permissions);
+//	chmod($this_file,$permissions);
 	echo $warning;
 	$warning_bottom = $warning;
 	}
@@ -240,7 +244,7 @@ else {
 $settings = json_decode($content,TRUE);
 if($bad_settings) die();
 echo "<p class=\"green-text\">".str_replace("\n","<br />",$settings['header'])."</p>";
-echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+echo "<form method=\"post\" action=\"".$url_this_page."&source=".$source."\" enctype=\"multipart/form-data\">";
 echo "<p style=\"text-align:left;\"><input class=\"save\" type=\"submit\" name=\"saveparameters\" value=\"SAVE TO ‘".$filename."’\"></p>";
 echo "<table class=\"thinborder\" style=\"border-spacing: 2px;\" cellpadding=\"2px;\">";
 $bp_parameter_names = @file_get_contents("settings_names.tab");

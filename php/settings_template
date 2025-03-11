@@ -395,5 +395,23 @@
         "value": "1",
         "unit": "",
         "boolean": "1"
+    },
+    "LiveGrammar": {
+        "name": "Follow grammar(s)",
+        "value": "0",
+        "unit": "",
+        "boolean": "1"
+    },
+    "LiveSettings": {
+        "name": "Follow settings",
+        "value": "0",
+        "unit": "",
+        "boolean": "1"
+    },
+    "TraceLive": {
+        "name": "Trace changes",
+        "value": "0",
+        "unit": "",
+        "boolean": "1"
     }
 }

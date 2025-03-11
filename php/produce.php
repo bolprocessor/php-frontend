@@ -13,18 +13,25 @@ echo "</head>";
 echo "<body>\n";
 
 set_time_limit(0);
+if(windows_system()) {
+    if(isset($_GET['keepalive'])) {
+        echo " "; // Send a space to keep connection alive
+        flush();
+        }
+    }
 
 $application_path = $bp_application_path;
 if(!file_exists($bp_application_path.$console)) {
 	echo "<p style=\"text-align:center; width:90%;\">The console application (file “bp”) is not working, or missing, or misplaced…</p>";
 	$source = $application_path."source";
 	if(file_exists($source)) {
-		$link = "compile.php";
+	//	$link = "compile.php";
+		$link = "compile.php?keepalive=1";
 		echo "<p style=\"text-align:center; width:90%;\">The source files of BP3 have been found. You can (re)compile the console.<br />";
 		if(!check_gcc())
 			if(windows_system()) echo "👉&nbsp;&nbsp;However, ‘gcc’ is not responding.<br />You first need to <a class=\"linkdotted\" target=\"_blank\" href=\"https://bolprocessor.org/install-mingw/\">install and set up MinGW</a>.";
 			else echo "👉&nbsp;&nbsp;However, ‘gcc’ is not responding. You will get it with <a class=\"linkdotted\" target=\"_blanl\" href=\"https://apps.apple.com/us/app/xcode/id497799835\">Xcode</a>.";
-		else echo "<br /><br /><big>👉&nbsp;&nbsp;<a href=\"".$application_path."php/compile.php?return=produce.php\">Run the compiler</a></big>";
+		else echo "<br /><br /><big>👉&nbsp;&nbsp;<a href=\"".$application_path."php/compile.php?return=produce.php&keepalive=1\">Run the compiler</a></big>";
 		echo "</p>";
 		}
 	else
@@ -197,6 +204,14 @@ echo "</div>";
 	//	echo "<p>htmlfile = ".$htmlfile."</p>";
 		@unlink($htmlfile);
 		}
+
+	$file_path = $temp_dir.$tracelive_folder.SLASH."_saved_grammar";
+	@unlink($file_path);
+	$file_path = $temp_dir.$tracelive_folder.SLASH."_saved_alphabet";
+	@unlink($file_path);
+	$file_path = $temp_dir.$tracelive_folder.SLASH."_saved_settings";
+	@unlink($file_path);
+
 	$time_start = time();
 	$time_end = $time_start + 3;
 /*	while(TRUE) {
@@ -209,8 +224,6 @@ echo "</div>";
 	@unlink($trace_csound);
 	$trace_csound = '';
 	
-	/* echo "<br />@@@@application_path = ".$application_path."<br />";
-	echo "console = ".$console."<br />"; */
 	$command = $application_path.$console." ".$instruction;
 	
 	if($grammar_path <> '') {

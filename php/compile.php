@@ -9,6 +9,12 @@ echo "<body>";
 set_time_limit(0);
 $user_os = getOS();
 // ob_start();
+if(windows_system()) {
+    if(isset($_GET['keepalive'])) {
+        echo " "; // Send a space to keep connection alive
+        flush();
+        }
+    }
 
 echo "<p style=\"text-align:center; width:90%;\">System = ".$user_os."</p>";
 if(!file_exists($bp_application_path."source")) {

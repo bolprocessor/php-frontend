@@ -73,4 +73,8 @@
 "PROCESSING CAPTURED MIDI EVENTS"				
 "MinPeriod"	"Minimum period"	"ms (deft 200, at least 2 times the Quantization)<br>This is used for positioning sound-objects<br>(Read https://bolprocessor.org/control-noteon-noteoff/)"	"0"	"200"
 "TraceCaptureAnalysis"	"Trace this analysis"		"1"	"1"
+"LIVE CODING (only grammars)"				
+"LiveGrammar"	"Follow grammar(s)"	"(Read https://bolprocessor.org/live-coding/)"	"1"	"0"
+"LiveSettings"	"Follow settings"		"1"	"0"
+"TraceLive"	"Trace changes"		"1"	"0"
 "-- end --"				

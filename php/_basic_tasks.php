@@ -176,6 +176,9 @@ if(!file_exists($bp_application_path.$trash_folder)) {
 	}
 $dir_trash_folder = $bp_application_path.$trash_folder.SLASH;
 
+$tracelive_folder = "trace_".my_session_id()."_live";
+if(!file_exists($temp_dir.$tracelive_folder)) mkdir($temp_dir.$tracelive_folder,0777,TRUE);
+
 // Delete old temp directories and trace files
 $dircontent = scandir($temp_dir);
 $now = time();
@@ -455,6 +458,15 @@ echo "<script>
 			console.error(\"Error selecting folder:\", error);
 		}
 	}";
+echo "</script>";
+
+echo "<script
+function keepAlive() {
+    setInterval(() => {
+        fetch(window.location.href + \"?keepalive=1\").then(response => response.text());
+    }, 2000); // Send request every 2 seconds
+}
+keepAlive();";
 echo "</script>";
 
 
@@ -825,7 +837,8 @@ function compile_help($text_help_file,$html_help_file) {
 
 function link_to_help() {
 	global $html_help_file;
-	$console_link = "produce.php?instruction=help";
+//	$console_link = "produce.php?instruction=help";
+	$console_link = "produce.php?instruction=help&keepalive=1";
 	$link = "<p>👉 Display <a class=\"linkdotted\" href=\"".nice_url($console_link)."\" onclick=\"window.open('".$console_link."','help','width=800,height=800,left=200'); return false;\">console's instructions</a> or the <a class=\"linkdotted\" onclick=\"window.open('".nice_url($html_help_file)."','Help','width=800,height=500'); return false;\" href=\"".nice_url($html_help_file)."\">complete BP3 help file</a></p>";
 	return $link;
 	}
@@ -2647,7 +2660,8 @@ function display_console_state() {
 	 else {
 		echo "Bol Processor is not yet installed or not responding&nbsp;😣<br />";
 		if(check_installation()) {
-			$link = "compile.php";
+//			$link = "compile.php";
+			$link = "compile.php?keepalive=1";
 			echo "Source files of BP3 have been found. You can (re)compile it.<br />";
 			if(!check_gcc())
 				if(windows_system()) echo "👉&nbsp;&nbsp;However, ‘gcc’ is not responding.<br />You first need to <a class=\"linkdotted\" target=\"_blank\" href=\"https://bolprocessor.org/install-mingw/\">install and set up MinGW</a>.";

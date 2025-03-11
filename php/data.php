@@ -1778,7 +1778,8 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 	if($imax > 0 AND substr_count($content,'{') > 0) {
 		$window_name_grammar = $window_name."_grammar";
 		$link_grammar = "produce.php?data=".urlencode($this_file);
-		$link_grammar = $link_grammar."&instruction=create_grammar";
+	//	$link_grammar = $link_grammar."&instruction=create_grammar";
+		$link_grammar = $link_grammar."&instruction=create_grammar&keepalive=1";
 		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		echo "<input type=\"hidden\" name=\"thistext\" value=\"".recode_tags($content)."\">";
 		echo "<input type=\"hidden\" name=\"file_format\" value=\"".$file_format."\">";
@@ -1833,8 +1834,10 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 		$output_file_expand = str_replace(".mid",'',$output_file_expand);
 		$output_file_expand .= ".bpda";
 		$link_options_expand = $link_options."&output=".urlencode($bp_application_path.$output_folder.SLASH.$output_file_expand)."&format=data";
-		$link_produce = "produce.php?data=".urlencode($data);
-		$link_produce_chunked = "produce.php?data=".urlencode($data_chunked);
+		$link_produce = "produce.php?data=".urlencode($data)."&keepalive=1";
+		$link_produce_chunked = "produce.php?data=".urlencode($data_chunked)."&keepalive=1";
+		/* $link_produce = "produce.php?data=".urlencode($data);
+		$link_produce_chunked = "produce.php?data=".urlencode($data_chunked); */
 		$link_play = $link_produce."&instruction=play";
 		$link_play_chunked = $link_produce_chunked."&instruction=play-all";
 		$link_play .= $link_options_play;
