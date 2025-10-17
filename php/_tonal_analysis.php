@@ -100,7 +100,7 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 		else if(isset($width_tonal_default_down[$current_directory][$i_mark])) $width_melodic_mark_down[$i_mark] = $width_tonal_default_down[$current_directory][$i_mark];
 		else $width_melodic_mark_down[$i_mark] = $width_default[$i_mark];
 		if(isset($_POST['reset_tonal_settings'])) $width_melodic_mark_down[$i_mark] = $width_default[$i_mark];
-		echo "&nbsp;&nbsp;±<input type=\"text\" style=\"border:none; text-align:center;\" name=\"width_melodic_mark_down_".$i_mark."\" size=\"3\" value=\"".$width_melodic_mark_down[$i_mark]."\">¢";
+		echo "&nbsp;&nbsp;±<input  style=\"border:none; text-align:center;\" name=\"width_melodic_mark_down_".$i_mark."\" size=\"3\" value=\"".$width_melodic_mark_down[$i_mark]."\">¢";
 		if(isset($_POST["weight_melodic_mark_down_".$i_mark]))
 			$weight_melodic_mark_down[$i_mark] = intval($_POST["weight_melodic_mark_down_".$i_mark]);
 		else if(isset($weight_tonal_default_down[$current_directory][$i_mark])) $weight_melodic_mark_down[$i_mark] = $weight_tonal_default_down[$current_directory][$i_mark];

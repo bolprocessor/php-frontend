@@ -177,9 +177,10 @@ function adjustToPeriod($event,$period) {
         if(!isset($this_object['end'])) unset($this_object);
         }
     $object = array_values($object);
-    $date_zero = $object[0]['start'];
+    $j0 = 0; while(!isset($object[$j0]['start']) AND $j0 < $imax) $j0++;
+    $date_zero = $object[$j0]['start'];
     $jmax = count($object);
-    for($j = 0; $j < $jmax; $j++) {
+    for($j = $j0; $j < $jmax; $j++) {
         $this_date = $object[$j]['start'] - $date_zero;
         $mismatch = fmod($this_date,$period);
         if($mismatch <> 0) {
@@ -216,9 +217,9 @@ function displayEvents($event,$arg) {
         echo "<tr>";
         for($i = 0; $i < $max_args; $i++) {
             echo "<td style=\"padding:3px;\">";
-            if($this_event['source'] > 0) echo "<span class=\"green-text\">";
+            if($this_event['source'] > 0) echo "<font color=\"green\">";
             echo $this_event[$arg[$i]];
-        if($this_event['source'] > 0) echo "</span>";
+        if($this_event['source'] > 0) echo "</font>";
             echo "</td>";
             }
         echo "</tr>";
@@ -235,17 +236,20 @@ function displayObjects($object) {
     echo "<tr>";
     echo $td.$ttd.$ttd."start".$ttd."end".$ttd."source".$ttd."part".$ttd."status".$ttd."data1".$ttd."data2"."</td>";
     echo "</tr>";
+    $origin = -1;
     for($j = 0; $j < $jmax; $j++) {
         echo "<tr>";
         $this_object = $object[$j];
+        if(!isset($this_object['start'])) continue;
+        if($origin == -1) $origin  = $this_object['start'];
         echo $td.$this_object['type'].$ttd;
-        if($this_object['source'] > 0) echo "<span class=\"green-text\">";
+        if($this_object['source'] > 0) echo "<font color=\"green\">";
         echo $this_object['note'];
-        if($this_object['source'] > 0) echo "</span>";
-        echo $ttd.$this_object['start'].$ttd.$this_object['end'].$ttd;
-        if($this_object['source'] > 0) echo "<span class=\"green-text\">";
+        if($this_object['source'] > 0) echo "</font>";
+        echo $ttd.($this_object['start'] - $origin).$ttd.($this_object['end'] - $origin).$ttd;
+        if($this_object['source'] > 0) echo "<font color=\"green\">";
         echo $this_object['source'];
-        if($this_object['source'] > 0) echo "</span>";
+        if($this_object['source'] > 0) echo "</font>";
         echo $ttd.$this_object['part'].$ttd.$this_object['status'].$ttd.$this_object['data1'].$ttd.$this_object['data2']."</td>";
         echo "</tr>";
         }

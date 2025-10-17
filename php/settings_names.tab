@@ -75,6 +75,7 @@
 "TraceCaptureAnalysis"	"Trace this analysis"		"1"	"1"
 "LIVE CODING (only grammars)"				
 "LiveGrammar"	"Follow grammar(s)"	"(Read https://bolprocessor.org/live-coding/)"	"1"	"0"
+"SyncChange"	"Synchronised change"		"1"	"0"
 "LiveSettings"	"Follow settings"		"1"	"0"
 "TraceLive"	"Trace changes"		"1"	"0"
 "-- end --"				

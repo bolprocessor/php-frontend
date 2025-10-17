@@ -143,6 +143,8 @@ if($need_to_save OR isset($_POST['savethisfile']) OR isset($_POST['compilegramma
 	$content = $_POST['thistext'];
 	if(isset($_POST['alphabet_file'])) $alphabet_file = $_POST['alphabet_file'];
 	else $alphabet_file = '';
+	if(isset($_POST['sync_change'])) $sync_change = $_POST['sync_change'];
+	else $sync_change = 0;
 	if(isset($_POST['note_convention'])) $note_convention = $_POST['note_convention'];
 //	if(isset($_POST['random_seed'])) $random_seed = $_POST['random_seed'];
 //	else $random_seed = 0;
@@ -159,6 +161,12 @@ if($need_to_save OR isset($_POST['savethisfile']) OR isset($_POST['compilegramma
 	$file_path = $temp_dir.$tracelive_folder.SLASH."_saved_grammar";
 	file_put_contents($file_path,$dir.$filename);
 	@chmod($file_path,$permissions);
+	$file_path = $temp_dir.$tracelive_folder.SLASH."_sync_grammar";
+	if($sync_change) {
+		file_put_contents($file_path,$dir.$filename);
+		@chmod($file_path,$permissions);
+		}
+	else @unlink($file_path);
 	$file_path = $temp_dir.$tracelive_folder.SLASH."_saved_alphabet";
 	if(isset($_POST['alphabet_file']) AND $_POST['alphabet_file'] <> '') {
 		$alphabet_file = $_POST['alphabet_file'];
@@ -343,7 +351,7 @@ if($csound_file <> '') {
 	if($csound_orchestra <> '') $found_orchestra_in_instruments = TRUE;
 	}
 else $csound_orchestra = '';
-$show_production = $trace_production = $note_convention = $non_stop_improvize = $p_clock = $q_clock = $striated_time = $max_time_computing = $produce_all_items = $random_seed = $quantization = $time_resolution = $live_grammar = $live_settings = 0;
+$show_production = $trace_production = $note_convention = $non_stop_improvize = $p_clock = $q_clock = $striated_time = $max_time_computing = $produce_all_items = $random_seed = $quantization = $time_resolution = $live_grammar = $live_settings = $sync_change = 0;
 $csound_default_orchestra = '';
 $diapason = 440; $C4key = 60;
 $dir_base = str_replace($bp_application_path,'',$dir);
@@ -371,6 +379,7 @@ if($settings_file <> '' AND file_exists($dir.$settings_file)) {
 		$non_stop_improvize = $settings['Improvize']['value'];
 		if(isset($settings['LiveGrammar'])) $live_grammar = $settings['LiveGrammar']['value'];
 		if(isset($settings['LiveSettings'])) $live_settings = $settings['LiveSettings']['value'];
+		if(isset($settings['SyncChange'])) $sync_change = $settings['SyncChange']['value'];
 		}
 	else {
 		$time_resolution = 10;
@@ -428,6 +437,7 @@ echo "</td>";
 echo "<input type=\"hidden\" name=\"settings_file\" value=\"".$settings_file."\">";
 echo "<input type=\"hidden\" name=\"csound_file\" value=\"".$csound_file."\">";
 echo "<input type=\"hidden\" name=\"tonality_file\" value=\"".$tonality_file."\">";
+echo "<input type=\"hidden\" name=\"sync_change\" value=\"".$sync_change."\">";
 $error = FALSE;
 if($produce_all_items > 0) $action = "produce-all";
 else $action = "produce";
@@ -616,6 +626,7 @@ if($settings_file <> '' AND file_exists($dir.$settings_file) AND $note_conventio
 else echo "• Note convention is <span class=\"red-text\">ENGLISH</span> by default<br />";
 if($live_grammar) echo "• <span class=\"red-text\">Live grammar</span> is set as per <span class=\"green-text\">‘".$settings_file."’</span><br />";
 if($live_settings) echo "• <span class=\"red-text\">Live settings</span> is set as per <span class=\"green-text\">‘".$settings_file."’</span><br />";
+if($sync_change) echo "• <span class=\"red-text\">Synchronised change</span> is set as per <span class=\"green-text\">‘".$settings_file."’</span><br />";
 if($file_format == "csound") {
 	if($csound_orchestra <> '' AND file_exists($dir.$csound_orchestra)) {
 		rename($dir.$csound_orchestra,$dir_csound_resources.$csound_orchestra);

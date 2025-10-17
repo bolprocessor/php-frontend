@@ -211,6 +211,8 @@ echo "</div>";
 	@unlink($file_path);
 	$file_path = $temp_dir.$tracelive_folder.SLASH."_saved_settings";
 	@unlink($file_path);
+	$file_path = $temp_dir.$tracelive_folder.SLASH."_sync_grammar";
+	@unlink($file_path);
 
 	$time_start = time();
 	$time_end = $time_start + 3;
