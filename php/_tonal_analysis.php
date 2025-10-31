@@ -359,7 +359,7 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 					}
 				if(!$found) continue;
 				}
-			$segment = create_chunks($line,$i_item,$temp_dir,$temp_folder,1,0,$measure_min,$measure_max,"slice");
+			$segment = create_parts($line,$i_item,$temp_dir,$temp_folder,1,0,$measure_min,$measure_max,"slice");
 	//		echo "<br />FINISH"; die();
 			if($segment['error'] == "break") break;
 			if($segment['error'] == "continue") continue;

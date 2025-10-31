@@ -109,7 +109,7 @@ $default_output_format = "midi";
 if(!isset($output_folder) OR $output_folder == '') $output_folder = "my_output";
 
 $maxchunk_size = 400; // Max number of measures contained in a chunk
-$minchunk_size = 10; // Min number of measures contained in a chunk
+$minchunk_size = 5; // Min number of measures contained in a chunk
 // $minchunk_size = 1; // Use this value to check the chunking to single measures
 
 $max_term_in_fraction = 32768; // Used to simplify fractions when importing MusicXML scores
@@ -191,7 +191,7 @@ foreach($dircontent as $thisfile) {
 	if(is_dir($temp_dir.$thisfile)) {
 		$table = explode('_',$thisfile);
 		$extension = end($table);
-		if($extension == "temp" AND count($table) > 2) {
+		if(($extension == "temp" AND count($table) > 2) OR ($extension == "live" AND count($table) > 1)) {
 			$id = $table[count($table) - 2];
 			if($old) {
 				if($id <> my_session_id()) {
@@ -1071,6 +1071,18 @@ function my_rmdir($src) {
     closedir($dir);
     @rmdir($src);
     return;
+	}
+
+function delete_folder($folder,$all) {
+	if(!file_exists($folder)) return;
+	$dircontent = scandir($folder);
+	foreach($dircontent as $thisfile) {
+		if($thisfile == '.' OR $thisfile == ".." OR $thisfile == ".DS_Store") continue;
+		if(is_dir($folder.SLASH.$thisfile)) my_rmdir($folder.SLASH.$thisfile);
+		else unlink($folder.SLASH.$thisfile);
+		}
+	if($all) @rmdir($folder);
+	return;
 	}
 
 function SaveObjectPrototypes($verbose,$dir,$filename,$temp_folder,$force) {
@@ -3529,8 +3541,7 @@ function nature_of_time($value) {
 	return '';
 	}
 
-function get_legato($c,$line,$pos) {
-	if($c <> '_') return -1;
+function get_legato($line,$pos) {
 	if(is_integer($pos1=strpos($line,"_legato(",$pos)) AND $pos1 == $pos) {
 		$pos2 = strpos($line,")",$pos1);
 		$legato_value = substr($line,$pos1 + 8,$pos2 - $pos1 - 8);
@@ -5228,5 +5239,52 @@ function my_file_put_contents($path,$content) {
 		return FALSE;
 		}
 	return TRUE;
+	}
+
+function zip_this_folder($folder) {
+	$rootPath = realpath($folder);
+	$zipFile = $folder.".zip";
+	if(file_exists($zipFile)) unlink($zipFile);
+	$zip = new ZipArchive();
+	$n = 0;
+	if($zip->open($zipFile, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
+		// Create recursive directory iterator
+		$files = new RecursiveIteratorIterator(
+			new RecursiveDirectoryIterator($rootPath),
+			RecursiveIteratorIterator::LEAVES_ONLY);
+		foreach ($files as $name => $file) {
+			// Skip directories (they will be added automatically)
+			if(is_integer($pos=strpos($file,".DS_Store"))) continue;
+			if (!$file->isDir()) {
+				// Get real and relative paths
+				$filePath = $file->getRealPath();
+				$relativePath = substr($filePath, strlen($rootPath) + 1);
+				// Add file to zip
+				$zip->addFile($filePath, $relativePath);
+				$n++;
+		//		echo $n." ".$file."<br />";
+				}
+			}
+		$zip->close();
+//		echo "Folder successfully zipped to $zipFile";
+		}
+	else {
+		echo "<p>⚠️ Failed to create zip file</p>";
+		return FALSE;
+		}
+	return $n;
+	}
+
+function nextShuffled($min,$max): int {
+    static $shuffled = [];
+    static $index = 0;
+    if(empty($shuffled) || $index >= count($shuffled)) {
+        $shuffled = range($min,$max);
+        shuffle($shuffled);
+        $index = 0;
+    	}
+    $value = $shuffled[$index];
+    $index++;
+    return $value;
 	}
 ?>

@@ -112,8 +112,11 @@ echo "</div>";
 	else $alphabet_path = '';
 	if(isset($_GET['format'])) $file_format = $_GET['format'];
 	else $file_format = '';
-	if(($instruction == "produce-all" OR $file_format <> '') AND isset($_GET['output'])) $output = urldecode($_GET['output']);
-	else $output = '';
+	$output = '';
+	if(($instruction == "produce-all" OR $file_format <> '') AND isset($_GET['output']))
+		$output = urldecode($_GET['output']);
+	if($instruction == "create_set" AND isset($_GET['output']))
+		$output = urldecode($_GET['output']);
 	if(isset($_GET['show_production'])) $show_production = TRUE;
 	else $show_production = FALSE;
 	if(isset($_GET['trace_production'])) $trace_production = TRUE;
@@ -126,7 +129,13 @@ echo "</div>";
 		}
 	if(isset($_GET['test'])) $check_command_line = TRUE;
 
-	if($instruction == "produce" OR $instruction == "produce-all" OR $instruction == "play" OR $instruction == "play-all" OR $instruction == "expand") {
+	if($instruction == "create_set") {
+		$training_set_folder = $midi_file;
+		if(!file_exists($training_set_folder)) mkdir($training_set_folder,0777,true);
+		}
+	else $training_set_folder = '';
+
+	if($instruction == "produce" OR $instruction == "produce-all" OR $instruction == "play" OR $instruction == "play-all" OR $instruction == "create_set" OR $instruction == "expand") {
 		echo "<script>";
 		echo "var sometext = \"<span id=warning><i>Process might take more than ".$max_sleep_time_after_bp_command." seconds.<br />To reduce computation time, you can increase </i>‘<b>Quantization</b>’<i> in the settings</span>\";";
 		echo "document.body.innerHTML = sometext";
@@ -161,12 +170,13 @@ echo "</div>";
 	// echo "output = ".$output."<br />";
 	$project_name = preg_replace("/\.[a-z]+$/u",'',$output);
 	// echo "project_name = ".$project_name."<br />";
-	if($instruction == "play" OR $instruction == "play-all")
+	if($instruction == "play" OR $instruction == "play-all" OR $instruction == "create_set")
 		$result_file = $project_name."_".$instruction."-result.html";
 	else $result_file = $project_name."-result.html";
     $result_file = str_replace(SLASH,'/',$result_file);
 	// echo "project_name = ".$project_name."<br />";
 	// echo "result_file = ".$result_file."<br />";
+	if($instruction == "create_set") $project_fullname = $this_title;
 	$project_fullname = str_replace($temp_dir,'',$project_fullname);
     $project_fullname = str_replace(SLASH,'/',$project_fullname);
 	$project_fullname = preg_replace("/\/[0-9]+\.bpda/u",'',$project_fullname);
@@ -174,7 +184,7 @@ echo "</div>";
 	$project_fullname = str_replace("_".my_session_id()."_temp",'',$project_fullname);
 	$table = explode('/',$project_fullname);
 	$project_fullname = end($table);
-    // echo "project_fullname = ".$project_fullname."<br />";
+    // echo "<br />project_fullname = ".$project_fullname."<br />";
     $trace_link = $temp_dir."trace_".my_session_id()."_".$project_fullname.".txt";
 	$tracefile = $temp_dir."trace_".my_session_id()."_".$project_fullname.".txt";
     $trace_link = str_replace(SLASH,'/',$trace_link);
@@ -227,6 +237,8 @@ echo "</div>";
 	$trace_csound = '';
 	
 	$command = $application_path.$console." ".$instruction;
+
+	// echo "<p>command = ".$command."</p>";
 	
 	if($grammar_path <> '') {
 		$thisgrammar = $grammar_path;
@@ -265,7 +277,7 @@ echo "</div>";
 	if($tonality_file <> '') $command .= " -to ".$dir_tonality_resources.$tonality_file;
 	
 	if($startup <> '') $command .= " --start ".$startup;
-	if($instruction == "produce" OR $instruction == "produce-all" OR $instruction == "play" OR $instruction == "play-all" OR $instruction == "expand") {
+	if($instruction == "produce" OR $instruction == "produce-all" OR $instruction == "play" OR $instruction == "play-all" OR $instruction == "expand" OR $instruction == "create_set") {
 		switch($file_format) {
 			case "data":
 			//	$command .= " -d -o ".$output;
@@ -288,6 +300,7 @@ echo "</div>";
 				break;
 			}
 		}
+	if($instruction == "produce-all") $command .= " -o ".$output;
 	if($tracefile <> '') $command .= " --traceout ".$tracefile;
 	if($show_production) $command .= " --show-production";
 	if($trace_production) $command .= " --trace-production";
@@ -349,6 +362,8 @@ if(windows_system()) {
     $command_show = $command = windows_command($command);
     $command_show = str_replace('^','',$command_show);
     }
+$command_show = str_replace("[","\[",$command_show);
+$command_show = str_replace("]","\]",$command_show);
 
 // display_darklight();
 echo "<p><small><b><span class=\"red-text\">BP3 ➡</span></b> ".$command_show."</small></p>\n";
@@ -411,27 +426,30 @@ if(isset($data_path) AND $data_path <> '') {
 		if($instruction == "play") echo "<p><b>Playing";
 		if($instruction == "play-all") echo "<p><b>Playing chunks";
 		if($instruction == "expand") echo "<p><b>Expanding";
-		if($item <> 0) echo " #".$item;
-		else echo ":";
-		echo "</b></p>";
-		echo "<p style=\"color:MediumTurquoise;\"><b>";
-		$table = explode(chr(10),$content);
-		for($i = $k = 0; $i < count($table); $i++) {
-			if($k > 800) {
-				echo "… … …<br />";
-				break;
+		if($instruction == "create_set") echo "<p><b>Creating AI training set</b>";
+		else {
+			if($item <> 0) echo " #".$item;
+			else echo ":";
+			echo "</b></p>";
+			echo "<p style=\"color:MediumTurquoise;\"><b>";
+			$table = explode(chr(10),$content);
+			for($i = $k = 0; $i < count($table); $i++) {
+				if($k > 800) {
+					echo "… … …<br />";
+					break;
+					}
+				$line = trim($table[$i]);
+				$line = recode_tags($line);
+				$line_show = $line;
+				if($line == '') continue;
+				$length = strlen($line);
+				if($length > 200)
+					$line_show = substr($line,0,50)."<br />&nbsp;&nbsp;... ... ...<br />".substr($line,-100,100);
+				echo $line_show."<br />";
+				$k += strlen($line_show);
 				}
-			$line = trim($table[$i]);
-			$line = recode_tags($line);
-			$line_show = $line;
-			if($line == '') continue;
-			$length = strlen($line);
-			if($length > 200)
-				$line_show = substr($line,0,50)."<br />&nbsp;&nbsp;... ... ...<br />".substr($line,-100,100);
-			echo $line_show."<br />";
-			$k += strlen($line_show);
+			echo "</b></p>";
 			}
-		echo "</b></p>";
 		}
 	}
 @unlink($stopfile); @unlink($panicfile); @unlink($pausefile); @unlink($continuefile);
@@ -515,7 +533,6 @@ if(!$no_error) {
 	}
 echo "<p>";
 
-// echo "<p>output = ".$output."</p>";
 if($output <> '') {
 	if($file_format == "csound") $output_link = nice_url($score_file);
 	else if($file_format == "midi") $output_link = '';
@@ -531,7 +548,7 @@ if($trace_production OR $instruction == "templates" OR $show_production) {
     }
 echo "</p>";
 	
-if($file_format == "midi") {
+if($file_format == "midi" AND $instruction <> "create_set") {
 	$midi_file_link = $midi_file;
 	if(file_exists($midi_file_link) AND filesize($midi_file_link) > 59) {
 //		echo "midi_file_link = ".$midi_file_link."<br />";
@@ -546,11 +563,17 @@ if($file_format == "midi") {
 		}
 	}
 
+if($instruction == "create_set" AND $training_set_folder <> '') {
+	check_training_folder($training_set_folder);
+	$number_zip = zip_this_folder($training_set_folder);
+	if($number_zip > 0)
+		echo "<hr><p><big>👉 Download <a href=\"".$training_set_folder.".zip\">zipped AI training set</a> (".($number_zip / 2)." samples)</big></p><hr>";
+	}
+
 // Prepare images if any
 $dircontent = scandir($temp_dir_abs);
 echo "<table style=\"background-color:snow; color:black; padding:0px;\"><tr>";
 $position_image = 0;
-// echo "<p>project_fullname = ".$project_fullname."</p>";
 foreach($dircontent as $thisfile) {
 	$table = explode('_',$thisfile);
 	if($table[0] <> "trace") continue;
@@ -578,7 +601,8 @@ foreach($dircontent as $thisfile) {
 	$table2 = explode(chr(10),$content);
 	$imax = count($table2);
 	$table3 = array();
-	$title1 = $this_name."_Image_".$number;
+//	$title1 = $this_name."_Image_".$number;
+	$title1 = rand(10000,99999); // Added 2025-10-28
 	$WidthMax = $HeightMax = 0;
 	$position_image++;
 	for($i = 0; $i < $imax; $i++) {
@@ -780,7 +804,7 @@ if($n_messages > 0) {
 	if($handle) {
 		$window_name = $grammar_name."_".rand(0,99)."_result";
 		if($bad_image) echo "<p>(<span class=\"red-text\"><b>*</b></span>) Syntax error in image: negative argument</p>";
-		echo "<p style=\"font-size:larger;\"><input class=\"save big\" onclick=\"window.open('".nice_url($result_file)."','".$window_name."','width=600,height=600,left=100'); return false;\" type=\"submit\" value=\"Show all ".$n_messages." lines\">";
+		echo "<p style=\"font-size:larger;\"><input class=\"save big\" onclick=\"window.open('".nice_url($result_file)."','".$window_name."','width=600,height=600,left=100'); return false;\" type=\"submit\" value=\"Show trace (".$n_messages." lines)\">";
 		if($warnings == 1) echo " <span class=\"blinking\">=> ".$warnings." warning</span>";
 		if($warnings > 1) echo " <span class=\"blinking\">=> ".$warnings." warnings</span>";
 		}
@@ -812,6 +836,27 @@ function check_image($link) {
 			}
 		}
 	return $result;
+	}
+
+function check_training_folder($folder) {
+	$rootPath = realpath($folder);
+//	echo "<p>".$rootPath."</p>";
+	$dircontent = scandir($folder);
+	foreach($dircontent as $thisfile) {
+		$ext = pathinfo($thisfile,PATHINFO_EXTENSION);
+		if($ext == "txt") {
+		//	echo $thisfile."<br />";
+			$table = explode('.',$thisfile);
+			$number = $table[0];
+			$midifile = $rootPath.SLASH.$number.".mid";
+		//	echo $midifile."<br />";
+			if(!file_exists($midifile)) {
+				echo "<span class=\"red-text\">➡</span> Deleting invalid sample ‘<span class=\"green-text\">".$thisfile."</span>’<br />";
+				unlink($rootPath.SLASH.$thisfile);
+				}
+			}
+		}
+	return;
 	}
 
 ?>

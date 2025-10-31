@@ -1795,15 +1795,45 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 			}
 		echo "</form>";
 		}
+	if(file_exists($temp_dir.$temp_folder)) {
+		delete_folder($temp_dir.$temp_folder,FALSE);
+		}
+
 	for($i = $i_item = 0; $i < $imax; $i++) {
 		$error_mssg = '';
 		$line = trim($table[$i]);
+	//	echo "i = ".$i."<br />";
 		if(is_integer($pos=strpos($line,"<?xml")) AND $pos == 0) break;
 		if(is_integer($pos=strpos($line,"//")) AND $pos == 0) continue;
 		if(is_integer($pos=strpos($line,"-")) AND $pos == 0) continue;
-		$segment = create_chunks($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxchunk_size,0,0,"chunk");
-		if($segment['error'] == "break") break;
-		if($segment['error'] == "continue") continue;
+	//	echo "imax = ".$imax."<br />";
+		if($i_item > 0)
+			$training_set_folder = $bp_application_path.$output_folder.SLASH."set_".$filename."[".($i_item + 1)."]";
+		else
+			$training_set_folder = $bp_application_path.$output_folder.SLASH."set_".$filename;
+		delete_folder($training_set_folder,TRUE);
+	/*	echo "<p>training_set_folder = ".$training_set_folder."</p>";
+		echo "<p>temp_dir = ".$temp_dir."</p>";
+		echo "<p>temp_folder = ".$temp_folder."</p>"; */
+	//	echo "<p>@@ i_item = ".$i_item." imax = ".$imax."</p>";
+		// Create 'units' = shortest sequences of polymetric structures for AI training sets
+		$segment = create_parts($line,$i_item,$temp_dir,$temp_folder,0,0,0,0,"units");
+		if($segment['error'] == "continue") {
+	//		echo "<p>continue i_item = ".$i_item."</p>";
+			continue;
+			}
+		$data_units = $segment['data_chunked'];
+		// Create 'chunks' = longer sequences of polymetric structures for real-time MIDI performance
+		$segment = create_parts($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxchunk_size,0,0,"chunk");
+		if($segment['error'] == "break") {
+	//		echo "<p>break i_item = ".$i_item."</p>";
+			break;
+			}
+		if($segment['error'] == "continue") {
+	//		echo "<p>continue i_item = ".$i_item."</p>";
+			continue;
+			}
+	//	echo "<p>@@@ i_item = ".$i_item." imax = ".$imax."</p>";
 		$i_item++;
 		$tie_mssg = $segment['tie_mssg'];
 		$data = $segment['data'];
@@ -1813,6 +1843,7 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 			$data_chunked = $chunked = FALSE;
 			$tie_mssg = '';
 			}
+		$link_options_create_set = $link_options;
 		$out[$i] = $output_file;
 		if($file_format == "csound") {
 			$cs = $output_file;
@@ -1833,33 +1864,34 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 		$output_file_expand = str_replace(".sco",'',$out[$i]);
 		$output_file_expand = str_replace(".mid",'',$output_file_expand);
 		$output_file_expand .= ".bpda";
-		$link_options_expand = $link_options."&output=".urlencode($bp_application_path.$output_folder.SLASH.$output_file_expand)."&format=data";
+		$link_options_expand = $link_options."&output=".urlencode($bp_application_path.$output_folder.SLASH.$output_file_expand)."&format=data"."&title=".urlencode($filename);
+		$link_options_create_set .= "&midifile=".urlencode($training_set_folder)."&format=midi&title=".urlencode($filename);
 		$link_produce = "produce.php?data=".urlencode($data)."&keepalive=1";
 		$link_produce_chunked = "produce.php?data=".urlencode($data_chunked)."&keepalive=1";
-		/* $link_produce = "produce.php?data=".urlencode($data);
-		$link_produce_chunked = "produce.php?data=".urlencode($data_chunked); */
+		$link_produce_create_set = "produce.php?data=".urlencode($data_units)."&keepalive=1";
 		$link_play = $link_produce."&instruction=play";
 		$link_play_chunked = $link_produce_chunked."&instruction=play-all";
 		$link_play .= $link_options_play;
 		$link_play_chunked .= $link_options_play;
 		$link_expand = $link_produce."&instruction=expand";
 		$link_expand .= $link_options_expand;
+		$link_create_set = $link_produce_create_set."&instruction=create_set";
+		$link_create_set .= $link_options_create_set;
 		$window_name_ = $window_name."_";
 		$window_name_expand = $window_name."_expand";
+		$window_name_create_set = $window_name."_create_set";
 		$window_name_chunked = $window_name."_chunked";
-	//	echo "<small>".urldecode($link_)."</small><br />";
-	//	echo "<small>".urldecode($link_expand)."</small><br />";
-	//	echo "<small>".urldecode($link__chunked)."</small><br />";
+		// echo "<small>link_play_chunked = ".urldecode($link_play_chunked)."</small><br /><br />";
+		// echo "<small>link_create_set = ".urldecode($link_create_set)."</small><br />";
 		$n1 = substr_count($line_recoded,'{');
 		$n2 = substr_count($line_recoded,'}');
 		if($n1 > $n2) $error_mssg .= "• <span class=\"red-text\">This score contains ".($n1-$n2)." extra ‘{'</span><br />";
 		if($n2 > $n1) $error_mssg .= "• <span class=\"red-text\">This score contains ".($n2-$n1)." extra ‘}'</span><br />";
-	/*	if($file_format == "rtmidi" AND file_exists($refresh_file)) $refresh_instruction = "document.getElementById('refresh').style.display = 'inline';";
-		else $refresh_instruction = ''; */
 		if($error_mssg == '') {
 			echo "<input id=\"Button\" class=\"produce\" onmouseover=\"checksaved();\" onclick=\"event.preventDefault(); if(checksaved()) {window.open('".$link_play."','".$window_name_."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" title=\"Play polymetric expression\" value=\"PLAY\">&nbsp;";
 			if($chunked) echo "<input class=\"produce\" onmouseover=\"checksaved();\" onclick=\"event.preventDefault(); if(checksaved()) {window.open('".$link_play_chunked."','".$window_name_chunked."','width=800,height=800,left=150,toolbar=yes'); return false;}\" type=\"submit\" name=\"produce\" title=\"Play polymetric expression in chunks (no graphics)\" value=\"PLAY safe (".$chunk_number." chunks)\">&nbsp;";
 			echo "&nbsp;<input class=\"edit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_expand."','".$window_name_expand."','width=800,height=800,left=100'); return false;\" type=\"submit\" name=\"produce\" title=\"Expand polymetric expression\" value=\"EXPAND\">&nbsp;";
+			if($chunked) echo "&nbsp;<input class=\"edit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_create_set."','".$window_name_create_set."','width=800,height=800,left=100'); return false;\" type=\"submit\" name=\"create_set\" title=\"Create MIDI file sample set for AI training\" value=\"CREATE SET FOR AI TRAINING\">&nbsp;";
 			}
 		if($tie_mssg <> '' AND $error_mssg == '') echo "<br />";
 		if($tie_mssg <> '') echo $tie_mssg;
@@ -1888,42 +1920,44 @@ echo "</script>\n";
 footer();
 echo "</body></html>";
 
-function create_chunks($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxchunk_size,$measure_min,$measure_max,$label) {
-	global $permissions;
+function create_parts($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxchunk_size,$measure_min,$measure_max,$label) {
+	global $permissions,$p_clock, $q_clock;
 // echo "@@@ measure_min = ".$measure_min."<br />";
 // echo "@@@ measure_max = ".$measure_max."<br />";
+//	$minchunk_size = 0;
 	$test_legato = FALSE;
 	$current_legato = array();
 	$i_layer = array();
 	$current_legato[0] = $i_layer[0] = $layer = $level_bracket = 0;
 	// $layer is the index of the line setting events on the phase diagram
 	// $level_bracket is the level of polymetric expression (or "measure")
-	// $label = chunk when chunking data, $label = slice when slicing (in harmonic analysis)
+	// $label = chunk when chunking data for PLAY safe, $label = unit when chunking data for AI training set, $label = slice when slicing (in harmonic analysis)
 	// In chunking, we trace whether legato() instructions have been reset before the end of each "measure",
 	// i.e. polymetric expression at the lowest $level_bracket
 	// We also trace note ties which have not been completely bound at the end of the measure
 	// Both conditions prohibit chunking the item at the end of the measure
 	$tie_mssg = '';
 	$segment['error'] = $tonal_scale = $initial_tempo = '';
+	if($label == "units" AND $p_clock <> $q_clock)
+		$initial_tempo = " _tempo(".$q_clock."/".$p_clock.") ";
 	if(is_integer($pos=strpos($line,"[")) AND $pos == 0)
 		$title_this = preg_replace("/\[([^\]]+)\].*/u",'$1',$line);
 	else $title_this = '';
 	$initial_controls = '';
-	if(is_integer($pos=strpos($line,"{"))) { // Fixed 2024-05-19
-//	if($label <> "chunk" AND is_integer($pos=strpos($line,"{"))) {
+	if(is_integer($pos=strpos($line,"{"))) {
 		$initial_controls = trim(substr($line,0,$pos));
 		$initial_controls = preg_replace("/\[[^\]]*\]/u",'',$initial_controls);
 	//	echo "@@@ initial_controls = ".$initial_controls."<br />";
-		if($label <> "chunk") {
+		// Pick up initial tempo if any
+		$tempo = preg_replace("/.*_tempo\(([^\)]+)\).*/u","$1",$initial_controls);
+		if($tempo <> $initial_controls) $initial_tempo .= "_tempo(".$tempo.") ";
+		//	echo "@@@ initial_tempo = ".$initial_tempo."<br />";
+		if($label <> "chunk" AND $label <> "units") {
 			// Pick up specified tonal scale if any
 			$scale = preg_replace("/.*_scale\(([^\,]+)[^\)]+\).+/u","$1",$line);
 			if($scale <> $line) $tonal_scale = $scale;
 		//	echo "@@@ tonal_scale = ".$tonal_scale."<br />";
 		//	echo $scale."<br />".$line."<br />";
-			// Pick up initial tempo if any
-			$tempo = preg_replace("/.*_tempo\(([^\)]+)\).*/u","$1",$initial_controls);
-			if($tempo <> $initial_controls) $initial_tempo = "_tempo(".$tempo.")";
-		//	echo "@@@ initial_tempo = ".$initial_tempo."<br />";
 			$initial_controls = '';
 			}
 		}
@@ -1963,33 +1997,70 @@ function create_chunks($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxc
 	if($segment['error'] <> '') return $segment;
 	$line_recoded = recode_entities($line);
 	$data = $temp_dir.$temp_folder.SLASH.$i_item.".bpda"; 
-	$handle = fopen($data,"w");
-	fwrite($handle,$line_recoded."\n");
-	fclose($handle);
-	chmod($data,$permissions);
+	if($label == "chunk") {
+		$hdl = fopen($data,"w");
+		if(fwrite($hdl,$line_recoded."\n") === FALSE) echo "<p>⚠️ Cannot write ".$data."<br />Probably permission issue…</p>";
+		fclose($hdl);
+		chmod($data,$permissions);
+		}
 	$chunked = FALSE;
 	$tie = $n = $brackets = $total_ties = 0;
 	$line_chunked = ''; $first = TRUE; $chunk_number = 1;
-	$start_chunk = "[".$label;
-	if($label == "chunk") $start_chunk .= " 1";
+	if($label == "units") $start_chunk = "[";
+	else $start_chunk = "[".$label." ";
+	if($label == "chunk" OR $label == "units") $start_chunk .= "1";
 	$start_chunk .= "] ";
+	if($label == "slice") $start_chunk = '';
 	$test_legato = FALSE;
+	$level_bracket = $n = 0;
+	if($label == "units") {
+		for($k = 0; $k < strlen($line_recoded); $k++) {
+			$c = $line_recoded[$k];
+			if($c == '{') $level_bracket++;
+			if($c == '}') {
+				$level_bracket--;
+				if($level_bracket == 0) $n++;
+				}
+			}
+		if($n < 3) {
+	//		echo "@@@ item = ".$i_item." n = ".$n."<br />";
+			$segment['data_chunked'] = '';
+			$segment['chunked'] = FALSE;
+			$segment['error'] = '';
+			return $segment;
+			}
+		}
+	$level_bracket = $n = 0;
+	$all_lines_chunked = '';
+	if($label == "units") {
+		$number_expressions = nextShuffled(1,5);
+	//	$number_expressions = 1;
+		$start_chunk .= " [".$number_expressions." structures]";
+		}
+	else $number_expressions = 1;
+//	echo "@@@ ok ".$i_item."<br />";
 	for($k = 0; $k < strlen($line_recoded); $k++) {
 		$line_chunked .= $start_chunk;
+		if($label == "units" AND $start_chunk <> '') {
+			$line_chunked .= $initial_tempo;
+			}
 		$start_chunk = '';
 		$c = $line_recoded[$k];
+	//	if($label == "units" AND $c == '&') continue; // For the time being we ignore tied notes when building AI training sample sets
 		if($k < (strlen($line_recoded) - 1) AND ctype_alnum($c) AND $line_recoded[$k+1] == '&') {
 			$tie++; $total_ties++;
 			}
 		if($k < (strlen($line_recoded) - 1) AND $c == '&' AND ctype_alnum($line_recoded[$k+1])) $tie--;
 		if($c == '.' AND $k > 0 AND $line_recoded[$k-1]) $brackets++;
-		$get_legato = get_legato($c,$line_recoded,$k);
-		if($get_legato >= 0) {
-			$current_legato[$layer] = $get_legato;
-			if($test_legato) echo "_legato(".$current_legato[$layer].") layer ".$layer." level ".$level_bracket."<br />";
+		if($c == '_') {
+			$get_legato = get_legato($line_recoded,$k);
+			if($get_legato >= 0) {
+				$current_legato[$layer] = $get_legato;
+				if($test_legato) echo "_legato(".$current_legato[$layer].") layer ".$layer." level ".$level_bracket."<br />";
+				}
 			}
 		if($c == '{') {
-			if($level_bracket == 0 AND !$first) $line_chunked .= $initial_controls;
+			if($level_bracket == 0 AND !$first AND $label <> "units") $line_chunked .= $initial_controls;
 			$first = FALSE;
 			$line_chunked .= $c;
 			$brackets++;
@@ -2001,54 +2072,77 @@ function create_chunks($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxc
 			$layer++;
 			if(!isset($current_legato[$layer])) $current_legato[$layer] = 0;
 			}
-		$line_chunked .= $c;
+		if(!$first OR $label <> "units") $line_chunked .= $c;
+		$linebreak = "\n";
 		if($c == '}') {
 			$level_bracket--;
 			$layer = $i_layer[$level_bracket];
 			if($level_bracket == 0) {
 				$n++;
-				$ok_legato = 1;
-				foreach($current_legato as $thisfield => $the_legato) {
-					if($test_legato) echo "(".$thisfield." -> ".$the_legato.")";
-					if($the_legato > 0) {
-						$ok_legato = 0;
+				if($n >= $number_expressions) {
+					$ok_legato = 1;
+					foreach($current_legato as $thisfield => $the_legato) {
+						if($test_legato) echo "(".$thisfield." -> ".$the_legato.")";
+						if($the_legato > 0) $ok_legato = 0;
 						}
+				/*	if($i_item < 4) echo "@@@ ok item = ".$i_item." label = ".$label." n = ".$n."<br />";
+					if($i_item == 2 AND $label == "units") {
+						echo "item #".$i_item." ok_legato = ".$ok_legato." n = ".$n." minchunk_size = ".$minchunk_size." maxchunk_size = ".$maxchunk_size." tie = ".$tie."<br />";
+						echo $line_chunked."<br />";
+						} */
+					if(($label == "units") OR (($label == "slice" OR $ok_legato) AND (($tie <= 0 AND $n >= $minchunk_size) OR ($maxchunk_size > 0 AND $n > $maxchunk_size)))) {
+						$current_legato = $i_layer = array();
+						$current_legato[0] = $i_layer[0] = $layer = 0;
+						if($label == "chunk" AND abs($tie) > 0)
+							$tie_mssg .=  "• <span class=\"red-text\">".$tie." unbound tie(s) in chunk #".$chunk_number."</span><br />";
+						if($label == "chunk" AND !$ok_legato)
+							$tie_mssg .=  "• <span class=\"red-text\">legato(s) may be truncated after chunk #".$chunk_number."</span><br />"; 
+						$line_chunked .= $linebreak;
+						$line_chunked = delete_orphan_ties($line_chunked);
+				//		if($i_item == 1) echo $line_chunked."<br />";
+						$all_lines_chunked .= $line_chunked;
+						$line_chunked = '';
+						$tie = $n = 0;
+						if($test_legato) echo " => ".$label." #".$chunk_number;
+						if($label == "units") {
+							$number_expressions = nextShuffled(1,5);
+				//			$number_expressions = 1;
+							$start_chunk = "[";
+							}
+						else $start_chunk = "[".$label." ";
+						if($label == "chunk" OR $label == "units") $start_chunk .= (++$chunk_number);
+						$start_chunk .= "] ";
+						if($label == "units") $start_chunk .= " [".$number_expressions." structures]";
+						if($label == "slice") $start_chunk = '';
+						if($k < (strlen($line_recoded) - 1) OR $label == "slice") $chunked = TRUE;
+						}
+					if($test_legato) echo "<br />";
 					}
-			//	if($label == "slice") echo "ok_legato = ".$ok_legato." n = ".$n." minchunk_size = ".$minchunk_size." maxchunk_size = ".$maxchunk_size." tie = ".$tie."<br />";
-				if((($label == "slice" OR $ok_legato) AND $tie <= 0 AND $n >= $minchunk_size) OR ($maxchunk_size > 0 AND $n > $maxchunk_size)) {
-					$current_legato = $i_layer = array();
-					$current_legato[0] = $i_layer[0] = $layer = 0;
-					if($label == "chunk" AND abs($tie) > 0)
-						$tie_mssg .=  "• <span class=\"red-text\">".$tie." unbound tie(s) in chunk #".$chunk_number."</span><br />";
-					if($label == "chunk" AND !$ok_legato)
-						$tie_mssg .=  "• <span class=\"red-text\">legato(s) may be truncated after chunk #".$chunk_number."</span><br />"; 
-					$line_chunked .= "\n";
-					$tie = $n = 0;
-					if($test_legato) echo " => ".$label." #".$chunk_number;
-					$start_chunk = "[".$label;
-					if($label == "chunk") $start_chunk .= " ".(++$chunk_number);
-					$start_chunk .= "] ";
-					if($k < (strlen($line_recoded) - 1) OR $label == "slice") $chunked = TRUE;
-					}
-				if($test_legato) echo "<br />";
 				}
 			}
 		}
+//	$chunked = TRUE;
+//	if($chunked OR $label == "units") {
+//	if($i_item == 2) echo "(".$i_item.") ".$all_lines_chunked."<br />";
 	if($chunked) {
+		$all_lines_chunked = preg_replace("/ +/u",' ',$all_lines_chunked);
+		$all_lines_chunked = str_replace("{ ","{",$all_lines_chunked);
 		if($total_ties > 0) $tie_mssg .=  " <i>total ".$total_ties." tied notes</i><br />";
-		$data_chunked = $temp_dir.$temp_folder.SLASH.$i_item."-".$label.".bpda";
-	//	echo $data_chunked."<br />";
+		if($label == "units")
+			$data_chunked = $temp_dir.$temp_folder.SLASH.$i_item."_".$label.".txt";
+		else
+			$data_chunked = $temp_dir.$temp_folder.SLASH.$i_item."-".$label.".bpda";
 		$handle = fopen($data_chunked,"w");
-		fwrite($handle,$line_chunked."\n");
+		fwrite($handle,$all_lines_chunked.$linebreak);
 		fclose($handle);
-		chmod($data_chunked,$permissions);
+		@chmod($data_chunked,$permissions);
 		}
 	else $data_chunked = '';
 	$segment['data'] = $data;
 	$segment['line_recoded'] = $line_recoded;
 	$segment['tie_mssg'] = $tie_mssg;
 	$segment['chunked'] = $chunked;
-	$segment['chunk_number'] = $chunk_number;
+	$segment['chunk_number'] = $chunk_number - 1;
 	$segment['data_chunked'] = $data_chunked;
 	$segment['title_this'] = $title_this;
 	$segment['tonal_scale'] = $tonal_scale;
@@ -2092,6 +2186,83 @@ function save($this_file,$filename,$top_header,$save_content) {
 		echo "</div>"; 
 		}
 	return;
+	}
+
+function delete_orphan_ties($data) {
+	// Work in progress: it still keeps erratic ties, which are difficult to predict.
+//	global $i_item;
+	$i_item = 0;
+	if(trim($data) == '') return $data;
+//	return $data;
+	$len = strlen($data);
+	$notechar = $note_octave = FALSE;
+	$data2 = $this_note = '';
+	$hit = array();
+	for($i = 0; $i < $len; $i++) {
+		$c = $data[$i];
+		if(preg_match('/^([a-zA-Z]|#)$/',$c)) {
+			$notechar = TRUE;
+			$note_octave = FALSE;
+			$this_note .= $c;
+			$data2 .= $c;
+			continue;
+			}
+		if($notechar AND preg_match('/^([0-9])$/',$c)) {
+			$note_octave = TRUE;
+			$this_note .= $c;
+			$data2 .= $c;
+			continue;
+			}
+		if($c == '&') {
+			$replacement = '&';
+			if($note_octave AND $this_note <> '') {
+				$pos = $i;
+				if($i_item == 1) echo $i." -> ".$this_note."<br />";
+				do {
+					$pos2 = 0;
+					if(is_integer($pos2=strpos($data,$this_note,$pos)) AND $pos2 > $pos) {
+						if($data[$pos2 - 1] == '&') {
+							if($i_item == 1) echo "@ ".($pos2 - 1)."<br />";
+							$replacement = ';';
+							$hit[$pos2 - 1] = $this_note;
+							// Still, there is no certainty that the time of this note is later than the time of its linked occurrence.
+							break;
+							}
+						else $pos = $pos2;
+						}
+					else break;
+					}
+				while(TRUE);
+				}
+			else {
+				if(isset($hit[$i])) {
+					$next_note = '';
+					for($j = ($i + 1); $j < $len; $j++) {
+						$d = $data[$j];
+						if(preg_match('/^([a-zA-Z]|#)$/',$d)) $next_note .= $d;
+						else if(preg_match('/^([0-9])$/',$d)) $next_note .= $d;
+						else break;
+						}
+					if($i_item == 1) echo "hit = ".$hit[$i].", next_note = ".$next_note."<br />";
+					if($hit[$i] == $next_note) {
+						if($i_item == 1) echo "@@ ".($i)."<br />";
+						$replacement = '§';
+						}
+					}
+				}
+			$data2 .= $replacement;
+			$notechar = $note_octave = FALSE;
+			}
+		else {
+			$data2 .= $c;
+			$notechar = $note_octave = FALSE;
+			$this_note = '';
+			}
+		}
+	$data = str_replace('&','',$data2);
+	$data = str_replace(';','&',$data);
+	$data = str_replace('§','&',$data);
+	return $data;
 	}
 
 // The following does not work yet. It is meant to handle "save" when typing command S
