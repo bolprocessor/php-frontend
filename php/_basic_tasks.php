@@ -5276,6 +5276,7 @@ function zip_this_folder($folder) {
 	}
 
 function nextShuffled($min,$max): int {
+	// Not used
     static $shuffled = [];
     static $index = 0;
     if(empty($shuffled) || $index >= count($shuffled)) {

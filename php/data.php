@@ -1586,7 +1586,7 @@ if(!isset($_POST['analyze_tonal'])) {
 
 	echo "<div style=\"float:right; vertical-align:middle; background-color:transparent;\">Import MusicXML: <input   onclick=\"if(!checksaved()) return false;\" type=\"file\" name=\"music_xml_import\">&nbsp;<input type=\"submit\" onclick=\"if(!checksaved()) return false;\" class=\"save\" value=\"← IMPORT\"></div>";
 
-	echo "<div style=\"text-align:left; background-color:transparent;\"><input id=\"saveButton\" class=\"save big\"  type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".begin_with(20,$filename)."’\"></div>";
+	echo "<div style=\"text-align:left; background-color:transparent;\"><input id=\"saveButton\" class=\"save big\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".begin_with(15,$filename)."’\"></div>";
 
 	$content = do_replace($content);
 
@@ -1890,8 +1890,11 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 		if($error_mssg == '') {
 			echo "<input id=\"Button\" class=\"produce\" onmouseover=\"checksaved();\" onclick=\"event.preventDefault(); if(checksaved()) {window.open('".$link_play."','".$window_name_."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" title=\"Play polymetric expression\" value=\"PLAY\">&nbsp;";
 			if($chunked) echo "<input class=\"produce\" onmouseover=\"checksaved();\" onclick=\"event.preventDefault(); if(checksaved()) {window.open('".$link_play_chunked."','".$window_name_chunked."','width=800,height=800,left=150,toolbar=yes'); return false;}\" type=\"submit\" name=\"produce\" title=\"Play polymetric expression in chunks (no graphics)\" value=\"PLAY safe (".$chunk_number." chunks)\">&nbsp;";
-			echo "&nbsp;<input class=\"edit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_expand."','".$window_name_expand."','width=800,height=800,left=100'); return false;\" type=\"submit\" name=\"produce\" title=\"Expand polymetric expression\" value=\"EXPAND\">&nbsp;";
-			if($chunked) echo "&nbsp;<input class=\"edit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_create_set."','".$window_name_create_set."','width=800,height=800,left=100'); return false;\" type=\"submit\" name=\"create_set\" title=\"Create MIDI file sample set for AI training\" value=\"CREATE SET FOR AI TRAINING\">&nbsp;";
+			echo "&nbsp;<input class=\"edit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_expand."','".$window_name_expand."','width=800,height=800,left=100'); return false;\" type=\"submit\" name=\"produce\" title=\"Expand polymetric expression\" value=\"EXPAND\">";
+			if($chunked) {
+				echo "<br  /><input id=\"saveButton\" class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"refresh\"> <span class=\"red-text\">➡ </span>";
+				echo "<input class=\"edit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_create_set."','".$window_name_create_set."','width=800,height=800,left=100'); return false;\" type=\"submit\" name=\"create_set\" title=\"Create MIDI file sample set for AI training\" value=\"CREATE SET FOR AI TRAINING\">";
+				}
 			}
 		if($tie_mssg <> '' AND $error_mssg == '') echo "<br />";
 		if($tie_mssg <> '') echo $tie_mssg;
@@ -2033,7 +2036,8 @@ function create_parts($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxch
 	$level_bracket = $n = 0;
 	$all_lines_chunked = '';
 	if($label == "units") {
-		$number_expressions = nextShuffled(1,5);
+	//	$number_expressions = nextShuffled(1,5);
+		$number_expressions = rand(1,5);
 	//	$number_expressions = 1;
 		$start_chunk .= " [".$number_expressions." structures]";
 		}
@@ -2105,7 +2109,8 @@ function create_parts($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxch
 						$tie = $n = 0;
 						if($test_legato) echo " => ".$label." #".$chunk_number;
 						if($label == "units") {
-							$number_expressions = nextShuffled(1,5);
+				//			$number_expressions = nextShuffled(1,5);
+							$number_expressions = rand(1,5);
 				//			$number_expressions = 1;
 							$start_chunk = "[";
 							}
