@@ -1889,10 +1889,10 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 		if($n2 > $n1) $error_mssg .= "• <span class=\"red-text\">This score contains ".($n2-$n1)." extra ‘}'</span><br />";
 		if($error_mssg == '') {
 			echo "<input id=\"Button\" class=\"produce\" onmouseover=\"checksaved();\" onclick=\"event.preventDefault(); if(checksaved()) {window.open('".$link_play."','".$window_name_."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" title=\"Play polymetric expression\" value=\"PLAY\">&nbsp;";
-			if($chunked) echo "<input class=\"produce\" onmouseover=\"checksaved();\" onclick=\"event.preventDefault(); if(checksaved()) {window.open('".$link_play_chunked."','".$window_name_chunked."','width=800,height=800,left=150,toolbar=yes'); return false;}\" type=\"submit\" name=\"produce\" title=\"Play polymetric expression in chunks (no graphics)\" value=\"PLAY safe (".$chunk_number." chunks)\">&nbsp;";
+			if($chunked) echo "<input class=\"produce\" onmouseover=\"checksaved();\" onclick=\"event.preventDefault(); if(checksaved()) {window.open('".$link_play_chunked."','".$window_name_chunked."','width=800,height=800,left=150,toolbar=yes'); return false;}\" type=\"submit\" name=\"produce\" title=\"Play polymetric expression in chunks to save RAM\" value=\"PLAY safe (".$chunk_number." chunks)\">&nbsp;";
 			echo "&nbsp;<input class=\"edit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_expand."','".$window_name_expand."','width=800,height=800,left=100'); return false;\" type=\"submit\" name=\"produce\" title=\"Expand polymetric expression\" value=\"EXPAND\">";
 			if($chunked) {
-				echo "<br  /><input id=\"saveButton\" class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"refresh\"> <span class=\"red-text\">➡ </span>";
+				echo "<br  /><input id=\"saveButton\" class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" title=\"Create a new sample set\" value=\"refresh\"> <span class=\"red-text\">➡ </span>";
 				echo "<input class=\"edit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_create_set."','".$window_name_create_set."','width=800,height=800,left=100'); return false;\" type=\"submit\" name=\"create_set\" title=\"Create MIDI file sample set for AI training\" value=\"CREATE SET FOR AI TRAINING\">";
 				}
 			}
