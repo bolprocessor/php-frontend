@@ -56,6 +56,8 @@ if(isset($_POST['ignore'])) {
 if(isset($_GET['startup'])) $startup = $_GET['startup'];
 else $startup = '';
 
+$is_minimised = isset($_GET['minimised']);
+
 if(isset($_GET['instruction'])) $instruction = $_GET['instruction'];
 else $instruction = '';
 if($instruction == '') {
@@ -73,6 +75,7 @@ if(isset($_GET['score'])) $score_file = $_GET['score'];
 else $score_file = '';
 if(isset($_GET['midifile'])) $midi_file = $_GET['midifile'];
 else $midi_file = '';
+// if($is_minimised) $midi_file .= "_mini";
 if(isset($_GET['tonality_file'])) $tonality_file = $_GET['tonality_file'];
 else $tonality_file = '';
 if(isset($_GET['item'])) $item = $_GET['item'];

@@ -413,5 +413,11 @@
         "value": "0",
         "unit": "",
         "boolean": "1"
+    },
+    "TraceMinimise": {
+        "name": "Trace item #",
+        "value": "0",
+        "unit": "(0 for none)",
+        "boolean": "0"
     }
 }

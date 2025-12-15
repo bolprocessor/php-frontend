@@ -96,6 +96,8 @@ if(!file_exists($temp_dir.$temp_folder)) {
 	mkdir($temp_dir.$temp_folder);
 	}
 $music_xml_file = $temp_dir.$temp_folder.SLASH."temp.musicxml";
+if(isset($_POST['cancel']) AND file_exists($music_xml_file)) unlink($music_xml_file); // Added 2025-12-15
+
 $capture_file = $temp_dir."trace_".my_session_id()."_".$filename."_capture";
 $more_data = ''; $dynamic_control = array();
 $link_edit = "data.php";
@@ -562,6 +564,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$convert_score = convert_musicxml($this_score,$repeat_section,$divisions,$fifths,$mode,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$create_channels,$include_breaths,$include_slurs,$include_measures,$ignore_fermata,$ignore_mordents,$chromatic_mordents,$ignore_turns,$chromatic_turns,$ignore_trills,$chromatic_trills,$ignore_arpeggios,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections,$trace_tempo,$trace_ornamentations,$breath_length,$breath_tag,$trace_measures,$measures,$accept_signs,$include_parts,$number_parts,$apply_rndtime,$rndtime,$apply_rndvel,$rndvel,$extend_last_measure,$number_measures,$accept_pedal);
 			$data .= $convert_score['data'];
 			$report = $convert_score['report'];
+			$data = normalize_ampersand($data); // Added 2025-12-15 happened in La Campanella
 			$data = preg_replace("/\s+/u"," ",$data);
 			$data = str_replace(",}","}",$data);
 			$data = str_replace(" }","}",$data);
@@ -1083,6 +1086,68 @@ if(isset($_POST['delete_velocity'])) {
 	$need_to_save = TRUE;
 	}
 
+if(isset($_POST['minimise_data'])) {
+	$content = @file_get_contents($this_file,TRUE);
+	$extract_data = extract_data(TRUE,$content);
+	$newcontent = $extract_data['content'];
+	$table = explode("\n",$newcontent);
+	$newtable = array();
+	$verbose = FALSE;
+	$already_said = FALSE;
+	$nbre = 0; $i_item = 0;
+	if(isset($_POST['trace_minimise'])) $trace_minimise = $_POST['trace_minimise'];
+	else $trace_minimise = 0;
+	foreach($table AS $line) {
+		if(trim($line) <> '' AND (!is_integer($pos=strpos($line,"//")) OR $pos <> 0) AND is_integer(strpos($line,"{")) AND !is_integer(strpos($line,"…")) AND !is_integer(strpos($line,"_rest"))) {
+			$i_item++;
+			if($i_item == $trace_minimise) {
+				$trace = TRUE;
+				if(!$already_said) echo "<p><span class=\"green-text\">// The following is a trace of the minimisation of item #".$i_item."<br />// Read code in \"data.php\" minimise_item() for details<br />--------------------------</span></p><blockquote>";
+				$already_said = TRUE;
+				}
+			else $trace = FALSE;
+			$minimise_item = minimise_item($line,$trace,$verbose,$nbre);
+			if(!$minimise_item['skip']) {
+				$nbre += $minimise_item['nbre'];
+				$errors = $minimise_item['error'];
+				if($errors == '') {
+					$newline = "[".$minimised_token."] ".$minimise_item['line'];
+					$line .= "\n".$newline."\n";
+					}
+				else echo "<p><span class=\"red-text\">ERROR:</span> ".$errors."</p>";
+				}
+			if($i_item == $trace_minimise) echo "</blockquote><span class=\"green-text\">--------------------------<br />// End of trace </span></p>";
+			}
+	//	echo $line."<br />";
+		$newtable[] = $line;
+		}
+	$newcontent = implode("\n",$newtable);
+	$_POST['thistext'] = $newcontent;
+	$no_save_midiresources = TRUE;
+	$need_to_save = TRUE;
+	}
+
+if(isset($_POST['undo_minimise_data'])) {
+	$content = @file_get_contents($this_file,TRUE);
+	$extract_data = extract_data(TRUE,$content);
+	$newcontent = $extract_data['content'];
+	$table = explode("\n",$newcontent);
+	$newtable = array();
+	$trace = FALSE;
+	$verbose = FALSE;
+	$nbre = 0;
+	foreach($table AS $line) {
+	//	echo $line."<br />";
+		if(is_integer($pos=strpos($line,"[".$minimised_token."]"))) continue;
+	//	echo $line."<br />";
+		$newtable[] = $line;
+		}
+	$newcontent = implode("\n",$newtable);
+	$_POST['thistext'] = $newcontent;
+	$no_save_midiresources = TRUE;
+	$need_to_save = TRUE;
+	}
+
 $change_velocity_average = $change_volume_average = 64;
 $change_velocity_max = $change_volume_max = 127;
 if(isset($_POST['change_velocity_average'])) $change_velocity_average = abs(intval($_POST['change_velocity_average']));
@@ -1221,6 +1286,7 @@ if($need_to_save OR isset($_POST['savethisfile'])) {
 			}
 		else save_midiressources($filename,FALSE);
 		}
+	if(isset($_POST['savethisfile']) AND file_exists($music_xml_file)) unlink($music_xml_file); // Added 2025-12-15
 	}
 else read_midiressources($filename);
 
@@ -1286,6 +1352,7 @@ $found_orchestra_in_settings = $quantize = FALSE;
 $trace_capture_analysis = TRUE;
 $minimum_period = 200; // milliseconds
 $advance_time = 10; // seconds
+$trace_minimise = 0;
 $dir_base = str_replace($bp_application_path,'',$dir);
 $url_settings = "settings.php?file=".urlencode($dir_base.$settings_file);
 if($settings_file <> '' AND file_exists($dir.$settings_file)) {
@@ -1313,6 +1380,7 @@ if($settings_file <> '' AND file_exists($dir.$settings_file)) {
 		$quantization = $settings['Quantization']['value'];
 		$quantize = $settings['Quantize']['value'];
 		$nature_of_time_settings = $settings['Nature_of_time']['value'];
+		if(isset($settings['TraceMinimise']['value'])) $trace_minimise = $settings['TraceMinimise']['value'];
 		if(isset($settings['MinPeriod']['value'])) $minimum_period = intval($settings['MinPeriod']['value']);
 		if(isset($settings['TraceCaptureAnalysis']['value'])) $trace_capture_analysis = intval($settings['TraceCaptureAnalysis']['value']);
 		}
@@ -1416,7 +1484,6 @@ if(isset($_POST['new_file_format'])) {
 	$file_format = $_POST['new_file_format'];
 	if($file_format == "rtmidi") read_midiressources($filename);
 	$no_save_midiresources = TRUE;
-//	echo "<p>@@ file_format = ".$file_format.", filename = ".$filename."</p>";
 	}
 save_settings2("data_file_format",$filename,$file_format); // To _settings.php
 $output_file = $default_output_name;
@@ -1719,7 +1786,7 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 		$found = TRUE;
 		}
 	if($found_tempo > 0) {
-		echo "<input class=\"edit\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"delete_tempo\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _tempo()\">&nbsp;";
+		echo "<input class=\"edit\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"delete_tempo\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _tempo()\"><br />";
 		$found = TRUE;
 		}
 	if($found_volume > 0) {
@@ -1728,7 +1795,7 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 		$found = TRUE;
 		}
 	if($found_velocity > 0) {
-		echo "<input class=\"edit\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"delete_velocity\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _vel()\">&nbsp;";
+		echo "<input class=\"edit\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"delete_velocity\" formaction=\"".$url_this_page."#topedit\" value=\"DELETE _vel()\"> ";
 		echo "<input class=\"edit\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"this.form.target='_self';return true;\" name=\"velocity_volume\" formaction=\"".$url_this_page."#topedit\" value=\"velocity -> volume\">&nbsp;";
 		$found = TRUE;
 		}
@@ -1771,10 +1838,30 @@ if($imax > 0 AND (substr_count($content,'{') > 0 OR substr_count($content,"-da."
 		}
 	}
 echo "</td>";
+
 $window_name = window_name($filename);
 if(!$hide AND !isset($_POST['analyze_tonal'])) {
 	echo "<td style=\"background-color:transparent;\">";
+	if(!isset($_POST['minimise'])) {
+		$data_is_minimised = data_is_minimised($this_file);
+		if($data_is_minimised) $disable_this = " disabled";
+		else $disable_this = '';
+		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+		if(!isset($trace_minimise)) $trace_minimise = 0;
+		if(!$data_is_minimised) {
+			if(substr_count($content,"}") > 0 AND !file_exists($music_xml_file)) {
+				echo "<input type=\"hidden\" name=\"trace_minimise\" value=\"".$trace_minimise."\">";
+				echo "<p><input type=\"submit\" onmouseover=\"checksaved();\" class=\"produce\" formaction=\"".$url_this_page."\" name=\"minimise_data\" value=\"MINIMISE\"".$disable_this.">&nbsp;polymetric structures on this page";
+				echo "<br /><span class=\"red-text\">➡&nbsp;</span><i>Items won't be deleted or modified. Minimised versions will be inserted.</i></p>";
+				}
+			}
+		else
+			echo "<span class=\"red-text\">➡&nbsp;</span><input type=\"submit\" onmouseover=\"checksaved();\" class=\"produce\" formaction=\"".$url_this_page."\" name=\"undo_minimise_data\" value=\"Undo MINIMISE\"> polymetric structures on this page";
+		echo "</form>";
+		}
 	echo "<table class=\"thicktable\">";
+	$is_exploded = (substr_count($content,"[item 1]") > 0);
+	$can_be_exploded = !$data_is_minimised AND !(substr_count($content,"}\n{") > 0);
 	if($imax > 0 AND substr_count($content,'{') > 0) {
 		$window_name_grammar = $window_name."_grammar";
 		$link_grammar = "produce.php?data=".urlencode($this_file);
@@ -1784,45 +1871,81 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 		echo "<input type=\"hidden\" name=\"thistext\" value=\"".recode_tags($content)."\">";
 		echo "<input type=\"hidden\" name=\"file_format\" value=\"".$file_format."\">";
 		echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
-		echo "<tr><td colspan=\"2\" style=\"vertical-align:middle; padding:6px;\">";
-		echo "<input type=\"submit\" onclick=\"clearsave();\" class=\"produce\" formaction=\"".$url_this_page."#topedit\" name=\"explode\" value=\"EXPLODE\">&nbsp;<span class=\"red-text\">➡ </span>split {…}&nbsp;expressions (measures)";
-		echo "<div style=\"float:right;\"><input class=\"produce\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_grammar."','".$window_name_grammar."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"create_grammar\" title=\"Create grammar using items on this page\" value=\"CREATE GRAMMAR\"></div>";
-		echo "</td></tr>";
-		if($imax > 0) {
+		if($can_be_exploded AND !$is_exploded  AND !file_exists($music_xml_file)) {
 			echo "<tr><td colspan=\"2\" style=\"vertical-align:middle; padding:6px;\">";
-			echo "<input type=\"submit\" onclick=\"clearsave();\" class=\"produce\" formaction=\"".$url_this_page."#topedit\" name=\"implode\" value=\"IMPLODE\">&nbsp;<span class=\"red-text\">➡ </span>merge {…}&nbsp;expressions (measures)";
+			echo "<input type=\"submit\" onclick=\"clearsave();\" class=\"produce\" formaction=\"".$url_this_page."#topedit\" name=\"explode\" value=\"EXPLODE\">&nbsp;<span class=\"red-text\">➡ </span>split {…}&nbsp;expressions (measures)";
 			echo "</td></tr>";
+			}
+		if($is_exploded) {
+			echo "<tr><td colspan=\"2\" style=\"vertical-align:middle; padding:6px;\">";
+			echo "<input class=\"produce\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_grammar."','".$window_name_grammar."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"create_grammar\" title=\"Create grammar using items on this page\" value=\"CREATE GRAMMAR\"> producing this data";
+			echo "</td></tr>";
+			if($imax > 0) {
+				echo "<tr><td colspan=\"2\" style=\"vertical-align:middle; padding:6px;\">";
+				echo "<input type=\"submit\" onclick=\"clearsave();\" class=\"produce\" formaction=\"".$url_this_page."#topedit\" name=\"implode\" value=\"IMPLODE\">&nbsp;<span class=\"red-text\">➡ </span>merge {…}&nbsp;expressions (measures)";
+				echo "</td></tr>";
+				}
 			}
 		echo "</form>";
 		}
-	if(file_exists($temp_dir.$temp_folder)) {
+	if(!isset($_POST['minimise']) AND !file_exists($music_xml_file) AND file_exists($temp_dir.$temp_folder)) {
 		delete_folder($temp_dir.$temp_folder,FALSE);
 		}
-
 	for($i = $i_item = 0; $i < $imax; $i++) {
 		$error_mssg = '';
+		if(file_exists($music_xml_file)) continue;
 		$line = trim($table[$i]);
 	//	echo "i = ".$i."<br />";
 		if(is_integer($pos=strpos($line,"<?xml")) AND $pos == 0) break;
 		if(is_integer($pos=strpos($line,"//")) AND $pos == 0) continue;
 		if(is_integer($pos=strpos($line,"-")) AND $pos == 0) continue;
 	//	echo "imax = ".$imax."<br />";
-		if($i_item > 0)
+		$units_path = $temp_dir.$temp_folder.SLASH;
+		if($i_item > 0) {
 			$training_set_folder = $bp_application_path.$output_folder.SLASH."set_".$filename."[".($i_item + 1)."]";
-		else
-			$training_set_folder = $bp_application_path.$output_folder.SLASH."set_".$filename;
-		delete_folder($training_set_folder,TRUE);
-	/*	echo "<p>training_set_folder = ".$training_set_folder."</p>";
-		echo "<p>temp_dir = ".$temp_dir."</p>";
-		echo "<p>temp_folder = ".$temp_folder."</p>"; */
-	//	echo "<p>@@ i_item = ".$i_item." imax = ".$imax."</p>";
-		// Create 'units' = shortest sequences of polymetric structures for AI training sets
-		$segment = create_parts($line,$i_item,$temp_dir,$temp_folder,0,0,0,0,"units");
-		if($segment['error'] == "continue") {
-	//		echo "<p>continue i_item = ".$i_item."</p>";
-			continue;
 			}
-		$data_units = $segment['data_chunked'];
+		else {
+			$training_set_folder = $bp_application_path.$output_folder.SLASH."set_".$filename;
+			}
+		$is_minimised = file_exists($units_path.$i_item."_min_units.txt");
+		if($is_minimised) $training_set_folder .= "_mini";
+		delete_folder($training_set_folder,TRUE);
+	//	echo "<p>@@@ deleting ".$training_set_folder."</p>";
+		if(!isset($_POST['minimise'])) {
+			// Create 'units' = shortest sequences of polymetric structures for AI training sets
+			$segment = create_parts($line,$i_item,$temp_dir,$temp_folder,0,0,0,0,"units");
+			if($segment['error'] == "continue") {
+				continue;
+				}
+			$data_units = $segment['data_chunked'];
+			}
+		else {
+			if(isset($_POST['this_item'])) $this_item = $_POST['this_item'] - 1;
+			else $this_item = $i_item;
+			$data_units = $units_path.$this_item."_units.txt";
+			$data_min_units = $units_path.$this_item."_min_units.txt";
+			if(!file_exists($data_min_units)) {
+				if(file_exists($data_units)) {
+					echo "<p>👉 Minimising polymetric structures for AI samples (item #".($this_item + 1).")<br />";
+					$min_units_handle = fopen($data_min_units,"w");
+					$result_minimise = minimise_whole_set($min_units_handle,$data_units);
+					fclose($min_units_handle);
+					$n_processed = $result_minimise['processed'];
+					$n_skipped = $result_minimise['skipped'];
+					if($n_processed > 0) {
+						echo "Minimising ".$n_processed." samples (".$n_skipped." skipped, ".$result_minimise['nbre']." undefined rests)";
+						if(!copy($data_min_units,$data_units)) echo "<p>⚠️ Failed to copy <span class=\"green-text\">".$this_item."_min_units.txt</span> to <span class=\"green-text\">".$this_item."_units.txt</span> (probably permission issue)</p>";
+						}
+					else {
+						@unlink($data_min_units);
+						if($n_processed > -1) echo "😢 No structure was minimised in this set of samples";
+						}
+					echo "</p>";
+					}
+				else echo "<p>⚠️ File not found:<br />".$data_units."</p>";
+				}
+		//	else echo "<p>👉 Set for AI is already minimised in item #".($this_item + 1)."</p>";
+			}
 		// Create 'chunks' = longer sequences of polymetric structures for real-time MIDI performance
 		$segment = create_parts($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxchunk_size,0,0,"chunk");
 		if($segment['error'] == "break") {
@@ -1833,8 +1956,8 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 	//		echo "<p>continue i_item = ".$i_item."</p>";
 			continue;
 			}
-	//	echo "<p>@@@ i_item = ".$i_item." imax = ".$imax."</p>";
 		$i_item++;
+		echo "<input type=\"hidden\" name=\"this_item\" value=\"".$i_item."\">";
 		$tie_mssg = $segment['tie_mssg'];
 		$data = $segment['data'];
 		$data_chunked = $segment['data_chunked'];
@@ -1892,8 +2015,15 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 			if($chunked) echo "<input class=\"produce\" onmouseover=\"checksaved();\" onclick=\"event.preventDefault(); if(checksaved()) {window.open('".$link_play_chunked."','".$window_name_chunked."','width=800,height=800,left=150,toolbar=yes'); return false;}\" type=\"submit\" name=\"produce\" title=\"Play polymetric expression in chunks to save RAM\" value=\"PLAY safe (".$chunk_number." chunks)\">&nbsp;";
 			echo "&nbsp;<input class=\"edit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_expand."','".$window_name_expand."','width=800,height=800,left=100'); return false;\" type=\"submit\" name=\"produce\" title=\"Expand polymetric expression\" value=\"EXPAND\">";
 			if($chunked) {
-				echo "<br  /><input id=\"saveButton\" class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" title=\"Create a new sample set\" value=\"refresh\"> <span class=\"red-text\">➡ </span>";
-				echo "<input class=\"edit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_create_set."','".$window_name_create_set."','width=800,height=800,left=100'); return false;\" type=\"submit\" name=\"create_set\" title=\"Create MIDI file sample set for AI training\" value=\"CREATE SET FOR AI TRAINING\">";
+				echo "<br  /><input id=\"saveButton\" class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" title=\"Create a new sample set\" value=\"refresh\">&nbsp;<span class=\"red-text\">➡&nbsp;</span>";
+				echo "<input id=\"saveButton\" class=\"save\" type=\"submit\" formaction=\"".$url_this_page."#topedit\" name=\"minimise\" title=\"Minimise polymetric expressions\" value=\"mini\">&nbsp;<span class=\"red-text\">➡&nbsp;</span>";
+				$number_samples = number_of_lines_in_file($units_path.($i_item-1)."_units.txt");
+				if($is_minimised) {
+					$create_button = "CREATE minimised SET FOR AI";
+					$link_create_set .= "&minimised";
+					}
+				else $create_button = "CREATE SET FOR AI";
+				echo "<input class=\"edit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_create_set."','".$window_name_create_set."','width=800,height=800,left=100'); return false;\" type=\"submit\" name=\"create_set\" title=\"Create MIDI file sample set for AI training\" value=\"".$create_button."\"> (".$number_samples."&nbsp;samples)";
 				}
 			}
 		if($tie_mssg <> '' AND $error_mssg == '') echo "<br />";
@@ -2080,6 +2210,10 @@ function create_parts($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxch
 		$linebreak = "\n";
 		if($c == '}') {
 			$level_bracket--;
+			if($level_bracket < 0) {
+				echo "<p><span class=\"red-text\">ERROR: </span><span class=\"green-text\">".$line."</span></p>";
+				$level_bracket = 0;
+				}
 			$layer = $i_layer[$level_bracket];
 			if($level_bracket == 0) {
 				$n++;
@@ -2269,6 +2403,453 @@ function delete_orphan_ties($data) {
 	$data = str_replace('§','&',$data);
 	return $data;
 	}
+
+function data_is_minimised($file) {
+	global $minimised_token;
+	$content = @file_get_contents($file,TRUE);
+	$extract_data = extract_data(TRUE,$content);
+	$table = explode("\n",$content);
+	foreach($table AS $line) {
+		if(!is_integer(strpos($line,"{"))) continue;
+		if(!is_integer(strpos($line,"[".$minimised_token."]"))) continue;
+		return TRUE;
+		}
+	return FALSE;
+	}
+
+function minimise_whole_set($min_units_handle,$units_file) {
+	// Does not yet process sequential structures (periods)
+	$trace = TRUE;
+	$trace = FALSE;
+	$check_only_one = TRUE;
+	$check_only_one = FALSE;
+	if($check_only_one) {
+		echo "<p>Checking a single example</p>";
+		unset($_POST['minimise']); // Avoid repeating process
+		}
+	$verbose = FALSE;
+	$errors = '';
+	$lines = file($units_file,FILE_IGNORE_NEW_LINES);
+	$i = $j = 0;
+	$done = FALSE;
+	$nbre = 0;
+	foreach($lines as $line) {
+		if($check_only_one) {
+			// The following is obsolete since you can trace items on the Data page
+			if($i > 0) break;
+		//	$line = "[10 beats] _tempo(11/5) _vel(64) _chan(1) {C4_ D4& - 3/2 {9/2, E4 F#4 {Gb4 - F3, A3 &D4 -}}}"; // good 1
+		//	$line = "{C4_ D4& - 3/2 {9/2, E4 F#4 {Gb4 - F3, A3 &D4 -}}}"; // good 1
+		//	$line = "{D4& - F3, A3 &D4 -}"; // good 1
+		//	$line = "{C4& {F3, &C4 - D4}}"; // good
+		//	$line = "_tempo(3/2) {C4& {3, &C4 - D4}}"; // good
+		//	$line = "{A4 F4 G4, 1/2 C4 D4 1/2 E4}"; // good 
+		//	$line = "_tempo(3/2) {A4 F4 G4, 3/2 C4 D4 3/2 E4}"; // good
+		//	$line = "_tempo(4/3) {A4 F4 G4, 3/4 C4 D4 3/4 E4}"; // good
+		//	$line = "_tempo(7/4) {A4 F4 G4, 3/7 C4 D4 3/7 E4}"; // good
+		//	$line = "{C4 D4 E4, A4 B4 F4 3 G4 A4 B4}"; // $$$
+		//	$line = "{4, C4 D4 E4, A4 B4 F4 2 G4 A4 B4}"; // good
+		//	$line = "_tempo(3/2) {C4 {3, C4 1 D4}}"; // good
+		//	$line = "{1/2 C4 D4 1/2 E4, A4 F4 G4}"; // good
+		//	$line = "{C4 D4 E4, A4 1/2 F4 G4 A3 B3 1/2}"; // good
+		//	$line = "{F4 G4, 1/2 C4 D4 1/2 E4}"; // good
+
+		//	$line = "{C4_ D4& - 1 1/2 {9/2, E4 F#4 {Gb4 - F3, A3 &D4 -}}}"; // good
+		//	$line = "{C5 D5 E5, C4 4/3 _tempo(3/2) D4}"; // good
+		//	$line = "{C5 D5 E5, 4/3 C4 _tempo(3/2) D4}"; // good
+		//	$line = "{C5 D5 E5,C4 - _tempo(3/2) D4}"; // bad 4/3
+		//	$line = "{{C5 D5 E5},C4 - _tempo(3/2) D4}"; // bad 4/3
+		//	$line = "{{C5 D5 E5},C4 4/3 _tempo(3/2) D4}"; // good
+		//	$line = "{C2  D2,{C5 D5 E5, -- F3},C4 4/3 _tempo(3/2) D4}"; // good -- bad  1/3
+		//	$line = "{C2  D2,C4 4/3 _tempo(3/2) D4}"; // bad  1/3
+		//	$line = "{C4 _tempo(4) D4, C5 D5 - E5}"; // good 1
+
+		//	$line = "{C4 3 D4, C5 D5 2 E5}"; // good 2
+		//	$line = "{C4 D4 E4, A4 B4 F4 - G4 A4 B4, C5 3 D5 E5}"; // bad 1 good 3
+		//	$line = "{C4 D4 E4, A4 B4 F4 3 G4 A4 B4, C5 3 D5 E5}"; // good 3 good 3
+		//	$line = "{C4 D4 E4, A4 B4 F4 2 G4}"; // good 2
+		//	$line = "{C4 D4 E4 , A4 B4 F4 3 F4 G4 A4 }"; // good 3
+		// $line = "{C4 D4 E4, A4 B4 F4 2 0 1 G4 A4 B4, C5 4/2 - D5 E5}"; // good 3 good 3
+		//	$line = "{C5 3 D5 E5, C4 D4 E4, A4 B4 F4 - G4 A4}"; // good 1
+		//	$line = "{C4 D4 E4, A4 B4 F4 7/7 G4 A4, C5 6/2 _tempo(3/2) D5 E5}"; // good 1 bad 2/3
+		//	$line = "{C4 D4& F4 {11/2, E4 G4 F#4 {4, Gb4 -- F3, A3 &D4 C3}}}";  // good
+			}
+		$minimise_item = minimise_item($line,$trace,$verbose,$nbre);
+		$j++;
+		if($check_only_one) break;
+		if($minimise_item['skip']) continue;
+		if(trim($line) == '') continue;
+		$i++;
+		$nbre = $minimise_item['nbre'];
+		$errors .= $minimise_item['error'];
+		$line = $minimise_item['line'];
+		if($min_units_handle) fwrite($min_units_handle,"[".$j."] ".$line."\n");
+		}
+	if($nbre > 0) $done = TRUE;
+	$result['done'] = $done;
+	$result['nbre'] = $nbre;
+	$result['processed'] = $i;
+	if($check_only_one) $result['processed'] = -1;
+	$result['skipped'] = $j - $i;
+	return $result;
+	}
+
+function minimise_item($line,$trace,$verbose,$nbre) {
+	$minimise_item['skip'] = FALSE;
+	$line = normalize_parentheses($line); // '-' is replaced with '§', and ',' with '@' betweeen brackets
+	$line = preg_replace('/\[.*?\]/','',$line);
+	$line = preg_replace('/([{}\.,-])/',' $1 ',$line);
+	$line = str_replace(" 0 "," ",$line);
+	$line = str_replace(" - "," 1 ",$line);
+	$line = simplify_fractions($line);
+	$line = preg_replace('/\b(\d+)\/1\b/','$1',$line); // Replace " 3/1" with " 3 "
+	$line = add_list_of_integers($line);
+	$line = add_list_of_ratios($line);
+	$line = str_replace(" 1 "," - ",$line);
+	$line = replace_spaced_dashes_with_count($line);
+	$line = preg_replace("/ +/u",' ',$line);
+	$line = normalize_ampersand($line); // Normally not necessary if recently imported musicxml
+	$line = trim($line);
+	if($trace) echo "<p>👉 ".$line."</p>";
+	$p_tempo = $q_tempo = 1;
+	$p_beats = $q_beats = array();
+	$level = $start = 0;
+	$minimise_item = minimise($line,$start,$p_beats,$q_beats,$level,$trace,$p_tempo,$q_tempo,$nbre);
+	$errors = $minimise_item['error'];
+	$nbre = $minimise_item['nbre'];
+	if($errors == '') {
+		$newline = $minimise_item['line'];
+		$newline = preg_replace('/\[.*?\]/','',$newline);
+		$newline = preg_replace("/ +/u",' ',$newline);
+		$newline = str_replace("{ ","{",$newline);
+		$newline = str_replace(" }","}",$newline);
+		$newline = str_replace(" ,",",",$newline);
+		$newline = str_replace(" .",".",$newline);
+		$newline = str_replace(" 1 "," - ",$newline);
+		$newline = str_replace(" 2 "," -- ",$newline);
+		$newline = preg_replace('/-\s-/','--',$newline);
+		$newline = str_replace('§','-',$newline);
+		$newline = str_replace('@',',',$newline);
+		$newline = preg_replace('/\(\s*(\d+)\s*,\s*(\d+)\s*\)/', '($1,$2)', $newline);
+		$newline = preg_replace("/ +/u",' ',$newline);
+	//	echo "<p>@@ ".$newline."</p>";
+		if($minimise_item['done']) {
+			if($verbose) echo "<p>➡ ".$newline."</p>";
+			}
+		else $minimise_item['skip'] = TRUE;
+		$minimise_item['line'] = $newline;
+		}
+	else {
+		echo "<p>".$errors."<br />";
+		echo "Unknown token in: ".$line."</p>";
+		}
+	return $minimise_item;
+	}
+
+function minimise($line,$start,$p_beats,$q_beats,$level,$trace,$p_tempo,$q_tempo,$nbre) {
+	global $max_term_in_fraction;
+	$minimise_result['error'] = '';
+	$done = FALSE;
+	$minimise_result['done'] = $done;
+	$minimise_result['nbre'] = $nbre;
+	if(is_integer(strpos($line,"…"))  OR is_integer(strpos($line,"_rest")) OR is_integer(strpos($line," . "))) {
+		// This item is already minimised or it contains a sequential polymetric structure
+		$minimise_result['skip'] = TRUE;
+		$minimise_result['line'] = $line;
+		return $minimise_result;
+		}
+	else $minimise_result['skip'] = FALSE;
+	$newline = array();
+	$minimise_result['end'] = $max = strlen($line);
+	$i = $start;
+	$field = 0;
+	$p_tempo_start = $p_tempo;
+	$q_tempo_start = $q_tempo;
+	$p_sounds = $q_sounds = $p_rests = $q_rests = $n_gaps = array();
+	$p_sounds[$field] = $p_rests[$field] = $p_beats[$field] = 0;
+	$q_sounds[$field] = $q_rests[$field] = $q_beats[$field] = 1;
+	$n_gaps[$field] = 0;
+	$newline[$field] = '';
+	while(TRUE) {
+		if($i >= $max) {
+			$minimise_result['end'] = $i;
+			break;
+			}
+		$c = $line[$i];
+		if($c == ',') {
+	//		if($trace) $newline[$field] .= "<small>[".$p_sounds[$field]."/".$q_sounds[$field]."+".$p_rests[$field]."/".$q_rests[$field].":".$n_gaps[$field]."]</small>";
+			$field++;
+			$newline[$field] = '';
+			$i++;
+			$p_tempo = $p_tempo_start;
+			$q_tempo = $q_tempo_start;
+			$p_sounds[$field] = $p_rests[$field] = $p_beats[$field] = 0;
+			$q_sounds[$field] = $q_rests[$field] = $q_beats[$field] = 1;
+			$n_gaps[$field] = 0;
+			continue;
+			}
+		if($c == '}') {
+	//		if($trace) $newline[$field] .= "<small>[".$p_sounds[$field]."/".$q_sounds[$field]."+".$p_rests[$field]."/".$q_rests[$field].":".$n_gaps[$field]."]</small>";
+			$create_undetermined_rests = create_undetermined_rests($newline,$p_beats,$q_beats,$p_sounds,$q_sounds,$p_rests,$q_rests,$n_gaps,$field,$p_tempo_start,$q_tempo_start,$trace);
+			$final_line = $create_undetermined_rests['final_line'];
+			$nbre += $create_undetermined_rests['nbre'];
+			if($create_undetermined_rests['nbre'] > 0) $done = TRUE;
+			$minimise_result['line'] = $final_line;
+			$minimise_result['end'] = $i;
+			$minimise_result['p_beats'] = $p_beats;
+			$minimise_result['q_beats'] = $q_beats;
+			$minimise_result['p_sounds'] = $p_sounds;
+			$minimise_result['q_sounds'] = $q_sounds;
+			$minimise_result['nbre'] = $nbre;
+			$minimise_result['done'] = $done;
+			return $minimise_result;
+			}
+		if($c == '{') {
+			$newline[$field] .= $c;
+			$old_p_beats = $p_beats[$field];
+			$old_q_beats = $q_beats[$field];
+			$new_result = minimise($line,($i + 1),$p_beats,$q_beats,($level + 1),$trace,$p_tempo,$q_tempo,$nbre);
+			$nbre = $new_result['nbre'];
+			$error = $minimise_result['error'] = $new_result['error'];
+			$minimise_result['nbre'] = $nbre;
+			if($new_result['done']) $done = TRUE;
+			$minimise_result['done'] = $done;
+			if($error <> '') return $minimise_result;
+			$add = add($p_beats[$field],$q_beats[$field],$new_result['p_beats'][0],$new_result['q_beats'][0]);
+			$p_beats[$field] = $add['p'];
+			$q_beats[$field] = $add['q'];
+			$i = $new_result['end'];
+			$newline[$field] .= $new_result['line'];
+			$newline[$field] .= '}';
+			$add = add($p_sounds[$field],$q_sounds[$field],$new_result['p_sounds'][0],$new_result['q_sounds'][0]);
+			$p_sounds[$field] = $add['p'];
+			$q_sounds[$field] = $add['q'];
+			$add = add($new_result['p_beats'][$field],$new_result['q_beats'][$field],-$old_p_beats,$old_q_beats);
+				$p = $add['p'];
+				$q = $add['q'];
+			if($trace) {
+				$showline = "{".$new_result['line']."}";
+				$showline .= " [".$p."/".$q." level ".$level."]";
+				echo $showline."<br />";
+				}
+			}
+		else {
+			$get_token = get_token($line,$i,$max,$p_tempo,$q_tempo,$field);
+			$add = add($p_beats[$field],$q_beats[$field],$get_token['p_beats'],$get_token['q_beats']);
+			$p_beats[$field] = $add['p'];
+			$q_beats[$field] = $add['q'];
+			$i = $get_token['i'];
+			$token = $get_token['token'];
+			if($token <> '') {
+				$newline[$field] .= $token." ";
+				$extra = $get_token['extra'];
+				if($extra <> '' AND $extra <> '…' AND $extra <> "_rest") {
+					$ok_extra = is_performance_control($extra);
+					if(!$ok_extra) {
+						$this_error = "⚠️ ".$extra." ?";
+					//	echo "<p>⚠️ ".$extra." ?</p>";
+						$minimise_result['error'] .= $this_error;
+						$minimise_result['line'] = implode(", ",$newline);
+						$minimise_result['nbre'] = $nbre;
+						return $minimise_result;
+						}
+					else {
+						$extra = str_replace("_tempo(",'',$extra);
+						$extra = str_replace(")",'',$extra);
+						$table = explode("/",$extra);
+						if(intval($table[0]) > 0) {
+							$p_tempo = $p_tempo * intval($table[0]);
+							if(count($table) > 1) $q_tempo = $q_tempo * intval($table[1]);
+							$simplify = simplify($p_tempo."/".$q_tempo,$max_term_in_fraction);
+							$p_tempo = $simplify['p'];
+							$q_tempo = $simplify['q'];
+							}
+						}
+					}
+				else {
+					// This token is a note or a rest
+					if(preg_match('/^\d+(\/\d+)?$/',$token)) {
+						// a rest
+						$add = add($p_rests[$field],$q_rests[$field],$get_token['p_beats'],$get_token['q_beats']);
+						$p_rests[$field] = $add['p'];
+						$q_rests[$field] = $add['q'];
+						$n_gaps[$field]++;
+						}
+					else {
+						$add = add($p_sounds[$field],$q_sounds[$field],$get_token['p_beats'],$get_token['q_beats']);
+						$p_sounds[$field] = $add['p'];
+						$q_sounds[$field] = $add['q'];
+						}
+					}
+				}
+			}
+		$i++;
+		}
+	$minimise_result['line'] = implode('',$newline);
+	$minimise_result['p_beats'] = $p_beats;
+	$minimise_result['q_beats'] = $q_beats;
+	$minimise_result['p_sounds'] = $p_sounds;
+	$minimise_result['q_sounds'] = $q_sounds;
+	$minimise_result['nbre'] = $nbre;
+//	$minimise_result['done'] = $done;
+	return $minimise_result;
+	}
+
+function get_token($line,$i,$imax,$p_tempo,$q_tempo,$field) {
+	global $max_term_in_fraction;
+	global $Englishnote,$Frenchnote,$Indiannote,$AltEnglishnote,$AltFrenchnote,$AltIndiannote;
+	$result = array();
+	$result['extra'] = '';
+	$result['p_beats'] = 0;
+	$result['q_beats'] = 1;
+//	$line_part = trim(substr($line,$i));
+	$line_part = substr($line,$i);
+//	$line_part = str_replace('}'," }",$line_part);
+	$tokens = explode(" ",$line_part);
+	$this_token = $token = trim($tokens[0]);
+	$result['i'] = $i + strlen($token);
+	$result['token'] = $token;
+	$result['extra'] = '';
+	if($token == '') return $result;
+	$p_rest = 0; $q_rest = 1;
+	$table = explode("/",$token);
+	$number = FALSE;
+	if(intval($table[0]) > 0) {
+		if($field == 0 OR TRUE) {
+			$p_rest = intval($table[0]);
+			if(count($table) > 1) $q_rest = intval($table[1]);
+			$simplify = simplify($p_rest * $q_tempo."/".$q_rest * $p_tempo,$max_term_in_fraction);
+			$p_rest = $simplify['p'];
+			$q_rest = $simplify['q'];
+			}
+		else {
+			$p_rest = $q_rest = 1;
+			}
+		$result['p_beats'] = $p_rest;
+		$result['q_beats'] = $q_rest;
+		return $result;
+		}
+	$i_duration = 0;
+	$token = str_replace("&",'',$token);
+	$i_duration += substr_count($token,"_");
+	$token = str_replace("_",'',$token);
+	$octave_string = trim(preg_replace("/[a-z A-Z #]+([0-9]+)/u","$1",$token));
+	if($octave_string <> '') $octave = intval($octave_string);
+	else $octave = -1;
+	$token = preg_replace("/([a-z A-Z #]+)[0-9]+/u","$1",$token);
+	// Try to recognise a note
+	for($grade = 0; $grade < 12; $grade++) {
+		if($token == $Englishnote[$grade]) break;
+		if($token == $AltEnglishnote[$grade]) break;
+		if($token == $Frenchnote[$grade]) break;
+		if($token == $AltFrenchnote[$grade]) break;
+		if($token == $Indiannote[$grade]) break;
+		if($token == $AltIndiannote[$grade]) break;
+		}
+	if($token <> '-' AND ($grade > 11 OR $octave < 0) AND $token <> '0') {
+		// This is generally a _tempo(), _chan(), _vel() etc.
+		$result['extra'] = $this_token;
+		return $result;
+		}
+	$i_duration++;
+	//	echo "p_beats = ".$p_beats.", q_beats =".$q_beats."<br />";
+	$result['p_beats'] = $q_tempo * $i_duration;
+	$result['q_beats'] = $p_tempo;
+	return $result;
+	}
+
+function create_undetermined_rests($lines,$p_beats,$q_beats,$p_sounds,$q_sounds,$p_rests,$q_rests,$n_gaps,$maxfield,$p_tempo,$q_tempo,$trace) {
+	global $max_term_in_fraction;
+	$lcm = 1; $ref_field = -1;
+	for($field = 0; $field <= $maxfield; $field++) {
+		if($trace) echo "<p>field #".$field." = ".$p_sounds[$field]."/".$q_sounds[$field]." sounds, ".$p_beats[$field]."/".$q_beats[$field]." beats</p>";
+		if($ref_field == -1 AND $p_beats[$field] > 0) $ref_field = $field; // The first field with no gaps is the reference
+		}
+	$nbre = 0;
+	if($ref_field == -1) {
+		$final_line = implode(", ",$lines);
+		$result['final_line'] = $final_line;
+		$result['nbre'] = $nbre;
+		return $result;
+		}
+	for($field = 0; $field <= $maxfield; $field++) {
+		if($trace) echo "[".$p_sounds[$field]."+".$p_rests[$field].", ".$p_beats[$field]."/".$q_beats[$field]." beats] ";
+		}
+	if($trace) echo "<p>ref field = ".$ref_field.", duration = ".$p_beats[$ref_field]."/".$q_beats[$ref_field]." beats</p>";
+	for($field = 0; $field <= $maxfield; $field++) {
+		// This is similar to the code in Polymetric.c, but it also does things that you won't see there. Notably taking into account $p_tempo and $q_tempo.
+		if($n_gaps[$field] == 0 OR ($field == $ref_field AND $p_sounds[$field] == 0)) continue;
+		$theline = " ".$lines[$field]." ";
+		$add = add($p_beats[$ref_field],$q_beats[$ref_field],-$p_sounds[$field],$q_sounds[$field]);
+		$xp = $add['p'];
+		$xq = $add['q'];
+		$number_rests = $n_gaps[$field];
+		if($trace) echo "<p>➡ xp = ".$xp.", xq = ".$xq.", p_tempo = ".$p_tempo.", q_tempo = ".$q_tempo.", n_gaps = ".$number_rests.", </p>";
+		if($xp < 1.) {
+		/*	$gcd= gcd($p_beats[$ref_field],$number_rests);
+			if($gcd < 1) $gcd = 1;
+			$p_sounds[$field] = $p_sounds[$field] / $gcd;
+			$q_sounds[$field] = ($q_sounds[$field] * $number_rests) / $gcd;
+			$p_sounds[$field] = $p_sounds[$field]; */
+			$q_sounds[$field] = ($q_sounds[$field] * $number_rests);
+			if($trace) echo "<p><b>case 1 field #".$field."</b> —> p_beats[ref_field] = ".$p_beats[$ref_field].", q_beats[ref_field] = ".$q_beats[$ref_field].", p_sounds[field] = ".$p_sounds[$field].", q_sounds[field] = ".$q_sounds[$field]."</p>";
+			$lcm = lcm($q_beats[$ref_field],$q_sounds[$field]);
+			$pmax = $p_beats[$ref_field] * ($lcm / $q_beats[$ref_field]);
+			$qmax = $lcm;
+			$p_sounds[$field] = $p_sounds[$field] * ($lcm / $q_sounds[$field]);
+			$q_sounds[$field] = $lcm;
+			if($trace) echo "<p>pmax/qmax = ".$pmax."/".$qmax.", lcm = ".$lcm.", p_sounds[field] = ".$p_sounds[$field].", q_sounds[field] = ".$q_sounds[$field]."</p>";
+			$x = (float) $p_sounds[$field] / $pmax;
+			$mgap = intval($x);
+		//	$p_therest  = (($mgap + 1.) * $pmax - $p_sounds[$field]) * $p_tempo / $number_rests;
+			$p_therest  = (float) (($mgap + 1.) * $pmax - $p_sounds[$field]) / $number_rests;
+			if($trace) echo "<p>mgap = ".$mgap.", x = ".$x.", p_therest (before adjust) = ".$p_therest."</p>";
+			$q_therest = $lcm;
+			if($p_therest <= 1.) {
+		//	if($p_therest < $p_tempo) {
+		/*		$p_therest = $p_tempo;
+				$q_therest = $q_tempo; */
+		//		$q_therest = $q_therest * $q_tempo;
+		/*		$q_therest = 1. / $p_therest;
+				$p_therest = 1; */
+				$q_therest = intval($q_tempo / $p_therest);
+				$p_therest = $p_tempo;
+				}
+			$p_therest = intval($p_therest);
+		//	if($p_therest < $lcm) $p_therest = $lcm;
+		//	if($p_therest < $p_tempo) $p_therest = $p_tempo;
+		//	if($p_therest < 1) $p_therest = $pmax * $p_tempo;
+		//	if($p_therest < $p_tempo) $p_therest = $p_tempo;
+		//	$q_therest = $lcm * $q_tempo;
+			
+			if($trace) echo "<p>p_therest (after adjust) = ".$p_therest.", q_therest = ".$q_therest."</p>";
+			}
+		else {
+			$p_therest = $xp * $p_tempo;
+			$q_therest = $xq * $q_tempo * $number_rests;
+			if($trace) echo "<p>case 2</p>";
+			}
+		
+		$simplify = simplify($p_therest."/".$q_therest,$max_term_in_fraction);
+		$p_therest = $simplify['p'];
+		$q_therest = $simplify['q'];
+		if($q_therest == 1) $the_rest = $p_therest;
+		else $the_rest = $p_therest."/".$q_therest;
+		if($trace) echo "[field #".$field." -> rest = ".$the_rest."] ";
+		$lines[$field] = trim(str_replace(" ".$the_rest." "," _rest ",$theline,$count_this));
+		if(isset($count_this)) {
+			$nbre += $count_this;
+		//	if($count_this > 0 AND $trace) echo "<p>".$lines[$field]." nbre = ".$nbre."</p>";
+			}
+		}
+	if($trace) echo "<br /><br />";
+	$final_line = implode(", ",$lines);
+	$result['final_line'] = $final_line;
+	$result['nbre'] = $nbre;
+	return $result;
+	}
+
+
+
 
 // The following does not work yet. It is meant to handle "save" when typing command S
 // The code for capturing the key is in _header.php

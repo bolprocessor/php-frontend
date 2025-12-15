@@ -66,6 +66,7 @@ if(isset($_POST['saveparameters'])) {
 				case "SamplingRate":
 				case "DefaultBlockKey":
 				case "MinPeriod":
+				case "TraceMinimise":
 					$value = abs(intval($value));
 					break;
 				}

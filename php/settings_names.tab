@@ -78,4 +78,6 @@
 "SyncChange"	"Synchronised change"		"1"	"0"
 "LiveSettings"	"Follow settings"		"1"	"0"
 "TraceLive"	"Trace changes"		"1"	"0"
+"MINIMISING (for geeks)"				
+"TraceMinimise"	"Trace item #"	"(0 for none)"	"0"	"0"
 "-- end --"				

@@ -44,6 +44,7 @@ if(!file_exists($file_path)) {
 $skin = 1; // Blue by default
 $midi_player = "MIDIjs";
 // $midi_player = "html-midi-player";
+$minimised_token = "MINIMISED";
 
 require_once("_settings.php");
 $bp_application_path = "..".SLASH;
@@ -4879,7 +4880,8 @@ function display_note_conventions($note_convention) {
 	if(isset($_POST['change_convention']) AND isset($_POST['new_convention'])) {
 	//	echo "<form id=\"topchanges\" method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		$hide = TRUE;
-		$new_convention = $_POST['new_convention'];
+		if(isset($_POST['new_convention'])) $new_convention = $_POST['new_convention'];
+		else $new_convention = 0;
 		echo "<input type=\"hidden\" name=\"new_convention\" value=\"".$new_convention."\">";
 		echo "<input type=\"hidden\" name=\"old_convention\" value=\"".$note_convention."\">";
 		echo "<br />";
@@ -4897,25 +4899,27 @@ function display_note_conventions($note_convention) {
 				$alt_note = $AltIndiannote;
 				break;
 			}
-		echo "<table>";
-		echo "<tr>";
-		for($i = 0; $i < 12; $i++) {
-			echo "<td>";
-			echo "<input type=\"radio\" name=\"new_note_".$i."\" value=\"".$standard_note[$i]."\" checked><br /><b><span class=\"red-text\">".$standard_note[$i];
-			echo "</span></b></td>";
-			}
-		echo "</tr>";
-		echo "<tr>";
-		for($i = 0; $i < 12; $i++) {
-			echo "<td>";
-			if($alt_note[$i] <> $standard_note[$i]) {
-				echo "<input type=\"radio\" name=\"new_note_".$i."\" value=\"".$alt_note[$i]."\"><br /><b><span class=\"red-text\">".$alt_note[$i];
-				echo "</span></b>";
+		if(isset($standard_note)) {
+			echo "<table>";
+			echo "<tr>";
+			for($i = 0; $i < 12; $i++) {
+				echo "<td>";
+				echo "<input type=\"radio\" name=\"new_note_".$i."\" value=\"".$standard_note[$i]."\" checked><br /><b><span class=\"red-text\">".$standard_note[$i];
+				echo "</span></b></td>";
 				}
-			echo "</td>";
+			echo "</tr>";
+			echo "<tr>";
+			for($i = 0; $i < 12; $i++) {
+				echo "<td>";
+				if($alt_note[$i] <> $standard_note[$i]) {
+					echo "<input type=\"radio\" name=\"new_note_".$i."\" value=\"".$alt_note[$i]."\"><br /><b><span class=\"red-text\">".$alt_note[$i];
+					echo "</span></b>";
+					}
+				echo "</td>";
+				}
+			echo "</tr>";
+			echo "</table>";
 			}
-		echo "</tr>";
-		echo "</table>";
 		echo "&nbsp;<input class=\"cancel\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\">";
 		echo "&nbsp;<input class=\"save\" type=\"submit\" onclick=\"this.form.target='_self'; return true;\" name=\"use_convention\" formaction=\"".$url_this_page."\" value=\"USE THIS CONVENTION\">";
 
@@ -5288,4 +5292,179 @@ function nextShuffled($min,$max): int {
     $index++;
     return $value;
 	}
+
+
+function replace_spaced_dashes_with_count($str) {
+    return preg_replace_callback(
+        '/(?:\s*-\s*)+/',       // one or more "-" possibly separated by spaces
+        function($m) {
+            $count = substr_count($m[0], '-');  // how many "-" in the matched chunk
+            return ' ' . $count . ' ';          // keep spaces around the number
+			},
+			$str
+		);
+	}
+
+function normalize_parentheses($text) {
+    return preg_replace_callback(
+        '/\(([^)]*)\)/',   // match anything inside parentheses
+        function ($m) {
+            $inside = $m[1];
+            $inside = str_replace('-', '§', $inside); // replace -
+            $inside = str_replace(',', '@', $inside); // replace ,
+            $inside = preg_replace('/\s+/', '', $inside); // remove spaces
+            return '(' . $inside . ')';
+        },
+        $text
+    );
+}
+
+
+function simplify_fractions($line) {
+    return preg_replace_callback(
+        '/\b(\d+)\/(\d+)\b/',    // match numerator/denominator
+        function($m) {
+            $num = (int)$m[1];
+            $den = (int)$m[2];
+            // Compute GCD using Euclid's algorithm
+            $a = $num;
+            $b = $den;
+            while ($b != 0) {
+                $t = $b;
+                $b = $a % $b;
+                $a = $t;
+            	}
+            $gcd = $a;
+            // Reduce fraction
+            $num /= $gcd;
+            $den /= $gcd;
+            return $num.'/'.$den;
+			},
+		$line);
+	}
+
+function add_list_of_integers($text) {
+    return preg_replace_callback(
+        '/(\s)(?:\d+\s+)+\d+(\s)/',   // [space][int (space int)+][space]
+        function ($matches) {
+            // Extract all numbers from the matched block
+            preg_match_all('/\d+/', $matches[0], $nums);
+
+            // $matches[1] = leading space, $matches[2] = trailing space
+            return $matches[1] . array_sum($nums[0]) . $matches[2];
+			},
+		$text);
+	}
+
+function add_list_of_ratios($text) {
+    return preg_replace_callback(
+        // [space] (int or a/b)+ separated by spaces [space]
+        '/(\s)(?:(?:\d+\/\d+|\d+)\s+)+(?:\d+\/\d+|\d+)(\s)/',
+        function ($matches) {
+            // $matches[0] is the whole matched chunk including spaces
+            // $matches[1] = leading space, $matches[2] = trailing space
+            // Get all integer or fraction tokens
+            preg_match_all('/\d+(?:\/\d+)?/', $matches[0], $nums);
+            // Sum as fraction: start at 0/1
+            $num = 0;  // numerator
+            $den = 1;  // denominator
+            foreach ($nums[0] as $tok) {
+                if (strpos($tok, '/') !== false) {
+                    list($n, $d) = array_map('intval', explode('/', $tok, 2));
+                } else {
+                    $n = (int)$tok;
+                    $d = 1;
+                	}
+                // num/den + n/d  = (num*d + n*den) / (den*d)
+                $num = $num * $d + $n * $den;
+                $den = $den * $d;
+            	}
+            // Simplify the fraction by gcd
+            $g = function ($a, $b) {
+                $a = abs($a);
+                $b = abs($b);
+                if ($a == 0 && $b == 0) return 1;
+                if ($b == 0) return $a ?: 1;
+                while ($b != 0) {
+                    $t = $b;
+                    $b = $a % $b;
+                    $a = $t;
+                	}
+                return $a ?: 1;
+            	};
+            $gcd = $g($num, $den);
+            $num /= $gcd;
+            $den /= $gcd;
+            // If you prefer integers when possible, you could:
+            // if ($den == 1) return $matches[1] . $num . $matches[2];
+            // Always return a fraction num/den
+            return $matches[1] . $num . '/' . $den . $matches[2];
+        	},
+        $text);
+	}
+
+function number_of_lines_in_file($filename) {
+    $lineCount = 0;
+    $handle = fopen($filename, "r");
+    if($handle) {
+        while(($line = fgets($handle)) !== false) {
+            // Trim removes spaces, tabs, and newlines
+            if (trim($line) !== '') {
+                $lineCount++;
+				}
+			}
+        fclose($handle);
+    	}
+    return $lineCount;
+	}
+
+function is_performance_control($text) {
+	$before = preg_replace('/\(.*$/', '', $text);
+	$it_is = FALSE;
+	switch($before) {
+		case "_tempo":
+		case "_chan":
+		case "_ins":
+		case "_value":
+		case "_vel":
+		case "_volume":
+		case "_pan":
+		case "_press":
+		case "_part":
+		case "_legato":
+		case "_staccato":
+		case "_switchon":
+		case "_switchoff":
+		case "_scale":
+		case "_rndtime":
+		case "_rndvel":
+		case "_pitchbend":
+		case "_srand":
+			$it_is = TRUE;
+		break;
+		}
+	return $it_is;
+	}
+
+function normalize_ampersand(string $s): string {
+	$s = str_replace("{","{ ",$s);
+	$s = str_replace("}"," }",$s);
+	$s = str_replace(","," , ",$s);
+	$s = str_replace("."," . ",$s);
+    // 1. Standalone &
+    $s = preg_replace('/(?<=^|\s)&(?=\s|$)/', '', $s);
+    // 2. Leading & on integer or ratio
+    $s = preg_replace('/(?<=^|\s)&(\d+(?:\/\d+)?)(?=\s|$)/', '$1', $s);
+    // 3. Trailing & on integer or ratio
+    $s = preg_replace('/(?<=^|\s)(\d+(?:\/\d+)?)&(?=\s|$)/', '$1', $s);
+	$s = str_replace("-&","-",$s);
+	$s = str_replace("&-","-",$s);
+	$s = str_replace("{ ","{",$s);
+	$s = str_replace(" }","}",$s);
+	$s = str_replace(" , ",",",$s);
+	$s = str_replace(" . ",".",$s);
+
+    return $s;
+	}
+
 ?>

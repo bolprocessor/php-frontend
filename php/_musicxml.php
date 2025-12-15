@@ -1613,9 +1613,11 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 	// if(MB_CONVERT_OK) $data = mb_convert_encoding($data,'UTF-8','UTF-8');
 	if($found_mordent OR $found_turn OR $found_trill OR $found_turn)
 		$data = process_ornamentation($data,$current_fifths,$trace_ornamentations);
-	$data = str_replace("_pedalstart_","_switch_on_part(".$i_part.") ",$data);
-	$data = str_replace("_pedalstop_","_switch_off_part(".$i_part.") ",$data);
-	$data = str_replace("_pedalstopstart_","_switch_off_part(".$i_part.") _switch_on_part(".$i_part.") ",$data); 	
+	if(isset($i_part)) {
+		$data = str_replace("_pedalstart_","_switch_on_part(".$i_part.") ",$data);
+		$data = str_replace("_pedalstop_","_switch_off_part(".$i_part.") ",$data);
+		$data = str_replace("_pedalstopstart_","_switch_off_part(".$i_part.") _switch_on_part(".$i_part.") ",$data);
+		}
 	$convert_score['data'] = $data;
 	$convert_score['metronome_min'] = $metronome_min;
 	$convert_score['metronome_max'] = $metronome_max;

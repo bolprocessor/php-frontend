@@ -1063,7 +1063,9 @@ function list_events($slice,$poly,$max_poly,$level_init,$i_token_init,$p_tempo,$
 		$i_token += ($i_next - 1);
 		$i_duration += substr_count($token,"_");
 		$token = str_replace("_",'',$token);
-		$octave = intval(preg_replace("/[a-z A-Z #]+([0-9]+)/u","$1",$token));
+		$octave_string = trim(preg_replace("/[a-z A-Z #]+([0-9]+)/u","$1",$token));
+		if($octave_string <> '') $octave = intval($octave_string);
+		else $octave = -1;
 		$poly[$i_poly]['token'][$j_token] = $token;
 		$poly[$i_poly]['field'][$j_token] = $i_field;
 		$poly[$i_poly]['p_dur'][$j_token] = $q_tempo * $i_duration;
@@ -1071,13 +1073,14 @@ function list_events($slice,$poly,$max_poly,$level_init,$i_token_init,$p_tempo,$
 		$poly[$i_poly]['p_start'][$j_token] = $p_abs_time;
 		$poly[$i_poly]['q_start'][$j_token] = $q_abs_time;
 		$poly[$i_poly]['legato'][$j_token] = 100 + $current_legato[$layer];
-		// Calculate end date which not be revised for notes outside polymetric expressions
+		// Calculate end date which will not be revised for notes outside polymetric expressions
 		$p_temp_duration = $poly[$i_poly]['p_dur'][$j_token] * $poly[$i_poly]['legato'][$j_token];
 		$q_temp_duration = $poly[$i_poly]['q_dur'][$j_token] * 100;
 		$add = add($poly[$i_poly]['p_start'][$j_token],$poly[$i_poly]['q_start'][$j_token],$p_temp_duration,$q_temp_duration);
 		$poly[$i_poly]['p_end'][$j_token] = $add['p'];
 		$poly[$i_poly]['q_end'][$j_token] = $add['q'];
-		$token = str_replace($octave,'',$token);
+	//	$token = str_replace($octave,'',$token);
+		$token = preg_replace("/([a-z A-Z #]+)[0-9]+/u","$1",$token);
 		for($grade = 0; $grade < 12; $grade++) {
 			if($token == $Englishnote[$grade]) break;
 			if($token == $AltEnglishnote[$grade]) break;
@@ -1086,7 +1089,7 @@ function list_events($slice,$poly,$max_poly,$level_init,$i_token_init,$p_tempo,$
 			if($token == $Indiannote[$grade]) break;
 			if($token == $AltIndiannote[$grade]) break;
 			}
-		if($token <> '-' AND ($octave == 0 OR $grade > 11) AND $tokens[$i_token] <> '0') {
+		if($token <> '-' AND ($octave < 0 OR $grade > 11) AND $tokens[$i_token] <> '0') {
 			$result['error'] = "Unknown token: ".$tokens[$i_token];
 			return $result;
 			}
