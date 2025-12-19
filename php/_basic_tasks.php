@@ -309,6 +309,11 @@ for($i = 0; $i < 7; $i++) {
 	$x_three = $x_three * 3;
 	}
 
+if(!file_exists('latest_version.cache') OR filemtime('latest_version.cache') < (time() - 43200)) {
+	$latest = getLatestTaggedVersion(); // This shouldn't be called more than once in 12 hours
+	if($latest !== false) file_put_contents('latest_version.cache',$latest);
+	}
+
 // ------ SCRIPTS ------
 
 echo "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js\"></script>\n";
@@ -782,6 +787,7 @@ function compile_help($text_help_file,$html_help_file) {
 		$content = str_replace(chr(10),"<br />",$content);
 		$content = str_replace("  ","&nbsp;&nbsp;",$content); // Remove tabulations
 		$table = explode("###",$content);
+		sort($table);
 		$handle = fopen($html_help_file,"w");
 		$file_header .= "<p style=\"color:black;\">".$table[0]."</p>";
 		$im = count($table);
@@ -2656,6 +2662,13 @@ function display_console_state() {
 	 $output = check_console();
 	 if($output <> '') {
 		echo "Bol Processor ‘<span class=\"green-text\"><b>".$console."</b></span>’ console is responding<br />Version ".$output;
+		$latest = trim(@file_get_contents('latest_version.cache'));
+		if($latest !== false) {
+			$version_clean = ltrim($output,'v');
+			$latest_clean  = ltrim($latest,'v');
+			if(version_compare($latest_clean,$version_clean,'>')) echo " <span class=\"red-text\">➡</span> <a class=\"linkdotted\" target=\"_blanl\" href=\"https://bolprocessor.org/install/\">upgrade to ".$latest_clean."</a>&nbsp;!";
+			else echo " (latest)";
+			}
 		$panicfile = str_replace(SLASH,'/',$panicfile);
 		if(isset($filename) AND $filename <> "Compilation" AND $filename <> "Produce" AND  $filename <> "Bol Processor" AND $url_this_page <> "index.php") {
 			echo "<div style=\"display:flex; justify-content:flex-end; align-items:center; background-color:transparent;\">";
@@ -5422,24 +5435,68 @@ function is_performance_control($text) {
 	$before = preg_replace('/\(.*$/', '', $text);
 	$it_is = FALSE;
 	switch($before) {
-		case "_tempo":
+		case "_articulcont":
+		case "_articulfixed":
+		case "_articulstep":
+		case "_capture":
 		case "_chan":
+		case "_cont":
+		case "_fixed":
 		case "_ins":
-		case "_value":
-		case "_vel":
-		case "_volume":
-		case "_pan":
-		case "_press":
-		case "_part":
+		case "_keymap":
+		case "_keyxpand":
 		case "_legato":
-		case "_staccato":
-		case "_switchon":
-		case "_switchoff":
-		case "_scale":
+		case "_mod":
+		case "_modcont":
+		case "_modfixed":
+		case "_modrate":
+		case "_modstep":
+		case "_ordseq":
+		case "_pan":
+		case "_pancont":
+		case "_pancontrol":
+		case "_panfixed":
+		case "_panrate":
+		case "_panstep":
+		case "_part":
+		case "_pitchbend":
+		case "_pitchcont":
+		case "_pitchfixed":
+		case "_pitchrange":
+		case "_pitchrate":
+		case "_pitchstep":
+		case "_press":
+		case "_prescont":
+		case "_pressfixed":
+		case "_pressrate":
+		case "_presstep":
+		case "_retro":
+		case "_rndseq":
 		case "_rndtime":
 		case "_rndvel":
-		case "_pitchbend":
+		case "_rotate":
+		case "_scale":
+		case "_script":
 		case "_srand":
+		case "_staccato":
+		case "_step":
+		case "_switchoff":
+		case "_switchon":
+		case "_tempo":
+		case "_transpose":
+		case "_transposecont":
+		case "_transposefixed":
+		case "_transposestep":
+		case "_value":
+		case "_vel":
+		case "_velcont":
+		case "_velfixed":
+		case "_velstep":
+		case "_volume":
+		case "_volumecont":
+		case "_volumefixed":
+		case "_volumerate":
+		case "_volumestep":
 			$it_is = TRUE;
 		break;
 		}
@@ -5465,6 +5522,22 @@ function normalize_ampersand(string $s): string {
 	$s = str_replace(" . ",".",$s);
 
     return $s;
+	}
+
+function getLatestTaggedVersion() {
+    $url = 'https://api.github.com/repos/bolprocessor/bolprocessor/releases/latest';
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_USERAGENT => 'PHP', // REQUIRED by GitHub
+        CURLOPT_CONNECTTIMEOUT => 10,
+        CURLOPT_TIMEOUT => 20
+    ]);
+    $response = curl_exec($ch);
+    curl_close($ch);
+    if ($response === false) return false;
+    $data = json_decode($response, true);
+    return $data['tag_name'] ?? false;
 	}
 
 ?>

@@ -1840,23 +1840,24 @@ if($imax > 0 AND (substr_count($content,'{') > 0 OR substr_count($content,"-da."
 echo "</td>";
 
 $window_name = window_name($filename);
+$data_is_minimised = FALSE;
 if(!$hide AND !isset($_POST['analyze_tonal'])) {
 	echo "<td style=\"background-color:transparent;\">";
 	if(!isset($_POST['minimise'])) {
 		$data_is_minimised = data_is_minimised($this_file);
-		if($data_is_minimised) $disable_this = " disabled";
-		else $disable_this = '';
-		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		if(!isset($trace_minimise)) $trace_minimise = 0;
 		if(!$data_is_minimised) {
+			echo "<form method=\"post\" action=\"".$url_this_page."\" onsubmit=\"alert('This process may take some time. Please be patient and do not refresh the page until it reloads automatically.'); var hidden = document.createElement('input'); hidden.type = 'hidden'; hidden.name = 'minimise_data'; hidden.value = '1'; this.appendChild(hidden); var btn = this.querySelector('input[name=minimise_data]'); btn.disabled = true; btn.value = 'Processing... Be patient!';\" enctype=\"multipart/form-data\">";
 			if(substr_count($content,"}") > 0 AND !file_exists($music_xml_file)) {
 				echo "<input type=\"hidden\" name=\"trace_minimise\" value=\"".$trace_minimise."\">";
-				echo "<p><input type=\"submit\" onmouseover=\"checksaved();\" class=\"produce\" formaction=\"".$url_this_page."\" name=\"minimise_data\" value=\"MINIMISE\"".$disable_this.">&nbsp;polymetric structures on this page";
+				echo "<p><input type=\"submit\" onmouseover=\"checksaved();\"  class=\"produce\" name=\"minimise_data\" value=\"MINIMISE\">&nbsp;polymetric structures on this page";
 				echo "<br /><span class=\"red-text\">➡&nbsp;</span><i>Items won't be deleted or modified. Minimised versions will be inserted.</i></p>";
 				}
 			}
-		else
+		else {
+			echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 			echo "<span class=\"red-text\">➡&nbsp;</span><input type=\"submit\" onmouseover=\"checksaved();\" class=\"produce\" formaction=\"".$url_this_page."\" name=\"undo_minimise_data\" value=\"Undo MINIMISE\"> polymetric structures on this page";
+			}
 		echo "</form>";
 		}
 	echo "<table class=\"thicktable\">";
@@ -2564,10 +2565,11 @@ function minimise($line,$start,$p_beats,$q_beats,$level,$trace,$p_tempo,$q_tempo
 	$field = 0;
 	$p_tempo_start = $p_tempo;
 	$q_tempo_start = $q_tempo;
-	$p_sounds = $q_sounds = $p_rests = $q_rests = $n_gaps = array();
+	$p_sounds = $q_sounds = $p_rests = $q_rests = array();
+	$all_rests = array();
+	$all_rests[$field] = array();
 	$p_sounds[$field] = $p_rests[$field] = $p_beats[$field] = 0;
 	$q_sounds[$field] = $q_rests[$field] = $q_beats[$field] = 1;
-	$n_gaps[$field] = 0;
 	$newline[$field] = '';
 	while(TRUE) {
 		if($i >= $max) {
@@ -2576,7 +2578,6 @@ function minimise($line,$start,$p_beats,$q_beats,$level,$trace,$p_tempo,$q_tempo
 			}
 		$c = $line[$i];
 		if($c == ',') {
-	//		if($trace) $newline[$field] .= "<small>[".$p_sounds[$field]."/".$q_sounds[$field]."+".$p_rests[$field]."/".$q_rests[$field].":".$n_gaps[$field]."]</small>";
 			$field++;
 			$newline[$field] = '';
 			$i++;
@@ -2584,12 +2585,12 @@ function minimise($line,$start,$p_beats,$q_beats,$level,$trace,$p_tempo,$q_tempo
 			$q_tempo = $q_tempo_start;
 			$p_sounds[$field] = $p_rests[$field] = $p_beats[$field] = 0;
 			$q_sounds[$field] = $q_rests[$field] = $q_beats[$field] = 1;
-			$n_gaps[$field] = 0;
+			$all_rests[$field] = array();
+	//		$all_rests[$field]['nr'] = 0;
 			continue;
 			}
 		if($c == '}') {
-	//		if($trace) $newline[$field] .= "<small>[".$p_sounds[$field]."/".$q_sounds[$field]."+".$p_rests[$field]."/".$q_rests[$field].":".$n_gaps[$field]."]</small>";
-			$create_undetermined_rests = create_undetermined_rests($newline,$p_beats,$q_beats,$p_sounds,$q_sounds,$p_rests,$q_rests,$n_gaps,$field,$p_tempo_start,$q_tempo_start,$trace);
+			$create_undetermined_rests = create_undetermined_rests($newline,$p_beats,$q_beats,$p_sounds,$q_sounds,$p_rests,$q_rests,$field,$p_tempo_start,$q_tempo_start,$all_rests,$trace);
 			$final_line = $create_undetermined_rests['final_line'];
 			$nbre += $create_undetermined_rests['nbre'];
 			if($create_undetermined_rests['nbre'] > 0) $done = TRUE;
@@ -2627,8 +2628,8 @@ function minimise($line,$start,$p_beats,$q_beats,$level,$trace,$p_tempo,$q_tempo
 				$p = $add['p'];
 				$q = $add['q'];
 			if($trace) {
-				$showline = "{".$new_result['line']."}";
-				$showline .= " [".$p."/".$q." level ".$level."]";
+				$showline = "<span class=\"red-text\">Result = {".$new_result['line']."}</span>";
+		//		$showline .= " [".$p."/".$q." level ".$level."]";
 				echo $showline."<br />";
 				}
 			}
@@ -2667,17 +2668,21 @@ function minimise($line,$start,$p_beats,$q_beats,$level,$trace,$p_tempo,$q_tempo
 					}
 				else {
 					// This token is a note or a rest
+					$add = add($p_sounds[$field],$q_sounds[$field],$get_token['p_beats'],$get_token['q_beats']);
+					$p_sounds[$field] = $add['p'];
+					$q_sounds[$field] = $add['q'];
 					if(preg_match('/^\d+(\/\d+)?$/',$token)) {
-						// a rest
-						$add = add($p_rests[$field],$q_rests[$field],$get_token['p_beats'],$get_token['q_beats']);
-						$p_rests[$field] = $add['p'];
-						$q_rests[$field] = $add['q'];
-						$n_gaps[$field]++;
-						}
-					else {
-						$add = add($p_sounds[$field],$q_sounds[$field],$get_token['p_beats'],$get_token['q_beats']);
-						$p_sounds[$field] = $add['p'];
-						$q_sounds[$field] = $add['q'];
+						// this is a rest
+						$this_token = trim($token);
+						if(!isset($all_rests[$field]['token'][$this_token])) {
+							$all_rests[$field]['token'][$this_token] = 1;
+							$all_rests[$field]['p_dur'][$this_token] = 0;
+							$all_rests[$field]['q_dur'][$this_token] = 1;
+							}
+						else $all_rests[$field]['token'][$this_token]++;
+						$add = add($all_rests[$field]['p_dur'][$this_token],$all_rests[$field]['q_dur'][$this_token],$get_token['p_beats'],$get_token['q_beats']);
+						$all_rests[$field]['p_dur'][$this_token] = $add['p'];
+						$all_rests[$field]['q_dur'][$this_token] = $add['q'];
 						}
 					}
 				}
@@ -2757,91 +2762,120 @@ function get_token($line,$i,$imax,$p_tempo,$q_tempo,$field) {
 	return $result;
 	}
 
-function create_undetermined_rests($lines,$p_beats,$q_beats,$p_sounds,$q_sounds,$p_rests,$q_rests,$n_gaps,$maxfield,$p_tempo,$q_tempo,$trace) {
+function create_undetermined_rests($lines,$p_beats,$q_beats,$p_sounds,$q_sounds,$p_rests,$q_rests,$maxfield,$p_tempo,$q_tempo,$all_rests,$trace) {
 	global $max_term_in_fraction;
 	$lcm = 1; $ref_field = -1;
+	if($trace) echo "<p>";
 	for($field = 0; $field <= $maxfield; $field++) {
-		if($trace) echo "<p>field #".$field." = ".$p_sounds[$field]."/".$q_sounds[$field]." sounds, ".$p_beats[$field]."/".$q_beats[$field]." beats</p>";
-		if($ref_field == -1 AND $p_beats[$field] > 0) $ref_field = $field; // The first field with no gaps is the reference
+		if($ref_field == -1 AND $field == 0) {
+			// First field contains only the duration
+			$str = preg_replace('/\s*\d+(\/\d+)?\s*/','',$lines[$field]);
+			if($str == '') $ref_field = 0;
+			}
+		if($trace) echo "field #".$field." = ".$p_sounds[$field]."/".$q_sounds[$field]." sounds, ".$p_beats[$field]."/".$q_beats[$field]." beats, tempo = ".$p_tempo."/".$q_tempo."<br />";
+		// We calculate $ref_field although for the moment it is forced to 0
+		if($ref_field == -1 AND (!isset($all_rests[$field]) OR count($all_rests[$field]) == 0)) $ref_field = $field;
 		}
+	if($trace) echo "</p>";
 	$nbre = 0;
+	$ref_field = 0; // Forcing this value is probably the best thing
 	if($ref_field == -1) {
 		$final_line = implode(", ",$lines);
+		if($trace) echo "<p>FAILED: \"{".$final_line."}\" —> no reference field</p>";
 		$result['final_line'] = $final_line;
 		$result['nbre'] = $nbre;
 		return $result;
 		}
-	for($field = 0; $field <= $maxfield; $field++) {
-		if($trace) echo "[".$p_sounds[$field]."+".$p_rests[$field].", ".$p_beats[$field]."/".$q_beats[$field]." beats] ";
-		}
-	if($trace) echo "<p>ref field = ".$ref_field.", duration = ".$p_beats[$ref_field]."/".$q_beats[$ref_field]." beats</p>";
+	if($trace AND $ref_field >= 0) echo "<p>ref field = ".$ref_field.", duration = ".$p_beats[$ref_field]."/".$q_beats[$ref_field]." beats</p>";
 	for($field = 0; $field <= $maxfield; $field++) {
 		// This is similar to the code in Polymetric.c, but it also does things that you won't see there. Notably taking into account $p_tempo and $q_tempo.
-		if($n_gaps[$field] == 0 OR ($field == $ref_field AND $p_sounds[$field] == 0)) continue;
-		$theline = " ".$lines[$field]." ";
-		$add = add($p_beats[$ref_field],$q_beats[$ref_field],-$p_sounds[$field],$q_sounds[$field]);
-		$xp = $add['p'];
-		$xq = $add['q'];
-		$number_rests = $n_gaps[$field];
-		if($trace) echo "<p>➡ xp = ".$xp.", xq = ".$xq.", p_tempo = ".$p_tempo.", q_tempo = ".$q_tempo.", n_gaps = ".$number_rests.", </p>";
-		if($xp < 1.) {
-		/*	$gcd= gcd($p_beats[$ref_field],$number_rests);
-			if($gcd < 1) $gcd = 1;
-			$p_sounds[$field] = $p_sounds[$field] / $gcd;
-			$q_sounds[$field] = ($q_sounds[$field] * $number_rests) / $gcd;
-			$p_sounds[$field] = $p_sounds[$field]; */
-			$q_sounds[$field] = ($q_sounds[$field] * $number_rests);
-			if($trace) echo "<p><b>case 1 field #".$field."</b> —> p_beats[ref_field] = ".$p_beats[$ref_field].", q_beats[ref_field] = ".$q_beats[$ref_field].", p_sounds[field] = ".$p_sounds[$field].", q_sounds[field] = ".$q_sounds[$field]."</p>";
-			$lcm = lcm($q_beats[$ref_field],$q_sounds[$field]);
-			$pmax = $p_beats[$ref_field] * ($lcm / $q_beats[$ref_field]);
-			$qmax = $lcm;
-			$p_sounds[$field] = $p_sounds[$field] * ($lcm / $q_sounds[$field]);
-			$q_sounds[$field] = $lcm;
-			if($trace) echo "<p>pmax/qmax = ".$pmax."/".$qmax.", lcm = ".$lcm.", p_sounds[field] = ".$p_sounds[$field].", q_sounds[field] = ".$q_sounds[$field]."</p>";
-			$x = (float) $p_sounds[$field] / $pmax;
-			$mgap = intval($x);
-		//	$p_therest  = (($mgap + 1.) * $pmax - $p_sounds[$field]) * $p_tempo / $number_rests;
-			$p_therest  = (float) (($mgap + 1.) * $pmax - $p_sounds[$field]) / $number_rests;
-			if($trace) echo "<p>mgap = ".$mgap.", x = ".$x.", p_therest (before adjust) = ".$p_therest."</p>";
-			$q_therest = $lcm;
-			if($p_therest <= 1.) {
-		//	if($p_therest < $p_tempo) {
-		/*		$p_therest = $p_tempo;
-				$q_therest = $q_tempo; */
-		//		$q_therest = $q_therest * $q_tempo;
-		/*		$q_therest = 1. / $p_therest;
-				$p_therest = 1; */
-				$q_therest = intval($q_tempo / $p_therest);
-				$p_therest = $p_tempo;
+		if($field == $ref_field) continue;
+		if($trace) echo "<p>sounds = ".$p_sounds[$field]."/".$q_sounds[$field]."</p>";
+		if($field == $ref_field AND $p_sounds[$field] == 0) continue;
+		if(count($all_rests[$field]) == 0) {
+			if($trace) echo "<blockquote>FAILED: \"".$lines[$field]."\" —> field #".$field." contains no rest</blockquote>";
+			continue;
+			}
+		arsort($all_rests[$field]['token']);
+		foreach($all_rests[$field]['token'] as $token => $number_rests) {
+    		if($trace) echo "<blockquote><p>TRYING field #".$field.", \"".$lines[$field]."\"<br />—> ref_field = ".$ref_field.", token = \"".$token."\", number_rests = ".$number_rests.", duration = ".$all_rests[$field]['p_dur'][$token]."/".$all_rests[$field]['q_dur'][$token]."</p>";
+			if($number_rests == 0 OR $p_sounds[$field] == 0) {
+				if($trace) echo "<p>FAILED: \"".$lines[$field]."\" —> contains no rest</p></blockquote>";
+				continue;
 				}
-			$p_therest = intval($p_therest);
-		//	if($p_therest < $lcm) $p_therest = $lcm;
-		//	if($p_therest < $p_tempo) $p_therest = $p_tempo;
-		//	if($p_therest < 1) $p_therest = $pmax * $p_tempo;
-		//	if($p_therest < $p_tempo) $p_therest = $p_tempo;
-		//	$q_therest = $lcm * $q_tempo;
+			$theline = " ".$lines[$field]." ";
+			// Let xp/xq be the expected total duration of this/these rest(s)
+			$add = add($p_beats[$ref_field],$q_beats[$ref_field],-$p_sounds[$field],$q_sounds[$field]);
+			$xp = $add['p'];
+			$xq = $add['q'];
+			$add = add($xp,$xq,$all_rests[$field]['p_dur'][$token],$all_rests[$field]['q_dur'][$token]);
+			$xp = $add['p'];
+			$xq = $add['q'];
+			if($trace) echo "<p>➡ beats (".$p_beats[$ref_field]."/".$q_beats[$ref_field].") - sounds (".$p_sounds[$field]."/".$q_sounds[$field].") + rest duration (".$all_rests[$field]['p_dur'][$token]."/".$all_rests[$field]['q_dur'][$token].") = xp/xq = ".$xp."/".$xq.", number_rests = ".$number_rests."</p>";
+			$psounds = $p_sounds[$field];
+			$qsounds = $q_sounds[$field];
+			if($p_beats[$ref_field] == $xp AND $q_beats[$ref_field] == $xq) {
+				if($trace) echo "<p>FAILED: \"".$lines[$field]."\" —> contains only rests</p></blockquote>";
+				continue;
+				}
+			$add = add($psounds,$qsounds,-$all_rests[$field]['p_dur'][$token],$all_rests[$field]['q_dur'][$token]);
+			$psounds = $add['p'];
+			$qsounds = $add['q'];
+			if($xp < 1.) {
+				$qsounds = ($qsounds * $number_rests);
+				if($trace) echo "<p>case 1 —> beats[ref_field] = ".$p_beats[$ref_field]."/".$q_beats[$ref_field].", sounds[field] = ".$psounds."/".$qsounds."</p>";
+				$lcm = lcm($q_beats[$ref_field],$qsounds);
+				$pmax = $p_beats[$ref_field] * ($lcm / $q_beats[$ref_field]);
+				$qmax = $lcm;
+				$psounds = $psounds * ($lcm / $qsounds);
+				$qsounds = $lcm;
+				if($trace) echo "<p>pmax/qmax = ".$pmax."/".$qmax.", lcm = ".$lcm.", psounds/qsounds = ".$psounds."/".$qsounds."</p>";
+				$x = (float) $psounds / $pmax;
+				$mgap = intval($x);
+			//	$p_therest  = (($mgap + 1.) * $pmax - $psounds) * $p_tempo / $number_rests;
+				$p_therest  = (float) (($mgap + 1.) * $pmax - $psounds) / $number_rests;
+				if($trace) echo "<p>mgap = ".$mgap.", x = ".$x.", p_therest (before adjust) = ".$p_therest."</p>";
+				$q_therest = $lcm;
+				if($p_therest <= 1.) {
+			//	if($p_therest < $p_tempo) {
+			/*		$p_therest = $p_tempo;
+					$q_therest = $q_tempo; */
+			//		$q_therest = $q_therest * $q_tempo;
+			/*		$q_therest = 1. / $p_therest;
+					$p_therest = 1; */
+					$q_therest = intval($q_tempo / $p_therest);
+					$p_therest = $p_tempo;
+					}
+				$p_therest = intval($p_therest);
+			//	if($p_therest < $lcm) $p_therest = $lcm;
+			//	if($p_therest < $p_tempo) $p_therest = $p_tempo;
+			//	if($p_therest < 1) $p_therest = $pmax * $p_tempo;
+			//	if($p_therest < $p_tempo) $p_therest = $p_tempo;
+			//	$q_therest = $lcm * $q_tempo;
+				if($trace) echo "<p>p_therest (after adjust) = ".$p_therest.", q_therest = ".$q_therest."</p>";
+				}
+			else {
+				$p_therest = $xp * $p_tempo;
+				$q_therest = $xq * $q_tempo * $number_rests;
+				if($trace) echo "<p>case 2</p>";
+				}
 			
-			if($trace) echo "<p>p_therest (after adjust) = ".$p_therest.", q_therest = ".$q_therest."</p>";
-			}
-		else {
-			$p_therest = $xp * $p_tempo;
-			$q_therest = $xq * $q_tempo * $number_rests;
-			if($trace) echo "<p>case 2</p>";
-			}
-		
-		$simplify = simplify($p_therest."/".$q_therest,$max_term_in_fraction);
-		$p_therest = $simplify['p'];
-		$q_therest = $simplify['q'];
-		if($q_therest == 1) $the_rest = $p_therest;
-		else $the_rest = $p_therest."/".$q_therest;
-		if($trace) echo "[field #".$field." -> rest = ".$the_rest."] ";
-		$lines[$field] = trim(str_replace(" ".$the_rest." "," _rest ",$theline,$count_this));
-		if(isset($count_this)) {
-			$nbre += $count_this;
-		//	if($count_this > 0 AND $trace) echo "<p>".$lines[$field]." nbre = ".$nbre."</p>";
+			$simplify = simplify($p_therest."/".$q_therest,$max_term_in_fraction);
+			$p_therest = $simplify['p'];
+			$q_therest = $simplify['q'];
+			if($q_therest == 1) $the_rest = $p_therest;
+			else $the_rest = $p_therest."/".$q_therest;
+			if($trace) echo "[field #".$field." -> rest = ".$the_rest."] ";
+			$lines[$field] = trim(str_replace(" ".$the_rest." "," _rest ",$theline,$count_this));
+			if(isset($count_this)) {
+				$nbre += $count_this;
+				if($count_this > 0 AND $trace) echo "<p>GOT IT: \"".$lines[$field]."\" —> count_this = ".$nbre."</p>";
+				if($trace) echo "</blockquote>";
+				if($count_this > 0) break;
+				}
 			}
 		}
-	if($trace) echo "<br /><br />";
+	if($trace) echo "<br />";
 	$final_line = implode(", ",$lines);
 	$result['final_line'] = $final_line;
 	$result['nbre'] = $nbre;
