@@ -75,7 +75,6 @@ if(isset($_GET['score'])) $score_file = $_GET['score'];
 else $score_file = '';
 if(isset($_GET['midifile'])) $midi_file = $_GET['midifile'];
 else $midi_file = '';
-// if($is_minimised) $midi_file .= "_mini";
 if(isset($_GET['tonality_file'])) $tonality_file = $_GET['tonality_file'];
 else $tonality_file = '';
 if(isset($_GET['item'])) $item = $_GET['item'];
@@ -134,7 +133,9 @@ echo "</div>";
 
 	if($instruction == "create_set") {
 		$training_set_folder = $midi_file;
+		$unitsfilename = preg_replace("/.+\/([0-9]+_units\.txt)/","$1",$data_path);
 		if(!file_exists($training_set_folder)) mkdir($training_set_folder,0777,true);
+		copy($data_path,$training_set_folder.SLASH.$unitsfilename); // Copy "0_units.txt" and the like
 		}
 	else $training_set_folder = '';
 
@@ -853,7 +854,7 @@ function check_training_folder($folder) {
 			$number = $table[0];
 			$midifile = $rootPath.SLASH.$number.".mid";
 		//	echo $midifile."<br />";
-			if(!file_exists($midifile)) {
+			if(!file_exists($midifile) AND !is_integer(strpos($thisfile,"_units.txt"))) {
 				echo "<span class=\"red-text\">➡</span> Deleting invalid sample ‘<span class=\"green-text\">".$thisfile."</span>’<br />";
 				unlink($rootPath.SLASH.$thisfile);
 				}

@@ -2020,10 +2020,10 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 				echo "<input id=\"saveButton\" class=\"save\" type=\"submit\" formaction=\"".$url_this_page."#topedit\" name=\"minimise\" title=\"Minimise polymetric expressions\" value=\"mini\">&nbsp;<span class=\"red-text\">➡&nbsp;</span>";
 				$number_samples = number_of_lines_in_file($units_path.($i_item-1)."_units.txt");
 				if($is_minimised) {
-					$create_button = "CREATE minimised SET FOR AI";
+					$create_button = "CREATE minimised DATASET FOR AI";
 					$link_create_set .= "&minimised";
 					}
-				else $create_button = "CREATE SET FOR AI";
+				else $create_button = "CREATE DATASET FOR AI";
 				echo "<input class=\"edit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_create_set."','".$window_name_create_set."','width=800,height=800,left=100'); return false;\" type=\"submit\" name=\"create_set\" title=\"Create MIDI file sample set for AI training\" value=\"".$create_button."\"> (".$number_samples."&nbsp;samples)";
 				}
 			}
