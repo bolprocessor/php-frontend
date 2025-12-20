@@ -309,8 +309,8 @@ for($i = 0; $i < 7; $i++) {
 	$x_three = $x_three * 3;
 	}
 
-if(!file_exists('latest_version.cache') OR filemtime('latest_version.cache') < (time() - 43200)) {
-	$latest = getLatestTaggedVersion(); // This shouldn't be called more than once in 12 hours
+if(!file_exists('latest_version.cache') OR filemtime('latest_version.cache') < (time() - 259200)) {
+	$latest = getLatestTaggedVersion(); // This shouldn't be called more than once in 3 days
 	if($latest !== false) file_put_contents('latest_version.cache',$latest);
 	}
 
@@ -787,9 +787,9 @@ function compile_help($text_help_file,$html_help_file) {
 		$content = str_replace(chr(10),"<br />",$content);
 		$content = str_replace("  ","&nbsp;&nbsp;",$content); // Remove tabulations
 		$table = explode("###",$content);
+		$file_header .= "<p style=\"color:black;\">".$table[0]."</p>";
 		sort($table);
 		$handle = fopen($html_help_file,"w");
-		$file_header .= "<p style=\"color:black;\">".$table[0]."</p>";
 		$im = count($table);
 		for($i = 1; $i < $im; $i++) {
 			$table2 = explode("<br />",$table[$i]);
@@ -2666,6 +2666,7 @@ function display_console_state() {
 		if($latest !== false) {
 			$version_clean = ltrim($output,'v');
 			$latest_clean  = ltrim($latest,'v');
+	//		echo "<p".$latest." -> ".$latest_clean."</p>";
 			if(version_compare($latest_clean,$version_clean,'>')) echo " <span class=\"red-text\">➡</span> <a class=\"linkdotted\" target=\"_blanl\" href=\"https://bolprocessor.org/install/\">upgrade to ".$latest_clean."</a>&nbsp;!";
 			else echo " (latest)";
 			}
