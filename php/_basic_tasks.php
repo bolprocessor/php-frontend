@@ -5293,21 +5293,6 @@ function zip_this_folder($folder) {
 	return $n;
 	}
 
-function nextShuffled($min,$max): int {
-	// Not used
-    static $shuffled = [];
-    static $index = 0;
-    if(empty($shuffled) || $index >= count($shuffled)) {
-        $shuffled = range($min,$max);
-        shuffle($shuffled);
-        $index = 0;
-    	}
-    $value = $shuffled[$index];
-    $index++;
-    return $value;
-	}
-
-
 function replace_spaced_dashes_with_count($str) {
     return preg_replace_callback(
         '/(?:\s*-\s*)+/',       // one or more "-" possibly separated by spaces
@@ -5419,7 +5404,7 @@ function add_list_of_ratios($text) {
 
 function number_of_lines_in_file($filename) {
     $lineCount = 0;
-    $handle = fopen($filename, "r");
+    $handle = @fopen($filename,"r");
     if($handle) {
         while(($line = fgets($handle)) !== false) {
             // Trim removes spaces, tabs, and newlines
@@ -5429,6 +5414,7 @@ function number_of_lines_in_file($filename) {
 			}
         fclose($handle);
     	}
+	else return 0;
     return $lineCount;
 	}
 
@@ -5505,15 +5491,16 @@ function is_performance_control($text) {
 	}
 
 function normalize_ampersand(string $s): string {
+	// Delete unwanted '&' created when importing a MusicXML score
 	$s = str_replace("{","{ ",$s);
 	$s = str_replace("}"," }",$s);
 	$s = str_replace(","," , ",$s);
 	$s = str_replace("."," . ",$s);
-    // 1. Standalone &
+    // Delete standalone &
     $s = preg_replace('/(?<=^|\s)&(?=\s|$)/', '', $s);
-    // 2. Leading & on integer or ratio
+    // Delete leading & on integer or ratio
     $s = preg_replace('/(?<=^|\s)&(\d+(?:\/\d+)?)(?=\s|$)/', '$1', $s);
-    // 3. Trailing & on integer or ratio
+    // Delete trailing & on integer or ratio
     $s = preg_replace('/(?<=^|\s)(\d+(?:\/\d+)?)&(?=\s|$)/', '$1', $s);
 	$s = str_replace("-&","-",$s);
 	$s = str_replace("&-","-",$s);
@@ -5521,7 +5508,6 @@ function normalize_ampersand(string $s): string {
 	$s = str_replace(" }","}",$s);
 	$s = str_replace(" , ",",",$s);
 	$s = str_replace(" . ",".",$s);
-
     return $s;
 	}
 

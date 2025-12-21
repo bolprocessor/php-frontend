@@ -133,7 +133,8 @@ echo "</div>";
 
 	if($instruction == "create_set") {
 		$training_set_folder = $midi_file;
-		$unitsfilename = preg_replace("/.+\/([0-9]+_units\.txt)/","$1",$data_path);
+	//	$unitsfilename = preg_replace("/.+\/([0-9]+_units\.txt)/","$1",$data_path);
+		$unitsfilename = "all_units.txt";
 		if(!file_exists($training_set_folder)) mkdir($training_set_folder,0777,true);
 		copy($data_path,$training_set_folder.SLASH.$unitsfilename); // Copy "0_units.txt" and the like
 		}
@@ -571,7 +572,7 @@ if($instruction == "create_set" AND $training_set_folder <> '') {
 	check_training_folder($training_set_folder);
 	$number_zip = zip_this_folder($training_set_folder);
 	if($number_zip > 0)
-		echo "<hr><p><big>👉 Download <a href=\"".$training_set_folder.".zip\">zipped AI training set</a> (".($number_zip / 2)." samples)</big></p><hr>";
+		echo "<hr><p><big>👉 Download <a href=\"".$training_set_folder.".zip\">zipped AI training set</a> (".(($number_zip - 1) / 2)." samples)</big></p><hr>";
 	}
 
 // Prepare images if any

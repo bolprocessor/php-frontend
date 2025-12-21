@@ -564,7 +564,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$convert_score = convert_musicxml($this_score,$repeat_section,$divisions,$fifths,$mode,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$create_channels,$include_breaths,$include_slurs,$include_measures,$ignore_fermata,$ignore_mordents,$chromatic_mordents,$ignore_turns,$chromatic_turns,$ignore_trills,$chromatic_trills,$ignore_arpeggios,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections,$trace_tempo,$trace_ornamentations,$breath_length,$breath_tag,$trace_measures,$measures,$accept_signs,$include_parts,$number_parts,$apply_rndtime,$rndtime,$apply_rndvel,$rndvel,$extend_last_measure,$number_measures,$accept_pedal);
 			$data .= $convert_score['data'];
 			$report = $convert_score['report'];
-			$data = normalize_ampersand($data); // Added 2025-12-15 happened in La Campanella
+			$data = normalize_ampersand($data); // Added 2025-12-15, was used in La Campanella
 			$data = preg_replace("/\s+/u"," ",$data);
 			$data = str_replace(",}","}",$data);
 			$data = str_replace(" }","}",$data);
@@ -1286,6 +1286,7 @@ if($need_to_save OR isset($_POST['savethisfile'])) {
 			}
 		else save_midiressources($filename,FALSE);
 		}
+	unset($_POST['minimise_set']);
 	if(isset($_POST['savethisfile']) AND file_exists($music_xml_file)) unlink($music_xml_file); // Added 2025-12-15
 	}
 else read_midiressources($filename);
@@ -1889,9 +1890,10 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 			}
 		echo "</form>";
 		}
-	if(!isset($_POST['minimise']) AND !file_exists($music_xml_file) AND file_exists($temp_dir.$temp_folder)) {
+	if(!isset($_POST['minimise']) AND !isset($_POST['minimise_set']) AND !file_exists($music_xml_file) AND file_exists($temp_dir.$temp_folder)) {
 		delete_folder($temp_dir.$temp_folder,FALSE);
 		}
+	$is_minimised = array();
 	for($i = $i_item = 0; $i < $imax; $i++) {
 		$error_mssg = '';
 		if(file_exists($music_xml_file)) continue;
@@ -1902,43 +1904,43 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 		if(is_integer($pos=strpos($line,"-")) AND $pos == 0) continue;
 	//	echo "imax = ".$imax."<br />";
 		$units_path = $temp_dir.$temp_folder.SLASH;
-		if($i_item > 0) {
+		if($imax > 1) {
 			$training_set_folder = $bp_application_path.$output_folder.SLASH."set_".$filename."[".($i_item + 1)."]";
 			}
 		else {
 			$training_set_folder = $bp_application_path.$output_folder.SLASH."set_".$filename;
 			}
-		$is_minimised = file_exists($units_path.$i_item."_min_units.txt");
-		if($is_minimised) $training_set_folder .= "_mini";
 		delete_folder($training_set_folder,TRUE);
-	//	echo "<p>@@@ deleting ".$training_set_folder."</p>";
-		if(!isset($_POST['minimise'])) {
+
+		$data_units = $units_path.$i_item."_units.txt";
+		$data_min_units = array();
+		if(!isset($_POST['minimise_units_'.$i_item])) {
 			// Create 'units' = shortest sequences of polymetric structures for AI training sets
+			// echo "<p>@ Creating units: ".$i_item."</p>";
 			$segment = create_parts($line,$i_item,$temp_dir,$temp_folder,0,0,0,0,"units");
-			if($segment['error'] == "continue") {
-				continue;
-				}
+			if($segment['error'] == "continue") continue;
 			$data_units = $segment['data_chunked'];
 			}
 		else {
-			if(isset($_POST['this_item'])) $this_item = $_POST['this_item'] - 1;
-			else $this_item = $i_item;
-			$data_units = $units_path.$this_item."_units.txt";
-			$data_min_units = $units_path.$this_item."_min_units.txt";
-			if(!file_exists($data_min_units)) {
+			$this_item = $i_item;
+			$data_min_units[$this_item] = $units_path.$this_item."_min_units.txt";
+			if(!file_exists($data_min_units[$this_item])) {
 				if(file_exists($data_units)) {
 					echo "<p>👉 Minimising polymetric structures for AI samples (item #".($this_item + 1).")<br />";
-					$min_units_handle = fopen($data_min_units,"w");
+				//	echo "<p>training_set_folder = ".$training_set_folder."</p>";
+					delete_folder($training_set_folder."_mini",FALSE); // Added 2025-12-21
+					$min_units_handle = fopen($data_min_units[$this_item],"w");
 					$result_minimise = minimise_whole_set($min_units_handle,$data_units);
 					fclose($min_units_handle);
 					$n_processed = $result_minimise['processed'];
 					$n_skipped = $result_minimise['skipped'];
 					if($n_processed > 0) {
 						echo "Minimising ".$n_processed." samples (".$n_skipped." skipped, ".$result_minimise['nbre']." undefined rests)";
-						if(!copy($data_min_units,$data_units)) echo "<p>⚠️ Failed to copy <span class=\"green-text\">".$this_item."_min_units.txt</span> to <span class=\"green-text\">".$this_item."_units.txt</span> (probably permission issue)</p>";
+						if(!copy($data_min_units[$this_item],$data_units)) echo "<p>⚠️ Failed to copy <span class=\"green-text\">".$this_item."_min_units.txt</span> to <span class=\"green-text\">".$this_item."_units.txt</span> (probably permission issue)</p>";
+
 						}
 					else {
-						@unlink($data_min_units);
+				//		@unlink($data_min_units[$this_item]);
 						if($n_processed > -1) echo "😢 No structure was minimised in this set of samples";
 						}
 					echo "</p>";
@@ -1947,16 +1949,15 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 				}
 		//	else echo "<p>👉 Set for AI is already minimised in item #".($this_item + 1)."</p>";
 			}
-		// Create 'chunks' = longer sequences of polymetric structures for real-time MIDI performance
+		
+		// Create 'chunks' = longest sequences of polymetric structures for real-time MIDI performance
 		$segment = create_parts($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxchunk_size,0,0,"chunk");
-		if($segment['error'] == "break") {
-	//		echo "<p>break i_item = ".$i_item."</p>";
-			break;
-			}
-		if($segment['error'] == "continue") {
-	//		echo "<p>continue i_item = ".$i_item."</p>";
-			continue;
-			}
+		if($segment['error'] == "break") break;
+		if($segment['error'] == "continue") continue;
+		$is_minimised = array();
+		$is_minimised[$i_item] = file_exists($units_path.$i_item."_min_units.txt");
+		if($is_minimised[$i_item]) $training_set_folder .= "_mini";
+
 		$i_item++;
 		echo "<input type=\"hidden\" name=\"this_item\" value=\"".$i_item."\">";
 		$tie_mssg = $segment['tie_mssg'];
@@ -2017,14 +2018,23 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 			echo "&nbsp;<input class=\"edit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_expand."','".$window_name_expand."','width=800,height=800,left=100'); return false;\" type=\"submit\" name=\"produce\" title=\"Expand polymetric expression\" value=\"EXPAND\">";
 			if($chunked) {
 				echo "<br  /><input id=\"saveButton\" class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" title=\"Create a new sample set\" value=\"refresh\">&nbsp;<span class=\"red-text\">➡&nbsp;</span>";
-				echo "<input id=\"saveButton\" class=\"save\" type=\"submit\" formaction=\"".$url_this_page."#topedit\" name=\"minimise\" title=\"Minimise polymetric expressions\" value=\"mini\">&nbsp;<span class=\"red-text\">➡&nbsp;</span>";
-				$number_samples = number_of_lines_in_file($units_path.($i_item-1)."_units.txt");
-				if($is_minimised) {
+				$empty_minimised_set = !(isset($data_min_units[$i_item-1]) AND file_exists($data_min_units[$i_item-1]) AND number_of_lines_in_file($data_min_units[$i_item-1]) > 0);
+				$window_name_samples = "samples".$i_item;
+				if(isset($is_minimised[$i_item-1]) AND $is_minimised[$i_item-1]) {
 					$create_button = "CREATE minimised DATASET FOR AI";
 					$link_create_set .= "&minimised";
+					$window_name_samples .= "mini";
 					}
-				else $create_button = "CREATE DATASET FOR AI";
-				echo "<input class=\"edit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_create_set."','".$window_name_create_set."','width=800,height=800,left=100'); return false;\" type=\"submit\" name=\"create_set\" title=\"Create MIDI file sample set for AI training\" value=\"".$create_button."\"> (".$number_samples."&nbsp;samples)";
+				else {
+					$create_button = "CREATE DATASET FOR AI";
+					$name_minimise_units = "minimise_units_".($i_item - 1);
+					if($empty_minimised_set) echo "<input id=\"saveButton\" class=\"save\" type=\"submit\" formaction=\"".$url_this_page."#topedit\" name=\"".$name_minimise_units."\" title=\"Minimise polymetric expressions\" value=\"mini\">&nbsp;<span class=\"red-text\">➡&nbsp;</span>";
+					}
+				$number_samples = number_of_lines_in_file($units_path.($i_item-1)."_units.txt");
+				$link_sample = "preview_samples.php?file=".urlencode($data_units);
+				echo "<input type=\"hidden\" name=\"minimise_set\" value=\"1\">";
+				echo "<input class=\"edit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_create_set."','".$window_name_create_set."','width=800,height=800,left=100'); return false;\" type=\"submit\" name=\"create_set\" title=\"Create MIDI file sample set for AI training\" value=\"".$create_button."\">";
+				echo "(".$number_samples."&nbsp;<a href=\"\" onclick=\"window.open('".$link_sample."','".$window_name_samples."','width=1200,height=800,left=200'); return false;\">samples</a>)";
 				}
 			}
 		if($tie_mssg <> '' AND $error_mssg == '') echo "<br />";
@@ -2056,8 +2066,6 @@ echo "</body></html>";
 
 function create_parts($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxchunk_size,$measure_min,$measure_max,$label) {
 	global $permissions,$p_clock, $q_clock;
-// echo "@@@ measure_min = ".$measure_min."<br />";
-// echo "@@@ measure_max = ".$measure_max."<br />";
 //	$minchunk_size = 0;
 	$test_legato = FALSE;
 	$current_legato = array();
@@ -2081,17 +2089,13 @@ function create_parts($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxch
 	if(is_integer($pos=strpos($line,"{"))) {
 		$initial_controls = trim(substr($line,0,$pos));
 		$initial_controls = preg_replace("/\[[^\]]*\]/u",'',$initial_controls);
-	//	echo "@@@ initial_controls = ".$initial_controls."<br />";
 		// Pick up initial tempo if any
 		$tempo = preg_replace("/.*_tempo\(([^\)]+)\).*/u","$1",$initial_controls);
 		if($tempo <> $initial_controls) $initial_tempo .= "_tempo(".$tempo.") ";
-		//	echo "@@@ initial_tempo = ".$initial_tempo."<br />";
 		if($label <> "chunk" AND $label <> "units") {
 			// Pick up specified tonal scale if any
 			$scale = preg_replace("/.*_scale\(([^\,]+)[^\)]+\).+/u","$1",$line);
 			if($scale <> $line) $tonal_scale = $scale;
-		//	echo "@@@ tonal_scale = ".$tonal_scale."<br />";
-		//	echo $scale."<br />".$line."<br />";
 			$initial_controls = '';
 			}
 		}
@@ -2100,6 +2104,7 @@ function create_parts($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxch
 	$line = preg_replace("/^t[ ].*/u",'',$line); // Csound tempo statement
 	$line = preg_replace("/^s\s*$/u",'',$line); // Csound "s" statement
 	$line = preg_replace("/^e\s*$/u",'',$line); // Csound "e" statement
+	$line = normalize_ampersand($line); // Normally not necessary if recently imported musicxml
 	$restrict_analysis = FALSE;
 	// Beware that measure_min and measure_max may not be integers
 	if(!($measure_min === 0) AND strlen($measure_min) > 0) {
@@ -2157,7 +2162,6 @@ function create_parts($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxch
 				}
 			}
 		if($n < 3) {
-	//		echo "@@@ item = ".$i_item." n = ".$n."<br />";
 			$segment['data_chunked'] = '';
 			$segment['chunked'] = FALSE;
 			$segment['error'] = '';
@@ -2167,13 +2171,10 @@ function create_parts($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxch
 	$level_bracket = $n = 0;
 	$all_lines_chunked = '';
 	if($label == "units") {
-	//	$number_expressions = nextShuffled(1,5);
 		$number_expressions = rand(1,5);
-	//	$number_expressions = 1;
 		$start_chunk .= " [".$number_expressions." structures]";
 		}
 	else $number_expressions = 1;
-//	echo "@@@ ok ".$i_item."<br />";
 	for($k = 0; $k < strlen($line_recoded); $k++) {
 		$line_chunked .= $start_chunk;
 		if($label == "units" AND $start_chunk <> '') {
@@ -2181,7 +2182,6 @@ function create_parts($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxch
 			}
 		$start_chunk = '';
 		$c = $line_recoded[$k];
-	//	if($label == "units" AND $c == '&') continue; // For the time being we ignore tied notes when building AI training sample sets
 		if($k < (strlen($line_recoded) - 1) AND ctype_alnum($c) AND $line_recoded[$k+1] == '&') {
 			$tie++; $total_ties++;
 			}
@@ -2224,11 +2224,6 @@ function create_parts($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxch
 						if($test_legato) echo "(".$thisfield." -> ".$the_legato.")";
 						if($the_legato > 0) $ok_legato = 0;
 						}
-				/*	if($i_item < 4) echo "@@@ ok item = ".$i_item." label = ".$label." n = ".$n."<br />";
-					if($i_item == 2 AND $label == "units") {
-						echo "item #".$i_item." ok_legato = ".$ok_legato." n = ".$n." minchunk_size = ".$minchunk_size." maxchunk_size = ".$maxchunk_size." tie = ".$tie."<br />";
-						echo $line_chunked."<br />";
-						} */
 					if(($label == "units") OR (($label == "slice" OR $ok_legato) AND (($tie <= 0 AND $n >= $minchunk_size) OR ($maxchunk_size > 0 AND $n > $maxchunk_size)))) {
 						$current_legato = $i_layer = array();
 						$current_legato[0] = $i_layer[0] = $layer = 0;
@@ -2238,15 +2233,12 @@ function create_parts($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxch
 							$tie_mssg .=  "• <span class=\"red-text\">legato(s) may be truncated after chunk #".$chunk_number."</span><br />"; 
 						$line_chunked .= $linebreak;
 						$line_chunked = delete_orphan_ties($line_chunked);
-				//		if($i_item == 1) echo $line_chunked."<br />";
 						$all_lines_chunked .= $line_chunked;
 						$line_chunked = '';
 						$tie = $n = 0;
 						if($test_legato) echo " => ".$label." #".$chunk_number;
 						if($label == "units") {
-				//			$number_expressions = nextShuffled(1,5);
 							$number_expressions = rand(1,5);
-				//			$number_expressions = 1;
 							$start_chunk = "[";
 							}
 						else $start_chunk = "[".$label." ";
@@ -2261,9 +2253,6 @@ function create_parts($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxch
 				}
 			}
 		}
-//	$chunked = TRUE;
-//	if($chunked OR $label == "units") {
-//	if($i_item == 2) echo "(".$i_item.") ".$all_lines_chunked."<br />";
 	if($chunked) {
 		$all_lines_chunked = preg_replace("/ +/u",' ',$all_lines_chunked);
 		$all_lines_chunked = str_replace("{ ","{",$all_lines_chunked);
@@ -2419,15 +2408,8 @@ function data_is_minimised($file) {
 	}
 
 function minimise_whole_set($min_units_handle,$units_file) {
-	// Does not yet process sequential structures (periods)
 	$trace = TRUE;
 	$trace = FALSE;
-	$check_only_one = TRUE;
-	$check_only_one = FALSE;
-	if($check_only_one) {
-		echo "<p>Checking a single example</p>";
-		unset($_POST['minimise']); // Avoid repeating process
-		}
 	$verbose = FALSE;
 	$errors = '';
 	$lines = file($units_file,FILE_IGNORE_NEW_LINES);
@@ -2435,48 +2417,8 @@ function minimise_whole_set($min_units_handle,$units_file) {
 	$done = FALSE;
 	$nbre = 0;
 	foreach($lines as $line) {
-		if($check_only_one) {
-			// The following is obsolete since you can trace items on the Data page
-			if($i > 0) break;
-		//	$line = "[10 beats] _tempo(11/5) _vel(64) _chan(1) {C4_ D4& - 3/2 {9/2, E4 F#4 {Gb4 - F3, A3 &D4 -}}}"; // good 1
-		//	$line = "{C4_ D4& - 3/2 {9/2, E4 F#4 {Gb4 - F3, A3 &D4 -}}}"; // good 1
-		//	$line = "{D4& - F3, A3 &D4 -}"; // good 1
-		//	$line = "{C4& {F3, &C4 - D4}}"; // good
-		//	$line = "_tempo(3/2) {C4& {3, &C4 - D4}}"; // good
-		//	$line = "{A4 F4 G4, 1/2 C4 D4 1/2 E4}"; // good 
-		//	$line = "_tempo(3/2) {A4 F4 G4, 3/2 C4 D4 3/2 E4}"; // good
-		//	$line = "_tempo(4/3) {A4 F4 G4, 3/4 C4 D4 3/4 E4}"; // good
-		//	$line = "_tempo(7/4) {A4 F4 G4, 3/7 C4 D4 3/7 E4}"; // good
-		//	$line = "{C4 D4 E4, A4 B4 F4 3 G4 A4 B4}"; // $$$
-		//	$line = "{4, C4 D4 E4, A4 B4 F4 2 G4 A4 B4}"; // good
-		//	$line = "_tempo(3/2) {C4 {3, C4 1 D4}}"; // good
-		//	$line = "{1/2 C4 D4 1/2 E4, A4 F4 G4}"; // good
-		//	$line = "{C4 D4 E4, A4 1/2 F4 G4 A3 B3 1/2}"; // good
-		//	$line = "{F4 G4, 1/2 C4 D4 1/2 E4}"; // good
-
-		//	$line = "{C4_ D4& - 1 1/2 {9/2, E4 F#4 {Gb4 - F3, A3 &D4 -}}}"; // good
-		//	$line = "{C5 D5 E5, C4 4/3 _tempo(3/2) D4}"; // good
-		//	$line = "{C5 D5 E5, 4/3 C4 _tempo(3/2) D4}"; // good
-		//	$line = "{C5 D5 E5,C4 - _tempo(3/2) D4}"; // bad 4/3
-		//	$line = "{{C5 D5 E5},C4 - _tempo(3/2) D4}"; // bad 4/3
-		//	$line = "{{C5 D5 E5},C4 4/3 _tempo(3/2) D4}"; // good
-		//	$line = "{C2  D2,{C5 D5 E5, -- F3},C4 4/3 _tempo(3/2) D4}"; // good -- bad  1/3
-		//	$line = "{C2  D2,C4 4/3 _tempo(3/2) D4}"; // bad  1/3
-		//	$line = "{C4 _tempo(4) D4, C5 D5 - E5}"; // good 1
-
-		//	$line = "{C4 3 D4, C5 D5 2 E5}"; // good 2
-		//	$line = "{C4 D4 E4, A4 B4 F4 - G4 A4 B4, C5 3 D5 E5}"; // bad 1 good 3
-		//	$line = "{C4 D4 E4, A4 B4 F4 3 G4 A4 B4, C5 3 D5 E5}"; // good 3 good 3
-		//	$line = "{C4 D4 E4, A4 B4 F4 2 G4}"; // good 2
-		//	$line = "{C4 D4 E4 , A4 B4 F4 3 F4 G4 A4 }"; // good 3
-		// $line = "{C4 D4 E4, A4 B4 F4 2 0 1 G4 A4 B4, C5 4/2 - D5 E5}"; // good 3 good 3
-		//	$line = "{C5 3 D5 E5, C4 D4 E4, A4 B4 F4 - G4 A4}"; // good 1
-		//	$line = "{C4 D4 E4, A4 B4 F4 7/7 G4 A4, C5 6/2 _tempo(3/2) D5 E5}"; // good 1 bad 2/3
-		//	$line = "{C4 D4& F4 {11/2, E4 G4 F#4 {4, Gb4 -- F3, A3 &D4 C3}}}";  // good
-			}
 		$minimise_item = minimise_item($line,$trace,$verbose,$nbre);
 		$j++;
-		if($check_only_one) break;
 		if($minimise_item['skip']) continue;
 		if(trim($line) == '') continue;
 		$i++;
@@ -2489,7 +2431,6 @@ function minimise_whole_set($min_units_handle,$units_file) {
 	$result['done'] = $done;
 	$result['nbre'] = $nbre;
 	$result['processed'] = $i;
-	if($check_only_one) $result['processed'] = -1;
 	$result['skipped'] = $j - $i;
 	return $result;
 	}
@@ -2547,6 +2488,7 @@ function minimise_item($line,$trace,$verbose,$nbre) {
 	}
 
 function minimise($line,$start,$p_beats,$q_beats,$level,$trace,$p_tempo,$q_tempo,$nbre) {
+	// Does not yet process sequential structures (periods)
 	global $max_term_in_fraction;
 	$minimise_result['error'] = '';
 	$done = FALSE;
@@ -2629,7 +2571,6 @@ function minimise($line,$start,$p_beats,$q_beats,$level,$trace,$p_tempo,$q_tempo
 				$q = $add['q'];
 			if($trace) {
 				$showline = "<span class=\"red-text\">Result = {".$new_result['line']."}</span>";
-		//		$showline .= " [".$p."/".$q." level ".$level."]";
 				echo $showline."<br />";
 				}
 			}
@@ -2647,7 +2588,6 @@ function minimise($line,$start,$p_beats,$q_beats,$level,$trace,$p_tempo,$q_tempo
 					$ok_extra = is_performance_control($extra);
 					if(!$ok_extra) {
 						$this_error = "⚠️ ".$extra." ?";
-					//	echo "<p>⚠️ ".$extra." ?</p>";
 						$minimise_result['error'] .= $this_error;
 						$minimise_result['line'] = implode(", ",$newline);
 						$minimise_result['nbre'] = $nbre;
@@ -2706,9 +2646,7 @@ function get_token($line,$i,$imax,$p_tempo,$q_tempo,$field) {
 	$result['extra'] = '';
 	$result['p_beats'] = 0;
 	$result['q_beats'] = 1;
-//	$line_part = trim(substr($line,$i));
 	$line_part = substr($line,$i);
-//	$line_part = str_replace('}'," }",$line_part);
 	$tokens = explode(" ",$line_part);
 	$this_token = $token = trim($tokens[0]);
 	$result['i'] = $i + strlen($token);
@@ -2756,7 +2694,6 @@ function get_token($line,$i,$imax,$p_tempo,$q_tempo,$field) {
 		return $result;
 		}
 	$i_duration++;
-	//	echo "p_beats = ".$p_beats.", q_beats =".$q_beats."<br />";
 	$result['p_beats'] = $q_tempo * $i_duration;
 	$result['q_beats'] = $p_tempo;
 	return $result;
@@ -2881,8 +2818,6 @@ function create_undetermined_rests($lines,$p_beats,$q_beats,$p_sounds,$q_sounds,
 	$result['nbre'] = $nbre;
 	return $result;
 	}
-
-
 
 
 // The following does not work yet. It is meant to handle "save" when typing command S
