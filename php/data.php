@@ -1916,10 +1916,13 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 		$data_min_units = array();
 		if(!isset($_POST['minimise_units_'.$i_item])) {
 			// Create 'units' = shortest sequences of polymetric structures for AI training sets
-			// echo "<p>@ Creating units: ".$i_item."</p>";
+		//	echo "<p>@ Creating units: ".$i_item."</p>";
 			$segment = create_parts($line,$i_item,$temp_dir,$temp_folder,0,0,0,0,"units");
 			if($segment['error'] == "continue") continue;
 			$data_units = $segment['data_chunked'];
+			$data_min_units[$i_item] = $units_path.$i_item."_min_units.txt";
+		//	if(isset($data_min_units[$i_item])) echo "<p>§ ".$data_min_units[$i_item]."<br />";
+			@unlink($data_min_units[$i_item]);
 			}
 		else {
 			$this_item = $i_item;
