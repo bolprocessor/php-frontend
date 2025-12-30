@@ -5490,6 +5490,58 @@ function is_performance_control($text) {
 	return $it_is;
 	}
 
+function cleanup_score($data) {
+	$data = preg_replace("/\s+/u"," ",$data);
+	$data = str_replace(",}","}",$data);
+	$data = str_replace(" }","}",$data);
+	$data = str_replace("} ","}",$data);
+	$data = str_replace(" {","{",$data);
+	$data = str_replace("{ ","{",$data);
+	$data = str_replace(", ",",",$data);
+	$data = str_replace(" ,",",",$data);
+	do $data = str_replace("{}",'',$data,$count);
+	while($count > 0);
+	$data = preg_replace("/{({[^{^}]*})}/u","$1",$data); // Simplify {{xxxx}} --> {xxxx}
+	$data = preg_replace("/{([\-\s]+)}/u","$1",$data); // Simplify {---} --> ---
+	$data = str_replace(" ,",",",$data);
+//	$data = preg_replace("/{0\/?[0-9]*}/u",'',$data); // Empty measure created by repetition
+	$data = str_replace("- -","--",$data); // Simplify - - --> --
+	$data = preg_replace("/,[\-\s]+,/u",",",$data); // Suppress fields containing only rests
+	$data = preg_replace("/,[\-\s]+}/u","}",$data); // Suppress fields containing only rests
+	$data = preg_replace("/{([\-\s]+)}/u","$1",$data); // Simplify {---} --> ---
+	$data = preg_replace("/{([0-9]+\/?[0-9]*)}/u"," $1 ",$data); // Simplify {2/3} --> 2/3
+	$data = preg_replace("/,\s*([0-9]+\/?[0-9]*)\s*,/u",",",$data); // Suppress fields containing only rests
+	$data = preg_replace("/,\s*([0-9]+\/?[0-9]*)\s*}/u","}",$data); // Suppress fields containing only rests
+	$data = preg_replace("/{([0-9]+\/?[0-9]*),\-+}/u"," $1 ",$data); // Replace for instance "{33/8,--}" with " 33/8 " Added by BB 2021-02-23
+	$data = preg_replace("/{0\/?[0-9]*[^}]*}/u",'',$data); // Empty measure created by repetition
+	$data = preg_replace("/{_tempo[^\)]+\)\s*_volume[^\)]+\)\s*_chan[^\)]+\)\s*}/u",'',$data); // Empty measure at the beginning of a repetition
+	$data = preg_replace("/{_tempo[^\)]+\)\s*_vel[^\)]+\)\s*_chan[^\)]+\)\s*}/u",'',$data); // Empty measure at the beginning of a repetition
+	$data = str_replace(" ,",",",$data);
+	$data = str_replace(" }","}",$data);
+	$data = preg_replace("/}\s*[1-1]\s+/u","} - ",$data); // Added by BB 2022-02-01
+	$data = str_replace("-{","- {",$data);
+	$data = str_replace("}-","} -",$data);
+	$data = str_replace("}[","} [",$data);
+	$data = str_replace("]{","] {",$data);
+	return $data;
+	}
+
+function normalize_rests($line) {
+	$line = preg_replace('/([{}\.,-])/',' $1 ',$line);
+	$line = str_replace(" 0 "," ",$line);
+	$line = str_replace(" - "," 1 ",$line);
+	$line = simplify_fractions($line);
+	$line = preg_replace('/\b(\d+)\/1\b/','$1',$line); // Replace " 3/1" with " 3 "
+	$line = add_list_of_integers($line);
+	$line = add_list_of_ratios($line);
+	$line = str_replace(" 1 "," - ",$line);
+	$line = replace_spaced_dashes_with_count($line);
+	$line = preg_replace("/ +/u",' ',$line);
+	$line = normalize_ampersand($line); // Normally not necessary if recently imported musicxml
+	$line = trim($line);
+	return $line;
+	}
+
 function normalize_ampersand(string $s): string {
 	// Delete unwanted '&' created when importing a MusicXML score
 	$s = str_replace("{","{ ",$s);
@@ -5506,9 +5558,25 @@ function normalize_ampersand(string $s): string {
 	$s = str_replace("&-","-",$s);
 	$s = str_replace("{ ","{",$s);
 	$s = str_replace(" }","}",$s);
-	$s = str_replace(" , ",",",$s);
+	$s = str_replace(" ,",",",$s);
 	$s = str_replace(" . ",".",$s);
+	$s = preg_replace("/ +/u",' ',$s);
     return $s;
+	}
+
+function adjust_spaces_in_score($line) {
+	$line = preg_replace('/\[.*?\]/','',$line);
+	$line = preg_replace("/ +/u",' ',$line);
+	$line = str_replace("{ ","{",$line);
+	$line = str_replace(" }","}",$line);
+	$line = str_replace("( ","(",$line);
+	$line = str_replace(" )",")",$line);
+	$line = str_replace(" ,",",",$line);
+	$line = str_replace(", ",",",$line);
+//	$line = preg_replace('/\(([^,]+)\,\s+([^)]+?)\)/u', '($1,$2)', $line); // Remove spaces in expressions like _switchon(64, 1)
+	$line = str_replace(" .",".",$line);
+	$line = str_replace(". ",".",$line);
+	return $line;
 	}
 
 function getLatestTaggedVersion() {

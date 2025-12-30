@@ -564,44 +564,15 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$convert_score = convert_musicxml($this_score,$repeat_section,$divisions,$fifths,$mode,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$create_channels,$include_breaths,$include_slurs,$include_measures,$ignore_fermata,$ignore_mordents,$chromatic_mordents,$ignore_turns,$chromatic_turns,$ignore_trills,$chromatic_trills,$ignore_arpeggios,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections,$trace_tempo,$trace_ornamentations,$breath_length,$breath_tag,$trace_measures,$measures,$accept_signs,$include_parts,$number_parts,$apply_rndtime,$rndtime,$apply_rndvel,$rndvel,$extend_last_measure,$number_measures,$accept_pedal);
 			$data .= $convert_score['data'];
 			$report = $convert_score['report'];
-			$data = normalize_ampersand($data); // Added 2025-12-15, was used in La Campanella
-			$data = preg_replace("/\s+/u"," ",$data);
-			$data = str_replace(",}","}",$data);
-			$data = str_replace(" }","}",$data);
-			$data = str_replace("} ","}",$data);
-			$data = str_replace(" {","{",$data);
-			$data = str_replace("{ ","{",$data);
-			$data = str_replace(", ",",",$data);
-			$data = str_replace(" ,",",",$data);
-			do $data = str_replace("{}",'',$data,$count);
-			while($count > 0);
-			$data = preg_replace("/{({[^{^}]*})}/u","$1",$data); // Simplify {{xxxx}} --> {xxxx}
-			$data = preg_replace("/{([\-\s]+)}/u","$1",$data); // Simplify {---} --> ---
-			$data = str_replace(" ,",",",$data);
-		//	$data = preg_replace("/{0\/?[0-9]*}/u",'',$data); // Empty measure created by repetition
-			$data = str_replace("- -","--",$data); // Simplify - - --> --
-			$data = preg_replace("/,[\-\s]+,/u",",",$data); // Suppress fields containing only rests
-			$data = preg_replace("/,[\-\s]+}/u","}",$data); // Suppress fields containing only rests
-			$data = preg_replace("/{([\-\s]+)}/u","$1",$data); // Simplify {---} --> ---
-			$data = preg_replace("/{([0-9]+\/?[0-9]*)}/u"," $1 ",$data); // Simplify {2/3} --> 2/3
-			$data = preg_replace("/,\s*([0-9]+\/?[0-9]*)\s*,/u",",",$data); // Suppress fields containing only rests
-			$data = preg_replace("/,\s*([0-9]+\/?[0-9]*)\s*}/u","}",$data); // Suppress fields containing only rests
-			$data = preg_replace("/{([0-9]+\/?[0-9]*),\-+}/u"," $1 ",$data); // Replace for instance "{33/8,--}" with " 33/8 " Added by BB 2021-02-23
-			$data = preg_replace("/{0\/?[0-9]*[^}]*}/u",'',$data); // Empty measure created by repetition
-			$data = preg_replace("/{_tempo[^\)]+\)\s*_volume[^\)]+\)\s*_chan[^\)]+\)\s*}/u",'',$data); // Empty measure at the beginning of a repetition
-			$data = preg_replace("/{_tempo[^\)]+\)\s*_vel[^\)]+\)\s*_chan[^\)]+\)\s*}/u",'',$data); // Empty measure at the beginning of a repetition
-			$data = str_replace(" ,",",",$data);
-			$data = str_replace(" }","}",$data);
-			$data = preg_replace("/}\s*[1-1]\s+/u","} - ",$data); // Added by BB 2022-02-01
-			$data = str_replace("-{","- {",$data);
-			$data = str_replace("}-","} -",$data);
-			$data = str_replace("}[","} [",$data);
-			$data = str_replace("]{","] {",$data);
+	//		$data = normalize_ampersand($data); // Added 2025-12-15, was used in La Campanella
+			$data = cleanup_score($data);
 			$data = str_replace(" 0 "," ",$data); // Added by BB 2022-02-12
 			$data = str_replace(",1 ",", - ",$data); // Added by BB 2022-02-12
 			$data = str_replace("- -","--",$data); // Simplify - - --> -- (repeated for unknown reason)
 			$data = str_replace("_legato_"," _legato(".$slur_length.") ",$data);
 			$data = str_replace("_nolegato_"," _legato(0) ",$data);
+			$data = normalize_rests($data); // Added 2025-31-26
+			$data = adjust_spaces_in_score($data);
 
 			if($reload_musicxml) {
 				$more_data = "\n// MusicXML file ‘".$upload_filename."’ converted\n";
@@ -2107,7 +2078,6 @@ function create_parts($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxch
 	$line = preg_replace("/^t[ ].*/u",'',$line); // Csound tempo statement
 	$line = preg_replace("/^s\s*$/u",'',$line); // Csound "s" statement
 	$line = preg_replace("/^e\s*$/u",'',$line); // Csound "e" statement
-	$line = normalize_ampersand($line); // Normally not necessary if recently imported musicxml
 	$restrict_analysis = FALSE;
 	// Beware that measure_min and measure_max may not be integers
 	if(!($measure_min === 0) AND strlen($measure_min) > 0) {
@@ -2132,6 +2102,10 @@ function create_parts($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxch
 		}
 	if($restrict_analysis) echo ":</b><br /><small>".$line."</small><br /><br />";
 	$line = preg_replace("/\[[^\]]*\]/u",'',$line);
+	if($label == "units") {
+		$line = normalize_rests($line); // Normally not necessary if recently imported musicxml
+		$line = adjust_spaces_in_score($line);
+		}
 	if($line == '') $segment['error'] = "continue";
 	if(is_integer($pos=strpos($line,"<?xml")) AND $pos == 0) $segment['error'] = "break";
 	if(is_integer($pos=strpos($line,"//")) AND $pos == 0) $segment['error'] = "continue";
@@ -2442,18 +2416,7 @@ function minimise_item($line,$trace,$verbose,$nbre) {
 	$minimise_item['skip'] = FALSE;
 	$line = normalize_parentheses($line); // '-' is replaced with '§', and ',' with '@' betweeen brackets
 	$line = preg_replace('/\[.*?\]/','',$line);
-	$line = preg_replace('/([{}\.,-])/',' $1 ',$line);
-	$line = str_replace(" 0 "," ",$line);
-	$line = str_replace(" - "," 1 ",$line);
-	$line = simplify_fractions($line);
-	$line = preg_replace('/\b(\d+)\/1\b/','$1',$line); // Replace " 3/1" with " 3 "
-	$line = add_list_of_integers($line);
-	$line = add_list_of_ratios($line);
-	$line = str_replace(" 1 "," - ",$line);
-	$line = replace_spaced_dashes_with_count($line);
-	$line = preg_replace("/ +/u",' ',$line);
-	$line = normalize_ampersand($line); // Normally not necessary if recently imported musicxml
-	$line = trim($line);
+	$line = normalize_rests($line);
 	if($trace) echo "<p>👉 ".$line."</p>";
 	$p_tempo = $q_tempo = 1;
 	$p_beats = $q_beats = array();
@@ -2463,12 +2426,7 @@ function minimise_item($line,$trace,$verbose,$nbre) {
 	$nbre = $minimise_item['nbre'];
 	if($errors == '') {
 		$newline = $minimise_item['line'];
-		$newline = preg_replace('/\[.*?\]/','',$newline);
-		$newline = preg_replace("/ +/u",' ',$newline);
-		$newline = str_replace("{ ","{",$newline);
-		$newline = str_replace(" }","}",$newline);
-		$newline = str_replace(" ,",",",$newline);
-		$newline = str_replace(" .",".",$newline);
+		$newline = adjust_spaces_in_score($newline);
 		$newline = str_replace(" 1 "," - ",$newline);
 		$newline = str_replace(" 2 "," -- ",$newline);
 		$newline = preg_replace('/-\s-/','--',$newline);
