@@ -572,7 +572,7 @@ if($instruction == "create_set" AND $training_set_folder <> '') {
 	check_training_folder($training_set_folder);
 	$number_zip = zip_this_folder($training_set_folder);
 	if($number_zip > 0)
-		echo "<hr><p><big>👉 Download <a href=\"".$training_set_folder.".zip\">zipped AI training set</a> (".(($number_zip - 1) / 3)." samples)</big></p><hr>";
+		echo "<hr><p><big>👉 Download <a href=\"".$training_set_folder.".zip\">zipped AI training set</a> (".(($number_zip - 1) / 4)." samples)</big></p><hr>";
 	}
 
 // Prepare images if any
