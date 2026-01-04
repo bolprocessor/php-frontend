@@ -849,7 +849,7 @@ function check_training_folder($folder) {
 	$dircontent = scandir($folder);
 	foreach($dircontent as $thisfile) {
 		$ext = pathinfo($thisfile,PATHINFO_EXTENSION);
-		if($ext == "txt" OR $ext == "tab") {
+		if($ext == "txt" OR $ext == "tab" OR $ext == "tsv") {
 		//	echo $thisfile."<br />";
 			$table = explode('.',$thisfile);
 			$number = $table[0];
