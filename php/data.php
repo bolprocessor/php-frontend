@@ -2044,6 +2044,7 @@ function create_parts($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxch
 	$test_legato = FALSE;
 	$current_legato = array();
 	$i_layer = array();
+	$controllers = array();
 	$current_legato[0] = $i_layer[0] = $layer = $level_bracket = 0;
 	// $layer is the index of the line setting events on the phase diagram
 	// $level_bracket is the level of polymetric expression (or "measure")
@@ -2152,6 +2153,8 @@ function create_parts($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxch
 		$start_chunk .= " [".$number_expressions." structures]";
 		}
 	else $number_expressions = 1;
+//	$controllers[67][0] = 127;
+	if($label == "units") $start_chunk .= active_controllers($controllers);
 	for($k = 0; $k < strlen($line_recoded); $k++) {
 		$line_chunked .= $start_chunk;
 		if($label == "units" AND $start_chunk <> '') {
@@ -2169,6 +2172,15 @@ function create_parts($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxch
 			if($get_legato >= 0) {
 				$current_legato[$layer] = $get_legato;
 				if($test_legato) echo "_legato(".$current_legato[$layer].") layer ".$layer." level ".$level_bracket."<br />";
+				}
+			if($label == "units") {
+				$this_switch = get_switch($line_recoded,$k);
+				if($this_switch['value'] >= 0) {
+					$this_control = $this_switch['control'];
+					$this_channel = $this_switch['channel'] - 1;
+					$controllers[$this_control][$this_channel] = $this_switch['value'];
+					// We store this for the beginning of the next unit
+					}
 				}
 			}
 		if($c == '{') {
@@ -2224,6 +2236,7 @@ function create_parts($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxch
 						if($label == "units") $start_chunk .= " [".$number_expressions." structures]";
 						if($label == "slice") $start_chunk = '';
 						if($k < (strlen($line_recoded) - 1) OR $label == "slice") $chunked = TRUE;
+						if($label == "units") $start_chunk .= active_controllers($controllers);
 						}
 					if($test_legato) echo "<br />";
 					}
@@ -2254,6 +2267,18 @@ function create_parts($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxch
 	$segment['tonal_scale'] = $tonal_scale;
 	$segment['initial_tempo'] = $initial_tempo;
 	return $segment;
+	}
+
+function active_controllers($controllers) {
+	$result = '';
+	for($control = 64; $control < 96; $control++) {
+		// Insert current active controllers
+		for($i = 0; $i < 16; $i++) {
+			if(isset($controllers[$control][$i]) AND $controllers[$control][$i] > 0)
+				$result .= " _switchon(".$control.",".($i + 1).") ";
+			}
+		}
+	return $result;
 	}
 
 function is_capture_file($capture_file) {

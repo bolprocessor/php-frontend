@@ -3565,6 +3565,25 @@ function get_legato($line,$pos) {
 	else return -1;
 	}
 
+function get_switch($line,$pos) {
+	$result['value'] = -1;
+	if(is_integer($pos1=strpos($line,"_switchon(",$pos)) AND $pos1 == $pos) {
+		$result['value'] = 127;
+		$pos2 = strpos($line,",",$pos1);
+		$result['control'] = substr($line,$pos1 + 10,$pos2 - $pos1 - 10);
+		}
+	if(is_integer($pos1=strpos($line,"_switchoff(",$pos)) AND $pos1 == $pos) {
+		$result['value'] = 0;
+		$pos2 = strpos($line,",",$pos1);
+		$result['control'] = substr($line,$pos1 + 11,$pos2 - $pos1 - 11);
+		}
+	if($result['value'] >= 0) {
+		$pos3 = strpos($line,")",$pos2);
+		$result['channel'] = substr($line,$pos2 + 1,$pos3 - $pos2 - 1);
+		}
+	return $result;
+	}
+
 function date_sort($a, $b) {
 	if ($a['start'] == $b['start'])
 		return 0; // They are equal
