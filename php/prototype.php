@@ -1848,7 +1848,7 @@ if(!$no_midi) {
 				$code_line = $time." (ch ".$channel.") Hold 2 ";
 				$hide = 1;
 				}
-			if($ctrl == 70) {
+	/*		if($ctrl == 70) {
 				$code_line = $time." (ch ".$channel.") Sound variation ";
 				$hide = 1;
 				}
@@ -1891,7 +1891,7 @@ if(!$no_midi) {
 			if($ctrl == 95) {
 				$code_line = $time." (ch ".$channel.") Phase depth ";
 				$hide = 1;
-				}
+				} */
 			$more = 2;
 			}
 		else if($code >= 208 AND $code < 224 AND $k < $kmax1) {

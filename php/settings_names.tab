@@ -60,6 +60,7 @@
 "SamplingRate"	"Sampling rate"	"samples per second, usually 50"	"0"	"50"
 "C4key"	"C4 (middle C) key number"	"(0..127) usually 60"	"0"	"60"
 "A4freq"	"A4 frequency (diapason)"	"Hz (usually 440)"	"0"	"440"
+"PedalReleaseDefault"	"Pedals 64 to 69"	"Release pedal before pressing it again (set by default)"	"1"	"1"
 "StrikeAgainDefault"	"Strike again NoteOn's"	"Keep checked unless you know why!<br>(Read https://bolprocessor.org/control-noteon-noteoff/)"	"1"	"1"
 "DeftVelocity"	"Default velocity"	"(1..127)"	"0"	"64"
 "DeftVolume"	"Default volume"	"(1..127)"	"0"	"64"
