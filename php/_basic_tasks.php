@@ -5583,8 +5583,8 @@ function normalize_ampersand(string $s): string {
     return $s;
 	}
 
-function adjust_spaces_in_score($line) {
-	$line = preg_replace('/\[.*?\]/','',$line);
+function adjust_spaces_in_score($line,$delete_comments) {
+	if($delete_comments) $line = preg_replace('/\[.*?\]/','',$line);
 	$line = preg_replace("/ +/u",' ',$line);
 	$line = str_replace("{ ","{",$line);
 	$line = str_replace(" }","}",$line);

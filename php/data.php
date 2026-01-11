@@ -191,7 +191,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$partwise = $timewise = $attributes = $attributes_key = $changed_attributes = $found_trill = $found_mordent = $found_turn = $found_fermata = $found_arpeggio = $found_breath = $found_slur = FALSE;
 			$add_section = $include_breaths = $include_measures = $include_slurs = $include_parts = TRUE;
 			$accept_signs = FALSE;
-			$instrument_name = $midi_channel = $select_part = $duration_part = $divisions = $repeat_section = $rndtime = $rndvel = $part_label = $apply_rndtime = $apply_rndvel = $found_pedal = $accept_pedal = $switch_controler = $switch_channel = array();
+			$instrument_name = $midi_channel = $select_part = $duration_part = $divisions = $repeat_section = $rndtime = $rndvel = $part_label = $apply_rndtime = $apply_rndvel = $found_pedal = $accept_pedal = $sustain_controler = $sustain_channel = $sostenuto_controler = $sostenuto_channel = $soft_controler = $soft_channel = array();
 			$ignore_dynamics = isset($_POST['ignore_dynamics']);
 			if(isset($_POST['tempo_option'])) $tempo_option = $_POST['tempo_option'];
 			else $tempo_option = "all";
@@ -572,7 +572,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$data = str_replace("_legato_"," _legato(".$slur_length.") ",$data);
 			$data = str_replace("_nolegato_"," _legato(0) ",$data);
 			$data = normalize_rests($data); // Added 2025-31-26
-			$data = adjust_spaces_in_score($data);
+			$data = adjust_spaces_in_score($data,FALSE);
 
 			if($reload_musicxml) {
 				$more_data = "\n// MusicXML file ‘".$upload_filename."’ converted\n";
@@ -660,24 +660,28 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			for($i = 0;  $i < $number_parts; $i++) {
 				if(isset($found_pedal[$i])) {
 					$index1 = "accept_pedal_".$i;
-					$index2 = "switch_controler_".$i;
-					$index3 = "switch_channel_".$i;
+					$index2 = "sustain_controler_".$i;
+					$index3 = "sustain_channel_".$i;
 					if(!$reload_musicxml) {
 						$accept_pedal[$i] = TRUE;
-						$switch_controler[$i] = 64;
-						$switch_channel[$i] = $midi_channel[$part_label[$i]];
+						$sustain_controler[$i] = 64;
+						$sustain_channel[$i] = $midi_channel[$part_label[$i]];
 						}
 					else {
 						$accept_pedal[$i] = isset($_POST[$index1]);
-						$switch_controler[$i] = intval($_POST[$index2]);
-						if($switch_controler[$i] < 64 OR $switch_controler[$i] > 95) $switch_controler[$i] .= "???";
-						$switch_channel[$i] = intval($_POST[$index3]);
-						if($switch_channel[$i] < 1 OR $switch_channel[$i] > 16) $switch_channel[$i] .= "???";
+						$sustain_controler[$i] = intval($_POST[$index2]);
+						if($sustain_controler[$i] < 64 OR $sustain_controler[$i] > 95) $sustain_controler[$i] .= "???";
+						$sustain_channel[$i] = intval($_POST[$index3]);
+						if($sustain_channel[$i] < 1 OR $sustain_channel[$i] > 16) $sustain_channel[$i] .= "???";
 						}
+					$sostenuto_controler[$i] = 66;
+					$sostenuto_channel[$i] = $sustain_channel[$i];
+					$soft_controler[$i] = 67;
+					$soft_channel[$i] = $sustain_channel[$i];
 					echo "<input type=\"checkbox\" name=\"".$index1."\"";
 					if($accept_pedal[$i]) echo " checked";
-					echo ">&nbsp;<span class=\"red-text\">➡</span> Interpret ‘pedal’ commands in part ‘".$part_label[$i]."’:";
-					echo "&nbsp;controler #<input type=\"text\" style=\"border:none; text-align:center;\" name=\"".$index2."\" size=\"5\" value=\"".$switch_controler[$i]."\"> (64 to 95) on MIDI channel <input type=\"text\" style=\"border:none; text-align:center;\" name=\"".$index3."\" size=\"5\" value=\"".$switch_channel[$i]."\"> (1 to 16)";
+					echo ">&nbsp;<span class=\"red-text\">➡</span> Interpret ‘sustain pedal’ commands in part ‘".$part_label[$i]."’:";
+					echo "&nbsp;controler #<input type=\"text\" style=\"border:none; text-align:center;\" name=\"".$index2."\" size=\"5\" value=\"".$sustain_controler[$i]."\"> (64 to 95) on MIDI channel <input type=\"text\" style=\"border:none; text-align:center;\" name=\"".$index3."\" size=\"5\" value=\"".$sustain_channel[$i]."\"> (1 to 16)";
 					$this_link_preview = $link_preview."&filter=pedal";
 					$window_name = $upload_filename."_trill";
 					if(!$found_pedal_command) echo "&nbsp;<input class=\"produce\" onclick=\"window.open('".$this_link_preview."','".$window_name."','width=600,height=400,left=0'); return false;\" type=\"submit\" name=\"preview\" value=\"preview in file\" title=\"\">";
@@ -821,12 +825,16 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			echo "</div>";
 			if($found_pedal_command AND $reload_musicxml) {
 				for($i = 0; $i < $number_parts; $i++) {
-					if(!isset($switch_controler[$i]) OR !isset($switch_channel[$i])) {
+					if(!isset($sustain_controler[$i]) OR !isset($sustain_channel[$i])) {
 					//	echo "<p>Switch error ".$i."</p>";
 						continue;
 						}
-					$more_data = str_replace("_switch_on_part(".($i + 1).")"," _switchon(".$switch_controler[$i].",".$switch_channel[$i].") ",$more_data);
-					$more_data = str_replace("_switch_off_part(".($i + 1).")"," _switchoff(".$switch_controler[$i].",".$switch_channel[$i].") ",$more_data);
+					$more_data = str_replace("_switch_on_sustain_part(".($i + 1).")"," _switchon(".$sustain_controler[$i].",".$sustain_channel[$i].") ",$more_data);
+					$more_data = str_replace("_switch_off_sustain_part(".($i + 1).")"," _switchoff(".$sustain_controler[$i].",".$sustain_channel[$i].") ",$more_data);
+					$more_data = str_replace("_switch_on_sostenuto_part(".($i + 1).")"," _switchon(".$sostenuto_controler[$i].",".$sostenuto_channel[$i].") ",$more_data);
+					$more_data = str_replace("_switch_off_sostenuto_part(".($i + 1).")"," _switchoff(".$sostenuto_controler[$i].",".$sostenuto_channel[$i].") ",$more_data);
+					$more_data = str_replace("_switch_on_soft_part(".($i + 1).")"," _switchon(".$soft_controler[$i].",".$soft_channel[$i].") ",$more_data);
+					$more_data = str_replace("_switch_off_soft_part(".($i + 1).")"," _switchoff(".$soft_controler[$i].",".$soft_channel[$i].") ",$more_data);
 					}
 				}
 			$new_convention = 0; // English note convention
@@ -2105,7 +2113,7 @@ function create_parts($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxch
 	$line = preg_replace("/\[[^\]]*\]/u",'',$line);
 	if($label == "units") {
 		$line = normalize_rests($line); // Normally not necessary if recently imported musicxml
-		$line = adjust_spaces_in_score($line);
+		$line = adjust_spaces_in_score($line,TRUE);
 		}
 	if($line == '') $segment['error'] = "continue";
 	if(is_integer($pos=strpos($line,"<?xml")) AND $pos == 0) $segment['error'] = "break";
@@ -2451,7 +2459,7 @@ function minimise_item($line,$trace,$verbose,$nbre) {
 	$nbre = $minimise_item['nbre'];
 	if($errors == '') {
 		$newline = $minimise_item['line'];
-		$newline = adjust_spaces_in_score($newline);
+		$newline = adjust_spaces_in_score($newline,TRUE);
 		$newline = str_replace(" 1 "," - ",$newline);
 		$newline = str_replace(" 2 "," -- ",$newline);
 		$newline = preg_replace('/-\s-/','--',$newline);
