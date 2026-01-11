@@ -2124,6 +2124,7 @@ function create_parts($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxch
 	if(is_integer($pos=strpos($line,"-")) AND $pos == 0) $segment['error'] = "continue";
 	if($segment['error'] <> '') return $segment;
 	$line_recoded = recode_entities($line);
+//	$line_recoded = $line;
 	$data = $temp_dir.$temp_folder.SLASH.$i_item.".bpda"; 
 	if($label == "chunk") {
 		$hdl = fopen($data,"w");
@@ -2141,8 +2142,10 @@ function create_parts($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxch
 	if($label == "slice") $start_chunk = '';
 	$test_legato = FALSE;
 	$level_bracket = $n = 0;
+	$kmax = strlen($line_recoded);
+//	echo "line_recoded = ".$line_recoded."<br />";
 	if($label == "units") {
-		for($k = 0; $k < strlen($line_recoded); $k++) {
+		for($k = 0; $k < $kmax; $k++) {
 			$c = $line_recoded[$k];
 			if($c == '{') $level_bracket++;
 			if($c == '}') {
@@ -2166,17 +2169,17 @@ function create_parts($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxch
 	else $number_expressions = 1;
 //	$switches[67][0] = 127;
 	if($label == "units") $start_chunk .= active_controllers($switches);
-	for($k = 0; $k < strlen($line_recoded); $k++) {
+	for($k = 0; $k < $kmax; $k++) {
 		$line_chunked .= $start_chunk;
 		if($label == "units" AND $start_chunk <> '') {
 			$line_chunked .= $initial_tempo;
 			}
 		$start_chunk = '';
 		$c = $line_recoded[$k];
-		if($k < (strlen($line_recoded) - 1) AND ctype_alnum($c) AND $line_recoded[$k+1] == '&') {
+		if($k < ($kmax - 1) AND ctype_alnum($c) AND $line_recoded[$k+1] == '&') {
 			$tie++; $total_ties++;
 			}
-		if($k < (strlen($line_recoded) - 1) AND $c == '&' AND ctype_alnum($line_recoded[$k+1])) $tie--;
+		if($k < ($kmax - 1) AND $c == '&' AND ctype_alnum($line_recoded[$k+1])) $tie--;
 		if($c == '.' AND $k > 0 AND $line_recoded[$k-1]) $brackets++;
 		if($c == '_') {
 			$get_legato = get_legato($line_recoded,$k);
@@ -2219,12 +2222,12 @@ function create_parts($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxch
 			if($level_bracket == 0) {
 				$n++;
 				if($n >= $number_expressions) {
-					$ok_legato = 1;
+					$ok_legato = TRUE;
 					foreach($current_legato as $thisfield => $the_legato) {
 						if($test_legato) echo "(".$thisfield." -> ".$the_legato.")";
-						if($the_legato > 0) $ok_legato = 0;
+						if($the_legato > 0) $ok_legato = FALSE;
 						}
-					if(($label == "units") OR (($label == "slice" OR $ok_legato) AND (($tie <= 0 AND $n >= $minchunk_size) OR ($maxchunk_size > 0 AND $n > $maxchunk_size)))) {
+					if(($label == "units") OR (($label == "slice" OR $ok_legato) AND (($tie <= 0 AND $n >= $minchunk_size) OR ($maxchunk_size > 0 AND $n > $maxchunk_size))) OR $k >= ($kmax -1)) { // Fixed 2026-01-11
 						$current_legato = $i_layer = array();
 						$current_legato[0] = $i_layer[0] = $layer = 0;
 						if($label == "chunk" AND abs($tie) > 0)
@@ -2246,7 +2249,7 @@ function create_parts($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxch
 						$start_chunk .= "] ";
 						if($label == "units") $start_chunk .= " [".$number_expressions." structures]";
 						if($label == "slice") $start_chunk = '';
-						if($k < (strlen($line_recoded) - 1) OR $label == "slice") $chunked = TRUE;
+						if($k < ($kmax - 1) OR $label == "slice") $chunked = TRUE;
 						if($label == "units") $start_chunk .= active_controllers($switches);
 						}
 					if($test_legato) echo "<br />";
@@ -2254,6 +2257,7 @@ function create_parts($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxch
 				}
 			}
 		}
+//	echo "k = ".$k.", kmax = ".$kmax."<br />";
 	if($chunked) {
 		$all_lines_chunked = preg_replace("/ +/u",' ',$all_lines_chunked);
 		$all_lines_chunked = str_replace("{ ","{",$all_lines_chunked);
