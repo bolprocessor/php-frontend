@@ -315,7 +315,8 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 					continue;
 					}
 				if(is_integer($pos=strpos($line,"<score-part "))) {
-					$score_part = trim(preg_replace("/.*id=\"([^\"]+)\".*/u","$1",$line));
+					if (preg_match('/\bid\s*=\s*(["\'])(.*?)\1/', $line, $m))
+        				$score_part = $m[2];
 					continue;
 					}
 				if(is_integer($pos=strpos($line,"</score-part>"))) {
@@ -358,7 +359,9 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 					continue;
 					}
 				if($score_part <> '' AND is_integer($pos=strpos($line,"<instrument-name>"))) {
-					$instrument_name[$score_part] = trim(preg_replace("/<instrument\-name>(.+)<\/instrument\-name>/u","$1",$line));
+			//		$instrument_name[$score_part] = trim(preg_replace("/<instrument\-name>(.+)<\/instrument\-name>/u","$1",$line));
+					$this_xml = simplexml_load_string($line);
+					$instrument_name[$score_part] = trim((string)$this_xml);
 					continue;
 					}
 				if($score_part <> '' AND is_integer($pos=strpos($line,"<midi-channel>"))) {
