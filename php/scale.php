@@ -939,7 +939,7 @@ for($i = 0; $i < $imax; $i++) {
 		}
 	}
 echo "<p>";
-echo "&nbsp;&nbsp;<a target=\"_blank\" class=\"linkdotted\" href=\"https://www.csounds.com/manualOLPC/GEN51.html\">Csound GEN51</a> table: <span class=\"green-text\">".$scale_table."</span>";
+echo "&nbsp;&nbsp;<a target=\"_blank\" class=\"linkdotted\" href=\"https://www.csound.com/docs/manual/GEN51.html\">Csound GEN51</a> table: <span class=\"green-text\">".$scale_table."</span>";
 if($message <> '') echo $message;
 echo "<div style=\"float:right; margin-top:1em; padding:1em; border-radius:5%;\"><h2>Scale “".$filename."”</h2><h3>This version of the scale is stored in “<a href=\"tonality.php?file=tonality_resources%2F".$tonality_source."\"><span class=\"green-text\">".$tonality_source."</span></a>”</h3>";
 
@@ -979,7 +979,7 @@ echo "</div>";
 
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 if(isset($_POST['csound_source'])) {
-	echo "<p>👉 <a target=\"_blank\" class=\"linkdotted\" href=\"https://www.csounds.com/manual/html/GEN51.html\">Read the Csound documentation</a></p>";
+	echo "<p>👉 <a target=\"_blank\" class=\"linkdotted\" href=\"https://csound.com/docs/manual/GEN51.html\">Read the Csound documentation</a></p>";
 	$csound_source = $_POST['csound_source'];
 	echo "<input type=\"hidden\" name=\"csound_source\" value=\"".$csound_source."\">";
 	}
