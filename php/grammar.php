@@ -302,7 +302,7 @@ else {
 //	echo "<input type=\"hidden\" name=\"random_seed\" value=\"".$random_seed."\">";
 	echo "Location of output files: <span class=\"green-text\">".$bp_application_path."</span>";
 	echo "<input type=\"text\" name=\"output_folder\" size=\"15\" value=\"".$output_folder."\">";
-	echo "&nbsp;<input class=\"save\" type=\"submit\" onclick=\"clearsave();\" name=\"change_output_folder\" value=\"SAVE THIS LOCATION\"><br />➡ global setting for all projects in this session<br /><i>Folder will be created if necessary…</i>";
+	echo "&nbsp;<input class=\"save\" type=\"submit\" onclick=\"clearsave();\" name=\"change_output_folder\" value=\"SAVE THIS LOCATION\"><br />➡ This is a global setting for all projects in this session<br /><i>Folder will be created if necessary…</i>";
 	echo "</form>";
 	}
 
