@@ -1833,7 +1833,7 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 			echo "<form method=\"post\" action=\"".$url_this_page."\" onsubmit=\"alert('This process may take some time. Please be patient and do not refresh the page until it reloads automatically.'); var hidden = document.createElement('input'); hidden.type = 'hidden'; hidden.name = 'minimise_data'; hidden.value = '1'; this.appendChild(hidden); var btn = this.querySelector('input[name=minimise_data]'); btn.disabled = true; btn.value = 'Processing... Be patient!';\" enctype=\"multipart/form-data\">";
 			if(substr_count($content,"}") > 0 AND !file_exists($music_xml_file)) {
 				echo "<input type=\"hidden\" name=\"trace_minimise\" value=\"".$trace_minimise."\">";
-				echo "<p><input type=\"submit\" onmouseover=\"checksaved();\"  class=\"produce\" name=\"minimise_data\" value=\"MINIMISE\">&nbsp;polymetric structures on this page";
+				echo "<p>Try to <input type=\"submit\" onmouseover=\"checksaved();\"  class=\"produce\" name=\"minimise_data\" value=\"MINIMISE\">&nbsp;polymetric structures on this page";
 				echo "<br /><span class=\"red-text\">➡&nbsp;</span><i>Items won't be deleted or modified. Minimised versions will be inserted.</i></p>";
 				}
 			}
