@@ -538,7 +538,7 @@ echo "<div style=\"padding:1em; width:690px;\" class=\"thinborder2\">";
 if($settings_file <> '' AND file_exists($dir.$settings_file)) echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".nice_url($url_settings)."','".$settings_file."','width=800,height=800,left=100'); c\" value=\"EDIT ‘".$settings_file."’\">";
 if($settings_file == '' OR !file_exists($dir.$settings_file)) {
 	$time_resolution = 10; //  10 milliseconds by default
-	if($metronome > 0) {
+	if(isset($metronome) AND is_numeric($metronome) AND $metronome > 0) {
 		$p_clock = intval($metronome * 10000);
 		$q_clock = 600000;
 		$gcd = gcd($p_clock,$q_clock);

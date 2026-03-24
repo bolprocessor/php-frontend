@@ -28,12 +28,15 @@ if(isset($_POST['savethisfile'])) {
 	$content = $_POST['thistext'];
 	if(trim($content) <> '') {
 		echo "<span id=\"timespan\" style=\"color:red; float:right; background-color:white; padding:6px; border-radius:6px;\">&nbsp;Saved “".$this_file."” file…</span>";
-		$handle = fopen($this_file,"w");
-		$file_header = "// Bol Processor on-line test via PHP\n// Alphabet file saved as ‘".$filename."’. Date: ".gmdate('Y-m-d H:i:s');
-		fwrite($handle,$file_header."\n");
-		fwrite($handle,$content);
-		fclose($handle);
-		chmod($this_file,$permissions);
+		$handle = @fopen($this_file,"w");
+		if($handle) {
+			$file_header = "// Bol Processor on-line test via PHP\n// Alphabet file saved as ‘".$filename."’. Date: ".gmdate('Y-m-d H:i:s');
+			fwrite($handle,$file_header."\n");
+			fwrite($handle,$content);
+			fclose($handle);
+			@chmod($this_file,$permissions);
+			}
+		else echo "<p>➡ This file cannot be modified because it is write-protected</p>";
 		$file_path = $temp_dir.$tracelive_folder.SLASH."_saved_alphabet";
 		file_put_contents($file_path,$this_file);
 		@chmod($file_path,$permissions);

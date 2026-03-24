@@ -789,55 +789,61 @@ function compile_help($text_help_file,$html_help_file) {
 		$table = explode("###",$content);
 		$file_header .= "<p style=\"color:black;\">".$table[0]."</p>";
 		sort($table);
-		$handle = fopen($html_help_file,"w");
-		$im = count($table);
-		for($i = 1; $i < $im; $i++) {
-			$table2 = explode("<br />",$table[$i]);
-			$thetitle = trim($table2[0]);
-			if($thetitle == "END OF BP2 help") {
-			//	$im--;
-				break;
+		$handle = @fopen($html_help_file,"w");
+		if($handle) {
+			$im = count($table);
+			for($i = 1; $i < $im; $i++) {
+				$table2 = explode("<br />",$table[$i]);
+				$thetitle = trim($table2[0]);
+				if($thetitle == "END OF BP2 help") {
+				//	$im--;
+					break;
+					}
+				$title[$i] = $thetitle;
+				$item[$i] = '';
+				for($j = 1; $j < count($table2); $j++) {
+					$item_line = make_links_clickable($table2[$j]);
+					$item[$i] .= $item_line."<br />";
+					}
 				}
-			$title[$i] = $thetitle;
-			$item[$i] = '';
-			for($j = 1; $j < count($table2); $j++) {
-				$item_line = make_links_clickable($table2[$j]);
-				$item[$i] .= $item_line."<br />";
+			fwrite($handle,$file_header."\n");
+			$table_of_contents = "<table style=\"border-spacing: 2px;\" cellpadding=\"2px;\"><tr>";
+			$col = 1;
+			for($i = 1; $i < $im; $i++) {
+				if($col > 2) {
+					$col = 1;
+					$table_of_contents .= "</tr><tr>";
+					}
+				if(isset($title[$i]) AND $title[$i] <> '') {
+					$table_of_contents .= "<td><small><a style=\"color:darkblue;\" href=\"#".$i."\">".$title[$i]."</a></small></td>";
+					$col++;
+					$token = preg_replace("/\s?\[.*$/u",'',$title[$i]);
+					$token = preg_replace("/\s?\(.*$/u",'',$token);
+			//		$token = preg_replace("/\s?:.*$/u",'',$token);
+					if(!in_array($token,$no_entry))
+						$help[$i] = $title[$i];
+					else $help[$i] = '';
+					}
 				}
+			$table_of_contents .= "</tr></table>";
+			$table_header = "<h4 id=\"toc\" style=\"color:red;\">►&nbsp; Table of contents <a  href=\"javascript:unhide('up');unhide('up2');unhide('down');\"><span id=\"down\" class=\"unhidden\">[Show list…]</span></a>&nbsp;<a  href=\"javascript:unhide('up');unhide('up2');unhide('down');\"><span id=\"up2\" class=\"hidden\">[Hide list…]</span></a></h4>";
+			$table_header  .= "<div id=\"up\" class=\"hidden\">";
+			$table_header  .= $table_of_contents;
+			$table_header  .= "<p style=\"text-align:center;\">[<a class=\"triangle\" href=\"javascript:unhide('up');unhide('up2');unhide('down');\">Hide list…</a>]</p></div>";
+			fwrite($handle,$table_header."\n");
+			for($i = 1; $i < $im; $i++) {
+				if(!isset($title[$i])) continue;
+				fwrite($handle,"<h4 style=\"color:darkblue;\" id=\"".$i."\"><a href=\"#toc\">⇪</a> ".$title[$i]."</h4>\n");
+				fwrite($handle,$item[$i]."\n");
+				}
+			fwrite($handle,"</body>");
+			fclose($handle);
+			chmod($html_help_file,$permissions);
 			}
-		fwrite($handle,$file_header."\n");
-		$table_of_contents = "<table style=\"border-spacing: 2px;\" cellpadding=\"2px;\"><tr>";
-		$col = 1;
-		for($i = 1; $i < $im; $i++) {
-			if($col > 2) {
-				$col = 1;
-				$table_of_contents .= "</tr><tr>";
-				}
-			if(isset($title[$i]) AND $title[$i] <> '') {
-				$table_of_contents .= "<td><small><a style=\"color:darkblue;\" href=\"#".$i."\">".$title[$i]."</a></small></td>";
-				$col++;
-				$token = preg_replace("/\s?\[.*$/u",'',$title[$i]);
-				$token = preg_replace("/\s?\(.*$/u",'',$token);
-		//		$token = preg_replace("/\s?:.*$/u",'',$token);
-				if(!in_array($token,$no_entry))
-					$help[$i] = $title[$i];
-				else $help[$i] = '';
-				}
+		else {
+			echo "<p>➡ The BP_help file cannot be created. Maybe the disk is full, or the “php” folder is write-protected.</p>";
+			die();
 			}
-		$table_of_contents .= "</tr></table>";
-		$table_header = "<h4 id=\"toc\" style=\"color:red;\">►&nbsp; Table of contents <a  href=\"javascript:unhide('up');unhide('up2');unhide('down');\"><span id=\"down\" class=\"unhidden\">[Show list…]</span></a>&nbsp;<a  href=\"javascript:unhide('up');unhide('up2');unhide('down');\"><span id=\"up2\" class=\"hidden\">[Hide list…]</span></a></h4>";
-		$table_header  .= "<div id=\"up\" class=\"hidden\">";
-		$table_header  .= $table_of_contents;
-		$table_header  .= "<p style=\"text-align:center;\">[<a class=\"triangle\" href=\"javascript:unhide('up');unhide('up2');unhide('down');\">Hide list…</a>]</p></div>";
-		fwrite($handle,$table_header."\n");
-		for($i = 1; $i < $im; $i++) {
-			if(!isset($title[$i])) continue;
-			fwrite($handle,"<h4 style=\"color:darkblue;\" id=\"".$i."\"><a href=\"#toc\">⇪</a> ".$title[$i]."</h4>\n");
-			fwrite($handle,$item[$i]."\n");
-			}
-		fwrite($handle,"</body>");
-		fclose($handle);
-		chmod($html_help_file,$permissions);
 		}
 	return $help;
 	}
@@ -1378,9 +1384,12 @@ function reformat_grammar($verbose,$this_file) {
 		}
 	$new_content = implode(chr(10),$table);
 	// $this_file = "-gr._test";
-	$handle = fopen($this_file,"w");
-	fwrite($handle,$new_content);
-	fclose($handle);
+	$handle = @fopen($this_file,"w");
+	if($handle) {
+		fwrite($handle,$new_content);
+		fclose($handle);
+		}
+	else echo "<p>➡ This file cannot be modified because it is write-protected</p>";
 	return;
 	}
 
@@ -2488,14 +2497,17 @@ function save_settings($variable,$value) {
 			$new_table[$i] = $line;
 			}
 		$content = implode("\n",$new_table);
-		$handle = fopen($settings_file,"w");
-		fwrite($handle,"<?php\n");
-		fwrite($handle,$content);
-		$line = "\n§>\n";
-		$line = str_replace('§','?',$line);
-		fwrite($handle,$line);
-		fclose($handle);
-	//	chmod($settings_file,$permissions);
+		$handle = @fopen($settings_file,"w");
+		if($handle) {
+			fwrite($handle,"<?php\n");
+			fwrite($handle,$content);
+			$line = "\n§>\n";
+			$line = str_replace('§','?',$line);
+			fwrite($handle,$line);
+			fclose($handle);
+		//	chmod($settings_file,$permissions);
+			}
+		else echo "<p>➡ This file cannot be modified because it is write-protected</p>";
 		}
 	else echo "<p><span class=\"red-text\">File ‘_settings.php’ could nor be opened!</span></p>";
  	return;
