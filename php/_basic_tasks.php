@@ -955,6 +955,7 @@ function clean_up_encoding($create_bullets,$convert,$text) {
 	$text = preg_replace('/-in\s+/','-in.',$text);
 	$text = preg_replace('/-md\s+/','-md.',$text);
 	$text = preg_replace('/-gl\s+/','-gl.',$text);
+	$text = str_replace('∞',"inf",$text);
 	if($create_bullets) $text = preg_replace("/\s\\.$/u"," •",$text);
 //	if($create_bullets) $text = preg_replace("/\s\\.([^0-9])/u"," •$1",$text);
 	if ($create_bullets) {
