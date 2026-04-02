@@ -33,6 +33,7 @@ if(isset($_POST['saveparameters'])) {
 	$file_header = $top_header."\n// Settings file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
 	$settings['header'] = str_replace('"',"'",$file_header);
 	$warning = '';
+	$produceallitems = FALSE;
 	foreach($_POST as $key => $param) {
     	if(preg_match('/^param_(\d+)$/', $key, $matches)) {
         	$i = $matches[1]; // Extract the numeric index
@@ -71,6 +72,8 @@ if(isset($_POST['saveparameters'])) {
 					break;
 				}
 			if($param == "Quantization") $quantization = $value;
+
+			if($param == "AllItems") $produceallitems = $value;
 			if($param == "Quantize" AND $value == 0 AND $quantization > 0) {
 				$newvalue = 1;
 				$warning .= "<p>👉 <span class=\"red-text\">Quantize has been turned on because Quantization > 0</span></p>";
@@ -98,10 +101,18 @@ if(isset($_POST['saveparameters'])) {
 				}
 			if($param == "Improvize") $improvize = $value;
 			if($param == "MaxItemsProduce") { // Max items produced
-				if($improvize) $value = abs(intval($value));
-				if($improvize AND $value < 1) {
+				$value = abs(intval($value));
+				if(($improvize OR $produceallitems) AND $value < 1) {
 					$warning .= "<p>👉 <span class=\"red-text\">Max items produced must be a  positive integer. It has been set to 20</span></p>";
 					$value = 20;
+					}
+				else if($value < 1) $value = 1;
+				}
+			if($param == "MaxItemsGraphic") { // Max items displayed
+				$value = abs(intval($value));
+				if($value < 1) {
+					$warning .= "<p>👉 <span class=\"red-text\">Max items displayed must be a  positive integer. It has been set to 10</span></p>";
+					$value = 10;
 					}
 				}
 			if($param == "AllItems") { // Produce all items

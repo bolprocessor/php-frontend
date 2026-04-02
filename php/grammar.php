@@ -787,7 +787,7 @@ if(count($variable) > 0) {
 		fclose($handle);
 		chmod($data,$permissions);
 		$link_play_variable = $link_produce;
-		$link_play_variable .= "&data=".urlencode($data);
+		$link_play_variable .= "&startstring=".urlencode($data);
 		echo "<input class=\"produce\"  onclick=\"if(checksaved()) window.open('".$link_play_variable."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" value=\"".$var."\"> ";
 		}
 	}

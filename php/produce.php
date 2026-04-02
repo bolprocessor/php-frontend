@@ -91,8 +91,14 @@ if($instruction == "help") {
 else {
 	if(isset($_GET['grammar'])) $project_fullname = $grammar_path = urldecode($_GET['grammar']);
 	else $grammar_path = '';
-	if(isset($_GET['data'])) $project_fullname = $data_path = urldecode($_GET['data']);
-	else $data_path = '';
+	if(isset($_GET['startstring'])) {
+		$data_path = urldecode($_GET['startstring']);
+		$instruction = "produce";
+		}
+	else {
+		if(isset($_GET['data'])) $project_fullname = $data_path = urldecode($_GET['data']);
+		else $data_path = '';
+		}
 	if($grammar_path == '' AND $data_path == '') {
 		echo "Link to data and/or grammar is missing";
 		echo "<p style=\"text-align:center; width:90%;\"><big>👉&nbsp;&nbsp;<a href=\"\" onclick=\"window.close();\">Close this page</a></big></p>";
@@ -428,7 +434,7 @@ flush();
 if(isset($data_path) AND $data_path <> '') {
 	$content = @file_get_contents($data_path);
 	if($content <> FALSE) {
-		if($instruction == "play") echo "<p><b>Playing";
+		if($instruction == "play" OR $instruction == "produce") echo "<p><b>Playing";
 		if($instruction == "play-all") echo "<p><b>Playing chunks";
 		if($instruction == "expand") echo "<p><b>Expanding";
 		if($instruction == "create_set") echo "<p><b>Creating AI training set</b>";
