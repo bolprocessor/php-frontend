@@ -748,9 +748,7 @@ for($i = 0; $i < $imax; $i++) {
 		$variable[$word] = TRUE;
 		}
 	}
-// echo "<form method=\"post\" action=\"".$url_this_page."#expression\" enctype=\"multipart/form-data\">";
 $action = "play";
-// $link_produce = "produce.php?instruction=".$action."&grammar=".urlencode($this_file);
 $link_produce = "produce.php?instruction=".$action."&grammar=".urlencode($this_file)."&keepalive=1";
 if($file_format == "csound") {
 	$cs = $output_file;
@@ -808,7 +806,7 @@ if($expression == '') {
 	}
 $recoded_expression = recode_tags($expression);
 $link_play_expression = $link_produce;
-$link_play_expression .= "&data=".urlencode($data_expression);
+$link_play_expression .= "&startstring=".urlencode($data_expression);
 $window_name .= "_startup";
 echo "<p id=\"expression\">Use the following (polymetric) expression as startup:</p>";
 echo "<textarea name=\"expression\" rows=\"5\" style=\"width:700px;\">".$recoded_expression."</textarea>";
