@@ -134,7 +134,8 @@
         "97 IN wait for _note_ channel _1..16_ [toggle]",
         "97 Wait for _note_ channel _1..16_ [toggle]",
         "96 IN use each substitution _note_ channel _1..16_ [toggle]",
-        "101 IN use-ignore object constraints _note_ channel _1..16_ [toggle]"
+        "101 IN use-ignore object constraints _note_ channel _1..16_ [toggle]",
+        "193 CT _any_"
     ],
     "GramProcedure": [
         "11 2 _goto",

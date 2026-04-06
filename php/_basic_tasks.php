@@ -178,7 +178,10 @@ if(!file_exists($bp_application_path.$trash_folder)) {
 $dir_trash_folder = $bp_application_path.$trash_folder.SLASH;
 
 $tracelive_folder = "trace_".my_session_id()."_live";
-if(!file_exists($temp_dir.$tracelive_folder)) mkdir($temp_dir.$tracelive_folder,0777,TRUE);
+if(!file_exists($temp_dir.$tracelive_folder)) {
+	mkdir($temp_dir.$tracelive_folder,0777,TRUE);
+	chmod($temp_dir.$tracelive_folder,0777);
+	}
 
 // Delete old temp directories and trace files
 $dircontent = scandir($temp_dir);
