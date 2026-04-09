@@ -1291,6 +1291,7 @@ $extract_data = extract_data(TRUE,$content);
 echo "<p class=\"green-text\">".$extract_data['headers']."</p>";
 $content = $extract_data['content'];
 $alphabet_file = $extract_data['alphabet'];
+$grammar_file = $extract_data['grammar'];
 $objects_file = $extract_data['objects'];
 $csound_file = $extract_data['csound'];
 $tonality_file = $extract_data['tonality'];
@@ -1605,11 +1606,11 @@ if(!isset($_POST['analyze_tonal'])) {
 		echo "<br /><div class=\"thinborder\" style=\"width:50%; padding-left:0.5em;\">";
 		echo "<input type=\"hidden\" name=\"capture_file\" value=\"".$capture_file."\">";
 		if(file_exists($capture_file) AND is_capture_file($capture_file)) {
-			$link_analyse = "capture_analysis.php?data=".urlencode($capture_file)."&quantization=".$quantization."&minimum_period=".$minimum_period."&trace_capture_analysis=".$trace_capture_analysis;
+			$link_analyse_capture = "capture_analysis.php?data=".urlencode($capture_file)."&quantization=".$quantization."&minimum_period=".$minimum_period."&trace_capture_analysis=".$trace_capture_analysis;
 			$window_name = "capture_analysis";
 			$capture_file_name = "capture_".$today_date.".txt";
 			echo "<p>👉 A well-formed captured MIDI data file is in place: <span class=\"green-text\">".$capture_file_name."</span><br />";
-			echo "<input class=\"produce\" type=\"submit\" name=\"analyse_capture\" onclick=\"event.preventDefault(); window.open('".$link_analyse."','".$window_name."','width=800,height=800,left=200'); return false;\" value=\"ANALYSE CAPTURED MIDI DATA\">";
+			echo "<input class=\"produce\" type=\"submit\" name=\"analyse_capture\" onclick=\"event.preventDefault(); window.open('".$link_analyse_capture."','".$window_name."','width=800,height=800,left=200'); return false;\" value=\"ANALYSE CAPTURED MIDI DATA\">";
 			echo "<input type=\"hidden\" name=\"capture_file_name\" value=\"".$capture_file_name."\">";
 			echo "&nbsp;<—&nbsp;<input type=\"submit\" name=\"download_capture_file\" value=\"DOWNLOAD\" class=\"save\">";
 			echo "&nbsp;<—&nbsp;<input type=\"submit\" name=\"delete_capture_file\" value=\"DELETE\" class=\"trash\">";
@@ -1797,7 +1798,7 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 //	if($found) echo "<hr>";
 	}
 echo "</form>";
-$table = explode(chr(10),$content);
+$table = explode(chr(10).chr(10),$content); // 2026-04-09 Now using double linefeeds
 $imax = count($table);
 if($imax > 0 AND (substr_count($content,'{') > 0 OR substr_count($content,"-da.") > 0  OR substr_count($content,".bpda") > 0) AND !$hide) {
 	echo "<span id=\"tonalanalysis\"></span>";
@@ -1849,7 +1850,6 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 	if($imax > 0 AND substr_count($content,'{') > 0) {
 		$window_name_grammar = $window_name."_grammar";
 		$link_grammar = "produce.php?data=".urlencode($this_file);
-	//	$link_grammar = $link_grammar."&instruction=create_grammar";
 		$link_grammar = $link_grammar."&instruction=create_grammar&keepalive=1";
 		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		echo "<input type=\"hidden\" name=\"thistext\" value=\"".recode_tags($content)."\">";
@@ -1880,6 +1880,7 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 		$error_mssg = '';
 		if(file_exists($music_xml_file)) continue;
 		$line = trim($table[$i]);
+		$line = str_replace(chr(10),'',$line);
 	//	echo "i = ".$i."<br />";
 		if(is_integer($pos=strpos($line,"<?xml")) AND $pos == 0) break;
 		if(is_integer($pos=strpos($line,"//")) AND $pos == 0) continue;
@@ -1955,6 +1956,7 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 			}
 		$link_options_create_set = $link_options;
 		$out[$i] = $output_file;
+//		echo "output_file = ".$output_file."<br />";
 		if($file_format == "csound") {
 			$cs = $output_file;
 			$out[$i] = str_replace(".sco",'',$output_file);
@@ -1987,8 +1989,12 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 		$link_expand .= $link_options_expand;
 		$link_create_set = $link_produce_create_set."&instruction=create_set";
 		$link_create_set .= $link_options_create_set;
+	//	$link_analyze_item = "produce.php?data=".urlencode($data)."&instruction=analyze&grammar=".urlencode($dir.$grammar_file)."&output=".urlencode($bp_application_path.$output_folder.SLASH);
+		$link_analyze_item = "produce.php?data=".urlencode($data)."&instruction=analyze".$link_options."&output=".urlencode($bp_application_path.$output_folder.SLASH.$output_file);
+		if($alphabet_file <> '') $link_analyze_item .= "&alphabet=".urlencode($dir.$alphabet_file);
 		$window_name_ = $window_name."_";
 		$window_name_expand = $window_name."_expand";
+		$window_name_analyze = $window_name."_analyze";
 		$window_name_create_set = $window_name."_create_set";
 		$window_name_chunked = $window_name."_chunked";
 		// echo "<small>link_play_chunked = ".urldecode($link_play_chunked)."</small><br /><br />";
@@ -2001,6 +2007,9 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 			echo "<input id=\"Button\" class=\"produce\" onmouseover=\"checksaved();\" onclick=\"event.preventDefault(); if(checksaved()) {window.open('".$link_play."','".$window_name_."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" title=\"Play polymetric expression\" value=\"PLAY\">&nbsp;";
 			if($chunked) echo "<input class=\"produce\" onmouseover=\"checksaved();\" onclick=\"event.preventDefault(); if(checksaved()) {window.open('".$link_play_chunked."','".$window_name_chunked."','width=800,height=800,left=150,toolbar=yes'); return false;}\" type=\"submit\" name=\"produce\" title=\"Play polymetric expression in chunks to save RAM\" value=\"PLAY safe (".$chunk_number." chunks)\">&nbsp;";
 			echo "&nbsp;<input class=\"edit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_expand."','".$window_name_expand."','width=800,height=800,left=100'); return false;\" type=\"submit\" name=\"produce\" title=\"Expand polymetric expression\" value=\"EXPAND\">";
+			if($grammar_file <> '')
+			//	echo $link_analyze_item."<br />";
+				echo "&nbsp;<input id=\"Button\" class=\"produce\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_analyze_item."','".$window_name_analyze."','width=800,height=800,left=100'); return false;\" type=\"submit\" name=\"produce\" title=\"Analyse this item versus the grammar\" value=\"Analyse\">";
 			if($chunked) {
 				echo "<br  /><input id=\"saveButton\" class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" title=\"Create a new sample set\" value=\"refresh\">&nbsp;<span class=\"red-text\">➡&nbsp;</span>";
 				$empty_minimised_set = !(isset($data_min_units[$i_item-1]) AND file_exists($data_min_units[$i_item-1]) AND number_of_lines_in_file($data_min_units[$i_item-1]) > 0);
@@ -2025,6 +2034,7 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 		if($tie_mssg <> '' AND $error_mssg == '') echo "<br />";
 		if($tie_mssg <> '') echo $tie_mssg;
 		if($error_mssg <> '') echo $error_mssg;
+		$line_recoded = preg_replace("/\[[^\]]*\]/u",'',$line_recoded);
 		$line_recoded = recode_tags($line_recoded);
 		$length = strlen($line_recoded);
 		if($length > 400)
@@ -2113,7 +2123,7 @@ function create_parts($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxch
 			}
 		}
 	if($restrict_analysis) echo ":</b><br /><small>".$line."</small><br /><br />";
-	$line = preg_replace("/\[[^\]]*\]/u",'',$line);
+	$line = preg_replace('/(?<!^)\[[^\]]*\]/u','',trim($line)); // 2026-04-09, keep [] in the beginning
 	if($label == "units") {
 		$line = normalize_rests($line); // Normally not necessary if recently imported musicxml
 		$line = adjust_spaces_in_score($line,TRUE);

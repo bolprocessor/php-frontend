@@ -518,7 +518,7 @@ function extract_data($compact,$content) {
 	$table = explode(chr(10),$content);
 	$table_out = $extract_data = array();
 	$start = $header = TRUE;
-	$extract_data['grammar'] = $extract_data['metronome'] = $extract_data['time_structure'] = $extract_data['headers'] = $extract_data['alphabet'] = $extract_data['objects'] = $extract_data['csound'] = $extract_data['tonality'] = $extract_data['settings'] = $extract_data['data'] = $extract_data['orchestra'] = $extract_data['timebase'] = $extract_data['interaction'] = $extract_data['midisetup'] = $extract_data['timebase'] = $extract_data['keyboard'] = $extract_data['glossary'] = $extract_data['cstables'] = '';
+	$extract_data['grammar'] = $extract_data['metronome'] = $extract_data['time_structure'] = $extract_data['headers'] = $extract_data['alphabet'] = $extract_data['grammar'] = $extract_data['objects'] = $extract_data['csound'] = $extract_data['tonality'] = $extract_data['settings'] = $extract_data['data'] = $extract_data['orchestra'] = $extract_data['timebase'] = $extract_data['interaction'] = $extract_data['midisetup'] = $extract_data['timebase'] = $extract_data['keyboard'] = $extract_data['glossary'] = $extract_data['cstables'] = '';
 	$extract_data['templates'] = FALSE;
 	for($i = 0; $i < count($table); $i++) {
 		$line = trim($table[$i]);
@@ -546,6 +546,8 @@ function extract_data($compact,$content) {
 				} */
 			}
 		$table_out[] = $line;
+		$line = preg_replace("/ *\[.*\]/u",'',$line);
+		$line = preg_replace("/ *\/\/.*$/u",'',$line);
 		if(is_integer($pos=strpos($line,"TEMPLATES:")) AND $pos == 0) {
 			$extract_data['templates'] = TRUE;
 			}
@@ -570,6 +572,8 @@ function extract_data($compact,$content) {
 			$extract_data['alphabet'] = fix_file_name($line,"al");
 		else if(is_integer($pos=strpos($line,"-so")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
 			$extract_data['objects'] = fix_file_name($line,"so");
+		else if(is_integer($pos=strpos($line,"-gr")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
+			$extract_data['grammar'] = fix_file_name($line,"gr");
 		else if(is_integer($pos=strpos($line,"-mi")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
 			$extract_data['objects'] = fix_file_name($line,"mi");
 		else if(is_integer($pos=strpos($line,"-cs")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
@@ -1014,6 +1018,7 @@ function decode_entities($text) {
 
 function clean_up_file_to_html($file) {
 	global $permissions;
+	// echo "file = ".$file."<br />";
 	if(!file_exists($file)) {
 	//	echo "<p style=\"color:red;\">ERROR file not found: ".$file."</p>";
 		return '';
@@ -3682,6 +3687,7 @@ function find_replace_form() {
 	echo "<p>";
 	echo "<label for=\"replace\">and replace it with: </label>";
 	echo "<input type=\"text\" name=\"replace\" id=\"replace\">&nbsp;&nbsp;&nbsp;<button class=\"produce\" type=\"submit\" formaction=\"".$url_this_page."#saveButton\" name=\"action\" value=\"replace\" onclick=\"clearsave()\">Search and Replace (all)</button>";
+	echo "&nbsp;<input class=\"edit\" type=\"submit\" name=\"cancel\" value=\"CANCEL\">";
 	echo "</div>";
 	return;
 	}

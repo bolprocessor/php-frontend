@@ -4,6 +4,8 @@ $url_this_page = "produce.php";
 if(isset($_GET['title'])) $this_title = urldecode($_GET['title']);
 else $this_title = '';
 
+$success = $failed = FALSE;
+
 echo "<head>";
 if($midi_player == "MIDIjs") echo "<script type='text/javascript' src='https://www.midijs.net/lib/midi.js'></script>";
 else if($midi_player == "html-midi-player") echo "<script src=\"https://cdn.jsdelivr.net/combine/npm/tone@14.7.58,npm/@magenta/music@1.23.1/es6/core.js,npm/focus-visible@5,npm/html-midi-player@1.4.0\"></script>";
@@ -121,7 +123,7 @@ echo "</div>";
 	if(isset($_GET['format'])) $file_format = $_GET['format'];
 	else $file_format = '';
 	$output = '';
-	if(($instruction == "produce-all" OR $file_format <> '') AND isset($_GET['output']))
+	if(($instruction == "produce-all" OR $instruction == "analyze" OR $file_format <> '') AND isset($_GET['output']))
 		$output = urldecode($_GET['output']);
 	if($instruction == "create_set" AND isset($_GET['output']))
 		$output = urldecode($_GET['output']);
@@ -177,11 +179,10 @@ echo "</div>";
 	
 	$grammar_name = str_replace(" ","_",$grammar_name);
 	$data_name = str_replace(" ","_",$data_name);
-	
-	// echo "output = ".$output."<br />";
+//	echo "output = ".$output."<br />";
 	$project_name = preg_replace("/\.[a-z]+$/u",'',$output);
-	// echo "project_name = ".$project_name."<br />";
-	if($instruction == "play" OR $instruction == "play-all" OR $instruction == "create_set")
+//	echo "project_name = ".$project_name."<br />";
+	if($instruction == "play" OR $instruction == "play-all" OR $instruction == "analyze" OR $instruction == "create_set")
 		$result_file = $project_name."_".$instruction."-result.html";
 	else $result_file = $project_name."-result.html";
     $result_file = str_replace(SLASH,'/',$result_file);
@@ -416,16 +417,18 @@ if($instruction <> "help") {
 				}
 			}
 		}
-    $stopfile = str_replace(SLASH,'/',$stopfile);
-    $pausefile = str_replace(SLASH,'/',$pausefile);
-    $continuefile = str_replace(SLASH,'/',$continuefile);
-	echo "<p id=\"wait\" style=\"text-align:center; background-color:yellow; color:black;\"><br /><big><b><span class=\"blinking\">… Bol Processor console is working …</span></b></big><br />(Don't close this window!)<br /><br />";
-	echo "<button type=\"button\" class=\"produce\" onclick=\"createFile('".$stopfile."');\">Click to STOP</button>";
-	if($file_format == "rtmidi") {
-		echo "&nbsp;<button type=\"button\" class=\"produce\" onclick=\"createFile('".$pausefile."');\">Pause</button>";
-		echo "&nbsp;<button type=\"button\" class=\"produce\" onclick=\"createFile('".$continuefile."');\">Continue</button>";
+	if($instruction <> "analyze") {
+		$stopfile = str_replace(SLASH,'/',$stopfile);
+		$pausefile = str_replace(SLASH,'/',$pausefile);
+		$continuefile = str_replace(SLASH,'/',$continuefile);
+		echo "<p id=\"wait\" style=\"text-align:center; background-color:yellow; color:black;\"><br /><big><b><span class=\"blinking\">… Bol Processor console is working …</span></b></big><br />(Don't close this window!)<br /><br />";
+		echo "<button type=\"button\" class=\"produce\" onclick=\"createFile('".$stopfile."');\">Click to STOP</button>";
+		if($file_format == "rtmidi") {
+			echo "&nbsp;<button type=\"button\" class=\"produce\" onclick=\"createFile('".$pausefile."');\">Pause</button>";
+			echo "&nbsp;<button type=\"button\" class=\"produce\" onclick=\"createFile('".$continuefile."');\">Continue</button>";
+			}
+		echo "<br /><br /></p>\n";
 		}
-	echo "<br /><br /></p>\n";
 	}
 echo str_repeat(' ', 10240);  // send extra spaces to fill browser buffer, useful for Windows
 if(ob_get_level() > 0) ob_flush();
@@ -437,6 +440,7 @@ if(isset($data_path) AND $data_path <> '') {
 		if($instruction == "play" OR $instruction == "produce") echo "<p><b>Playing";
 		if($instruction == "play-all") echo "<p><b>Playing chunks";
 		if($instruction == "expand") echo "<p><b>Expanding";
+		if($instruction == "analyze") echo "<p><b>Analysing";
 		if($instruction == "create_set") echo "<p><b>Creating AI training set</b>";
 		else {
 			if($item <> 0) echo " #".$item;
@@ -804,11 +808,12 @@ if($n_messages > 0) {
 			$mssg = str_replace("=&gt; ",'',$mssg);
 			$mssg = "<font color=\"red\">".$mssg."</font>";
 			}
-   //     if(windows_system())
-            $mssg = preg_replace("/(C:.+)$/u","<font color=#007BFF><small>$1</small></font>",$mssg);
-   //     else
-			$mssg = preg_replace("/(\.\.\/.+)$/u","<font color=#007BFF><small>$1</small></font>",$mssg);
+        if($mssg !== null) $mssg = preg_replace("/(C:.+)$/u","<font color=#007BFF><small>$1</small></font>",$mssg);
+		if($mssg !== null)	$mssg = preg_replace("/(\.\.\/.+)$/u","<font color=#007BFF><small>$1</small></font>",$mssg);
 		if($mssg == "(null)") continue;
+		if(is_integer(strpos($mssg,"accepted by"))) $success = TRUE;
+		if(is_integer(strpos($mssg,"matched no template"))) $failed = TRUE;
+		if(is_integer(strpos($mssg,"No success"))) $failed = TRUE;
 		if($handle) fwrite($handle,$mssg."<br />\n");
 		if($i == 7) echo "… … …<br />";
 		if($i < 7 OR $i > ($n_messages - 4)) echo $mssg."<br />";
@@ -832,6 +837,9 @@ if($trace_csound <> '' AND file_exists($trace_csound)) {
 	echo "&nbsp;<input class=\"save big\" onclick=\"window.open('".nice_url($trace_csound_link)."','".$window_name."','width=800,height=600,left=100'); return false;\" type=\"submit\" value=\"Show Csound trace\">";
 	}
 echo "</p>";
+
+if($success) echo "<p style=\"color:red;\">😀 This item was successfully analysed 😀</p>";
+if($failed) echo "<p style=\"color:red;\">😢 This item failed in the parsing 😢</p>";
 
 @unlink($running_trace);
 
