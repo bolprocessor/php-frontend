@@ -37,6 +37,7 @@ window.name = '".$filename."'
 </script>";
 $this_file = $bp_application_path.$file;
 $dir = str_replace($filename,'',$this_file);
+$thistype = "data";
 $current_directory = str_replace(SLASH.$filename,'',$file);
 $current_directory = str_replace(SLASH,'/',$current_directory);
 save_settings("last_data_directory",$current_directory);

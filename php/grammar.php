@@ -15,6 +15,7 @@ $current_directory = str_replace(SLASH,'/',$current_directory);
 save_settings("last_grammar_directory",$current_directory);
 $textarea_rows = 20;
 $save_warning = '';
+$thistype = "grammar";
 
 if($test) echo "grammar_file = ".$this_file."<br />";
 // echo "skin = ".$skin."<br />";
@@ -59,6 +60,7 @@ echo "&nbsp;Workspace = <input title=\"List this workspace\" class=\"edit\" name
 
 $hide = $need_to_save = FALSE;
 $no_save_midiresources = FALSE;
+$true_bp_grammar = FALSE;
 
 if(isset($_POST['use_convention'])) {
 	$new_convention = use_convention($this_file);
@@ -525,14 +527,22 @@ $link_produce .= "&here=".urlencode($here);
 echo "</tr>";
 echo "</table>";
 echo "<br />";
-if($templates) {
+// if($templates) {
+if($true_bp_grammar) {
 	$action = "templates";
-//	$link_produce_templates = "produce.php?instruction=".$action."&grammar=".urlencode($this_file);
 	$link_produce_templates = "produce.php?instruction=".$action."&grammar=".urlencode($this_file)."&keepalive=1";
-//	$link_produce_templates .= "&trace_production=1";
+	//"&output=".urlencode($output.SLASH).".txt";
+	$link_produce_templates .= "&output=".urlencode($output.SLASH."templates.txt")."&format=data";
 	$link_produce_templates .= "&here=".urlencode($here);
-	$window_name = window_name($filename);
-	echo "<input class=\"edit\" onclick=\"if(checksaved()) window.open('".$link_produce_templates."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"CHECK TEMPLATES\"><br /><br />";
+	if($alphabet_file <> '') {
+		if(!file_exists($dir.$alphabet_file)) {
+			$upload_mssg = upload_related_form($dir,$alphabet_file,"alphabet");
+			$error = TRUE;
+			}
+		else $link_produce_templates .= "&alphabet=".urlencode($dir.$alphabet_file);
+		}
+//	if($settings_file <> '')
+//		$link_produce_templates .= "&settings=".urlencode($dir.$settings_file);
 	}
 echo "<div style=\"padding:1em; width:690px;\" class=\"thinborder2\">";
 if($settings_file <> '' AND file_exists($dir.$settings_file)) echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".nice_url($url_settings)."','".$settings_file."','width=800,height=800,left=100'); c\" value=\"EDIT ‘".$settings_file."’\">";
@@ -680,6 +690,9 @@ echo "<input type=\"hidden\" name=\"alphabet_file\" value=\"".$alphabet_file."\"
 
 echo "<span  id=\"topedit\">&nbsp;</span>";
 echo $save_warning;
+
+if($true_bp_grammar)echo "👉 This is a true BP grammar<br />";
+
 echo "<br /><button id=\"downloadupload\" class=\"save\" onclick=\"toggledownload(); return false;\">DOWNLOAD / UPLOAD</button>&nbsp;<button class=\"edit\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button><p></p>";
 
 download_upload_project_form($dir,$filename,"grammar",$settings_file); find_replace_form();
@@ -693,6 +706,11 @@ if((file_exists($output.SLASH.$default_output_name.".wav") OR file_exists($outpu
 	echo "&nbsp;&nbsp;&nbsp;<input class=\"edit\" style=\"font-size:large;\" onclick=\"window.open('".nice_url($result_file)."','result','width=800,height=600,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Show latests results\">";
 	}
 echo "&nbsp;<input class=\"edit big\" type=\"submit\" onclick=\"clearsave();\" name=\"compilegrammar\" value=\"COMPILE GRAMMAR\">";
+if($true_bp_grammar) {
+	if($templates) $this_value = "Update templates";
+	else $this_value = "Create templates";
+	echo "&nbsp;<input class=\"edit big\" onclick=\"if(checksaved()) {window.open('".$link_produce_templates."','".$window_name."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"create_templates\" value=\"".$this_value."\">";
+	}
 echo "&nbsp;<input onclick=\"if(checksaved()) {window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)";
 if($error) {
 	echo " - disabled because of missing files\"";

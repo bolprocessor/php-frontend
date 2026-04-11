@@ -62,6 +62,7 @@ $is_minimised = isset($_GET['minimised']);
 
 if(isset($_GET['instruction'])) $instruction = $_GET['instruction'];
 else $instruction = '';
+// echo "instruction = ".$instruction."<br />";
 if($instruction == '') {
 	echo "ERROR: No instruction has been sent";
 	echo "<p style=\"text-align:center; width:90%;\"><big>👉&nbsp;&nbsp;<a href=\"\" onclick=\"window.close();\">Close this page</a></big></p>";
@@ -123,8 +124,10 @@ echo "</div>";
 	if(isset($_GET['format'])) $file_format = $_GET['format'];
 	else $file_format = '';
 	$output = '';
-	if(($instruction == "produce-all" OR $instruction == "analyze" OR $file_format <> '') AND isset($_GET['output']))
+	if(($instruction == "produce-all" OR $instruction == "templates" OR $instruction == "analyze" OR $file_format <> '') AND isset($_GET['output'])) {
 		$output = urldecode($_GET['output']);
+	//	echo "@output = ".$output."<br />";
+		}
 	if($instruction == "create_set" AND isset($_GET['output']))
 		$output = urldecode($_GET['output']);
 	if(isset($_GET['show_production'])) $show_production = TRUE;
@@ -182,7 +185,7 @@ echo "</div>";
 //	echo "output = ".$output."<br />";
 	$project_name = preg_replace("/\.[a-z]+$/u",'',$output);
 //	echo "project_name = ".$project_name."<br />";
-	if($instruction == "play" OR $instruction == "play-all" OR $instruction == "analyze" OR $instruction == "create_set")
+	if($instruction == "play" OR $instruction == "play-all" OR $instruction == "analyze" OR $instruction == "create_set" OR $instruction == "templates")
 		$result_file = $project_name."_".$instruction."-result.html";
 	else $result_file = $project_name."-result.html";
     $result_file = str_replace(SLASH,'/',$result_file);
@@ -312,7 +315,7 @@ echo "</div>";
 				break;
 			}
 		}
-	if($instruction == "produce-all") $command .= " -o ".$output;
+	if($instruction == "produce-all" OR $instruction == "templates") $command .= " -o ".$output;
 	if($tracefile <> '') $command .= " --traceout ".$tracefile;
 	if($show_production) $command .= " --show-production";
 	if($trace_production) $command .= " --trace-production";
@@ -417,7 +420,7 @@ if($instruction <> "help") {
 				}
 			}
 		}
-	if($instruction <> "analyze") {
+	if($instruction <> "analyze" AND $instruction <> "templates") {
 		$stopfile = str_replace(SLASH,'/',$stopfile);
 		$pausefile = str_replace(SLASH,'/',$pausefile);
 		$continuefile = str_replace(SLASH,'/',$continuefile);
@@ -434,6 +437,7 @@ echo str_repeat(' ', 10240);  // send extra spaces to fill browser buffer, usefu
 if(ob_get_level() > 0) ob_flush();
 flush();
 
+if($instruction == "templates") echo "<p><b>Creating/updating templates";
 if(isset($data_path) AND $data_path <> '') {
 	$content = @file_get_contents($data_path);
 	if($content <> FALSE) {
@@ -587,79 +591,81 @@ if($instruction == "create_set" AND $training_set_folder <> '') {
 	}
 
 // Prepare images if any
-$dircontent = scandir($temp_dir_abs);
-echo "<table style=\"background-color:snow; color:black; padding:0px;\"><tr>";
-$position_image = 0;
-foreach($dircontent as $thisfile) {
-	$table = explode('_',$thisfile);
-	if($table[0] <> "trace") continue;
-	if(!isset($table[2]) OR $table[1] <> my_session_id()) continue;
-	$found = FALSE; $this_name = '';
-//	echo "<p>".$thisfile."</p>";
-	for($i = 2; $i < (count($table) - 1); $i++) {
-		if($table[$i] == "image" AND is_integer(strpos($thisfile,$project_fullname))) {
-			$this_name = $table[$i - 1];
-			$found = TRUE;
-			break;
+if($instruction <> "templates") {
+	$dircontent = scandir($temp_dir_abs);
+	echo "<table style=\"background-color:snow; color:black; padding:0px;\"><tr>";
+	$position_image = 0;
+	foreach($dircontent as $thisfile) {
+		$table = explode('_',$thisfile);
+		if($table[0] <> "trace") continue;
+		if(!isset($table[2]) OR $table[1] <> my_session_id()) continue;
+		$found = FALSE; $this_name = '';
+	//	echo "<p>".$thisfile."</p>";
+		for($i = 2; $i < (count($table) - 1); $i++) {
+			if($table[$i] == "image" AND is_integer(strpos($thisfile,$project_fullname))) {
+				$this_name = $table[$i - 1];
+				$found = TRUE;
+				break;
+				}
+			}
+		if(!$found) continue;
+	//	echo "<p>FOUND: ".$thisfile."</p>";
+		echo "<td style=\"border-radius: 6px; border: 4px solid Gold; background-color:azure; color:black;vertical-align:middle; text-align: center; padding:8px; margin:0px;\>";
+		$number_and_time = str_replace(".html",'',$table[$i + 1]);
+		$table_number = explode('-',$number_and_time);
+		$number = $table_number[0];
+		$image_time = '';
+		if(count($table_number) > 1) $image_time = $table_number[1]."s";
+	//		if($image_time == "0.00s") $image_time = '';
+	//		$number = intval($number_and_time);
+		$content = @file_get_contents($temp_dir_abs.$thisfile);
+		$table2 = explode(chr(10),$content);
+		$imax = count($table2);
+		$table3 = array();
+	//	$title1 = $this_name."_Image_".$number;
+		$title1 = rand(10000,99999); // Added 2025-10-28
+		$WidthMax = $HeightMax = 0;
+		$position_image++;
+		for($i = 0; $i < $imax; $i++) {
+			$line = trim($table2[$i]);
+		//	echo $i." ".recode_tags($line)."<br />";
+			if(is_integer($pos=strpos($line,"canvas.width"))) {
+				$table4 = explode("=",$line);
+				$WidthMax = round(intval($table4[2])) + 10;
+			//	echo $i.") WidthMax = ".$WidthMax."<br />";
+				}
+			if(is_integer($pos=strpos($line,"canvas.height"))) {
+				$table4 = explode("=",$line);
+				$HeightMax = round(intval($table4[2]));
+			//	echo $i.") HeightMax = ".$HeightMax."<br />";
+				}
+			}
+		for($i = $j = 0; $i < $imax; $i++) {
+			$line = trim($table2[$i]);
+			$table3[$j] = $line;
+			$j++;
+			}
+		$link = $temp_dir.$thisfile;
+		$left = 10 + (50 * ($position_image - 1));
+		$window_height = 600;
+		if($HeightMax < $window_height) $window_height = $HeightMax + 60;
+		$window_width = 1200;
+		if($WidthMax < $window_width) $window_width = $WidthMax +  20;
+		echo "<div style=\"border:2px solid gray; background-color:azure; color:black; width:8em;  padding:2px; text-align:center; border-radius: 6px;\"><a class=\"darkblue-text\" onclick=\"window.open('".nice_url($link)."','".$title1."','width=".$window_width.",height=".$window_height.",left=".$left."'); return false;\" href=\"".nice_url($link)."\">Image ".$number."</a><br />".$image_time;
+		if(check_image($link) <> '') {
+			$bad_image = TRUE;
+			echo " <span class=\"red-text\"><b>*</b></span>";
+			}
+		echo "</div>&nbsp;";
+		echo "</td>";
+		if(++$position_image > 11) {
+			$position_image = 0;
+			echo "</tr><tr>";
 			}
 		}
-	if(!$found) continue;
-//	echo "<p>FOUND: ".$thisfile."</p>";
-	echo "<td style=\"border-radius: 6px; border: 4px solid Gold; background-color:azure; color:black;vertical-align:middle; text-align: center; padding:8px; margin:0px;\>";
-	$number_and_time = str_replace(".html",'',$table[$i + 1]);
-	$table_number = explode('-',$number_and_time);
-	$number = $table_number[0];
-	$image_time = '';
-	if(count($table_number) > 1) $image_time = $table_number[1]."s";
-//		if($image_time == "0.00s") $image_time = '';
-//		$number = intval($number_and_time);
-	$content = @file_get_contents($temp_dir_abs.$thisfile);
-	$table2 = explode(chr(10),$content);
-	$imax = count($table2);
-	$table3 = array();
-//	$title1 = $this_name."_Image_".$number;
-	$title1 = rand(10000,99999); // Added 2025-10-28
-	$WidthMax = $HeightMax = 0;
-	$position_image++;
-	for($i = 0; $i < $imax; $i++) {
-		$line = trim($table2[$i]);
-	//	echo $i." ".recode_tags($line)."<br />";
-		if(is_integer($pos=strpos($line,"canvas.width"))) {
-			$table4 = explode("=",$line);
-			$WidthMax = round(intval($table4[2])) + 10;
-		//	echo $i.") WidthMax = ".$WidthMax."<br />";
-			}
-		if(is_integer($pos=strpos($line,"canvas.height"))) {
-			$table4 = explode("=",$line);
-			$HeightMax = round(intval($table4[2]));
-		//	echo $i.") HeightMax = ".$HeightMax."<br />";
-			}
-		}
-	for($i = $j = 0; $i < $imax; $i++) {
-		$line = trim($table2[$i]);
-		$table3[$j] = $line;
-		$j++;
-		}
-	$link = $temp_dir.$thisfile;
-	$left = 10 + (50 * ($position_image - 1));
-	$window_height = 600;
-	if($HeightMax < $window_height) $window_height = $HeightMax + 60;
-	$window_width = 1200;
-	if($WidthMax < $window_width) $window_width = $WidthMax +  20;
-	echo "<div style=\"border:2px solid gray; background-color:azure; color:black; width:8em;  padding:2px; text-align:center; border-radius: 6px;\"><a class=\"darkblue-text\" onclick=\"window.open('".nice_url($link)."','".$title1."','width=".$window_width.",height=".$window_height.",left=".$left."'); return false;\" href=\"".nice_url($link)."\">Image ".$number."</a><br />".$image_time;
-	if(check_image($link) <> '') {
-		$bad_image = TRUE;
-		echo " <span class=\"red-text\"><b>*</b></span>";
-		}
-	echo "</div>&nbsp;";
-	echo "</td>";
-	if(++$position_image > 11) {
-		$position_image = 0;
-		echo "</tr><tr>";
-		}
+	echo "</tr></table>";
+	echo "<br />";
 	}
-echo "</tr></table>";
-echo "<br />";
 	
 // Process Csound score if possible
 if($no_error AND $file_format == "csound") {
@@ -838,8 +844,8 @@ if($trace_csound <> '' AND file_exists($trace_csound)) {
 	}
 echo "</p>";
 
-if($success) echo "<p style=\"color:red;\">😀 This item was successfully analysed 😀</p>";
-if($failed) echo "<p style=\"color:red;\">😢 This item failed in the parsing 😢</p>";
+if($success) echo "<p><big>✅ This item was successfully parsed</big></p>";
+if($failed) echo "<p><big>❌ This item failed in the parsing</big></p>";
 
 @unlink($running_trace);
 

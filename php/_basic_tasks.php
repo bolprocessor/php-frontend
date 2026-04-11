@@ -504,6 +504,7 @@ function findCsoundPath($exeName) {
     }
 	
 function extract_data($compact,$content) {
+	global $true_bp_grammar,$thistype;
 	$said = FALSE;
 	$content = trim($content);
 	$content = str_replace(chr(13).chr(10),chr(10),$content);
@@ -518,8 +519,11 @@ function extract_data($compact,$content) {
 	$table = explode(chr(10),$content);
 	$table_out = $extract_data = array();
 	$start = $header = TRUE;
+	$is_valid_for_parsing = FALSE;
+	$nr_end_lines= 0;
+	$is_true_bp = TRUE;
 	$extract_data['grammar'] = $extract_data['metronome'] = $extract_data['time_structure'] = $extract_data['headers'] = $extract_data['alphabet'] = $extract_data['grammar'] = $extract_data['objects'] = $extract_data['csound'] = $extract_data['tonality'] = $extract_data['settings'] = $extract_data['data'] = $extract_data['orchestra'] = $extract_data['timebase'] = $extract_data['interaction'] = $extract_data['midisetup'] = $extract_data['timebase'] = $extract_data['keyboard'] = $extract_data['glossary'] = $extract_data['cstables'] = '';
-	$extract_data['templates'] = FALSE;
+	$extract_data['templates'] = $found_templates = $need_end_line = FALSE;
 	for($i = 0; $i < count($table); $i++) {
 		$line = trim($table[$i]);
 		$line = preg_replace("/\s/u",' ',$line);
@@ -537,19 +541,23 @@ function extract_data($compact,$content) {
 			}
 		if(($new_name = new_name($line,"instruction")) <> $line) {
 			$line = $new_name; // Convert old prefixes/prefixes to new ones
-	/*		if(!$said) {
-				echo "line = ".$line."<br />";
-				$said = TRUE;
-				echo "<script type='text/javascript'>";
-				echo "tellsave();";
-				echo "</script>";
-				} */
+			}
+		$line = trim($line);
+		if(str_starts_with($line,'--')) $nr_end_lines++;
+		else $nr_end_lines = 0;
+		if($found_templates AND str_starts_with($line,'--')) $need_end_line = FALSE;
+		if(isset($thistype) AND $thistype == "grammar" AND !$start AND strlen($line) < 1) continue;
+		if($nr_end_lines > 1) {
+			$nr_end_lines--;
+			continue;
 			}
 		$table_out[] = $line;
 		$line = preg_replace("/ *\[.*\]/u",'',$line);
-		$line = preg_replace("/ *\/\/.*$/u",'',$line);
+		$line = trim(preg_replace("/ *\/\/.*$/u",'',$line));
+		if(!is_true_bp($line)) $is_true_bp = FALSE;
+		if(is_valid_for_parsing($line)) $is_valid_for_parsing = TRUE;
 		if(is_integer($pos=strpos($line,"TEMPLATES:")) AND $pos == 0) {
-			$extract_data['templates'] = TRUE;
+			$extract_data['templates'] = $found_templates = $need_end_line = TRUE;
 			}
 		if(is_integer($pos=strpos($line,"_mm")) AND $pos == 0) {
 			$metronome = preg_replace("/.*_mm\(([^\)]+)\).*/u","$1",$line);
@@ -598,12 +606,35 @@ function extract_data($compact,$content) {
 			$extract_data['keyboard'] = fix_file_name($line,"kb");
 		else if(is_integer($pos=strpos($line,"-gl")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
 			$extract_data['glossary'] = fix_file_name($line,"gl");
-		else if($line <> '') $start = FALSE;
+		else if($line <> '' AND !str_starts_with($line,'/*')) {
+			$start = FALSE;
+			}
 		}
+	if($need_end_line) $table_out[] = "-----";
 	$extract_data['content'] = implode(chr(10),$table_out);
 	// Below, we fix an old error of naming tempered tunings
 	$extract_data['content'] = str_replace("_scale(meantone_","_scale(",$extract_data['content']);
+	if(!$true_bp_grammar AND $is_true_bp AND $is_valid_for_parsing) {
+		$true_bp_grammar = TRUE;
+		}
+	// else echo "@@@ not true<br />";
 	return $extract_data;
+	}
+
+function is_true_bp($line) {
+	if(str_ends_with($line, '->')) return FALSE;
+	if(str_contains($line, 'lambda') || str_contains($line, 'empty')  || str_contains($line, 'null') || str_contains($line, 'nil')) return FALSE;
+	if(str_ends_with($line, 'SUB') || str_ends_with($line, 'SUB1') || str_ends_with($line, 'POSLONG')) return FALSE;
+	if(str_contains($line, '{') || str_contains($line, '}')) return FALSE;
+	if(str_contains($line, '<K')) return FALSE; // Controled rule weight
+	if(preg_match('#/.+?/#',$line)) return FALSE; // Flag
+	if(str_contains($line, '_destru') || str_contains($line, '_goto')  || str_contains($line, '_failed') || str_contains($line, '_repeat') || str_contains($line, '_retro') || str_contains($line, '_rndseq') || str_contains($line, '_keyxpand') || str_contains($line, '_stepOn') || str_contains($line, '_stepOff') || str_contains($line, '_stop')) return FALSE;
+	return TRUE;
+	}
+
+function is_valid_for_parsing($line) {
+	if(str_contains($line,'<--') || str_contains($line,'<->')) return TRUE;
+	return FALSE;
 	}
 
 function fix_file_name($line,$type) {
