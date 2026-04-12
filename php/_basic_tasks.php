@@ -546,7 +546,7 @@ function extract_data($compact,$content) {
 		if(str_starts_with($line,'--')) $nr_end_lines++;
 		else $nr_end_lines = 0;
 		if($found_templates AND str_starts_with($line,'--')) $need_end_line = FALSE;
-		if(isset($thistype) AND $thistype == "grammar" AND !$start AND strlen($line) < 1) continue;
+	//	if(isset($thistype) AND $thistype == "grammar" AND !$start AND strlen($line) < 1) continue;
 		if($nr_end_lines > 1) {
 			$nr_end_lines--;
 			continue;
