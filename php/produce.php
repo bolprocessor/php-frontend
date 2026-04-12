@@ -420,7 +420,7 @@ if($instruction <> "help") {
 				}
 			}
 		}
-	if($instruction <> "analyze" AND $instruction <> "templates") {
+//	if($instruction <> "analyze" AND $instruction <> "templates") {
 		$stopfile = str_replace(SLASH,'/',$stopfile);
 		$pausefile = str_replace(SLASH,'/',$pausefile);
 		$continuefile = str_replace(SLASH,'/',$continuefile);
@@ -431,7 +431,7 @@ if($instruction <> "help") {
 			echo "&nbsp;<button type=\"button\" class=\"produce\" onclick=\"createFile('".$continuefile."');\">Continue</button>";
 			}
 		echo "<br /><br /></p>\n";
-		}
+//		}
 	}
 echo str_repeat(' ', 10240);  // send extra spaces to fill browser buffer, useful for Windows
 if(ob_get_level() > 0) ob_flush();
@@ -537,12 +537,13 @@ if($test) echo "dir = ".$dir."<br />";
 if($test) echo "trace_link = ".$trace_link."<br />";
 if($test) echo "output_link = ".$output_link."<br />";
 if($test) echo "file_format = ".$file_format."<br />";
-echo "<script>";
-echo "document.getElementById('warning').style.display = \"none\";";
-echo "document.getElementById('wait').style.display = \"none\";";
-echo "document.getElementById('miwait').style.display = \"none\";";
-echo "document.getElementById('cswait').style.display = \"none\";";
-echo "</script>";
+
+echo '<script>
+["warning","wait","miwait","cswait"].forEach(function(id) {
+  var el = document.getElementById(id);
+  if (el) el.style.display = "none";
+});
+</script>';
 
 if(!$no_error) {
 	if(strlen($content_trace) > 4) {

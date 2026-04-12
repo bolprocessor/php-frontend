@@ -1990,9 +1990,9 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 		$link_expand .= $link_options_expand;
 		$link_create_set = $link_produce_create_set."&instruction=create_set";
 		$link_create_set .= $link_options_create_set;
-	//	$link_analyze_item = "produce.php?data=".urlencode($data)."&instruction=analyze&grammar=".urlencode($dir.$grammar_file)."&output=".urlencode($bp_application_path.$output_folder.SLASH);
 		$link_analyze_item = "produce.php?data=".urlencode($data)."&instruction=analyze".$link_options."&output=".urlencode($bp_application_path.$output_folder.SLASH.$output_file);
 		if($alphabet_file <> '') $link_analyze_item .= "&alphabet=".urlencode($dir.$alphabet_file);
+		if($trace_production > 0) $link_analyze_item .= "&trace_production=1";
 		$window_name_ = $window_name."_";
 		$window_name_expand = $window_name."_expand";
 		$window_name_analyze = $window_name."_analyze";
@@ -2010,7 +2010,7 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 			echo "&nbsp;<input class=\"edit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_expand."','".$window_name_expand."','width=800,height=800,left=100'); return false;\" type=\"submit\" name=\"produce\" title=\"Expand polymetric expression\" value=\"EXPAND\">";
 			if($grammar_file <> '')
 			//	echo $link_analyze_item."<br />";
-				echo "&nbsp;<input id=\"Button\" class=\"produce\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_analyze_item."','".$window_name_analyze."','width=800,height=800,left=100'); return false;\" type=\"submit\" name=\"produce\" title=\"Analyse this item versus the grammar\" value=\"Analyse\">";
+				echo "&nbsp;<input id=\"Button\" class=\"produce\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_analyze_item."','".$window_name_analyze."','width=800,height=800,left=100'); return false;\" type=\"submit\" name=\"produce\" title=\"Analyse this item versus the grammar\" value=\"Analyse\"> ";
 			if($chunked) {
 				echo "<br  /><input id=\"saveButton\" class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" title=\"Create a new sample set\" value=\"refresh\">&nbsp;<span class=\"red-text\">➡&nbsp;</span>";
 				$empty_minimised_set = !(isset($data_min_units[$i_item-1]) AND file_exists($data_min_units[$i_item-1]) AND number_of_lines_in_file($data_min_units[$i_item-1]) > 0);
