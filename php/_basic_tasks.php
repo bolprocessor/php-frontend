@@ -1470,7 +1470,8 @@ function save_triplet($data, $filename) {
 function get_weight($line) {
  //   if(preg_match('/<(inf|\d+)>/i', $line, $matches)) {
     if(preg_match('/<([^>]+)>/i', $line, $matches)) {
-        return $matches[1];
+        if($matches[1] <> "-") return $matches[1];
+		// When the derivation mode is "<->" it could be mistaken for a weight
     	}
     return 127; // default value
 	}

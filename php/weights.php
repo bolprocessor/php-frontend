@@ -24,7 +24,7 @@ echo link_to_help();
 
 echo "<h2>Weights “".$filename."”</h2>";
 
-$grammar_page_url = "grammar.php?file=ctests/acceleration_package/".$grammar_file;
+$grammar_page_url = "grammar.php?file=".$current_directory.SLASH.$grammar_file;
 // echo "grammar_page_url = ".$grammar_page_url."<br />";
 
 $temp_weights_file = $temp_dir."trace_".my_session_id()."_".$grammar_file."_weights.json";
@@ -114,6 +114,7 @@ if($content <> '') {
 			echo "gram#{$row['igram']}[{$row['irul']}] &lt;{$weight}&gt;<br>";
 			}
 		}
+	// echo $grammar_page_url."<br />";
 	echo "<br /><form method=\"post\" action=\"".$grammar_page_url."#topedit\" target=\"opener\" enctype=\"multipart/form-data\">";
 	echo "<input type=\"hidden\" name=\"apply_these_weights\" value=\"".htmlspecialchars($json, ENT_QUOTES,'UTF-8')."\">";
 	echo "<input class=\"save\" type=\"submit\" value=\"APPLY WEIGHTS in ‘".$filename."’ (see above) back to ‘".$grammar_file."’ grammar\">";
