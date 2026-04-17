@@ -665,7 +665,7 @@ function window_name($text) {
 	}
 	
 function display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,$objects_file,$csound_file,$tonality_file,$alphabet_file,$data_file,$weights_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file) {
-	global $bp_application_path, $csound_resources, $tonality_resources, $output_file, $file_format, $current_file, $test;
+	global $bp_application_path, $csound_resources, $tonality_resources, $output_file, $file_format, $current_file, $grammarWindow, $test;
 	$page_type = str_replace(".php",'',$url_this_page);
 	$page_type = preg_replace("/\.php.*/u",'',$url_this_page);
 	
@@ -715,7 +715,8 @@ function display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,
 		}
 	if($weights_file <> '') {
 		$url_this_page = "weights.php?file=".urlencode($dir.$weights_file);
-		$url_this_page .= "&grammar_file=".urlencode($current_file);
+		$url_this_page .= "&grammar_file=".urlencode($current_file); 
+		$url_this_page .= "&grammarWindow=".urlencode($grammarWindow);
 		if($test) echo "url_this_page = ".$url_this_page."<br />";
 		echo "<td>";
 		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" onclick=\"event.preventDefault(); if(checksaved()) {window.open('".$url_this_page."','".$weights_file."','width=800,height=800,left=100'); return false;}\" value=\"EDIT ‘".begin_with(20,$weights_file)."’\">";

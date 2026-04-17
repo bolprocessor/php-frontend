@@ -6,6 +6,8 @@ else $file = '';
 if(isset($_GET['grammar_file'])) $grammar_file = urldecode($_GET['grammar_file']);
 else if(isset($_POST['grammar_file'])) $grammar_file = $_POST['grammar_file'];
 else $grammar_file = '';
+if(isset($_GET['grammarWindow'])) $grammarWindow = urldecode($_GET['grammarWindow']);
+else $grammarWindow = '';
 $url_this_page = "weights.php?file=".urlencode($file);
 $table = explode(SLASH,$file);
 $filename = end($table);
@@ -24,12 +26,13 @@ echo link_to_help();
 
 echo "<h2>Weights “".$filename."”</h2>";
 
-$grammar_page_url = "grammar.php?file=".$current_directory.SLASH.$grammar_file;
-// echo "grammar_page_url = ".$grammar_page_url."<br />";
+$grammar_page_url = "grammar.php?file=".urlencode($current_directory.SLASH.$grammar_file);
 
 $temp_weights_file = $temp_dir."trace_".my_session_id()."_".$grammar_file."_weights.json";
 
 reformat_grammar(FALSE,$dir.$grammar_file);
+
+if(isset($_POST['grammarWindow'])) $grammarWindow = $_POST['grammarWindow'];
 
 if(isset($_POST['savethisfile'])) {
 	$content = file_get_contents($temp_weights_file);
@@ -90,6 +93,7 @@ else $content = '';
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 echo "<p style=\"text-align:left;\"><input class=\"save\" type=\"submit\" name=\"savethisfile\" value=\"SAVE current rule weights to ‘".$filename."’\"></p>";
 echo "<input type=\"hidden\" name=\"grammar_file\" value=\"".$grammar_file."\">";
+if($grammarWindow <> '') echo "<input type=\"hidden\" name=\"grammarWindow\" value=\"".$grammarWindow."\">";
 if($content <> '') {
 	echo "<input type=\"hidden\" name=\"apply_these_weights\" value=\"".htmlspecialchars($json, ENT_QUOTES,'UTF-8')."\">";
 	echo "<p style=\"text-align:left;\"><input class=\"save\" type=\"submit\" name=\"resetthisfile\" value=\"RESET rule weights (value 127) in ‘".$filename."’\"> (except variable ones)</p>";
@@ -115,9 +119,32 @@ if($content <> '') {
 			}
 		}
 	// echo $grammar_page_url."<br />";
-	echo "<br /><form method=\"post\" action=\"".$grammar_page_url."#topedit\" target=\"opener\" enctype=\"multipart/form-data\">";
+	// echo $grammarWindow."<br />";
+		
+	echo "<br /><form id=\"return_to_grammar\" method=\"post\" action=\"".$grammar_page_url."#topedit\" onsubmit=\"return sendBackToGrammar();\" enctype=\"multipart/form-data\">";
 	echo "<input type=\"hidden\" name=\"apply_these_weights\" value=\"".htmlspecialchars($json, ENT_QUOTES,'UTF-8')."\">";
+	if($grammarWindow <> '') echo "<input type=\"hidden\" name=\"grammarWindow\" value=\"".$grammarWindow."\">";
 	echo "<input class=\"save\" type=\"submit\" value=\"APPLY WEIGHTS in ‘".$filename."’ (see above) back to ‘".$grammar_file."’ grammar\">";
 	echo "</form>";
 	}
+// We need the following function because "target" is not properly handled by some browwsers
+// The target is the grammar window from which these weights originated.
+echo "<script>
+function sendBackToGrammar() {
+    var targetName = ".json_encode($grammarWindow).";
+    if (!targetName) {
+        alert('No grammar window name found');
+        return false;
+    }
+
+    var w = window.open('', targetName);
+    if (!w) {
+        alert('Could not find grammar window: ' + targetName);
+        return false;
+    }
+
+    document.getElementById('return_to_grammar').target = targetName;
+    return true;
+}
+</script>";
 ?>

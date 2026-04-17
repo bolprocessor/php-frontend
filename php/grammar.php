@@ -17,7 +17,16 @@ $textarea_rows = 20;
 $save_warning = '';
 $thistype = "grammar";
 
-if($test) echo "grammar_file = ".$this_file."<br />";
+
+$grammarWindow = 'gw_'.md5($current_directory.'/'.$filename);
+// echo "grammarWindow = ".$grammarWindow."<br />";
+ // This will be passed by display_more_buttons() and used in weights.php to return to the current window
+echo "<script>
+window.name = '".$grammarWindow."';
+</script>";
+// window.name = '".json_encode($grammarWindow)."';
+
+// if($test) echo "grammar_file = ".$this_file."<br />";
 // echo "skin = ".$skin."<br />";
 
 $temp_folder = str_replace(' ','_',$filename)."_".my_session_id()."_temp";
@@ -934,6 +943,7 @@ function save($this_file,$filename,$top_header,$save_content) {
 
 function apply_new_weights($table,$imax,$weight_table,$verbose) {
 	global $section_headers;
+	$verbose = FALSE;
 	$index = [];
 	foreach($weight_table as $row)
 		$index[$row['igram']][$row['irul']] = $row['weight'];
@@ -948,19 +958,20 @@ function apply_new_weights($table,$imax,$weight_table,$verbose) {
 		if(!is_integer(strpos($line,"-->")) AND !is_integer(strpos($line,"<->")) AND !is_integer(strpos($line,"<--"))) $ignore = TRUE;
 		if(is_integer($pos=strpos($line,"//")) AND $pos == 0) $ignore = TRUE;
 		if(is_integer($pos=strpos($line,"--")) AND $pos == 0) {
-			$i_gram++; $irul = 1;
+			$igram++; $irul = 1;
 			$ignore = TRUE;
 			}
 		if(is_integer($pos=strpos($line,"-")) AND $pos == 0) $ignore = TRUE;
 		if(is_integer($pos=strpos($line,"_")) AND $pos == 0) $ignore = TRUE;
 		if(is_integer($pos=strpos($line,"[")) AND $pos == 0) $ignore = TRUE;
-		if(is_integer($pos=stripos($line,"gram#")) AND $pos == 0) {	
+		if(!$ignore AND is_integer($pos=stripos($line,"gram#")) AND $pos == 0) {	
 			$line = preg_replace("/^GRAM#/u","gram#",$line);
-			if (preg_match('/gram#(\d+)\[(\d+)\]\s*(?:<[^>]+>\s*)?(.*)/', $line, $matches)) {
-				$igram = $matches[1];
-				$irul  = $matches[2];
-				$the_rule  = $matches[3];
-			//	echo "rule = ".$the_rule."<br />";
+			if($verbose) echo "line = ".$line."<br />";
+			if (preg_match('/^gram#\s*(\d+)\s*\[\s*(\d+)\s*\]\s*(?:<([^>]*)>\s*)?(.*)$/', trim($line), $matches)) {
+				$igram    = $matches[1];
+				$irul     = $matches[2];
+				$the_rule = $matches[4];
+				if ($verbose) echo "FOUND: igram = ‘".$igram."’, irul = ‘".$irul."’, rule = ‘".$the_rule."’<br />";
 				$found_rule = TRUE;
 				}
 			else $irul++;
@@ -985,6 +996,7 @@ function apply_new_weights($table,$imax,$weight_table,$verbose) {
 			}
 		if($found_rule) {
 			$weight = $index[$igram][$irul] ?? null;
+			if($verbose) echo "weight = ".$weight."<br /><br />";
 			if($weight == 127) $line = "gram#".$igram."[".$irul."] ".$the_rule;
 			else $line = "gram#".$igram."[".$irul."] <".$weight."> ".$the_rule;
 			}
