@@ -43,7 +43,7 @@
 "AllTemplates"	"When parsing, check all templates"		"1"	"0"
 "COMPUTE"				
 "DeftBufferSize"	"Default buffer size"	"symbols"	"0"	"1000"
-"MaxConsoleTime"	"Max computation time"	"seconds. Time for console's work (0 = no limit) Except in Improvize mode"	"0"	"60"
+"MaxConsoleTime"	"Max computation time"	"seconds. Time for console's work (0 = no limit).<br >(Except in Improvize mode)"	"0"	"60"
 "ComputeWhilePlay"	"Compute while playing"	"true by default"	"1"	"1"
 "AdvanceTime"	"Max advance time"	"seconds (if not compute while playing)"	"0"	"10.5"
 "AllowRandomize"	"Allow randomize"		"1"	"1"

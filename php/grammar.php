@@ -21,6 +21,7 @@ if($test) echo "grammar_file = ".$this_file."<br />";
 // echo "skin = ".$skin."<br />";
 
 $temp_folder = str_replace(' ','_',$filename)."_".my_session_id()."_temp";
+$current_file = $filename; // THis will be passed to display_more_buttons()
 if(!file_exists($temp_dir.$temp_folder)) mkdir($temp_dir.$temp_folder,0777,TRUE);
 $default_output_name = str_replace("-gr.",'',$filename);
 $default_output_name = str_replace(".bpgr",'',$default_output_name);
@@ -31,8 +32,8 @@ if(isset($_POST['output_file'])) {
 	$output_file = $_POST['output_file'];
 	$output_file = fix_new_name($output_file);
 	}
-
 $output_file = add_proper_extension($file_format,$output_file);
+$temp_weights_file = $temp_dir."trace_".my_session_id()."_".$filename."_weights.json";
 
 $project_name = preg_replace("/\.[a-z]+$/u",'',$output_file);
 $result_file = $bp_application_path.$output_folder.SLASH.$project_name."-result.html";
@@ -239,6 +240,8 @@ echo "<div style=\"float:right;\"><p style=\"border:2px solid gray; background-c
 if(isset($_POST['compilegrammar'])) {
 	if(isset($_POST['alphabet_file'])) $alphabet_file = $_POST['alphabet_file'];
 	else $alphabet_file = '';
+	if(isset($_POST['weights_file'])) $weights_file = $_POST['weights_file'];
+	else $weights_file = '';
 	if(isset($_POST['settings_file'])) $settings_file = $_POST['settings_file'];
 	else $settings_file = '';
 	if(isset($_POST['csound_file'])) $csound_file = $_POST['csound_file'];
@@ -284,15 +287,15 @@ if(isset($_POST['compilegrammar'])) {
 	echo "<span id=\"timespan\" style=\"color:red; background-color:white; padding:6px; border-radius:6px;\">".$command."</span>";
 	$o = send_to_console($command);
 	$trace_link = '';
-	if(file_exists($dir.$tracefile)) {
-		$trace_content = file_get_contents($dir.$tracefile);
-		if($trace_content !== false && strlen($trace_content) > 10)
-			$trace_link = clean_up_file_to_html($dir.$tracefile);
+	if(file_exists($tracefile)) {
+		$trace_content = file_get_contents($tracefile);
+		if($trace_content !== false && strlen($trace_content) > 5)
+			$trace_link = clean_up_file_to_html($tracefile);
 		}
 	if($trace_link <> '') echo "<p><big>👉 <span class=\"red-text\">Errors found! Open the </span> <a onclick=\"window.open('".nice_url($trace_link)."','trace','width=800,height=800'); return false;\" href=\"".nice_url($trace_link)."\">trace file</a>!</big></p>";
 	//	}
 	else echo "<p><span class=\"red-text\">➡</span> <span class=\"green-text\">No error.</span></p>";
-	@unlink($dir.$tracefile);
+	@unlink($tracefile);
 	reformat_grammar(FALSE,$this_file);
 	}
 else {
@@ -319,12 +322,13 @@ $content = @file_get_contents($this_file);
 if($content === FALSE) ask_create_new_file($url_this_page,$filename);
 if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 $metronome = 0;
-$nature_of_time = $objects_file = $csound_file = $tonality_file = $alphabet_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = '';
+$nature_of_time = $objects_file = $csound_file = $tonality_file = $alphabet_file = $data_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = $weights_file = '';
 $nature_of_time_settings = STRIATED;
 $extract_data = extract_data(TRUE,$content);
 echo "<p class=\"green-text\">".$extract_data['headers']."</p>";
 $content = $extract_data['content'];
 $alphabet_file = $extract_data['alphabet'];
+$data_file = $extract_data['data'];
 $objects_file = $extract_data['objects'];
 $csound_file = $extract_data['csound'];
 $tonality_file = $extract_data['tonality'];
@@ -335,6 +339,7 @@ $midisetup_file = $extract_data['midisetup'];
 $timebase_file = $extract_data['timebase'];
 $keyboard_file = $extract_data['keyboard'];
 $glossary_file = $extract_data['glossary'];
+$weights_file = $extract_data['weights'];
 $metronome = $metronome_in_grammar = $extract_data['metronome'];
 $time_structure = $extract_data['time_structure'];
 if($time_structure == "striated") $nature_of_time = STRIATED;
@@ -363,8 +368,8 @@ if($settings_file <> '' AND file_exists($dir.$settings_file)) {
 	if(!$bad_settings) {
 		$content_json = @file_get_contents($dir.$settings_file,TRUE);
 		$settings = json_decode($content_json,TRUE);
-		$show_production = $settings['DisplayProduce']['value'];
-		$trace_production = $settings['TraceProduce']['value'];
+		if(isset($settings['DisplayProduce'])) $show_production = $settings['DisplayProduce']['value'];
+		if(isset($settings['TraceProduce'])) $trace_production = $settings['TraceProduce']['value'];
 		$play_each_sub = $settings['UseEachSub']['value'];
 		$max_items = $settings['MaxItemsProduce']['value'];
 		$p_clock = $settings['Pclock']['value'];
@@ -440,7 +445,7 @@ echo "<input type=\"hidden\" name=\"settings_file\" value=\"".$settings_file."\"
 echo "<input type=\"hidden\" name=\"csound_file\" value=\"".$csound_file."\">";
 echo "<input type=\"hidden\" name=\"tonality_file\" value=\"".$tonality_file."\">";
 echo "<input type=\"hidden\" name=\"sync_change\" value=\"".$sync_change."\">";
-$error = FALSE;
+$error = $error2 = FALSE;
 if($produce_all_items > 0) $action = "produce-all";
 else $action = "produce";
 // $link_produce = "produce.php?instruction=".$action."&grammar=".urlencode($this_file);
@@ -457,6 +462,13 @@ if($alphabet_file <> '') {
 		$error = TRUE;
 		}
 	else $link_produce .= "&alphabet=".urlencode($dir.$alphabet_file);
+	}
+if($weights_file <> '') {
+	if(!file_exists($dir.$weights_file)) {
+	//	$upload_mssg = upload_related_form($dir,$weights_file,"weights");
+		echo "<p>⚠️  <span class=\"red-text\">WARNING:</span> <span class=\"green-text\">‘".$weights_file."’</span> not found</p>";
+		$error2 = TRUE;
+		}
 	}
 if($settings_file <> '') {
 	if(!file_exists($dir.$settings_file)) {
@@ -687,11 +699,10 @@ echo "<input type=\"hidden\" name=\"trace_production\" value=\"".$trace_producti
 echo "<input type=\"hidden\" name=\"metronome\" value=\"".$metronome."\">";
 echo "<input type=\"hidden\" name=\"time_structure\" value=\"".$time_structure."\">";
 echo "<input type=\"hidden\" name=\"alphabet_file\" value=\"".$alphabet_file."\">";
+echo "<input type=\"hidden\" name=\"weights_file\" value=\"".$weights_file."\">";
 
 echo "<span  id=\"topedit\">&nbsp;</span>";
 echo $save_warning;
-
-if($true_bp_grammar)echo "👉 This is a true BP grammar<br />";
 
 echo "<br /><button id=\"downloadupload\" class=\"save\" onclick=\"toggledownload(); return false;\">DOWNLOAD / UPLOAD</button>&nbsp;<button class=\"edit\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button><p></p>";
 
@@ -719,11 +730,27 @@ if($error) {
 else echo "\" class=\"produce big\"";
 echo ">";
 echo "</p>";
+if($true_bp_grammar) {
+	$link_learn = "produce.php?data=".urlencode($dir.$data_file)."&instruction=analyze&grammar=".urlencode($this_file)."&alphabet=".urlencode($dir.$alphabet_file)."&settings=".urlencode($dir.$settings_file)."&weights=".urlencode($dir.$weights_file)."&trace_production=1";
+	// echo $link_learn."<br />";
+	echo "<p>👉 This is a true BP grammar&nbsp;";
+	if($data_file <> '' AND file_exists($dir.$data_file) AND !$error) {
+		$this_value = "LEARN weights from ‘".$data_file."’";
+		echo "➡&nbsp;<input class=\"produce big\" onclick=\"if(checksaved()) {window.open('".$link_learn."','Learning','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"learn\" value=\"".$this_value."\">";
+		}
+	echo "</p>";
+	}
 
 $content = do_replace($content);
 
 $table = explode(chr(10),$content);
 $imax = count($table);
+if(isset($_POST['apply_these_weights'])) {
+	echo "<p>👉 Applying new weights</p>";
+	$json = $_POST['apply_these_weights'];
+	$weight_table = json_decode($json,true);
+	$content = apply_new_weights($table,$imax,$weight_table,FALSE);
+	}
 if($imax > $textarea_rows) $textarea_rows = $imax + 5;
 echo "<textarea id=\"textArea\" name=\"thistext\" onchange=\"tellsave()\" rows=\"".$textarea_rows."\" style=\"width:90%;\">".$content."</textarea>";
 
@@ -740,7 +767,7 @@ $link_test = $link_produce."&test";
 $display_command_title = "DisplayCommand".$filename;
 echo "&nbsp;<input class=\"edit\" onclick=\"window.open('".nice_url($link_test)."','".$display_command_title."','width=1000,height=200,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Display command line\">";
 echo "</div>";
-display_more_buttons(FALSE,$content,$url_this_page,$dir,'',$objects_file,$csound_file,$tonality_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
+display_more_buttons($error OR $error2,$content,$url_this_page,$dir,'',$objects_file,$csound_file,$tonality_file,$alphabet_file,$data_file,$weights_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
 
 $variable = array();
 for($i = 0; $i < $imax; $i++) {
@@ -903,5 +930,68 @@ function save($this_file,$filename,$top_header,$save_content) {
 		}
 	else echo "<div style=\"padding: 1em; border-radius: 6px;\"><p>👉 <span class=\"red-text\"><b>WARNING</b>: Some files have been imported and cannot be modified.</span></p><p><b>Linux user?</b> Open your terminal and type: <span class=\"green-text\">sudo /opt/lampp/htdocs/bolprocessor/change_permissions.sh</span><br />(Your password will be required...)</p></div>";
 	return;
+	}
+
+function apply_new_weights($table,$imax,$weight_table,$verbose) {
+	global $section_headers;
+	$index = [];
+	foreach($weight_table as $row)
+		$index[$row['igram']][$row['irul']] = $row['weight'];
+	$table2 = array();
+	$igram = $irul = 1;
+	$ignore_all =  FALSE;
+	for($i = 0; $i < $imax; $i++) {
+		$line = trim($table[$i]);
+		$line_no_brackets = preg_replace("/\s*?\[.*\]/u",'',$line);
+		$ignore = $found_rule = FALSE;
+		if($line_no_brackets == '') $ignore = TRUE;
+		if(!is_integer(strpos($line,"-->")) AND !is_integer(strpos($line,"<->")) AND !is_integer(strpos($line,"<--"))) $ignore = TRUE;
+		if(is_integer($pos=strpos($line,"//")) AND $pos == 0) $ignore = TRUE;
+		if(is_integer($pos=strpos($line,"--")) AND $pos == 0) {
+			$i_gram++; $irul = 1;
+			$ignore = TRUE;
+			}
+		if(is_integer($pos=strpos($line,"-")) AND $pos == 0) $ignore = TRUE;
+		if(is_integer($pos=strpos($line,"_")) AND $pos == 0) $ignore = TRUE;
+		if(is_integer($pos=strpos($line,"[")) AND $pos == 0) $ignore = TRUE;
+		if(is_integer($pos=stripos($line,"gram#")) AND $pos == 0) {	
+			$line = preg_replace("/^GRAM#/u","gram#",$line);
+			if (preg_match('/gram#(\d+)\[(\d+)\]\s*(?:<[^>]+>\s*)?(.*)/', $line, $matches)) {
+				$igram = $matches[1];
+				$irul  = $matches[2];
+				$the_rule  = $matches[3];
+			//	echo "rule = ".$the_rule."<br />";
+				$found_rule = TRUE;
+				}
+			else $irul++;
+			}
+		if(in_array($line_no_brackets,$section_headers)) $ignore = TRUE;
+		if($line_no_brackets == "TIMEPATTERNS:") {
+			$i_line++;
+			do {
+				$line = trim($table[$i_line]);
+				$table2[$i_line] = $line;
+				if($verbose) echo $line."<br  />";
+				$i_line++;
+				}
+			while(!is_integer($pos=strpos($line,"--")) AND $i_line < $i_line_max);
+			continue;
+			}
+		if($line_no_brackets == "DATA:" OR $line_no_brackets == "COMMENTS:") $ignore_all = TRUE;
+		if(!$ignore AND !$ignore_all AND !$found_rule) {
+			$the_rule = $line;
+			$found_rule = TRUE;
+			$irul++;
+			}
+		if($found_rule) {
+			$weight = $index[$igram][$irul] ?? null;
+			if($weight == 127) $line = "gram#".$igram."[".$irul."] ".$the_rule;
+			else $line = "gram#".$igram."[".$irul."] <".$weight."> ".$the_rule;
+			}
+		$table2[] = $line;
+		if($verbose) echo $line."<br  />";
+		}
+	$content = implode(chr(10),$table2);
+	return $content;
 	}
 ?>

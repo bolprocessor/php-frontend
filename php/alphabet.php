@@ -64,6 +64,7 @@ $midisetup_file = $extract_data['midisetup'];
 $timebase_file = $extract_data['timebase'];
 $keyboard_file = $extract_data['keyboard'];
 $glossary_file = $extract_data['glossary'];
+$data_file = $weights_file = '';
 
 if(is_integer($pos=strpos($content,"-mi")) AND $pos > 0) {
 	// Some old files did not have ‘//’ in their headers
@@ -75,5 +76,5 @@ echo "<p style=\"text-align:left;\"><input class=\"save\" type=\"submit\" onclic
 echo "<textarea name=\"thistext\" onchange=\"tellsave()\" rows=\"40\" style=\"width:700px;\">".$content."</textarea>";
 echo "</form>";
 
-display_more_buttons(FALSE,$content,$url_this_page,$dir,$grammar_file,$objects_file,$csound_file,$tonality_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
+display_more_buttons(FALSE,$content,$url_this_page,$dir,$grammar_file,$objects_file,$csound_file,$tonality_file,$alphabet_file,$data_file,$weights_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
 ?>

@@ -117,6 +117,8 @@ echo "</div>";
 	else $settings_path = '';
 	if(isset($_GET['objects'])) $objects_path = $_GET['objects'];
 	else $objects_path = '';
+	if(isset($_GET['weights'])) $weights_path = $_GET['weights'];
+	else $weights_path = '';
 	if(isset($_GET['note_convention'])) $note_convention = $_GET['note_convention'];
 	else $note_convention = '';
 	if(isset($_GET['alphabet'])) $alphabet_path = urldecode($_GET['alphabet']);
@@ -272,6 +274,12 @@ echo "</div>";
 		if(is_integer(strpos($thissettings,' ')))
 			$thissettings = '"'.$thissettings.'"';
 		}
+	if($weights_path <> '') {
+		$thisweights = $weights_path;
+		if(is_integer(strpos($thisweights,' ')))
+			$thisweights = '"'.$thisweights.'"';
+		}
+
 
 	$thisalphabet = $alphabet_path;
 	if(is_integer(strpos($thisalphabet,' '))) $thisalphabet = '"'.$thisalphabet.'"';
@@ -285,6 +293,7 @@ echo "</div>";
 	if($data_path <> '') $command .= " -da ".$thisdata;
 	if($grammar_path <> '') $command .= " -gr ".$thisgrammar;
 	if($alphabet_path <> '') $command .= " -al ".$thisalphabet;
+	if($weights_path <> '') $command .= " -wg ".$thisweights;
 	if($objects_path <> '') $command .= " -so ".$thisobject;
 
 	if($note_convention <> '') $command .= " --".$note_convention;

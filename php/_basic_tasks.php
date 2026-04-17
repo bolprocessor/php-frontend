@@ -20,6 +20,7 @@ define('MB_CONVERT_OK',function_exists('mb_convert_encoding'));
 define('MULTIBYTE_INTERNAL_OK', function_exists('mb_internal_encoding'));
 define('MULTIBYTE_EREG_OK', function_exists('mb_ereg_replace'));
 define('GD_AVAILABLE',function_exists('gd_info'));
+$section_headers = array("RND","ORD","LIN","SUB","SUB1","TEM","POSLONG","LEFT","RIGHT","INIT:","TIMEPATTERNS:","DATA:","COMMENTS:");
 
 $architecture = php_uname("m");
 
@@ -522,7 +523,7 @@ function extract_data($compact,$content) {
 	$is_valid_for_parsing = FALSE;
 	$nr_end_lines= 0;
 	$is_true_bp = TRUE;
-	$extract_data['grammar'] = $extract_data['metronome'] = $extract_data['time_structure'] = $extract_data['headers'] = $extract_data['alphabet'] = $extract_data['grammar'] = $extract_data['objects'] = $extract_data['csound'] = $extract_data['tonality'] = $extract_data['settings'] = $extract_data['data'] = $extract_data['orchestra'] = $extract_data['timebase'] = $extract_data['interaction'] = $extract_data['midisetup'] = $extract_data['timebase'] = $extract_data['keyboard'] = $extract_data['glossary'] = $extract_data['cstables'] = '';
+	$extract_data['grammar'] = $extract_data['metronome'] = $extract_data['time_structure'] = $extract_data['headers'] = $extract_data['alphabet'] = $extract_data['grammar'] = $extract_data['objects'] = $extract_data['csound'] = $extract_data['tonality'] = $extract_data['settings'] = $extract_data['data'] = $extract_data['orchestra'] = $extract_data['timebase'] = $extract_data['interaction'] = $extract_data['midisetup'] = $extract_data['timebase'] = $extract_data['keyboard'] = $extract_data['glossary'] = $extract_data['cstables'] = $extract_data['weights'] = $extract_data['data'] = '';
 	$extract_data['templates'] = $found_templates = $need_end_line = FALSE;
 	for($i = 0; $i < count($table); $i++) {
 		$line = trim($table[$i]);
@@ -578,6 +579,8 @@ function extract_data($compact,$content) {
 			$extract_data['alphabet'] = fix_file_name($line,"ho");
 		else if(is_integer($pos=strpos($line,"-al")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
 			$extract_data['alphabet'] = fix_file_name($line,"al");
+		else if(is_integer($pos=strpos($line,"-da")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
+			$extract_data['data'] = fix_file_name($line,"da");
 		else if(is_integer($pos=strpos($line,"-so")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
 			$extract_data['objects'] = fix_file_name($line,"so");
 		else if(is_integer($pos=strpos($line,"-gr")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
@@ -594,8 +597,6 @@ function extract_data($compact,$content) {
 			$extract_data['data'] = fix_file_name($line,"da");
 		else if(is_integer($pos=strpos($line,"-or")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
 			$extract_data['orchestra'] = fix_file_name($line,"or");
-		else if(is_integer($pos=strpos($line,"-tb")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
-			$extract_data['timebase'] = fix_file_name($line,"tb");
 		else if(is_integer($pos=strpos($line,"-in")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
 			$extract_data['interaction'] = fix_file_name($line,"in");
 		else if(is_integer($pos=strpos($line,"-md")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
@@ -606,6 +607,8 @@ function extract_data($compact,$content) {
 			$extract_data['keyboard'] = fix_file_name($line,"kb");
 		else if(is_integer($pos=strpos($line,"-gl")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
 			$extract_data['glossary'] = fix_file_name($line,"gl");
+		else if(is_integer($pos=strpos($line,"-wg")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
+			$extract_data['weights'] = fix_file_name($line,"wg");
 		else if($line <> '' AND !str_starts_with($line,'/*')) {
 			$start = FALSE;
 			}
@@ -661,8 +664,8 @@ function window_name($text) {
 	return $text;
 	}
 	
-function display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,$objects_file,$csound_file,$tonality_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file) {
-	global $bp_application_path, $csound_resources, $tonality_resources, $output_file, $file_format, $test;
+function display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,$objects_file,$csound_file,$tonality_file,$alphabet_file,$data_file,$weights_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file) {
+	global $bp_application_path, $csound_resources, $tonality_resources, $output_file, $file_format, $current_file, $test;
 	$page_type = str_replace(".php",'',$url_this_page);
 	$page_type = preg_replace("/\.php.*/u",'',$url_this_page);
 	
@@ -696,11 +699,26 @@ function display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,
 		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" onclick=\"window.open('".$url_this_page."','".$alphabet_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".begin_with(20,$alphabet_file)."’\">";
 		echo "</td>";
 		}
+	if($data_file <> '') {
+		$url_this_page = "data.php?file=".urlencode($dir.$data_file);
+		if($test) echo "url_this_page = ".$url_this_page."<br />";
+		echo "<td>";
+		echo "<input class=\"edit\" type=\"submit\" name=\"opendata\" onclick=\"event.preventDefault(); window.open('".$url_this_page."','".$data_file."','width=1000,height=1000,left=100'); return false;\" formaction=\"".$url_this_page."\" value=\"EDIT ‘".begin_with(20,$data_file)."’\">&nbsp;";
+		echo "</td>";
+		}
 	if($grammar_file <> '') {
 		$url_this_page = "grammar.php?file=".urlencode($dir.$grammar_file);
 		if($test) echo "url_this_page = ".$url_this_page."<br />";
 		echo "<td>";
-		echo "<input class=\"edit\" type=\"submit\" name=\"opengrammar\" onclick=\"this.form.target='_blank';return true;\" formaction=\"".$url_this_page."\" value=\"EDIT ‘".begin_with(20,$grammar_file)."’\">&nbsp;";
+		echo "<input class=\"edit\" type=\"submit\" name=\"opengrammar\" onclick=\"event.preventDefault(); window.open('".$url_this_page."','".$grammar_file."','width=1000,height=1000,left=100'); return false;\" formaction=\"".$url_this_page."\" value=\"EDIT ‘".begin_with(20,$grammar_file)."’\">&nbsp;";
+		echo "</td>";
+		}
+	if($weights_file <> '') {
+		$url_this_page = "weights.php?file=".urlencode($dir.$weights_file);
+		$url_this_page .= "&grammar_file=".urlencode($current_file);
+		if($test) echo "url_this_page = ".$url_this_page."<br />";
+		echo "<td>";
+		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" onclick=\"event.preventDefault(); if(checksaved()) {window.open('".$url_this_page."','".$weights_file."','width=800,height=800,left=100'); return false;}\" value=\"EDIT ‘".begin_with(20,$weights_file)."’\">";
 		echo "</td>";
 		}
 	if($objects_file <> '') {
@@ -1032,8 +1050,7 @@ function decode_tags($text) {
 
 function recode_entities($text) {
 	$text = preg_replace("/\s*•$/u"," .",$text);
-//	$text = preg_replace("/\s*•[ ]*/u"," . ",$text);
-	$text = preg_replace("/\s*•\s*/u"," . ",$text);
+	$text = preg_replace("/(\s*)•(\s*)/u",'$1 . $2', $text);
 	$text = str_replace(" … "," _rest ",$text);
 	$text = preg_replace("/\s*…\s*,/u"," _rest,",$text);
 	$text = preg_replace("/{\s*…\s*/u","{_rest ",$text);
@@ -1372,24 +1389,26 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder,$force) {
 	}
 	
 function reformat_grammar($verbose,$this_file) {
+	global $temp_weights_file,$section_headers;
 	if(!file_exists($this_file)) return;
 	$content = @file_get_contents($this_file);
 	if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 	$new_content = $content;
-	$i_gram = $irul = 1;
-	$section_headers = array("RND","ORD","LIN","SUB","SUB1","TEM","POSLONG","LEFT","RIGHT","INIT:","TIMEPATTERNS:","DATA:","COMMENTS:");
+	$i_gram = $i_rul = 1;
 	$table = explode(chr(10),$new_content);
 	$ignore_all = FALSE;
 	$i_line_max = count($table);
+	if(isset($temp_weights_file)) @unlink($temp_weights_file);
 	for($i_line = 0; $i_line < $i_line_max; $i_line++) {
 		$line = trim($table[$i_line]);
+		$found_rule = FALSE;
 		$line_no_brackets = preg_replace("/\s*?\[.*\]/u",'',$line);
 		$ignore = FALSE;
 		if($line_no_brackets == '') $ignore = TRUE;
 		if(!is_integer(strpos($line,"-->")) AND !is_integer(strpos($line,"<->")) AND !is_integer(strpos($line,"<--"))) $ignore = TRUE;
 		if(is_integer($pos=strpos($line,"//")) AND $pos == 0) $ignore = TRUE;
 		if(is_integer($pos=strpos($line,"--")) AND $pos == 0) {
-			$i_gram++; $irul = 1;
+			$i_gram++; $i_rul = 1;
 			$ignore = TRUE;
 			}
 		if(is_integer($pos=strpos($line,"-")) AND $pos == 0) $ignore = TRUE;
@@ -1398,8 +1417,9 @@ function reformat_grammar($verbose,$this_file) {
 		if(is_integer($pos=stripos($line,"gram#")) AND $pos == 0) {
 			$ignore = TRUE;
 			$line = preg_replace("/^GRAM#/u","gram#",$line);
-			$line = preg_replace("/^gram#([0-9]+)\[([0-9]+)\]/u","gram#".$i_gram."[".$irul."]",$line);
-			$irul++;
+			$line = preg_replace("/^gram#([0-9]+)\[([0-9]+)\]/u","gram#".$i_gram."[".$i_rul."]",$line);
+			$found_rule = TRUE;
+			$i_rul++;
 			}
 		if(in_array($line_no_brackets,$section_headers)) $ignore = TRUE;
 		if($line_no_brackets == "TIMEPATTERNS:") {
@@ -1416,10 +1436,19 @@ function reformat_grammar($verbose,$this_file) {
 			}
 		if($line_no_brackets == "DATA:" OR $line_no_brackets == "COMMENTS:") $ignore_all = TRUE;
 		if(!$ignore AND !$ignore_all) {
-			$line = "gram#".$i_gram."[".$irul."] ".$line;
-			$irul++;
+			$line = "gram#".$i_gram."[".$i_rul."] ".$line;
+			$found_rule = TRUE;
+			$i_rul++;
 			}
 		if($verbose) echo $line."<br />";
+		if($found_rule) {
+			$this_weight = get_weight($line);
+		//	echo "<".$this_weight."> ".$line."<br />";
+			$this_data['igram'] = $i_gram;
+			$this_data['irul'] = $i_rul - 1;
+			$this_data['weight'] = $this_weight;
+			save_triplet($this_data,$temp_weights_file);
+			}
 		$table[$i_line] = $line;
 		}
 	$new_content = implode(chr(10),$table);
@@ -1429,8 +1458,21 @@ function reformat_grammar($verbose,$this_file) {
 		fwrite($handle,$new_content);
 		fclose($handle);
 		}
-	else echo "<p>➡ This file cannot be modified because it is write-protected</p>";
+	else echo "<p>⚠️ This file cannot be modified because it is write-protected</p>";
 	return;
+	}
+
+function save_triplet($data, $filename) {
+    $json = json_encode($data,JSON_UNESCAPED_SLASHES);
+    file_put_contents($filename,$json.PHP_EOL,FILE_APPEND);
+	}
+
+function get_weight($line) {
+ //   if(preg_match('/<(inf|\d+)>/i', $line, $matches)) {
+    if(preg_match('/<([^>]+)>/i', $line, $matches)) {
+        return $matches[1];
+    	}
+    return 127; // default value
 	}
 
 function SaveTonality($verbose,$dir,$filename,$temp_folder,$force) {
@@ -5224,6 +5266,10 @@ function convert_to_json($dir,$settings_file) {
 			}
 		$start = FALSE;
 		if(!isset($parameter_edit[$i]) OR !$parameter_edit[$i]) {
+			$j++;
+			continue;
+			}
+		if(!isset($parameter_name[$i]) OR parameter_name[$i] == '') {
 			$j++;
 			continue;
 			}

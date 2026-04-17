@@ -105,7 +105,7 @@ $link_edit = "data.php";
 
 $temp_midi_ressources = $temp_dir."trace_".my_session_id()."_".$filename."_";
 
-$objects_file = $csound_file = $tonality_file = $alphabet_file = $grammar_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = $csound_default_orchestra = '';
+$objects_file = $csound_file = $tonality_file = $alphabet_file = $data_file = $grammar_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = $weights_file = $csound_default_orchestra = '';
 
 if(isset($_POST['alphabet_file'])) $alphabet_file = $_POST['alphabet_file'];
 if(isset($_POST['grammar_file'])) $grammar_file = $_POST['grammar_file'];
@@ -1287,7 +1287,7 @@ if($content === FALSE) ask_create_new_file($url_this_page,$filename);
 if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 
 $metronome = 0;
-$nature_of_time = $time_structure = $objects_file = $csound_file = $tonality_file = $tonality_file = $alphabet_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = '';
+$nature_of_time = $time_structure = $objects_file = $csound_file = $tonality_file = $tonality_file = $alphabet_file = $data_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = '';
 $extract_data = extract_data(TRUE,$content);
 echo "<p class=\"green-text\">".$extract_data['headers']."</p>";
 $content = $extract_data['content'];
@@ -1644,7 +1644,7 @@ if(!isset($_POST['analyze_tonal'])) {
 
 	echo "<br /><textarea id=\"textArea\" name=\"thistext\" onchange=\"tellsave()\" rows=\"40\" style=\"width:750px;\">".$content."</textarea><br /><br />";
 	echo "<div style=\"float:right; background-color:transparent;\"><input class=\"save big\" type=\"submit\" formaction=\"".$url_this_page."#textArea\"  onclick=\"clearsave();\" name=\"savethisfile\" value=\"SAVE ‘".begin_with(20,$filename)."’\"></div>";
-	display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,$objects_file,$csound_file,$tonality_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
+	display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,$objects_file,$csound_file,$tonality_file,$alphabet_file,$data_file,$weights_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
 	}
 
 $hide = FALSE;
@@ -2008,7 +2008,7 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 			echo "<input id=\"Button\" class=\"produce\" onmouseover=\"checksaved();\" onclick=\"event.preventDefault(); if(checksaved()) {window.open('".$link_play."','".$window_name_."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" title=\"Play polymetric expression\" value=\"PLAY\">&nbsp;";
 			if($chunked) echo "<input class=\"produce\" onmouseover=\"checksaved();\" onclick=\"event.preventDefault(); if(checksaved()) {window.open('".$link_play_chunked."','".$window_name_chunked."','width=800,height=800,left=150,toolbar=yes'); return false;}\" type=\"submit\" name=\"produce\" title=\"Play polymetric expression in chunks to save RAM\" value=\"PLAY safe (".$chunk_number." chunks)\">&nbsp;";
 			echo "&nbsp;<input class=\"edit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_expand."','".$window_name_expand."','width=800,height=800,left=100'); return false;\" type=\"submit\" name=\"produce\" title=\"Expand polymetric expression\" value=\"EXPAND\">";
-			if($grammar_file <> '')
+			if($grammar_file <> '' AND file_exists($dir.$grammar_file))
 			//	echo $link_analyze_item."<br />";
 				echo "&nbsp;<input id=\"Button\" class=\"produce\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_analyze_item."','".$window_name_analyze."','width=800,height=800,left=100'); return false;\" type=\"submit\" name=\"produce\" title=\"Analyse this item versus the grammar\" value=\"Analyse\"> ";
 			if($chunked) {

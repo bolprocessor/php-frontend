@@ -402,8 +402,9 @@ if($iobj >= 0) {
 	fclose($handle);
 	chmod($temp_alphabet_file,$permissions);
 	}
+$data_file = $weights_file = '';
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-display_more_buttons(FALSE,$content,$url_this_page,$dir,$grammar_file,'',$csound_file,$tonality_file,$alphabet_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
+display_more_buttons(FALSE,$content,$url_this_page,$dir,$grammar_file,'',$csound_file,$tonality_file,$alphabet_file,$data_file,$weights_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
 echo "</form>";
 
 ?>
