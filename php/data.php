@@ -1845,7 +1845,11 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 			}
 		echo "</form>";
 		}
-	echo "<table class=\"thicktable\">";
+	echo "<table class=\"thicktable\" style=\"table-layout:fixed; width:100%;\">";
+	echo '<colgroup>';
+	echo '<col style="width:40px;">';
+	echo '<col style="width:auto;">';
+	echo '</colgroup>';
 	$is_exploded = (substr_count($content,"[item 1]") > 0);
 	$can_be_exploded = !$data_is_minimised AND !(substr_count($content,"}\n{") > 0);
 	if($imax > 0 AND substr_count($content,'{') > 0) {
@@ -1971,7 +1975,7 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 		$chunk_number = $segment['chunk_number'];
 		$line_recoded = $segment['line_recoded'];
 		$title_this = $segment['title_this'];
-		echo "<tr><td>".$i_item."</td><td>";
+		echo "<tr><td style=\"white-space:nowrap;\">".$i_item."</td><td style=\"overflow-wrap:anywhere;\">";
 		$link_options_play = $link_options."&output=".urlencode($bp_application_path.$output_folder.SLASH.$out[$i])."&format=".$file_format."&item=".$i_item."&title=".urlencode($filename);
 		$link_options_chunked = $link_options_play;
 		$output_file_expand = str_replace(".sco",'',$out[$i]);
@@ -2334,6 +2338,7 @@ function save($this_file,$filename,$top_header,$save_content) {
 	if($handle) {
 		$file_header = $top_header."\n// Data saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
 		fwrite($handle, $file_header."\n");
+		$save_content = recode_entities($save_content);
 		fwrite($handle, $save_content);
 		fclose($handle);
 		@chmod($this_file,$permissions);

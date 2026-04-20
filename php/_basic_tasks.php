@@ -1051,7 +1051,8 @@ function decode_tags($text) {
 
 function recode_entities($text) {
 	$text = preg_replace("/\s*•$/u"," .",$text);
-	$text = preg_replace("/(\s*)•(\s*)/u",'$1 . $2', $text);
+//	$text = preg_replace("/(\s*)•(\s*)/u",'$1 . $2', $text);
+	$text = preg_replace("/(\s*)•(\s*)/u",' .$2', $text); // $2 can be a line break
 	$text = str_replace(" … "," _rest ",$text);
 	$text = preg_replace("/\s*…\s*,/u"," _rest,",$text);
 	$text = preg_replace("/{\s*…\s*/u","{_rest ",$text);
@@ -1089,6 +1090,12 @@ function clean_up_file_to_html($file) {
 	$handle = fopen($file_html,"w");
 	$header = "<head>\n";
 	$header .= "<meta content=\"text/html; charset=utf-8\" http-equiv=\"Content-Type\" />\n";
+	$header .= "<style>
+	body, p, div {
+		overflow-wrap: anywhere;
+		word-break: break-word;
+		}
+	</style>\n";
 	$header .= "</head><body>\n";
 	fwrite($handle,$header."\n");
 	fwrite($handle,$text."\n");

@@ -4,7 +4,8 @@ $url_this_page = "produce.php";
 if(isset($_GET['title'])) $this_title = urldecode($_GET['title']);
 else $this_title = '';
 
-$success = $failed = FALSE;
+$learning = FALSE;
+$failed_parsing = $failed_template = $success = 0;
 
 echo "<head>";
 if($midi_player == "MIDIjs") echo "<script type='text/javascript' src='https://www.midijs.net/lib/midi.js'></script>";
@@ -105,7 +106,7 @@ else {
 	if($grammar_path == '' AND $data_path == '') {
 		echo "Link to data and/or grammar is missing";
 		echo "<p style=\"text-align:center; width:90%;\"><big>👉&nbsp;&nbsp;<a href=\"\" onclick=\"window.close();\">Close this page</a></big></p>";
-echo "</div>";
+		echo "</div>";
 		die();
 		}
 	if($instruction == "create_grammar") {
@@ -130,6 +131,7 @@ echo "</div>";
 		$output = urldecode($_GET['output']);
 	//	echo "@output = ".$output."<br />";
 		}
+	if($instruction == "analyze" AND $weights_path <> '' AND $grammar_path <> '') $learning = TRUE;
 	if($instruction == "create_set" AND isset($_GET['output']))
 		$output = urldecode($_GET['output']);
 	if(isset($_GET['show_production'])) $show_production = TRUE;
@@ -191,8 +193,8 @@ echo "</div>";
 		$result_file = $project_name."_".$instruction."-result.html";
 	else $result_file = $project_name."-result.html";
     $result_file = str_replace(SLASH,'/',$result_file);
-	// echo "project_name = ".$project_name."<br />";
-	// echo "result_file = ".$result_file."<br />";
+//	echo "project_name = ".$project_name."<br />";
+//	echo "result_file = ".$result_file."<br />";
 	if($instruction == "create_set") $project_fullname = $this_title;
 	$project_fullname = str_replace($temp_dir,'',$project_fullname);
     $project_fullname = str_replace(SLASH,'/',$project_fullname);
@@ -390,7 +392,7 @@ $command_show = str_replace("[","\[",$command_show);
 $command_show = str_replace("]","\]",$command_show);
 
 // display_darklight();
-echo "<p><small><b><span class=\"red-text\">BP3 ➡</span></b> ".$command_show."</small></p>\n";
+echo "<p><small><b><span class=\"red-text\">BP3 (for geeks) ➡</span></b> ".$command_show."</small></p>\n";
 
 $stopfile = $temp_dir_abs."trace_".my_session_id()."_".$project_fullname."_stop";
 // This will be used by createFile() after clicking the STOP button in produce.php
@@ -453,13 +455,14 @@ if(isset($data_path) AND $data_path <> '') {
 		if($instruction == "play" OR $instruction == "produce") echo "<p><b>Playing";
 		if($instruction == "play-all") echo "<p><b>Playing chunks";
 		if($instruction == "expand") echo "<p><b>Expanding";
-		if($instruction == "analyze") echo "<p><b>Analysing";
+		if($instruction == "analyze" AND $learning) echo "<p><b>Analysing and learning weights from all items in <span class=\"green-text\">‘".$data_name."’</span>";
+		else if($instruction == "analyze") echo "<p><b>Analysing";
 		if($instruction == "create_set") echo "<p><b>Creating AI training set</b>";
-		else {
+		else if(!$learning) {
 			if($item <> 0) echo " #".$item;
 			else echo ":";
 			echo "</b></p>";
-			echo "<p style=\"color:MediumTurquoise;\"><b>";
+			echo "<p style=\"color:MediumTurquoise; overflow-wrap:break-word;\"><b>";
 			$table = explode(chr(10),$content);
 			for($i = $k = 0; $i < count($table); $i++) {
 				if($k > 800) {
@@ -786,6 +789,12 @@ else {
 		$header .= "<script type='text/javascript' src='https://www.midijs.net/lib/midi.js'></script>\n";
 		$header .= "<script src=\"https://cdn.jsdelivr.net/combine/npm/tone@14.7.58,npm/@magenta/music@1.23.1/es6/core.js,npm/focus-visible@5,npm/html-midi-player@1.4.0\"></script>";
 		$header .= "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js\"></script>\n";
+		$header .= "<style>
+		body, p {
+			overflow-wrap: anywhere;
+			word-break: break-word;
+			}
+		</style>\n";
 		$header .= "</head><body>\n";
 		fwrite($handle,$header."\n");
 		fwrite($handle,"<h2 id=\"midi\">".$grammar_name."</h2>\n");
@@ -814,6 +823,7 @@ else {
 	}
 if($n_messages > 0) {
 	$warnings = 0;
+	$analyzing_success = $analyzing_failure = FALSE;
 	for($i=0; $i < $n_messages; $i++) {
 		$mssg = $o[$i];
 		$mssg = clean_up_encoding(FALSE,TRUE,$mssg);
@@ -827,9 +837,23 @@ if($n_messages > 0) {
         if($mssg !== null) $mssg = preg_replace("/(C:.+)$/u","<font color=#007BFF><small>$1</small></font>",$mssg);
 		if($mssg !== null)	$mssg = preg_replace("/(\.\.\/.+)$/u","<font color=#007BFF><small>$1</small></font>",$mssg);
 		if($mssg == "(null)") continue;
-		if(is_integer(strpos($mssg,"accepted by"))) $success = TRUE;
-		if(is_integer(strpos($mssg,"matched no template"))) $failed = TRUE;
-		if(is_integer(strpos($mssg,"No success"))) $failed = TRUE;
+	/*	if(($this_count = substr_count($mssg,"Analyzing new selection")) > 0) {
+			$analyzing_new_selection = TRUE;
+			} */
+		if(($this_count = substr_count($mssg,"Analyzing item")) > 0) {
+			$analyzing_failure = TRUE;
+			$analyzing_success = TRUE;
+			}
+		if(($this_count = substr_count($mssg,"rejected by")) > 0 AND $analyzing_failure) {
+			$failed_parsing++;
+			$analyzing_failure = FALSE;
+			}
+		if(($this_count = substr_count($mssg,"accepted by")) > 0 AND $analyzing_success) {
+			$success += $this_count;
+			$analyzing_success = FALSE;
+			}
+		if(($this_count = substr_count($mssg,"matched no template")) > 0) $failed_template += $this_count;
+		// if(($this_count = substr_count($mssg,"No success")) > 0) $failed_parsing += $this_count;
 		if($handle) fwrite($handle,$mssg."<br />\n");
 		if($i == 7) echo "… … …<br />";
 		if($i < 7 OR $i > ($n_messages - 4)) echo $mssg."<br />";
@@ -854,8 +878,9 @@ if($trace_csound <> '' AND file_exists($trace_csound)) {
 	}
 echo "</p>";
 
-if($success) echo "<p><big>✅ This item was successfully parsed</big></p>";
-if($failed) echo "<p><big>❌ This item failed in the parsing</big></p>";
+if($success > 0) echo "<p><big>✅&nbsp;&nbsp;".$success." item(s) were successfully parsed</big></p>";
+if($failed_parsing > 0) echo "<p><big>❌&nbsp;&nbsp;".$failed_parsing." item(s) failed in the parsing after matching a template</big></p>";
+if($failed_template > 0) echo "<p><big>❌&nbsp;&nbsp;".$failed_template." item(s) matched no template</big></p>";
 
 @unlink($running_trace);
 

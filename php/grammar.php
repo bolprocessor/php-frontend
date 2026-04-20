@@ -740,12 +740,13 @@ else echo "\" class=\"produce big\"";
 echo ">";
 echo "</p>";
 if($true_bp_grammar) {
-	$link_learn = "produce.php?data=".urlencode($dir.$data_file)."&instruction=analyze&grammar=".urlencode($this_file)."&alphabet=".urlencode($dir.$alphabet_file)."&settings=".urlencode($dir.$settings_file)."&weights=".urlencode($dir.$weights_file)."&trace_production=1";
+	$link_learn = "produce.php?data=".urlencode($dir.$data_file)."&instruction=analyze&grammar=".urlencode($this_file)."&alphabet=".urlencode($dir.$alphabet_file)."&settings=".urlencode($dir.$settings_file)."&weights=".urlencode($dir.$weights_file)."&output=".urlencode($output.SLASH.$output_file);
+	if($trace_production) $link_learn .= "&trace_production=1";
 	// echo $link_learn."<br />";
-	echo "<p>👉 This is a true BP grammar&nbsp;";
+	echo "<p>👉 <span class=\"red-text\">This is a TRUE BP grammar</span>&nbsp;";
 	if($data_file <> '' AND file_exists($dir.$data_file) AND !$error) {
-		$this_value = "LEARN weights from ‘".$data_file."’";
-		echo "➡&nbsp;<input class=\"produce big\" onclick=\"if(checksaved()) {window.open('".$link_learn."','Learning','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"learn\" value=\"".$this_value."\">";
+		$this_value = "LEARN weights";
+		echo "➡&nbsp;<input class=\"produce big\" onclick=\"if(checksaved()) {window.open('".$link_learn."','Learning','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"learn\" value=\"".$this_value."\">&nbsp;from all items in <span class=\"green-text\">‘".$data_file."’</span>";
 		}
 	echo "</p>";
 	}

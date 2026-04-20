@@ -52,11 +52,12 @@ if(isset($_POST['savethisfile'])) {
 		@chmod($file_path,$permissions);
 		}
 	}
-if(isset($_POST['resetthisfile'])) {
+if(isset($_POST['resetthisfile_127']) OR isset($_POST['resetthisfile_0'])) {
 	echo "<span id=\"timespan\" style=\"color:red; float:right; background-color:white; padding:6px; border-radius:6px;\">&nbsp;Resetted “".$this_file."” file…</span>";
 	$json = $_POST['apply_these_weights'];
 	$weight_table = json_decode($json,true);
-	$new_weight = 127;
+	if(isset($_POST['resetthisfile_127'])) $new_weight = 127;
+	else $new_weight = 0;
 	$handle = @fopen($this_file,"w");
 	if($handle) {
 		$file_header = "// Bol Processor on-line test via PHP\n// Weights file saved as ‘".$filename."’. Date: ".gmdate('Y-m-d H:i:s');
@@ -91,12 +92,13 @@ if(file_exists($this_file)) {
 else $content = '';
 
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-echo "<p style=\"text-align:left;\"><input class=\"save\" type=\"submit\" name=\"savethisfile\" value=\"SAVE current rule weights to ‘".$filename."’\"></p>";
+echo "<p style=\"text-align:left;\"><input class=\"save\" type=\"submit\" name=\"savethisfile\" value=\"COPY current rule weights\"> from grammar <span class=\"green-text\">‘".$grammar_file."’</span> to <span class=\"green-text\">‘".$filename."’</span></p>";
 echo "<input type=\"hidden\" name=\"grammar_file\" value=\"".$grammar_file."\">";
 if($grammarWindow <> '') echo "<input type=\"hidden\" name=\"grammarWindow\" value=\"".$grammarWindow."\">";
 if($content <> '') {
 	echo "<input type=\"hidden\" name=\"apply_these_weights\" value=\"".htmlspecialchars($json, ENT_QUOTES,'UTF-8')."\">";
-	echo "<p style=\"text-align:left;\"><input class=\"save\" type=\"submit\" name=\"resetthisfile\" value=\"RESET rule weights (value 127) in ‘".$filename."’\"> (except variable ones)</p>";
+	echo "<p><input class=\"save\" type=\"submit\" name=\"resetthisfile_127\" value=\"SET rule weights to 127\"> in <span class=\"green-text\">‘".$filename."’</span> (except variable ones)</p>";
+	echo "<p><input class=\"save\" type=\"submit\" name=\"resetthisfile_0\" value=\"RESET rule weights to 0\"> in <span class=\"green-text\">‘".$filename."’</span> (except variable ones)</p>";
 	}
 echo "</form>";
 
@@ -124,11 +126,12 @@ if($content <> '') {
 	echo "<br /><form id=\"return_to_grammar\" method=\"post\" action=\"".$grammar_page_url."#topedit\" onsubmit=\"return sendBackToGrammar();\" enctype=\"multipart/form-data\">";
 	echo "<input type=\"hidden\" name=\"apply_these_weights\" value=\"".htmlspecialchars($json, ENT_QUOTES,'UTF-8')."\">";
 	if($grammarWindow <> '') echo "<input type=\"hidden\" name=\"grammarWindow\" value=\"".$grammarWindow."\">";
-	echo "<input class=\"save\" type=\"submit\" value=\"APPLY WEIGHTS in ‘".$filename."’ (see above) back to ‘".$grammar_file."’ grammar\">";
+	echo "<input class=\"save\" type=\"submit\" value=\"COPY BACK rule weights\"> in <span class=\"green-text\">‘".$filename."’</span> (shown above) to <span class=\"green-text\">‘".$grammar_file."’</span> grammar";
 	echo "</form>";
 	}
 // We need the following function because "target" is not properly handled by some browwsers
 // The target is the grammar window from which these weights originated.
+
 echo "<script>
 function sendBackToGrammar() {
     var targetName = ".json_encode($grammarWindow).";
@@ -143,7 +146,22 @@ function sendBackToGrammar() {
         return false;
     }
 
-    document.getElementById('return_to_grammar').target = targetName;
+    var form = document.getElementById('return_to_grammar');
+    form.target = targetName;
+
+	// Bring the related grammar window to front
+    try { w.focus(); } catch(e) {}
+
+    // Close this window shortly after submit
+    setTimeout(function() {
+    try {
+        window.close();
+    } catch(e) {
+        window.open('', '_self');
+        window.close();
+		}
+	}, 600);
+
     return true;
 }
 </script>";
