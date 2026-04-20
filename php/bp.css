@@ -345,6 +345,38 @@ body.light-mode .produce {
 	box-shadow: -1px -1px 1px #000;
 	}
 
+.produce:disabled,
+.produce[disabled] {
+    background-color: #ccc;
+    color: #888;
+    cursor: not-allowed;
+    box-shadow: none;
+	}
+body.light-mode .produce:disabled,
+body.light-mode.produce[disabled] {
+    background-color: #ccc;
+    color: #888;
+    cursor: not-allowed;
+    box-shadow: none;
+	}
+
+.produce:disabled:hover,
+.produce[disabled]:hover,
+.produce:disabled:active,
+.produce[disabled]:active {
+    background-color: #ccc;
+    color: #888;
+    box-shadow: none;
+	}
+body.light-mode .produce:disabled:hover,
+body.light-mode .produce[disabled]:hover,
+body.light-mode .produce:disabled:active,
+body.light-mode .produce[disabled]:active {
+    background-color: #ccc;
+    color: #888;
+    box-shadow: none;
+	}
+
 body.light-mode .produce:hover {
     background-color: #4CAF50;
     color: white;

@@ -2046,7 +2046,7 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 			$line_show = substr($line_recoded,0,90)."<br />&nbsp;... ... ...<br />".substr($line_recoded,-90,90);
 		else $line_show = $line_recoded;
 		echo "<small>";
-		if($title_this <> '') $line_show = "<b><font color=\"AquaMarine\">[".$title_this."]</font></b> ".$line_show;
+		if($title_this <> '') $line_show = "<br /><span class=\"red-text\">[".$title_this."]</span><br />".$line_show;
 		echo "<span class=\"green-text\">".$line_show."</span>";
 		echo "</small></td></tr>";
 		}
