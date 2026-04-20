@@ -5191,6 +5191,35 @@ function store_midiressources($filename) {
 	return;
 	}
 
+function save($this_file,$filename,$top_header,$save_content) {
+	global $permissions,$current_directory;
+	$the_warning = '';
+	if(trim($save_content) == '') return;
+    if(file_exists($this_file)) {
+        $backup_file = $this_file."_bak";
+        if(!copy($this_file,$backup_file))
+            echo "<p>👉 <span class=\"red-text\">Failed to create backup of the file.</span></p>";
+		else @chmod($backup_file,$permissions);
+		$handle = @fopen($this_file, "w");
+		if($handle) {
+			$file_header = $top_header."\n// Data saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
+			fwrite($handle, $file_header."\n");
+			$save_content = recode_entities($save_content);
+			fwrite($handle, $save_content);
+			fclose($handle);
+			@chmod($this_file,$permissions);
+			}
+		else {
+			$the_warning .= "<div style=\"background-color:white; color:black; padding: 6px; border-radius:12px; width:50%; word-wrap: break-word; border: 2px solid red;\"><p>⚠️ <span class=\"red-text\"><b>PROBLEM:</b> This file has been imported and cannot be modified.</span></p>";
+			if(linux_system()) $the_warning .= "<p><b>Linux user:</b> Open your terminal and type: <span class=\"red-text\">sudo /opt/lampp/htdocs/bolprocessor/change_permissions.sh</span><br />(Your password will be required...)</p>";
+			if(mac_system()) $the_warning .= "<p><b>Mac user:</b> In the <i>Finder info</i>, set to read-write permission the whole content of your <span class=\"red-text\">“".$current_directory."”</span> data folder</p>";
+			if(windows_system()) $the_warning .= "<p><b>Windows user:</b> I can't explain this issue.</p>";
+			$the_warning .= "</div>";
+			}
+		}
+	return $the_warning;
+	}
+
 function convert_to_json($dir,$settings_file) {
 	// Convert an old settings file to JSON format
 	global $top_header;

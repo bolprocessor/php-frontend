@@ -41,6 +41,7 @@ $thistype = "data";
 $current_directory = str_replace(SLASH.$filename,'',$file);
 $current_directory = str_replace(SLASH,'/',$current_directory);
 save_settings("last_data_directory",$current_directory);
+$the_warning = '';
 
 if(isset($_POST['delete_capture_file'])) {
 	$capture_file = $_POST['capture_file'];
@@ -79,7 +80,7 @@ if(isset($data_file_format[$filename])) $file_format = $data_file_format[$filena
 if(!isset($_POST['analyze_tonal'])) display_console_state();
 
 $url = "index.php?path=".urlencode($current_directory);
-echo "&nbsp;Workspace = <input title=\"List this workspace\" title=\"List this workspace\" class=\"edit\" name=\"workspace\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$url."','_self');\" value=\"".$current_directory."\">";
+echo "&nbsp;Workspace = <input title=\"List this workspace\" class=\"edit\" name=\"workspace\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$url."','_self');\" value=\"".$current_directory."\">";
 
 echo link_to_help();
 
@@ -149,7 +150,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			}
 		if($more_data <> '') $save_content = $more_data."\n\n".$save_content;
 		$save_content = preg_replace("/ +/u",' ',$save_content);
-		save($this_file,$filename,$top_header,$save_content);
+		$the_warning = save($this_file,$filename,$top_header,$save_content);
 		$content = str_replace(chr(13).chr(10),chr(10),$content);
 		$content = str_replace(chr(13),chr(10),$content);
 		$declarations = '';
@@ -1641,7 +1642,7 @@ if(!isset($_POST['analyze_tonal'])) {
 	echo "<div style=\"text-align:left; background-color:transparent;\"><input id=\"saveButton\" class=\"save big\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".begin_with(15,$filename)."’\"></div>";
 
 	$content = do_replace($content);
-
+	echo $the_warning; // If saving was impossible due to write permissions
 	echo "<br /><textarea id=\"textArea\" name=\"thistext\" onchange=\"tellsave()\" rows=\"40\" style=\"width:750px;\">".$content."</textarea><br /><br />";
 	echo "<div style=\"float:right; background-color:transparent;\"><input class=\"save big\" type=\"submit\" formaction=\"".$url_this_page."#textArea\"  onclick=\"clearsave();\" name=\"savethisfile\" value=\"SAVE ‘".begin_with(20,$filename)."’\"></div>";
 	display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,$objects_file,$csound_file,$tonality_file,$alphabet_file,$data_file,$weights_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
@@ -2323,31 +2324,6 @@ function is_capture_file($capture_file) {
 		 return TRUE;
 		}
 	else return FALSE;
-	}
-
-function save($this_file,$filename,$top_header,$save_content) {
-	global $permissions;
-	if(trim($save_content) == '') return;
-    if(file_exists($this_file)) {
-        $backup_file = $this_file."_bak";
-        if(!copy($this_file,$backup_file))
-            echo "<p>👉 <span class=\"red-text\">Failed to create backup of the file.</span></p>";
-		else @chmod($backup_file,$permissions);
-		}
-	$handle = @fopen($this_file, "w");
-	if($handle) {
-		$file_header = $top_header."\n// Data saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
-		fwrite($handle, $file_header."\n");
-		$save_content = recode_entities($save_content);
-		fwrite($handle, $save_content);
-		fclose($handle);
-		@chmod($this_file,$permissions);
-		}
-	else {
-		echo "<div style=\"background-color:white; color:black; padding: 1em; border-radius: 6px;\"><p>👉 <span class=\"red-text\"><b>WARNING</b>: Some files have been imported and cannot be modified.</span></p><p><b>Linux user?</b> Open your terminal and type: <span class=\"green-text\">sudo /opt/lampp/htdocs/bolprocessor/change_permissions.sh</span><br />(Your password will be required...)</p>";
-		echo "</div>"; 
-		}
-	return;
 	}
 
 function delete_orphan_ties($data) {

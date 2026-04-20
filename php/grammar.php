@@ -14,7 +14,7 @@ $current_directory = str_replace(SLASH.$filename,'',$file);
 $current_directory = str_replace(SLASH,'/',$current_directory);
 save_settings("last_grammar_directory",$current_directory);
 $textarea_rows = 20;
-$save_warning = '';
+$save_warning = $the_warning = '';
 $thistype = "grammar";
 
 
@@ -169,7 +169,7 @@ if($need_to_save OR isset($_POST['savethisfile']) OR isset($_POST['compilegramma
 	else @unlink($file_path);
 	$content = recode_entities($content);
 	$content = preg_replace("/ +/u",' ',$content);
-	save($this_file,$filename,$top_header,$content);
+	$the_warning = save($this_file,$filename,$top_header,$content);
 	$file_path = $temp_dir.$tracelive_folder.SLASH."_saved_grammar";
 	file_put_contents($file_path,$dir.$filename);
 	@chmod($file_path,$permissions);
@@ -762,6 +762,7 @@ if(isset($_POST['apply_these_weights'])) {
 	$content = apply_new_weights($table,$imax,$weight_table,FALSE);
 	}
 if($imax > $textarea_rows) $textarea_rows = $imax + 5;
+echo $the_warning; // If saving was impossible due to write permissions
 echo "<textarea id=\"textArea\" name=\"thistext\" onchange=\"tellsave()\" rows=\"".$textarea_rows."\" style=\"width:90%;\">".$content."</textarea>";
 
 echo "<p style=\"float:right; margin-right:100px;\"><input class=\"save big\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".begin_with(20,$filename)."’\"></p>";
@@ -921,6 +922,7 @@ footer();
 echo "</body>";
 echo "</html>";
 
+/*
 function save($this_file,$filename,$top_header,$save_content) {
 	global $permissions;
 	if(trim($save_content) == '') return;
@@ -929,18 +931,24 @@ function save($this_file,$filename,$top_header,$save_content) {
         if(!copy($this_file, $backup_file))
             echo "<p>👉 <span class=\"red-text\">Failed to create backup of the file.</span></p>";
 		else @chmod($backup_file,$permissions);
+		$handle = @fopen($this_file, "w");
+		if($handle) {
+			$file_header = $top_header."\n// Grammar saved as \"" .$filename."\". Date: ".gmdate('Y-m-d H:i:s');
+			fwrite($handle, $file_header."\n");
+			fwrite($handle, $save_content);
+			fclose($handle);
+			@chmod($this_file,$permissions);
+			}
+		else {
+			echo "<div style=\"background-color:white; color:black; padding: 6px; border-radius: 6px;\"><p>👉 <span class=\"red-text\"><b>WARNING</b>: This file has been imported and cannot be modified.</span></p>";
+			if(linux_system()) echo "<p><b>Linux user:</b> Open your terminal and type: <span class=\"green-text\">sudo /opt/lampp/htdocs/bolprocessor/change_permissions.sh</span><br />(Your password will be required...)</p>";
+			if(mac_system()) echo "<p><b>Mac user:</b> In the finder, set to read-write the whole content of the current data folder</p>";
+			echo "</div>";
+			if(file_exists($backup_file)) copy($backup_file,$this_file);
+			}
 		}
-	$handle = @fopen($this_file, "w");
-	if($handle) {
-		$file_header = $top_header."\n// Grammar saved as \"" .$filename."\". Date: ".gmdate('Y-m-d H:i:s');
-		fwrite($handle, $file_header."\n");
-		fwrite($handle, $save_content);
-		fclose($handle);
-		@chmod($this_file,$permissions);
-		}
-	else echo "<div style=\"padding: 1em; border-radius: 6px;\"><p>👉 <span class=\"red-text\"><b>WARNING</b>: Some files have been imported and cannot be modified.</span></p><p><b>Linux user?</b> Open your terminal and type: <span class=\"green-text\">sudo /opt/lampp/htdocs/bolprocessor/change_permissions.sh</span><br />(Your password will be required...)</p></div>";
-	return;
-	}
+	return $the_warning;
+	} */
 
 function apply_new_weights($table,$imax,$weight_table,$verbose) {
 	global $section_headers;
