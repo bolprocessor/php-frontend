@@ -39,7 +39,7 @@ $file_format = $default_output_format;
 if(isset($grammar_file_format[$filename])) $file_format = $grammar_file_format[$filename]; // From _settings.php
 if(isset($_POST['output_file'])) {
 	$output_file = $_POST['output_file'];
-	$output_file = fix_new_name($output_file);
+	$output_file = fix_new_name($output_file,TRUE);
 	}
 $output_file = add_proper_extension($file_format,$output_file);
 $temp_weights_file = $temp_dir."trace_".my_session_id()."_".$filename."_weights.json";

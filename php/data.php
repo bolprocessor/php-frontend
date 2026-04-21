@@ -1475,7 +1475,7 @@ save_settings2("data_file_format",$filename,$file_format); // To _settings.php
 $output_file = $default_output_name;
 if(isset($_POST['output_file'])) {
 	$output_file = $_POST['output_file'];
-	$output_file = fix_new_name($output_file);
+	$output_file = fix_new_name($output_file,TRUE);
 	}
 $output_file = add_proper_extension($file_format,$output_file);
 // echo "<p>output_file = ".$output_file."</p>";

@@ -112,7 +112,7 @@ if($test) echo "url_this_page = ".$url_this_page."<br />";
 $new_file = '';
 if(isset($_POST['create_folder'])) {
 	$foldername = trim($_POST['foldername']);
-	$foldername = fix_new_name($foldername);
+	$foldername = fix_new_name($foldername,TRUE);
 	if($test) echo "foldername = ".$foldername."<br />";
 	if($foldername <> '') {
 		if($test) echo "new folder = ".$new_file."<br />";
@@ -430,14 +430,6 @@ if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension 
 		echo "<input class=\"save\" type=\"submit\" name=\"create_folder\" value=\"CREATE NEW FOLDER IN THIS WORKSPACE\"><br />named:&nbsp;";
 		echo "<input type=\"text\" name=\"foldername\" size=\"15\" style=\"background-color:CornSilk;\" value=\"\">";
 		echo "</p>";
-	/*	echo "<p style=\"text-align:left;\">";
-		echo "<input class=\"save\" onclick=\"selectFolder()\" type=\"submit\" name=\"create_link\" value=\"CREATE LINK TO FOLDER OUTSIDE THIS WORKSPACE\"><br />";
-		echo "<label for=\"folderPath\">Selected folder: </label>";
-        echo "<input type=\"text\" id=\"folderPath\" name=\"folderPath\" readonly required placeholder=\"Selected folder path will appear here\">";
-	//	echo "<input type=\"file\" id=\"folderInput\" webkitdirectory directory onchange=\"getFolderPath()\">";
-        echo "<br /><label for=\"linkName\">Symbolic link name: </label>";
-        echo "<input type=\"text\" name=\"linkName\" size=\"15\" required>";
-		echo "</p>"; */
 		echo "</form>";
 		if($path <> '') {
 			echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
@@ -852,7 +844,7 @@ function display_directory($test,$dir,$filter) {
 				if(!$test AND $rename_checked_files AND $type <> '' AND isset($_POST['new_name_'.$i_file]) AND trim($_POST['new_name_'.$i_file]) <> '') {
 					$new_name = trim($_POST['new_name_'.$i_file]);
 					$make_copy = isset($_POST['copy_'.$i_file]);
-					$new_name = fix_new_name($new_name);
+					$new_name = fix_new_name($new_name,TRUE);
 					if($new_name <> '') {
 						if($type <> "directory") {
 							$table2 = explode(".",$new_name);
@@ -962,7 +954,11 @@ function display_directory($test,$dir,$filter) {
 
 function folder_list($dir,$list,$path) {
 	global $bp_application_path;
-	$dircontent = scandir($dir);
+	if(!is_array($list)) $list = [];
+	if(!is_dir($dir)) return $list;
+	if(is_macos_alias($dir)) return $list;
+	$dircontent = @scandir($dir);
+	if($dircontent === false) return $list;
 	foreach($dircontent as $thisfile) {
 		if($thisfile[0] == '.') continue;
 		if(!is_dir($dir.$thisfile)) continue;

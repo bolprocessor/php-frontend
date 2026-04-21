@@ -1829,7 +1829,7 @@ function store2($handle,$varname,$index,$var) {
 	}
 
 function good_name($type,$filename,$name_mode) {
-	$filename = fix_new_name($filename);
+	$filename = fix_new_name($filename,TRUE);
 	$filename = trim($filename);
 //	echo "filename = ".$filename."<br />";
 	$filename = str_replace("-".$type.".",'',$filename);
@@ -1842,10 +1842,11 @@ function good_name($type,$filename,$name_mode) {
 	return $filename;
 	}
 
-function fix_new_name($name) {
+function fix_new_name($name,$no_slash) {
 	$name = str_replace('+','_',$name);
+	$name = str_replace('$','_',$name); // 2026-04-21
 	$name = str_replace(' ','_',$name);
-	$name = str_replace(SLASH,'_',$name);
+	if($no_slash) $name = str_replace(SLASH,'_',$name);
 	$name = str_replace('"',"'",$name);
 	return $name;
 	}
@@ -2433,6 +2434,7 @@ function windows_system() {
 	return FALSE;
 	}
 
+/*
 function is_macos_alias($file) {
 	// Check that file is an alias pointing to a folder
 	if(!file_exists($file)) return FALSE;
@@ -2453,6 +2455,23 @@ function is_macos_alias($file) {
         	}
 		}
 	return FALSE;
+	} */
+
+function is_macos_alias($file) {
+	// Check that file is an alias pointing to a folder
+    if (!file_exists($file) || !is_file($file)) {
+        return false;
+    	}
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $mime = $finfo->file($file);
+    if ($mime !== 'application/octet-stream') {
+        return false;
+    	}
+    $xattrList = shell_exec('xattr -l ' . escapeshellarg($file));
+    if ($xattrList && strpos($xattrList, 'com.apple.FinderInfo') !== false) {
+        return true;
+    	}
+    return false;
 	}
 	
 function send_to_console($command) {
@@ -5196,7 +5215,7 @@ function save($this_file,$filename,$top_header,$save_content) {
 	$the_warning = '';
 	if(trim($save_content) == '') return;
     if(file_exists($this_file)) {
-        $backup_file = $this_file."_bak";
+        $backup_file = fix_new_name($this_file,FALSE)."_bak";
         if(!copy($this_file,$backup_file))
             echo "<p>👉 <span class=\"red-text\">Failed to create backup of the file.</span></p>";
 		else @chmod($backup_file,$permissions);
@@ -5210,10 +5229,11 @@ function save($this_file,$filename,$top_header,$save_content) {
 			@chmod($this_file,$permissions);
 			}
 		else {
-			$the_warning .= "<div style=\"background-color:white; color:black; padding: 6px; border-radius:12px; width:50%; word-wrap: break-word; border: 2px solid red;\"><p>⚠️ <span class=\"red-text\"><b>PROBLEM:</b> This file has been imported and cannot be modified.</span></p>";
+			$the_warning .= "<div style=\"background-color:white; color:black; padding-bottom:6px; padding-right:6px; padding-left:1em; border-radius:12px; width:50%; word-wrap: break-word; border: 2px solid red;\"><p>⚠️ <span class=\"red-text\"><b>PROBLEM:</b> This file <span class=\"red-text\">“".$filename."”</span> has been imported and cannot be modified.</span></p>";
 			if(linux_system()) $the_warning .= "<p><b>Linux user:</b> Open your terminal and type: <span class=\"red-text\">sudo /opt/lampp/htdocs/bolprocessor/change_permissions.sh</span><br />(Your password will be required...)</p>";
 			if(mac_system()) $the_warning .= "<p><b>Mac user:</b> In the <i>Finder info</i>, set to read-write permission the whole content of your <span class=\"red-text\">“".$current_directory."”</span> data folder</p>";
 			if(windows_system()) $the_warning .= "<p><b>Windows user:</b> I can't explain this issue.</p>";
+			if(file_exists($backup_file)) $the_warning .= "<p>👉 Another solution is to work with the backup <span class=\"red-text\">“".$filename."_bak”</span> which has now been created. Click the <b>Workspace button</b> at the top of this page to access it.</p>";
 			$the_warning .= "</div>";
 			}
 		}
