@@ -71,6 +71,7 @@ echo "&nbsp;Workspace = <input title=\"List this workspace\" class=\"edit\" name
 $hide = $need_to_save = FALSE;
 $no_save_midiresources = FALSE;
 $true_bp_grammar = FALSE;
+$reason_not_true = '';
 
 if(isset($_POST['use_convention'])) {
 	$new_convention = use_convention($this_file);
@@ -743,11 +744,16 @@ if($true_bp_grammar) {
 	$link_learn = "produce.php?data=".urlencode($dir.$data_file)."&instruction=analyze&grammar=".urlencode($this_file)."&alphabet=".urlencode($dir.$alphabet_file)."&settings=".urlencode($dir.$settings_file)."&weights=".urlencode($dir.$weights_file)."&output=".urlencode($output.SLASH.$output_file);
 	if($trace_production) $link_learn .= "&trace_production=1";
 	// echo $link_learn."<br />";
-	echo "<p>👉 <span class=\"red-text\">This is a TRUE BP grammar</span>&nbsp;";
+	echo "<p>👉 This is a <span class=\"red-text\">TRUE</span> BP grammar&nbsp;";
 	if($data_file <> '' AND file_exists($dir.$data_file) AND !$error) {
 		$this_value = "LEARN weights";
 		echo "➡&nbsp;<input class=\"produce big\" onclick=\"if(checksaved()) {window.open('".$link_learn."','Learning','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"learn\" value=\"".$this_value."\">&nbsp;from all items in <span class=\"green-text\">‘".$data_file."’</span>";
 		}
+	echo "</p>";
+	}
+else {
+	echo '<p>👉 This is <span class="red-text">NOT a TRUE</span> BP grammar&nbsp;[<a href="#" onclick="toggleReason(); return false;">why?</a>] ➡&nbsp;<a target="_true" href="https://bolprocessor.org/parsing-items/#a-simple-true-bol-processor-grammar">more info</a>';
+	echo '<span id="reason" style="display:none;">'.$reason_not_true.'</span>';
 	echo "</p>";
 	}
 

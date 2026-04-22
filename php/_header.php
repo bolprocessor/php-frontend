@@ -92,6 +92,17 @@ echo "$(document).ready(function() {\n
 });\n";
 echo "</script>\n";
 
+echo "<script>\n"; // Used in grammar.php
+echo "function toggleReason() {
+    var el = document.getElementById('reason');
+    if (el.style.display === 'none') {
+        el.style.display = 'block';
+    } else {
+        el.style.display = 'none';
+    }
+}\n";
+echo "</script>";
+
 /* echo "<script>";
 echo "function createFile(pathToFile) {
     $.ajax({
@@ -106,16 +117,6 @@ echo "function createFile(pathToFile) {
     });\n";
 echo "}
 </script>"; */
-
-/*
-echo "<script>";
-echo "function clearFields(inputId, nameId, commentId) {
-    document.getElementsByName(inputId)[0].value = \"\";
-    document.getElementsByName(nameId)[0].value = \"\";
-    document.getElementsByName(commentId)[0].value = \"\";\n";
-echo "}
-</script>";
-*/
 
 echo "<script src=\"darkmode.js\"></script>"; 
 

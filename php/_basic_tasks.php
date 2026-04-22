@@ -29,6 +29,7 @@ $test = FALSE;
 
 $permissions = 0775;
 $today_date = date("Y-m-d");
+$reason_not_true =  '';
 
 $file_path = "_settings.php";
 if(!file_exists($file_path)) {
@@ -111,7 +112,7 @@ $default_output_format = "midi";
 if(!isset($output_folder) OR $output_folder == '') $output_folder = "my_output";
 
 $maxchunk_size = 400; // Max number of measures contained in a chunk
-$minchunk_size = 5; // Min number of measures contained in a chunk
+$minchunk_size = 15; // Min number of measures contained in a chunk
 // $minchunk_size = 1; // Use this value to check the chunking to single measures
 
 $max_term_in_fraction = 32768; // Used to simplify fractions when importing MusicXML scores
@@ -505,7 +506,7 @@ function findCsoundPath($exeName) {
     }
 	
 function extract_data($compact,$content) {
-	global $true_bp_grammar,$thistype;
+	global $true_bp_grammar,$thistype,$reason_not_true;
 	$said = FALSE;
 	$content = trim($content);
 	$content = str_replace(chr(13).chr(10),chr(10),$content);
@@ -617,21 +618,49 @@ function extract_data($compact,$content) {
 	$extract_data['content'] = implode(chr(10),$table_out);
 	// Below, we fix an old error of naming tempered tunings
 	$extract_data['content'] = str_replace("_scale(meantone_","_scale(",$extract_data['content']);
-	if(!$true_bp_grammar AND $is_true_bp AND $is_valid_for_parsing) {
+	if($is_true_bp AND $is_valid_for_parsing) {
 		$true_bp_grammar = TRUE;
 		}
-	// else echo "@@@ not true<br />";
+	else if(!$is_valid_for_parsing) {
+		$reason_not_true = "▶︎ It does not contain rules valid for parsing (with '<--' or '<->' derivation signs)<br />";
+		}
 	return $extract_data;
 	}
 
 function is_true_bp($line) {
-	if(str_ends_with($line, '->')) return FALSE;
-	if(str_contains($line, 'lambda') || str_contains($line, 'empty')  || str_contains($line, 'null') || str_contains($line, 'nil')) return FALSE;
-	if(str_ends_with($line, 'SUB') || str_ends_with($line, 'SUB1') || str_ends_with($line, 'POSLONG')) return FALSE;
-	if(str_contains($line, '{') || str_contains($line, '}')) return FALSE;
-	if(str_contains($line, '<K')) return FALSE; // Controled rule weight
-	if(preg_match('#/.+?/#',$line)) return FALSE; // Flag
-	if(str_contains($line, '_destru') || str_contains($line, '_goto')  || str_contains($line, '_failed') || str_contains($line, '_repeat') || str_contains($line, '_retro') || str_contains($line, '_rndseq') || str_contains($line, '_keyxpand') || str_contains($line, '_stepOn') || str_contains($line, '_stepOff') || str_contains($line, '_stop')) return FALSE;
+	global $reason_not_true;
+	if(str_ends_with($line, '->') OR str_contains($line, 'lambda') || str_contains($line, 'empty')  || str_contains($line, 'null') || str_contains($line, 'nil')) {
+		$reason_not_true .= "▶︎ It has an erasing rule<br />";
+		return FALSE;
+		}
+	if(str_ends_with($line, 'SUB') || str_ends_with($line, 'SUB1') || str_ends_with($line, 'POSLONG')) {
+		$reason_not_true .= "▶︎ A subgrammar has a derivation mode such as 'SUB', 'SUB1', 'POSLONG'<br />";
+		return FALSE;
+		}
+	if(str_contains($line, '{') || str_contains($line, '}')) {
+		$reason_not_true .= "▶︎ A rule contains {polymetric expressions}<br />";
+		return FALSE;
+		}
+	if(str_contains($line, '<K') OR preg_match('/<\d+[+-]\d+>/',$line)) {
+		$reason_not_true .= "▶︎ A rule has a variable weight<br />";
+		return FALSE;
+		}
+	if(preg_match('#/.+?/#',$line)) {
+		$reason_not_true .= "▶︎ A rule contains a /flag/<br />";
+		return FALSE;
+		}
+	if(str_contains($line, '_destru')) {
+		$reason_not_true .= "▶︎ A subgrammar has a '_destru' instruction<br />";
+		return FALSE;
+		}
+	if(str_contains($line, '_goto')  || str_contains($line, '_failed') || str_contains($line, '_repeat') || str_contains($line, '_stop')) {
+		$reason_not_true .= "▶︎ A rule has an instruction such as '_goto', '_repeat', etc.<br />";
+		return FALSE;
+		}
+	if(str_contains($line, '_retro') || str_contains($line, '_rndseq') || str_contains($line, '_keyxpand') || str_contains($line, '_stepOn') || str_contains($line, '_stepOff')) {
+		$reason_not_true .= "▶︎ A rule has performance controls such as '_retro', '_keyxpand', '_stepOn', etc.<br />";
+		return FALSE;
+		}
 	return TRUE;
 	}
 
@@ -2457,13 +2486,14 @@ function is_macos_alias($file) {
 	return FALSE;
 	} */
 
-function is_macos_alias($file) {
+function is_macos_alias($file) { // Fixed 2026-04-21
 	// Check that file is an alias pointing to a folder
     if (!file_exists($file) || !is_file($file)) {
         return false;
     	}
     $finfo = new finfo(FILEINFO_MIME_TYPE);
     $mime = $finfo->file($file);
+//	echo "mime = ".$mime." =>   ".$file."<br />";
     if ($mime !== 'application/octet-stream') {
         return false;
     	}
