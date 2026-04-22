@@ -821,6 +821,7 @@ else {
 		fwrite($handle,"<p><b>Messages:</b></p>\n");
 		}
 	}
+$weights_file_path = '';
 if($n_messages > 0) {
 	$warnings = 0;
 	$analyzing_success = $analyzing_failure = FALSE;
@@ -840,6 +841,9 @@ if($n_messages > 0) {
 	/*	if(($this_count = substr_count($mssg,"Analyzing new selection")) > 0) {
 			$analyzing_new_selection = TRUE;
 			} */
+		if(($this_count = substr_count($mssg,"Creating weights file:")) > 0) {
+			$weights_file_path = trim(str_replace("Creating weights file:",'',$mssg));
+			}
 		if(($this_count = substr_count($mssg,"Analyzing item")) > 0) {
 			$analyzing_failure = TRUE;
 			$analyzing_success = TRUE;
@@ -881,6 +885,7 @@ echo "</p>";
 if($success > 0) echo "<p><big>✅&nbsp;&nbsp;".$success." item(s) were successfully parsed</big></p>";
 if($failed_parsing > 0) echo "<p><big>❌&nbsp;&nbsp;".$failed_parsing." item(s) failed in the parsing after matching a template</big></p>";
 if($failed_template > 0) echo "<p><big>❌&nbsp;&nbsp;".$failed_template." item(s) matched no template</big></p>";
+if($weights_file_path <> '') echo "<p>👉 New weights are saved in ".$weights_file_path."</p>";
 
 @unlink($running_trace);
 

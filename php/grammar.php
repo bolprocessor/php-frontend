@@ -473,6 +473,12 @@ if($alphabet_file <> '') {
 		}
 	else $link_produce .= "&alphabet=".urlencode($dir.$alphabet_file);
 	}
+if($data_file <> '') {
+	if(!file_exists($dir.$data_file)) {
+		$upload_mssg = upload_related_form($dir,$data_file,"data");
+		$error = TRUE;
+		}
+	}
 if($weights_file <> '') {
 	if(!file_exists($dir.$weights_file)) {
 	//	$upload_mssg = upload_related_form($dir,$weights_file,"weights");
@@ -741,7 +747,9 @@ else echo "\" class=\"produce big\"";
 echo ">";
 echo "</p>";
 if($true_bp_grammar) {
-	$link_learn = "produce.php?data=".urlencode($dir.$data_file)."&instruction=analyze&grammar=".urlencode($this_file)."&alphabet=".urlencode($dir.$alphabet_file)."&settings=".urlencode($dir.$settings_file)."&weights=".urlencode($dir.$weights_file)."&output=".urlencode($output.SLASH.$output_file);
+	if($weights_file == '') $weights_file = str_replace("-da.","-wg.",$filename);
+	$link_learn = "produce.php?data=".urlencode($dir.$data_file)."&instruction=analyze&grammar=".urlencode($this_file)."&settings=".urlencode($dir.$settings_file)."&weights=".urlencode($dir.$weights_file)."&output=".urlencode($output.SLASH.$output_file);
+	if($alphabet_file <> '') $link_learn .= "&alphabet=".urlencode($dir.$alphabet_file);
 	if($trace_production) $link_learn .= "&trace_production=1";
 	// echo $link_learn."<br />";
 	echo "<p>👉 This is a <span class=\"red-text\">TRUE</span> BP grammar&nbsp;";
@@ -762,7 +770,9 @@ $content = do_replace($content);
 $table = explode(chr(10),$content);
 $imax = count($table);
 if(isset($_POST['apply_these_weights'])) {
-	echo "<p>👉 Applying new weights</p>";
+	echo "<p>👉 Applying new weights&nbsp;";
+	echo "➡&nbsp;<input class=\"save\" type=\"submit\" id=\"saveButton\" onclick=\"clearsave();\" name=\"savethisfile\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".begin_with(20,$filename)."’\">";
+	echo "</p>";
 	$json = $_POST['apply_these_weights'];
 	$weight_table = json_decode($json,true);
 	$content = apply_new_weights($table,$imax,$weight_table,FALSE);
