@@ -581,7 +581,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 
 			if($reload_musicxml) {
 				$more_data = "\n// MusicXML file ‘".$upload_filename."’ converted\n";
-				// The first "\n" is necessary to create an empty line separating headers. See extract_data()
+				// The first "\n" is necessary to create an empty line separating headers. See extract_data(FALSE,)
 				if($subtitle_part <> '') $more_data .= $subtitle_part."\n";
 				}
 			if($reload_musicxml) $more_data .= $list_settings;
@@ -959,7 +959,7 @@ if(isset($_POST['create_settings_file']) AND isset($_POST['new_settings_file']) 
 	if($new_settings_file <> '') {
 		$settings_file = good_name("se",$new_settings_file,'');
 		$content = @file_get_contents($this_file,TRUE);
-		$extract_data = extract_data(TRUE,$content);
+		$extract_data = extract_data(FALSE,TRUE,$content);
 		$newcontent = $extract_data['content'];
 		$newcontent = preg_replace("/\-se\.[a-zA-Z0-9]+\s/u",'',$newcontent);
 		$newcontent = preg_replace("/\-se\.:\s?[a-zA-Z0-9]+\.bpse\s/u",'',$newcontent);
@@ -972,7 +972,7 @@ if(isset($_POST['create_settings_file']) AND isset($_POST['new_settings_file']) 
 if(isset($_GET['newsettings'])) {
 	$settings_file = urldecode($_GET['newsettings']);
 	$content = @file_get_contents($this_file,TRUE);
-	$extract_data = extract_data(TRUE,$content);
+	$extract_data = extract_data(FALSE,TRUE,$content);
 	$newcontent = $extract_data['content'];
 	$newcontent = preg_replace("/\-se\.[a-zA-Z0-9]+\s/u",'',$newcontent);
 	$newcontent = preg_replace("/\-se\.:\s?[a-zA-Z0-9]+\.bpse\s/u",'',$newcontent);
@@ -992,7 +992,7 @@ if(isset($_POST['use_convention'])) {
 
 if(isset($_POST['delete_chan'])) {
 	$content = @file_get_contents($this_file,TRUE);
-	$extract_data = extract_data(TRUE,$content);
+	$extract_data = extract_data(FALSE,TRUE,$content);
 	$newcontent = $extract_data['content'];
 	$newcontent = preg_replace("/_chan\([^\)]+\)/u",' ',$newcontent);
 	$_POST['thistext'] = $newcontent;
@@ -1002,7 +1002,7 @@ if(isset($_POST['delete_chan'])) {
 
 if(isset($_POST['delete_ins'])) {
 	$content = @file_get_contents($this_file,TRUE);
-	$extract_data = extract_data(TRUE,$content);
+	$extract_data = extract_data(FALSE,TRUE,$content);
 	$newcontent = $extract_data['content'];
 	$newcontent = preg_replace("/_ins\([^\)]+\)/u",' ',$newcontent);
 	$_POST['thistext'] = $newcontent;
@@ -1012,7 +1012,7 @@ if(isset($_POST['delete_ins'])) {
 
 if(isset($_POST['delete_part'])) {
 	$content = @file_get_contents($this_file,TRUE);
-	$extract_data = extract_data(TRUE,$content);
+	$extract_data = extract_data(FALSE,TRUE,$content);
 	$newcontent = $extract_data['content'];
 	$newcontent = preg_replace("/_part\([^\)]+\)/u",' ',$newcontent);
 	$_POST['thistext'] = $newcontent;
@@ -1022,7 +1022,7 @@ if(isset($_POST['delete_part'])) {
 
 if(isset($_POST['delete_tempo'])) {
 	$content = @file_get_contents($this_file,TRUE);
-	$extract_data = extract_data(TRUE,$content);
+	$extract_data = extract_data(FALSE,TRUE,$content);
 	$newcontent = $extract_data['content'];
 	$newcontent = preg_replace("/_tempo\([^\)]+\)/u",' ',$newcontent);
 	$_POST['thistext'] = $newcontent;
@@ -1032,7 +1032,7 @@ if(isset($_POST['delete_tempo'])) {
 	
 if(isset($_POST['delete_volume'])) {
 	$content = @file_get_contents($this_file,TRUE);
-	$extract_data = extract_data(TRUE,$content);
+	$extract_data = extract_data(FALSE,TRUE,$content);
 	$newcontent = $extract_data['content'];
 	$newcontent = preg_replace("/_volume\([^\)]+\)/u",' ',$newcontent);
 	$_POST['thistext'] = $newcontent;
@@ -1042,7 +1042,7 @@ if(isset($_POST['delete_volume'])) {
 	
 if(isset($_POST['volume_velocity'])) {
 	$content = @file_get_contents($this_file,TRUE);
-	$extract_data = extract_data(TRUE,$content);
+	$extract_data = extract_data(FALSE,TRUE,$content);
 	$newcontent = $extract_data['content'];
 	$newcontent = preg_replace("/_volume\(([^\)]+)\)/u","_vel($1)",$newcontent);
 	$_POST['thistext'] = $newcontent;
@@ -1052,7 +1052,7 @@ if(isset($_POST['volume_velocity'])) {
 	
 if(isset($_POST['velocity_volume'])) {
 	$content = @file_get_contents($this_file,TRUE);
-	$extract_data = extract_data(TRUE,$content);
+	$extract_data = extract_data(FALSE,TRUE,$content);
 	$newcontent = $extract_data['content'];
 	$newcontent = preg_replace("/_vel\(([^\)]+)\)/u","_volume($1)",$newcontent);
 	$_POST['thistext'] = $newcontent;
@@ -1062,7 +1062,7 @@ if(isset($_POST['velocity_volume'])) {
 	
 if(isset($_POST['delete_velocity'])) {
 	$content = @file_get_contents($this_file,TRUE);
-	$extract_data = extract_data(TRUE,$content);
+	$extract_data = extract_data(FALSE,TRUE,$content);
 	$newcontent = $extract_data['content'];
 	$newcontent = preg_replace("/_vel\([^\)]+\)/u",' ',$newcontent);
 	$_POST['thistext'] = $newcontent;
@@ -1072,7 +1072,7 @@ if(isset($_POST['delete_velocity'])) {
 
 if(isset($_POST['minimise_data'])) {
 	$content = @file_get_contents($this_file,TRUE);
-	$extract_data = extract_data(TRUE,$content);
+	$extract_data = extract_data(FALSE,TRUE,$content);
 	$newcontent = $extract_data['content'];
 	$table = explode("\n",$newcontent);
 	$newtable = array();
@@ -1113,7 +1113,7 @@ if(isset($_POST['minimise_data'])) {
 
 if(isset($_POST['undo_minimise_data'])) {
 	$content = @file_get_contents($this_file,TRUE);
-	$extract_data = extract_data(TRUE,$content);
+	$extract_data = extract_data(FALSE,TRUE,$content);
 	$newcontent = $extract_data['content'];
 	$table = explode("\n",$newcontent);
 	$newtable = array();
@@ -1159,7 +1159,7 @@ if(isset($_POST['apply_velocity_change'])) {
 			$b2 = $change_velocity_average;
 			}
 		$content = @file_get_contents($this_file,TRUE);
-		$extract_data = extract_data(TRUE,$content);
+		$extract_data = extract_data(FALSE,TRUE,$content);
 		$data = $extract_data['content'];
 		$pos1 = 0; $done = array(); $said = FALSE;
 		while(is_integer($pos1=strpos($data,"_vel(",$pos1))) {
@@ -1209,7 +1209,7 @@ if(isset($_POST['apply_volume_change'])) {
 			$b2 = $change_volume_average;
 			}
 		$content = @file_get_contents($this_file,TRUE);
-		$extract_data = extract_data(TRUE,$content);
+		$extract_data = extract_data(FALSE,TRUE,$content);
 		$data = $extract_data['content'];
 		$pos1 = 0; $done = array(); $said = FALSE;
 		while(is_integer($pos1=strpos($data,"_volume(",$pos1))) {
@@ -1289,7 +1289,7 @@ if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 
 $metronome = 0;
 $nature_of_time = $time_structure = $objects_file = $csound_file = $tonality_file = $tonality_file = $alphabet_file = $data_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = '';
-$extract_data = extract_data(TRUE,$content);
+$extract_data = extract_data(FALSE,TRUE,$content);
 echo "<p class=\"green-text\">".$extract_data['headers']."</p>";
 $content = $extract_data['content'];
 $alphabet_file = $extract_data['alphabet'];
@@ -1655,7 +1655,7 @@ if(isset($_POST['modify_velocity'])) {
 	echo "<h3>Modify velocities:</h3>";
 	echo "<i>Values will be quadratically interpolated</i><br />";
 	$content = @file_get_contents($this_file,TRUE);
-	$extract_data = extract_data(TRUE,$content);
+	$extract_data = extract_data(FALSE,TRUE,$content);
 	$data = $extract_data['content'];
 	$velocity_average = search_value("average",$data,"_vel");
 	$max_velocity = search_value("max",$data,"_vel");
@@ -1687,7 +1687,7 @@ if(isset($_POST['modify_volume'])) {
 	echo "<h3>Modify volumes:</h3>";
 	echo "<i>Values will be quadratically interpolated</i><br />";
 	$content = @file_get_contents($this_file,TRUE);
-	$extract_data = extract_data(TRUE,$content);
+	$extract_data = extract_data(FALSE,TRUE,$content);
 	$data = $extract_data['content'];
 	$volume_average = search_value("average",$data,"_volume");
 	$volume_max = search_value("max",$data,"_volume");
@@ -2406,7 +2406,7 @@ function delete_orphan_ties($data) {
 function data_is_minimised($file) {
 	global $minimised_token;
 	$content = @file_get_contents($file,TRUE);
-	$extract_data = extract_data(TRUE,$content);
+	$extract_data = extract_data(FALSE,TRUE,$content);
 	$table = explode("\n",$content);
 	foreach($table AS $line) {
 		if(!is_integer(strpos($line,"{"))) continue;

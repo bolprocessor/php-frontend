@@ -49,7 +49,7 @@ if(isset($_POST['addinstruction'])) {
 			$entry = $instruction." ".$script_more[$instruction];
 			$content = @file_get_contents($this_file);
 			if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
-			$extract_data = extract_data(TRUE,$content);
+			$extract_data = extract_data(FALSE,TRUE,$content);
 			$content = $extract_data['content'];
 			$content .= "\n".$entry;
 			$_POST['thistext'] = $content;
@@ -81,7 +81,7 @@ if(isset($_POST['checkscript'])) {
 	echo "<p><b>Checked script:</b></p>";
 	$content = @file_get_contents($this_file);
 	if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
-	$extract_data = extract_data(TRUE,$content);
+	$extract_data = extract_data(FALSE,TRUE,$content);
 	$content = $extract_data['content'];
 	$table = explode(chr(10),$content);
 	$imax = count($table);
@@ -119,7 +119,7 @@ if(!isset($_POST['running'])) {
 	try_create_new_file($this_file,$filename);
 	$content = @file_get_contents($this_file);
 	if($content === FALSE) ask_create_new_file($url_this_page,$filename);
-	$extract_data = extract_data(TRUE,$content);
+	$extract_data = extract_data(FALSE,TRUE,$content);
 	echo "<p class=\"green-text\">".$extract_data['headers']."</p>";
 	$content = $extract_data['content'];
 	$content = preg_replace("/[\x20]+/u",' ',$content);

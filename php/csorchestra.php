@@ -32,7 +32,7 @@ try_create_new_file($this_file,$filename);
 $content = @file_get_contents($this_file);
 if($content === FALSE) ask_create_new_file($url_this_page,$filename);
 if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
-$extract_data = extract_data(TRUE,$content);
+$extract_data = extract_data(FALSE,TRUE,$content);
 $content = $extract_data['content'];
 $textarea_rows = 15;
 $table = explode(chr(10),$content);

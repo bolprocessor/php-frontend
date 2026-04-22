@@ -83,7 +83,7 @@ if(file_exists($this_file)) {
 	if($content === FALSE) die();
 	if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 
-	$extract_data = extract_data(TRUE,$content);
+	$extract_data = extract_data(FALSE,TRUE,$content);
 	echo "<p class=\"green-text\">".$extract_data['headers']."</p>";
 
 	$content = $extract_data['content'];
@@ -127,6 +127,7 @@ if($content <> '') {
 	echo "<input type=\"hidden\" name=\"apply_these_weights\" value=\"".htmlspecialchars($json, ENT_QUOTES,'UTF-8')."\">";
 	if($grammarWindow <> '') echo "<input type=\"hidden\" name=\"grammarWindow\" value=\"".$grammarWindow."\">";
 	echo "<input class=\"save\" type=\"submit\" value=\"COPY BACK rule weights\"> in <span class=\"green-text\">‘".$filename."’</span> (shown above) to <span class=\"green-text\">‘".$grammar_file."’</span> grammar";
+	echo "<br />👉 then, save the grammar!";
 	echo "</form>";
 	}
 // We need the following function because "target" is not properly handled by some browwsers
@@ -139,13 +140,11 @@ function sendBackToGrammar() {
         alert('No grammar window name found');
         return false;
     }
-
     var w = window.open('', targetName);
     if (!w) {
         alert('Could not find grammar window: ' + targetName);
         return false;
     }
-
     var form = document.getElementById('return_to_grammar');
     form.target = targetName;
 

@@ -505,7 +505,7 @@ function findCsoundPath($exeName) {
 	return false;
     }
 	
-function extract_data($compact,$content) {
+function extract_data($is_grammar,$compact,$content) {
 	global $true_bp_grammar,$thistype,$reason_not_true;
 	$said = FALSE;
 	$content = trim($content);
@@ -521,9 +521,9 @@ function extract_data($compact,$content) {
 	$table = explode(chr(10),$content);
 	$table_out = $extract_data = array();
 	$start = $header = TRUE;
-	$is_valid_for_parsing = FALSE;
+	if($is_grammar) $is_valid_for_parsing = FALSE;
 	$nr_end_lines= 0;
-	$is_true_bp = TRUE;
+	if($is_grammar) $is_true_bp = TRUE;
 	$extract_data['grammar'] = $extract_data['metronome'] = $extract_data['time_structure'] = $extract_data['headers'] = $extract_data['alphabet'] = $extract_data['grammar'] = $extract_data['objects'] = $extract_data['csound'] = $extract_data['tonality'] = $extract_data['settings'] = $extract_data['data'] = $extract_data['orchestra'] = $extract_data['timebase'] = $extract_data['interaction'] = $extract_data['midisetup'] = $extract_data['timebase'] = $extract_data['keyboard'] = $extract_data['glossary'] = $extract_data['cstables'] = $extract_data['weights'] = $extract_data['data'] = '';
 	$extract_data['templates'] = $found_templates = $need_end_line = FALSE;
 	for($i = 0; $i < count($table); $i++) {
@@ -556,8 +556,8 @@ function extract_data($compact,$content) {
 		$table_out[] = $line;
 		$line = preg_replace("/ *\[.*\]/u",'',$line);
 		$line = trim(preg_replace("/ *\/\/.*$/u",'',$line));
-		if(!is_true_bp($line)) $is_true_bp = FALSE;
-		if(is_valid_for_parsing($line)) $is_valid_for_parsing = TRUE;
+		if($is_grammar AND !is_true_bp($line)) $is_true_bp = FALSE;
+		if($is_grammar AND is_valid_for_parsing($line)) $is_valid_for_parsing = TRUE;
 		if(is_integer($pos=strpos($line,"TEMPLATES:")) AND $pos == 0) {
 			$extract_data['templates'] = $found_templates = $need_end_line = TRUE;
 			}
@@ -618,11 +618,13 @@ function extract_data($compact,$content) {
 	$extract_data['content'] = implode(chr(10),$table_out);
 	// Below, we fix an old error of naming tempered tunings
 	$extract_data['content'] = str_replace("_scale(meantone_","_scale(",$extract_data['content']);
-	if($is_true_bp AND $is_valid_for_parsing) {
-		$true_bp_grammar = TRUE;
-		}
-	else if(!$is_valid_for_parsing) {
-		$reason_not_true = "▶︎ It does not contain rules valid for parsing (with '<--' or '<->' derivation signs)<br />";
+	if($is_grammar) {
+		if($is_true_bp AND $is_valid_for_parsing) {
+			$true_bp_grammar = TRUE;
+			}
+		else if(!$is_valid_for_parsing) {
+			$reason_not_true = "▶︎ It does not contain rules valid for parsing (with '<--' or '<->' derivation signs)<br />";
+			}
 		}
 	return $extract_data;
 	}
@@ -1232,7 +1234,7 @@ function SaveObjectPrototypes($verbose,$dir,$filename,$temp_folder,$force) {
 		$object_label = str_replace(".".$extension,'',$thisfile);
 		if($verbose) echo $object_label." ";
 		$content = file_get_contents($temp_dir.$temp_folder.SLASH.$thisfile);
-		$extract_data = extract_data(TRUE,$content);
+		$extract_data = extract_data(FALSE,TRUE,$content);
 		$headers = $extract_data['headers'];
 		if(!is_integer($pos=strpos($headers,"//"))) continue;
 		$content = $extract_data['content'];
@@ -1348,7 +1350,7 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder,$force) {
 		$instrument_label = str_replace(".".$extension,'',$thisfile);
 		if($verbose) echo $instrument_label." ";
 		$content = file_get_contents($temp_dir.$temp_folder.SLASH.$thisfile);
-		$extract_data = extract_data(FALSE,$content);
+		$extract_data = extract_data(FALSE,FALSE,$content);
 		$headers = $extract_data['headers'];
 		if(!is_integer($pos=strpos($headers,"//"))) continue;
 		$content = $extract_data['content'];
@@ -2548,7 +2550,7 @@ function get_orchestra_filename($csound_file) {
 	$content = @file_get_contents($csound_file);
 	if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 	if($content != FALSE) {
-		$extract_data = extract_data(FALSE,$content);
+		$extract_data = extract_data(FALSE,FALSE,$content);
 		$content = $extract_data['content'];
 		$content_no_br = str_replace("<br>",chr(10),$content);
 		$table = explode(chr(10),$content_no_br);
@@ -2564,7 +2566,7 @@ function get_name_so_file($this_file) {
 	$content = @file_get_contents($this_file);
 	if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 	if($content != FALSE) {
-		$extract_data = extract_data(TRUE,$content);
+		$extract_data = extract_data(FALSE,TRUE,$content);
 		$objects_file = $extract_data['objects'];
 		}
 	return $objects_file;
@@ -3201,7 +3203,7 @@ function list_of_instruments($csound_instruments_file) {
 	if(!file_exists($csound_instruments_file)) return $list_of_instruments;
 	$content = @file_get_contents($csound_instruments_file);
 	if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
-	$extract_data = extract_data(FALSE,$content);
+	$extract_data = extract_data(FALSE,FALSE,$content);
 	$content = $extract_data['content'];
 	$content_no_br = str_replace("<br>",chr(10),$content);
 	$table = explode(chr(10),$content_no_br);
@@ -3666,7 +3668,7 @@ function create_grammar($data_path) {
 	$grammar = '';
 	$content = @file_get_contents($data_path);
 	if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
-	$extract_data = extract_data(TRUE,$content);
+	$extract_data = extract_data(FALSE,TRUE,$content);
 	$content = $extract_data['content'];
 	$table = explode(chr(10),$content );
 	$imax = count($table);
@@ -4825,7 +4827,7 @@ function begin_with($n_chars,$text) {
 	}
 
 function apply_changes_instructions($content) {
-	$extract_data = extract_data(TRUE,$content);
+	$extract_data = extract_data(FALSE,TRUE,$content);
 	$newcontent = $extract_data['content'];
 	$imax = $_POST['chan_max'];
 	for($i = 0; $i < $imax; $i++) {
@@ -5131,7 +5133,7 @@ function use_convention($this_file) {
 		}
 	$content = @file_get_contents($this_file);
 	if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
-	$extract_data = extract_data(TRUE,$content);
+	$extract_data = extract_data(FALSE,TRUE,$content);
 	$newcontent = $extract_data['content'];
 	if(MULTIBYTE_INTERNAL_OK) mb_internal_encoding("UTF-8");  // Set internal character encoding to UTF-8
 	$newcontent = my_mb_ereg_replace("\n","<br>", $newcontent);
@@ -5335,7 +5337,7 @@ function convert_to_json($dir,$settings_file) {
 			$parameter_yesno[$i] = 1;
 		else $parameter_yesno[$i] = 0;
 		}
-	$extract_data = extract_data(TRUE,$content);
+	$extract_data = extract_data(FALSE,TRUE,$content);
 	$content = $extract_data['content'];
 	$table = explode(chr(10),$content);
 	$imax_file = count($table);

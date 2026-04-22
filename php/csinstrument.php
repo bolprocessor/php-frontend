@@ -251,7 +251,7 @@ if(isset($_POST['saveinstrument'])) {
 	}
 
 $content = file_get_contents($instrument_file);
-$extract_data = extract_data(TRUE,$content);
+$extract_data = extract_data(FALSE,TRUE,$content);
 $content = $extract_data['content'];
 
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";

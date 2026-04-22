@@ -148,7 +148,7 @@ if($content === FALSE) {
 	die();
 	}
 if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
-$extract_data = extract_data(TRUE,$content);
+$extract_data = extract_data(FALSE,TRUE,$content);
 echo "<p class=\"green-text\">".$extract_data['headers']."</p>";
 $content = $extract_data['content'];
 $j = 0;

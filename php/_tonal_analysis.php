@@ -334,7 +334,7 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 						$item_name = end($table3);
 						$content2 = @file_get_contents($data_file);
 						if(MB_CONVERT_OK) $content2 = mb_convert_encoding($content2,'UTF-8','UTF-8');
-						$extract_data = extract_data(TRUE,$content2);
+						$extract_data = extract_data(FALSE,TRUE,$content2);
 						$newcontent = $extract_data['content'];
 						$table2 = explode(chr(10),$newcontent);
 						$imax2 = count($table2);

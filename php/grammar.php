@@ -82,7 +82,7 @@ if(isset($_POST['use_convention'])) {
 
 if(isset($_POST['delete_chan'])) {
 	$content = @file_get_contents($this_file,TRUE);
-	$extract_data = extract_data(TRUE,$content);
+	$extract_data = extract_data(TRUE,TRUE,$content);
 	$newcontent = $extract_data['content'];
 	$newcontent = preg_replace("/_chan\([^\)]+\)/u",' ',$newcontent);
 	$_POST['thistext'] = $newcontent;
@@ -92,7 +92,7 @@ if(isset($_POST['delete_chan'])) {
 
 if(isset($_POST['delete_ins'])) {
 	$content = @file_get_contents($this_file,TRUE);
-	$extract_data = extract_data(TRUE,$content);
+	$extract_data = extract_data(TRUE,TRUE,$content);
 	$newcontent = $extract_data['content'];
 	$newcontent = preg_replace("/_ins\([^\)]+\)/u",' ',$newcontent);
 	$_POST['thistext'] = $newcontent;
@@ -102,7 +102,7 @@ if(isset($_POST['delete_ins'])) {
 
 if(isset($_POST['delete_part'])) {
 	$content = @file_get_contents($this_file,TRUE);
-	$extract_data = extract_data(TRUE,$content);
+	$extract_data = extract_data(TRUE,TRUE,$content);
 	$newcontent = $extract_data['content'];
 	$newcontent = preg_replace("/_part\([^\)]+\)/u",' ',$newcontent);
 	$_POST['thistext'] = $newcontent;
@@ -112,7 +112,7 @@ if(isset($_POST['delete_part'])) {
 
 if(isset($_POST['delete_tempo'])) {
 	$content = @file_get_contents($this_file,TRUE);
-	$extract_data = extract_data(TRUE,$content);
+	$extract_data = extract_data(TRUE,TRUE,$content);
 	$newcontent = $extract_data['content'];
 	$newcontent = preg_replace("/_tempo\([^\)]+\)/u",' ',$newcontent);
 	$_POST['thistext'] = $newcontent;
@@ -122,7 +122,7 @@ if(isset($_POST['delete_tempo'])) {
 	
 if(isset($_POST['delete_volume'])) {
 	$content = @file_get_contents($this_file,TRUE);
-	$extract_data = extract_data(TRUE,$content);
+	$extract_data = extract_data(TRUE,TRUE,$content);
 	$newcontent = $extract_data['content'];
 	$newcontent = preg_replace("/_volume\([^\)]+\)/u",' ',$newcontent);
 	$_POST['thistext'] = $newcontent;
@@ -334,7 +334,7 @@ if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 $metronome = 0;
 $nature_of_time = $objects_file = $csound_file = $tonality_file = $alphabet_file = $data_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = $weights_file = '';
 $nature_of_time_settings = STRIATED;
-$extract_data = extract_data(TRUE,$content);
+$extract_data = extract_data(TRUE,TRUE,$content);
 echo "<p class=\"green-text\">".$extract_data['headers']."</p>";
 $content = $extract_data['content'];
 $alphabet_file = $extract_data['alphabet'];

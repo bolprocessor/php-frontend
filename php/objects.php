@@ -188,7 +188,7 @@ if(strlen(trim($content)) == 0) {
 	$content = @file_get_contents($template);
 	}
 $objects_file = $grammar_file = $csound_file = $tonality_file = $alphabet_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = '';
-$extract_data = extract_data(TRUE,$content);
+$extract_data = extract_data(FALSE,TRUE,$content);
 echo "<p class=\"green-text\">".$extract_data['headers']."</p>";
 $content = $extract_data['content'];
 $csound_file = $extract_data['csound'];

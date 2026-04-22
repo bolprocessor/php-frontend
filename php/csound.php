@@ -215,7 +215,7 @@ if(strlen(trim($content)) == 0) {
 	$template = "csound_template";
 	$content = @file_get_contents($template);
 	}
-$extract_data = extract_data(FALSE,$content);
+$extract_data = extract_data(FALSE,FALSE,$content);
 echo "<p class=\"green-text\">".$extract_data['headers']."</p>";
 $content = $extract_data['content'];
 
