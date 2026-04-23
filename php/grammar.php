@@ -71,6 +71,7 @@ echo "&nbsp;Workspace = <input title=\"List this workspace\" class=\"edit\" name
 $hide = $need_to_save = FALSE;
 $no_save_midiresources = FALSE;
 $true_bp_grammar = FALSE;
+$grammar_has_structures = FALSE;
 $reason_not_true = '';
 
 if(isset($_POST['use_convention'])) {
@@ -334,6 +335,7 @@ if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 $metronome = 0;
 $nature_of_time = $objects_file = $csound_file = $tonality_file = $alphabet_file = $data_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = $weights_file = '';
 $nature_of_time_settings = STRIATED;
+$grammar_has_structures = FALSE;
 $extract_data = extract_data(TRUE,TRUE,$content);
 echo "<p class=\"green-text\">".$extract_data['headers']."</p>";
 $content = $extract_data['content'];
@@ -354,7 +356,7 @@ $metronome = $metronome_in_grammar = $extract_data['metronome'];
 $time_structure = $extract_data['time_structure'];
 if($time_structure == "striated") $nature_of_time = STRIATED;
 if($time_structure == "smooth") $nature_of_time = SMOOTH;
-$templates = $extract_data['templates'];
+$grammar_has_templates = $extract_data['templates'];
 $found_elsewhere = FALSE;
 if($alphabet_file <> '' AND $objects_file == '') {
 	$objects_file = get_name_so_file($dir.$alphabet_file);
@@ -555,7 +557,7 @@ $link_produce .= "&here=".urlencode($here);
 echo "</tr>";
 echo "</table>";
 echo "<br />";
-// if($templates) {
+// if($grammar_has_templates) {
 if($true_bp_grammar) {
 	$action = "templates";
 	$link_produce_templates = "produce.php?instruction=".$action."&grammar=".urlencode($this_file)."&keepalive=1";
@@ -733,10 +735,17 @@ if((file_exists($output.SLASH.$default_output_name.".wav") OR file_exists($outpu
 	echo "&nbsp;&nbsp;&nbsp;<input class=\"edit\" style=\"font-size:large;\" onclick=\"window.open('".nice_url($result_file)."','result','width=800,height=600,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Show latests results\">";
 	}
 echo "&nbsp;<input class=\"edit big\" type=\"submit\" onclick=\"clearsave();\" name=\"compilegrammar\" value=\"COMPILE GRAMMAR\">";
-if($true_bp_grammar) {
-	if($templates) $this_value = "Update templates";
-	else $this_value = "Create templates";
-	echo "&nbsp;<input class=\"edit big\" onclick=\"if(checksaved()) {window.open('".$link_produce_templates."','".$window_name."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"create_templates\" value=\"".$this_value."\">";
+// $grammar_has_structures = TRUE;
+if($true_bp_grammar AND $grammar_has_structures) {
+	if($grammar_has_templates) {
+		$this_value = "Update templates";
+		$extra_class = "";
+		}
+	else {
+		$this_value = "Create templates";
+        $extra_class = "attention";
+		}
+	echo "&nbsp;<input class=\"edit big $extra_class\" onclick=\"if(checksaved()) {window.open('".$link_produce_templates."','".$window_name."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"create_templates\" value=\"".$this_value."\">";
 	}
 echo "&nbsp;<input onclick=\"if(checksaved()) {window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)";
 if($error) {
@@ -754,8 +763,12 @@ if($true_bp_grammar) {
 	// echo $link_learn."<br />";
 	echo "<p>👉 This is a <span class=\"red-text\">TRUE</span> BP grammar&nbsp;";
 	if($data_file <> '' AND file_exists($dir.$data_file) AND !$error) {
-		$this_value = "LEARN weights";
-		echo "➡&nbsp;<input class=\"produce big\" onclick=\"if(checksaved()) {window.open('".$link_learn."','Learning','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"learn\" value=\"".$this_value."\">&nbsp;from all items in <span class=\"green-text\">‘".$data_file."’</span>";
+		if(!$grammar_has_structures OR $grammar_has_templates) {
+		echo "➡&nbsp;<input class=\"produce big\" onclick=\"if(checksaved()) {window.open('".$link_learn."','Learning','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"learn\" value=\"LEARN weights\">&nbsp;from all items in <span class=\"green-text\">‘".$data_file."’</span>";
+			}
+		else {
+			echo "➡&nbsp;create templates if it is used for parsing!";
+			}
 		}
 	echo "</p>";
 	}

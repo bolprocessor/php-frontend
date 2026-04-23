@@ -5,7 +5,7 @@ if(isset($_GET['title'])) $this_title = urldecode($_GET['title']);
 else $this_title = '';
 
 $learning = FALSE;
-$failed_parsing = $failed_template = $success = 0;
+$failed_parsing = $failed_template = $success_parsing = 0;
 
 echo "<head>";
 if($midi_player == "MIDIjs") echo "<script type='text/javascript' src='https://www.midijs.net/lib/midi.js'></script>";
@@ -822,6 +822,7 @@ else {
 		}
 	}
 $weights_file_path = '';
+$created_templates = FALSE;
 if($n_messages > 0) {
 	$warnings = 0;
 	$analyzing_success = $analyzing_failure = FALSE;
@@ -844,6 +845,9 @@ if($n_messages > 0) {
 		if(($this_count = substr_count($mssg,"Creating weights file:")) > 0) {
 			$weights_file_path = trim(str_replace("Creating weights file:",'',$mssg));
 			}
+		if(($this_count = substr_count($mssg,"templates have been produced")) > 0) {
+			$created_templates = TRUE;
+			}
 		if(($this_count = substr_count($mssg,"Analyzing item")) > 0) {
 			$analyzing_failure = TRUE;
 			$analyzing_success = TRUE;
@@ -853,7 +857,7 @@ if($n_messages > 0) {
 			$analyzing_failure = FALSE;
 			}
 		if(($this_count = substr_count($mssg,"accepted by")) > 0 AND $analyzing_success) {
-			$success += $this_count;
+			$success_parsing += $this_count;
 			$analyzing_success = FALSE;
 			}
 		if(($this_count = substr_count($mssg,"matched no template")) > 0) $failed_template += $this_count;
@@ -882,10 +886,11 @@ if($trace_csound <> '' AND file_exists($trace_csound)) {
 	}
 echo "</p>";
 
-if($success > 0) echo "<p><big>✅&nbsp;&nbsp;".$success." item(s) were successfully parsed</big></p>";
+if($success_parsing > 0) echo "<p><big>✅&nbsp;&nbsp;".$success_parsing." item(s) successfully parsed</big></p>";
 if($failed_parsing > 0) echo "<p><big>❌&nbsp;&nbsp;".$failed_parsing." item(s) failed in the parsing after matching a template</big></p>";
 if($failed_template > 0) echo "<p><big>❌&nbsp;&nbsp;".$failed_template." item(s) matched no template</big></p>";
 if($weights_file_path <> '') echo "<p>👉 New weights are saved in ".$weights_file_path."</p>";
+if($created_templates) echo "<p>👉 Templates have been created. Click the “<span class=\"red-text\">output file</span>” link!</p>";
 
 @unlink($running_trace);
 

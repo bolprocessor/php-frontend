@@ -417,6 +417,16 @@ body.light-mode .warning {
 	box-shadow: 2px 2px 2px 2px gold;
 	border-radius: 0.5em;
 	}
+	
+.attention {
+    animation: pulse 1.2s infinite;
+	}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+	}
 
 input[type=submit] {
 	margin: 2px;

@@ -30,6 +30,8 @@ $test = FALSE;
 $permissions = 0775;
 $today_date = date("Y-m-d");
 $reason_not_true =  '';
+$true_bp_grammar = FALSE;
+$grammar_has_structures = FALSE;
 
 $file_path = "_settings.php";
 if(!file_exists($file_path)) {
@@ -506,7 +508,7 @@ function findCsoundPath($exeName) {
     }
 	
 function extract_data($is_grammar,$compact,$content) {
-	global $true_bp_grammar,$thistype,$reason_not_true;
+	global $true_bp_grammar,$grammar_has_structures,$thistype,$reason_not_true;
 	$said = FALSE;
 	$content = trim($content);
 	$content = str_replace(chr(13).chr(10),chr(10),$content);
@@ -548,19 +550,20 @@ function extract_data($is_grammar,$compact,$content) {
 		if(str_starts_with($line,'--')) $nr_end_lines++;
 		else $nr_end_lines = 0;
 		if($found_templates AND str_starts_with($line,'--')) $need_end_line = FALSE;
-	//	if(isset($thistype) AND $thistype == "grammar" AND !$start AND strlen($line) < 1) continue;
 		if($nr_end_lines > 1) {
 			$nr_end_lines--;
 			continue;
 			}
 		$table_out[] = $line;
+		if(str_starts_with($line,"//") OR str_starts_with($line,"/*")) continue;
 		$line = preg_replace("/ *\[.*\]/u",'',$line);
 		$line = trim(preg_replace("/ *\/\/.*$/u",'',$line));
-		if($is_grammar AND !is_true_bp($line)) $is_true_bp = FALSE;
-		if($is_grammar AND is_valid_for_parsing($line)) $is_valid_for_parsing = TRUE;
 		if(is_integer($pos=strpos($line,"TEMPLATES:")) AND $pos == 0) {
 			$extract_data['templates'] = $found_templates = $need_end_line = TRUE;
 			}
+		if($is_grammar AND !$found_templates AND structural_rule($line)) $grammar_has_structures = TRUE;
+		if($is_grammar AND !$found_templates AND !is_true_bp($line)) $is_true_bp = FALSE;
+		if($is_grammar AND !$found_templates AND is_valid_for_parsing($line)) $is_valid_for_parsing = TRUE;
 		if(is_integer($pos=strpos($line,"_mm")) AND $pos == 0) {
 			$metronome = preg_replace("/.*_mm\(([^\)]+)\).*/u","$1",$line);
 			$extract_data['metronome'] = $metronome;
@@ -572,7 +575,7 @@ function extract_data($is_grammar,$compact,$content) {
 			$extract_data['time_structure'] = "smooth";
 			}
 		if(is_integer($pos=strpos($line,"_striated")) AND $pos == 0) {
-			$extract_data['time_structure'] = "_striated";
+			$extract_data['time_structure'] = "striated";
 			}
 		if(is_integer($pos=strpos($line,"-gr")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
 			$extract_data['grammar'] = fix_file_name($line,"ho");
@@ -627,6 +630,18 @@ function extract_data($is_grammar,$compact,$content) {
 			}
 		}
 	return $extract_data;
+	}
+
+function structural_rule($line) {
+	if(str_contains($line,"(=") OR str_contains($line,"(:")) {
+	//	echo "Structural rule (parenthesis): ".$line."<br />";
+		return TRUE;
+		}
+	if(str_contains($line," +") OR str_contains($line,":") OR str_contains($line,";") OR str_contains($line," =") OR str_contains($line,"\\")) {
+	//	echo "Structural rule (structure marker): ".$line."<br />";
+		return TRUE;
+		}
+	return FALSE;
 	}
 
 function is_true_bp($line) {

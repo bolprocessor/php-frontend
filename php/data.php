@@ -1308,7 +1308,7 @@ $metronome = $extract_data['metronome'];
 $time_structure = $extract_data['time_structure'];
 if($time_structure == "striated") $nature_of_time = STRIATED;
 if($time_structure == "smooth") $nature_of_time = SMOOTH;
-$templates = $extract_data['templates'];
+$grammar_has_templates = $extract_data['templates'];
 $found_elsewhere = FALSE;
 if($alphabet_file <> '' AND $objects_file == '') {
 	$objects_file = get_name_so_file($dir.$alphabet_file);
