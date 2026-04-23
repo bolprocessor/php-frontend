@@ -484,7 +484,7 @@ if($data_file <> '') {
 if($weights_file <> '') {
 	if(!file_exists($dir.$weights_file)) {
 	//	$upload_mssg = upload_related_form($dir,$weights_file,"weights");
-		echo "<p>⚠️  <span class=\"red-text\">WARNING:</span> <span class=\"green-text\">‘".$weights_file."’</span> not found</p>";
+		echo "<p>⚠️  <span class=\"red-text\">WARNING:</span> <span class=\"green-text\">‘".$weights_file."’</span> not yet saved</p>";
 		$error2 = TRUE;
 		}
 	}
@@ -784,7 +784,7 @@ $table = explode(chr(10),$content);
 $imax = count($table);
 if(isset($_POST['apply_these_weights'])) {
 	echo "<p>👉 Applying new weights&nbsp;";
-	echo "➡&nbsp;<input class=\"save\" type=\"submit\" id=\"saveButton\" onclick=\"clearsave();\" name=\"savethisfile\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".begin_with(20,$filename)."’\">";
+	echo "➡&nbsp;If these are  correct <input class=\"save\" type=\"submit\" id=\"saveButton\" onclick=\"clearsave();\" name=\"savethisfile\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".begin_with(20,$filename)."’\">&nbsp;otherwise <input class=\"edit\" type=\"submit\" name=\"\" value=\"REFRESH THIS PAGE\">";
 	echo "</p>";
 	$json = $_POST['apply_these_weights'];
 	$weight_table = json_decode($json,true);

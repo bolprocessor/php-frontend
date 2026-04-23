@@ -10,21 +10,46 @@ if(isset($_GET['grammarWindow'])) $grammarWindow = urldecode($_GET['grammarWindo
 else $grammarWindow = '';
 $url_this_page = "weights.php?file=".urlencode($file);
 $table = explode(SLASH,$file);
-$filename = end($table);
+$current_filename = end($table);
 $this_file = $bp_application_path.$file;
-$dir = str_replace($filename,'',$this_file);
-$current_directory = str_replace(SLASH.$filename,'',$file);
+$dir = str_replace($current_filename,'',$this_file);
+$current_directory = str_replace(SLASH.$current_filename,'',$file);
 
 require_once("_header.php");
-display_darklight();
+// display_darklight();
 
+/*
+echo '<head>';
+echo '    <meta charset="UTF-8">';
+echo '    <meta name="viewport" content="width=device-width, initial-scale=1.0">';
+echo '    <title>Weights</title>';
+echo '    <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 20px;
+            }
+            button {
+                padding: 8px 14px;
+                margin-right: 10px;
+                cursor: pointer;
+            }
+            textarea {
+                width: 100%;
+                height: 300px;
+                margin-top: 15px;
+                font-family: monospace;
+                font-size: 14px;
+            }
+        </style>';
+echo '</head>';
+echo "<body>"; */
 echo "<p>";
 $url = "index.php?path=".urlencode($current_directory);
-echo "&nbsp;Workspace = <input title=\"List this workspace\" class=\"edit\" name=\"workspace\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$url."','_self');\" value=\"".$current_directory."\"></p>";
+// echo "&nbsp;Workspace = <input title=\"List this workspace\" class=\"edit\" name=\"workspace\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$url."','_self');\" value=\"".$current_directory."\"></p>";
 
-echo link_to_help();
+// echo link_to_help();
 
-echo "<h2>Weights “".$filename."”</h2>";
+echo "<h2>Weights “".$current_filename."”</h2>";
 
 $grammar_page_url = "grammar.php?file=".urlencode($current_directory.SLASH.$grammar_file);
 
@@ -40,7 +65,7 @@ if(isset($_POST['savethisfile'])) {
 		echo "<span id=\"timespan\" style=\"color:red; float:right; background-color:white; padding:6px; border-radius:6px;\">&nbsp;Saved “".$this_file."” file…</span>";
 		$handle = @fopen($this_file,"w");
 		if($handle) {
-			$file_header = "// Bol Processor on-line test via PHP\n// Weights file saved as ‘".$filename."’. Date: ".gmdate('Y-m-d H:i:s');
+			$file_header = "// Bol Processor on-line test via PHP\n// Weights file saved as ‘".$current_filename."’. Date: ".gmdate('Y-m-d H:i:s');
 			fwrite($handle,$file_header."\n");
 			fwrite($handle,$content);
 			fclose($handle);
@@ -52,6 +77,7 @@ if(isset($_POST['savethisfile'])) {
 		@chmod($file_path,$permissions);
 		}
 	}
+
 if(isset($_POST['resetthisfile_127']) OR isset($_POST['resetthisfile_0'])) {
 	echo "<span id=\"timespan\" style=\"color:red; float:right; background-color:white; padding:6px; border-radius:6px;\">&nbsp;Resetted “".$this_file."” file…</span>";
 	$json = $_POST['apply_these_weights'];
@@ -60,7 +86,7 @@ if(isset($_POST['resetthisfile_127']) OR isset($_POST['resetthisfile_0'])) {
 	else $new_weight = 0;
 	$handle = @fopen($this_file,"w");
 	if($handle) {
-		$file_header = "// Bol Processor on-line test via PHP\n// Weights file saved as ‘".$filename."’. Date: ".gmdate('Y-m-d H:i:s');
+		$file_header = "// Bol Processor on-line test via PHP\n// Weights file saved as ‘".$current_filename."’. Date: ".gmdate('Y-m-d H:i:s');
 		fwrite($handle,$file_header."\n");
 		foreach($weight_table AS $row) {
 			$this_data['igram'] = $row['igram'];
@@ -78,27 +104,65 @@ if(isset($_POST['resetthisfile_127']) OR isset($_POST['resetthisfile_0'])) {
 	file_put_contents($file_path,$this_file);
 	@chmod($file_path,$permissions);
 	}
-if(file_exists($this_file)) {
-	$content = @file_get_contents($this_file);
-	if($content === FALSE) die();
-	if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 
+if(isset($_POST["copy_from_file"])AND isset($_POST["wgfile"])AND is_file($_POST["wgfile"])){
+	echo "Copying from file ".$_POST["wgfile"]."<br />";
+	$content = file_get_contents($_POST["wgfile"]);
+	if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 	$extract_data = extract_data(FALSE,TRUE,$content);
 	echo "<p class=\"green-text\">".$extract_data['headers']."</p>";
-
 	$content = $extract_data['content'];
 	$json = '['.preg_replace('/}\s*{/', '},{', trim($content)).']';
+	$_POST['save_these_weights'] = TRUE;
+	$_POST['new_name'] = $current_filename;
 	}
-else $content = '';
+else {
+	if(file_exists($this_file)) {
+		$content = @file_get_contents($this_file);
+		if($content === FALSE) die();
+		if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
+		$extract_data = extract_data(FALSE,TRUE,$content);
+		echo "<p class=\"green-text\">".$extract_data['headers']."</p>";
+		$content = $extract_data['content'];
+		$json = '['.preg_replace('/}\s*{/', '},{', trim($content)).']';
+		}
+	else $content = '';
+	}
+
+if($content <> '' AND isset($_POST['save_these_weights'])) {
+	$new_name = trim($_POST['new_name']);
+	$new_name = str_replace("-wg.",'',$new_name);
+	$new_name = good_name("wg",$new_name,"prefix");
+	if($new_name <> '') {
+		echo "<span id=\"timespan\" style=\"color:red; float:right; background-color:white; padding:6px; border-radius:6px;\">&nbsp;Saving to “".$new_name."” file…</span>";
+		$file_path = $dir.$new_name;
+	//	echo "<span id=\"timespan\" style=\"color:red; float:right; background-color:white; padding:6px; border-radius:6px;\">&nbsp;Saving to “".$file_path."”…</span>";
+	$new_content = "// Bol Processor on-line test via PHP\n// Weights file saved as ‘".$new_name."’. Date: ".gmdate('Y-m-d H:i:s')."\n";
+		$new_content .= $content;
+		file_put_contents($file_path,$new_content);
+		@chmod($file_path,$permissions);
+		}
+	}
 
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-echo "<p style=\"text-align:left;\"><input class=\"save\" type=\"submit\" name=\"savethisfile\" value=\"COPY current rule weights\"> from grammar <span class=\"green-text\">‘".$grammar_file."’</span> to <span class=\"green-text\">‘".$filename."’</span></p>";
+echo "<p style=\"text-align:left;\"><input class=\"save\" type=\"submit\" name=\"savethisfile\" value=\"COPY current rule weights\"> from grammar <span class=\"green-text\">‘".$grammar_file."’</span> to <span class=\"green-text\">‘".$current_filename."’</span></p>";
 echo "<input type=\"hidden\" name=\"grammar_file\" value=\"".$grammar_file."\">";
 if($grammarWindow <> '') echo "<input type=\"hidden\" name=\"grammarWindow\" value=\"".$grammarWindow."\">";
+
+$all_files = glob($dir."/*-wg.*");
+echo "<input class=\"save\" type=\"submit\" name=\"copy_from_file\" value=\"COPY weights from this file:\">&nbsp;";
+echo "<select name=\"wgfile\">&nbsp;to <span class=\"green-text\">‘".$current_filename."’</span>";
+foreach($all_files as $some_file) {
+	$some_name = basename($some_file);
+	echo "<option value=\"".htmlspecialchars($some_file,ENT_QUOTES)."\">".htmlspecialchars($some_name,ENT_QUOTES)."</option>";
+	}
+echo "</select>&nbsp;to <span class=\"green-text\">‘".$current_filename."’</span>";
+
 if($content <> '') {
 	echo "<input type=\"hidden\" name=\"apply_these_weights\" value=\"".htmlspecialchars($json, ENT_QUOTES,'UTF-8')."\">";
-	echo "<p><input class=\"save\" type=\"submit\" name=\"resetthisfile_127\" value=\"SET rule weights to 127\"> in <span class=\"green-text\">‘".$filename."’</span> (except variable ones)</p>";
-	echo "<p><input class=\"save\" type=\"submit\" name=\"resetthisfile_0\" value=\"RESET rule weights to 0\"> in <span class=\"green-text\">‘".$filename."’</span> (except variable ones)</p>";
+	echo "<p><input class=\"save\" type=\"submit\" name=\"save_these_weights\" value=\"SAVE a copy to:\">&nbsp;<span class=\"green-text\">-wg.</span>&nbsp;<input type=\"text\" name=\"new_name\" size=\"30\" value=\"enter_a_name\"></p>";
+	echo "<p><input class=\"save\" type=\"submit\" name=\"resetthisfile_127\" value=\"SET rule weights to 127\"> in <span class=\"green-text\">‘".$current_filename."’</span> (except variable ones)</p>";
+	echo "<p><input class=\"save\" type=\"submit\" name=\"resetthisfile_0\" value=\"RESET rule weights to 0\"> in <span class=\"green-text\">‘".$current_filename."’</span> (except variable ones)</p>";
 	}
 echo "</form>";
 
@@ -126,8 +190,8 @@ if($content <> '') {
 	echo "<br /><form id=\"return_to_grammar\" method=\"post\" action=\"".$grammar_page_url."#topedit\" onsubmit=\"return sendBackToGrammar();\" enctype=\"multipart/form-data\">";
 	echo "<input type=\"hidden\" name=\"apply_these_weights\" value=\"".htmlspecialchars($json, ENT_QUOTES,'UTF-8')."\">";
 	if($grammarWindow <> '') echo "<input type=\"hidden\" name=\"grammarWindow\" value=\"".$grammarWindow."\">";
-	echo "<input class=\"save\" type=\"submit\" value=\"COPY BACK rule weights\"> in <span class=\"green-text\">‘".$filename."’</span> (shown above) to <span class=\"green-text\">‘".$grammar_file."’</span> grammar";
-	echo "<br />👉 then, save the grammar!";
+	echo "<input class=\"save\" type=\"submit\" value=\"COPY BACK rule weights\"> in <span class=\"green-text\">‘".$current_filename."’</span> (shown above) to <span class=\"green-text\">‘".$grammar_file."’</span> grammar";
+	echo "<br />👉 then, save the grammar if these weights are correct…";
 	echo "</form>";
 	}
 // We need the following function because "target" is not properly handled by some browwsers

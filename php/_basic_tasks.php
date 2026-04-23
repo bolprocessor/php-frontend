@@ -1112,6 +1112,59 @@ function decode_entities($text) {
 	return $text;
 	}
 
+function add_linefeeds_after_remarks($text) { // 2026-04-23
+	$table = explode(chr(10),$text);
+	$is_comment = FALSE;
+	$table2 = array();
+	foreach($table AS $line) {
+		$line = trim($line);
+		if(str_starts_with($line,"//")) $is_comment = TRUE;
+		else {
+			if($is_comment) {
+				if($line <> '') $table2[] = '';
+				$is_comment = FALSE;
+				}
+			}
+		$table2[] = $line;
+		}
+	$text = implode(chr(10),$table2);
+	return $text;
+	}
+
+function cut_linefeeds_in_remarks($text) { // 2026-04-23
+	$table = explode(chr(10),$text);
+	$is_comment = FALSE;
+	$comment_line = '';
+	$table2 = array();
+	foreach($table AS $line) {
+		$line = trim($line);
+		if(str_starts_with($line,"/*")) {
+			if(!str_ends_with($line,"*/")) {
+				$is_comment = TRUE;
+				$comment_line = $line;
+				continue;
+				}
+			else {
+				$line = str_replace("/*",'',$line);
+				$line = str_replace("*/",'',$line);
+				$line = "// ".$line;
+				}
+			}
+		if($is_comment AND str_ends_with($line,"*/")) {
+			$line = $comment_line." ".$line;
+			$is_comment = FALSE;
+			$comment_line = '';
+			}
+		if($is_comment) {
+			$comment_line .= " ".$line;
+			continue;
+			}
+		$table2[] = $line;
+		}
+	$text = implode(chr(10),$table2);
+	return $text;
+	}
+
 function clean_up_file_to_html($file) {
 	global $permissions;
 	// echo "file = ".$file."<br />";
@@ -5270,6 +5323,8 @@ function save($this_file,$filename,$top_header,$save_content) {
 		if($handle) {
 			$file_header = $top_header."\n// Data saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
 			fwrite($handle, $file_header."\n");
+			$save_content = cut_linefeeds_in_remarks($save_content); // 2026-04-23
+			$save_content = add_linefeeds_after_remarks($save_content); // 2026-04-23
 			$save_content = recode_entities($save_content);
 			fwrite($handle, $save_content);
 			fclose($handle);
