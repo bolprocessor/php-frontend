@@ -5429,7 +5429,7 @@ function convert_to_json($dir,$settings_file) {
 			$j++;
 			continue;
 			}
-		if(!isset($parameter_name[$i]) OR parameter_name[$i] == '') {
+		if(!isset($parameter_name[$i]) OR $parameter_name[$i] == '') {
 			$j++;
 			continue;
 			}
@@ -5439,11 +5439,13 @@ function convert_to_json($dir,$settings_file) {
 		if($name == "GraphicScaleP") $name = "Graphic scale P";
 		if($name == "GraphicScaleQ") $name = "Graphic scale Q";
 		if($name == "SamplingRate") $name = "Sampling rate";
-		$the_token = $token[$name];
-		$settings[$the_token]['name'] = $name;
-		$settings[$the_token]['value'] = $value;
-		$settings[$the_token]['unit'] = $parameter_unit[$i];
-		$settings[$the_token]['boolean'] = $parameter_yesno[$i];
+		if(isset($token[$name])) {
+			$the_token = $token[$name];
+			$settings[$the_token]['name'] = $name;
+			$settings[$the_token]['value'] = $value;
+			$settings[$the_token]['unit'] = $parameter_unit[$i];
+			$settings[$the_token]['boolean'] = $parameter_yesno[$i];
+			}
 		}
 	$settings['ComputeWhilePlay']['name'] = "Compute while playing";
 	$settings['ComputeWhilePlay']['value'] = 1;
