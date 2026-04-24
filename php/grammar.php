@@ -784,7 +784,7 @@ $table = explode(chr(10),$content);
 $imax = count($table);
 if(isset($_POST['apply_these_weights'])) {
 	echo "<p>👉 Applying new weights&nbsp;";
-	echo "➡&nbsp;If these are  correct <input class=\"save\" type=\"submit\" id=\"saveButton\" onclick=\"clearsave();\" name=\"savethisfile\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".begin_with(20,$filename)."’\">&nbsp;otherwise <input class=\"edit\" type=\"submit\" name=\"\" value=\"REFRESH THIS PAGE\">";
+	echo "➡&nbsp;If these are  correct &nbsp;<input class=\"save  attention\" type=\"submit\" id=\"saveButton\" onclick=\"clearsave();\" name=\"savethisfile\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".begin_with(20,$filename)."’\">&nbsp;&nbsp;otherwise &nbsp;<input class=\"edit attention\" type=\"submit\" name=\"\" value=\"REFRESH THIS PAGE\">";
 	echo "</p>";
 	$json = $_POST['apply_these_weights'];
 	$weight_table = json_decode($json,true);

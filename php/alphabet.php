@@ -30,7 +30,7 @@ if(isset($_POST['savethisfile'])) {
 		echo "<span id=\"timespan\" style=\"color:red; float:right; background-color:white; padding:6px; border-radius:6px;\">&nbsp;Saved “".$this_file."” file…</span>";
 		$handle = @fopen($this_file,"w");
 		if($handle) {
-			$file_header = "// Bol Processor on-line test via PHP\n// Alphabet file saved as ‘".$filename."’. Date: ".gmdate('Y-m-d H:i:s');
+			$file_header = $top_header."\n// Alphabet file saved as ‘".$filename."’. Date: ".gmdate('Y-m-d H:i:s');
 			fwrite($handle,$file_header."\n");
 			fwrite($handle,$content);
 			fclose($handle);

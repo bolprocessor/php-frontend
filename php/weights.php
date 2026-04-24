@@ -59,13 +59,14 @@ reformat_grammar(FALSE,$dir.$grammar_file);
 
 if(isset($_POST['grammarWindow'])) $grammarWindow = $_POST['grammarWindow'];
 
+$file_header = $top_header."\n// Weights file saved from ‘".$grammar_file."’ as ‘".$current_filename."’. Date: ".gmdate('Y-m-d H:i:s');
+
 if(isset($_POST['savethisfile'])) {
 	$content = file_get_contents($temp_weights_file);
 	if(trim($content) <> '') {
 		echo "<span id=\"timespan\" style=\"color:red; float:right; background-color:white; padding:6px; border-radius:6px;\">&nbsp;Saved “".$this_file."” file…</span>";
 		$handle = @fopen($this_file,"w");
 		if($handle) {
-			$file_header = "// Bol Processor on-line test via PHP\n// Weights file saved as ‘".$current_filename."’. Date: ".gmdate('Y-m-d H:i:s');
 			fwrite($handle,$file_header."\n");
 			fwrite($handle,$content);
 			fclose($handle);
@@ -86,7 +87,6 @@ if(isset($_POST['resetthisfile_127']) OR isset($_POST['resetthisfile_0'])) {
 	else $new_weight = 0;
 	$handle = @fopen($this_file,"w");
 	if($handle) {
-		$file_header = "// Bol Processor on-line test via PHP\n// Weights file saved as ‘".$current_filename."’. Date: ".gmdate('Y-m-d H:i:s');
 		fwrite($handle,$file_header."\n");
 		foreach($weight_table AS $row) {
 			$this_data['igram'] = $row['igram'];
@@ -136,8 +136,7 @@ if($content <> '' AND isset($_POST['save_these_weights'])) {
 	if($new_name <> '') {
 		echo "<span id=\"timespan\" style=\"color:red; float:right; background-color:white; padding:6px; border-radius:6px;\">&nbsp;Saving to “".$new_name."” file…</span>";
 		$file_path = $dir.$new_name;
-	//	echo "<span id=\"timespan\" style=\"color:red; float:right; background-color:white; padding:6px; border-radius:6px;\">&nbsp;Saving to “".$file_path."”…</span>";
-	$new_content = "// Bol Processor on-line test via PHP\n// Weights file saved as ‘".$new_name."’. Date: ".gmdate('Y-m-d H:i:s')."\n";
+		$new_content = $file_header."\n";
 		$new_content .= $content;
 		file_put_contents($file_path,$new_content);
 		@chmod($file_path,$permissions);
@@ -149,7 +148,7 @@ echo "<p style=\"text-align:left;\"><input class=\"save\" type=\"submit\" name=\
 echo "<input type=\"hidden\" name=\"grammar_file\" value=\"".$grammar_file."\">";
 if($grammarWindow <> '') echo "<input type=\"hidden\" name=\"grammarWindow\" value=\"".$grammarWindow."\">";
 
-$all_files = glob($dir."/*-wg.*");
+$all_files = glob($dir."*-wg.*");
 echo "<input class=\"save\" type=\"submit\" name=\"copy_from_file\" value=\"COPY weights from this file:\">&nbsp;";
 echo "<select name=\"wgfile\">&nbsp;to <span class=\"green-text\">‘".$current_filename."’</span>";
 foreach($all_files as $some_file) {
@@ -167,7 +166,7 @@ if($content <> '') {
 echo "</form>";
 
 if($content <> '') {
-	$data = json_decode($json, true);
+	$data = json_decode($json,true);
 	if($data === null) {
 		echo "JSON error: " . json_last_error_msg();
 		echo "<pre>$json</pre>";
