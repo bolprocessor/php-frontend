@@ -756,7 +756,7 @@ else echo "\" class=\"produce big\"";
 echo ">";
 echo "</p>";
 if($true_bp_grammar AND !$error) {
-	if($weights_file == '') $weights_file = str_replace("-gr.","-wg.",$filename);
+	if($weights_file == '' AND str_starts_with($filename,"-gr.")) $weights_file = str_replace("-gr.","-wg.",$filename);
 	$link_learn = "produce.php?data=".urlencode($dir.$data_file)."&instruction=analyze&grammar=".urlencode($this_file)."&settings=".urlencode($dir.$settings_file)."&weights=".urlencode($dir.$weights_file)."&output=".urlencode($output.SLASH.$output_file);
 	if($alphabet_file <> '') $link_learn .= "&alphabet=".urlencode($dir.$alphabet_file);
 	if($trace_production) $link_learn .= "&trace_production=1";
