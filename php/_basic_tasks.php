@@ -626,7 +626,7 @@ function extract_data($is_grammar,$compact,$content) {
 			$true_bp_grammar = TRUE;
 			}
 		else if(!$is_valid_for_parsing) {
-			$reason_not_true = "▶︎ It does not contain rules valid for parsing (with '<--' or '<->' derivation signs)<br />";
+			$reason_not_true = "▶︎ It does not contain rules valid for parsing (with '<--' or '<->' derivation signs) ➡ Replace '-->' with '<->' to fix it!<br />";
 			}
 		}
 	return $extract_data;
@@ -647,7 +647,7 @@ function structural_rule($line) {
 function is_true_bp($line) {
 	global $reason_not_true;
 	if(str_ends_with($line, '->') OR str_contains($line, 'lambda') || str_contains($line, 'empty')  || str_contains($line, 'null') || str_contains($line, 'nil')) {
-		$reason_not_true .= "▶︎ It has an erasing rule<br />";
+		$reason_not_true .= "▶︎ It has an erasing rule: ".$line."<br />";
 		return FALSE;
 		}
 	if(str_ends_with($line, 'SUB') || str_ends_with($line, 'SUB1') || str_ends_with($line, 'POSLONG')) {
@@ -655,15 +655,15 @@ function is_true_bp($line) {
 		return FALSE;
 		}
 	if(str_contains($line, '{') || str_contains($line, '}')) {
-		$reason_not_true .= "▶︎ A rule contains {polymetric expressions}<br />";
+		$reason_not_true .= "▶︎ This rule contains {polymetric expressions}: ".$line."<br />";
 		return FALSE;
 		}
 	if(str_contains($line, '<K') OR preg_match('/<\d+[+-]\d+>/',$line)) {
-		$reason_not_true .= "▶︎ A rule has a variable weight<br />";
+		$reason_not_true .= "▶︎ This rule has a variable weight: ".$line."<br />";
 		return FALSE;
 		}
 	if(preg_match('#/.+?/#',$line)) {
-		$reason_not_true .= "▶︎ A rule contains a /flag/<br />";
+		$reason_not_true .= "▶︎ This rule contains a /flag/: ".$line."<br />";
 		return FALSE;
 		}
 	if(str_contains($line, '_destru')) {
@@ -1232,6 +1232,7 @@ function note_convention($i) {
 		case 2: $c = "indian"; break;
 		case 3: $c = "keys"; break;
 		case 4: $c = "custom"; break;
+		default: $c = "english";
 		}
 	return $c;
 	}

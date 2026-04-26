@@ -755,16 +755,21 @@ if($error) {
 else echo "\" class=\"produce big\"";
 echo ">";
 echo "</p>";
-if($true_bp_grammar) {
-	if($weights_file == '') $weights_file = str_replace("-da.","-wg.",$filename);
+if($true_bp_grammar AND !$error) {
+	if($weights_file == '') $weights_file = str_replace("-gr.","-wg.",$filename);
 	$link_learn = "produce.php?data=".urlencode($dir.$data_file)."&instruction=analyze&grammar=".urlencode($this_file)."&settings=".urlencode($dir.$settings_file)."&weights=".urlencode($dir.$weights_file)."&output=".urlencode($output.SLASH.$output_file);
 	if($alphabet_file <> '') $link_learn .= "&alphabet=".urlencode($dir.$alphabet_file);
 	if($trace_production) $link_learn .= "&trace_production=1";
 	// echo $link_learn."<br />";
 	echo "<p>👉 This is a <span class=\"red-text\">TRUE</span> BP grammar&nbsp;";
-	if($data_file <> '' AND file_exists($dir.$data_file) AND !$error) {
+	if($data_file <> '' AND file_exists($dir.$data_file)) {
 		if(!$grammar_has_structures OR $grammar_has_templates) {
-		echo "➡&nbsp;<input class=\"produce big\" onclick=\"if(checksaved()) {window.open('".$link_learn."','Learning','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"learn\" value=\"LEARN weights\">&nbsp;from all items in <span class=\"green-text\">‘".$data_file."’</span>";
+			if($weights_file == '') {
+				echo "➡&nbsp;You can learn weights from <span class=\"green-text\">‘".$data_file."’</span>, but first you need to create a ‘-wg’ weights file";
+				}
+			else {
+				echo "➡&nbsp;<input class=\"produce big\" onclick=\"if(checksaved()) {window.open('".$link_learn."','Learning','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"learn\" value=\"LEARN weights\">&nbsp;from all items in <span class=\"green-text\">‘".$data_file."’</span>";
+				}
 			}
 		else {
 			echo "➡&nbsp;create templates if it is used for parsing!";
