@@ -659,7 +659,7 @@ function is_true_bp($line) {
 		return FALSE;
 		}
 	if(str_contains($line, '<K') OR preg_match('/<\d+[+-]\d+>/',$line)) {
-		$reason_not_true .= "▶︎ This rule has a variable weight: ".$line."<br />";
+		$reason_not_true .= "▶︎ This rule has a variable weight: ".htmlspecialchars($line)."<br />";
 		return FALSE;
 		}
 	if(preg_match('#/.+?/#',$line)) {

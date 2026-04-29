@@ -33,7 +33,7 @@ if(isset($_POST['saveparameters'])) {
 	$file_header = $top_header."\n// Settings file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
 	$settings['header'] = str_replace('"',"'",$file_header);
 	$warning = '';
-	$produceallitems = FALSE;
+	$produceallitems = $tracedetail = FALSE;
 	foreach($_POST as $key => $param) {
     	if(preg_match('/^param_(\d+)$/', $key, $matches)) {
         	$i = $matches[1]; // Extract the numeric index
@@ -72,8 +72,8 @@ if(isset($_POST['saveparameters'])) {
 					break;
 				}
 			if($param == "Quantization") $quantization = $value;
-
 			if($param == "AllItems") $produceallitems = $value;
+			if($param == "TraceDetail") $tracedetail = $value;
 			if($param == "Quantize" AND $value == 0 AND $quantization > 0) {
 				$newvalue = 1;
 				$warning .= "<p>👉 <span class=\"red-text\">Quantize has been turned on because Quantization > 0</span></p>";
@@ -82,6 +82,14 @@ if(isset($_POST['saveparameters'])) {
 			if($param == "Quantize" AND $value == 1 AND $quantization == 0) {
 				$newvalue = 0;
 				$warning .= "<p>👉 <span class=\"red-text\">Quantize has been turned off because Quantization = 0</span></p>";
+				$value = $newvalue;
+				}
+			if($param == "TraceProduce" AND $value == 1 AND $tracedetail == 1 && $produceallitems == 1) {
+				$warning .= "<p>👉 <span class=\"red-text\">When producing all items, detailed trace will not be possible</span></p>";
+				}
+			if($param == "TraceProduce" AND $value == 0 AND $tracedetail == 1) {
+				$newvalue = 1;
+				$warning .= "<p>👉 <span class=\"red-text\">Trace production has been turned on because Detailed trace is selected</span></p>";
 				$value = $newvalue;
 				}
 			if($param == "MinPeriod" AND $quantization > 0 AND $value < (2 * $quantization)) {

@@ -756,7 +756,12 @@ else echo "\" class=\"produce big\"";
 echo ">";
 echo "</p>";
 if($true_bp_grammar AND !$error) {
-	if($weights_file == '' AND str_starts_with($filename,"-gr.")) $weights_file = str_replace("-gr.","-wg.",$filename);
+	if($weights_file == '') {
+		if(str_starts_with($filename,"-gr.")) $weights_file = str_replace("-gr.","-wg.",$filename);
+		else if(str_ends_with($filename,".bpgr")) $weights_file = "-wg.".str_replace(".bpgr",'',$filename);
+		$mssg_weights = "</p><p>👉 You should declare a weights file (e.g. \"<span class=\"red-text\">".$weights_file."</span>\") on top of the grammar, and save it.";
+		}
+	else $mssg_weights = '';
 	$link_learn = "produce.php?data=".urlencode($dir.$data_file)."&instruction=analyze&grammar=".urlencode($this_file)."&settings=".urlencode($dir.$settings_file)."&weights=".urlencode($dir.$weights_file)."&output=".urlencode($output.SLASH.$output_file);
 	if($alphabet_file <> '') $link_learn .= "&alphabet=".urlencode($dir.$alphabet_file);
 	if($trace_production) $link_learn .= "&trace_production=1";
@@ -769,6 +774,7 @@ if($true_bp_grammar AND !$error) {
 				}
 			else {
 				echo "➡&nbsp;<input class=\"produce big\" onclick=\"if(checksaved()) {window.open('".$link_learn."','Learning','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"learn\" value=\"LEARN weights\">&nbsp;from all items in <span class=\"green-text\">‘".$data_file."’</span>";
+				echo $mssg_weights;
 				}
 			}
 		else {
