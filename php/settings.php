@@ -282,7 +282,7 @@ for($i = 0; $i < $imax; $i++) {
 	if(count($table2) == 1 OR trim($table2[1]) == '') {
 		if(!$first_line) echo "<tr><td colspan=\"3\">&nbsp;</td></tr>";
 		$first_line = FALSE;
-		echo "<tr><td colspan=\"2\" style=\"color:magenta;\"><b>".$line."</b><td></tr>";
+		echo "<tr><td colspan=\"3\" style=\"color:magenta;\"><b>".$line."</b><td></tr>";
 		continue;
 		}
 	$param = $table2[0];

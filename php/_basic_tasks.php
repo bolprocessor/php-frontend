@@ -658,8 +658,8 @@ function is_true_bp($line) {
 		$reason_not_true .= "▶︎ This rule contains {polymetric expressions}: ".$line."<br />";
 		return FALSE;
 		}
-	if(str_contains($line, '<K') OR preg_match('/<\d+[+-]\d+>/',$line)) {
-		$reason_not_true .= "▶︎ This rule has a variable weight: ".htmlspecialchars($line)."<br />";
+	if(preg_match('/<K?\d+-\d+>/', $line)) {
+		$reason_not_true .= "▶︎ This rule has a decreasing weight: ".htmlspecialchars($line)."<br />";
 		return FALSE;
 		}
 	if(preg_match('#/.+?/#',$line)) {

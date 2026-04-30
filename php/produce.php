@@ -889,8 +889,8 @@ echo "</p>";
 if($success_parsing > 0) echo "<p><big>✅&nbsp;&nbsp;".$success_parsing." item(s) successfully parsed</big></p>";
 if($failed_parsing > 0) echo "<p><big>❌&nbsp;&nbsp;".$failed_parsing." item(s) failed in the parsing after matching a template</big></p>";
 if($failed_template > 0) echo "<p><big>❌&nbsp;&nbsp;".$failed_template." item(s) matched no template</big></p>";
-if($weights_file_path <> '') echo "<p><big>👉 New weights are saved in ".$weights_file_path."</big></p>";
-if($created_templates) echo "<p><big>👉 Templates have been created. Click the “<span class=\"green-text\">output file</span>” link!</big></p>";
+if($weights_file_path <> '') echo "<p><big>👉  New weights are saved in ".$weights_file_path."</big></p>";
+if($created_templates) echo "<p><big>👉  Templates have been created. Click the “<span class=\"green-text\">output file</span>” link!</big></p>";
 
 @unlink($running_trace);
 

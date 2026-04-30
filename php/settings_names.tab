@@ -32,7 +32,7 @@
 "SplitVariables"	"Split |variables|"		"1"	"1"
 "SplitLines"	"Add lines between items"		"1"	"0"
 "CsoundTrace"	"Trace Csound"		"1"	"0"
-"PRODUCTION - PARSING (only grammars)"				
+"PRODUCTION (grammars) - PARSING (data and grammars)"				
 "Improvize"	"Non-stop improvize"		"1"	"0"
 "AllItems"	"Produce all items"		"1"	"0"
 "MaxItemsProduce"	"Max items produced"	"Except in real-time MIDI (deft 20)"	"0"	"20"
