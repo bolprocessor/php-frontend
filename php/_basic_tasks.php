@@ -2576,10 +2576,8 @@ function is_macos_alias($file) { // Fixed 2026-04-21
 	}
 	
 function send_to_console($command) {
-	global $test,$pid,$bp_application_path,$console;
+//	global $test,$pid,$bp_application_path,$console;
 	$table = array();
-//	$command .= " > /dev/null 2>&1"; // This makes it possible to get the pid.
-//	$command .= " 2>&1"; // Redirect stderr to stdout to capture all output
 	if(windows_system()) {
 		$command = windows_command($command);
 //		echo "<small>Windows: exec = <span class=\"red-text\">".str_replace('^','',$command)."</span></small><br />";
@@ -2588,17 +2586,7 @@ function send_to_console($command) {
 	exec($command,$table,$return_var);
 //	echo "Return status: ".$return_var."\n";
     $pid = 0;
- /*   if(!windows_system()) {
-        $command = "pgrep -f ".$bp_application_path.$console;
-        $pid = exec($command);
-        } */
 	$_SESSION['pid'] = $pid;
-/*	$reply = shell_exec($command);
-	echo $reply;
-	return $table; */
-	// system($command,$o);
-	// return $o;
-//	passthru($command,$o);
 	return $table;
 	}
 
@@ -3962,6 +3950,106 @@ function footer() {
 	});";
 	echo "</script>";
 	return;
+	}
+
+function footer_keyboard_mapping($dir,$keyboard_file) {
+    $mapPath = $dir.$keyboard_file;
+	if($keyboard_file == '' OR !file_exists($mapPath)) return;
+    $keyboardJson = file_get_contents($mapPath);
+    ?>
+    <script>
+    (function() {
+        const textarea = document.getElementById("textArea");
+        if (!textarea) return; // page without textarea → do nothing
+
+        const keyboardMap = <?= $keyboardJson ?>;
+        let mappingEnabled = false;
+
+        function insertAtCursor(textarea, text) {
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+
+            textarea.value =
+                textarea.value.substring(0, start) +
+                text +
+                textarea.value.substring(end);
+
+            const pos = start + text.length;
+            textarea.selectionStart = pos;
+            textarea.selectionEnd = pos;
+
+            textarea.dispatchEvent(new Event("input"));
+
+            if (typeof tellsave === "function") {
+                tellsave();
+				}
+			}
+
+        textarea.addEventListener("keydown", function (e) {
+
+            /* Toggle with ESC */
+            if (e.key === "Escape") {
+                mappingEnabled = !mappingEnabled;
+                console.log("Mapping:", mappingEnabled ? "ON" : "OFF");
+                e.preventDefault();
+                return;
+            }
+
+            if (!mappingEnabled) return;
+
+            let key = e.key;
+
+            if (key === "Backspace" ||
+                key === "Delete" ||
+                key === "ArrowLeft" ||
+                key === "ArrowRight" ||
+                key === "ArrowUp" ||
+                key === "ArrowDown") {
+                return;
+            }
+
+            if (key === "Enter") {
+                e.preventDefault();
+                insertAtCursor(textarea, "\n");
+                return;
+            }
+
+            if (key === " ") {
+                e.preventDefault();
+                insertAtCursor(textarea, " ");
+                return;
+            }
+
+            if (/^[0-9]$/.test(key)) {
+                e.preventDefault();
+                insertAtCursor(textarea, key);
+                return;
+            }
+
+            if (key.length === 1) {
+
+                /* Only English letters are mapped */
+                if (/^[a-zA-Z]$/.test(key)) {
+                    const mapKey = key.toUpperCase();
+
+                    if (keyboardMap[mapKey] !== undefined) {
+                        e.preventDefault();
+                        insertAtCursor(textarea, keyboardMap[mapKey]);
+                        return;
+                    }
+
+                    e.preventDefault();
+                    return;
+                }
+
+                /* Other characters → normal typing */
+                return;
+				}
+			});
+
+		})();
+    </script>
+    <?php
 	}
 
 function upload_project($type) {

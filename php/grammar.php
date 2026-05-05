@@ -462,7 +462,6 @@ if($produce_all_items > 0) $action = "produce-all";
 else $action = "produce";
 // $link_produce = "produce.php?instruction=".$action."&grammar=".urlencode($this_file);
 $link_produce = "produce.php?instruction=".$action."&grammar=".urlencode($this_file)."&keepalive=1";
-
 $upload_mssg = '';
 $result_upload = upload_related($dir);
 
@@ -508,6 +507,12 @@ if($timebase_file <> '') {
 		$error = TRUE;
 		}
 	else $link_produce .= "&timebase=".urlencode($dir.$timebase_file);
+	}
+if($keyboard_file <> '') {
+	if(!file_exists($dir.$keyboard_file)) {
+		$upload_mssg .= "<br /><span class=\"red-text blinking\">WARNING:</span> <span class=\"green-text\">".$keyboard_file."</span> not found<br />";
+		$error = TRUE;
+		}
 	}
 if($csound_file <> '') {
 	if(!file_exists($dir_csound_resources.$csound_file)) {
@@ -959,6 +964,7 @@ echo "window.onload = function() {
 echo "</script>\n";
 
 footer();
+footer_keyboard_mapping($dir, $keyboard_file);
 echo "</body>";
 echo "</html>";
 

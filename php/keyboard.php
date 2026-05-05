@@ -27,6 +27,7 @@ save_settings("last_name",$filename);
 if(isset($_POST['savethisfile'])) {
 	echo "<span id=\"timespan\" style=\"color:red; float:right; background-color:white; padding:6px; border-radius:6px;\">&nbsp;Saved “".$this_file."” file…</span>";
 	$content = $_POST['thistext'];
+	$content = mappingListToJson($content);
 	$handle = fopen($this_file,"w");
 	$file_header = $top_header."\n// Keyboard file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
 	fwrite($handle,$file_header."\n");
@@ -38,13 +39,43 @@ if(isset($_POST['savethisfile'])) {
 try_create_new_file($this_file,$filename);
 $content = @file_get_contents($this_file);
 if($content === FALSE) ask_create_new_file($url_this_page,$filename);
-if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
+// if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 $extract_data = extract_data(FALSE,TRUE,$content);
 echo "<p class=\"green-text\">".$extract_data['headers']."</p>";
 $content = $extract_data['content'];
+$content = jsonToMappingList($content);
+if($content == '') $content = "A =\nB =\nC =\nD =\nE =\nF =\nG =\nH =\nI =\nJ =\nK =\nL =\nM =\nN =\nO =\nP =\nQ =\nR =\nS =\nT =\nU =\nV =\nW =\nX =\nY =\nZ =\n";
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 
 echo "<p style=\"text-align:left;\"><input class=\"save\" type=\"submit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></p>";
 echo "<textarea name=\"thistext\" rows=\"40\" style=\"width:700px;\">".$content."</textarea>";
 echo "</form>";
+
+function mappingListToJson(string $text): string {
+    $map = [];
+    foreach (preg_split('/\R/', $text) as $line) {
+        $line = trim($line);
+        if ($line === '' || str_starts_with($line, '//')) {
+            continue;
+        	}
+        if (preg_match('/^(.+?)\s*=\s*(.*?)\s*$/', $line, $m)) {
+            $key = trim($m[1]);
+            $value = trim($m[2]);
+            $map[$key] = $value;
+			}
+		}
+    return json_encode($map, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+	}
+
+function jsonToMappingList(string $json): string {
+    $map = json_decode($json, true);
+    if (!is_array($map)) {
+        return '';
+    	}
+    $lines = [];
+    foreach ($map as $key => $value) {
+        $lines[] = $key . ' = ' . $value;
+    	}
+    return implode("\n", $lines);
+	}
 ?>

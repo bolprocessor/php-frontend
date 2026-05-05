@@ -1569,6 +1569,12 @@ if($timebase_file <> '') {
 		}
 	else $link_options .= "&timebase=".urlencode($dir.$timebase_file);
 	}
+if($keyboard_file <> '') {
+	if(!file_exists($dir.$keyboard_file)) {
+		$upload_mssg .= "<br /><span class=\"red-text blinking\">WARNING:</span> <span class=\"green-text\">".$keyboard_file."</span> not found<br />";
+		$error = TRUE;
+		}
+	}
 if($csound_file <> '') {
 	if(!file_exists($dir_csound_resources.$csound_file)) {
 		$upload_mssg .= "<br /><span class=\"red-text blinking\">WARNING:</span> <span class=\"green-text\">".$csound_file."</span> not found<br />";
@@ -2061,8 +2067,8 @@ echo "window.onload = function() {
     toggleAllDisplays($NumberMIDIinputs); toggleAllDisplays($NumberMIDIoutputs); settogglesearch(); settoggledownload(); settogglescales();
 	};\n";
 echo "</script>\n";
-
 footer();
+footer_keyboard_mapping($dir, $keyboard_file);
 echo "</body></html>";
 
 function create_parts($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxchunk_size,$measure_min,$measure_max,$label) {
@@ -2847,4 +2853,5 @@ function save() {
     });
 }
 </script>"; */
+
 ?>
