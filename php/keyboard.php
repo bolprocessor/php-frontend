@@ -17,39 +17,68 @@ require_once("_header.php");
 display_darklight();
 
 $url = "index.php?path=".urlencode($current_directory);
-echo "<p>Workspace = <input title=\"List this workspace\" class=\"edit\" name=\"workspace\" type=\"submit\" onclick=\"window.open('".$url."','_self');\" value=\"".$current_directory."\">";
-
-echo link_to_help();
 
 echo "<h2>Keyboard file “".$filename."”</h2>";
 save_settings("last_name",$filename); 
 
 if(isset($_POST['savethisfile'])) {
 	echo "<span id=\"timespan\" style=\"color:red; float:right; background-color:white; padding:6px; border-radius:6px;\">&nbsp;Saved “".$this_file."” file…</span>";
-	$content = $_POST['thistext'];
-	$content = mappingListToJson($content);
+	$content = mappingFormToJson($_POST['mapping'] ?? array());
 	$handle = fopen($this_file,"w");
 	$file_header = $top_header."\n// Keyboard file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
 	fwrite($handle,$file_header."\n");
 	fwrite($handle,$content);
 	fclose($handle);
-	chmod($this_file,$permissions);
 	}
 
 try_create_new_file($this_file,$filename);
 $content = @file_get_contents($this_file);
 if($content === FALSE) ask_create_new_file($url_this_page,$filename);
-// if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 $extract_data = extract_data(FALSE,TRUE,$content);
 echo "<p class=\"green-text\">".$extract_data['headers']."</p>";
+echo "<p style=\"width:500px;\">This is a shorthand mapping of keys to words used in grammars and data on the Bol Processor. ";
+echo "You can activate and deactivate the mapping by pressing the 'escape' button.</p>";
 $content = $extract_data['content'];
-$content = jsonToMappingList($content);
-if($content == '') $content = "A =\nB =\nC =\nD =\nE =\nF =\nG =\nH =\nI =\nJ =\nK =\nL =\nM =\nN =\nO =\nP =\nQ =\nR =\nS =\nT =\nU =\nV =\nW =\nX =\nY =\nZ =\n";
+$mapping = jsonToMappingArray($content);
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-
 echo "<p style=\"text-align:left;\"><input class=\"save\" type=\"submit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></p>";
-echo "<textarea name=\"thistext\" rows=\"40\" style=\"width:700px;\">".$content."</textarea>";
+echo "<table style=\"border-collapse:collapse;\">";
+for($i = 0; $i < 13; $i++) {
+	$letter1 = chr(ord('A') + $i);
+	$letter2 = chr(ord('A') + $i + 13);
+	$value1 = htmlspecialchars($mapping[$letter1] ?? '',ENT_QUOTES);
+	$value2 = htmlspecialchars($mapping[$letter2] ?? '',ENT_QUOTES);
+	echo "<tr>";
+	echo "<td style=\"padding:4px 6px; text-align:right; font-weight:bold;\">".$letter1."&nbsp;&nbsp;➡</td>";
+	echo "<td style=\"padding:4px 18px 4px 0;\"><input class=\"edit\" type=\"text\" name=\"mapping[".$letter1."]\" value=\"".$value1."\" style=\"width:180px;\"></td>";
+	echo "<td style=\"padding:4px 6px; text-align:right; font-weight:bold;\">".$letter2."&nbsp;&nbsp;➡</td>";
+	echo "<td style=\"padding:4px 0;\"><input class=\"edit\" type=\"text\" name=\"mapping[".$letter2."]\" value=\"".$value2."\" style=\"width:180px;\"></td>";
+	echo "</tr>";
+	}
+echo "</table>";
 echo "</form>";
+
+function mappingFormToJson(array $form): string {
+    $map = [];
+    for($i = 0; $i < 26; $i++) {
+        $key = chr(ord('A') + $i);
+        $map[$key] = trim($form[$key] ?? '');
+        }
+    return json_encode($map, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    }
+
+function jsonToMappingArray(string $json): array {
+    $map = json_decode($json, true);
+    if (!is_array($map)) {
+        $map = [];
+        }
+    $output = [];
+    for($i = 0; $i < 26; $i++) {
+        $key = chr(ord('A') + $i);
+        $output[$key] = isset($map[$key]) ? $map[$key] : '';
+        }
+    return $output;
+    }
 
 function mappingListToJson(string $text): string {
     $map = [];

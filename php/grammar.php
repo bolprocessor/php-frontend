@@ -964,7 +964,7 @@ echo "window.onload = function() {
 echo "</script>\n";
 
 footer();
-footer_keyboard_mapping($dir, $keyboard_file);
+footer_keyboard_mapping($dir,$keyboard_file);
 echo "</body>";
 echo "</html>";
 

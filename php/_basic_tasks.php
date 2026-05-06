@@ -820,7 +820,7 @@ function display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,
 	if($keyboard_file <> '') {
 		$url_this_page = "keyboard.php?file=".urlencode($dir.$keyboard_file);
 		echo "<td>";
-		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$keyboard_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".begin_with(20,$keyboard_file)."’\">";
+		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$keyboard_file."','width=700,height=700,left=100'); return false;\" value=\"EDIT ‘".begin_with(20,$keyboard_file)."’\">";
 		echo "</td>";
 		}
 	if($glossary_file <> '') {
@@ -3961,44 +3961,33 @@ function footer_keyboard_mapping($dir,$keyboard_file) {
     (function() {
         const textarea = document.getElementById("textArea");
         if (!textarea) return; // page without textarea → do nothing
-
         const keyboardMap = <?= $keyboardJson ?>;
         let mappingEnabled = false;
-
         function insertAtCursor(textarea, text) {
             const start = textarea.selectionStart;
             const end = textarea.selectionEnd;
-
             textarea.value =
                 textarea.value.substring(0, start) +
                 text +
                 textarea.value.substring(end);
-
             const pos = start + text.length;
             textarea.selectionStart = pos;
             textarea.selectionEnd = pos;
-
             textarea.dispatchEvent(new Event("input"));
-
             if (typeof tellsave === "function") {
                 tellsave();
 				}
 			}
-
         textarea.addEventListener("keydown", function (e) {
-
             /* Toggle with ESC */
             if (e.key === "Escape") {
                 mappingEnabled = !mappingEnabled;
                 console.log("Mapping:", mappingEnabled ? "ON" : "OFF");
                 e.preventDefault();
                 return;
-            }
-
+            	}
             if (!mappingEnabled) return;
-
             let key = e.key;
-
             if (key === "Backspace" ||
                 key === "Delete" ||
                 key === "ArrowLeft" ||
@@ -4006,47 +3995,38 @@ function footer_keyboard_mapping($dir,$keyboard_file) {
                 key === "ArrowUp" ||
                 key === "ArrowDown") {
                 return;
-            }
-
+            	}
             if (key === "Enter") {
                 e.preventDefault();
                 insertAtCursor(textarea, "\n");
                 return;
-            }
-
+            	}
             if (key === " ") {
                 e.preventDefault();
                 insertAtCursor(textarea, " ");
                 return;
-            }
-
+            	}
             if (/^[0-9]$/.test(key)) {
                 e.preventDefault();
                 insertAtCursor(textarea, key);
                 return;
-            }
-
+            	}
             if (key.length === 1) {
-
                 /* Only English letters are mapped */
                 if (/^[a-zA-Z]$/.test(key)) {
                     const mapKey = key.toUpperCase();
-
                     if (keyboardMap[mapKey] !== undefined) {
                         e.preventDefault();
                         insertAtCursor(textarea, keyboardMap[mapKey]);
                         return;
-                    }
-
+                    	}
                     e.preventDefault();
                     return;
-                }
-
+                	}
                 /* Other characters → normal typing */
                 return;
 				}
 			});
-
 		})();
     </script>
     <?php
