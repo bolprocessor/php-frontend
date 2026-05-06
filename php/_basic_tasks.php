@@ -710,30 +710,13 @@ function window_name($text) {
 	return $text;
 	}
 	
-function display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,$objects_file,$csound_file,$tonality_file,$alphabet_file,$data_file,$weights_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file) {
+function display_more_buttons($error,$content,$url_source_page,$dir,$grammar_file,$objects_file,$csound_file,$tonality_file,$alphabet_file,$data_file,$weights_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file) {
 	global $bp_application_path, $csound_resources, $tonality_resources, $output_file, $file_format, $current_file, $grammarWindow, $test;
-	$page_type = str_replace(".php",'',$url_this_page);
-	$page_type = preg_replace("/\.php.*/u",'',$url_this_page);
+	$page_type = str_replace(".php",'',$url_source_page);
+	$page_type = preg_replace("/\.php.*/u",'',$url_source_page);
 	
 	$dir = str_replace($bp_application_path,'',$dir);
 	if($test) echo "dir = ".$dir."<br />";
-	if($content <> '') {
-		if($page_type == "grammar" OR $page_type == "alphabet" OR $page_type == "glossary" OR $page_type == "interaction") {
-			if(isset($_POST['show_help_entries'])) {
-				$entries = display_help_entries($content);
-				echo $entries."<br />";
-				}
-			else {
-				echo "<div id=\"thisone\" style=\"float:right; margin-top:36px; background-color:transparent;\">";
-	//			echo "<form method=\"post\"  action=\"".$url_this_page."#help_entries\" enctype=\"multipart/form-data\">";
-				echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
-				echo "<input type=\"hidden\" name=\"file_format\" value=\"".$file_format."\">";
-				echo "<input class=\"edit\" type=\"submit\" onmouseover=\"checksaved();\" formaction=\"".$url_this_page."#help_entries\" name=\"show_help_entries\" value=\"SHOW HELP ENTRIES\">";
-	//			echo "</form>";
-				echo "</div>";
-				}
-			}
-		}
 	echo "<table style=\"padding:0px; border-spacing:2px; background-color:transparent;\" cellpadding=\"0px;\"><tr>";
 	if($error) {
 		echo "<td style=\"vertical-align:middle;\"><big><span class=\"red-text blinking\">➡</span></big></td>";
@@ -820,7 +803,7 @@ function display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,
 	if($keyboard_file <> '') {
 		$url_this_page = "keyboard.php?file=".urlencode($dir.$keyboard_file);
 		echo "<td>";
-		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$keyboard_file."','width=700,height=700,left=100'); return false;\" value=\"EDIT ‘".begin_with(20,$keyboard_file)."’\">";
+		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$keyboard_file."','width=700,height=750,left=100'); return false;\" value=\"EDIT ‘".begin_with(20,$keyboard_file)."’\">";
 		echo "</td>";
 		}
 	if($glossary_file <> '') {
@@ -829,7 +812,24 @@ function display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,
 		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$glossary_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".begin_with(20,$glossary_file)."’\">";
 		echo "</td>";
 		}
-	echo "</tr></table>";
+	echo "</tr>";
+	echo "</table>";
+
+	if($content <> '') {
+		if($page_type == "grammar" OR $page_type == "alphabet" OR $page_type == "glossary" OR $page_type == "interaction") {
+			if(isset($_POST['show_help_entries'])) {
+				$entries = display_help_entries($content);
+				echo $entries."<br />";
+				}
+			else {
+				echo "<div id=\"thisone\" style=\"text-align:left; margin-top:12px; background-color:transparent;\">";
+				echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
+				echo "<input type=\"hidden\" name=\"file_format\" value=\"".$file_format."\">";
+				echo "👉 <input class=\"edit\" type=\"submit\" onmouseover=\"checksaved();\" formaction=\"".$url_source_page."#help_entries\" name=\"show_help_entries\" value=\"SHOW HELP ENTRIES\">";
+				echo "</div>";
+				}
+			}
+		}
 	return;
 	}
 
@@ -3923,7 +3923,7 @@ function upload_related($dir) {
 		$expectedFileName = $_POST['expectedFileName'];
 		$uploadedFileName = $_FILES['uploaded_file']['name'];
 		if($uploadedFileName !== $expectedFileName)
-			$result .= "<br />👉 <span class=\"red-text\">Incorrect file</span> <span class=\"green-text\">".$uploadedFileName."</span>.</span> Please select <span class=\"green-text\">".$expectedFileName."</span>";
+			$result .= "<br />👉 <span class=\"red-text\">Incorrect file name:</span> <span class=\"green-text\">".$uploadedFileName."</span>.</span> Please select <span class=\"green-text\">".$expectedFileName."</span>";
 		else {
 			$uploadDir = $dir; // Define your upload directory
 			$uploadPath = $uploadDir.SLASH.basename($uploadedFileName);

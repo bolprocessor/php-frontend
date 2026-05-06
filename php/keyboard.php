@@ -20,10 +20,18 @@ $url = "index.php?path=".urlencode($current_directory);
 
 echo "<h2>Keyboard file “".$filename."”</h2>";
 save_settings("last_name",$filename); 
+$add_space = FALSE;
 
-if(isset($_POST['savethisfile'])) {
+if(isset($_POST['savethisfile']) AND isset($_POST['mapping'])) {
 	echo "<span id=\"timespan\" style=\"color:red; float:right; background-color:white; padding:6px; border-radius:6px;\">&nbsp;Saved “".$this_file."” file…</span>";
-	$content = mappingFormToJson($_POST['mapping'] ?? array());
+    if(isset($_POST['add_space'])) $add_space = TRUE;
+    $mapping = $_POST['mapping'];
+    foreach($mapping AS $key => $thisword) {
+        $thisword = trim($thisword);
+        if($add_space AND ($thisword <> '')) $mapping[$key] = $thisword." ";
+        else $mapping[$key] = $thisword;
+        }
+	$content = mappingFormToJson($mapping);
 	$handle = fopen($this_file,"w");
 	$file_header = $top_header."\n// Keyboard file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
 	fwrite($handle,$file_header."\n");
@@ -37,11 +45,20 @@ if($content === FALSE) ask_create_new_file($url_this_page,$filename);
 $extract_data = extract_data(FALSE,TRUE,$content);
 echo "<p class=\"green-text\">".$extract_data['headers']."</p>";
 echo "<p style=\"width:500px;\">This is a shorthand mapping of keys to words used in grammars and data on the Bol Processor. ";
-echo "You can activate and deactivate the mapping by pressing the 'escape' button.</p>";
+echo "You can activate and deactivate the mapping by pressing the 'escape' button. Unmapped keys will remain ‘silent’.</p>";
 $content = $extract_data['content'];
 $mapping = jsonToMappingArray($content);
+foreach($mapping AS $key => $thisword) {
+    if(str_ends_with($thisword," ")) $add_space = TRUE;
+    if($add_space) {
+        $thisword = trim($thisword);
+        if($thisword <> '') $mapping[$key] = $thisword." ";
+        }
+    }
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-echo "<p style=\"text-align:left;\"><input class=\"save\" type=\"submit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></p>";
+echo "<p><input type=\"checkbox\" name=\"add_space\" style=\"vertical-align:middle;\"";
+if($add_space) echo " checked";
+echo ">&nbsp;Add a space after each word</p>";
 echo "<table style=\"border-collapse:collapse;\">";
 for($i = 0; $i < 13; $i++) {
 	$letter1 = chr(ord('A') + $i);
@@ -56,13 +73,14 @@ for($i = 0; $i < 13; $i++) {
 	echo "</tr>";
 	}
 echo "</table>";
+echo "<p style=\"text-align:right;\"><input class=\"save big\" type=\"submit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></p>";
 echo "</form>";
 
 function mappingFormToJson(array $form): string {
     $map = [];
     for($i = 0; $i < 26; $i++) {
         $key = chr(ord('A') + $i);
-        $map[$key] = trim($form[$key] ?? '');
+        $map[$key] = $form[$key] ?? '';
         }
     return json_encode($map, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     }
@@ -80,7 +98,7 @@ function jsonToMappingArray(string $json): array {
     return $output;
     }
 
-function mappingListToJson(string $text): string {
+/* function mappingListToJson(string $text): string {
     $map = [];
     foreach (preg_split('/\R/', $text) as $line) {
         $line = trim($line);
@@ -106,5 +124,5 @@ function jsonToMappingList(string $json): string {
         $lines[] = $key . ' = ' . $value;
     	}
     return implode("\n", $lines);
-	}
+	} */
 ?>

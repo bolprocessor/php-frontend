@@ -249,6 +249,7 @@ echo "<div style=\"float:right;\"><p style=\"border:2px solid gray; background-c
 */
 
 if(isset($_POST['compilegrammar'])) {
+	$error_mssg = '';
 	if(isset($_POST['alphabet_file'])) $alphabet_file = $_POST['alphabet_file'];
 	else $alphabet_file = '';
 	if(isset($_POST['weights_file'])) $weights_file = $_POST['weights_file'];
@@ -469,14 +470,14 @@ $result_upload = upload_related($dir);
 
 if($alphabet_file <> '') {
 	if(!file_exists($dir.$alphabet_file)) {
-		$upload_mssg = upload_related_form($dir,$alphabet_file,"alphabet");
+		$upload_mssg .= upload_related_form($dir,$alphabet_file,"alphabet");
 		$error = TRUE;
 		}
 	else $link_produce .= "&alphabet=".urlencode($dir.$alphabet_file);
 	}
 if($data_file <> '') {
 	if(!file_exists($dir.$data_file)) {
-		$upload_mssg = upload_related_form($dir,$data_file,"data");
+		$upload_mssg .= upload_related_form($dir,$data_file,"data");
 		$error = TRUE;
 		}
 	}
@@ -489,41 +490,41 @@ if($weights_file <> '') {
 	}
 if($settings_file <> '') {
 	if(!file_exists($dir.$settings_file)) {
-		$upload_mssg = upload_related_form($dir,$settings_file,"settings");
+		$upload_mssg .= upload_related_form($dir,$settings_file,"settings");
 		$error = TRUE;
 		}
 	else $link_produce .= "&settings=".urlencode($dir.$settings_file);
 	}
 if($objects_file <> '') {
 	if(!file_exists($dir.$objects_file)) {
-		$upload_mssg = upload_related_form($dir,$objects_file,"objects");
+		$upload_mssg .= upload_related_form($dir,$objects_file,"objects");
 		$error = TRUE;
 		}
 	else $link_produce .= "&objects=".urlencode($dir.$objects_file);
 	}
 if($timebase_file <> '') {
 	if(!file_exists($dir.$timebase_file)) {
-		$upload_mssg = upload_related_form($dir,$timebase_file,"timebase");
+		$upload_mssg .= upload_related_form($dir,$timebase_file,"timebase");
 		$error = TRUE;
 		}
 	else $link_produce .= "&timebase=".urlencode($dir.$timebase_file);
 	}
 if($keyboard_file <> '') {
 	if(!file_exists($dir.$keyboard_file)) {
-		$upload_mssg .= "<br /><span class=\"red-text blinking\">WARNING:</span> <span class=\"green-text\">".$keyboard_file."</span> not found<br />";
+		$upload_mssg .= upload_related_form($dir,$keyboard_file,"keyboard");
 		$error = TRUE;
 		}
 	}
 if($csound_file <> '') {
 	if(!file_exists($dir_csound_resources.$csound_file)) {
-		$upload_mssg .= "<br /><span class=\"red-text\">WARNING: ".$dir_csound_resources.$csound_file." not found</span><br />";
+		$upload_mssg .= "<br /><span class=\"red-text\">WARNING: </span><span class=\"green-text\">".$dir_csound_resources.$csound_file."</span> not found<br />";
 		$error = TRUE;
 		}
 	else $link_produce .= "&csound_file=".urlencode($csound_file);
 	}
 if($tonality_file <> '') {
 	if(!file_exists($dir_tonality_resources.$tonality_file)) {
-		$upload_mssg .= "<br /><span class=\"red-text\">WARNING: ".$dir_tonality_resources.$tonality_file." not found</span><br />";
+		$upload_mssg .= "<br /><span class=\"red-text\">WARNING: </span><span class=\"green-text\">".$dir_tonality_resources.$tonality_file."</span> not found<br />";
 		$error = TRUE;
 		}
 	else $link_produce .= "&tonality_file=".urlencode($tonality_file);
@@ -571,15 +572,15 @@ if($true_bp_grammar) {
 	$link_produce_templates .= "&here=".urlencode($here);
 	if($alphabet_file <> '') {
 		if(!file_exists($dir.$alphabet_file)) {
-			$upload_mssg = upload_related_form($dir,$alphabet_file,"alphabet");
-			$error = TRUE;
+		/*	$upload_mssg .= upload_related_form($dir,$alphabet_file,"alphabet");
+			$error = TRUE; */
 			}
 		else $link_produce_templates .= "&alphabet=".urlencode($dir.$alphabet_file);
 		}
 //	if($settings_file <> '')
 //		$link_produce_templates .= "&settings=".urlencode($dir.$settings_file);
 	}
-echo "<div style=\"padding:1em; width:690px;\" class=\"thinborder2\">";
+echo "<div style=\"padding:1em; width:690px; background-color:transparent;\" class=\"thinborder2\">";
 if($settings_file <> '' AND file_exists($dir.$settings_file)) echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".nice_url($url_settings)."','".$settings_file."','width=800,height=800,left=100'); c\" value=\"EDIT ‘".$settings_file."’\">";
 if($settings_file == '' OR !file_exists($dir.$settings_file)) {
 	$time_resolution = 10; //  10 milliseconds by default
@@ -732,7 +733,7 @@ echo "<br /><button id=\"downloadupload\" class=\"save\" onclick=\"toggledownloa
 download_upload_project_form($dir,$filename,"grammar",$settings_file); find_replace_form();
 	echo $upload_message; echo $undo_upload_project_message;
 
-if($upload_mssg <> '') echo $upload_mssg;
+if($upload_mssg <> '') echo "<blockquote class=\"attention\" style=\"width:50%;\">".$upload_mssg."</blockquote>";
 echo $result_upload;
 
 echo "<p><input class=\"save big\" type=\"submit\" id=\"saveButton\" onclick=\"clearsave();\" name=\"savethisfile\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".begin_with(20,$filename)."’\">";
@@ -760,7 +761,8 @@ if($error) {
 else echo "\" class=\"produce big\"";
 echo ">";
 echo "</p>";
-if($true_bp_grammar AND !$error) {
+if($true_bp_grammar) {
+// if($true_bp_grammar AND !$error) {
 	if($weights_file == '') {
 		if(str_starts_with($filename,"-gr.")) $weights_file = str_replace("-gr.","-wg.",$filename);
 		else if(str_ends_with($filename,".bpgr")) $weights_file = "-wg.".str_replace(".bpgr",'',$filename);
@@ -821,7 +823,7 @@ else echo "\" class=\"produce big\"";
 echo ">";
 $link_test = $link_produce."&test";
 $display_command_title = "DisplayCommand".$filename;
-echo "&nbsp;<input class=\"edit\" onclick=\"window.open('".nice_url($link_test)."','".$display_command_title."','width=1000,height=200,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Display command line\">";
+echo "&nbsp;<input class=\"edit\" onclick=\"window.open('".nice_url($link_test)."','".$display_command_title."','width=1000,height=200,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Display latest command line\">";
 echo "</div>";
 display_more_buttons($error OR $error2,$content,$url_this_page,$dir,'',$objects_file,$csound_file,$tonality_file,$alphabet_file,$data_file,$weights_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
 

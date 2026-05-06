@@ -979,7 +979,7 @@ if(isset($_GET['newsettings'])) {
 	$_POST['thistext'] = $settings_file."\n\n".$newcontent;
 	$no_save_midiresources = TRUE;
 	$need_to_save = TRUE;
-	$error_mssg .= "<br /><span class=\"red-text blinking\">WARNING: this is a new tag/window. Close the previous one to avoid mixing versions!</span><br />";
+	$error_mssg .= "<br /><span class=\"red-text\">WARNING: this is a new tag/window. Close the previous one to avoid mixing versions!</span><br />";
 	$error = TRUE;
 	}
 
@@ -1536,48 +1536,48 @@ $link_options = ''; $upload_mssg = '';
 
 if($grammar_file <> '') {
 	if(!file_exists($dir.$grammar_file)) {
-		$upload_mssg = upload_related_form($dir,$grammar_file,"grammar");
+		$upload_mssg .= upload_related_form($dir,$grammar_file,"grammar");
 		$error = TRUE;
 		}
 	else $link_options .= "&grammar=".urlencode($dir.$grammar_file);
 	}
 if($alphabet_file <> '') {
 	if(!file_exists($dir.$alphabet_file)) {
-		$upload_mssg = upload_related_form($dir,$alphabet_file,"alphabet");
+		$upload_mssg .= upload_related_form($dir,$alphabet_file,"alphabet");
 		$error = TRUE;
 		}
 	else $link_options .= "&alphabet=".urlencode($dir.$alphabet_file);
 	}
 if($settings_file <> '') {
 	if(!file_exists($dir.$settings_file)) {
-		$upload_mssg = upload_related_form($dir,$settings_file,"settings");
+		$upload_mssg .= upload_related_form($dir,$settings_file,"settings");
 		$error = TRUE;
 		}
 	else $link_options .= "&settings=".urlencode($dir.$settings_file);
 	}
 if($objects_file <> '') {
 	if(!file_exists($dir.$objects_file)) {
-		$upload_mssg = upload_related_form($dir,$objects_file,"objects");
+		$upload_mssg .= upload_related_form($dir,$objects_file,"objects");
 		$error = TRUE;
 		}
 	else $link_options .= "&objects=".urlencode($dir.$objects_file);
 	}
 if($timebase_file <> '') {
 	if(!file_exists($dir.$timebase_file)) {
-		$upload_mssg = upload_related_form($dir,$timebase_file,"timebase");
+		$upload_mssg .= upload_related_form($dir,$timebase_file,"timebase");
 		$error = TRUE;
 		}
 	else $link_options .= "&timebase=".urlencode($dir.$timebase_file);
 	}
 if($keyboard_file <> '') {
 	if(!file_exists($dir.$keyboard_file)) {
-		$upload_mssg .= "<br /><span class=\"red-text blinking\">WARNING:</span> <span class=\"green-text\">".$keyboard_file."</span> not found<br />";
+		$upload_mssg .= upload_related_form($dir,$keyboard_file,"keyboard");
 		$error = TRUE;
 		}
 	}
 if($csound_file <> '') {
 	if(!file_exists($dir_csound_resources.$csound_file)) {
-		$upload_mssg .= "<br /><span class=\"red-text blinking\">WARNING:</span> <span class=\"green-text\">".$csound_file."</span> not found<br />";
+		$upload_mssg .= "<br /><span class=\"red-text\">WARNING:</span> <span class=\"green-text\">".$csound_file."</span> not found<br />";
 		$error = TRUE;
 		}
 	else {
@@ -1587,7 +1587,7 @@ if($csound_file <> '') {
 	}
 if($tonality_file <> '') {
 	if(!file_exists($dir_tonality_resources.$tonality_file)) {
-		$upload_mssg .= "<br /><span class=\"red-text\">WARNING: ".$dir_tonality_resources.$tonality_file." not found</span><br />";
+		$upload_mssg .= "<br /><span class=\"red-text\">WARNING: </span><span class=\"green-text\">".$dir_tonality_resources.$tonality_file."</span> not found<br />";
 		$error = TRUE;
 		}
 	else {
@@ -1600,9 +1600,7 @@ $link_options .= "&here=".urlencode($dir.$filename);
 if($error_mssg <> '') {
 	echo "<p>".$error_mssg."</p>";
 	}
-if($upload_mssg <> '') {
-	echo "<p>".$upload_mssg."</p>";
-	}
+if($upload_mssg <> '') echo "<blockquote class=\"attention\" style=\"width:50%;\">".$upload_mssg."</blockquote>";
 
 if(intval($note_convention) <> intval($new_convention) AND $new_convention <> '')
 	echo "<p><span class=\"red-text\">➡</span> WARNING: Note convention should be set to <span class=\"red-text\">‘".ucfirst(note_convention(intval($new_convention)))."’</span> in the <span class=\"green-text\">‘".$settings_file."’</span> settings file</p>";
@@ -2068,7 +2066,7 @@ echo "window.onload = function() {
 	};\n";
 echo "</script>\n";
 footer();
-footer_keyboard_mapping($dir, $keyboard_file);
+footer_keyboard_mapping($dir,$keyboard_file);
 echo "</body></html>";
 
 function create_parts($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxchunk_size,$measure_min,$measure_max,$label) {
