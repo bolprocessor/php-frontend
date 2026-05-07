@@ -728,7 +728,7 @@ function display_more_buttons($error,$content,$url_source_page,$dir,$grammar_fil
 		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" onclick=\"window.open('".$url_this_page."','".$alphabet_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".begin_with(20,$alphabet_file)."’\">";
 		echo "</td>";
 		}
-	if($data_file <> '') {
+	/* if($data_file <> '') {
 		$url_this_page = "data.php?file=".urlencode($dir.$data_file);
 		if($test) echo "url_this_page = ".$url_this_page."<br />";
 		echo "<td>";
@@ -741,7 +741,7 @@ function display_more_buttons($error,$content,$url_source_page,$dir,$grammar_fil
 		echo "<td>";
 		echo "<input class=\"edit\" type=\"submit\" name=\"opengrammar\" onclick=\"event.preventDefault(); window.open('".$url_this_page."','".$grammar_file."','width=1000,height=1000,left=100'); return false;\" formaction=\"".$url_this_page."\" value=\"EDIT ‘".begin_with(20,$grammar_file)."’\">&nbsp;";
 		echo "</td>";
-		}
+		} */
 	if($weights_file <> '') {
 		$url_this_page = "weights.php?file=".urlencode($dir.$weights_file);
 		$url_this_page .= "&grammar_file=".urlencode($current_file); 
