@@ -1931,10 +1931,8 @@ function store2($handle,$varname,$index,$var) {
 function good_name($type,$filename,$name_mode) {
 	$filename = fix_new_name($filename,TRUE);
 	$filename = trim($filename);
-//	echo "filename = ".$filename."<br />";
-	$filename = str_replace("-".$type.".",'',$filename);
-	$filename = str_replace(".bp".$type,'',$filename);
-//	$filename = str_replace(" ","_",$filename);
+	$filename = str_ireplace("-".$type.".",'',$filename);
+	$filename = str_ireplace(".bp".$type,'',$filename);
 	if($name_mode == "extension")
 		$filename .= ".bp".$type;
 	else
@@ -1946,6 +1944,7 @@ function fix_new_name($name,$no_slash) {
 	$name = str_replace('+','_',$name);
 	$name = str_replace('$','_',$name); // 2026-04-21
 	$name = str_replace(' ','_',$name);
+	$name = str_replace(':','_',$name);
 	if($no_slash) $name = str_replace(SLASH,'_',$name);
 	$name = str_replace('"',"'",$name);
 	return $name;

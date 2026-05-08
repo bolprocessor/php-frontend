@@ -559,8 +559,8 @@ echo '<script>
 
 if(!$no_error) {
 	if(strlen($content_trace) > 4) {
-		echo "<p><span class=\"red-text blinking\">Errors found… </span> ";
-		echo "Check the <a onclick=\"window.open('".nice_url($trace_link)."','errors','width=800,height=500,left=400'); return false;\" href=\"".$trace_link."\">error trace</a> file!</p>";
+		echo "<p class=\"attention\"><big><span class=\"red-text\"><b>Errors found… </b></span> ";
+		echo "Check the <a class=\"linkdotted\" onclick=\"window.open('".nice_url($trace_link)."','errors','width=800,height=500,left=400'); return false;\" href=\"".$trace_link."\">error trace</a> file!</big></p>";
 		}
 	}
 echo "<p>";

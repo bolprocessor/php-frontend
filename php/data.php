@@ -1331,6 +1331,7 @@ echo "<input type=\"hidden\" name=\"objects_file\" value=\"".$objects_file."\">"
 echo "<input type=\"hidden\" name=\"new_convention\" value=\"".$new_convention."\">";
 $show_production = $trace_production = $non_stop_improvize = $p_clock = $q_clock = $striated_time = $max_time_computing = $produce_all_items = $random_seed = $quantization = $time_resolution = 0;
 $compute_while_playing = TRUE;
+$trace_production = FALSE;
 $note_convention = '';
 $csound_default_orchestra = '';
 $diapason = 440; $C4key = 60;
@@ -1338,7 +1339,7 @@ $found_orchestra_in_settings = $quantize = FALSE;
 $trace_capture_analysis = TRUE;
 $minimum_period = 200; // milliseconds
 $advance_time = 10; // seconds
-$trace_minimise = 0;
+$trace_minimise = FALSE;
 $dir_base = str_replace($bp_application_path,'',$dir);
 $url_settings = "settings.php?file=".urlencode($dir_base.$settings_file);
 if($settings_file <> '' AND file_exists($dir.$settings_file)) {
@@ -1347,7 +1348,8 @@ if($settings_file <> '' AND file_exists($dir.$settings_file)) {
 		$content_json = @file_get_contents($dir.$settings_file,TRUE);
 		$settings = json_decode($content_json,TRUE);
 		$show_production = $settings['DisplayProduce']['value'];
-		$trace_production = $settings['TraceProduce']['value'];
+		if(isset($settings['TraceProduce']['value']))
+			$trace_production = $settings['TraceProduce']['value'];
 		$note_convention = $settings['NoteConvention']['value'];
 		$non_stop_improvize = $settings['Improvize']['value'];
 		$max_items = $settings['MaxItemsProduce']['value'];

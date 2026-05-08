@@ -736,6 +736,8 @@ download_upload_project_form($dir,$filename,"grammar",$settings_file); find_repl
 if($upload_mssg <> '') echo "<blockquote class=\"attention\" style=\"width:50%;\">".$upload_mssg."</blockquote>";
 echo $result_upload;
 
+// $error = FALSE;
+
 $attention = '';
 if($need_to_save) $attention = "attention";
 echo "<p><input class=\"save big ".$attention."\" type=\"submit\" id=\"saveButton\" onclick=\"clearsave();\" name=\"savethisfile\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".begin_with(20,$filename)."’\">";

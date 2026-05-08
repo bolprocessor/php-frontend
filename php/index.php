@@ -127,51 +127,6 @@ if(isset($_POST['create_folder'])) {
 			}
 		}
 	}
-
-/*
-if(isset($_POST['create_link'])) {
-	unset($_POST['create_link']);
-	$targetFolder = $_POST['folderPath'];
-    $linkName = $_POST['linkName'];
-    if(empty($targetFolder) || empty($linkName))
-        echo "<p>Error: Please select a folder and enter a link name</p>";
-	else {
-//		$linkName = escapeshellarg($linkName);
-		echo "linkName = ".$linkName."<br >";
-		echo "targetFolder = ".$targetFolder."<br >";
-		$workspace = getcwd();
-		$linkPath = realpath($workspace.SLASH.$linkName);
-		$targetPath = realpath($workspace.SLASH.$targetFolder);
-		echo "linkPath = ".$linkPath."<br >";
-		echo "targetPath = ".$targetPath."<br >";
-
-		// Check if the target folder exists
-		if (!$targetPath || !is_dir($targetPath)) {
-    		echo "<p>Error: Target folder '$targetFolder' does not exist or is invalid</p>";
-			}
-		if (is_link($linkPath) || file_exists($linkPath)) {
-			unlink($linkPath);
-			}
-
-		// Detect OS
-		if (windows_system()) {
-			// Windows (Requires Admin Privileges)
-			$command = "mklink /D $linkPath $targetPath";
-			$cmd = "cmd.exe /c \"$command\"";
-			}
-		else {
-			// macOS / Linux
-			$command = "ln -s $targetPath $linkPath";
-			$cmd = "/bin/bash -c \"$command\"";
-			}
-		$output = shell_exec($cmd);
-		// Check success
-		if(is_link($linkPath) || file_exists($linkPath))
-			echo "<p>Symlink created successfully: $linkPath -> $target</p>";
-		else echo "<p>Error creating symlink. Ensure you have the necessary permissions</p>";
-		}
-	} */
-
 if(isset($_POST['create_grammar'])) {
 	$type = $_POST['type'];
 	$name_mode = $_POST['name_mode'];
@@ -252,6 +207,24 @@ if(isset($_POST['create_timebase'])) {
 			$template = "timebase_template";
 			$template_content = @file_get_contents($template);
 			fwrite($handle,$template_content."\n");
+			fclose($handle);
+			chmod($dir.SLASH.$filename,$permissions);
+			}
+		}
+	}
+if(isset($_POST['create_keyboard'])) {
+	$type = $_POST['type'];
+	$name_mode = $_POST['name_mode'];
+	$filename = trim($_POST['filename']);
+	if($filename <> '') {
+		$filename = good_name($type,$filename,$name_mode);
+		$new_file = $filename;
+		if(file_exists($dir.SLASH.$filename)) {
+			echo "<p><span class=\"red-text\">This file already exists:</span> <span class=\"red-text\">".$filename."</span></p>";
+			unset($_POST['create_keyboard']);
+			}
+		else {
+			$handle = fopen($dir.SLASH.$filename,"w");
 			fclose($handle);
 			chmod($dir.SLASH.$filename,$permissions);
 			}
@@ -456,7 +429,7 @@ if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension 
 			echo "<p style=\"text-align:left;\">";
 			echo "<input class=\"save\" type=\"submit\" name=\"create_alphabet\" value=\"CREATE NEW ALPHABET FILE\"><br />named:&nbsp;";
 			echo "<input type=\"text\" name=\"filename\" size=\"20\" style=\"background-color:CornSilk;\" value=\"\">";
-			$type = "ho";
+			$type = "al";
 			echo "<br /><input type=\"radio\" name=\"name_mode\" value=\"prefix\" checked>with prefix ‘-".$type."’";
 			echo "<br /><input type=\"radio\" name=\"name_mode\" value=\"extension\">with extension ‘bp".$type."’";
 			echo "<input type=\"hidden\" name=\"type\" value=\"".$type."\">";
@@ -492,6 +465,17 @@ if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension 
 			echo "<input type=\"hidden\" name=\"type\" value=\"".$type."\">";
 			echo "</p>";
 			echo "</form>";
+			echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+			echo "<p style=\"text-align:left;\">";
+			echo "<input class=\"save\" type=\"submit\" name=\"create_keyboard\" value=\"CREATE NEW KEYBOARD MAPPING\"><br />named:&nbsp;";
+			echo "<input type=\"text\" name=\"filename\" size=\"20\" style=\"background-color:CornSilk;\" value=\"\">";
+			$type = "kb";
+			echo "<br /><input type=\"radio\" name=\"name_mode\" value=\"prefix\" checked>with prefix ‘-".$type."’";
+			echo "<br /><input type=\"radio\" name=\"name_mode\" value=\"extension\">with extension ‘bp".$type."’";
+			echo "<input type=\"hidden\" name=\"type\" value=\"".$type."\">";
+			echo "</p>";
+			echo "</form>";
+
 			}
 		echo "</div>";
 		}
@@ -661,8 +645,8 @@ if(!is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"t
 		echo "<h4>Sound objects</h4>";
 		echo "</th>";
 		echo "<th>";
-		$n3 = display_directory(TRUE,$dir,"glossary");
-		echo "<h4>Glossaries</h4>";
+		$n3 = display_directory(TRUE,$dir,"keyboard");
+		echo "<h4>Keyboard mappings</h4>";
 		echo "</th>";
 		echo"</tr>";
 		echo "<tr>";
@@ -673,7 +657,7 @@ if(!is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"t
 		if($n2 > 0) display_directory(FALSE,$dir,"objects");
 		echo "</td>";
 		echo "<td style=\"padding-bottom:6px;\">";
-		if($n3 > 0) display_directory(FALSE,$dir,"glossary");
+		if($n3 > 0) display_directory(FALSE,$dir,"keyboard");
 		echo "</td>";
 		echo"</tr>";
 		echo "<tr>";
