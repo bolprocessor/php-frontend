@@ -852,6 +852,10 @@ if($n_messages > 0) {
 			$analyzing_failure = TRUE;
 			$analyzing_success = TRUE;
 			}
+		if(($this_count = substr_count($mssg,"Analyzing new")) > 0) {
+			$analyzing_failure = TRUE;
+			$analyzing_success = TRUE;
+			}
 		if(($this_count = substr_count($mssg,"rejected by")) > 0 AND $analyzing_failure) {
 			$failed_parsing++;
 			$analyzing_failure = FALSE;
