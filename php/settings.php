@@ -329,9 +329,24 @@ for($i = 0; $i < $imax; $i++) {
 		echo ">";
 		}
 	else {
-		echo "<input type=\"text\" name=\"parameter_".$i."\" size=\"15\" style=\"background-color:CornSilk; border: none;\" value=\"";
-		echo $value;
-		echo "\">";
+		if($param == "ParseMode") {
+			if(trim($value) == '') $value = "ANAL";
+			echo "<label>";
+			echo "<input type=\"radio\" name=\"parameter_".$i."\" value=\"ANAL\"";
+			if($value == "ANAL") echo " checked";
+			echo "> ANAL";
+			echo "</label><br />";
+			echo "<label>";
+			echo "<input type=\"radio\" name=\"parameter_".$i."\" value=\"LEARN\"";
+			if($value == "LEARN") echo " checked";
+			echo "> LEARN";
+			echo "</label>";
+			}
+		else {
+			echo "<input type=\"text\" name=\"parameter_".$i."\" size=\"15\" style=\"background-color:CornSilk; border: none;\" value=\"";
+			echo $value;
+			echo "\">";
+			}
 		}
 	echo "</td>";
 	echo "<td style=\"vertical-align:top;\">";

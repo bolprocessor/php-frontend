@@ -373,6 +373,7 @@ if($csound_file <> '') {
 else $csound_orchestra = '';
 $show_production = $trace_production = $note_convention = $non_stop_improvize = $p_clock = $q_clock = $striated_time = $max_time_computing = $produce_all_items = $random_seed = $quantization = $time_resolution = $live_grammar = $live_settings = $sync_change = 0;
 $csound_default_orchestra = '';
+$parse_mode = "ANAL";
 $diapason = 440; $C4key = 60;
 $dir_base = str_replace($bp_application_path,'',$dir);
 $found_orchestra_in_settings = $quantize = $play_each_sub = FALSE;
@@ -397,6 +398,7 @@ if($settings_file <> '' AND file_exists($dir.$settings_file)) {
 		$nature_of_time_settings = $settings['Nature_of_time']['value'];
 		$note_convention = $settings['NoteConvention']['value'];
 		$non_stop_improvize = $settings['Improvize']['value'];
+		if(isset($settings['ParseMode'])) $parse_mode = $settings['ParseMode']['value'];
 		if(isset($settings['LiveGrammar'])) $live_grammar = $settings['LiveGrammar']['value'];
 		if(isset($settings['LiveSettings'])) $live_settings = $settings['LiveSettings']['value'];
 		if(isset($settings['SyncChange'])) $sync_change = $settings['SyncChange']['value'];
@@ -773,9 +775,17 @@ if($true_bp_grammar) {
 		$mssg_weights = "</p><p>👉 You should declare a weights file (e.g. \"<span class=\"red-text\">".$weights_file."</span>\") on top of the grammar, and save it.";
 		}
 	else $mssg_weights = '';
-	$link_learn = "produce.php?data=".urlencode($dir.$data_file)."&instruction=analyze&grammar=".urlencode($this_file)."&settings=".urlencode($dir.$settings_file)."&weights=".urlencode($dir.$weights_file)."&output=".urlencode($output.SLASH.$output_file);
-	if($alphabet_file <> '') $link_learn .= "&alphabet=".urlencode($dir.$alphabet_file);
-	if($trace_production) $link_learn .= "&trace_production=1";
+	$link_learn = $link_anal = "produce.php?data=".urlencode($dir.$data_file)."&instruction=analyze&grammar=".urlencode($this_file)."&settings=".urlencode($dir.$settings_file)."&output=".urlencode($output.SLASH.$output_file);
+	$link_learn .= "&weights=".urlencode($dir.$weights_file)."&mode=LEARN";
+	$link_anal .= "&mode=ANAL";
+	if($alphabet_file <> '') {
+		$link_learn .= "&alphabet=".urlencode($dir.$alphabet_file);
+		$link_anal .= "&alphabet=".urlencode($dir.$alphabet_file);
+		}
+	if($trace_production) {
+		$link_learn .= "&trace_production=1";
+		$link_anal .= "&trace_production=1";
+		}
 	// echo $link_learn."<br />";
 	echo "<p>👉 This is a <span class=\"red-text\">TRUE</span> BP grammar&nbsp;";
 	if($data_file <> '' AND file_exists($dir.$data_file)) {
@@ -784,8 +794,14 @@ if($true_bp_grammar) {
 				echo "➡&nbsp;You can learn weights from <span class=\"green-text\">‘".$data_file."’</span>, but first you need to create a ‘-wg’ weights file";
 				}
 			else {
-				echo "➡&nbsp;<input class=\"produce big\" onclick=\"if(checksaved()) {window.open('".$link_learn."','Learning','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"learn\" value=\"LEARN weights\">&nbsp;from all items in <span class=\"green-text\">‘".$data_file."’</span>";
-				echo $mssg_weights;
+				if($parse_mode == "ANAL") {
+					echo "➡&nbsp;<input class=\"produce big\" onclick=\"if(checksaved()) {window.open('".$link_anal."','Learning','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"learn\" value=\"ANALYSE\">";
+					}
+				else {
+					echo "➡&nbsp;<input class=\"produce big\" onclick=\"if(checksaved()) {window.open('".$link_learn."','Learning','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"learn\" value=\"LEARN weights\">&nbsp;from";
+					}
+				echo "&nbsp;all items in <span class=\"green-text\">‘".$data_file."’</span>";
+				if($parse_mode == "LEARN") echo $mssg_weights;
 				}
 			}
 		else {

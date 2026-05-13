@@ -4,7 +4,7 @@ $url_this_page = "produce.php";
 if(isset($_GET['title'])) $this_title = urldecode($_GET['title']);
 else $this_title = '';
 
-$learning = FALSE;
+$learn = $anal = FALSE;
 $failed_parsing = $failed_template = $success_parsing = 0;
 
 echo "<head>";
@@ -126,12 +126,16 @@ else {
 	else $alphabet_path = '';
 	if(isset($_GET['format'])) $file_format = $_GET['format'];
 	else $file_format = '';
+	if(isset($_GET['mode'])) $mode = $_GET['mode'];
+	else $mode = '';
 	$output = '';
 	if(($instruction == "produce-all" OR $instruction == "templates" OR $instruction == "analyze" OR $file_format <> '') AND isset($_GET['output'])) {
 		$output = urldecode($_GET['output']);
 	//	echo "@output = ".$output."<br />";
 		}
-	if($instruction == "analyze" AND $weights_path <> '' AND $grammar_path <> '') $learning = TRUE;
+/*	if($instruction == "analyze" AND $weights_path <> '' AND $grammar_path <> '') $learn = TRUE; */
+	if($instruction == "analyze" AND $mode == "LEARN" AND $grammar_path <> '') $learn = TRUE;
+	if($instruction == "analyze" AND $mode == "ANAL" AND $grammar_path <> '') $anal = TRUE;
 	if($instruction == "create_set" AND isset($_GET['output']))
 		$output = urldecode($_GET['output']);
 	if(isset($_GET['show_production'])) $show_production = TRUE;
@@ -455,10 +459,11 @@ if(isset($data_path) AND $data_path <> '') {
 		if($instruction == "play" OR $instruction == "produce") echo "<p><b>Playing";
 		if($instruction == "play-all") echo "<p><b>Playing chunks";
 		if($instruction == "expand") echo "<p><b>Expanding";
-		if($instruction == "analyze" AND $learning) echo "<p><b>Analysing and learning weights from all items in <span class=\"green-text\">‘".$data_name."’</span>";
+		if($instruction == "analyze" AND $learn) echo "<p><b>Analysing and learning weights from all items in <span class=\"green-text\">‘".$data_name."’</span>";
+		else if($instruction == "analyze" AND $anal) echo "<p><b>Analysing all items in <span class=\"green-text\">‘".$data_name."’</span>";
 		else if($instruction == "analyze") echo "<p><b>Analysing";
 		if($instruction == "create_set") echo "<p><b>Creating AI training set</b>";
-		else if(!$learning) {
+		else if(!$learn AND !$anal) {
 			if($item <> 0) echo " #".$item;
 			else echo ":";
 			echo "</b></p>";
@@ -893,7 +898,7 @@ echo "</p>";
 if($success_parsing > 0) echo "<p><big>✅&nbsp;&nbsp;".$success_parsing." item(s) successfully parsed</big></p>";
 if($failed_parsing > 0) echo "<p><big>❌&nbsp;&nbsp;".$failed_parsing." item(s) failed in the parsing after matching a template</big></p>";
 if($failed_template > 0) echo "<p><big>❌&nbsp;&nbsp;".$failed_template." item(s) matched no template</big></p>";
-if($weights_file_path <> '') echo "<p><big>👉  New weights are saved in ".$weights_file_path."</big></p>";
+if($weights_file_path <> '' AND $learn) echo "<p><big>👉  New weights are saved in ".$weights_file_path."</big></p>";
 if($created_templates) echo "<p><big>👉  Templates have been created. Click the “<span class=\"green-text\">output file</span>” link!</big></p>";
 
 @unlink($running_trace);

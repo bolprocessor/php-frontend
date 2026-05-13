@@ -38,6 +38,7 @@
 "MaxItemsProduce"	"Max items produced"	"Except in real-time MIDI (deft 20)"	"0"	"20"
 "UseEachSub"	"Play each substitution"		"1"	"0"
 "StepProduce"	"Step-by-step produce"	"(not implemented)"	"1"	"0"
+"ParseMode"	"Parse mode"	"when grammar is parsing a data file"	"0"	"ANAL"
 "TraceDetail"	"Detailed trace"	"(for special use)"	"1"	"0"
 "TraceProduce"	"Trace production or parsing"		"1"	"0"
 "PlanProduce"	"Choose candidate rule"	"(not implemented)"	"1"	"0"
