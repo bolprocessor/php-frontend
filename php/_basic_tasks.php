@@ -2533,6 +2533,7 @@ function windows_system() {
 	return FALSE;
 	}
 
+
 /*
 function is_macos_alias($file) {
 	// Check that file is an alias pointing to a folder
@@ -2556,23 +2557,65 @@ function is_macos_alias($file) {
 	return FALSE;
 	} */
 
-function is_macos_alias($file) { // Fixed 2026-04-21
-	// Check that file is an alias pointing to a folder
-    if (!file_exists($file) || !is_file($file)) {
+function is_macos_alias($file) {
+
+    // Must be a regular file
+    if (!is_file($file)) {
         return false;
-    	}
-    $finfo = new finfo(FILEINFO_MIME_TYPE);
-    $mime = $finfo->file($file);
-//	echo "mime = ".$mime." =>   ".$file."<br />";
-    if ($mime !== 'application/octet-stream') {
+    }
+
+    // Reuse finfo object for speed
+    static $finfo = null;
+
+    if ($finfo === null) {
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+    }
+
+    // Fast reject of ordinary text/media files
+    if ($finfo->file($file) !== 'application/octet-stream') {
         return false;
-    	}
-    $xattrList = shell_exec('xattr -l ' . escapeshellarg($file));
-    if ($xattrList && strpos($xattrList, 'com.apple.FinderInfo') !== false) {
-        return true;
-    	}
-    return false;
-	}
+    }
+
+    // Read FinderInfo directly
+    $finderInfo = shell_exec(
+        'xattr -p com.apple.FinderInfo ' .
+        escapeshellarg($file) .
+        ' 2>/dev/null'
+    );
+
+    if ($finderInfo === null || strlen($finderInfo) < 10) {
+        return false;
+    }
+
+    // Finder flags are bytes 8-9
+    $flags = unpack('n', substr($finderInfo, 8, 2))[1];
+
+    // 0x8000 = alias flag
+    if (($flags & 0x8000) === 0) {
+        return false;
+    }
+
+    // Resolve alias target with AppleScript
+    $script =
+        'POSIX path of (original item of (POSIX file "' .
+        str_replace('"', '\"', $file) .
+        '" as alias))';
+
+    $output = shell_exec(
+        'osascript -e ' .
+        escapeshellarg($script) .
+        ' 2>/dev/null'
+    );
+
+    if ($output === null) {
+        return false;
+    }
+
+    $target = trim($output);
+
+    // True only if target exists and is a folder
+    return ($target !== '' && is_dir($target));
+}
 	
 function send_to_console($command) {
 //	global $test,$pid,$bp_application_path,$console;

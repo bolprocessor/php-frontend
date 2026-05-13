@@ -940,7 +940,7 @@ function folder_list($dir,$list,$path) {
 	global $bp_application_path;
 	if(!is_array($list)) $list = [];
 	if(!is_dir($dir)) return $list;
-	if(is_macos_alias($dir)) return $list;
+	if(mac_system() AND is_macos_alias($dir)) return $list;
 	$dircontent = @scandir($dir);
 	if($dircontent === false) return $list;
 	foreach($dircontent as $thisfile) {
