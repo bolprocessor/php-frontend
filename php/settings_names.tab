@@ -39,6 +39,7 @@
 "UseEachSub"	"Play each substitution"		"1"	"0"
 "StepProduce"	"Step-by-step produce"	"(not implemented)"	"1"	"0"
 "ParseMode"	"Parse mode"	"when grammar is parsing a data file"	"0"	"ANAL"
+"LearnFromWeights"	"Start from latest weights file instead of grammar"	"when learning rule weights from a data file"	"1"	"1"
 "TraceDetail"	"Detailed trace"	"(for special use)"	"1"	"0"
 "TraceProduce"	"Trace production or parsing"		"1"	"0"
 "PlanProduce"	"Choose candidate rule"	"(not implemented)"	"1"	"0"

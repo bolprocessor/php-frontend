@@ -16,38 +16,8 @@ $dir = str_replace($current_filename,'',$this_file);
 $current_directory = str_replace(SLASH.$current_filename,'',$file);
 
 require_once("_header.php");
-// display_darklight();
-
-/*
-echo '<head>';
-echo '    <meta charset="UTF-8">';
-echo '    <meta name="viewport" content="width=device-width, initial-scale=1.0">';
-echo '    <title>Weights</title>';
-echo '    <style>
-            body {
-                font-family: Arial, sans-serif;
-                margin: 20px;
-            }
-            button {
-                padding: 8px 14px;
-                margin-right: 10px;
-                cursor: pointer;
-            }
-            textarea {
-                width: 100%;
-                height: 300px;
-                margin-top: 15px;
-                font-family: monospace;
-                font-size: 14px;
-            }
-        </style>';
-echo '</head>';
-echo "<body>"; */
 echo "<p>";
 $url = "index.php?path=".urlencode($current_directory);
-// echo "&nbsp;Workspace = <input title=\"List this workspace\" class=\"edit\" name=\"workspace\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$url."','_self');\" value=\"".$current_directory."\"></p>";
-
-// echo link_to_help();
 
 echo "<h2>Weights “".$current_filename."”</h2>";
 
@@ -83,15 +53,16 @@ if(isset($_POST['resetthisfile_127']) OR isset($_POST['resetthisfile_0'])) {
 	echo "<span id=\"timespan\" style=\"color:red; float:right; background-color:white; padding:6px; border-radius:6px;\">&nbsp;Resetted “".$this_file."” file…</span>";
 	$json = $_POST['apply_these_weights'];
 	$weight_table = json_decode($json,true);
-	if(isset($_POST['resetthisfile_127'])) $new_weight = 127;
-	else $new_weight = 0;
+	if(isset($_POST['resetthisfile_127'])) $new_weight = "127";
+	else $new_weight = "0";
 	$handle = @fopen($this_file,"w");
 	if($handle) {
 		fwrite($handle,$file_header."\n");
 		foreach($weight_table AS $row) {
 			$this_data['igram'] = $row['igram'];
 			$this_data['irul'] = $row['irul'];
-			if(is_numeric($row['weight'])) $this_data['weight'] = $new_weight;
+			if(is_numeric($row['weight'])) 
+				$this_data['weight'] = $new_weight;
 			else $this_data['weight'] = $row['weight'];
 			$json = json_encode($this_data,JSON_UNESCAPED_SLASHES);
 			fwrite($handle,$json."\n");

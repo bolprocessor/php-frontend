@@ -847,8 +847,8 @@ if($n_messages > 0) {
 	/*	if(($this_count = substr_count($mssg,"Analyzing new selection")) > 0) {
 			$analyzing_new_selection = TRUE;
 			} */
-		if(($this_count = substr_count($mssg,"Creating weights file:")) > 0) {
-			$weights_file_path = trim(str_replace("Creating weights file:",'',$mssg));
+		if(($this_count = substr_count($mssg,"Creating new weights file:")) > 0) {
+			$weights_file_path = trim(str_replace("Creating new weights file:",'',$mssg));
 			}
 		if(($this_count = substr_count($mssg,"templates have been produced")) > 0) {
 			$created_templates = TRUE;
@@ -898,7 +898,7 @@ echo "</p>";
 if($success_parsing > 0) echo "<p><big>✅&nbsp;&nbsp;".$success_parsing." item(s) successfully parsed</big></p>";
 if($failed_parsing > 0) echo "<p><big>❌&nbsp;&nbsp;".$failed_parsing." item(s) failed in the parsing after matching a template</big></p>";
 if($failed_template > 0) echo "<p><big>❌&nbsp;&nbsp;".$failed_template." item(s) matched no template</big></p>";
-if($weights_file_path <> '' AND $learn) echo "<p><big>👉  New weights are saved in ".$weights_file_path."</big></p>";
+if($weights_file_path <> '' AND $learn) echo "<p><big>👉  New weights are saved in ".$weights_file_path."</big><br />&nbsp;&nbsp;&nbsp;&nbsp;(Click the button below the grammar)</p>";
 if($created_templates) echo "<p><big>👉  Templates have been created. Click the “<span class=\"green-text\">output file</span>” link!</big></p>";
 
 @unlink($running_trace);
