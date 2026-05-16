@@ -22,6 +22,16 @@ echo "<h2>Keyboard file “".$filename."”</h2>";
 save_settings("last_name",$filename); 
 $add_space = FALSE;
 
+if(isset($_POST["copy_from_file"])AND isset($_POST["kbfile"])AND is_file($_POST["kbfile"])){
+    if($_POST["kbfile"] <> $this_file."_bak") copy($this_file, $this_file."_bak");
+	echo "Copying from file ".$_POST["kbfile"]."<br />";
+	$content = file_get_contents($_POST["kbfile"]);
+	$extract_data = extract_data(FALSE,TRUE,$content);
+	$content = $extract_data['content'];
+    $_POST['mapping'] = jsonToMappingArray($content);
+	$_POST['savethisfile'] = TRUE;
+	}
+
 if(isset($_POST['savethisfile']) AND isset($_POST['mapping'])) {
 	echo "<span id=\"timespan\" style=\"color:red; float:right; background-color:white; padding:6px; border-radius:6px;\">&nbsp;Saved “".$this_file."” file…</span>";
     if(isset($_POST['add_space'])) $add_space = TRUE;
@@ -74,6 +84,20 @@ for($i = 0; $i < 13; $i++) {
 	}
 echo "</table>";
 echo "<p style=\"text-align:right;\"><input class=\"save big\" type=\"submit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></p>";
+
+$all_files = array_merge(
+    glob($dir . "*-kb.*"),
+    glob($dir . "*.bpkb")
+    );
+echo "<input class=\"save\" type=\"submit\" name=\"copy_from_file\" value=\"COPY data from this file:\">&nbsp;";
+echo "<select name=\"kbfile\">&nbsp;to <span class=\"green-text\">‘".$filename."’</span>";
+foreach($all_files as $some_file) {
+	$some_name = basename($some_file);
+    if($some_name == $filename) continue;
+	echo "<option value=\"".htmlspecialchars($some_file,ENT_QUOTES)."\">".htmlspecialchars($some_name,ENT_QUOTES)."</option>";
+	}
+echo "</select>&nbsp;to <span class=\"green-text\">‘".$filename."’</span>";
+
 echo "</form>";
 
 function mappingFormToJson(array $form): string {

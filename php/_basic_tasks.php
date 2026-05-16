@@ -803,7 +803,7 @@ function display_more_buttons($error,$content,$url_source_page,$dir,$grammar_fil
 	if($keyboard_file <> '') {
 		$url_this_page = "keyboard.php?file=".urlencode($dir.$keyboard_file);
 		echo "<td>";
-		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$keyboard_file."','width=700,height=750,left=100'); return false;\" value=\"EDIT ‘".begin_with(20,$keyboard_file)."’\">";
+		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$keyboard_file."','width=700,height=770,left=100'); return false;\" value=\"EDIT ‘".begin_with(20,$keyboard_file)."’\">";
 		echo "</td>";
 		}
 	if($glossary_file <> '') {

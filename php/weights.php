@@ -148,7 +148,10 @@ echo "<p style=\"text-align:left;\"><input class=\"save\" type=\"submit\" name=\
 echo "<input type=\"hidden\" name=\"grammar_file\" value=\"".$grammar_file."\">";
 if($grammarWindow <> '') echo "<input type=\"hidden\" name=\"grammarWindow\" value=\"".$grammarWindow."\">";
 
-$all_files = glob($dir."*-wg.*");
+$all_files = array_merge(
+    glob($dir . "*-wg.*"),
+    glob($dir . "*.bpwg")
+    );
 echo "<input class=\"save\" type=\"submit\" name=\"copy_from_file\" value=\"COPY weights from this file:\">&nbsp;";
 echo "<select name=\"wgfile\">&nbsp;to <span class=\"green-text\">‘".$current_filename."’</span>";
 foreach($all_files as $some_file) {
