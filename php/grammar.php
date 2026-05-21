@@ -17,14 +17,13 @@ $textarea_rows = 20;
 $save_warning = $the_warning = '';
 $thistype = "grammar";
 
-
 $grammarWindow = 'gw_'.md5($current_directory.'/'.$filename);
 // echo "grammarWindow = ".$grammarWindow."<br />";
- // This will be passed by display_more_buttons() and used in weights.php to return to the current window
+
+// The following will be used for "MIDI enter notes", or passed by display_more_buttons() and used in "weights.php" to return to the current window 
 echo "<script>
 window.name = '".$grammarWindow."';
 </script>";
-// window.name = '".json_encode($grammarWindow)."';
 
 // if($test) echo "grammar_file = ".$this_file."<br />";
 // echo "skin = ".$skin."<br />";
@@ -730,7 +729,9 @@ echo "<input type=\"hidden\" name=\"weights_file\" value=\"".$weights_file."\">"
 echo "<span  id=\"topedit\">&nbsp;</span>";
 echo $save_warning;
 
-echo "<br /><button id=\"downloadupload\" class=\"save\" onclick=\"toggledownload(); return false;\">DOWNLOAD / UPLOAD</button>&nbsp;<button class=\"edit\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button><p></p>";
+echo "<br /><button id=\"downloadupload\" class=\"save\" onclick=\"toggledownload(); return false;\">DOWNLOAD / UPLOAD</button>&nbsp;<button class=\"edit\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button>";
+enter_notes_button($filename,$NumberMIDIinputs,$dir,$settings_file);
+echo "</p>";
 
 download_upload_project_form($dir,$filename,"grammar",$settings_file); find_replace_form();
 	echo $upload_message; echo $undo_upload_project_message;
@@ -987,6 +988,7 @@ echo "</script>\n";
 
 footer();
 footer_keyboard_mapping($dir,$keyboard_file);
+footer_enter_notes($grammarWindow);
 echo "</body>";
 echo "</html>";
 

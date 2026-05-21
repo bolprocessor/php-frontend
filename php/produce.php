@@ -6,6 +6,9 @@ else $this_title = '';
 
 $learn = $anal = FALSE;
 $failed_parsing = $failed_template = $success_parsing = 0;
+$trace_link = $output = $dir = '';
+$trace_production = $show_production = FALSE;
+$file_format = '';
 
 echo "<head>";
 if($midi_player == "MIDIjs") echo "<script type='text/javascript' src='https://www.midijs.net/lib/midi.js'></script>";
@@ -85,6 +88,7 @@ if(isset($_GET['item'])) $item = $_GET['item'];
 else $item = 0;
 
 // ob_start();
+@unlink($temp_dir."/trace_notes_txt");
 $check_command_line = FALSE;
 $sound_file_link = $result_file = $tracefile = '';
 $project_fullname = '';
@@ -103,7 +107,7 @@ else {
 		if(isset($_GET['data'])) $project_fullname = $data_path = urldecode($_GET['data']);
 		else $data_path = '';
 		}
-	if($grammar_path == '' AND $data_path == '') {
+	if($instruction <> "enter_notes" AND $grammar_path == '' AND $data_path == '') {
 		echo "Link to data and/or grammar is missing";
 		echo "<p style=\"text-align:center; width:90%;\"><big>👉&nbsp;&nbsp;<a href=\"\" onclick=\"window.close();\">Close this page</a></big></p>";
 		echo "</div>";
@@ -126,6 +130,7 @@ else {
 	else $alphabet_path = '';
 	if(isset($_GET['format'])) $file_format = $_GET['format'];
 	else $file_format = '';
+	if($instruction == "enter_notes") $file_format = "rtmidi";
 	if(isset($_GET['mode'])) $mode = $_GET['mode'];
 	else $mode = '';
 	$output = '';
@@ -133,7 +138,6 @@ else {
 		$output = urldecode($_GET['output']);
 	//	echo "@output = ".$output."<br />";
 		}
-/*	if($instruction == "analyze" AND $weights_path <> '' AND $grammar_path <> '') $learn = TRUE; */
 	if($instruction == "analyze" AND $mode == "LEARN" AND $grammar_path <> '') $learn = TRUE;
 	if($instruction == "analyze" AND $mode == "ANAL" AND $grammar_path <> '') $anal = TRUE;
 	if($instruction == "create_set" AND isset($_GET['output']))
@@ -199,7 +203,7 @@ else {
     $result_file = str_replace(SLASH,'/',$result_file);
 //	echo "project_name = ".$project_name."<br />";
 //	echo "result_file = ".$result_file."<br />";
-	if($instruction == "create_set") $project_fullname = $this_title;
+	if($instruction == "create_set" OR $instruction == "enter_notes") $project_fullname = $this_title;
 	$project_fullname = str_replace($temp_dir,'',$project_fullname);
     $project_fullname = str_replace(SLASH,'/',$project_fullname);
 	$project_fullname = preg_replace("/\/[0-9]+\.bpda/u",'',$project_fullname);
@@ -307,7 +311,7 @@ else {
 	if($tonality_file <> '') $command .= " -to ".$dir_tonality_resources.$tonality_file;
 	
 	if($startup <> '') $command .= " --start ".$startup;
-	if($instruction == "produce" OR $instruction == "produce-all" OR $instruction == "play" OR $instruction == "play-all" OR $instruction == "expand" OR $instruction == "create_set") {
+	if($instruction == "produce" OR $instruction == "produce-all" OR $instruction == "play" OR $instruction == "play-all" OR $instruction == "expand" OR $instruction == "create_set" OR $instruction == "enter_notes") {
 		switch($file_format) {
 			case "data":
 			//	$command .= " -d -o ".$output;
@@ -395,12 +399,10 @@ if(windows_system()) {
 $command_show = str_replace("[","\[",$command_show);
 $command_show = str_replace("]","\]",$command_show);
 
-// display_darklight();
 echo "<p><small><b><span class=\"red-text\">BP3 (for geeks) ➡</span></b> ".$command_show."</small></p>\n";
 
 $stopfile = $temp_dir_abs."trace_".my_session_id()."_".$project_fullname."_stop";
 // This will be used by createFile() after clicking the STOP button in produce.php
-
 $donefile = $temp_dir_abs."trace_".my_session_id()."_".$project_fullname."_done";
 // This is created by the console to tell its job is over
 
@@ -435,24 +437,26 @@ if($instruction <> "help") {
 				}
 			}
 		}
-//	if($instruction <> "analyze" AND $instruction <> "templates") {
-		$stopfile = str_replace(SLASH,'/',$stopfile);
-		$pausefile = str_replace(SLASH,'/',$pausefile);
-		$continuefile = str_replace(SLASH,'/',$continuefile);
-		echo "<p id=\"wait\" style=\"text-align:center; background-color:yellow; color:black;\"><br /><big><b><span class=\"blinking\">… Bol Processor console is working …</span></b></big><br />(Don't close this window!)<br /><br />";
-		echo "<button type=\"button\" class=\"produce\" onclick=\"createFile('".$stopfile."');\">Click to STOP</button>";
-		if($file_format == "rtmidi") {
-			echo "&nbsp;<button type=\"button\" class=\"produce\" onclick=\"createFile('".$pausefile."');\">Pause</button>";
-			echo "&nbsp;<button type=\"button\" class=\"produce\" onclick=\"createFile('".$continuefile."');\">Continue</button>";
-			}
-		echo "<br /><br /></p>\n";
-//		}
+	$stopfile = str_replace(SLASH,'/',$stopfile);
+	$pausefile = str_replace(SLASH,'/',$pausefile);
+	$continuefile = str_replace(SLASH,'/',$continuefile);
+
+	echo "<p id=\"wait\" style=\"text-align:center; background-color:yellow; color:black;\"><br /><big><b><span class=\"blinking\">… Bol Processor console is working …</span></b></big><br />(Don't close this window!)<br /><br />";
+
+	if($instruction == "templates") echo "👉 Creating/updating templates<br /><br />";
+	if($instruction == "enter_notes") echo "👉 Entering notes from the MIDI input device.<br /><br />Notes are displayed at the insertion point of your grammar or data.<br />The note convention is chosen in the settings file.<br /><br />If it doesn't work, click STOP, then SHOW process, and check connected devices<br />&nbsp;&nbsp;to update the MIDI input.<br /><br />Read <a target=\"_blank\" href=\"https://bolprocessor.org/enter-notes/\">https://bolprocessor.org/enter-notes/</a> for details.<br /><br />";
+
+	echo "<button type=\"button\" class=\"produce\" onclick=\"createFile('".$stopfile."');\">Click to STOP</button>";
+	if($file_format == "rtmidi") {
+		echo "&nbsp;<button type=\"button\" class=\"produce\" onclick=\"createFile('".$pausefile."');\">Pause</button>";
+		echo "&nbsp;<button type=\"button\" class=\"produce\" onclick=\"createFile('".$continuefile."');\">Continue</button>";
+		}
+	echo "<br /><br /></p>\n";
 	}
 echo str_repeat(' ', 10240);  // send extra spaces to fill browser buffer, useful for Windows
 if(ob_get_level() > 0) ob_flush();
 flush();
 
-if($instruction == "templates") echo "<p><b>Creating/updating templates";
 if(isset($data_path) AND $data_path <> '') {
 	$content = @file_get_contents($data_path);
 	if($content <> FALSE) {
@@ -518,7 +522,7 @@ if($instruction == "help") {
 
 $last_warning = $time_start = time();
 $time_end = $time_start + $max_sleep_time_after_bp_command;
-//	echo $donefile."<br />";
+// echo "donefile = ".$donefile."<br />";
 /*	echo "<p id=\"donestatus\">Waiting for ‘done’ file…</p>";
 $dots = 0;
 while(TRUE) {
@@ -538,6 +542,7 @@ while(TRUE) {
 	}
 if($dots > 0) echo "<br /><br />"; */
 @unlink($donefile);
+@unlink($temp_dir."/trace_notes_txt");
 $content_trace = $tracefile_html = '';
 if(file_exists($tracefile)) {
     $content_trace = file_get_contents($tracefile,TRUE);
@@ -772,7 +777,7 @@ $handle = FALSE;
 $terminated = FALSE;
 if(file_exists($stopfile) OR file_exists($panicfile)) $terminated = TRUE;
 @unlink($pausefile); @unlink($continuefile);
-if($terminated) echo "<p style=\"color:red;\"><big>👉 The performance has been interrupted</big></p>";
+if($terminated AND $instruction <> "enter_notes") echo "<p style=\"color:red;\"><big>👉 The performance has been interrupted</big></p>";
 
 $capture_file = $temp_dir_abs."trace_".my_session_id()."_".$project_fullname."_capture";
 if(file_exists($capture_file)) {
@@ -889,7 +894,7 @@ if($n_messages > 0) {
 		}
 	}
 else echo "<p>No message produced…";
-if($trace_csound <> '' AND file_exists($trace_csound)) {
+if(isset($trace_csound) AND $trace_csound <> '' AND file_exists($trace_csound)) {
 	$window_name = $grammar_name."_".rand(0,99)."_result";
 	echo "&nbsp;<input class=\"save big\" onclick=\"window.open('".nice_url($trace_csound_link)."','".$window_name."','width=800,height=600,left=100'); return false;\" type=\"submit\" value=\"Show Csound trace\">";
 	}

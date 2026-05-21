@@ -1047,7 +1047,7 @@ function clean_up_encoding($create_bullets,$convert,$text) {
 	$text = str_replace("Â","¬",$text);
 	$text = str_replace("¤","•",$text);
 	$text = str_replace("â¢","•",$text);
-	$text = preg_replace('/-se\s+/','-se.',$text);
+/*	$text = preg_replace('/-se\s+/','-se.',$text);
 	$text = preg_replace('/-al\s+/','-al.',$text);
 	$text = preg_replace('/-gr\s+/','-gr.',$text);
 	$text = preg_replace('/-so\s+/','-so.',$text);
@@ -1057,7 +1057,7 @@ function clean_up_encoding($create_bullets,$convert,$text) {
 	$text = preg_replace('/-or\s+/','-or.',$text);
 	$text = preg_replace('/-in\s+/','-in.',$text);
 	$text = preg_replace('/-md\s+/','-md.',$text);
-	$text = preg_replace('/-gl\s+/','-gl.',$text);
+	$text = preg_replace('/-gl\s+/','-gl.',$text); */
 	$text = str_replace('∞',"inf",$text);
 	if($create_bullets) $text = preg_replace("/\s\\.$/u"," •",$text);
 //	if($create_bullets) $text = preg_replace("/\s\\.([^0-9])/u"," •$1",$text);
@@ -1118,7 +1118,7 @@ function add_linefeeds_after_remarks($text) { // 2026-04-23
 	$table2 = array();
 	foreach($table AS $line) {
 		$line = trim($line);
-		if(str_starts_with($line,"//")) $is_comment = TRUE;
+		if(str_starts_with($line,"//") OR str_starts_with($line,"-")) $is_comment = TRUE;
 		else {
 			if($is_comment) {
 				if($line <> '') $table2[] = '';
@@ -2484,47 +2484,52 @@ function get_instruction($line) {
 	}
 
 function getOS() {
-    $user_agent = $_SERVER['HTTP_USER_AGENT'];
-    $os_platform  = "Unknown OS Platform";
-    $os_array     = array(
-         '/windows nt 10/i'      =>  'Windows 10',
-         '/windows nt 6.3/i'     =>  'Windows 8.1',
-         '/windows nt 6.2/i'     =>  'Windows 8',
-         '/windows nt 6.1/i'     =>  'Windows 7',
-         '/windows nt 6.0/i'     =>  'Windows Vista',
-         '/windows nt 5.2/i'     =>  'Windows Server 2003/XP x64',
-         '/windows nt 5.1/i'     =>  'Windows XP',
-         '/windows xp/i'         =>  'Windows XP',
-         '/windows nt 5.0/i'     =>  'Windows 2000',
-         '/windows me/i'         =>  'Windows ME',
-         '/win98/i'              =>  'Windows 98',
-         '/win95/i'              =>  'Windows 95',
-         '/win16/i'              =>  'Windows 3.11',
-         '/macintosh|mac os x/i' =>  'Mac OS X',
-         '/mac_powerpc/i'        =>  'Mac OS 9',
-         '/linux/i'              =>  'Linux',
-         '/ubuntu/i'             =>  'Ubuntu',
-         '/iphone/i'             =>  'iPhone',
-         '/ipod/i'               =>  'iPod',
-         '/ipad/i'               =>  'iPad',
-         '/android/i'            =>  'Android',
-         '/blackberry/i'         =>  'BlackBerry',
-         '/webos/i'              =>  'Mobile'
-          );
-    foreach($os_array as $regex => $value)
-        if(preg_match($regex,$user_agent))
+    $user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+    $os_platform = "Unknown OS Platform";
+    $os_array = array(
+        '/windows nt 10/i'      => 'Windows 10',
+        '/windows nt 6.3/i'     => 'Windows 8.1',
+        '/windows nt 6.2/i'     => 'Windows 8',
+        '/windows nt 6.1/i'     => 'Windows 7',
+        '/windows nt 6.0/i'     => 'Windows Vista',
+        '/windows nt 5.2/i'     => 'Windows Server 2003/XP x64',
+        '/windows nt 5.1/i'     => 'Windows XP',
+        '/windows xp/i'         => 'Windows XP',
+        '/windows nt 5.0/i'     => 'Windows 2000',
+        '/windows me/i'         => 'Windows ME',
+        '/win98/i'              => 'Windows 98',
+        '/win95/i'              => 'Windows 95',
+        '/win16/i'              => 'Windows 3.11',
+        '/macintosh|mac os x/i' => 'Mac OS X',
+        '/mac_powerpc/i'        => 'Mac OS 9',
+        '/linux/i'              => 'Linux',
+        '/ubuntu/i'             => 'Ubuntu',
+        '/iphone/i'             => 'iPhone',
+        '/ipod/i'               => 'iPod',
+        '/ipad/i'               => 'iPad',
+        '/android/i'            => 'Android',
+        '/blackberry/i'         => 'BlackBerry',
+        '/webos/i'              => 'Mobile'
+    	);
+    foreach ($os_array as $regex => $value) {
+        if (preg_match($regex, $user_agent)) {
             $os_platform = $value;
+            break;
+			}
+		}
     return $os_platform;
 	}
 
 function linux_system() {
 	$os_platform = getOS();
 	if((is_integer(strpos($os_platform,"Linux")) OR is_integer(strpos($os_platform,"Ubuntu")))) return TRUE;
+	return FALSE;
 	}
 
 function mac_system() {
 	$os_platform = getOS();
 	if(is_integer(strpos($os_platform,"Mac OS"))) return TRUE;
+	return FALSE;
 	}
 
 function windows_system() {
@@ -3994,6 +3999,35 @@ function footer() {
 	return;
 	}
 
+function footer_enter_notes($window) {
+    ?>
+	<script>
+	window.name = "<?= $window ?>";
+	function insertNoteAtCursor(textarea, text) {
+		const start = textarea.selectionStart ?? textarea.value.length;
+		const end = textarea.selectionEnd ?? textarea.value.length;
+		textarea.value =
+			textarea.value.substring(0, start) +
+			text +
+			textarea.value.substring(end);
+		const pos = start + text.length;
+		textarea.selectionStart = pos;
+		textarea.selectionEnd = pos;
+		textarea.dispatchEvent(new Event("input", { bubbles: true }));
+		}
+	window.addEventListener("DOMContentLoaded", () => {
+		const textarea = document.getElementById("textArea");
+		if(!textarea) return;
+		const ev = new EventSource("note_stream.php?channel=" + encodeURIComponent(window.name));
+		ev.onmessage = e => {
+			insertNoteAtCursor(textarea, e.data + " ");
+			};
+		});
+	</script>
+<?php
+	return;
+	}
+
 function footer_keyboard_mapping($dir,$keyboard_file) {
     $mapPath = $dir.$keyboard_file;
 	if($keyboard_file == '' OR !file_exists($mapPath)) return;
@@ -4756,6 +4790,15 @@ function display_midi_ports($filename) {
 		echo "<br />";
 		}
 	echo "<input class=\"save\" style=\"float:right;\" type=\"submit\" name=\"create_input\" value=\"Add an input\">";
+	return;
+	}
+
+function enter_notes_button($filename,$NumberMIDIinputs,$dir,$settings_file) {
+	if(!isset($NumberMIDIinputs) OR $NumberMIDIinputs < 1) return;
+	$window_name = "capture";
+	$link_capture = "produce.php?instruction=enter_notes";
+	$link_capture .= "&settings=".urlencode($dir.$settings_file)."&title=".urlencode($filename);
+	echo "&nbsp;<input onclick=\"window.open('".$link_capture."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"MIDI enter notes\" class=\"produce\">";
 	return;
 	}
 

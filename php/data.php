@@ -32,11 +32,16 @@ $url_this_page = "data.php?file=".urlencode($file);
 save_settings("last_data_page",$url_this_page);
 $table = explode(SLASH,$file);
 $filename = end($table);
-echo "<script>
-window.name = '".$filename."'
-</script>";
 $this_file = $bp_application_path.$file;
 $dir = str_replace($filename,'',$this_file);
+
+$dataWindow = 'gw_'.md5($dir.'/'.$filename);
+
+// The following will be used for "MIDI enter notes"
+echo "<script>
+window.name = '".$dataWindow."'
+</script>";
+
 $thistype = "data";
 $current_directory = str_replace(SLASH.$filename,'',$file);
 $current_directory = str_replace(SLASH,'/',$current_directory);
@@ -1483,7 +1488,7 @@ $output_file = add_proper_extension($file_format,$output_file);
 // echo "<p>output_file = ".$output_file."</p>";
 
 if(!is_connected() AND $file_format == "midi") {
-	echo "<p style=\"color:red;\">➡ Cannot find the MIDI file er “midijs.net”… Are you connected to Internet?</p>";
+	echo "<p style=\"color:red;\">➡ Cannot find the MIDI file player “midijs.net”… Are you connected to Internet?</p>";
 	}
 
 $project_name = preg_replace("/\.[a-z]+$/u",'',$output_file);
@@ -1635,7 +1640,9 @@ if(!isset($_POST['analyze_tonal'])) {
 			}
 		echo "</div>";
 		}
-	echo "<p id=\"downloadupload\"><button class=\"save\"\" onclick=\"toggledownload(); return false;\">DOWNLOAD / UPLOAD</button>&nbsp;<button class=\"edit\"\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button></p>";
+	echo "<p id=\"downloadupload\"><button class=\"save\"\" onclick=\"toggledownload(); return false;\">DOWNLOAD / UPLOAD</button>&nbsp;<button class=\"edit\"\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button>";
+	enter_notes_button($filename,$NumberMIDIinputs,$dir,$settings_file);
+	echo "</p>";
 
 	download_upload_project_form($dir,$filename,"data",$settings_file); find_replace_form();
 	echo $upload_message; echo $undo_upload_project_message;
@@ -2069,6 +2076,7 @@ echo "window.onload = function() {
 echo "</script>\n";
 footer();
 footer_keyboard_mapping($dir,$keyboard_file);
+footer_enter_notes($dataWindow);
 echo "</body></html>";
 
 function create_parts($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxchunk_size,$measure_min,$measure_max,$label) {

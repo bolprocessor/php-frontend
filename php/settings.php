@@ -18,6 +18,15 @@ display_darklight();
 
 echo link_to_help();
 
+$scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+    ? 'https'
+    : 'http';
+$host = $_SERVER['HTTP_HOST'];
+$url_to_push = $scheme."://".$host .$_SERVER['SCRIPT_NAME'];
+$url_to_push = str_replace("settings.php",'',$url_to_push);
+$url_to_push .= "note_push.php";
+// Typically "http://localhost/try/bolprocessor/php/"
+
 echo "<h2>Settings “".$filename."”</h2>";
 
 $token = get_settings_tokens();
@@ -241,6 +250,9 @@ if(isset($_POST['saveparameters'])) {
 			$settings[$param]['boolean'] = $boolean;
 			}
 		}
+	$settings['UrlToPush']['name'] = "url_to_push";
+	$settings['UrlToPush']['value'] = $url_to_push;
+	$settings['UrlToPush']['boolean'] = 0;
 	$settings = recursive_strval($settings);
 	$jsonData = json_encode($settings,JSON_PRETTY_PRINT);
     my_file_put_contents($this_file,$jsonData);
@@ -263,6 +275,7 @@ else {
 	}
 $settings = json_decode($content,TRUE);
 if($bad_settings) die();
+if(!isset($settings['UrlToPush']['value']) OR $settings['UrlToPush']['value'] <> $url_to_push) echo "<p class=\"attention\">⚠️ Click SAVE to update this file!</p>";
 echo "<p class=\"green-text\">".str_replace("\n","<br />",$settings['header'])."</p>";
 echo "<form method=\"post\" action=\"".$url_this_page."&source=".$source."\" enctype=\"multipart/form-data\">";
 echo "<p style=\"text-align:left;\"><input class=\"save\" type=\"submit\" name=\"saveparameters\" value=\"SAVE TO ‘".$filename."’\"></p>";
