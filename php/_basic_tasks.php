@@ -8,7 +8,7 @@ error_reporting(E_ALL);
 // ini_set('output_buffering','off');
 // ini_set('zlib.output_compression', 0);
 // ini_set("pcre.jit", "0"); 2025-02-11
-require('midi.class.php'); // $$$ Probably not used, needs to be checked.
+// require('midi.class.php'); // $$$ Probably not used, needs to be checked.
 // Source: https://github.com/robbie-cao/midi-class-php
 
 define('MAXFILESIZE',50000000);
@@ -126,6 +126,7 @@ $bad_settings = FALSE;
 
 $oldmask = umask(0);
 $temp_dir = $bp_application_path."temp_bolprocessor";
+@unlink($temp_dir."/trace_notes_txt");
 if(!file_exists($temp_dir)) {
 	if (!mkdir($temp_dir, $permissions, true))
         error_log("Failed to create directory '{$temp_dir}' with error: " . error_get_last()['message']);
@@ -325,19 +326,25 @@ if(!file_exists('latest_version.cache') OR filemtime('latest_version.cache') < (
 
 echo "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js\"></script>\n";
 echo "<script>";
+echo "let currentRequest = null;\n";
 echo "function createFile(pathToFile) {
-    $.ajax({
+    if (currentRequest) {
+        currentRequest.abort();
+    	}
+    currentRequest = $.ajax({
         url: '_createfile.php',
-        data: { path_to_file: pathToFile },
-        success: function(response) {
-            document.getElementById('message').innerHTML = response;
-        },
-        error: function() {
-            document.getElementById('message').innerHTML = \"Error creating the file.\";
-        }
-    });\n";
-echo "}
-</script>";
+        cache: false,
+        timeout: 5000,
+        data: {
+            path_to_file: pathToFile
+        	},
+        complete: function() {
+            currentRequest = null;
+        	}
+    	});
+	}\n";
+echo "</script>";
+
 echo "<script>\n";
 echo "$(document).ready(function() {
   $(\"#parent1\").click(function() {
@@ -2563,61 +2570,48 @@ function is_macos_alias($file) {
 	} */
 
 function is_macos_alias($file) {
-
     // Must be a regular file
     if (!is_file($file)) {
         return false;
     }
-
     // Reuse finfo object for speed
     static $finfo = null;
-
     if ($finfo === null) {
         $finfo = new finfo(FILEINFO_MIME_TYPE);
     }
-
     // Fast reject of ordinary text/media files
     if ($finfo->file($file) !== 'application/octet-stream') {
         return false;
     }
-
     // Read FinderInfo directly
     $finderInfo = shell_exec(
         'xattr -p com.apple.FinderInfo ' .
         escapeshellarg($file) .
         ' 2>/dev/null'
     );
-
     if ($finderInfo === null || strlen($finderInfo) < 10) {
         return false;
     }
-
     // Finder flags are bytes 8-9
     $flags = unpack('n', substr($finderInfo, 8, 2))[1];
-
     // 0x8000 = alias flag
     if (($flags & 0x8000) === 0) {
         return false;
     }
-
     // Resolve alias target with AppleScript
     $script =
         'POSIX path of (original item of (POSIX file "' .
         str_replace('"', '\"', $file) .
         '" as alias))';
-
     $output = shell_exec(
         'osascript -e ' .
         escapeshellarg($script) .
         ' 2>/dev/null'
     );
-
     if ($output === null) {
         return false;
     }
-
     $target = trim($output);
-
     // True only if target exists and is a folder
     return ($target !== '' && is_dir($target));
 }
@@ -4000,6 +3994,7 @@ function footer() {
 	}
 
 function footer_enter_notes($window) {
+	global $temp_dir;
     ?>
 	<script>
 	window.name = "<?= $window ?>";
@@ -4014,11 +4009,14 @@ function footer_enter_notes($window) {
 		textarea.selectionStart = pos;
 		textarea.selectionEnd = pos;
 		textarea.dispatchEvent(new Event("input", { bubbles: true }));
+		textarea.dispatchEvent(new Event("change", { bubbles: true }));
 		}
 	window.addEventListener("DOMContentLoaded", () => {
 		const textarea = document.getElementById("textArea");
 		if(!textarea) return;
-		const ev = new EventSource("note_stream.php?channel=" + encodeURIComponent(window.name));
+		const tempDir = <?= json_encode($temp_dir) ?>;
+		const ev = new EventSource(
+            "note_stream.php?temp_dir=" + encodeURIComponent(tempDir));
 		ev.onmessage = e => {
 			insertNoteAtCursor(textarea, e.data + " ");
 			};

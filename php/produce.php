@@ -16,8 +16,8 @@ else if($midi_player == "html-midi-player") echo "<script src=\"https://cdn.jsde
 echo "<script src=\"darkmode.js\"></script>";
 echo "<link rel=\"stylesheet\" href=\"bp-light.css\" />\n";
 echo "</head>";
-echo "<body>\n";
 
+echo "<body>\n";
 set_time_limit(0);
 if(windows_system()) {
     if(isset($_GET['keepalive'])) {
@@ -345,10 +345,9 @@ if($instruction <> "help") {
 	// Check that the same project is not already running in the same sesssion
 	$running_trace = $temp_dir_abs."trace_".my_session_id()."_".$project_fullname.".txt";
 	// Example: trace_dnh20dhdkjj9nd1ehr9kj360ec_-gr.Mozart.txt
-	if(file_exists($running_trace)) {
+	if(!windows_system() AND file_exists($running_trace)) {
 		echo "<form  id=\"topchanges\" method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		echo "<p style=\"color:red;\">Project “".$project_fullname."” is already running in the same session.</p>";
-		// echo $running_trace."<br />";
 		echo "<input type=\"hidden\" name=\"running_trace\" value=\"".$running_trace."\">";
 		echo "<input style=\"color:DarkBlue; background-color:yellow;\" onclick=\"window.close();\" type=\"submit\" value=\"WAIT UNTIL IT IS OVER\">";
 		echo "&nbsp;&nbsp;<input class=\"produce\" type=\"submit\" name=\"ignore\" value=\"IGNORE\">";
@@ -384,6 +383,18 @@ if($instruction <> "help") {
 			sleep(1);
 			}
 		}
+//	echo "<p>running_trace = ".$running_trace."</p>";
+	echo "<script>
+	window.addEventListener('pagehide', function () {
+		navigator.sendBeacon(
+			'_createfile.php?path_to_file=' + encodeURIComponent(".json_encode($panicfile).")
+			);
+		navigator.sendBeacon(
+			'_deletefile.php?path_to_file=' + encodeURIComponent(".json_encode($running_trace).")
+			);
+		navigator.sendBeacon('_kill_bp.php');
+		});
+	</script>";
 	}
 
 if($check_command_line) {
@@ -441,15 +452,49 @@ if($instruction <> "help") {
 	$pausefile = str_replace(SLASH,'/',$pausefile);
 	$continuefile = str_replace(SLASH,'/',$continuefile);
 
+	echo "<script>
+	function setButtonState(button, disabled) {
+		button.disabled = disabled;
+		if(disabled) {
+			button.classList.add('disabled');
+			}
+		else {
+			button.classList.remove('disabled');
+			}
+		}
+	function pauseProcess() {
+		createFile(" . json_encode($pausefile) . ");
+		setButtonState(document.getElementById('pauseBtn'), true);
+		setButtonState(document.getElementById('continueBtn'), false);
+		}
+	function continueProcess() {
+		createFile(" . json_encode($continuefile) . ");
+		setButtonState(document.getElementById('pauseBtn'), false);
+		setButtonState(document.getElementById('continueBtn'), true);
+		}
+	</script>";
+
 	echo "<p id=\"wait\" style=\"text-align:center; background-color:yellow; color:black;\"><br /><big><b><span class=\"blinking\">… Bol Processor console is working …</span></b></big><br />(Don't close this window!)<br /><br />";
 
 	if($instruction == "templates") echo "👉 Creating/updating templates<br /><br />";
 	if($instruction == "enter_notes") echo "👉 Entering notes from the MIDI input device.<br /><br />Notes are displayed at the insertion point of your grammar or data.<br />The note convention is chosen in the settings file.<br /><br />If it doesn't work, click STOP, then SHOW process, and check connected devices<br />&nbsp;&nbsp;to update the MIDI input.<br /><br />Read <a target=\"_blank\" href=\"https://bolprocessor.org/enter-notes/\">https://bolprocessor.org/enter-notes/</a> for details.<br /><br />";
-
 	echo "<button type=\"button\" class=\"produce\" onclick=\"createFile('".$stopfile."');\">Click to STOP</button>";
-	if($file_format == "rtmidi") {
-		echo "&nbsp;<button type=\"button\" class=\"produce\" onclick=\"createFile('".$pausefile."');\">Pause</button>";
-		echo "&nbsp;<button type=\"button\" class=\"produce\" onclick=\"createFile('".$continuefile."');\">Continue</button>";
+	if($file_format == "rtmidi" AND $instruction <> "enter_notes") {
+		echo "&nbsp;<button
+			id=\"pauseBtn\"
+			type=\"button\"
+			class=\"produce\"
+			onclick=\"pauseProcess();\">
+			Pause
+		</button>";
+		echo "&nbsp;<button
+			id=\"continueBtn\"
+			type=\"button\"
+			class=\"produce disabled\"
+			disabled
+			onclick=\"continueProcess();\">
+			Continue
+		</button>";
 		}
 	echo "<br /><br /></p>\n";
 	}
@@ -837,7 +882,9 @@ if($n_messages > 0) {
 	$warnings = 0;
 	$analyzing_success = $analyzing_failure = FALSE;
 	for($i=0; $i < $n_messages; $i++) {
-		$mssg = $o[$i];
+		$mssg = trim($o[$i]);
+		if($mssg == null) continue;
+		if($mssg == '') continue;
 		$mssg = clean_up_encoding(FALSE,TRUE,$mssg);
 		$mssg = str_replace('<',"&lt;",$mssg);
 		$mssg = str_replace('>',"&gt;",$mssg);
@@ -846,36 +893,35 @@ if($n_messages > 0) {
 			$mssg = str_replace("=&gt; ",'',$mssg);
 			$mssg = "<font color=\"red\">".$mssg."</font>";
 			}
-        if($mssg !== null) $mssg = preg_replace("/(C:.+)$/u","<font color=#007BFF><small>$1</small></font>",$mssg);
-		if($mssg !== null)	$mssg = preg_replace("/(\.\.\/.+)$/u","<font color=#007BFF><small>$1</small></font>",$mssg);
+		if($mssg == null) continue;
+        $mssg = preg_replace("/(C:.+)$/u","<font color=#007BFF><small>$1</small></font>",$mssg);
+		if($mssg == null) continue;
+		$mssg = preg_replace("/(\.\.\/.+)$/u","<font color=#007BFF><small>$1</small></font>",$mssg);
+		if($mssg == null) continue;
 		if($mssg == "(null)") continue;
-	/*	if(($this_count = substr_count($mssg,"Analyzing new selection")) > 0) {
-			$analyzing_new_selection = TRUE;
-			} */
-		if(($this_count = substr_count($mssg,"Creating new weights file:")) > 0) {
+		if(($this_count = substr_count((string)$mssg,"Creating new weights file:")) > 0) {
 			$weights_file_path = trim(str_replace("Creating new weights file:",'',$mssg));
 			}
-		if(($this_count = substr_count($mssg,"templates have been produced")) > 0) {
+		if(($this_count = substr_count((string)$mssg,"templates have been produced")) > 0) {
 			$created_templates = TRUE;
 			}
-		if(($this_count = substr_count($mssg,"Analyzing item")) > 0) {
+		if(($this_count = substr_count((string)$mssg,"Analyzing item")) > 0) {
 			$analyzing_failure = TRUE;
 			$analyzing_success = TRUE;
 			}
-		if(($this_count = substr_count($mssg,"Analyzing new")) > 0) {
+		if(($this_count = substr_count((string)$mssg,"Analyzing new")) > 0) {
 			$analyzing_failure = TRUE;
 			$analyzing_success = TRUE;
 			}
-		if(($this_count = substr_count($mssg,"rejected by")) > 0 AND $analyzing_failure) {
+		if(($this_count = substr_count((string)$mssg,"rejected by")) > 0 AND $analyzing_failure) {
 			$failed_parsing++;
 			$analyzing_failure = FALSE;
 			}
-		if(($this_count = substr_count($mssg,"accepted by")) > 0 AND $analyzing_success) {
+		if(($this_count = substr_count((string)$mssg,"accepted by")) > 0 AND $analyzing_success) {
 			$success_parsing += $this_count;
 			$analyzing_success = FALSE;
 			}
-		if(($this_count = substr_count($mssg,"matched no template")) > 0) $failed_template += $this_count;
-		// if(($this_count = substr_count($mssg,"No success")) > 0) $failed_parsing += $this_count;
+		if(($this_count = substr_count((string)$mssg,"matched no template")) > 0) $failed_template += $this_count;
 		if($handle) fwrite($handle,$mssg."<br />\n");
 		if($i == 7) echo "… … …<br />";
 		if($i < 7 OR $i > ($n_messages - 4)) echo $mssg."<br />";

@@ -1,6 +1,5 @@
 <?php
-// session_start();
-$note = trim($_POST['note'] ?? '');
+$note = trim($_GET['note'] ?? '');
 if ($note === '') $note = "???";
 if ($note === '') {
     http_response_code(400);
