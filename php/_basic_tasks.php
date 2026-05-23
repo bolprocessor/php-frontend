@@ -126,7 +126,6 @@ $bad_settings = FALSE;
 
 $oldmask = umask(0);
 $temp_dir = $bp_application_path."temp_bolprocessor";
-@unlink($temp_dir."/trace_notes_txt");
 if(!file_exists($temp_dir)) {
 	if (!mkdir($temp_dir, $permissions, true))
         error_log("Failed to create directory '{$temp_dir}' with error: " . error_get_last()['message']);
@@ -134,6 +133,7 @@ if(!file_exists($temp_dir)) {
         chmod($temp_dir, $permissions); // Double-check permissions
 	}
 $temp_dir .= SLASH;
+@unlink($temp_dir."trace_notes_txt");
 if(!file_exists($temp_dir."messages")) mkdir($temp_dir."messages",$permissions,true);
 umask($oldmask);
 $panicfile = $temp_dir."messages".SLASH."_panic";
@@ -484,8 +484,8 @@ echo "<script
 function keepAlive() {
     setInterval(() => {
         fetch(window.location.href + \"?keepalive=1\").then(response => response.text());
-    }, 2000); // Send request every 2 seconds
-}
+    	}, 2000); // Send request every 2 seconds
+	}
 keepAlive();";
 echo "</script>";
 
@@ -3993,11 +3993,10 @@ function footer() {
 	return;
 	}
 
-function footer_enter_notes($window) {
+function footer_enter_notes() {
 	global $temp_dir;
     ?>
 	<script>
-	window.name = "<?= $window ?>";
 	function insertNoteAtCursor(textarea, text) {
 		const start = textarea.selectionStart ?? textarea.value.length;
 		const end = textarea.selectionEnd ?? textarea.value.length;
@@ -4013,7 +4012,11 @@ function footer_enter_notes($window) {
 		}
 	window.addEventListener("DOMContentLoaded", () => {
 		const textarea = document.getElementById("textArea");
-		if(!textarea) return;
+		if(!textarea) {
+			console.error("ERROR: textarea #textArea not found");
+			alert("ERROR: textarea #textArea not found");
+			return;
+			}
 		const tempDir = <?= json_encode($temp_dir) ?>;
 		const ev = new EventSource(
             "note_stream.php?temp_dir=" + encodeURIComponent(tempDir));
@@ -4795,7 +4798,7 @@ function enter_notes_button($filename,$NumberMIDIinputs,$dir,$settings_file) {
 	if(!isset($NumberMIDIinputs) OR $NumberMIDIinputs < 1) return;
 	$window_name = "capture";
 	$link_capture = "produce.php?instruction=enter_notes";
-	$link_capture .= "&settings=".urlencode($dir.$settings_file)."&title=".urlencode($filename);
+	$link_capture .= "&settings=".urlencode($dir.$settings_file)."&title=".urlencode($filename)."&keepalive=1";
 	echo "&nbsp;<input onclick=\"window.open('".$link_capture."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"MIDI enter notes\" class=\"produce\">";
 	return;
 	}

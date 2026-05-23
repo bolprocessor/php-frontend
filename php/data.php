@@ -2076,7 +2076,7 @@ echo "window.onload = function() {
 echo "</script>\n";
 footer();
 footer_keyboard_mapping($dir,$keyboard_file);
-footer_enter_notes($dataWindow);
+footer_enter_notes();
 echo "</body></html>";
 
 function create_parts($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxchunk_size,$measure_min,$measure_max,$label) {

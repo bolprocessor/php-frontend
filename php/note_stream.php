@@ -6,7 +6,7 @@ header("X-Accel-Buffering: no");
 
 $temp_dir = $_GET['temp_dir'] ?? '';
 if($temp_dir === '') die();
-$file = $temp_dir."/trace_notes_txt";
+$file = $temp_dir."trace_notes_txt";
 $pos = 0;
 while (ob_get_level() > 0) {
     ob_end_flush();
@@ -21,7 +21,7 @@ while(true) {
             while (($line = fgets($fp)) !== false) {
                 $note = trim($line);
                 if ($note !== '') {
-                    echo "data: ".str_replace(["\n","\r"],"",$note)."\n\n";
+                    echo "data: ".$note."\n\n";
                     @ob_flush();
                     @flush();
                     }

@@ -88,7 +88,7 @@ if(isset($_GET['item'])) $item = $_GET['item'];
 else $item = 0;
 
 // ob_start();
-@unlink($temp_dir."/trace_notes_txt");
+@unlink($temp_dir."trace_notes_txt");
 $check_command_line = FALSE;
 $sound_file_link = $result_file = $tracefile = '';
 $project_fullname = '';
@@ -341,6 +341,15 @@ else {
 	if($new_random_seed) $command .= " --seed ".$random_seed;
 	}
 
+$stopfile = $temp_dir_abs."trace_".my_session_id()."_".$project_fullname."_stop";
+// This will be used by createFile() after clicking the STOP button in produce.php
+$donefile = $temp_dir_abs."trace_".my_session_id()."_".$project_fullname."_done";
+// This is created by the console to tell its job is over
+
+$stopfile = str_replace(SLASH,'/',$stopfile);
+$pausefile = str_replace(SLASH,'/',$pausefile);
+$continuefile = str_replace(SLASH,'/',$continuefile);
+
 if($instruction <> "help") {
 	// Check that the same project is not already running in the same sesssion
 	$running_trace = $temp_dir_abs."trace_".my_session_id()."_".$project_fullname.".txt";
@@ -387,12 +396,8 @@ if($instruction <> "help") {
 	echo "<script>
 	window.addEventListener('pagehide', function () {
 		navigator.sendBeacon(
-			'_createfile.php?path_to_file=' + encodeURIComponent(".json_encode($panicfile).")
+			'_createfile.php?path_to_file=' + encodeURIComponent(".json_encode($stopfile).")
 			);
-		navigator.sendBeacon(
-			'_deletefile.php?path_to_file=' + encodeURIComponent(".json_encode($running_trace).")
-			);
-		navigator.sendBeacon('_kill_bp.php');
 		});
 	</script>";
 	}
@@ -411,11 +416,6 @@ $command_show = str_replace("[","\[",$command_show);
 $command_show = str_replace("]","\]",$command_show);
 
 echo "<p><small><b><span class=\"red-text\">BP3 (for geeks) ➡</span></b> ".$command_show."</small></p>\n";
-
-$stopfile = $temp_dir_abs."trace_".my_session_id()."_".$project_fullname."_stop";
-// This will be used by createFile() after clicking the STOP button in produce.php
-$donefile = $temp_dir_abs."trace_".my_session_id()."_".$project_fullname."_done";
-// This is created by the console to tell its job is over
 
 if($instruction <> "help") {
 	if($tracefile <> '') @unlink($tracefile);
@@ -448,9 +448,6 @@ if($instruction <> "help") {
 				}
 			}
 		}
-	$stopfile = str_replace(SLASH,'/',$stopfile);
-	$pausefile = str_replace(SLASH,'/',$pausefile);
-	$continuefile = str_replace(SLASH,'/',$continuefile);
 
 	echo "<script>
 	function setButtonState(button, disabled) {
@@ -461,6 +458,9 @@ if($instruction <> "help") {
 		else {
 			button.classList.remove('disabled');
 			}
+		}
+	function stopProcess() {
+		createFile(" . json_encode($stopfile) . ");
 		}
 	function pauseProcess() {
 		createFile(" . json_encode($pausefile) . ");
@@ -478,23 +478,10 @@ if($instruction <> "help") {
 
 	if($instruction == "templates") echo "👉 Creating/updating templates<br /><br />";
 	if($instruction == "enter_notes") echo "👉 Entering notes from the MIDI input device.<br /><br />Notes are displayed at the insertion point of your grammar or data.<br />The note convention is chosen in the settings file.<br /><br />If it doesn't work, click STOP, then SHOW process, and check connected devices<br />&nbsp;&nbsp;to update the MIDI input.<br /><br />Read <a target=\"_blank\" href=\"https://bolprocessor.org/enter-notes/\">https://bolprocessor.org/enter-notes/</a> for details.<br /><br />";
-	echo "<button type=\"button\" class=\"produce\" onclick=\"createFile('".$stopfile."');\">Click to STOP</button>";
+	echo "<button type=\"button\" class=\"produce\" onclick=\"stopProcess();\">Click to STOP</button>";
 	if($file_format == "rtmidi" AND $instruction <> "enter_notes") {
-		echo "&nbsp;<button
-			id=\"pauseBtn\"
-			type=\"button\"
-			class=\"produce\"
-			onclick=\"pauseProcess();\">
-			Pause
-		</button>";
-		echo "&nbsp;<button
-			id=\"continueBtn\"
-			type=\"button\"
-			class=\"produce disabled\"
-			disabled
-			onclick=\"continueProcess();\">
-			Continue
-		</button>";
+		echo "&nbsp;<button id=\"pauseBtn\" type=\"button\" class=\"produce\" onclick=\"pauseProcess();\">Pause</button>";
+		echo "&nbsp;<button id=\"continueBtn\" type=\"button\" class=\"produce disabled\" disabled onclick=\"continueProcess();\">Continue</button>";
 		}
 	echo "<br /><br /></p>\n";
 	}
@@ -587,7 +574,7 @@ while(TRUE) {
 	}
 if($dots > 0) echo "<br /><br />"; */
 @unlink($donefile);
-@unlink($temp_dir."/trace_notes_txt");
+// @unlink($temp_dir."trace_notes_txt");
 $content_trace = $tracefile_html = '';
 if(file_exists($tracefile)) {
     $content_trace = file_get_contents($tracefile,TRUE);
@@ -822,7 +809,7 @@ $handle = FALSE;
 $terminated = FALSE;
 if(file_exists($stopfile) OR file_exists($panicfile)) $terminated = TRUE;
 @unlink($pausefile); @unlink($continuefile);
-if($terminated AND $instruction <> "enter_notes") echo "<p style=\"color:red;\"><big>👉 The performance has been interrupted</big></p>";
+if($terminated AND $instruction <> "enter_notes") echo "<p class=\"attention\" style=\"color:red;\"><big>👉 The process has been interrupted</big></p>";
 
 $capture_file = $temp_dir_abs."trace_".my_session_id()."_".$project_fullname."_capture";
 if(file_exists($capture_file)) {
@@ -878,8 +865,8 @@ else {
 	}
 $weights_file_path = '';
 $created_templates = FALSE;
+$warnings = 0;
 if($n_messages > 0) {
-	$warnings = 0;
 	$analyzing_success = $analyzing_failure = FALSE;
 	for($i=0; $i < $n_messages; $i++) {
 		$mssg = trim($o[$i]);
@@ -888,7 +875,7 @@ if($n_messages > 0) {
 		$mssg = clean_up_encoding(FALSE,TRUE,$mssg);
 		$mssg = str_replace('<',"&lt;",$mssg);
 		$mssg = str_replace('>',"&gt;",$mssg);
-		if(is_integer($pos=strpos($mssg,"=&gt; "))) {
+		if(str_starts_with($mssg,"=&gt; ")) {
 			$warnings++;
 			$mssg = str_replace("=&gt; ",'',$mssg);
 			$mssg = "<font color=\"red\">".$mssg."</font>";
@@ -953,6 +940,9 @@ if($weights_file_path <> '' AND $learn) echo "<p><big>👉  New weights are save
 if($created_templates) echo "<p><big>👉  Templates have been created. Click the “<span class=\"green-text\">output file</span>” link!</big></p>";
 
 @unlink($running_trace);
+if($instruction == "enter_notes" AND $warnings == 0) {
+	 echo "<script>window.close();</script>";
+	}
 
 function check_image($link) {
 	$result = '';
