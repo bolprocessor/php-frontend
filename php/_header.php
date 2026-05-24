@@ -103,21 +103,6 @@ echo "function toggleReason() {
 }\n";
 echo "</script>";
 
-/* echo "<script>";
-echo "function createFile(pathToFile) {
-    $.ajax({
-        url: '_createfile.php',
-        data: { path_to_file: pathToFile },
-        success: function(response) {
-            document.getElementById('message').innerHTML = response;
-        },
-        error: function() {
-            document.getElementById('message').innerHTML = \"Error creating the file.\";
-        }
-    });\n";
-echo "}
-</script>"; */
-
 echo "<script src=\"darkmode.js\"></script>"; 
 
 echo "</head>";

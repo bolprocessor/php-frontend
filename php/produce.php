@@ -342,9 +342,9 @@ else {
 	}
 
 $stopfile = $temp_dir_abs."trace_".my_session_id()."_".$project_fullname."_stop";
-// This will be used by createFile() after clicking the STOP button in produce.php
+
 $donefile = $temp_dir_abs."trace_".my_session_id()."_".$project_fullname."_done";
-// This is created by the console to tell its job is over
+// This one is created by the console to tell its job is over
 
 $stopfile = str_replace(SLASH,'/',$stopfile);
 $pausefile = str_replace(SLASH,'/',$pausefile);
@@ -393,10 +393,16 @@ if($instruction <> "help") {
 			}
 		}
 //	echo "<p>running_trace = ".$running_trace."</p>";
+	$trace_notes_file = $temp_dir."trace_notes_txt";
 	echo "<script>
 	window.addEventListener('pagehide', function () {
 		navigator.sendBeacon(
-			'_createfile.php?path_to_file=' + encodeURIComponent(".json_encode($stopfile).")
+			'_createfile.php?path_to_file=' +
+			encodeURIComponent(" . json_encode($stopfile) . ")
+			);
+		navigator.sendBeacon(
+			'_deletefile.php?path_to_file=' +
+			encodeURIComponent(" . json_encode($trace_notes_file) . ")
 			);
 		});
 	</script>";
@@ -460,15 +466,15 @@ if($instruction <> "help") {
 			}
 		}
 	function stopProcess() {
-		createFile(" . json_encode($stopfile) . ");
+		createFile(".json_encode($stopfile).");
 		}
 	function pauseProcess() {
-		createFile(" . json_encode($pausefile) . ");
+		createFile(".json_encode($pausefile).");
 		setButtonState(document.getElementById('pauseBtn'), true);
 		setButtonState(document.getElementById('continueBtn'), false);
 		}
 	function continueProcess() {
-		createFile(" . json_encode($continuefile) . ");
+		createFile(".json_encode($continuefile).");
 		setButtonState(document.getElementById('pauseBtn'), false);
 		setButtonState(document.getElementById('continueBtn'), true);
 		}
@@ -477,7 +483,7 @@ if($instruction <> "help") {
 	echo "<p id=\"wait\" style=\"text-align:center; background-color:yellow; color:black;\"><br /><big><b><span class=\"blinking\">… Bol Processor console is working …</span></b></big><br />(Don't close this window!)<br /><br />";
 
 	if($instruction == "templates") echo "👉 Creating/updating templates<br /><br />";
-	if($instruction == "enter_notes") echo "👉 Entering notes from the MIDI input device.<br /><br />Notes are displayed at the insertion point of your grammar or data.<br />The note convention is chosen in the settings file.<br /><br />If it doesn't work, click STOP, then SHOW process, and check connected devices<br />&nbsp;&nbsp;to update the MIDI input.<br /><br />Read <a target=\"_blank\" href=\"https://bolprocessor.org/enter-notes/\">https://bolprocessor.org/enter-notes/</a> for details.<br /><br />";
+	if($instruction == "enter_notes") echo "👉 Entering notes from the MIDI input device.<br /><br />Notes are displayed at the insertion point of your grammar or data.<br />The note convention is chosen in the settings file.<br /><br />👉 You can close this window when done.<br /><br />If it doesn't work, click STOP, then SHOW process, and check connected devices<br />&nbsp;&nbsp;to update the MIDI input.<br /><br />Read <a target=\"_blank\" href=\"https://bolprocessor.org/enter-notes/\">https://bolprocessor.org/enter-notes/</a> for details.<br /><br />";
 	echo "<button type=\"button\" class=\"produce\" onclick=\"stopProcess();\">Click to STOP</button>";
 	if($file_format == "rtmidi" AND $instruction <> "enter_notes") {
 		echo "&nbsp;<button id=\"pauseBtn\" type=\"button\" class=\"produce\" onclick=\"pauseProcess();\">Pause</button>";
