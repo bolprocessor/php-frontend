@@ -485,7 +485,7 @@ if($instruction <> "help") {
 		}
 	echo "<br /><br /></p>\n";
 	}
-echo str_repeat(' ', 10240);  // send extra spaces to fill browser buffer, useful for Windows
+// echo str_repeat(' ', 10240);  // send extra spaces to fill browser buffer, useful for Windows
 if(ob_get_level() > 0) ob_flush();
 flush();
 
@@ -941,7 +941,9 @@ if($created_templates) echo "<p><big>👉  Templates have been created. Click th
 
 @unlink($running_trace);
 if($instruction == "enter_notes" AND $warnings == 0) {
-	 echo "<script>window.close();</script>";
+	$file = $temp_dir."trace_notes_txt";
+	if(file_exists($file) && filesize($file) > 3)
+		echo "<script>window.close();</script>";
 	}
 
 function check_image($link) {

@@ -3995,6 +3995,7 @@ function footer() {
 
 function footer_enter_notes() {
 	global $temp_dir;
+	$temp_dir_noslash = str_replace(SLASH,'/',$temp_dir);
     ?>
 	<script>
 	function insertNoteAtCursor(textarea, text) {
@@ -4017,11 +4018,14 @@ function footer_enter_notes() {
 			alert("ERROR: textarea #textArea not found");
 			return;
 			}
-		const tempDir = <?= json_encode($temp_dir) ?>;
+		const tempDir = <?= json_encode($temp_dir_noslash) ?>;
 		const ev = new EventSource(
             "note_stream.php?temp_dir=" + encodeURIComponent(tempDir));
 		ev.onmessage = e => {
 			insertNoteAtCursor(textarea, e.data + " ");
+			};
+		ev.onerror = e => {
+			console.warn("EventSource problem; readyState =",ev.readyState,e);
 			};
 		});
 	</script>
