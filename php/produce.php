@@ -942,8 +942,10 @@ if($created_templates) echo "<p><big>👉  Templates have been created. Click th
 @unlink($running_trace);
 if($instruction == "enter_notes" AND $warnings == 0) {
 	$file = $temp_dir."trace_notes_txt";
-	if(file_exists($file) && filesize($file) > 3)
+	if(file_exists($file) && filesize($file) > 3) {
+		@unlink($file);
 		echo "<script>window.close();</script>";
+		}
 	}
 
 function check_image($link) {
