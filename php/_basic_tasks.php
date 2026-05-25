@@ -204,6 +204,9 @@ $now = time();
 $yesterday = $now - (24 * 3600);
 foreach($dircontent as $thisfile) {
 	if($thisfile == '.' OR $thisfile == ".." OR $thisfile == ".DS_Store") continue;
+	if(str_ends_with($thisfile,"_stop")) {
+		unlink($temp_dir.$thisfile); continue;
+		}
 	$time_saved = filemtime($temp_dir.$thisfile);
 	if($time_saved < $yesterday) $old = TRUE;
 	else $old = FALSE;
