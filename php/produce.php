@@ -350,6 +350,8 @@ $stopfile = str_replace(SLASH,'/',$stopfile);
 $pausefile = str_replace(SLASH,'/',$pausefile);
 $continuefile = str_replace(SLASH,'/',$continuefile);
 
+@unlink($pausefile); @unlink($continuefile); @unlink($stopfile);
+
 if($instruction <> "help") {
 	// Check that the same project is not already running in the same sesssion
 	$running_trace = $temp_dir_abs."trace_".my_session_id()."_".$project_fullname.".txt";
@@ -398,11 +400,11 @@ if($instruction <> "help") {
 	window.addEventListener('pagehide', function () {
 		navigator.sendBeacon(
 			'_createfile.php?path_to_file=' +
-			encodeURIComponent(" . json_encode($stopfile) . ")
+			encodeURIComponent(".json_encode($stopfile).")
 			);
 		navigator.sendBeacon(
 			'_deletefile.php?path_to_file=' +
-			encodeURIComponent(" . json_encode($trace_notes_file) . ")
+			encodeURIComponent(".json_encode($trace_notes_file).")
 			);
 		});
 	</script>";
@@ -467,6 +469,7 @@ if($instruction <> "help") {
 		}
 	function stopProcess() {
 		createFile(".json_encode($stopfile).");
+		setButtonState(document.getElementById('stopBtn'), true);
 		}
 	function pauseProcess() {
 		createFile(".json_encode($pausefile).");
@@ -484,7 +487,7 @@ if($instruction <> "help") {
 
 	if($instruction == "templates") echo "👉 Creating/updating templates<br /><br />";
 	if($instruction == "enter_notes") echo "👉 Entering notes from the MIDI input device.<br /><br />Notes are displayed at the insertion point of your grammar or data.<br />The note convention is chosen in the settings file.<br /><br />👉 You can close this window when done.<br /><br />If it doesn't work, click STOP, then SHOW process, and check connected devices<br />&nbsp;&nbsp;to update the MIDI input.<br /><br />Read <a target=\"_blank\" href=\"https://bolprocessor.org/enter-notes/\">https://bolprocessor.org/enter-notes/</a> for details.<br /><br />";
-	echo "<button type=\"button\" class=\"produce\" onclick=\"stopProcess();\">Click to STOP</button>";
+	echo "<button id=\"stopBtn\" type=\"button\" class=\"produce\" onclick=\"stopProcess();\">Click to STOP</button>";
 	if($file_format == "rtmidi" AND $instruction <> "enter_notes") {
 		echo "&nbsp;<button id=\"pauseBtn\" type=\"button\" class=\"produce\" onclick=\"pauseProcess();\">Pause</button>";
 		echo "&nbsp;<button id=\"continueBtn\" type=\"button\" class=\"produce disabled\" disabled onclick=\"continueProcess();\">Continue</button>";
@@ -814,7 +817,7 @@ if($no_error AND $file_format == "csound") {
 $handle = FALSE;
 $terminated = FALSE;
 if(file_exists($stopfile) OR file_exists($panicfile)) $terminated = TRUE;
-@unlink($pausefile); @unlink($continuefile);
+@unlink($pausefile); @unlink($continuefile); @unlink($stopfile);
 if($terminated AND $instruction <> "enter_notes") echo "<p class=\"attention\" style=\"color:red;\"><big>👉 The process has been interrupted</big></p>";
 
 $capture_file = $temp_dir_abs."trace_".my_session_id()."_".$project_fullname."_capture";

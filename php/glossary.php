@@ -30,6 +30,7 @@ if(isset($_POST['savethisfile'])) {
 	fwrite($handle,$file_header."\n");
 	fwrite($handle,$content);
 	fclose($handle);
+	echo "<script>clearsave();</script>";
 	}
 $grammar_file = $time_structure = $objects_file = $csound_file = $tonality_file = $alphabet_file = $settings_file = $orchestra_file = $interaction_file = $midisetup_file = $timebase_file = $keyboard_file = $glossary_file = '';
 

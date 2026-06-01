@@ -11,10 +11,10 @@ while(ob_get_level() > 0) {
     ob_end_flush();
     }
 ob_implicit_flush(true);
-clearstatcache(false,$file);
 $temp_dir = $_GET['temp_dir'] ?? '';
 if($temp_dir === '') die();
 $file = rtrim($temp_dir, "/\\")."/trace_notes_txt";
+clearstatcache(false,$file);
 while(true) {
     if (file_exists($file)) {
         $fp = fopen($file, "r");

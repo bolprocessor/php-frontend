@@ -1277,6 +1277,7 @@ if($need_to_save OR isset($_POST['savethisfile'])) {
 		}
 	unset($_POST['minimise_set']);
 	if(isset($_POST['savethisfile']) AND file_exists($music_xml_file)) unlink($music_xml_file); // Added 2025-12-15
+	echo "<script>clearsave();</script>";
 	}
 else read_midiressources($filename);
 
@@ -1652,12 +1653,12 @@ if(!isset($_POST['analyze_tonal'])) {
 
 	echo "<div style=\"float:right; vertical-align:middle; background-color:transparent;\">Import MusicXML: <input   onclick=\"if(!checksaved()) return false;\" type=\"file\" name=\"music_xml_import\">&nbsp;<input type=\"submit\" onclick=\"if(!checksaved()) return false;\" class=\"save\" value=\"← IMPORT\"></div>";
 
-	echo "<div style=\"text-align:left; background-color:transparent;\"><input id=\"saveButton\" class=\"save big\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".begin_with(15,$filename)."’\"></div>";
+	echo "<div style=\"text-align:left; background-color:transparent;\"><input id=\"saveButton\" class=\"save big\" type=\"submit\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".begin_with(15,$filename)."’\"></div>";
 
 	$content = do_replace($content);
 	echo $the_warning; // If saving was impossible due to write permissions
 	echo "<br /><textarea id=\"textArea\" name=\"thistext\" onchange=\"tellsave()\" rows=\"40\" style=\"width:750px;\">".$content."</textarea><br /><br />";
-	echo "<div style=\"float:right; background-color:transparent;\"><input class=\"save big\" type=\"submit\" formaction=\"".$url_this_page."#textArea\"  onclick=\"clearsave();\" name=\"savethisfile\" value=\"SAVE ‘".begin_with(20,$filename)."’\"></div>";
+	echo "<div style=\"float:right; background-color:transparent;\"><input class=\"save big\" type=\"submit\" formaction=\"".$url_this_page."#textArea\" name=\"savethisfile\" value=\"SAVE ‘".begin_with(20,$filename)."’\"></div>";
 	display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,$objects_file,$csound_file,$tonality_file,$alphabet_file,$data_file,$weights_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
 	}
 

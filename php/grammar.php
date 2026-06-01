@@ -195,6 +195,7 @@ if($need_to_save OR isset($_POST['savethisfile']) OR isset($_POST['compilegramma
 			}
 		else save_midiressources($filename,FALSE);
 		}
+	echo "<script>clearsave();</script>";
 	}
 else read_midiressources($filename);
 
@@ -743,7 +744,7 @@ echo $result_upload;
 
 $attention = '';
 if($need_to_save) $attention = "attention";
-echo "<p><input class=\"save big ".$attention."\" type=\"submit\" id=\"saveButton\" onclick=\"clearsave();\" name=\"savethisfile\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".begin_with(20,$filename)."’\">";
+echo "<p><input class=\"save big ".$attention."\" type=\"submit\" id=\"saveButton\" name=\"savethisfile\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".begin_with(20,$filename)."’\">";
 if((file_exists($output.SLASH.$default_output_name.".wav") OR file_exists($output.SLASH.$default_output_name.".mid") OR file_exists($output.SLASH.$default_output_name.".html") OR file_exists($output.SLASH.$default_output_name.".sco")) AND file_exists($result_file)) {
 	echo "&nbsp;&nbsp;&nbsp;<input class=\"edit\" style=\"font-size:large;\" onclick=\"window.open('".nice_url($result_file)."','result','width=800,height=600,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Show latests results\">";
 	}
@@ -760,7 +761,7 @@ if($true_bp_grammar AND $grammar_has_structures) {
 		}
 	echo "&nbsp;<input class=\"edit big $extra_class\" onclick=\"if(checksaved()) {window.open('".$link_produce_templates."','".$window_name."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"create_templates\" value=\"".$this_value."\">";
 	}
-echo "&nbsp;<input onclick=\"if(checksaved()) {window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)";
+echo "&nbsp;<input onclick=\"if(checksaved()) {window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;}\" type=\"button\" name=\"produce\" value=\"PRODUCE ITEM(s)";
 if($error) {
 	echo " - disabled because of missing files\"";
 	echo " class=\"edit big disabled\" style=\"box-shadow: none;\" disabled ";
@@ -833,9 +834,9 @@ if($imax > $textarea_rows) $textarea_rows = $imax + 5;
 echo $the_warning; // If saving was impossible due to write permissions
 echo "<textarea id=\"textArea\" name=\"thistext\" onchange=\"tellsave()\" rows=\"".$textarea_rows."\" style=\"width:90%;\">".$content."</textarea>";
 
-echo "<p style=\"float:right; margin-right:100px;\"><input class=\"save big\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".begin_with(20,$filename)."’\"></p>";
+echo "<p style=\"float:right; margin-right:100px;\"><input class=\"save big\" type=\"submit\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".begin_with(20,$filename)."’\"></p>";
 echo "<div style=\"background-color:transparent;\">";
-echo "<input onclick=\"event.preventDefault(); if(checksaved()) {window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" value=\"PRODUCE ITEM(s)";
+echo "<input onclick=\"event.preventDefault(); if(checksaved()) {window.open('".$link_produce."','".$window_name."','width=800,height=800,left=200'); return false;}\" type=\"button\" name=\"produce\" value=\"PRODUCE ITEM(s)";
 if($error) {
 	echo " - disabled because of missing files\"";
 	echo " class=\"edit big disabled\" style=\"box-shadow: none;\" disabled ";

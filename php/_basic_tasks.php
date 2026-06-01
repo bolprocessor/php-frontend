@@ -342,16 +342,19 @@ echo "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.mi
 echo "<script>";
 echo "let currentRequest = null;\n";
 echo "function createFile(pathToFile) {
-    if (currentRequest) {
-        currentRequest.abort();
-    	}
+	if (typeof noteEventSource !== 'undefined' && noteEventSource) {
+			noteEventSource.close();
+			noteEventSource = null;
+		}
     currentRequest = $.ajax({
         url: '_createfile.php',
         cache: false,
-        timeout: 5000,
         data: {
             path_to_file: pathToFile
         	},
+		error: function(xhr,status,error) {
+			alert('AJAX error: ' + status);
+			},
         complete: function() {
             currentRequest = null;
         	}
@@ -4033,13 +4036,15 @@ function footer_enter_notes() {
 			return;
 			}
 		const tempDir = <?= json_encode($temp_dir_noslash) ?>;
-		const ev = new EventSource(
-            "note_stream.php?temp_dir=" + encodeURIComponent(tempDir));
-		ev.onmessage = e => {
+
+		noteEventSource = new EventSource(
+		"note_stream.php?temp_dir=" + encodeURIComponent(tempDir)
+			);
+		noteEventSource.onmessage = e => {
 			insertNoteAtCursor(textarea, " " + e.data);
 			};
-		ev.onerror = e => {
-			console.warn("EventSource problem; readyState = ",ev.readyState,e);
+		noteEventSource.onerror = e => {
+			console.warn("EventSource problem; readyState = ", noteEventSource.readyState, e);
 			};
 		});
 	</script>
@@ -4817,7 +4822,7 @@ function enter_notes_button($filename,$NumberMIDIinputs,$dir,$settings_file) {
 	$window_name = "capture";
 	$link_capture = "produce.php?instruction=enter_notes";
 	$link_capture .= "&settings=".urlencode($dir.$settings_file)."&title=".urlencode($filename)."&keepalive=1";
-	echo "&nbsp;<input onclick=\"window.open('".$link_capture."','".$window_name."','width=800,height=800,left=200'); return false;\" type=\"submit\" name=\"produce\" value=\"MIDI enter notes\" class=\"produce\">";
+	echo "&nbsp;<input onclick=\"if(checksaved()) {window.open('".$link_capture."','".$window_name."','width=800,height=800,left=200'); return false;}\" type=\"button\" name=\"produce\" value=\"MIDI enter notes\" class=\"produce\">";
 	return;
 	}
 

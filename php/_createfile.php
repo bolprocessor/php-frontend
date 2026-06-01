@@ -1,10 +1,7 @@
 <?php
-// session_start(); => Don't use it here, because it would delay the file creation while the console is running.
 // Creating files in the "temp" folder
 // This script is called by the createFile() Javascript
-// It is helpful to create a "_stop" file when the STOP button is clicked
-
-// set_time_limit(0);
+// It is helpful to create a "_stop" file when the STOP button is clicked, or "_pause", "_continue" and "_panic" files as well.
 flush();
 $path_to_file = $_GET['path_to_file'] ?? '';
 if(!empty($path_to_file)) {
