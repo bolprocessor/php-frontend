@@ -31,5 +31,6 @@ while(true) {
             fclose($fp);
             }
         }
+    else usleep(1000000); // 1 sec
     usleep(300000); // 0.3 sec
     }

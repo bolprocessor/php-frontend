@@ -988,7 +988,7 @@ echo "</script>\n";
 
 footer();
 footer_keyboard_mapping($dir,$keyboard_file);
-footer_enter_notes();
+if($NumberMIDIinputs > 0) footer_enter_notes();
 echo "</body>";
 echo "</html>";
 

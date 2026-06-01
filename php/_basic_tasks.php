@@ -157,7 +157,8 @@ $MIDIinput[0] = -1;
 $MIDIoutput[0] = 0;
 $MIDIinputname = $MIDIoutputname = $MIDIoutputcomment = $MIDIinputcomment = array();
 $MIDIinputname[0] = $MIDIoutputname[0] = $MIDIoutputcomment[0] = $MIDIinputcomment[0] = '';
-$NumberMIDIinputs = $NumberMIDIoutputs = 1;
+$NumberMIDIoutputs = 1;
+$NumberMIDIinputs = 0;
 if(isset($_POST['NumberMIDIinputs'])) $NumberMIDIinputs = $_POST['NumberMIDIinputs'];
 if(isset($_POST['NumberMIDIoutputs'])) $NumberMIDIoutputs = $_POST['NumberMIDIoutputs'];
 $NoteOffFilter = $NoteOnFilter = $KeyPressureFilter = $ControlTypeFilter = $ProgramChangeFilter = $ChannelPressureFilter = $PitchBendFilter = $SystemExclusiveFilter = $TimeCodeFilter = $SongPositionFilter = $SongSelectFilter = $TuneRequestFilter = $EndSysExFilter = $TimingClockFilter = $StartFilter = $ContinueFilter = $ActiveSensingFilter = $SystemResetFilter = array();
@@ -4035,10 +4036,10 @@ function footer_enter_notes() {
 		const ev = new EventSource(
             "note_stream.php?temp_dir=" + encodeURIComponent(tempDir));
 		ev.onmessage = e => {
-			insertNoteAtCursor(textarea, e.data + " ");
+			insertNoteAtCursor(textarea, " " + e.data);
 			};
 		ev.onerror = e => {
-			console.warn("EventSource problem; readyState =",ev.readyState,e);
+			console.warn("EventSource problem; readyState = ",ev.readyState,e);
 			};
 		});
 	</script>
