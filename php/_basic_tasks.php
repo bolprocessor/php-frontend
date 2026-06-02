@@ -1,5 +1,5 @@
 <?php
-if(strtoupper(substr(PHP_OS,0,3)) === 'WIN' && isset($_SERVER['HTTP_HOST']) && $_SERVER['HTTP_HOST'] === 'localhost') {
+/* if(strtoupper(substr(PHP_OS,0,3)) === 'WIN' && isset($_SERVER['HTTP_HOST']) && $_SERVER['HTTP_HOST'] === 'localhost') {
 	// This avoids slowing down access on Windows machines
     header(
         'Location: http://127.0.0.1' .
@@ -8,7 +8,7 @@ if(strtoupper(substr(PHP_OS,0,3)) === 'WIN' && isset($_SERVER['HTTP_HOST']) && $
         302
     	);
     exit;	
-	}
+	} */
 session_start();
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
