@@ -269,7 +269,7 @@ $AltFrenchnote = array("si#","reb","re","mib","fab","mi#","solb","sol","lab","la
 $AltIndiannote = array("ni#","sa#","re","re#","mak","ga#","pak","pa","pa#","dha","dha#","sak","ni#");
 
 // Create a list of fractions eligible for frequency ratios in just intonation
-// Numerator or denominator may be a power of 3 multiplied by 5 multiplied by a power of 2
+// Numerator or denominator may be a power of 3 multiplied by a power of 5 multiplied by a power of 2
 $i_ratio = 0;
 $x_three = 1;
 for($i = 0; $i < 7; $i++) {
@@ -3509,6 +3509,7 @@ function simplify_fraction_eliminate_schisma($p,$q) {
 	}
 
 function update_series($p,$q,$series) {
+	$series = '';
 	if(($p * $q) <> 0) {
 		while(modulo($p,2) == 0) $p = $p / 2;
 		while(modulo($q,2) == 0) $q = $q / 2;
