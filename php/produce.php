@@ -535,9 +535,11 @@ if(isset($data_path) AND $data_path <> '') {
 	}
 @unlink($stopfile); @unlink($panicfile); @unlink($pausefile); @unlink($continuefile);
 session_abort();
+while(file_exists($stopfile)) {
+	usleep(200000); // 0.2 sec
+	}
 // $command = "ASAN_OPTIONS=detect_leaks=0 ".$command; // This is for debugging
 $o = send_to_console($command);
-// if($pid > 0) echo "<small>The pid was <span class=\"red-text\">".$pid."</span></small><br />";
 echo "<hr style=\"border: 1px solid black;\">";
 session_reset();
 
