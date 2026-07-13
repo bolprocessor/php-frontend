@@ -39,7 +39,7 @@ if(isset($_POST['saveparameters'])) {
 	$saved_warning_bottom = "<p id=\"timespan3\"><span class=\"red-text\">➡</span> Saved parameters… <span class=\"red-text\">Don't forget to save again related grammar or data!</span></p>";
 	echo $saved_warning_top;
 	$settings = array();
-	$file_header = $top_header."\n// Settings file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
+	$file_header = $top_header."\n// Settings file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s'." GMT");
 	$settings['header'] = str_replace('"',"'",$file_header);
 	$warning = '';
 	$produceallitems = $tracedetail = FALSE;

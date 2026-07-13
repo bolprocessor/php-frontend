@@ -33,7 +33,7 @@ save_settings("last_name",$filename);
 if(isset($_POST['savethisfile'])) {echo "<span id=\"timespan\" style=\"color:red; float:right; background-color:white; padding:6px; border-radius:6px;\">&nbsp;Saved “".$this_file."” file…</span>";
 	$content = $_POST['thistext'];
 	$handle = fopen($this_file,"w");
-	$file_header = $top_header."\n// MIDI orchestra file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
+	$file_header = $top_header."\n// MIDI orchestra file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s')." GMT";
 	fwrite($handle,$file_header."\n");
 	fwrite($handle,$content);
 	fclose($handle);

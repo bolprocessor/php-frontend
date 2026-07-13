@@ -2263,7 +2263,7 @@ function create_parts($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxch
 						$current_legato[0] = $i_layer[0] = $layer = 0;
 						if($label == "chunk" AND abs($tie) > 0)
 							$tie_mssg .=  "• <span class=\"red-text\">".$tie." unbound tie(s) in chunk #".$chunk_number."</span><br />";
-						if($label == "chunk" AND !$ok_legato)
+						if($label == "chunk" AND !$ok_legato AND $chunk_number > 1)
 							$tie_mssg .=  "• <span class=\"red-text\">legato(s) may be truncated after chunk #".$chunk_number."</span><br />"; 
 						$line_chunked .= $linebreak;
 						$line_chunked = delete_orphan_ties($line_chunked);

@@ -43,7 +43,7 @@ if(isset($_POST['savethisfile']) AND isset($_POST['mapping'])) {
         }
 	$content = mappingFormToJson($mapping);
 	$handle = fopen($this_file,"w");
-	$file_header = $top_header."\n// Keyboard file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
+	$file_header = $top_header."\n// Keyboard file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s')." GMT";
 	fwrite($handle,$file_header."\n");
 	fwrite($handle,$content);
 	fclose($handle);

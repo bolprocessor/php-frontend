@@ -1304,7 +1304,7 @@ function SaveObjectPrototypes($verbose,$dir,$filename,$temp_folder,$force) {
 	fwrite($handle,"lock\n");
 	fclose($handle);
 	$handle = fopen($dir.$filename,"w");
-	$file_header = $top_header."\n// Object prototypes file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
+	$file_header = $top_header."\n// Object prototypes file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s')." GMT";
 	fwrite($handle,$file_header."\n");
 	$PrototypeTickKey = $_POST['PrototypeTickKey'];
 	fwrite($handle,$PrototypeTickKey."\n");
@@ -1416,7 +1416,7 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder,$force) {
 	fclose($handle);
 	unlink($dir.$filename);
 	$handle = fopen($dir.$filename,"w");
-	$file_header = $top_header."\n// Csound resource file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
+	$file_header = $top_header."\n// Csound resource file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s')." GMT";
 	fwrite($handle,$file_header."\n");
 	$number_channels = $_POST['number_channels'];
 	fwrite($handle,$number_channels."\n");
@@ -1637,7 +1637,7 @@ function SaveTonality($verbose,$dir,$filename,$temp_folder,$force) {
 	if($handle_lock) fclose($handle_lock);
 	@unlink($dir.$filename);
 	$handle = fopen($dir.$filename,"w");
-	$file_header = $top_header."\n// Tonality resource file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
+	$file_header = $top_header."\n// Tonality resource file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s')." GMT";
 	fwrite($handle,$file_header."\n");
 	if(isset($_POST['begin_tables'])) $begin_tables = $_POST['begin_tables'];
 	else $begin_tables = "_begin tables";
@@ -5594,7 +5594,7 @@ function convert_to_json($dir,$settings_file) {
 	$imax = $imax_file; $start = TRUE;
 	if($imax_file < $imax_parameters) $imax = $imax_parameters;
 	$settings = array();
-	$file_header = $top_header."\n// Settings file saved as \"".$settings_file."\". Date: ".gmdate('Y-m-d H:i:s');
+	$file_header = $top_header."\n// Settings file saved as \"".$settings_file."\". Date: ".gmdate('Y-m-d H:i:s')." GMT";
 	$settings['header'] = str_replace('"',"'",$file_header);
 	for($i = $j = 0; $i < $imax; $i++) {
 		$value = trim($table[$i]);

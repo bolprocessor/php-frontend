@@ -86,7 +86,7 @@ if(isset($_POST['changestatus'])) {
 	$new_track = isset($_POST['addtrack']);
 //	echo "<p id=\"timespan\" style=\"color:red;\">Saved all data…</p>";
 	$handle = fopen($this_file,"w");
-	$file_header = $top_header."\n// Time base file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
+	$file_header = $top_header."\n// Time base file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s')." GMT";
 	fwrite($handle,$file_header."\n");
 	$maxticks = $_POST['maxticks'];
 	if($new_track) {
