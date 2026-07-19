@@ -148,10 +148,10 @@ if(isset($_POST['saveparameters'])) {
 				}
 			if($param == "MaxConsoleTime") { // Max computation time
 				$newvalue = intval($value);
-				if($newvalue < 1) $newvalue = 15;
-				if($newvalue > 3600) $newvalue = 3600;
-				if(strcmp($newvalue,$value) <> 0)
+				if($newvalue > 3600) {
+					$newvalue = 3600;
 					$warning .= "<p>👉 <span class=\"red-text\">Max computation time must be a positive integer, max 3600 seconds: “</span><span class=\"green-text\">".$value."</span><span class=\"red-text\">” has been replaced with “</span><span class=\"green-text\">".$newvalue."</span><span class=\"red-text\">”</span></p>";
+					}
 				$value = $newvalue;
 				}
 			if($param == "Seed") { // Seed for randomization

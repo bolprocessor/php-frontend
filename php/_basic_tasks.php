@@ -2421,6 +2421,7 @@ function is_variable($note_convention,$word) {
 	if($word == '') return $word;
 	$word = str_replace(')','',$word);
 	$word = str_replace('(','',$word);
+	$word = preg_replace('/GRAM#[0-9]+/u','',$word);
 	if(trim($word) == '') return $word;
 	if($word[0] == '|' AND $word[strlen($word) - 1] == '|') {
 		$word = str_replace('|','',$word);
