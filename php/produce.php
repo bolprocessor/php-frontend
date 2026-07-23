@@ -341,7 +341,13 @@ else {
 	if($new_random_seed) $command .= " --seed ".$random_seed;
 	}
 
+$pattern = $temp_dir_abs.'trace_'.my_session_id().'_*_stop';
+foreach (glob($pattern) as $stopfile) {
+    if(is_file($stopfile)) unlink($stopfile);
+	}
+
 $stopfile = $temp_dir_abs."trace_".my_session_id()."_".$project_fullname."_stop";
+// echo "Stopfile = ".$stopfile."<br />";
 
 $donefile = $temp_dir_abs."trace_".my_session_id()."_".$project_fullname."_done";
 // This one is created by the console to tell its job is over

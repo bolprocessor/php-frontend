@@ -118,7 +118,7 @@ if(!isset($midi_resources) OR $midi_resources == '') $midi_resources = "midi_res
 save_settings("midi_resources",$midi_resources);
 if(!isset($trash_folder) OR $trash_folder == '') $trash_folder = "trash_bolprocessor";
 save_settings("trash_folder",$trash_folder);
-$max_sleep_time_after_bp_command = 240; // seconds. Maximum time waiting for the 'done.txt' file
+$max_sleep_time_after_bp_command = 300; // seconds. Maximum time waiting for the 'done.txt' file
 $default_output_format = "midi";
 
 if(!isset($output_folder) OR $output_folder == '') $output_folder = "my_output";
@@ -2136,7 +2136,7 @@ function old_name($name) {
 			case "bpal":
 				$oldsuffix = "bpho";
 				break;
-			case "bpso";
+			case "bpso":
 				$oldsuffix = "bpmi";
 				break;
 			}
@@ -2174,7 +2174,7 @@ function new_name($name,$type) {
 			case "bpho":
 				$newsuffix = "bpal";
 				break;
-			case "bpmi";
+			case "bpmi":
 				$newsuffix = "bpso";
 				break;
 			}
@@ -4015,41 +4015,51 @@ function footer() {
 function footer_enter_notes() {
 	global $temp_dir;
 	$temp_dir_noslash = str_replace(SLASH,'/',$temp_dir);
+	// echo "@@@ temp_dir_noslash = ".$temp_dir_noslash."<br />";
     ?>
-	<script>
-	function insertNoteAtCursor(textarea, text) {
-		const start = textarea.selectionStart ?? textarea.value.length;
-		const end = textarea.selectionEnd ?? textarea.value.length;
-		textarea.value =
-			textarea.value.substring(0, start) +
-			text +
-			textarea.value.substring(end);
-		const pos = start + text.length;
-		textarea.selectionStart = pos;
-		textarea.selectionEnd = pos;
-		textarea.dispatchEvent(new Event("input", { bubbles: true }));
-		textarea.dispatchEvent(new Event("change", { bubbles: true }));
-		}
-	window.addEventListener("DOMContentLoaded", () => {
-		const textarea = document.getElementById("textArea");
-		if(!textarea) {
-			console.error("ERROR: textarea #textArea not found");
-			alert("ERROR: textarea #textArea not found");
-			return;
-			}
-		const tempDir = <?= json_encode($temp_dir_noslash) ?>;
-
-		noteEventSource = new EventSource(
-		"note_stream.php?temp_dir=" + encodeURIComponent(tempDir)
+<script>
+let noteEventSource;
+function insertNoteAtCursor(textarea, text) {
+    const start = textarea.selectionStart ?? textarea.value.length;
+    const end = textarea.selectionEnd ?? textarea.value.length;
+    textarea.value =
+        textarea.value.substring(0, start) +
+        text +
+        textarea.value.substring(end);
+    const pos = start + text.length;
+    textarea.selectionStart = pos;
+    textarea.selectionEnd = pos;
+    textarea.dispatchEvent(new Event("input", {bubbles: true}));
+    textarea.dispatchEvent(new Event("change", {bubbles: true}));
+	}
+function startNoteStream() {
+    const textarea = document.getElementById("textArea");
+    if (!textarea) {
+        console.error("ERROR: textarea #textArea not found");
+        return;
+    	}
+    const tempDir = <?= json_encode($temp_dir_noslash) ?>;
+    const url = "note_stream.php?temp_dir=" + encodeURIComponent(tempDir);
+    console.log("Opening MIDI note stream:", url);
+    noteEventSource = new EventSource(url);
+    noteEventSource.onopen = () => {
+        console.log("MIDI note stream connected");
+		};
+    noteEventSource.onmessage = e => {
+        console.log("MIDI note received:", JSON.stringify(e.data));
+        insertNoteAtCursor(textarea, " " + e.data);
+    	};
+    noteEventSource.onerror = e => {
+        console.warn(
+            "MIDI note stream problem; readyState =",
+            noteEventSource.readyState, e
 			);
-		noteEventSource.onmessage = e => {
-			insertNoteAtCursor(textarea, " " + e.data);
-			};
-		noteEventSource.onerror = e => {
-			console.warn("EventSource problem; readyState = ", noteEventSource.readyState, e);
-			};
-		});
-	</script>
+		};
+	}
+if (document.readyState === "loading")
+    window.addEventListener("DOMContentLoaded", startNoteStream);
+else startNoteStream();
+</script>
 <?php
 	return;
 	}
