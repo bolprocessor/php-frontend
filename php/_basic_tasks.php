@@ -4012,7 +4012,7 @@ function footer() {
 	return;
 	}
 
-function footer_enter_notes() {
+/* function footer_enter_notes() {
 	global $temp_dir;
 	$temp_dir_noslash = str_replace(SLASH,'/',$temp_dir);
 	// echo "@@@ temp_dir_noslash = ".$temp_dir_noslash."<br />";
@@ -4062,6 +4062,74 @@ else startNoteStream();
 </script>
 <?php
 	return;
+	} */
+
+function footer_enter_notes() {
+    global $temp_dir;
+    $temp_dir_noslash = str_replace(SLASH, '/', $temp_dir);
+    ?>
+<script>
+let notePollPosition = 0;
+let notePollTimer = null;
+function insertNoteAtCursor(textarea, text) {
+    const start = textarea.selectionStart ?? textarea.value.length;
+    const end = textarea.selectionEnd ?? textarea.value.length;
+    textarea.value =
+        textarea.value.substring(0, start) +
+        text +
+        textarea.value.substring(end);
+    const pos = start + text.length;
+    textarea.selectionStart = pos;
+    textarea.selectionEnd = pos;
+    textarea.dispatchEvent(new Event("input", {bubbles: true}));
+    textarea.dispatchEvent(new Event("change", {bubbles: true}));
+	}
+function startNotePolling() {
+    const textarea = document.getElementById("textArea");
+    if (!textarea) {
+        console.error("ERROR: textarea #textArea not found");
+        return;
+    	}
+    const tempDir = <?= json_encode($temp_dir_noslash) ?>;
+    async function pollNotes() {
+        try {
+            const url =
+                "note_poll.php?temp_dir=" +
+                encodeURIComponent(tempDir) +
+                "&pos=" + notePollPosition;
+            const response = await fetch(url, {
+                cache: "no-store",
+                credentials: "same-origin"
+            });
+            if (!response.ok) {
+                throw new Error("HTTP " + response.status);
+            	}
+            const result = await response.json();
+            if (typeof result.pos === "number") {
+                notePollPosition = result.pos;
+            	}
+            if (Array.isArray(result.notes)) {
+                for (const note of result.notes) {
+                    insertNoteAtCursor(textarea, " " + note);
+					}
+				}
+			}
+        catch (error) {
+            console.warn("MIDI note polling problem:", error);
+        	}
+        finally {
+            notePollTimer = window.setTimeout(pollNotes, 300);
+			}
+		}
+    pollNotes();
+	}
+if (document.readyState === "loading") {
+    window.addEventListener("DOMContentLoaded", startNotePolling);
+	}
+else startNotePolling();
+</script>
+<?php
+    return;
 	}
 
 function footer_keyboard_mapping($dir,$keyboard_file) {
