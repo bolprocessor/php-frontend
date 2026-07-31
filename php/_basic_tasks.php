@@ -18,7 +18,7 @@ error_reporting(E_ALL);
 // ini_set('output_buffering','off');
 // ini_set('zlib.output_compression', 0);
 // ini_set("pcre.jit", "0"); 2025-02-11
-// require('midi.class.php'); // $$$ Probably not used, needs to be checked.
+require('midi.class.php'); // Required for prototype.php and timebase.php
 // Source: https://github.com/robbie-cao/midi-class-php
 
 define('MAXFILESIZE',50000000);
