@@ -1987,6 +1987,11 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 			$out[$i]  = '';
 			$link_options .= "&midifile=".urlencode($output.SLASH.$midi_file);
 			}
+		if($file_format == "eventlist") {
+			$eventlist_file = $output_file;
+			$out[$i]  = '';
+			$link_options .= "&eventlistfile=".urlencode($output.SLASH.$eventlist_file);
+			}
 		$chunk_number = $segment['chunk_number'];
 		$line_recoded = $segment['line_recoded'];
 		$title_this = $segment['title_this'];

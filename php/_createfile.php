@@ -7,7 +7,6 @@ $path_to_file = $_GET['path_to_file'] ?? '';
 if(!empty($path_to_file)) {
 	file_put_contents($path_to_file,"ok");
 	chmod($path_to_file,0666);
-//	exec('sync'); // This makes it easier for the console to find the file, see the stop() function in ConsoleMain.c
 	}
 die();
 ?>

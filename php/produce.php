@@ -82,6 +82,8 @@ if(isset($_GET['score'])) $score_file = $_GET['score'];
 else $score_file = '';
 if(isset($_GET['midifile'])) $midi_file = $_GET['midifile'];
 else $midi_file = '';
+if(isset($_GET['eventlistfile'])) $eventlist_file = $_GET['eventlistfile'];
+else $eventlist_file = '';
 if(isset($_GET['tonality_file'])) $tonality_file = $_GET['tonality_file'];
 else $tonality_file = '';
 if(isset($_GET['item'])) $item = $_GET['item'];
@@ -327,6 +329,11 @@ else {
 				$command .= " --csoundout ".$score_file;
 				if($instruction == "produce-all") $command .= " -o ".$output;
 				break;
+			case "eventlist":
+			//	$command .= " -d --eventlistout ".$output;
+				$command .= " --eventlistout ".$eventlist_file;
+				if($instruction == "produce-all") $command .= " -o ".$output;
+				break;
 			default:
 				$command .= " --rtmidi"; // We use the default destination
 				if($instruction == "produce-all") $command .= " -o ".$output;
@@ -535,7 +542,7 @@ if(isset($data_path) AND $data_path <> '') {
 	}
 @unlink($stopfile); @unlink($panicfile); @unlink($pausefile); @unlink($continuefile);
 session_abort();
-while(file_exists($stopfile)) {
+while(file_exists($stopfile)) { // Probably useless because the file will be deleted when starting the console, see remove(StopfileName) in ConsoleMain.c
 	usleep(200000); // 0.2 sec
 	}
 // $command = "ASAN_OPTIONS=detect_leaks=0 ".$command; // This is for debugging
@@ -619,14 +626,19 @@ if(!$no_error) {
 echo "<p>";
 
 if($output <> '') {
-	if($file_format == "csound") $output_link = nice_url($score_file);
-	else if($file_format == "midi") $output_link = '';
+	if($file_format == "csound") $output_link = $download_link = nice_url($score_file);
+	else if($file_format == "midi") $output_link = $download_link = '';
+	else if($file_format == "eventlist") {
+		$download_link = $output_link;
+	//	$output_link = 'view_csv.php?file='.rawurlencode(basename($temp_dir.$eventlist_file));
+		$output_link = "view_csv.php?file=".urlencode($eventlist_file);
+		}
 	else {
 		$output_html = clean_up_file_to_html($output);
-		$output_link = str_replace(SLASH,'/',$output_html);
+		$output_link = $download_link = str_replace(SLASH,'/',$output_html);
 		}
 	$title_out = rand(10000,99999);
-	if($output_link <> '') echo "<span class=\"red-text\">➡</span> Read the <a class=\"linkdotted\" onclick=\"window.open('".$output_link."','".$title_out."','width=800,height=700,left=300'); return false;\" href=\"".$output_link."\">output file</a> (or <a class=\"linkdotted\" href=\"".$output_link."\" download>download it</a>)<br />";
+	if($output_link <> '') echo "<span class=\"red-text\">➡</span> Read the <a class=\"linkdotted\" onclick=\"window.open('".$output_link."','".$title_out."','width=800,height=700,left=300'); return false;\" href=\"".$output_link."\">output file</a> (or <a class=\"linkdotted\" href=\"".$download_link."\" download>download it</a>)<br />";
 	}
 if($trace_production OR $instruction == "templates" OR $show_production) {
     if(file_exists($trace_link) AND strlen($content_trace) > 20) 

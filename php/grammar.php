@@ -203,6 +203,7 @@ else read_midiressources($filename);
 $output_file = trim(str_replace(".bpda",'',$output_file));
 $output_file = trim(str_replace(".sco",'',$output_file));
 $output_file = trim(str_replace(".mid",'',$output_file));
+$output_file = trim(str_replace(".csv",'',$output_file));
 if($file_format == "data") {
 	if($output_file == '') $output_file = $default_output_name;
 	$output_file .= ".bpda";
@@ -214,6 +215,10 @@ if($file_format == "csound") {
 if($file_format == "midi") {
 	if($output_file == '') $output_file = $default_output_name;
 	$output_file .= ".mid";
+	}
+if($file_format == "eventlist") {
+	if($output_file == '') $output_file = $default_output_name;
+	$output_file .= ".csv";
 	}
 if($file_format == '') $output_file = $default_output_name;
 
@@ -551,6 +556,10 @@ if($file_format == "midi") {
 	$output_file = str_replace(".mid",'',$output_file);
 	$link_produce .= "&midifile=".urlencode($output.SLASH.$midi_file);
 	}
+if($file_format == "eventlist") {
+	$eventlist_file = $output_file;
+	$link_produce .= "&eventlistfile=".urlencode($output.SLASH.$eventlist_file);
+	}
 if(($file_format == "rtmidi" OR $file_format == "csound" OR $file_format == "midi") AND $action == "produce-all") $output_file .= ".bpda";
 /* if($file_format == "rtmidi" AND file_exists($refresh_file)) $refresh_instruction = "document.getElementById('refresh').style.display = 'inline';";
 else $refresh_instruction = ''; */
@@ -730,7 +739,7 @@ echo "<input type=\"hidden\" name=\"weights_file\" value=\"".$weights_file."\">"
 echo "<span  id=\"topedit\">&nbsp;</span>";
 echo $save_warning;
 
-echo "<br /><button id=\"downloadupload\" class=\"save\" onclick=\"toggledownload(); return false;\">DOWNLOAD / UPLOAD</button>&nbsp;<button class=\"edit\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button>";
+echo "<br /><button class=\"edit\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button>&nbsp;&nbsp;<button id=\"downloadupload\" class=\"save\" onclick=\"toggledownload(); return false;\">DOWNLOAD / UPLOAD</button>";
 enter_notes_button($filename,$NumberMIDIinputs,$dir,$settings_file);
 echo "</p>";
 
@@ -884,6 +893,10 @@ if($file_format == "midi") {
 	$midi_file = $output_file;
 	$output_file = str_replace(".mid",'',$output_file);
 	$link_produce .= "&midifile=".urlencode($output.SLASH.$midi_file);
+	}
+if($file_format == "eventlist") {
+	$eventlist_file = $output_file;
+	$link_produce .= "&eventlistfile=".urlencode($output.SLASH.$eventlist_file);
 	}
 if($alphabet_file <> '') $link_produce .= "&alphabet=".urlencode($dir.$alphabet_file);
 if($settings_file <> '' AND file_exists($dir.$settings_file)) $link_produce .= "&settings=".urlencode($dir.$settings_file);

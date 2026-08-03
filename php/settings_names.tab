@@ -20,7 +20,7 @@
 "TraceMicrotonality"	"Trace microtonality"		"1"	"0"
 "DISPLAY"				
 "DisplayItems"	"Display final score"	"Bol Processor score"	"1"	"0"
-"MaxItemsGraphic"	"Max items displayed"	"in graphics"	"0"	"10"
+"MaxItemsGraphic"	"Max items displayed"	"in real-time MIDI"	"0"	"10"
 "ShowGraphic"	"Show graphics"	"Object graph or Pianoroll, see below"	"1"	"1"
 "ShowObjectGraph"	"Show object graph"		"1"	"1"
 "ShowAllObjects"	"Show all objects"	"including inaudible ones (for geeks)"	"1"	"0"

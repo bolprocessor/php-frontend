@@ -2,8 +2,7 @@
 /* if(strtoupper(substr(PHP_OS,0,3)) === 'WIN' && isset($_SERVER['HTTP_HOST']) && $_SERVER['HTTP_HOST'] === 'localhost') {
 	// This avoids slowing down access on Windows machines
     header(
-        'Location: http://127.0.0.1' .
-        $_SERVER['REQUEST_URI'],
+        'Location: http://127.0.0.1' . $_SERVER['REQUEST_URI'],
         true,
         302
     	);
@@ -1210,22 +1209,25 @@ function clean_up_file_to_html($file) {
 	do $text = str_replace(chr(10).chr(10).chr(10),chr(10).chr(10),$text,$count);
 	while($count > 0);
 	$text = str_replace(chr(10),"<br />",$text);
-	$handle = fopen($file_html,"w");
-	$header = "<head>\n";
-	$header .= "<meta content=\"text/html; charset=utf-8\" http-equiv=\"Content-Type\" />\n";
-	$header .= "<style>
-	body, p, div {
-		overflow-wrap: anywhere;
-		word-break: break-word;
+	$handle = @fopen($file_html,"w");
+	if($handle) {
+		$header = "<head>\n";
+		$header .= "<meta content=\"text/html; charset=utf-8\" http-equiv=\"Content-Type\" />\n";
+		$header .= "<style>
+		body, p, div {
+			overflow-wrap: anywhere;
+			word-break: break-word;
+			}
+		</style>\n";
+		$header .= "</head><body>\n";
+		fwrite($handle,$header."\n");
+		fwrite($handle,$text."\n");
+		fwrite($handle,"</body>\n");
+		fclose($handle);
+		chmod($file_html,$permissions);
+		return $file_html;
 		}
-	</style>\n";
-	$header .= "</head><body>\n";
-	fwrite($handle,$header."\n");
-	fwrite($handle,$text."\n");
-	fwrite($handle,"</body>\n");
-	fclose($handle);
-	chmod($file_html,$permissions);
-	return $file_html;
+	return '';
 	}
 
 function clean_up_file($file) { // NOT USED
@@ -3894,10 +3896,12 @@ function add_proper_extension($format,$filename) {
 	$filename = str_replace(".mid",'',$filename);
 	$filename = str_replace(".sco",'',$filename);
 	$filename = str_replace(".bpda",'',$filename);
+	$filename = str_replace(".csv",'',$filename);
 	switch($format) {
 		case "midi": $output_file = $filename.".mid"; break;
 		case "csound": $output_file = $filename.".sco"; break;
 		case "data": $output_file = $filename.".bpda"; break;
+		case "eventlist": $output_file = $filename.".csv"; break;
 		case "rtmidi": $output_file = $filename; break;
 		default: $output_file = $filename; break;
 		}
@@ -5546,6 +5550,9 @@ function show_file_format_choice($type,$file_format,$url_this_page,$filename) {
 		if($file_format == "csound") echo " checked";
 		echo ">Csound score";
 		}
+	echo "<br /><input type=\"radio\" style=\"margin-bottom:0.5em;\" name=\"new_file_format\" value=\"eventlist\"";
+	if($file_format == "eventlist") echo " checked";
+	echo ">Event list";
 	echo "<br /><input class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topmidiports\" name=\"savethisfile\" value=\"SAVE format\">";
 	return;
 	}
