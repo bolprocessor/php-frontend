@@ -191,6 +191,8 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 	
 	if($FixScale == 0 AND isset($_POST['OkExpand'])) $OkExpand = 1;
 	if($FixScale == 0 AND isset($_POST['OkCompress'])) $OkCompress = 1;
+	if($okrescale AND !$OkExpand AND !$OkCompress)
+		$OkExpand = $OkCompress = 1;
 	
 	$string[$k++] = $okrescale;
 	$string[$k++] = $FixScale;
@@ -295,46 +297,50 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 	$MaxCoverBeg = '';
 	if($CoverBegMode == -1) $MaxCoverBeg = $_POST['MaxCoverBeg1'];
 	if($CoverBegMode == 0) $MaxCoverBeg = $_POST['MaxCoverBeg2'];
-	if($CoverBeg) {
+/*	if($CoverBeg) {
 		$CoverBegMode = 0;
 		$MaxCoverBeg = 100;
-		}
+		} */
+	if($MaxCoverBeg == '') $MaxCoverBeg = 0; // 2026-08-05
 	fwrite($handle,$CoverBegMode."\n");
 	fwrite($handle,$MaxCoverBeg."\n");
 	
 	if(isset($_POST['CoverEndMode'])) $CoverEndMode = $_POST['CoverEndMode'];
 	else $CoverEndMode = 0;
-	$MaxCoverEnd = 0;
+	$MaxCoverEnd = '';
 	if($CoverEndMode == -1) $MaxCoverEnd = $_POST['MaxCoverEnd1'];
 	if($CoverEndMode == 0) $MaxCoverEnd = $_POST['MaxCoverEnd2'];
-	if($CoverEnd) {
+	/* if($CoverEnd) {
 		$CoverEndMode = 0;
 		$MaxCoverEnd = 100;
-		}
+		} */
+	if($MaxCoverEnd == '') $MaxCoverEnd = 0; // 2026-08-05
+//	if($MaxCoverEnd > 0) $CoverEndMode = -2;
 	fwrite($handle,$CoverEndMode."\n");
 	fwrite($handle,$MaxCoverEnd."\n");
 	
 	if(isset($_POST['TruncBegMode'])) $TruncBegMode = $_POST['TruncBegMode'];
 	else $TruncBegMode = 1;
-	$MaxTruncBeg = '';
+	$MaxTruncBeg = 0;
 	if($TruncBegMode == -1) $MaxTruncBeg = $_POST['MaxTruncBeg1'];
 	if($TruncBegMode == 0) $MaxTruncBeg = $_POST['MaxTruncBeg2'];
-	if($TruncBeg OR $MaxTruncBeg == '') {
+/*	if($TruncBeg OR $MaxTruncBeg == '') {
 		$MaxTruncBeg = 0;
 		$TruncBegMode = 1;
-		}
+		} */
 	fwrite($handle,$TruncBegMode."\n");
+	if($MaxTruncBeg == '') $MaxTruncBeg = 100;
 	fwrite($handle,$MaxTruncBeg."\n");
 	
 	if(isset($_POST['TruncEndMode'])) $TruncEndMode = $_POST['TruncEndMode'];
 	else $TruncEndMode = 1;
-	$MaxTruncEnd = '';
+	$MaxTruncEnd = 0;
 	if($TruncEndMode == -1) $MaxTruncEnd = $_POST['MaxTruncEnd1'];
 	if($TruncEndMode == 0) $MaxTruncEnd = $_POST['MaxTruncEnd2'];
-	if($TruncEnd OR $MaxTruncEnd == '') {
+/*	if($TruncEnd AND $MaxTruncEnd == '') {
 		$MaxTruncEnd = 0;
 		$TruncEndMode = 1;
-		}
+		} */
 	fwrite($handle,$TruncEndMode."\n");
 	fwrite($handle,$MaxTruncEnd."\n");
 	
@@ -405,23 +411,23 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 	fwrite($handle,$PreRollMode."\n");
 	fwrite($handle,$PostRollMode."\n");
 	
-	$BeforePeriod = '';
-	if(isset($_POST['PeriodMode'])) {
-		$PeriodMode = $_POST['PeriodMode'];
-		if($PeriodMode == -1) $BeforePeriod = $_POST['BeforePeriod1'];
-		if($PeriodMode == 0) $BeforePeriod = $_POST['BeforePeriod2'];
+	$CyclicAfter = '';
+	if(isset($_POST['CycleMode'])) {
+		$CycleMode = $_POST['CycleMode'];
+		if($CycleMode == -1) $CyclicAfter = $_POST['BeforePeriod1'];
+		if($CycleMode == 0) $CyclicAfter = $_POST['BeforePeriod2'];
 		}
-	if($BeforePeriod == '') {
-		$BeforePeriod = "0";
-		$PeriodMode = -2;
+	if($CyclicAfter == '') {
+		$CyclicAfter = "0";
+		$CycleMode = -2;
 		}
-	fwrite($handle,$PeriodMode."\n");
-	fwrite($handle,$BeforePeriod."\n");
-	if(isset($_POST['ForceIntegerPeriod'])) $ForceIntegerPeriod = 1;
-	else $ForceIntegerPeriod = 0;
+	fwrite($handle,$CycleMode."\n");
+	fwrite($handle,$CyclicAfter."\n");
+	if(isset($_POST['ForceIntegerCycles'])) $ForceIntegerCycles = 1;
+	else $ForceIntegerCycles = 0;
 	if(isset($_POST['DiscardNoteOffs'])) $DiscardNoteOffs = 1;
 	else $DiscardNoteOffs = 0;
-	fwrite($handle,$ForceIntegerPeriod."\n");
+	fwrite($handle,$ForceIntegerCycles."\n");
 	fwrite($handle,$DiscardNoteOffs."\n");
 	
 	if(isset($_POST['StrikeAgain']))
@@ -787,9 +793,9 @@ $PostRoll = $object_param[$j++];
 $PreRollMode = $object_param[$j++];
 $PostRollMode = $object_param[$j++];
 
-$PeriodMode = $object_param[$j++];
-$BeforePeriod = $object_param[$j++];
-$ForceIntegerPeriod = $object_param[$j++];
+$CycleMode = $object_param[$j++];
+$CyclicAfter = $object_param[$j++];
+$ForceIntegerCycles = $object_param[$j++];
 $DiscardNoteOffs = $object_param[$j++];
 
 $StrikeAgain = $object_param[$j++];
@@ -850,7 +856,7 @@ store($h_image,"pivendoff",$PivPos);
 echo "<p>RESCALING</p>";
 $value_min = $value_max = $dilation_controller = $dilation_channel = $value_controller = $value_channel = '';
 $dilation_ok = FALSE;
-if(!$FixScale AND !$OkExpand AND !$OkCompress) {
+if(!$FixScale AND !$OkExpand AND !$OkCompress AND !$okrescale) {
 	$dilation_ok = TRUE;
 	if($AlphaMin > 0) $value_min = intval($AlphaMin);
 	if($AlphaMax > 0) $value_max = intval($AlphaMax);
@@ -864,10 +870,10 @@ if($okrescale OR $OkExpand OR $OkCompress) echo " checked";
 echo ">OK rescale<br />";
 echo "&nbsp;<input type=\"checkbox\" name=\"OkExpand\" value=\"OkExpand\"";
 if($OkExpand) echo " checked";
-echo ">Expand at will<br />";
+echo ">Expand<br />";
 echo "&nbsp;<input type=\"checkbox\" name=\"OkCompress\" value=\"OkCompress\"";
 if($OkCompress) echo " checked";
-echo ">Compress at will<br />";
+echo ">Compress<br />";
 echo "<input type=\"radio\" name=\"Rescale\" value=\"neverrescale\"";
 if($FixScale) echo " checked";
 echo ">Never rescale<br />";
@@ -920,10 +926,10 @@ echo "> Accept velocity changes<br />";
 echo "<p>LOCATION</p>";
 echo "<input type=\"radio\" name=\"OkRelocate\" value=\"1\"";
 if($OkRelocate == 1) echo " checked";
-echo ">Relocate at will<br />";
+echo ">Relocate<br />";
 echo "<input type=\"radio\" name=\"OkRelocate\" value=\"0\"";
 if($OkRelocate == 0) echo " checked";
-echo ">Do not relocate at will<br /><br />";
+echo ">Do not relocate<br /><br />";
 
 echo "<input type=\"radio\" name=\"DelayMode\" value=\"-1\"";
 if(!$OkRelocate AND $DelayMode == -1) {
@@ -1029,12 +1035,12 @@ echo "<p>COVER BEGINNING</p>";
 if(!$CoverBeg AND $MaxCoverBeg == '') $MaxCoverBeg = 0;
 echo "<input type=\"radio\" name=\"CoverBeg\" value=\"1\"";
 if($CoverBeg == 1) echo " checked";
-echo ">Cover at will<br />";
+echo ">Cover<br />";
 echo "<input type=\"radio\" name=\"CoverBeg\" value=\"0\"";
 if($CoverBeg == 0) echo " checked";
 echo ">Never cover<br />";
 echo "<input type=\"radio\" name=\"CoverBegMode\" value=\"-1\"";
-if(!$CoverBeg AND $CoverBegMode == -1) {
+if($CoverBeg AND $CoverBegMode == -1 AND $MaxCoverBeg > 0) {
 	echo " checked";
 	$value = $MaxCoverBeg;
 	}
@@ -1042,7 +1048,7 @@ else $value = '';
 echo ">Not more than";
 echo "&nbsp;<input type=\"text\" name=\"MaxCoverBeg1\" size=\"5\" value=\"".$value."\"> ms<br />";
 echo "<input type=\"radio\" name=\"CoverBegMode\" value=\"0\"";
-if(!$CoverBeg AND $CoverBegMode == 0) {
+if($CoverBeg AND $CoverBegMode == 0 AND $MaxCoverBeg > 0) {
 	echo " checked";
 	$value = $MaxCoverBeg;
 	}
@@ -1059,12 +1065,12 @@ echo "<p>COVER END</p>";
 if(!$CoverEnd AND $MaxCoverEnd == '') $MaxCoverEnd = 0;
 echo "<input type=\"radio\" name=\"CoverEnd\" value=\"1\"";
 if($CoverEnd == 1) echo " checked";
-echo ">Cover at will<br />";
+echo ">Cover<br />";
 echo "<input type=\"radio\" name=\"CoverEnd\" value=\"0\"";
 if($CoverEnd == 0) echo " checked";
 echo ">Never cover<br />";
 echo "<input type=\"radio\" name=\"CoverEndMode\" value=\"-1\"";
-if(!$CoverEnd AND $CoverEndMode == -1) {
+if($CoverEnd AND $CoverEndMode == -1 AND $MaxCoverEnd > 0) {
 	echo " checked";
 	$value = $MaxCoverEnd;
 	}
@@ -1072,7 +1078,7 @@ else $value = '';
 echo ">Not more than";
 echo "&nbsp;<input type=\"text\" name=\"MaxCoverEnd1\" size=\"5\" value=\"".$value."\"> ms<br />";
 echo "<input type=\"radio\" name=\"CoverEndMode\" value=\"0\"";
-if(!$CoverEnd AND $CoverEndMode == 0) {
+if($CoverEnd AND $CoverEndMode == 0 AND $MaxCoverEnd > 0) {
 	echo " checked";
 	$value = $MaxCoverEnd;
 	}
@@ -1086,13 +1092,13 @@ store($h_image,"MaxCoverEnd",$MaxCoverEnd);
 echo "<p>TRUNCATE BEGINNING</p>";
 echo "<input type=\"radio\" name=\"TruncBeg\" value=\"1\"";
 if($TruncBeg == 1) echo " checked";
-echo ">Truncate at will<br />";
+echo ">Truncate<br />";
 echo "<input type=\"radio\" name=\"TruncBeg\" value=\"0\"";
 if($TruncBeg == 0) echo " checked";
 echo ">Do not truncate<br />";
 
 echo "<input type=\"radio\" name=\"TruncBegMode\" value=\"-1\"";
-if(!$TruncBeg AND $TruncBegMode == -1) {
+if($TruncBeg AND $TruncBegMode == -1 AND $MaxTruncBeg > 0) {
 	echo " checked";
 	$value = $MaxTruncBeg;
 	}
@@ -1100,7 +1106,7 @@ else $value = '';
 echo ">Not more than";
 echo "&nbsp;<input type=\"text\" name=\"MaxTruncBeg1\" size=\"5\" value=\"".$value."\"> ms<br />";
 echo "<input type=\"radio\" name=\"TruncBegMode\" value=\"0\"";
-if(!$TruncBeg AND $TruncBegMode == 0) {
+if($TruncBeg AND $TruncBegMode == 0 AND $MaxTruncBeg > 0) {
 	echo " checked";
 	$value = $MaxTruncBeg;
 	}
@@ -1113,13 +1119,12 @@ store($h_image,"MaxTruncBeg",$MaxTruncBeg);
 echo "<p>TRUNCATE END</p>";
 echo "<input type=\"radio\" name=\"TruncEnd\" value=\"1\"";
 if($TruncEnd == 1) echo " checked";
-echo ">Truncate at will<br />";
+echo ">Truncate<br />";
 echo "<input type=\"radio\" name=\"TruncEnd\" value=\"0\"";
 if($TruncEnd == 0) echo " checked";
 echo ">Do not truncate<br />";
-
 echo "<input type=\"radio\" name=\"TruncEndMode\" value=\"-1\"";
-if(!$TruncEnd AND $TruncEndMode == -1) {
+if($TruncEnd AND $TruncEndMode == -1 AND $MaxTruncEnd > 0) {
 	echo " checked";
 	$value = $MaxTruncEnd;
 	}
@@ -1127,7 +1132,7 @@ else $value = '';
 echo ">Not more than";
 echo "&nbsp;<input type=\"text\" name=\"MaxTruncEnd1\" size=\"5\" value=\"".$value."\"> ms<br />";
 echo "<input type=\"radio\" name=\"TruncEndMode\" value=\"0\"";
-if(!$TruncEnd AND $TruncEndMode == 0) {
+if($TruncEnd AND $TruncEndMode == 0 AND $MaxTruncEnd > 0) {
 	echo " checked";
 	$value = $MaxTruncEnd;
 	}
@@ -1173,36 +1178,36 @@ echo ">Post-roll";
 echo "&nbsp;<input type=\"text\" name=\"PostRoll2\" size=\"5\" value=\"".$value."\"> % of duration";
 
 echo "<p>CYCLIC</p>";
-echo "<input type=\"radio\" name=\"PeriodMode\" value=\"-2\"";
-if($PeriodMode == -2) {
+echo "<input type=\"radio\" name=\"CycleMode\" value=\"-2\"";
+if($CycleMode == -2) {
 	echo " checked";
 	}
-echo ">No period<br />";
-echo "<input type=\"radio\" name=\"PeriodMode\" value=\"-1\"";
-if($PeriodMode == -1) {
+echo ">No cycle<br />";
+echo "<input type=\"radio\" name=\"CycleMode\" value=\"-1\"";
+if($CycleMode == -1) {
 	echo " checked";
-	$value = $BeforePeriod;
+	$value = $CyclicAfter;
 	}
 else $value = '';
-echo ">Periodical after";
+echo ">Cyclic after";
 echo "&nbsp;<input type=\"text\" name=\"BeforePeriod1\" size=\"5\" value=\"".$value."\"> ms<br />";
-echo "<input type=\"radio\" name=\"PeriodMode\" value=\"0\"";
-if($PeriodMode == 0) {
+echo "<input type=\"radio\" name=\"CycleMode\" value=\"0\"";
+if($CycleMode == 0) {
 	echo " checked";
-	$value = $BeforePeriod;
+	$value = $CyclicAfter;
 	}
 else $value = '';
-echo ">Periodical after";
+echo ">Cyclic after";
 echo "&nbsp;<input type=\"text\" name=\"BeforePeriod2\" size=\"5\" value=\"".$value."\"> % of duration<br />";
-store($h_image,"PeriodMode",$PeriodMode);
-store($h_image,"BeforePeriod",$BeforePeriod);
+store($h_image,"CycleMode",$CycleMode);
+store($h_image,"CyclicAfter",$CyclicAfter);
 
-echo "<input type=\"checkbox\" name=\"ForceIntegerPeriod\"";
-if($ForceIntegerPeriod) echo " checked";
-echo ">Force integer number of periods<br />";
+echo "<input type=\"checkbox\" name=\"ForceIntegerCycles\"";
+if($ForceIntegerCycles) echo " checked";
+echo ">Force integer number of cycles<br />";
 echo "<input type=\"checkbox\" name=\"DiscardNoteOffs\"";
 if($DiscardNoteOffs) echo " checked";
-echo ">Discard NoteOff’s except in last period";
+echo ">Discard NoteOff’s except in last cycle";
 
 echo "<p>STRIKE MODE</p>";
 echo "<input type=\"radio\" name=\"StrikeAgain\" value=\"1\"";

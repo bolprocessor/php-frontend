@@ -218,15 +218,15 @@ if($Tref > 0 AND $Tref <= $max_duration) {
 	}
 
 // Draw period if object is cyclic
-if(isset($PeriodMode) AND $Duration > 0) {
-	$before_period = -1;
-	if($PeriodMode == -1) $before_period = $BeforePeriod;
-	if($PeriodMode == 0) $before_period = $BeforePeriod * $Duration / 100;
-	if($before_period >= 0) {
+if(isset($CycleMode) AND $Duration > 0) {
+	$cyclic_after = -1;
+	if($CycleMode == -1) $cyclic_after = $CyclicAfter;
+	if($CycleMode == 0) $cyclic_after = $CyclicAfter * $Duration / 100;
+	if($cyclic_after >= 0) {
 		imageline($im,$margin_left + ($alpha * $Duration),$y2-58,$margin_left + ($alpha * $Duration),$y2-20,$blue);
-		imageline($im,$margin_left + ($alpha * $before_period),$y2-58,$margin_left + ($alpha * $Duration),$y2-58,$blue);
-		imageline($im,$margin_left + ($alpha * $before_period),$y2-58,$margin_left + ($alpha * $before_period),$y2-20,$blue);
-		arrow($im,$margin_left + ($alpha * $before_period),$y1 - 38,$margin_left + ($alpha * $before_period),$y1,17,5,0,$blue);
+		imageline($im,$margin_left + ($alpha * $cyclic_after),$y2-58,$margin_left + ($alpha * $Duration),$y2-58,$blue);
+		imageline($im,$margin_left + ($alpha * $cyclic_after),$y2-58,$margin_left + ($alpha * $cyclic_after),$y2-20,$blue);
+		arrow($im,$margin_left + ($alpha * $cyclic_after),$y1 - 38,$margin_left + ($alpha * $cyclic_after),$y1,17,5,0,$blue);
 		$mssg = "(cyclic)";
 		$length_mssg = imagefontwidth(10) * strlen($mssg);
 		imagestring($im,10,$x2 - $length_mssg,$y2-50,$mssg,$blue);
