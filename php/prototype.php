@@ -297,11 +297,10 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 	$MaxCoverBeg = '';
 	if($CoverBegMode == -1) $MaxCoverBeg = $_POST['MaxCoverBeg1'];
 	if($CoverBegMode == 0) $MaxCoverBeg = $_POST['MaxCoverBeg2'];
-/*	if($CoverBeg) {
-		$CoverBegMode = 0;
-		$MaxCoverBeg = 100;
-		} */
-	if($MaxCoverBeg == '') $MaxCoverBeg = 0; // 2026-08-05
+	if(!$CoverBeg OR $MaxCoverBeg == '') {
+		$MaxCoverBeg = 0;
+		$CoverBegMode = 1;
+		}
 	fwrite($handle,$CoverBegMode."\n");
 	fwrite($handle,$MaxCoverBeg."\n");
 	
@@ -310,11 +309,10 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 	$MaxCoverEnd = '';
 	if($CoverEndMode == -1) $MaxCoverEnd = $_POST['MaxCoverEnd1'];
 	if($CoverEndMode == 0) $MaxCoverEnd = $_POST['MaxCoverEnd2'];
-	/* if($CoverEnd) {
-		$CoverEndMode = 0;
-		$MaxCoverEnd = 100;
-		} */
-	if($MaxCoverEnd == '') $MaxCoverEnd = 0; // 2026-08-05
+	if(!$CoverEnd OR $MaxCoverEnd == '') {
+		$MaxCoverEnd = 0;
+		$CoverEndMode = 1;
+		}
 //	if($MaxCoverEnd > 0) $CoverEndMode = -2;
 	fwrite($handle,$CoverEndMode."\n");
 	fwrite($handle,$MaxCoverEnd."\n");
@@ -324,10 +322,10 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 	$MaxTruncBeg = 0;
 	if($TruncBegMode == -1) $MaxTruncBeg = $_POST['MaxTruncBeg1'];
 	if($TruncBegMode == 0) $MaxTruncBeg = $_POST['MaxTruncBeg2'];
-/*	if($TruncBeg OR $MaxTruncBeg == '') {
+	if(!$TruncBeg OR $MaxTruncBeg == '') {
 		$MaxTruncBeg = 0;
 		$TruncBegMode = 1;
-		} */
+		}
 	fwrite($handle,$TruncBegMode."\n");
 	if($MaxTruncBeg == '') $MaxTruncBeg = 100;
 	fwrite($handle,$MaxTruncBeg."\n");
@@ -337,10 +335,10 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 	$MaxTruncEnd = 0;
 	if($TruncEndMode == -1) $MaxTruncEnd = $_POST['MaxTruncEnd1'];
 	if($TruncEndMode == 0) $MaxTruncEnd = $_POST['MaxTruncEnd2'];
-/*	if($TruncEnd AND $MaxTruncEnd == '') {
+	if(!$TruncEnd OR $MaxTruncEnd == '') {
 		$MaxTruncEnd = 0;
 		$TruncEndMode = 1;
-		} */
+		}
 	fwrite($handle,$TruncEndMode."\n");
 	fwrite($handle,$MaxTruncEnd."\n");
 	
@@ -1095,7 +1093,7 @@ if($TruncBeg == 1) echo " checked";
 echo ">Truncate<br />";
 echo "<input type=\"radio\" name=\"TruncBeg\" value=\"0\"";
 if($TruncBeg == 0) echo " checked";
-echo ">Do not truncate<br />";
+echo ">Never truncate<br />";
 
 echo "<input type=\"radio\" name=\"TruncBegMode\" value=\"-1\"";
 if($TruncBeg AND $TruncBegMode == -1 AND $MaxTruncBeg > 0) {
@@ -1122,7 +1120,7 @@ if($TruncEnd == 1) echo " checked";
 echo ">Truncate<br />";
 echo "<input type=\"radio\" name=\"TruncEnd\" value=\"0\"";
 if($TruncEnd == 0) echo " checked";
-echo ">Do not truncate<br />";
+echo ">Never truncate<br />";
 echo "<input type=\"radio\" name=\"TruncEndMode\" value=\"-1\"";
 if($TruncEnd AND $TruncEndMode == -1 AND $MaxTruncEnd > 0) {
 	echo " checked";
