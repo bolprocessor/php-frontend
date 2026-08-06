@@ -927,7 +927,7 @@ if($OkRelocate == 1) echo " checked";
 echo ">Relocate<br />";
 echo "<input type=\"radio\" name=\"OkRelocate\" value=\"0\"";
 if($OkRelocate == 0) echo " checked";
-echo ">Do not relocate<br /><br />";
+echo ">Do not relocate beyond delay/forward (below)<br /><br />";
 
 echo "<input type=\"radio\" name=\"DelayMode\" value=\"-1\"";
 if(!$OkRelocate AND $DelayMode == -1) {
