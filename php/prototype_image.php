@@ -218,10 +218,10 @@ if($Tref > 0 AND $Tref <= $max_duration) {
 	}
 
 // Draw period if object is cyclic
-if(isset($CycleMode) AND $Duration > 0) {
+if(isset($CyclicMode) AND $Duration > 0) {
 	$cyclic_after = -1;
-	if($CycleMode == -1) $cyclic_after = $CyclicAfter;
-	if($CycleMode == 0) $cyclic_after = $CyclicAfter * $Duration / 100;
+	if($CyclicMode == -1) $cyclic_after = $CyclicAfter;
+	if($CyclicMode == 0) $cyclic_after = $CyclicAfter * $Duration / 100;
 	if($cyclic_after >= 0) {
 		imageline($im,$margin_left + ($alpha * $Duration),$y2-58,$margin_left + ($alpha * $Duration),$y2-20,$blue);
 		imageline($im,$margin_left + ($alpha * $cyclic_after),$y2-58,$margin_left + ($alpha * $Duration),$y2-58,$blue);

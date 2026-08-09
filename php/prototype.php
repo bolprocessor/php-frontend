@@ -264,8 +264,9 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 	fwrite($handle,$ForwardMode."\n");
 	fwrite($handle,$MaxForward."\n");
 	
-	$BreakTempoMode = $_POST['BreakTempoMode'];
-	fwrite($handle,$BreakTempoMode."\n");
+	// $BreakTempoMode = $_POST['BreakTempoMode'];
+	$not_used = 1;
+	fwrite($handle,$not_used."\n");
 	fwrite($handle,$division."\n");
 	
 	if(isset($_POST['ContBegMode'])) $ContBegMode = $_POST['ContBegMode'];
@@ -410,16 +411,16 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 	fwrite($handle,$PostRollMode."\n");
 	
 	$CyclicAfter = '';
-	if(isset($_POST['CycleMode'])) {
-		$CycleMode = $_POST['CycleMode'];
-		if($CycleMode == -1) $CyclicAfter = $_POST['BeforePeriod1'];
-		if($CycleMode == 0) $CyclicAfter = $_POST['BeforePeriod2'];
+	if(isset($_POST['CyclicMode'])) {
+		$CyclicMode = $_POST['CyclicMode'];
+		if($CyclicMode == -1) $CyclicAfter = $_POST['BeforePeriod1'];
+		if($CyclicMode == 0) $CyclicAfter = $_POST['BeforePeriod2'];
 		}
 	if($CyclicAfter == '') {
 		$CyclicAfter = "0";
-		$CycleMode = -2;
+		$CyclicMode = 1;
 		}
-	fwrite($handle,$CycleMode."\n");
+	fwrite($handle,$CyclicMode."\n");
 	fwrite($handle,$CyclicAfter."\n");
 	if(isset($_POST['ForceIntegerCycles'])) $ForceIntegerCycles = 1;
 	else $ForceIntegerCycles = 0;
@@ -434,13 +435,13 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 	fwrite($handle,$StrikeAgain."\n");
 	
 	$CsoundInstr = '';
-	if(isset($_POST['CsoundAssignedInstr'])) {
-		$CsoundAssignedInstr = $_POST['CsoundAssignedInstr'];
+	if(isset($_POST['CsoundInstrumentMode'])) {
+		$CsoundInstrumentMode = $_POST['CsoundInstrumentMode'];
 		$CsoundInstr = $_POST['CsoundInstr'];
 		}
-	else $CsoundAssignedInstr = -1;
+	else $CsoundInstrumentMode = -1;
 	if($CsoundInstr == '') $CsoundInstr = -1;
-	fwrite($handle,$CsoundAssignedInstr."\n");
+	fwrite($handle,$CsoundInstrumentMode."\n");
 	fwrite($handle,$CsoundInstr."\n");
 	if(isset($_POST['tempo']) AND $_POST['tempo'] > 0)
 		$tempo = $_POST['tempo'];
@@ -747,7 +748,8 @@ $MaxDelay = $object_param[$j++];
 $ForwardMode = $object_param[$j++];
 $MaxForward = $object_param[$j++];
 
-$BreakTempoMode = $object_param[$j++];
+// $BreakTempoMode = $object_param[$j++];
+$not_used = $object_param[$j++];
 
 $x = $object_param[$j++];
 if(isset($_POST['division'])) $division = $_POST['division'];
@@ -791,14 +793,15 @@ $PostRoll = $object_param[$j++];
 $PreRollMode = $object_param[$j++];
 $PostRollMode = $object_param[$j++];
 
-$CycleMode = $object_param[$j++];
+$CyclicMode = $object_param[$j++];
+if($CyclicMode == -2) $CyclicMode = 1;
 $CyclicAfter = $object_param[$j++];
 $ForceIntegerCycles = $object_param[$j++];
 $DiscardNoteOffs = $object_param[$j++];
 
 $StrikeAgain = $object_param[$j++];
 
-$CsoundAssignedInstr = $object_param[$j++];
+$CsoundInstrumentMode = $object_param[$j++];
 $CsoundInstr = $object_param[$j++];
 
 $j++;
@@ -964,8 +967,7 @@ echo ">Allow forward";
 echo "&nbsp;<input type=\"text\" name=\"MaxForward2\" size=\"5\" value=\"".$value."\"> % of duration";
 
 echo "<p>BREAK TEMPO (ORGANUM)</p>";
-// echo "(BreakTempoMode = ".$BreakTempoMode." ???)<br />";
-echo "<input type=\"hidden\" name=\"BreakTempoMode\" value=\"".$BreakTempoMode."\">";
+// echo "<input type=\"hidden\" name=\"BreakTempoMode\" value=\"".$BreakTempoMode."\">";
 
 echo "<input type=\"radio\" name=\"BreakTempo\" value=\"0\"";
 if($BreakTempo == 0) echo " checked";
@@ -1176,28 +1178,28 @@ echo ">Post-roll";
 echo "&nbsp;<input type=\"text\" name=\"PostRoll2\" size=\"5\" value=\"".$value."\"> % of duration";
 
 echo "<p>CYCLIC</p>";
-echo "<input type=\"radio\" name=\"CycleMode\" value=\"-2\"";
-if($CycleMode == -2) {
+echo "<input type=\"radio\" name=\"CyclicMode\" value=\"1\"";
+if($CyclicMode == 1) {
 	echo " checked";
 	}
 echo ">No cycle<br />";
-echo "<input type=\"radio\" name=\"CycleMode\" value=\"-1\"";
-if($CycleMode == -1) {
+echo "<input type=\"radio\" name=\"CyclicMode\" value=\"-1\"";
+if($CyclicMode == -1) {
 	echo " checked";
 	$value = $CyclicAfter;
 	}
 else $value = '';
 echo ">Cyclic after";
 echo "&nbsp;<input type=\"text\" name=\"BeforePeriod1\" size=\"5\" value=\"".$value."\"> ms<br />";
-echo "<input type=\"radio\" name=\"CycleMode\" value=\"0\"";
-if($CycleMode == 0) {
+echo "<input type=\"radio\" name=\"CyclicMode\" value=\"0\"";
+if($CyclicMode == 0) {
 	echo " checked";
 	$value = $CyclicAfter;
 	}
 else $value = '';
 echo ">Cyclic after";
 echo "&nbsp;<input type=\"text\" name=\"BeforePeriod2\" size=\"5\" value=\"".$value."\"> % of duration<br />";
-store($h_image,"CycleMode",$CycleMode);
+store($h_image,"CyclicMode",$CyclicMode);
 store($h_image,"CyclicAfter",$CyclicAfter);
 
 echo "<input type=\"checkbox\" name=\"ForceIntegerCycles\"";
@@ -1219,14 +1221,14 @@ if($StrikeAgain == -1) echo " checked";
 echo ">Strike NoteOn’s according to default";
 
 echo "<p>MIDI TO CSOUND CONVERSION</p>";
-echo "<input type=\"radio\" name=\"CsoundAssignedInstr\" value=\"0\"";
-if($CsoundAssignedInstr == 0) echo " checked";
+echo "<input type=\"radio\" name=\"CsoundInstrumentMode\" value=\"0\"";
+if($CsoundInstrumentMode == 0) echo " checked";
 echo ">Force to current instrument<br />";
-echo "<input type=\"radio\" name=\"CsoundAssignedInstr\" value=\"-1\"";
-if($CsoundAssignedInstr == -1 AND $CsoundInstr == -1) echo " checked";
+echo "<input type=\"radio\" name=\"CsoundInstrumentMode\" value=\"-1\"";
+if($CsoundInstrumentMode == -1 AND $CsoundInstr == -1) echo " checked";
 echo ">Do not change instrument<br />";
-echo "<input type=\"radio\" name=\"CsoundAssignedInstr\" value=\"-1\"";
-if($CsoundAssignedInstr == -1 AND $CsoundInstr <> -1) {
+echo "<input type=\"radio\" name=\"CsoundInstrumentMode\" value=\"-1\"";
+if($CsoundInstrumentMode == -1 AND $CsoundInstr <> -1) {
 	echo " checked";
 	$value = $CsoundInstr;
 	}
