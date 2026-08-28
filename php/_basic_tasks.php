@@ -1127,6 +1127,7 @@ function recode_entities($text) {
 	$text = preg_replace("/{\s*…\s*/u","{_rest ",$text);
 	$text = preg_replace("/\s*…\s*}/u"," _rest}",$text);
 	$text = preg_replace("/,\s*…\s*/u",", _rest ",$text);
+	$text = preg_replace("/] */u","] ",$text);
 	return $text;
 	}
 

@@ -339,7 +339,7 @@ $trash_backups = isset($_POST['trash_backups']);
 // if(MB_CONVERT_OK) echo "<p>MB_CONVERT_OK</p>";
 
 if($folder <> '')
-	echo "<h3>Content of workspace: <span class=\"red-text\">".str_replace(SLASH,'/',$folder)."</span></h3>";
+	echo "<h3>Content of workspace: <span class=\"red-text\"><input title=\"List this workspace\" class=\"edit big\" name=\"workspace\" type=\"submit\" value=\"".$folder."\"></h3>";
 $table = explode('_',$folder);
 $extension = end($table);
 

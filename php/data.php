@@ -85,7 +85,7 @@ if(isset($data_file_format[$filename])) $file_format = $data_file_format[$filena
 if(!isset($_POST['analyze_tonal'])) display_console_state();
 
 $url = "index.php?path=".urlencode($current_directory);
-echo "&nbsp;Workspace = <input title=\"List this workspace\" class=\"edit\" name=\"workspace\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$url."','_self');\" value=\"".$current_directory."\">";
+echo "&nbsp;Workspace = <input title=\"List this workspace\" class=\"edit big\" name=\"workspace\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$url."','_self');\" value=\"".$current_directory."\">";
 
 echo link_to_help();
 
@@ -596,7 +596,6 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$more_data .= "\n".$data;
 
 			echo "<h3><span class=\"red-text\">Importing MusicXML file:</span> <span class=\"green-text\">".$upload_filename."</span></h3>";
-		//	echo "<div style=\"background-color:white; width:75%; padding:1em; box-shadow: -5px 5px 5px 0px gold;\">";
 			echo "<div style=\"width:75%; padding:1em; box-shadow: -5px 5px 5px 0px gold;\">";
 			$window_name = $upload_filename;
 			$link_preview = "preview_musicxml.php?music_xml_file=".urlencode($music_xml_file)."&title=".urlencode($upload_filename);
@@ -1346,6 +1345,7 @@ $trace_capture_analysis = TRUE;
 $minimum_period = 200; // milliseconds
 $advance_time = 10; // seconds
 $trace_minimise = FALSE;
+$ignore_fields = FALSE;
 $dir_base = str_replace($bp_application_path,'',$dir);
 $url_settings = "settings.php?file=".urlencode($dir_base.$settings_file);
 if($settings_file <> '' AND file_exists($dir.$settings_file)) {
@@ -1374,6 +1374,7 @@ if($settings_file <> '' AND file_exists($dir.$settings_file)) {
 		$quantization = $settings['Quantization']['value'];
 		$quantize = $settings['Quantize']['value'];
 		$nature_of_time_settings = $settings['Nature_of_time']['value'];
+		if(isset($settings['IgnoreFields'])) $ignore_fields = $settings['IgnoreFields']['value'];
 		if(isset($settings['TraceMinimise']['value'])) $trace_minimise = $settings['TraceMinimise']['value'];
 		if(isset($settings['MinPeriod']['value'])) $minimum_period = intval($settings['MinPeriod']['value']);
 		if(isset($settings['TraceCaptureAnalysis']['value'])) $trace_capture_analysis = intval($settings['TraceCaptureAnalysis']['value']);
@@ -1655,6 +1656,7 @@ if(!isset($_POST['analyze_tonal'])) {
 
 	echo "<div style=\"text-align:left; background-color:transparent;\"><input id=\"saveButton\" class=\"save big\" type=\"submit\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".begin_with(15,$filename)."’\"></div>";
 
+	if($ignore_fields) echo "<p>👉 The <span class=\"red-text\">“Ignore field separators”</span> option is set to TRUE. This data will use the old algorithm for processing serial tools</p>";
 	$content = do_replace($content);
 	echo $the_warning; // If saving was impossible due to write permissions
 	echo "<br /><textarea id=\"textArea\" name=\"thistext\" onchange=\"tellsave()\" rows=\"40\" style=\"width:750px;\">".$content."</textarea><br /><br />";
@@ -2066,8 +2068,10 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 			$line_show = substr($line_recoded,0,90)."<br />&nbsp;... ... ...<br />".substr($line_recoded,-90,90);
 		else $line_show = $line_recoded;
 		echo "<small>";
+		$line_show = "<span class=\"green-text\">".$line_show."</span>";
 		if($title_this <> '') $line_show = "<br /><span class=\"red-text\">[".$title_this."]</span><br />".$line_show;
-		echo "<span class=\"green-text\">".$line_show."</span>";
+		echo $line_show;
+	//	echo "<span class=\"green-text\">".$line_show."</span>";
 		echo "</small></td></tr>";
 		}
 	echo "</table>";

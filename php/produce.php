@@ -519,7 +519,7 @@ if(isset($data_path) AND $data_path <> '') {
 			if($item <> 0) echo " #".$item;
 			else echo ":";
 			echo "</b></p>";
-			echo "<p style=\"color:MediumTurquoise; overflow-wrap:break-word;\"><b>";
+			echo "<p style=\"overflow-wrap:break-word;\"><b>";
 			$table = explode(chr(10),$content);
 			for($i = $k = 0; $i < count($table); $i++) {
 				if($k > 800) {
@@ -533,7 +533,9 @@ if(isset($data_path) AND $data_path <> '') {
 				$length = strlen($line);
 				if($length > 200)
 					$line_show = substr($line,0,50)."<br />&nbsp;&nbsp;... ... ...<br />".substr($line,-100,100);
-				echo $line_show."<br />";
+				if($line_show[0] == '[') $line_show = "<span class=\"red-text\">".$line_show;
+				$line_show = preg_replace("/\] /","]</span><br />",$line_show,1);
+				echo "<span class=\"green-text\">".$line_show."</span><br />";
 				$k += strlen($line_show);
 				}
 			echo "</b></p>";
@@ -629,16 +631,15 @@ if($output <> '') {
 	if($file_format == "csound") $output_link = $download_link = nice_url($score_file);
 	else if($file_format == "midi") $output_link = $download_link = '';
 	else if($file_format == "eventlist") {
-		$download_link = $output_link;
-	//	$output_link = 'view_csv.php?file='.rawurlencode(basename($temp_dir.$eventlist_file));
 		$output_link = "view_csv.php?file=".urlencode($eventlist_file);
+		$download_link = $eventlist_file;
 		}
 	else {
 		$output_html = clean_up_file_to_html($output);
 		$output_link = $download_link = str_replace(SLASH,'/',$output_html);
 		}
 	$title_out = rand(10000,99999);
-	if($output_link <> '') echo "<span class=\"red-text\">➡</span> Read the <a class=\"linkdotted\" onclick=\"window.open('".$output_link."','".$title_out."','width=800,height=700,left=300'); return false;\" href=\"".$output_link."\">output file</a> (or <a class=\"linkdotted\" href=\"".$download_link."\" download>download it</a>)<br />";
+	if($output_link <> '') echo "<span class=\"red-text\">➡</span> Read the <a class=\"linkdotted\" onclick=\"window.open('".$output_link."','".$title_out."','width=800,height=400,left=300'); return false;\" href=\"".$output_link."\">output file</a> (or <a class=\"linkdotted\" href=\"".$download_link."\" download>download it</a>)<br />";
 	}
 if($trace_production OR $instruction == "templates" OR $show_production) {
     if(file_exists($trace_link) AND strlen($content_trace) > 20) 
@@ -839,7 +840,7 @@ if(file_exists($capture_file)) {
 	echo "<p>👉 Reload the <span class=\"green-text\">".$project_fullname."</span> project to see <span class=\"red-text\">captured MIDI events</span> at the end of the data…</p>";
 	}
 
-if($n_messages > 6000) echo "<p><span class=\"red-text\">➡</span> Too many messages produced! (".$n_messages.")</p>";
+if($n_messages > 30000) echo "<p><span class=\"red-text\">➡</span> Too many messages produced! (".$n_messages.")</p>";
 else {
 	if($result_file <> '') $handle = fopen($result_file,"w");
 	if($handle) {

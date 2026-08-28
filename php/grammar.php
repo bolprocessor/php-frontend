@@ -65,7 +65,7 @@ $temp_midi_ressources = $temp_dir."trace_".my_session_id()."_".$filename."_";
 
 echo "<p>";
 $url = "index.php?path=".urlencode($current_directory);
-echo "&nbsp;Workspace = <input title=\"List this workspace\" class=\"edit\" name=\"workspace\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$url."','_self');\" value=\"".$current_directory."\">";
+echo "&nbsp;Workspace = <input title=\"List this workspace\" class=\"edit big\" name=\"workspace\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$url."','_self');\" value=\"".$current_directory."\">";
 
 $hide = $need_to_save = FALSE;
 $no_save_midiresources = FALSE;
@@ -381,7 +381,7 @@ $csound_default_orchestra = '';
 $parse_mode = "ANAL";
 $diapason = 440; $C4key = 60;
 $dir_base = str_replace($bp_application_path,'',$dir);
-$found_orchestra_in_settings = $quantize = $play_each_sub = FALSE;
+$found_orchestra_in_settings = $quantize = $play_each_sub = $ignore_fields = FALSE;
 if($settings_file <> '' AND file_exists($dir.$settings_file)) {
 	convert_to_json($dir,$settings_file);
 	if(!$bad_settings) {
@@ -403,6 +403,7 @@ if($settings_file <> '' AND file_exists($dir.$settings_file)) {
 		$nature_of_time_settings = $settings['Nature_of_time']['value'];
 		$note_convention = $settings['NoteConvention']['value'];
 		$non_stop_improvize = $settings['Improvize']['value'];
+		if(isset($settings['IgnoreFields'])) $ignore_fields = $settings['IgnoreFields']['value'];
 		if(isset($settings['ParseMode'])) $parse_mode = $settings['ParseMode']['value'];
 		if(isset($settings['LiveGrammar'])) $live_grammar = $settings['LiveGrammar']['value'];
 		if(isset($settings['LiveSettings'])) $live_settings = $settings['LiveSettings']['value'];
@@ -826,7 +827,7 @@ else {
 	echo '<span id="reason" style="display:none;">'.$reason_not_true.'</span>';
 	echo "</p>";
 	}
-
+if($ignore_fields) echo "<p>👉 The <span class=\"red-text\">“Ignore field separators”</span> option is set to TRUE. This grammar will use the old algorithm for processing serial tools</p>";
 $content = do_replace($content);
 
 $table = explode(chr(10),$content);
