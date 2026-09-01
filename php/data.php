@@ -1659,6 +1659,12 @@ if(!isset($_POST['analyze_tonal'])) {
 	if($ignore_fields) echo "<p>👉 The <span class=\"red-text\">“Ignore field separators”</span> option is set to TRUE. This data will use the old algorithm for processing serial tools</p>";
 	$content = do_replace($content);
 	echo $the_warning; // If saving was impossible due to write permissions
+	if($settings_file == '') {
+		$new_settings_file = str_replace("-da.",'',$filename);
+		$new_settings_file = str_replace(".bpda",'',$new_settings_file);
+		$new_settings_file = "-se.".$new_settings_file;
+		echo "<p>&nbsp;</p><p style=\"width:90%\" class=\"warning\"><span class=\"red-text\">➡</span> <input class=\"save\" onclick=\"window.open('settings_list.php?dir=".urlencode($dir)."&thispage=".urlencode($url_this_page)."','settingsfiles','width=400,height=400,left=100'); return false;\" type=\"submit\" title=\"Display settings file\" value=\"CHOOSE\"> a settings file or <input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"create_settings_file\" formaction=\"".$url_this_page."\" value=\"CREATE\"> a new file named <input type=\"text\" name=\"new_settings_file\" size=\"25\" value=\"".$new_settings_file."\"></p>";
+		}
 	echo "<br /><textarea id=\"textArea\" name=\"thistext\" onchange=\"tellsave()\" rows=\"40\" style=\"width:750px;\">".$content."</textarea><br /><br />";
 	echo "<div style=\"float:right; background-color:transparent;\"><input class=\"save big\" type=\"submit\" formaction=\"".$url_this_page."#textArea\" name=\"savethisfile\" value=\"SAVE ‘".begin_with(20,$filename)."’\"></div>";
 	display_more_buttons($error,$content,$url_this_page,$dir,$grammar_file,$objects_file,$csound_file,$tonality_file,$alphabet_file,$data_file,$weights_file,$settings_file,$orchestra_file,$interaction_file,$midisetup_file,$timebase_file,$keyboard_file,$glossary_file);
@@ -1743,14 +1749,8 @@ if(isset($_POST['manage_instructions'])) {
 $hide = display_note_conventions($note_convention);
 
 if(!$hide AND !isset($_POST['analyze_tonal'])) {
-	if($settings_file == '') {
-		$new_settings_file = str_replace("-da.",'',$filename);
-		$new_settings_file = str_replace(".bpda",'',$new_settings_file);
-		$new_settings_file = "-se.".$new_settings_file;
-		echo "<p>&nbsp;</p><p><span class=\"red-text\">➡</span> <input class=\"save big\" onclick=\"window.open('settings_list.php?dir=".urlencode($dir)."&thispage=".urlencode($url_this_page)."','settingsfiles','width=400,height=400,left=100'); return false;\" type=\"submit\" title=\"Display settings file\" value=\"CHOOSE\"> a settings file or <input class=\"edit big\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"create_settings_file\" formaction=\"".$url_this_page."\" value=\"CREATE\"> a new file named <input type=\"text\" name=\"new_settings_file\" size=\"25\" value=\"".$new_settings_file."\"></p>";
-		}
-	else 
-		echo "<p><input class=\"edit\" onclick=\"window.open('settings_list.php?dir=".urlencode($dir)."&thispage=".urlencode($url_this_page)."','settingsfiles','width=400,height=400,left=100'); return false;\" type=\"submit\" title=\"Display settings file\" value=\"CHOOSE\"> a different settings file</p>";
+	if($settings_file <> '')
+		echo "<p>&nbsp;&nbsp;<input class=\"edit\" onclick=\"window.open('settings_list.php?dir=".urlencode($dir)."&thispage=".urlencode($url_this_page)."','settingsfiles','width=400,height=400,left=100'); return false;\" type=\"submit\" title=\"Display settings file\" value=\"CHOOSE\"> a different settings file</p>";
 	echo "<table class=\"thinborder\">";
 	echo "<tr>";
 	echo "<td style=\"vertical-align:middle; white-space:nowrap;\"><input class=\"edit\" type=\"submit\" onmouseover=\"checksaved();\" name=\"change_convention\" formaction=\"".$url_this_page."#topchanges\" value=\"APPLY NOTE CONVENTION to this data\"> ➡</td>";
@@ -2255,7 +2255,11 @@ function create_parts($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxch
 		if($c == '}') {
 			$level_bracket--;
 			if($level_bracket < 0) {
-				echo "<p><span class=\"red-text\">ERROR: </span><span class=\"green-text\">".$line."</span></p>";
+				$l = strlen($line);
+				if($l > 400)
+					$line_show = substr($line,0,90)."<br />&nbsp;... ... ...<br />".substr($line,-90,90);
+				else $line_show = $line;
+				echo "<p><span class=\"red-text\">ERROR level = ".$level_bracket.": </span><span class=\"green-text\">".$line_show."</span></p>";
 				$level_bracket = 0;
 				}
 			$layer = $i_layer[$level_bracket];

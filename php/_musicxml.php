@@ -1941,7 +1941,14 @@ function ornament($note,$long,$link,$diatonic_scale,$direction,$fifths,$trill,$t
 			if($note2 <> "???") $note2 = $alt_note.$octave;
 			}
 		if($alt_note <> '' AND $pitch_class == $diatonic_scale[$i]) echo "<span class=\"red-text\">➡</span> Error pitch class ".$pitch_class." not changed in ".$expression."<br />";
-		$octave = preg_replace("/.+([0-9]+)/u","$1",$note);
+
+		if (preg_match('/(\d+)(?!.*\d)/u', $note, $matches))
+			$octave = (int)$matches[1];
+		else $octave = null;  // no octave found
+		if(!is_integer($octave)) {
+			echo "@note = ".$note."<br />";
+			echo "@octave = “".$octave."”<br />";
+			}
 		if($direction == "up" OR $turn OR $trill) {
 			$higher_pitch_class = $pitch_class + 1;
 			if($higher_pitch_class > $diatonic_scale[6]) {

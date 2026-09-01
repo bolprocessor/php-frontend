@@ -914,6 +914,7 @@ function list_events($slice,$poly,$max_poly,$level_init,$i_token_init,$p_tempo,$
 	$max_tokens = count($tokens);
 	for($i_token = $i_token_init; $i_token < $max_tokens; $i_token++) {
 		$token = trim($tokens[$i_token]);
+		$token = preg_replace('/\[[^\]]*\]/u','', $token); // 2026-09-01
 		if($token == '') continue;
 		if(is_integer($pos1=strpos($token,"_legato("))) {
 			$pos2 = strpos($token,")",$pos1);
@@ -1032,8 +1033,9 @@ function list_events($slice,$poly,$max_poly,$level_init,$i_token_init,$p_tempo,$
 			$q_number_beats[$i_field] = $add['q'];
 			continue;
 			}
-		$newtempo = preg_replace("/_tempo\(([^\)]+)\)/u","$1",$token);
+		$newtempo = preg_replace('/^_tempo\(([^)]+)\).*$/u', '$1', $token);
 		if($newtempo <> $token) {
+		//	echo "@token = “".$token."”, @newtempo = “".$newtempo."”<br />";
 			$table = explode("/",$newtempo);
 			$p_newtempo = $table[0]; $q_newtempo = 1;
 			if(count($table) > 1) $q_newtempo = $table[1];
@@ -1080,6 +1082,7 @@ function list_events($slice,$poly,$max_poly,$level_init,$i_token_init,$p_tempo,$
 		$poly[$i_poly]['p_end'][$j_token] = $add['p'];
 		$poly[$i_poly]['q_end'][$j_token] = $add['q'];
 	//	$token = str_replace($octave,'',$token);
+		$token = preg_replace('/\[[^\]]*\]/u','', $token); // 2026-09-01
 		$token = preg_replace("/([a-z A-Z #]+)[0-9]+/u","$1",$token);
 		for($grade = 0; $grade < 12; $grade++) {
 			if($token == $Englishnote[$grade]) break;
