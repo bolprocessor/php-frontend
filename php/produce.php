@@ -666,7 +666,7 @@ if($output <> '') {
 	if($objects_path <> '' AND $file_format == "eventlist") {
 		$objects_link = str_replace("-so.",'',$objects_path).".json";
 		$objects_json = basename($objects_link);
-		echo "<span class=\"red-text\">➡</span> Download <a class=\"linkdotted\" href=\"".$objects_link."\" download>.$objects_json</a><br />";
+		echo "<span class=\"red-text\">➡</span> Download the <a class=\"linkdotted\" href=\"".$objects_link."\" download>.$objects_json</a> sound-object file<br />";
 		}
 	}
 if($trace_production OR $instruction == "templates" OR $show_production) {
