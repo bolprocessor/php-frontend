@@ -178,17 +178,18 @@ function adjustToPeriod($event,$period) {
         }
     $object = array_values($object);
     $j0 = 0; while(!isset($object[$j0]['start']) AND $j0 < $imax) $j0++;
-    $date_zero = $object[$j0]['start'];
+    $this_date = $date_zero = $object[$j0]['start'];
     $jmax = count($object);
     for($j = $j0; $j < $jmax; $j++) {
-        $this_date = $object[$j]['start'] - $date_zero;
+        if(isset($object[$j]['start']))
+            $this_date = $object[$j]['start'] - $date_zero;
         $mismatch = fmod($this_date,$period);
-        if($mismatch <> 0) {
+        if($mismatch <> 0  AND isset($object[$j]['start'])) {
     //        echo $j.") ".$this_date." -> ".$mismatch."<br />";
             if($mismatch <= ($period - $mismatch)) $object[$j]['start'] -= $mismatch;
             else $object[$j]['start'] += ($period - $mismatch);
             }
-        if($this_object['type'] == "note") {
+        if($this_object['type'] == "note" AND isset($object[$j]['start']) AND isset($object[$j]['end'])) {
             $duration = $object[$j]['end'] - $object[$j]['start'];
             if($duration < $period) $object[$j]['end'] += ($period - $duration);
             }
@@ -240,7 +241,7 @@ function displayObjects($object) {
     for($j = 0; $j < $jmax; $j++) {
         echo "<tr>";
         $this_object = $object[$j];
-        if(!isset($this_object['start'])) continue;
+        if(!isset($this_object['start']) OR !isset($this_object['end'])) continue;
         if($origin == -1) $origin  = $this_object['start'];
         echo $td.$this_object['type'].$ttd;
         if($this_object['source'] > 0) echo "<font color=\"green\">";

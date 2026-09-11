@@ -140,6 +140,7 @@ else {
 		$output = urldecode($_GET['output']);
 	//	echo "@output = ".$output."<br />";
 		}
+	if(isset($_GET['output'])) $output = urldecode($_GET['output']);
 	if($instruction == "analyze" AND $mode == "LEARN" AND $grammar_path <> '') $learn = TRUE;
 	if($instruction == "analyze" AND $mode == "ANAL" AND $grammar_path <> '') $anal = TRUE;
 	if($instruction == "create_set" AND isset($_GET['output']))
@@ -198,7 +199,6 @@ else {
 	$data_name = str_replace(" ","_",$data_name);
 //	echo "output = ".$output."<br />";
 	$project_name = preg_replace("/\.[a-z]+$/u",'',$output);
-//	echo "project_name = ".$project_name."<br />";
 	if($instruction == "play" OR $instruction == "play-all" OR $instruction == "analyze" OR $instruction == "create_set" OR $instruction == "templates")
 		$result_file = $project_name."_".$instruction."-result.html";
 	else $result_file = $project_name."-result.html";
@@ -217,8 +217,8 @@ else {
     $trace_link = $temp_dir."trace_".my_session_id()."_".$project_fullname.".txt";
 	$tracefile = $temp_dir."trace_".my_session_id()."_".$project_fullname.".txt";
     $trace_link = str_replace(SLASH,'/',$trace_link);
- //   $tracefile = str_replace(SLASH,'/',$tracefile);
-//	echo "<p>Trace file = ".$tracefile."</p>";
+    $tracefile = str_replace(SLASH,'/',$tracefile);
+//	echo "<p>Trace link = ".$trace_link."</p>";
 	$midiport = str_replace(".txt","_midiport",$tracefile);
 //	echo "<p>midiport file = ".$midiport."</p>";
 	if($file_format == "rtmidi" AND !file_exists($midiport)) {
@@ -260,7 +260,7 @@ else {
 		if(time() > $time_end) break;
 		sleep(1);
 		} */
-	@unlink($result_file);
+//	@unlink($result_file);
 	if($output <> '') @unlink($output);
 	@unlink($trace_csound);
 	$trace_csound = '';
@@ -332,7 +332,7 @@ else {
 			case "eventlist":
 			//	$command .= " -d --eventlistout ".$output;
 				$command .= " --eventlistout ".$eventlist_file;
-				if($instruction == "produce-all") $command .= " -o ".$output;
+			//	if($instruction == "produce-all") $command .= " -o ".$output;
 				break;
 			default:
 				$command .= " --rtmidi"; // We use the default destination
@@ -357,7 +357,8 @@ $stopfile = str_replace(SLASH,'/',$stopfile);
 $pausefile = str_replace(SLASH,'/',$pausefile);
 $continuefile = str_replace(SLASH,'/',$continuefile);
 
-@unlink($pausefile); @unlink($continuefile); @unlink($stopfile);
+@unlink($pausefile); @unlink($continuefile);
+// @unlink($stopfile);
 
 if($instruction <> "help") {
 	// Check that the same project is not already running in the same sesssion
@@ -412,6 +413,10 @@ if($instruction <> "help") {
 		navigator.sendBeacon(
 			'_deletefile.php?path_to_file=' +
 			encodeURIComponent(".json_encode($trace_notes_file).")
+			);
+		navigator.sendBeacon(
+			'_deletefile.php?path_to_file=' +
+			encodeURIComponent(".json_encode($running_trace).")
 			);
 		});
 	</script>";
@@ -542,7 +547,8 @@ if(isset($data_path) AND $data_path <> '') {
 			}
 		}
 	}
-@unlink($stopfile); @unlink($panicfile); @unlink($pausefile); @unlink($continuefile);
+@unlink($stopfile);
+@unlink($panicfile); @unlink($pausefile); @unlink($continuefile);
 session_abort();
 while(file_exists($stopfile)) { // Probably useless because the file will be deleted when starting the console, see remove(StopfileName) in ConsoleMain.c
 	usleep(200000); // 0.2 sec
@@ -593,6 +599,23 @@ while(TRUE) {
 		}
 	}
 if($dots > 0) echo "<br /><br />"; */
+
+$dots = 0;
+while(TRUE) {
+	if(file_exists($donefile) AND file_exists($tracefile)) break;
+	if(file_exists($donefile)) break;
+	if(time() > $time_end) {
+		echo "<p><span class=\"red-text\">Maximum time (".$max_sleep_time_after_bp_command." seconds) spent waiting for the 'done.txt' file… The process is incomplete!</span></p>";
+		break;
+		}
+	sleep(1);
+	$time_done = time() - $last_warning;
+	if($time_done > 1) {
+		$last_warning = time();
+		$dots++;
+		}
+	}
+sleep(1);
 @unlink($donefile);
 // @unlink($temp_dir."trace_notes_txt");
 $content_trace = $tracefile_html = '';
@@ -640,6 +663,11 @@ if($output <> '') {
 		}
 	$title_out = rand(10000,99999);
 	if($output_link <> '') echo "<span class=\"red-text\">➡</span> Read the <a class=\"linkdotted\" onclick=\"window.open('".$output_link."','".$title_out."','width=800,height=400,left=300'); return false;\" href=\"".$output_link."\">output file</a> (or <a class=\"linkdotted\" href=\"".$download_link."\" download>download it</a>)<br />";
+	if($objects_path <> '' AND $file_format == "eventlist") {
+		$objects_link = str_replace("-so.",'',$objects_path).".json";
+		$objects_json = basename($objects_link);
+		echo "<span class=\"red-text\">➡</span> Download <a class=\"linkdotted\" href=\"".$objects_link."\" download>.$objects_json</a><br />";
+		}
 	}
 if($trace_production OR $instruction == "templates" OR $show_production) {
     if(file_exists($trace_link) AND strlen($content_trace) > 20) 
@@ -832,7 +860,8 @@ if($no_error AND $file_format == "csound") {
 $handle = FALSE;
 $terminated = FALSE;
 if(file_exists($stopfile) OR file_exists($panicfile)) $terminated = TRUE;
-@unlink($pausefile); @unlink($continuefile); @unlink($stopfile);
+@unlink($pausefile); @unlink($continuefile);
+@unlink($stopfile);
 if($terminated AND $instruction <> "enter_notes") echo "<p class=\"attention\" style=\"color:red;\"><big>👉 The process has been interrupted</big></p>";
 
 $capture_file = $temp_dir_abs."trace_".my_session_id()."_".$project_fullname."_capture";
@@ -844,8 +873,7 @@ if($n_messages > 30000) echo "<p><span class=\"red-text\">➡</span> Too many me
 else {
 	if($result_file <> '') $handle = fopen($result_file,"w");
 	if($handle) {
-	/*	$darlightscript = "<?php\nrequire(\"../php/darkmode.js\");\n?>";
-		fwrite($handle,$darlightscript."\n"); */
+	//	echo "@@@ writing ".$result_file."<br />";
 		$header = "<!DOCTYPE HTML>";
 		$header .= "<html lang=\"en\">";
 		$header .= "<head>\n";
@@ -963,7 +991,7 @@ if($failed_template > 0) echo "<p><big>❌&nbsp;&nbsp;".$failed_template." item(
 if($weights_file_path <> '' AND $learn) echo "<p><big>👉  New weights are saved in ".$weights_file_path."</big><br />&nbsp;&nbsp;&nbsp;&nbsp;(Click the button below the grammar)</p>";
 if($created_templates) echo "<p><big>👉  Templates have been created. Click the “<span class=\"green-text\">output file</span>” link!</big></p>";
 
-@unlink($running_trace);
+// @unlink($running_trace);
 if($instruction == "enter_notes" AND $warnings == 0) {
 	$file = $temp_dir."trace_notes_txt";
 	if(file_exists($file) && filesize($file) > 3) {
@@ -971,6 +999,8 @@ if($instruction == "enter_notes" AND $warnings == 0) {
 		echo "<script>window.close();</script>";
 		}
 	}
+$handle = fopen($stopfile,"w");
+if($handle) fclose($handle);
 
 function check_image($link) {
 	$result = '';

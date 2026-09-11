@@ -1,5 +1,5 @@
 <?php
-echo "<!DOCTYPE HTML>";
+echo "<!DOCTYPE HTML>\n";
 echo "<html lang=\"en\">";
 echo "<head>";
 echo "<meta content=\"text/html; charset=utf-8\" http-equiv=\"Content-Type\" />";
@@ -58,7 +58,7 @@ echo "document.addEventListener('keydown', function(event) {
     if (key.toLowerCase() === \"s\" && event.metaKey) {
       alert(\"Soon this key will be programmed to save data...\");
         event.preventDefault(true);  // Prevent the default action to avoid triggering browser's save dialog
-        save();  // Call the save function
+  //      save();  // Call the save function
       }
   });";
 echo "</script>\n";

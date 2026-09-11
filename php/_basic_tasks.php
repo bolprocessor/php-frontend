@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <?php
 /* if(strtoupper(substr(PHP_OS,0,3)) === 'WIN' && isset($_SERVER['HTTP_HOST']) && $_SERVER['HTTP_HOST'] === 'localhost') {
 	// This avoids slowing down access on Windows machines
@@ -76,7 +77,6 @@ if(isset($_POST['csound_path_change'])) {
 if(windows_system()) {
     $console = "bp.exe";
     if (!isset($csound_name) || $csound_name == '') $csound_name = "csound.exe";
-  //  $programFiles = getenv("ProgramFiles"); This is only valid in English!
     $programFiles = findCsoundPath($csound_name);
     $programFiles = str_replace("\Csound6_x64\bin",'',$programFiles);
  //   echo "programFiles = ".$programFiles."<br />";
@@ -496,15 +496,6 @@ echo "<script>
 	}";
 echo "</script>";
 
-echo "<script
-function keepAlive() {
-    setInterval(() => {
-        fetch(window.location.href + \"?keepalive=1\").then(response => response.text());
-    	}, 2000); // Send request every 2 seconds
-	}
-keepAlive();";
-echo "</script>";
-
 
 // --------- FUNCTIONS ------------
 
@@ -751,20 +742,6 @@ function display_more_buttons($error,$content,$url_source_page,$dir,$grammar_fil
 		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" onclick=\"window.open('".$url_this_page."','".$alphabet_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".begin_with(20,$alphabet_file)."’\">";
 		echo "</td>";
 		}
-	/* if($data_file <> '') {
-		$url_this_page = "data.php?file=".urlencode($dir.$data_file);
-		if($test) echo "url_this_page = ".$url_this_page."<br />";
-		echo "<td>";
-		echo "<input class=\"edit\" type=\"submit\" name=\"opendata\" onclick=\"event.preventDefault(); window.open('".$url_this_page."','".$data_file."','width=1000,height=1000,left=100'); return false;\" formaction=\"".$url_this_page."\" value=\"EDIT ‘".begin_with(20,$data_file)."’\">&nbsp;";
-		echo "</td>";
-		}
-	if($grammar_file <> '') {
-		$url_this_page = "grammar.php?file=".urlencode($dir.$grammar_file);
-		if($test) echo "url_this_page = ".$url_this_page."<br />";
-		echo "<td>";
-		echo "<input class=\"edit\" type=\"submit\" name=\"opengrammar\" onclick=\"event.preventDefault(); window.open('".$url_this_page."','".$grammar_file."','width=1000,height=1000,left=100'); return false;\" formaction=\"".$url_this_page."\" value=\"EDIT ‘".begin_with(20,$grammar_file)."’\">&nbsp;";
-		echo "</td>";
-		} */
 	if($weights_file <> '') {
 		$url_this_page = "weights.php?file=".urlencode($dir.$weights_file);
 		$url_this_page .= "&grammar_file=".urlencode($current_file); 
@@ -777,26 +754,26 @@ function display_more_buttons($error,$content,$url_source_page,$dir,$grammar_fil
 	if($objects_file <> '') {
 		$url_this_page = "objects.php?file=".urlencode($dir.$objects_file);
 		echo "<td>";
-		echo "<input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" formaction=\"".$url_this_page."\" value=\"EDIT ‘".begin_with(20,$objects_file)."’\">&nbsp;";
+		echo "<input class=\"edit\" type=\"submit\" formtarget=\"_blank\" formaction=\"".$url_this_page."\" value=\"EDIT ‘".begin_with(20,$objects_file)."’\">&nbsp;";
 		echo "</td>";
 		}
 	if($csound_file <> '') {
 		$url_this_page = "csound.php?file=".urlencode($csound_resources.SLASH.$csound_file);
 		echo "<td>";
-		echo "<input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" formaction=\"".$url_this_page."\" value=\"EDIT ‘".begin_with(20,$csound_file)."’\">&nbsp;";
+		echo "<input class=\"edit\" type=\"submit\" formtarget=\"_blank\" formaction=\"".$url_this_page."\" value=\"EDIT ‘".begin_with(20,$csound_file)."’\">&nbsp;";
 		echo "</td>";
 		}
 	if($tonality_file <> '') {
 		$url_this_page = "tonality.php?file=".urlencode($tonality_resources.SLASH.$tonality_file);
 		echo "<td>";
-		echo "<input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" formaction=\"".$url_this_page."\" value=\"EDIT ‘".begin_with(20,$tonality_file)."’\">&nbsp;";
+		echo "<input class=\"edit\" type=\"submit\" formtarget=\"_blank\" formaction=\"".$url_this_page."\" value=\"EDIT ‘".begin_with(20,$tonality_file)."’\">&nbsp;";
 		echo "</td>";
 		}
 	if($settings_file <> '') {
 		$url_this_page = "settings.php?file=".urlencode($dir.$settings_file);
 		if($test) echo "url_this_page = ".$url_this_page."<br />";
 		echo "<td>";
-		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$settings_file."','width=1000,height=800,left=100'); return false;\" value=\"EDIT ‘".begin_with(20,$settings_file)."’\">";
+		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"event.preventDefault(); if(checksaved()) {window.open('".$url_this_page."','".$settings_file."','width=800,height=800,left=100'); return false;}\" value=\"EDIT ‘".begin_with(20,$settings_file)."’\">";
 		echo "</td>";
 		}
 	if($orchestra_file <> '') {
@@ -895,8 +872,8 @@ function compile_help($text_help_file,$html_help_file) {
 	if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 	if($content) {
 		$file_header = "<!DOCTYPE HTML>\n";
-		$file_header .= "<html lang=\"en\">";
-		$file_header .= "<head>";
+		$file_header .= "<html lang=\"en\">\n";
+		$file_header .= "<head>\n";
 		$file_header .= "<meta content=\"text/html; charset=utf-8\" http-equiv=\"Content-Type\" />";
 		$file_header .= "<link rel=\"stylesheet\" href=\"bp-light.css\" />\n";
 		$file_header .= "<script>\n";
@@ -4003,71 +3980,23 @@ function upload_related($dir) {
 	}
 
 function footer() {
-	echo "<script>"; // Script used for uploading attached files
-	echo "document.getElementById(\"fileInput\").addEventListener(\"change\", function() {
-	let fileNameSpan = document.getElementById(\"fileName\");
-		if (this.files.length > 0) {
-			fileNameSpan.innerHTML = '<span class=\"green-text\">' + this.files[0].name + '</span>';
+	echo "<script> // Script used for uploading attached files
+	const fileInput = document.getElementById('fileInput');
+	if (fileInput) {
+		fileInput.addEventListener('change', function () {
+			const fileNameSpan = document.getElementById('fileName');
+			if (!fileNameSpan) return;
+			if (this.files.length > 0) {
+				fileNameSpan.innerHTML =
+					'<span class=\"green-text\">' + this.files[0].name + '</span>';
+			} else {
+				fileNameSpan.textContent = '(no file)';
 			}
-		else {
-			fileNameSpan.textContent = \"(no file)\";
-			}
-	});";
-	echo "</script>";
+		});
+	}
+	</script>";
 	return;
 	}
-
-/* function footer_enter_notes() {
-	global $temp_dir;
-	$temp_dir_noslash = str_replace(SLASH,'/',$temp_dir);
-	// echo "@@@ temp_dir_noslash = ".$temp_dir_noslash."<br />";
-    ?>
-<script>
-let noteEventSource;
-function insertNoteAtCursor(textarea, text) {
-    const start = textarea.selectionStart ?? textarea.value.length;
-    const end = textarea.selectionEnd ?? textarea.value.length;
-    textarea.value =
-        textarea.value.substring(0, start) +
-        text +
-        textarea.value.substring(end);
-    const pos = start + text.length;
-    textarea.selectionStart = pos;
-    textarea.selectionEnd = pos;
-    textarea.dispatchEvent(new Event("input", {bubbles: true}));
-    textarea.dispatchEvent(new Event("change", {bubbles: true}));
-	}
-function startNoteStream() {
-    const textarea = document.getElementById("textArea");
-    if (!textarea) {
-        console.error("ERROR: textarea #textArea not found");
-        return;
-    	}
-    const tempDir = <?= json_encode($temp_dir_noslash) ?>;
-    const url = "note_stream.php?temp_dir=" + encodeURIComponent(tempDir);
-    console.log("Opening MIDI note stream:", url);
-    noteEventSource = new EventSource(url);
-    noteEventSource.onopen = () => {
-        console.log("MIDI note stream connected");
-		};
-    noteEventSource.onmessage = e => {
-        console.log("MIDI note received:", JSON.stringify(e.data));
-        insertNoteAtCursor(textarea, " " + e.data);
-    	};
-    noteEventSource.onerror = e => {
-        console.warn(
-            "MIDI note stream problem; readyState =",
-            noteEventSource.readyState, e
-			);
-		};
-	}
-if (document.readyState === "loading")
-    window.addEventListener("DOMContentLoaded", startNoteStream);
-else startNoteStream();
-</script>
-<?php
-	return;
-	} */
 
 function footer_enter_notes() {
     global $temp_dir;
@@ -5581,11 +5510,11 @@ function save($this_file,$filename,$top_header,$save_content) {
 	$the_warning = '';
 	if(trim($save_content) == '') return;
     if(file_exists($this_file)) {
-        $backup_file = fix_new_name($this_file,FALSE)."_bak";
+     /*  $backup_file = fix_new_name($this_file,FALSE)."_bak"; // Deleted 2026-09-09
         if(!copy($this_file,$backup_file))
             echo "<p>👉 <span class=\"red-text\">Failed to create backup of the file.</span></p>";
-		else @chmod($backup_file,$permissions);
-		$handle = @fopen($this_file, "w");
+		else @chmod($backup_file,$permissions); */
+		$handle = @fopen($this_file,"w");
 		if($handle) {
 			$file_header = $top_header."\n// Data saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
 			fwrite($handle, $file_header."\n");
@@ -5601,7 +5530,7 @@ function save($this_file,$filename,$top_header,$save_content) {
 			if(linux_system()) $the_warning .= "<p><b>Linux user:</b> Open your terminal and type: <span class=\"red-text\">sudo /opt/lampp/htdocs/bolprocessor/change_permissions.sh</span><br />(Your password will be required...)</p>";
 			if(mac_system()) $the_warning .= "<p><b>Mac user:</b> In the <i>Finder info</i>, set to read-write permission the whole content of your <span class=\"red-text\">“".$current_directory."”</span> data folder</p>";
 			if(windows_system()) $the_warning .= "<p><b>Windows user:</b> I can't explain this issue.</p>";
-			if(file_exists($backup_file)) $the_warning .= "<p>👉 Another solution is to work with the backup <span class=\"red-text\">“".$filename."_bak”</span> which has now been created. Click the <b>Workspace button</b> at the top of this page to access it.</p>";
+		/*	if(file_exists($backup_file)) $the_warning .= "<p>👉 Another solution is to work with the backup <span class=\"red-text\">“".$filename."_bak”</span> which has now been created. Click the <b>Workspace button</b> at the top of this page to access it.</p>"; */
 			$the_warning .= "</div>";
 			}
 		}

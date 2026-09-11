@@ -259,6 +259,16 @@ if(isset($_POST['saveparameters'])) {
 //	chmod($this_file,$permissions);
 	echo $warning;
 	$warning_bottom = $warning;
+	// When this Settings window was opened from a Data window, refresh that
+	// specific window only after the settings file has been written.
+	if($source <> '') {
+		$source_json = json_encode($source);
+		echo "<script>\n";
+		echo "if(window.opener && !window.opener.closed && window.opener.name === ".$source_json.") {\n";
+		echo "    window.opener.location.reload();\n";
+		echo "}\n";
+		echo "</script>\n";
+		}
 	}
 
 try_create_new_file($this_file,$filename);

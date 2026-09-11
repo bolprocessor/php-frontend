@@ -1695,7 +1695,9 @@ function add_note($stream,$i_measure,$the_event,$long_ornamentation,$approach_or
 				if($this_last_note == $this_note) $direction = "lower";
 				// Trill will start on lower movement if preceding note is identical
 				}
-			$stream .= " ornament(".$diatonic_scale_string."_".$i_measure."_".$direction."trill,".$mode.",,".$the_event['trill-beats']."|";
+		//	$stream .= " ornament(".$diatonic_scale_string."_".$i_measure."_".$direction."trill,".$mode.",,".$the_event['trill-beats']."|";
+			$stream .= " ornament(".$diatonic_scale_string."_".$i_measure."_".$direction."trill,".$mode.",".$the_event['trill-beats']."|";
+			// 2026-09-10
 			}
 		}
 	if(isset($the_event['slur'])) {
@@ -1943,7 +1945,7 @@ function ornament($note,$long,$link,$diatonic_scale,$direction,$fifths,$trill,$t
 		if($alt_note <> '' AND $pitch_class == $diatonic_scale[$i]) echo "<span class=\"red-text\">➡</span> Error pitch class ".$pitch_class." not changed in ".$expression."<br />";
 
 		if (preg_match('/(\d+)(?!.*\d)/u', $note, $matches))
-			$octave = (int)$matches[1];
+			$octave = (int)$matches[1]; // 2026-09-01
 		else $octave = null;  // no octave found
 		if(!is_integer($octave)) {
 			echo "@note = ".$note."<br />";

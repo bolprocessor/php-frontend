@@ -70,12 +70,12 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
 	else if(!$trashed AND isset($_POST['upload_capture_file'])) echo "<p class=\"red-text\">👉 No file of captured MIDI data has been chosen…</p>";
 	}
 
-if(isset($_POST['reload'])) {
+/* if(isset($_POST['reload'])) {
     $refresh_file = $temp_dir."trace_".my_session_id()."_".$filename."_midiport_refresh";
 	@unlink($refresh_file);
-    header("Location: ".$url_this_page);
+    header("Location: ".$url_this_page,TRUE,303);
     exit();	
-	}
+	} */
 require_once("_header.php");
 
 if(isset($_POST['stop_analysis'])) unset($_POST['analyze_tonal']);
@@ -1405,7 +1405,7 @@ if(!isset($_POST['analyze_tonal'])) {
 		echo "•&nbsp;No quantization<br />";
 		}
 	else {
-		echo "<input class=\"edit\"  style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".nice_url($url_settings)."','".$settings_file."','width=800,height=800,left=100'); return false;\" value=\"EDIT ‘".begin_with(20,$settings_file)."’\">";
+		echo "<input class=\"edit\"  style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"event.preventDefault(); if(checksaved()) {window.open('".nice_url($url_settings)."','".$settings_file."','width=800,height=800,left=100'); return false;}\" value=\"EDIT ‘".begin_with(20,$settings_file)."’\">";
 		if($p_clock > 0 AND $q_clock > 0) {
 			$metronome_settings = 60 * $q_clock / $p_clock;
 			}
@@ -1650,10 +1650,10 @@ if(!isset($_POST['analyze_tonal'])) {
 	echo $upload_message; echo $undo_upload_project_message;
 
 	echo "<br /><table border=\"0\" style=\"background-color:transparent;\"><tr style=\"background-color:transparent;\">";
+	// echo "URL of this page = ".$url_this_page."<br />";
 	echo "<td style=\"background-color:transparent;\">";
 
 	echo "<div style=\"float:right; vertical-align:middle; background-color:transparent;\">Import MusicXML: <input   onclick=\"if(!checksaved()) return false;\" type=\"file\" name=\"music_xml_import\">&nbsp;<input type=\"submit\" onclick=\"if(!checksaved()) return false;\" class=\"save\" value=\"← IMPORT\"></div>";
-
 	echo "<div style=\"text-align:left; background-color:transparent;\"><input id=\"saveButton\" class=\"save big\" type=\"submit\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".begin_with(15,$filename)."’\"></div>";
 
 	if($ignore_fields) echo "<p>👉 The <span class=\"red-text\">“Ignore field separators”</span> option is set to TRUE. This data will use the old algorithm for processing serial tools</p>";
@@ -1991,7 +1991,7 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 			}
 		if($file_format == "eventlist") {
 			$eventlist_file = $output_file;
-			$out[$i]  = '';
+			$out[$i]  = str_replace(".csv",'',$output_file);
 			$link_options .= "&eventlistfile=".urlencode($output.SLASH.$eventlist_file);
 			}
 		$chunk_number = $segment['chunk_number'];
@@ -2026,6 +2026,7 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 		$window_name_chunked = $window_name."_chunked";
 		// echo "<small>link_play_chunked = ".urldecode($link_play_chunked)."</small><br /><br />";
 		// echo "<small>link_create_set = ".urldecode($link_create_set)."</small><br />";
+		// echo "<small>link_play = ".urldecode($link_play)."</small><br />";
 		$n1 = substr_count($line_recoded,'{');
 		$n2 = substr_count($line_recoded,'}');
 		if($n1 > $n2) $error_mssg .= "• <span class=\"red-text\">This score contains ".($n1-$n2)." extra ‘{'</span><br />";

@@ -54,10 +54,9 @@ else $new_convention = '';
 
 if(isset($_POST['reload'])) {
 	@unlink($refresh_file);
-    header("Location: ".$url_this_page);
+    header("Location: ".$url_this_page,TRUE,303);
     exit();	
 	}
-
 require_once("_header.php");
 display_console_state();
 
@@ -198,7 +197,6 @@ if($need_to_save OR isset($_POST['savethisfile']) OR isset($_POST['compilegramma
 	echo "<script>clearsave();</script>";
 	}
 else read_midiressources($filename);
-
 
 $output_file = trim(str_replace(".bpda",'',$output_file));
 $output_file = trim(str_replace(".sco",'',$output_file));
@@ -593,7 +591,10 @@ if($true_bp_grammar) {
 //		$link_produce_templates .= "&settings=".urlencode($dir.$settings_file);
 	}
 echo "<div style=\"padding:1em; width:690px; background-color:transparent;\" class=\"thinborder2\">";
-if($settings_file <> '' AND file_exists($dir.$settings_file)) echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".nice_url($url_settings)."','".$settings_file."','width=800,height=800,left=100'); c\" value=\"EDIT ‘".$settings_file."’\">";
+if($settings_file <> '' AND file_exists($dir.$settings_file)) {
+	echo "<input class=\"edit\"  style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"event.preventDefault(); if(checksaved()) {window.open('".nice_url($url_settings)."','".$settings_file."','width=800,height=800,left=100'); return false;}\" value=\"EDIT ‘".$settings_file."’\">";
+//	echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".nice_url($url_settings)."','".$settings_file."','width=800,height=800,left=100'); \" value=\"EDIT ‘".$settings_file."’\">";
+	}
 if($settings_file == '' OR !file_exists($dir.$settings_file)) {
 	$time_resolution = 10; //  10 milliseconds by default
 	if(isset($metronome) AND is_numeric($metronome) AND $metronome > 0) {
@@ -754,6 +755,9 @@ echo $result_upload;
 
 $attention = '';
 if($need_to_save) $attention = "attention";
+
+// echo "URL of this page = ".$url_this_page."<br />";
+
 echo "<p><input class=\"save big ".$attention."\" type=\"submit\" id=\"saveButton\" name=\"savethisfile\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".begin_with(20,$filename)."’\">";
 if((file_exists($output.SLASH.$default_output_name.".wav") OR file_exists($output.SLASH.$default_output_name.".mid") OR file_exists($output.SLASH.$default_output_name.".html") OR file_exists($output.SLASH.$default_output_name.".sco")) AND file_exists($result_file)) {
 	echo "&nbsp;&nbsp;&nbsp;<input class=\"edit\" style=\"font-size:large;\" onclick=\"window.open('".nice_url($result_file)."','result','width=800,height=600,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"Show latests results\">";
