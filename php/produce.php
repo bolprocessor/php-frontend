@@ -669,6 +669,7 @@ if($output <> '') {
 		if($objects_path <> '') {
 			$objects_link = str_replace("-so.",'',$objects_path).".json";
 			$objects_json = basename($objects_link);
+			$objects_link = $output_dir."/".$objects_json;
 			echo "<span class=\"red-text\">➡</span> Download the <a class=\"linkdotted\" href=\"".$objects_link."\" download>".$objects_json."</a> sound-object file<br />";
 			}
 		$scl_files = glob($output_dir.SLASH."*.scl");
