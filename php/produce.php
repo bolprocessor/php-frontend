@@ -19,6 +19,7 @@ echo "</head>";
 
 echo "<body>\n";
 set_time_limit(0);
+$time_begin = time();
 if(windows_system()) {
     if(isset($_GET['keepalive'])) {
         echo " "; // Send a space to keep connection alive
@@ -656,6 +657,7 @@ if($output <> '') {
 	else if($file_format == "eventlist") {
 		$output_link = "view_csv.php?file=".urlencode($eventlist_file);
 		$download_link = $eventlist_file;
+		$output_dir = dirname($eventlist_file);
 		}
 	else {
 		$output_html = clean_up_file_to_html($output);
@@ -663,10 +665,27 @@ if($output <> '') {
 		}
 	$title_out = rand(10000,99999);
 	if($output_link <> '') echo "<span class=\"red-text\">➡</span> Read the <a class=\"linkdotted\" onclick=\"window.open('".$output_link."','".$title_out."','width=800,height=400,left=300'); return false;\" href=\"".$output_link."\">output file</a> (or <a class=\"linkdotted\" href=\"".$download_link."\" download>download it</a>)<br />";
-	if($objects_path <> '' AND $file_format == "eventlist") {
-		$objects_link = str_replace("-so.",'',$objects_path).".json";
-		$objects_json = basename($objects_link);
-		echo "<span class=\"red-text\">➡</span> Download the <a class=\"linkdotted\" href=\"".$objects_link."\" download>.$objects_json</a> sound-object file<br />";
+	if($file_format == "eventlist") {
+		if($objects_path <> '') {
+			$objects_link = str_replace("-so.",'',$objects_path).".json";
+			$objects_json = basename($objects_link);
+			echo "<span class=\"red-text\">➡</span> Download the <a class=\"linkdotted\" href=\"".$objects_link."\" download>".$objects_json."</a> sound-object file<br />";
+			}
+		$scl_files = glob($output_dir.SLASH."*.scl");
+		if($scl_files != FALSE AND count($scl_files) > 0) {
+			usort($scl_files, function($a, $b) {
+				return filemtime($b) <=> filemtime($a); // newest first
+				});
+			foreach($scl_files as $scl_file) {
+				if(filemtime($scl_file) < $time_begin) continue;
+				$latest_scl = $scl_file;
+				$latest_scl_name = basename($latest_scl);
+				$latest_kbm_name = str_replace(".scl",".kbm",$latest_scl_name);
+				$scl_link = $output_dir."/".$latest_scl_name;
+				$kbm_link = $output_dir."/".$latest_kbm_name;
+				echo "<span class=\"red-text\">➡</span> Download the <a class=\"linkdotted\" href=\"".$scl_link."\" download>".$latest_scl_name."</a> and <a class=\"linkdotted\" href=\"".$kbm_link."\" download>".$latest_kbm_name."</a> scale files<br />";
+				}
+			}
 		}
 	}
 if($trace_production OR $instruction == "templates" OR $show_production) {

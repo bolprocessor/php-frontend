@@ -2917,7 +2917,7 @@ function display_console_state() {
 		if($latest !== false) {
 			$version_clean = ltrim($output,'v');
 			$latest_clean  = ltrim($latest,'v');
-	//		echo "<p".$latest." -> ".$latest_clean."</p>";
+	//		echo "<p>".$latest." -> ".$latest_clean."</p>";
 			if(version_compare($latest_clean,$version_clean,'>')) echo " <span class=\"red-text\">➡</span> <a class=\"linkdotted\" target=\"_blanl\" href=\"https://bolprocessor.org/install/\">upgrade to ".$latest_clean."</a>&nbsp;!";
 			else echo " (latest)";
 			}
@@ -5510,10 +5510,10 @@ function save($this_file,$filename,$top_header,$save_content) {
 	$the_warning = '';
 	if(trim($save_content) == '') return;
     if(file_exists($this_file)) {
-     /*  $backup_file = fix_new_name($this_file,FALSE)."_bak"; // Deleted 2026-09-09
+    	$backup_file = fix_new_name($this_file,FALSE)."_bak";
         if(!copy($this_file,$backup_file))
             echo "<p>👉 <span class=\"red-text\">Failed to create backup of the file.</span></p>";
-		else @chmod($backup_file,$permissions); */
+		else @chmod($backup_file,$permissions);
 		$handle = @fopen($this_file,"w");
 		if($handle) {
 			$file_header = $top_header."\n// Data saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
