@@ -1228,17 +1228,17 @@ echo "<input type=\"radio\" name=\"CsoundInstrumentMode\" value=\"0\"";
 if($CsoundInstrumentMode == 0) echo " checked";
 echo ">Force to current instrument<br />";
 echo "<input type=\"radio\" name=\"CsoundInstrumentMode\" value=\"-1\"";
-if($CsoundInstrumentMode == -1 AND $CsoundInstr == -1) echo " checked";
+if($CsoundInstrumentMode == -1) echo " checked";
 echo ">Do not change instrument<br />";
-echo "<input type=\"radio\" name=\"CsoundInstrumentMode\" value=\"-1\"";
-if($CsoundInstrumentMode == -1 AND $CsoundInstr <> -1) {
+echo "<input type=\"radio\" name=\"CsoundInstrumentMode\" value=\"1\"";
+if($CsoundInstrumentMode == 1) {
 	echo " checked";
 	$value = $CsoundInstr;
 	}
 else $value = '';
-echo ">Force to instrument";
+echo ">Force to instrument #";
 echo "&nbsp;<input type=\"text\" name=\"CsoundInstr\" size=\"5\" value=\"".$value."\"><br />";
-echo "<input type=\"hidden\" name=\"tempo\" value=\"".$tempo."\">";
+echo "<input type=\"hidden\" name=\"tempo\" value=\"\">";
 	
 $kmax = 0;
 $time_max_midi = 0;
