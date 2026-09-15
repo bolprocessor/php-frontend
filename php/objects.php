@@ -274,8 +274,8 @@ for($i = 0; $i < count($table); $i++) {
 		$file_header .= "\n".$filename;
 		fwrite($handle_object,$file_header."\n");
 		echo "<input type=\"hidden\" name=\"object_name_".$iobj."\" value=\"".$object_name[$iobj]."\">";
-		$j = $i_start_midi = $n = 0; $first = TRUE;
-		$has_csound[$iobj] = FALSE;
+		$j = $i_start_midi = $n = 0; $first = TRUE;  $nmax = 0;
+		$has_csound[$iobj] = $has_midi[$iobj] = FALSE;
 		do {
 			$i++; $line = $table[$i];
 			if(is_integer($pos=strpos($line,"_beginCsoundScore_"))) {
@@ -301,14 +301,18 @@ for($i = 0; $i < count($table); $i++) {
 				if($first) {
 					$nmax = intval($line);
 					$first = FALSE;
-				//	echo $object_name[$iobj]." nmax = ".$nmax."<br />";
+					// echo $object_name[$iobj]." nmax = ".$nmax."<br />";
 					$number_codes = TRUE;
 					}
-				if($n <= $nmax) fwrite($handle_bytes,$line."\n");
+				if($n <= $nmax) {
+					fwrite($handle_bytes,$line."\n");
+					// echo "n = ".$n.", line = ‘".$line."’<br />";
+					}
 				$n++;
 				}
 			else if(!$number_codes AND !is_integer(strpos($line,"_endCsoundScore_")))
 				fwrite($handle_object,$line."\n");
+			if($nmax > 0) $has_midi[$iobj] = TRUE;
 			if(is_integer($pos=stripos($line,"<HTML>"))) break;
 			$j++;
 			continue;
@@ -375,6 +379,10 @@ if($iobj >= 0) {
 		echo "</td>";
 		echo "<td style=\"vertical-align:middle;\">";
 		if($has_csound[$i]) echo "Csound";
+		if($has_midi[$i]) {
+			if($has_csound[$i]) echo "<br />";
+			echo "MIDI";
+			}
 		echo "</td>";
 		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		echo "<td style=\"padding:4px; vertical-align:middle;\">";

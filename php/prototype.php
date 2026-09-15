@@ -180,12 +180,14 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 	switch($_POST['Rescale']) {
 		case "okrescale":
 			$okrescale = 1;
+			$RescaleMode = 0;
 			break;
 		case "neverrescale":
 			$FixScale = 1;
+			$RescaleMode = 1;
 			break;
 		case "dilationrange":
-			$okrescale = 0;
+			$RescaleMode = 2;
 			break;
 		}
 	
@@ -232,7 +234,7 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 	fwrite($handle,$string."\n");
 	$j++;
 	
-	$RescaleMode = $_POST['RescaleMode']; // ???
+	// $RescaleMode = $_POST['RescaleMode'];
 	fwrite($handle,$RescaleMode."\n");
 	
 	$AlphaMin = $_POST['AlphaMin']; if($AlphaMin == '') $AlphaMin = "0.0000";
@@ -677,8 +679,8 @@ $pivbeg = $string[$k++];
 $pivend = $string[$k++];
 $pivbegon = $string[$k++];
 $pivendoff = $string[$k++];
-$pivcent = $string[$k++];
-$pivcentonoff = $string[$k++];
+$pivmiddle = $string[$k++];
+$pivmiddleonoff = $string[$k++];
 echo "<p>PIVOT</p>";
 if($Tref > 0) echo "<p>This object has a pivot — it is <i>striated</i> — because Tref > 0 (see above).</p>";
 else echo "<p>This object has NO pivot — it is <i>smooth</i> — because Tref = 0<br /><i>This pivot setting is therefore irrelevant.</i></p>";
@@ -686,7 +688,7 @@ echo "<input type=\"radio\" name=\"Pivot_mode\" value=\"0\"";
 if($pivbeg == 1) echo " checked";
 echo ">Beginning<br />";
 echo "<input type=\"radio\" name=\"Pivot_mode\" value=\"4\"";
-if($pivcent == 1) echo " checked";
+if($pivmiddle == 1) echo " checked";
 echo ">Middle<br />";
 echo "<input type=\"radio\" name=\"Pivot_mode\" value=\"1\"";
 if($pivend == 1) echo " checked";
@@ -695,17 +697,17 @@ echo "<input type=\"radio\" name=\"Pivot_mode\" value=\"2\"";
 if($pivbegon == 1) echo " checked";
 echo ">First NoteOn<br />";
 echo "<input type=\"radio\" name=\"Pivot_mode\" value=\"5\"";
-if($pivcentonoff == 1) echo " checked";
+if($pivmiddleonoff == 1) echo " checked";
 echo ">Middle NoteOn/Off<br />";
 echo "<input type=\"radio\" name=\"Pivot_mode\" value=\"3\"";
 if($pivendoff == 1) echo " checked";
 echo ">Last NoteOff<br />";
 
 store($h_image,"pivbeg",$pivbeg);
-store($h_image,"pivcent",$pivcent);
+store($h_image,"pivmiddle",$pivmiddle);
 store($h_image,"pivend",$pivend);
 store($h_image,"pivbegon",$pivbegon);
-store($h_image,"pivcentonoff",$pivcentonoff);
+store($h_image,"pivmiddleonoff",$pivmiddleonoff);
 store($h_image,"pivendoff",$pivendoff);
 	
 $okrescale = $string[$k++];
@@ -754,7 +756,7 @@ $not_used = $object_param[$j++];
 $x = $object_param[$j++];
 if(isset($_POST['division'])) $division = $_POST['division'];
 else if($x > 1) {
-	echo "division = x = ".$x." (j = ".$j.")<br />";
+//	echo "division = x = ".$x." (j = ".$j.")<br />";
 	$division = $x;
 	}
 else $division = 1000;
@@ -901,7 +903,7 @@ if($alpha_controller) echo " checked";
 echo ">Send dilation ratio to controller ";
 echo "&nbsp;<input type=\"text\" name=\"AlphaCtrlNr\" size=\"5\" value=\"".$value_controller."\"> channel <input type=\"text\" name=\"AlphaCtrlChan\" size=\"5\" value=\"".$value_channel."\"><br />";
 
-echo "<p>RescaleMode = <input type=\"text\" name=\"RescaleMode\" size=\"5\" value=\"".$RescaleMode."\"> ???</p>";
+/* echo "<p>RescaleMode = <input type=\"text\" name=\"RescaleMode\" size=\"5\" value=\"".$RescaleMode."\"></p>"; */
 
 echo "<p>MIDI CHANGES</p>";
 
@@ -1159,7 +1161,8 @@ if($PreRollMode == 0) {
 else $value = '';
 echo ">Pre-roll";
 echo "&nbsp;<input type=\"text\" name=\"PreRoll2\" size=\"5\" value=\"".$value."\"> % of duration<br />";
-	
+
+
 echo "<input type=\"radio\" name=\"PostRollMode\" value=\"-1\"";
 if($PostRollMode == -1) {
 	echo " checked";
@@ -2016,6 +2019,8 @@ echo "<p>DURATION OF MIDI SEQUENCE</p>";
 $real_duration = $Duration - $PreRoll + $PostRoll;
 store($h_image,"PreRoll",$PreRoll);
 store($h_image,"PostRoll",$PostRoll);
+store($h_image,"PreRollMode",$PreRollMode);
+store($h_image,"PostRollMode",$PostRollMode);
 echo "Real MIDI duration of this object will be:<br /><b>event duration - pre-roll + post-roll</b> = ".$Duration." - (".$PreRoll.") + (".$PostRoll.") = ".$real_duration." ms<br />for a metronome period Tref = ".$Tref." ms";
 if($duration_warning <> '') echo $duration_warning;
 echo "<input type=\"hidden\" name=\"Duration\" value=\"".$Duration."\">";
@@ -2041,7 +2046,7 @@ if(!$new_midi AND !$no_midi) {
 	}
 
 store($h_image,"object_name",$object_name);
-store($h_image,"Duration",$Duration);
+// store($h_image,"Duration",$Duration);
 store($h_image,"Tref",$Tref);
 
 $link = "prototype_image.php?save_codes_dir=".urlencode($save_codes_dir);

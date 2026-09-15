@@ -6,25 +6,29 @@ require_once($image_file);
 error_reporting(0);
 
 if($pivbeg == 1) $pivot_pos = 0;
-if($pivcent == 1) $pivot_pos = $Duration / 2;
-if($pivend == 1) $pivot_pos = $Duration;
 if(isset($first_note_on) AND $pivbegon == 1) $pivot_pos = $first_note_on;
 if(isset($last_note_off) AND $pivendoff == 1) $pivot_pos = $last_note_off;
-if(isset($last_note_off) AND isset($last_note_off) AND $pivcentonoff == 1) $pivot_pos = ($first_note_on + $last_note_off) / 2;
+if(isset($last_note_off) AND isset($last_note_off) AND $pivmiddleonoff == 1) $pivot_pos = ($first_note_on + $last_note_off) / 2;
 
 $margin_left = 50;
 $width = 600;
 $height = 20;
 $alpha = 0;
-if($Duration > 0) $alpha = $width/$Duration;
-$max_duration = $Duration;
-$image_range = "midi";
-if(isset($time_max_csound) AND $time_max_csound > $Duration) {
+$max_duration = 0;
+if($time_max_midi > 0) {
+	$alpha = $width/$time_max_midi;
+	$max_duration = $time_max_midi;
+	$image_range = "midi";
+	}
+if(isset($time_max_csound) AND $time_max_csound > $time_max_midi) {
 	$alpha = $width/$time_max_csound;
 	$max_duration = $time_max_csound;
 	$image_range = "csound";
 	}
 $more = 0;
+
+if($pivmiddle == 1) $pivot_pos = $max_duration / 2;
+if($pivend == 1) $pivot_pos = $max_duration;
 
 // Revise left and right margins to display gaps correctly if any
 if($ContBeg) $beg_mssg = "ContBeg";
@@ -38,7 +42,7 @@ if($ContBeg AND $ContBegMode == -1) {
 	if($gapbeg > 0) $beg_mssg .= " with gap ".$MaxBegGap." ms";
 	}
 if($ContBeg AND $ContBegMode == 0) {
-	$gapbeg = $MaxBegGap * $Duration / 100;
+	$gapbeg = $MaxBegGap * $max_duration / 100;
 	if($gapbeg > 0) $beg_mssg .= " with gap ".$MaxBegGap." %";
 	}
 
@@ -53,18 +57,39 @@ if($ContEnd AND $ContEndMode == -1) {
 	if($gapend > 0) $end_mssg .= " with gap ".$MaxEndGap." ms";
 	}
 if($ContEnd AND $ContEndMode == 0) {
-	$gapend = $MaxEndGap * $Duration / 100;
+	$gapend = $MaxEndGap * $max_duration / 100;
 	if($gapend > 0) $end_mssg .= " with gap ".$MaxEndGap." %";
 	}
 	
 if(($alpha * $gapend) > 50) $more += ($alpha * $gapend);
 
+$preroll = $PreRoll;
+$postroll = $PostRoll;
+$preroll_mssg = $postroll_mssg = '';
+
+if($PreRollMode == 0) {
+	$preroll = $PreRoll * $max_duration / 100;
+	if($preroll > 0) $preroll_mssg = "Preroll ".$PreRoll." %";
+	}
+if($PreRollMode == -1) {
+	if($preroll > 0) $preroll_mssg = "Preroll ".$PreRoll." ms";
+	}
+
+if($PostRollMode == 0) {
+	$postroll = $PostRoll * $max_duration / 100;
+	if($postroll > 0) $postroll_mssg = "Postroll ".$PostRoll." %";
+	}
+if($PostRollMode == -1) {
+	if($postroll > 0) $postroll_mssg = "Postroll ".$PostRoll." ms";
+	}
+if($postroll > 0) $more += 200;
+
 // Revise left and right margins to display pivot if position is outside object
 if($pivspec == 1) {
 	if($PivMode == -1) $pivot_pos = $PivPos;
 	else if($PivMode == 0) {
-		if($Duration > 0)
-			$pivot_pos = $PivPos * $Duration / 100;
+		if($max_duration > 0)
+			$pivot_pos = $PivPos * $max_duration / 100;
 		else {
 			if(isset($time_max_csound)) $pivot_pos = $PivPos * $time_max_csound / 100;
 			else $pivot_pos = 0;
@@ -100,8 +125,8 @@ $text = "Sound-object prototype \"".$object_name."\"";
 $font = 'arial.ttf';
 imagettftext($im, 20, 0, $margin_left,30, $black, $font, $text); */
 imagestring($im,10,$margin_left,30,$text,$black);
-$text = "Duration (MIDI) ".$Duration." ms";
-if($Tref > 0) $text .= " = ".round(($Duration / $Tref),2)." beat(s)";
+$text = "Duration (MIDI) ".$time_max_midi." ms";
+if($Tref > 0) $text .= " = ".round(($time_max_midi / $Tref),2)." beat(s)";
 imagestring($im,10,$margin_left,50,$text,$black);
 if(isset($time_max_csound) AND $time_max_csound > 0) {
 	$text = "Duration (Csound) ".$time_max_csound." ms";
@@ -117,15 +142,15 @@ if(isset($event_csound[0])) {
 	$y2 = $y1 + $height;
 	$x2 = $x1 + ($alpha * $time_max_csound);
 	$x2max = $x2;
-	imagefilledrectangle($im,$x1+($alpha*$PreRoll),$y1,$x2+($alpha*$PostRoll),$y2,$yellow);
+	imagefilledrectangle($im,$x1+($alpha*$preroll),$y1,$x2+($alpha*$postroll),$y2,$yellow);
 	for($i = 0; $i < count($event_csound); $i++) {
 		$time = $event_csound[$i];
 		$x = $margin_left + ($alpha * $time);
 		imageline($im,$x,$y1,$x,$y2+5,$blue);
 		}
-	imagerectangle($im,$x1+($alpha*$PreRoll),$y1,$x2+($alpha*$PostRoll),$y2,$black);
+	imagerectangle($im,$x1+($alpha*$preroll),$y1,$x2+($alpha*$postroll),$y2,$black);
 	$text = "Csound";
-	$center = ($x1+($alpha*$PreRoll) + $x2+($alpha*$PostRoll)) / 2;
+	$center = ($x1+($alpha*$preroll) + $x2+($alpha*$postroll)) / 2;
 	$length = imagefontwidth(10) * strlen($text);
 	$text_start = $center - ($length / 2);
 	imagestring($im,10,$text_start,$y1 + 3,$text,$black);
@@ -134,16 +159,20 @@ if(isset($event_csound[0])) {
 	}
 	
 // MIDI rectangle
-$x2 = $x1 + ($alpha * $Duration);
+$x2 = $x1 + ($alpha * $time_max_midi);
 $y1 = 270;
 $y2 = $y1 + $height;
-if($Duration > 0) {
-	imagefilledrectangle($im,$x1+($alpha*$PreRoll),$y1,$x2+($alpha*$PostRoll),$y2,$yellow);
-	imagerectangle($im,$x1+($alpha*$PreRoll),$y1,$x2+($alpha*$PostRoll),$y2,$black);
+if($time_max_midi > 0) {
+	imagefilledrectangle($im,$x1+($alpha*$preroll),$y1,$x2+($alpha*$postroll),$y2,$yellow);
+	imagerectangle($im,$x1+($alpha*$preroll),$y1,$x2+($alpha*$postroll),$y2,$black);
+	// Draw pivot if object is striated
+	if($Tref > 0 AND isset($pivot_pos)) {
+		arrow($im,$margin_left+($alpha*$pivot_pos),$y1 - 30,$margin_left+($alpha*$pivot_pos),$y1,17,5,$OkRelocate,$red);
+		}
 	}
 
 // Draw MIDI events
-if($Duration > 0) {
+if($time_max_midi > 0) {
 	if(isset($event_midi[0])) {
 		for($i = 0; $i < count($event_midi); $i++) {
 			$time = $event_midi[$i];
@@ -152,7 +181,7 @@ if($Duration > 0) {
 			}
 		}
 	$text = "MIDI";
-	$center = ($x1+($alpha*$PreRoll) + $x2+($alpha*$PostRoll)) / 2;
+	$center = ($x1+($alpha*$preroll) + $x2+($alpha*$postroll)) / 2;
 	$length = imagefontwidth(10) * strlen($text);
 	$text_start = $center - ($length / 2);
 	imagestring($im,10,$text_start,$y1 + 3,$text,$black);
@@ -161,7 +190,7 @@ if($Duration > 0) {
 	}
 
 // Draw time line and time units
-imageline($im,$x1,110,$x2max+($alpha*$PostRoll),110,$black);
+imageline($im,$x1,110,$x2max+($alpha*$postroll),110,$black);
 $t = $n = 0;
 $i = 10;
 while(TRUE) {
@@ -211,20 +240,19 @@ if($Tref > 0 AND $Tref <= $max_duration) {
 		imagefilledrectangle($im,$x-1,125,$x+1,140+$y,$green);
 		$t += $Tref;
 		$i++;
-		if($t > ($max_duration + $PostRoll)) break;
+		if($t > ($max_duration + $postroll)) break;
 		}
-	// imageline($im,$x1,135,$x2 - $length_mssg - 10,135,$red);
 	imagestring($im,10,$x - $length_mssg,125,$mssg,$green);
 	}
 
 // Draw period if object is cyclic
-if(isset($CyclicMode) AND $Duration > 0) {
+if(isset($CyclicMode) AND $max_duration > 0) {
 	$cyclic_after = -1;
 	if($CyclicMode == -1) $cyclic_after = $CyclicAfter;
-	if($CyclicMode == 0) $cyclic_after = $CyclicAfter * $Duration / 100;
+	if($CyclicMode == 0) $cyclic_after = $CyclicAfter * $max_duration / 100;
 	if($cyclic_after >= 0) {
-		imageline($im,$margin_left + ($alpha * $Duration),$y2-58,$margin_left + ($alpha * $Duration),$y2-20,$blue);
-		imageline($im,$margin_left + ($alpha * $cyclic_after),$y2-58,$margin_left + ($alpha * $Duration),$y2-58,$blue);
+		imageline($im,$margin_left + ($alpha * $max_duration),$y2-58,$margin_left + ($alpha * $max_duration),$y2-20,$blue);
+		imageline($im,$margin_left + ($alpha * $cyclic_after),$y2-58,$margin_left + ($alpha * $max_duration),$y2-58,$blue);
 		imageline($im,$margin_left + ($alpha * $cyclic_after),$y2-58,$margin_left + ($alpha * $cyclic_after),$y2-20,$blue);
 		arrow($im,$margin_left + ($alpha * $cyclic_after),$y1 - 38,$margin_left + ($alpha * $cyclic_after),$y1,17,5,0,$blue);
 		$mssg = "(cyclic)";
@@ -233,22 +261,17 @@ if(isset($CyclicMode) AND $Duration > 0) {
 		}
 	}
 
-// Draw pivot if object is striated
-if($Tref > 0 AND isset($pivot_pos) AND $Duration > 0) {
-	arrow($im,$margin_left+($alpha*$pivot_pos),$y1 - 30,$margin_left+($alpha*$pivot_pos),$y1,17,5,$OkRelocate,$red);
-	}
-
 $vshift = 30;
 
 // Draw trailing rectangle if continuous beginning
 if(isset($ContBeg) AND $ContBeg)
-	imagefilledrectangle($im,0,$y1,$x1+($alpha*$PreRoll)-($alpha*$gapbeg)-1,$y2,$yellow);
+	imagefilledrectangle($im,0,$y1,$x1+($alpha*$preroll)-($alpha*$gapbeg)-1,$y2,$yellow);
 
 // Indicate measure of gap at beginning if any
 if($gapbeg > 0) {
-	imagefilledrectangle($im,$x1+($alpha*$PreRoll)-($alpha*$gapbeg)-1,$y2 + $vshift,$x1,$y2 + $vshift + 1,$blue);
+	imagefilledrectangle($im,$x1+($alpha*$preroll)-($alpha*$gapbeg)-1,$y2 + $vshift,$x1,$y2 + $vshift + 1,$blue);
 	imageline($im,$x1,$y2 + $vshift,$x1,$y2 + $vshift - 20,$blue);
-	imageline($im,$x1+($alpha*$PreRoll)-($alpha*$gapbeg)-1,$y2 + $vshift,$x1+($alpha*$PreRoll)-($alpha*$gapbeg)-1,$y2 + $vshift - 20,$blue);
+	imageline($im,$x1+($alpha*$preroll)-($alpha*$gapbeg)-1,$y2 + $vshift,$x1+($alpha*$preroll)-($alpha*$gapbeg)-1,$y2 + $vshift - 20,$blue);
 	}
 
 // Draw trailing rectangle if continuous end
@@ -277,7 +300,7 @@ else $end_mssg = "#TruncEnd";
 
 $max_truncbeg = -1;
 if(!$TruncBeg AND $TruncBegMode == 0) {
-	$max_truncbeg = $MaxTruncBeg * $Duration / 100;
+	$max_truncbeg = $MaxTruncBeg * $max_duration / 100;
 	if($max_truncbeg > 0) $beg_mssg = "TruncBeg ".$MaxTruncBeg." %";
 	}
 if(!$TruncBeg AND $TruncBegMode == -1) {
@@ -296,7 +319,7 @@ imagestring($im,10,$margin_left,$y2 + $vshift,$beg_mssg,$black);
 
 $max_truncend = -1;
 if(!$TruncEnd AND $TruncEndMode == 0) {
-	$max_truncend = $MaxTruncEnd * $Duration / 100;
+	$max_truncend = $MaxTruncEnd * $max_duration / 100;
 	if($max_truncend > 0) $end_mssg = "TruncEnd ".$MaxTruncEnd." %";
 	}
 if(!$TruncEnd AND $TruncEndMode == -1) {
@@ -323,7 +346,7 @@ else $end_mssg = "#CoverEnd";
 
 $max_coverbeg = -1;
  if(!$CoverBeg AND $CoverBegMode == 0) {
-	$max_coverbeg = $MaxCoverBeg * $Duration / 100;
+	$max_coverbeg = $MaxCoverBeg * $max_duration / 100;
 	if($max_coverbeg > 0) $beg_mssg = "CoverBeg ".$MaxCoverBeg." %";
 	}
  if(!$CoverBeg AND $CoverBegMode == -1) {
@@ -340,11 +363,11 @@ if($max_coverbeg > 0) {
 	}
 imagestring($im,10,$margin_left,$y2 + $vshift,$beg_mssg,$black);
 
-$vshift += 30;
+// $vshift += 30;
 
 $max_coverend = -1;
 if(!$CoverEnd AND $CoverEndMode == 0) {
-	$max_coverend = $MaxCoverEnd * $Duration / 100;
+	$max_coverend = $MaxCoverEnd * $max_duration / 100;
 	if($max_coverend > 0) $end_mssg = "CoverEnd ".$MaxCoverEnd." %";
 	}
 if(!$CoverEnd AND $CoverEndMode == -1) {
@@ -384,6 +407,12 @@ else {
 		if($OkExpand)
 			imagestring($im,10,$margin_left,$y2 + $vshift,"Expand at will",$black);
 		}
+	}
+if($preroll_mssg <> '') {
+	imagestring($im,10,$x2max - (imagefontwidth(10) * strlen($preroll_mssg)),$y2 + $vshift - 20,$preroll_mssg,$black);
+	}
+if($postroll_mssg <> '') {
+	imagestring($im,10,$x2max - (imagefontwidth(10) * strlen($postroll_mssg)),$y2 + $vshift,$postroll_mssg,$black);
 	}
 
 $vshift += 20;
