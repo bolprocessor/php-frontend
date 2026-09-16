@@ -521,8 +521,8 @@ if(isset($_POST['createcsound'])) {
 			$application_path = $bp_application_path;
 			$command = $application_path."bp play";
 			$command .= " -da ".$data;
-			$command .= " -ho ".$alphabet;
-			$command .= " -mi \"".$prototypes_file."\"";
+			$command .= " -al ".$alphabet;
+			$command .= " -so \"".$prototypes_file."\"";
 			if($CsoundInstruments_file <> '') $command .= " -cs \"".$CsoundInstruments_file."\"";
 		//	$command .= " -d --csoundout ".$csound_file;
 			$command .= " --csoundout ".$csound_file;
@@ -534,7 +534,7 @@ if(isset($_POST['createcsound'])) {
 			$n_messages = count($o);
 			if($n_messages > 0) {
 				for($i=$j=0; $i < $n_messages; $i++) {
-			//		echo $o[$i]."<br />";
+				//	echo $o[$i]."<br />";
 					$mssg[$j] = $o[$i];
 					$mssg[$j] = clean_up_encoding(FALSE,TRUE,$mssg[$j]);
 					if(is_integer($pos=strpos($mssg[$j],"Errors: 0")) AND $pos == 0) $no_error = TRUE;
@@ -1180,7 +1180,7 @@ else $value = '';
 echo ">Post-roll";
 echo "&nbsp;<input type=\"text\" name=\"PostRoll2\" size=\"5\" value=\"".$value."\"> % of duration";
 
-echo "<p>CYCLIC</p>";
+echo "<p>CYCLIC (only MIDI)</p>";
 echo "<input type=\"radio\" name=\"CyclicMode\" value=\"1\"";
 if($CyclicMode == 1) {
 	echo " checked";
@@ -1212,7 +1212,7 @@ echo "<input type=\"checkbox\" name=\"DiscardNoteOffs\"";
 if($DiscardNoteOffs) echo " checked";
 echo ">Discard NoteOff’s except in last cycle";
 
-echo "<p>STRIKE MODE</p>";
+echo "<p>STRIKE MODE (only MIDI)</p>";
 echo "<input type=\"radio\" name=\"StrikeAgain\" value=\"1\"";
 if($StrikeAgain == 1) echo " checked";
 echo ">Strike again NoteOn’s<br />";
@@ -1970,7 +1970,7 @@ if(!$no_midi) {
 	if($mf2t_content) {
 		$size_mf2t = strlen($mf2t_content);
 		if($size_mf2t < 1000000) {
-			echo "<p>Creating MIDI file for listening…</p>";
+			echo "<p>A MIDI file has been created…</p>";
 			$midi = new Midi();
 			$midi->importTxt($mf2t_content);
 			$midi->saveMidFile($midi_file);
