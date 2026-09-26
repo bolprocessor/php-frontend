@@ -908,7 +908,7 @@ function display_directory($test,$dir,$filter) {
 					if($renamed) echo "(<span class=\"red-text\">renamed</span>)&nbsp;";
 					if($rename_files) {
 						echo "&nbsp;➡&nbsp;&nbsp;<input type=\"text\" style=\"border:2px; solid #dadada; border-bottom-style: groove; text-align:left;\" name=\"new_name_".$i_file."\" size=\"30\" value=\"\">";
-						echo "<input type=\"checkbox\" name=\"copy_".$i_file."\">&nbsp;➡&nbsp;make a copy";
+						echo "<input type=\"checkbox\" name=\"copy_".$i_file."\">&nbsp;➡&nbsp;copy";
 						}
 					else if(!$this_is_directory AND !$this_is_a_link) {
 						$time_saved = filemtime($dir.SLASH.$thisfile);

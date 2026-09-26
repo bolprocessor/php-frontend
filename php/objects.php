@@ -77,6 +77,7 @@ if(isset($_POST['duplicate_object'])) {
 	$copy_object = str_replace(' ','-',$copy_object);
 	$copy_object = str_replace('/','-',$copy_object);
 	$copy_object = str_replace('#','-',$copy_object);
+	$copy_object = str_replace('_','-',$copy_object);
 	$copy_object = str_replace('"','',$copy_object);
 	$this_object_file = $temp_dir.$temp_folder.SLASH.$object.".txt";
 	$copy_object_file = $temp_dir.$temp_folder.SLASH.$copy_object.".txt";
@@ -106,6 +107,7 @@ if(isset($_POST['rename_object'])) {
 	$new_object = str_replace(' ','-',$new_object);
 	$new_object = str_replace(SLASH,'-',$new_object);
 	$new_object = str_replace('#','-',$new_object);
+	$new_object = str_replace('_','-',$new_object);
 	$new_object = str_replace('"','',$new_object);
 	if($new_object <> '') {
 		echo "<p><span class=\"red-text\">Renamed </span><span class=\"green-text\"><big>“".$object."”</big></span> as <span class=\"green-text\"><big>“".$new_object."”</big></span>…</p>";
@@ -336,7 +338,7 @@ echo "<p style=\"text-align:left;\">";
 echo "<input class=\"save big\" type=\"submit\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’ INCLUDING ALL CHANGES TO PROTOTYPES\"><br />";
 echo "<span class=\"red-text\">➡</span> Changes in prototypes are <span class=\"red-text\">autosaved</span> every 30 seconds if changes occurred.<br />Keep this page open as long as you are editing sound-object prototypes!</p>";
 if($autosave) echo "<script type=\"text/javascript\" src=\"autosaveObjects.js\"></script>";
-echo "<p><input class=\"save\" type=\"submit\" name=\"create_object\" value=\"CREATE A NEW OBJECT\"> named <input type=\"text\" name=\"new_object\" size=\"10\" value=\"\"></p>";
+echo "<p><input class=\"save\" type=\"submit\" name=\"create_object\" value=\"CREATE A NEW OBJECT\"> named <input type=\"text\" name=\"new_object\" size=\"20\" value=\"\"></p>";
 if($deleted_objects <> '') echo "<p><input class=\"save\" type=\"submit\" name=\"restore\" value=\"RESTORE ALL DELETED OBJECTS\"> = <span class=\"green-text\"><big>".$deleted_objects."</big></span></p>";
 echo "</form>";
 
@@ -398,10 +400,10 @@ if($iobj >= 0) {
 		echo "<input class=\"save\" type=\"submit\" name=\"delete_object\" value=\"DELETE\">";
 		echo "</td>";
 		echo "<td style=\"padding:4px; vertical-align:middle;\">";
-		echo "<input class=\"edit\" type=\"submit\" name=\"rename_object\" value=\"RENAME AS\">: <input type=\"text\" name=\"object_new_name\" size=\"10\" value=\"\">";
+		echo "<input class=\"edit\" type=\"submit\" name=\"rename_object\" value=\"RENAME AS\">: <input type=\"text\" name=\"object_new_name\" size=\"15\" value=\"\">";
 		echo "</td>";
 		echo "<td style=\"padding:4px; vertical-align:middle;\">";
-		echo "<input class=\"edit\" type=\"submit\" name=\"duplicate_object\" value=\"DUPLICATE AS\">: <input type=\"text\" name=\"copy_object\" size=\"10\" value=\"\">";
+		echo "<input class=\"edit\" type=\"submit\" name=\"duplicate_object\" value=\"DUPLICATE AS\">: <input type=\"text\" name=\"copy_object\" size=\"15\" value=\"\">";
 		echo "</td>";
 		echo "</tr>";
 		echo "</form>";

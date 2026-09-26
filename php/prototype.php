@@ -144,8 +144,14 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 	$file_header .= "\n".$source_file;
 	fwrite($handle,$file_header."\n");
 	$object_type = 0;
-	if(isset($_POST['object_type1'])) $object_type += 1;
-	if(isset($_POST['object_type4'])) $object_type += 4;
+	$csound_score = @file_get_contents($csound_file);
+	$csound_score = trim($csound_score);
+	$midi_score = @file_get_contents($midi_file);
+	$midi_score = trim($midi_score);
+	if($midi_score  <> '') $object_type += 1;
+	if($csound_score  <> '') $object_type += 4;
+//	if(isset($_POST['object_type1'])) $object_type += 1;
+//	if(isset($_POST['object_type4'])) $object_type += 4;
 	fwrite($handle,$object_type."\n");
 	$j = 1;
 	$resolution = $_POST["object_param_".$j++];
@@ -157,13 +163,10 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 	if($MIDIchannel == '') $MIDIchannel = 0;
 	$MIDIchannel = intval($MIDIchannel);
 	
-//	$default_channel = $_POST["object_param_".$j++];
 	fwrite($handle,$MIDIchannel."\n");
 	$j++;
 	
 	$Tref = intval($_POST['Tref']);
-//	$Trefc = $_POST['Tref'] / $resolution;
-//	fwrite($handle,$Trefc."\n");
 	fwrite($handle,$Tref."\n");
 	$j++;
 	$quantization = $_POST["object_param_".$j++];
@@ -190,7 +193,6 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 			$RescaleMode = 2;
 			break;
 		}
-	
 	if($FixScale == 0 AND isset($_POST['OkExpand'])) $OkExpand = 1;
 	if($FixScale == 0 AND isset($_POST['OkCompress'])) $OkCompress = 1;
 	if($okrescale AND !$OkExpand AND !$OkCompress)
@@ -223,6 +225,8 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 	$string[$k++] = $TruncBeg;
 	$string[$k++] = $TruncEnd;
 	
+	$Duration = intval($_POST['Duration']);
+
 	$pivspec = 0;
 	if($_POST['Pivot_mode'] == 18) $pivspec = 1;
 	$string[$k++] = $pivspec;
@@ -234,12 +238,12 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 	fwrite($handle,$string."\n");
 	$j++;
 	
-	// $RescaleMode = $_POST['RescaleMode'];
+//	$RescaleMode = $_POST['RescaleMode'];
 	fwrite($handle,$RescaleMode."\n");
 	
-	$AlphaMin = $_POST['AlphaMin']; if($AlphaMin == '') $AlphaMin = "0.0000";
+	$AlphaMin = $_POST['AlphaMin']; if($AlphaMin == '') $AlphaMin = "1.0000";
 	fwrite($handle,$AlphaMin."\n");
-	$AlphaMax = $_POST['AlphaMax']; if($AlphaMax == '') $AlphaMax = "0.0000";
+	$AlphaMax = $_POST['AlphaMax']; if($AlphaMax == '') $AlphaMax = "1.0000";
 	fwrite($handle,$AlphaMax."\n");
 	
 	if(isset($_POST['DelayMode'])) $DelayMode = $_POST['DelayMode'];
@@ -251,6 +255,7 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 		$MaxDelay = 0;
 		$DelayMode = 1;
 		}
+	if($MaxDelay < 0) $MaxDelay = 0;
 	fwrite($handle,$DelayMode."\n");
 	fwrite($handle,$MaxDelay."\n");
 	
@@ -263,10 +268,10 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 		$MaxForward = 0;
 		$ForwardMode = 1;
 		}
+	if($MaxForward < 0) $MaxForward = 0;
 	fwrite($handle,$ForwardMode."\n");
 	fwrite($handle,$MaxForward."\n");
 	
-	// $BreakTempoMode = $_POST['BreakTempoMode'];
 	$not_used = 1;
 	fwrite($handle,$not_used."\n");
 	fwrite($handle,$division."\n");
@@ -280,6 +285,9 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 		$MaxBegGap = 0;
 		$ContBegMode = 1;
 		}
+	if($MaxBegGap < 0) $MaxBegGap = 0;
+	if($ContBegMode == 0 AND $MaxBegGap > 99) $MaxBegGap = 0;
+	if($ContBegMode == -1 AND $MaxBegGap > $Duration) $MaxBegGap = 0;
 	fwrite($handle,$ContBegMode."\n");
 	fwrite($handle,$MaxBegGap."\n");
 	
@@ -292,6 +300,9 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 		$MaxEndGap = 0;
 		$ContEndMode = 1;
 		}
+	if($MaxEndGap < 0) $MaxEndGap = 0;
+	if($ContEndMode == 0 AND $MaxEndGap > 99) $MaxEndGap = 0;
+	if($ContEndMode == -1 AND $MaxEndGap > $Duration) $MaxEndGap = 0;
 	fwrite($handle,$ContEndMode."\n");
 	fwrite($handle,$MaxEndGap."\n");
 	
@@ -304,6 +315,9 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 		$MaxCoverBeg = 0;
 		$CoverBegMode = 1;
 		}
+	if($MaxCoverBeg < 0) $MaxCoverBeg = 0;
+	if($CoverBegMode == 0 AND $MaxCoverBeg > 99) $MaxCoverBeg = 0;
+	if($CoverBegMode == -1 AND $MaxCoverBeg > $Duration) $MaxCoverBeg = 0;
 	fwrite($handle,$CoverBegMode."\n");
 	fwrite($handle,$MaxCoverBeg."\n");
 	
@@ -316,7 +330,9 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 		$MaxCoverEnd = 0;
 		$CoverEndMode = 1;
 		}
-//	if($MaxCoverEnd > 0) $CoverEndMode = -2;
+	if($MaxCoverEnd < 0) $MaxCoverEnd = 0;
+	if($CoverEndMode == 0 AND $MaxCoverEnd > 99) $MaxCoverEnd = 0;
+	if($CoverEndMode == -1 AND $MaxCoverEnd > $Duration) $MaxCoverEnd = 0;
 	fwrite($handle,$CoverEndMode."\n");
 	fwrite($handle,$MaxCoverEnd."\n");
 	
@@ -329,8 +345,10 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 		$MaxTruncBeg = 0;
 		$TruncBegMode = 1;
 		}
+	if($MaxTruncBeg < 0) $MaxTruncBeg = 0;
+	if($TruncBegMode == 0 AND $MaxTruncBeg > 99) $MaxTruncBeg = 100;
+	if($TruncBegMode == -1 AND $MaxTruncBeg > $Duration) $MaxTruncBeg = $Duration;
 	fwrite($handle,$TruncBegMode."\n");
-	if($MaxTruncBeg == '') $MaxTruncBeg = 100;
 	fwrite($handle,$MaxTruncBeg."\n");
 	
 	if(isset($_POST['TruncEndMode'])) $TruncEndMode = $_POST['TruncEndMode'];
@@ -342,6 +360,9 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 		$MaxTruncEnd = 0;
 		$TruncEndMode = 1;
 		}
+	if($MaxTruncEnd < 0) $MaxTruncEnd = 0;
+	if($TruncEndMode == 0 AND $MaxTruncEnd > 99) $MaxTruncEnd = 100;
+	if($TruncEndMode == -1 AND $MaxTruncEnd > $Duration) $MaxTruncEnd = $Duration;
 	fwrite($handle,$TruncEndMode."\n");
 	fwrite($handle,$MaxTruncEnd."\n");
 	
@@ -355,6 +376,7 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 		}
 	fwrite($handle,$PivMode."\n");
 	fwrite($handle,$PivPos."\n");
+	// echo "PivMode = ".$PivMode.", PivPos = ".$PivPos."<br/>";
 	
 	$AlphaCtrlNr = $_POST['AlphaCtrlNr'];
 	if($AlphaCtrlNr == '') $AlphaCtrlNr = -1;
@@ -397,6 +419,7 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 		$PreRoll = 0;
 		$PreRollMode = -1;
 		}
+//	if($PreRoll < 0) $PreRoll = 0;
 	$PostRoll = '';
 	if(isset($_POST['PostRollMode'])) {
 		$PostRollMode = $_POST['PostRollMode'];
@@ -407,6 +430,7 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 		$PostRoll = 0;
 		$PostRollMode = -1;
 		}
+	if($PostRoll < 0) $PostRoll = 0;
 	fwrite($handle,$PreRoll."\n");
 	fwrite($handle,$PostRoll."\n");
 	fwrite($handle,$PreRollMode."\n");
@@ -422,12 +446,16 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 		$CyclicAfter = "0";
 		$CyclicMode = 1;
 		}
+	if($CyclicAfter < 0) $CyclicAfter = 0;
+	if($CyclicMode == 0 AND $CyclicAfter > 99) $CyclicAfter = 0;
+	if($CyclicMode == -1 AND $CyclicAfter >= $Duration) $CyclicAfter = 0;
 	fwrite($handle,$CyclicMode."\n");
 	fwrite($handle,$CyclicAfter."\n");
 	if(isset($_POST['ForceIntegerCycles'])) $ForceIntegerCycles = 1;
 	else $ForceIntegerCycles = 0;
-	if(isset($_POST['DiscardNoteOffs'])) $DiscardNoteOffs = 1;
-	else $DiscardNoteOffs = 0;
+/*	if(isset($_POST['DiscardNoteOffs'])) $DiscardNoteOffs = 1;
+	else $DiscardNoteOffs = 0; */
+	$DiscardNoteOffs = 0;
 	fwrite($handle,$ForceIntegerCycles."\n");
 	fwrite($handle,$DiscardNoteOffs."\n");
 	
@@ -615,6 +643,7 @@ echo "<input type=\"hidden\" name=\"temp_dir\" value=\"".$temp_dir."\">";
 
 $object_comment = recode_tags($object_comment);
 $size = strlen($object_comment);
+if($size < 50) $size = 50;
 echo "<p>Comment on this prototype = <input type=\"text\" name=\"object_comment\" size=\"".$size."\" value=\"".$object_comment."\"></p>";
 echo "<p>OBJECT TYPE</p>";
 $j = 0;
@@ -641,16 +670,16 @@ echo "<p>MIDI CHANNEL</p>";
 
 echo "<p><input type=\"radio\" name=\"channel_force\" value=\"0\"";
 if($MIDIchannel == 0) echo " checked";
-echo "> Force to current channel<br />";
+echo "> Force events to the current MIDI channel<br />";
 echo "<input type=\"radio\" name=\"channel_force\" value=\"-1\"";
 if($MIDIchannel == -1) echo " checked";
-echo "> Do not change channels<br />";
+echo "> Do not change the MIDI channels of events in this object<br />";
 echo "<input type=\"radio\" name=\"channel_force\" value=\"1\"";
 if($MIDIchannel > 0) echo " checked";
-echo "> Force to channel&nbsp;";
+echo "> Force events to MIDI channel&nbsp;#";
 if($MIDIchannel > 0) $value = $MIDIchannel;
 else $value = '';
-echo "<input type=\"text\" name=\"MIDIchannel\" size=\"3\" value=\"". $value."\"></p>";
+echo "<input type=\"text\" name=\"MIDIchannel\" size=\"3\" value=\"". $value."\">&nbsp;(1 to 16)</p>";
 
 echo "<p>TIME REFERENCE</p>";
 
@@ -799,7 +828,7 @@ $CyclicMode = $object_param[$j++];
 if($CyclicMode == -2) $CyclicMode = 1;
 $CyclicAfter = $object_param[$j++];
 $ForceIntegerCycles = $object_param[$j++];
-$DiscardNoteOffs = $object_param[$j++];
+$DiscardNoteOffs = $object_param[$j++]; // Obsolete
 
 $StrikeAgain = $object_param[$j++];
 
@@ -856,13 +885,13 @@ store($h_image,"pivendoff",$pivspec);
 store($h_image,"pivendoff",$PivMode);
 store($h_image,"pivendoff",$PivPos);
 
-echo "<p>RESCALING</p>";
+echo "<p>RESCALING DURATION</p>";
 $value_min = $value_max = $dilation_controller = $dilation_channel = $value_controller = $value_channel = '';
 $dilation_ok = FALSE;
 if(!$FixScale AND !$OkExpand AND !$OkCompress AND !$okrescale) {
 	$dilation_ok = TRUE;
-	if($AlphaMin > 0) $value_min = intval($AlphaMin);
-	if($AlphaMax > 0) $value_max = intval($AlphaMax);
+	if($AlphaMin > 0) $value_min = $AlphaMin;
+	if($AlphaMax > 0) $value_max = $AlphaMax;
 	}
 	
 $scalable = FALSE;
@@ -884,7 +913,7 @@ echo ">Never rescale<br />";
 echo "<input type=\"radio\" name=\"Rescale\" value=\"dilationrange\"";
 if($dilation_ok) echo " checked";
 echo ">Dilation ratio range from";
-echo "&nbsp;<input type=\"text\" name=\"AlphaMin\" size=\"5\" value=\"".$value_min."\"> to <input type=\"text\" name=\"AlphaMax\" size=\"5\" value=\"".$value_max."\"> %<br />";
+echo "&nbsp;<input type=\"text\" name=\"AlphaMin\" size=\"5\" value=\"".$value_min."\"> to <input type=\"text\" name=\"AlphaMax\" size=\"5\" value=\"".$value_max."\"><br />";
 
 store($h_image,"OkExpand",$OkExpand);
 store($h_image,"OkCompress",$OkCompress);
@@ -921,7 +950,7 @@ if($OkPan) echo " checked";
 echo "> Accept panoramic changes<br />";
 echo "<input type=\"checkbox\" name=\"OkMap\"";
 if($OkMap) echo " checked";
-echo "> Accept key changes<br />";
+echo "> Accept key expand and mapping<br />";
 echo "<input type=\"checkbox\" name=\"OkVelocity\"";
 if($OkVelocity) echo " checked";
 echo "> Accept velocity changes<br />";
@@ -1153,14 +1182,15 @@ if($PreRollMode == -1) {
 else $value = '';
 echo ">Pre-roll";
 echo "&nbsp;<input type=\"text\" name=\"PreRoll1\" size=\"5\" value=\"".$value."\"> ms<br />";
-echo "<input type=\"radio\" name=\"PreRollMode\" value=\"0\"";
+
+/* echo "<input type=\"radio\" name=\"PreRollMode\" value=\"0\"";
 if($PreRollMode == 0) {
 	echo " checked";
 	$value = $PreRoll;
 	}
 else $value = '';
 echo ">Pre-roll";
-echo "&nbsp;<input type=\"text\" name=\"PreRoll2\" size=\"5\" value=\"".$value."\"> % of duration<br />";
+echo "&nbsp;<input type=\"text\" name=\"PreRoll2\" size=\"5\" value=\"".$value."\"> % of duration<br />"; */
 
 
 echo "<input type=\"radio\" name=\"PostRollMode\" value=\"-1\"";
@@ -1171,16 +1201,17 @@ if($PostRollMode == -1) {
 else $value = '';
 echo ">Post-roll";
 echo "&nbsp;<input type=\"text\" name=\"PostRoll1\" size=\"5\" value=\"".$value."\"> ms<br />";
-echo "<input type=\"radio\" name=\"PostRollMode\" value=\"0\"";
+
+/* echo "<input type=\"radio\" name=\"PostRollMode\" value=\"0\"";
 if($PostRollMode == 0) {
 	echo " checked";
 	$value = $PostRoll;
 	}
 else $value = '';
 echo ">Post-roll";
-echo "&nbsp;<input type=\"text\" name=\"PostRoll2\" size=\"5\" value=\"".$value."\"> % of duration";
+echo "&nbsp;<input type=\"text\" name=\"PostRoll2\" size=\"5\" value=\"".$value."\"> % of duration"; */
 
-echo "<p>CYCLIC (only MIDI)</p>";
+echo "<p>CYCLIC</p>";
 echo "<input type=\"radio\" name=\"CyclicMode\" value=\"1\"";
 if($CyclicMode == 1) {
 	echo " checked";
@@ -1208,25 +1239,25 @@ store($h_image,"CyclicAfter",$CyclicAfter);
 echo "<input type=\"checkbox\" name=\"ForceIntegerCycles\"";
 if($ForceIntegerCycles) echo " checked";
 echo ">Force integer number of cycles<br />";
-echo "<input type=\"checkbox\" name=\"DiscardNoteOffs\"";
+/* echo "<input type=\"checkbox\" name=\"DiscardNoteOffs\"";
 if($DiscardNoteOffs) echo " checked";
-echo ">Discard NoteOff’s except in last cycle";
+echo ">Discard NoteOff’s except in last cycle"; */
 
-echo "<p>STRIKE MODE (only MIDI)</p>";
+echo "<p>STRIKE MODE (MIDI)</p>";
 echo "<input type=\"radio\" name=\"StrikeAgain\" value=\"1\"";
 if($StrikeAgain == 1) echo " checked";
-echo ">Strike again NoteOn’s<br />";
+echo ">Strike again NoteOn’s (recommended)<br />";
 echo "<input type=\"radio\" name=\"StrikeAgain\" value=\"0\"";
 if($StrikeAgain == 0) echo " checked";
 echo ">Don’t strike again NoteOn’s<br />";
 echo "<input type=\"radio\" name=\"StrikeAgain\" value=\"-1\"";
 if($StrikeAgain == -1) echo " checked";
-echo ">Strike NoteOn’s according to default";
+echo ">Strike NoteOn’s according to project settings";
 
-echo "<p>MIDI TO CSOUND CONVERSION</p>";
+echo "<p>CSOUND</p>";
 echo "<input type=\"radio\" name=\"CsoundInstrumentMode\" value=\"0\"";
 if($CsoundInstrumentMode == 0) echo " checked";
-echo ">Force to current instrument<br />";
+echo ">Force to instrument used in context<br />";
 echo "<input type=\"radio\" name=\"CsoundInstrumentMode\" value=\"-1\"";
 if($CsoundInstrumentMode == -1) echo " checked";
 echo ">Do not change instrument<br />";
@@ -1237,7 +1268,7 @@ if($CsoundInstrumentMode == 1) {
 	}
 else $value = '';
 echo ">Force to instrument #";
-echo "&nbsp;<input type=\"text\" name=\"CsoundInstr\" size=\"5\" value=\"".$value."\"><br />";
+echo "&nbsp;<input type=\"text\" name=\"CsoundInstr\" size=\"5\" value=\"".$value."\"> ➡ make sure that it exists!<br />";
 echo "<input type=\"hidden\" name=\"tempo\" value=\"\">";
 	
 $kmax = 0;
@@ -1988,9 +2019,9 @@ if(!$no_midi AND file_exists($midi_text)) {
 	if($test) echo "bytes_link = ".$bytes_link."<br />";
 	if($test) echo "midi_file = ".$midi_file."<br />";
 	echo "<table class=\"thinborder\" id=\"midi\"><tr>";
-	echo "<td><div style=\"border:2px solid gray; background-color:azure; color:black; width:10em; padding:2px; text-align:center; border-radius: 6px;\"><a class=\"linkdotted\" style=\"color: #007BFF;\" onclick=\"window.open('".nice_url($text_link)."','MIDItext','width=300,height=300'); return false;\" href=\"".nice_url($text_link)."\">EXPLICIT MIDI codes</a></div></td>";
-	echo "<td><div style=\"border:2px solid gray; background-color:azure; color:black; width:13em;  padding:2px; text-align:center; border-radius: 6px;\"><a class=\"linkdotted\" style=\"color: #007BFF;\" onclick=\"window.open('".nice_url($bytes_link)."','MIDIbytes','width=300,height=500,left=400'); return false;\" href=\"".nice_url($bytes_link)."\">TIME-STAMPED MIDI bytes</a><br /><small>Top number is the number of bytes</small></div></td>";
-	echo "<td style=\"white-space:nowrap;\"><div style=\"border:2px solid gray; background-color:azure; color:black; width:15em;  padding:2px; text-align:center; border-radius: 6px;\"><a class=\"linkdotted\" style=\"color: #007BFF;\" onclick=\"window.open('".nice_url($mf2t_link)."','MF2T','width=300,height=500,left=300'); return false;\" href=\"".nice_url($mf2t_link)."\">MF2T code</a><br />";
+	echo "<td><div style=\"border:2px solid gray; background-color:azure; color:black; width:10em; padding:2px; text-align:center; border-radius: 6px;\"><a class=\"linkdotted\" style=\"color: #007BFF;\" onclick=\"window.open('".nice_url($text_link)."','MIDItext','width=500,height=300'); return false;\" href=\"".nice_url($text_link)."\">EXPLICIT MIDI codes</a></div></td>";
+	echo "<td><div style=\"border:2px solid gray; background-color:azure; color:black; width:13em;  padding:2px; text-align:center; border-radius: 6px;\"><a class=\"linkdotted\" style=\"color: #007BFF;\" onclick=\"window.open('".nice_url($bytes_link)."','MIDIbytes','width=500,height=500,left=400'); return false;\" href=\"".nice_url($bytes_link)."\">TIME-STAMPED MIDI bytes</a><br /><small>Top number is the number of bytes</small></div></td>";
+	echo "<td style=\"white-space:nowrap;\"><div style=\"border:2px solid gray; background-color:azure; color:black; width:15em;  padding:2px; text-align:center; border-radius: 6px;\"><a class=\"linkdotted\" style=\"color: #007BFF;\" onclick=\"window.open('".nice_url($mf2t_link)."','MF2T','width=500,height=500,left=300'); return false;\" href=\"".nice_url($mf2t_link)."\">MF2T code</a><br />";
 	echo "<small>division = <input type=\"text\" name=\"division\" size=\"5\" value=\"".$division."\"><br />";
 	echo "<small>tempo = ".$tempo." µs<br />timesig = ".$timesig."</small>";
 	echo "</div></td>";
@@ -2024,12 +2055,12 @@ store($h_image,"PostRollMode",$PostRollMode);
 echo "Real MIDI duration of this object will be:<br /><b>event duration - pre-roll + post-roll</b> = ".$Duration." - (".$PreRoll.") + (".$PostRoll.") = ".$real_duration." ms<br />for a metronome period Tref = ".$Tref." ms";
 if($duration_warning <> '') echo $duration_warning;
 echo "<input type=\"hidden\" name=\"Duration\" value=\"".$Duration."\">";
-echo "<p><input class=\"edit\" type=\"submit\" name=\"adjust_duration\" formaction=\"".$url_this_page."#midi\" value=\"Adjust event time duration\"> to <input type=\"text\" name=\"NewDuration\" size=\"8\" value=\"".$Duration."\"> ms<br />";
-if($Tref > 0) echo "<input class=\"edit\" type=\"submit\" name=\"adjust_beats\" formaction=\"".$url_this_page."#midi\" value=\"Adjust event beat duration\"> to <input type=\"text\" name=\"NewBeats\" size=\"8\" value=\"".round($Duration/($Tref),2)."\"> beats (striated object with Tref = ".($Tref / $resolution)." ticks of ".$resolution." ms, i.e. ".($Tref)." ms)";
+echo "<p><input class=\"edit\" type=\"submit\" name=\"adjust_duration\" formaction=\"".$url_this_page."#midi\" value=\"Adjust object time duration\"> to <input type=\"text\" name=\"NewDuration\" size=\"8\" value=\"".$Duration."\"> ms<br />";
+if($Tref > 0) echo "<input class=\"edit\" type=\"submit\" name=\"adjust_beats\" formaction=\"".$url_this_page."#midi\" value=\"Adjust object beat duration\"> to <input type=\"text\" name=\"NewBeats\" size=\"8\" value=\"".round($Duration/($Tref),2)."\"> beats (striated object with Tref = ".($Tref / $resolution)." ticks of ".$resolution." ms, i.e. ".($Tref)." ms)";
 echo "</p>";
 
 echo "<p>";
-echo "<p><input class=\"edit\" type=\"submit\" name=\"crop_duration\" formaction=\"".$url_this_page."#midi\" value=\"Crop event time duration\"> to <input type=\"text\" name=\"CroppedDuration\" size=\"8\" value=\"\"> ms (truncate the end of the MIDI sequence)<br />";
+echo "<p><input class=\"edit\" type=\"submit\" name=\"crop_duration\" formaction=\"".$url_this_page."#midi\" value=\"Crop object time duration\"> to <input type=\"text\" name=\"CroppedDuration\" size=\"8\" value=\"\"> ms (truncate the end of the MIDI sequence)<br />";
 echo "</p>";
 
 if($silence_before_warning <> '') echo "<span class=\"red-text\">➡</span> ".$silence_before_warning."<br />";

@@ -650,30 +650,30 @@ if($nature_of_time == STRIATED) echo "•&nbsp;Time is <span class=\"red-text\">
 else echo "•&nbsp;Time is <span class=\"red-text\">".nature_of_time($nature_of_time)."</span> (no fixed tempo)<br />";
 if($non_stop_improvize > 0) {
 	if($max_items == 0) $max_items = 20;
-	echo "• <span class=\"red-text\">Non-stop improvize</span> as set by <span class=\"green-text\">‘".$settings_file."’</span>";
+	echo "• <span class=\"red-text\">Non-stop improvize</span> as per <span class=\"green-text\">‘".$settings_file."’</span>";
 	if($file_format <> "rtmidi") echo ": <i>only ".$max_items." variations will be produced</i>";
 	echo "<br />";
 	}
 if($play_each_sub > 0) {
-	echo "• <span class=\"red-text\">Play each substitution</span> (SUB grammar) as set by <span class=\"green-text\">‘".$settings_file."’</span>";
+	echo "• <span class=\"red-text\">Play each substitution</span> (SUB grammar) as per <span class=\"green-text\">‘".$settings_file."’</span>";
 	echo "<br />";
 	}
-if($diapason <> 440) echo "• <span class=\"red-text\">Diapason</span> (A4 frequency) = <span class=\"red-text\">".$diapason."</span> Hz as set by <span class=\"green-text\">‘".$settings_file."’</span><br />";
+if($diapason <> 440) echo "• <span class=\"red-text\">Diapason</span> (A4 frequency) = <span class=\"red-text\">".$diapason."</span> Hz as per <span class=\"green-text\">‘".$settings_file."’</span><br />";
 if($C4key <> 60) {
-	echo "• <span class=\"red-text\">C4 key number</span> = <span class=\"red-text\">".$C4key."</span> as set by <span class=\"green-text\">‘".$settings_file."’</span>";
+	echo "• <span class=\"red-text\">C4 key number</span> = <span class=\"red-text\">".$C4key."</span> as per <span class=\"green-text\">‘".$settings_file."’</span>";
 	if($file_format == "csound") echo " ➡ this has no incidence on Csound scores";
 	echo "<br />";
 	}
 if($found_elsewhere AND $objects_file <> '') echo "• <span class=\"red-text\">Sound-object prototype</span> file = <span class=\"green-text\">‘".$objects_file."’</span> found in <span class=\"green-text\">‘".$alphabet_file."’</span><br />";
 if($produce_all_items == 1) {
-	echo "• <span class=\"red-text\">Produce all items</span> has been set ON by <span class=\"green-text\">‘".$settings_file."’</span>";
+	echo "• <span class=\"red-text\">Produce all items</span> is set ON by <span class=\"green-text\">‘".$settings_file."’</span>";
 	if($file_format <> "rtmidi") echo ": <i>only ".$max_items." variations will be produced</i>";
 	echo "<br />";
 	}
-else if($show_production == 1) echo "• <span class=\"red-text\">Show production</span> has been set ON by <span class=\"green-text\">‘".$settings_file."’</span><br />";
-if($trace_production == 1) echo "• <span class=\"red-text\">Trace production</span> has been set ON by <span class=\"green-text\">‘".$settings_file."’</span><br />";
+else if($show_production == 1) echo "• <span class=\"red-text\">Show production</span> is set ON by <span class=\"green-text\">‘".$settings_file."’</span><br />";
+if($trace_production == 1) echo "• <span class=\"red-text\">Trace production</span> is set ON by <span class=\"green-text\">‘".$settings_file."’</span><br />";
 /* if($max_time_computing > 0) {
-	echo "• Max console computation time has been set to <span class=\"red-text\">".$max_time_computing."</span> seconds by <span class=\"green-text\">‘".$settings_file."’</span>";
+	echo "• Max console computation time is set to <span class=\"red-text\">".$max_time_computing."</span> seconds by <span class=\"green-text\">‘".$settings_file."’</span>";
 	if($max_time_computing < 10) echo "&nbsp;<span class=\"red-text\">➡</span>&nbsp;probably too small!";
 	if($max_time_computing > 3600) {
 		echo "<br /><span class=\"red-text\">➡</span>&nbsp;reduced to <span class=\"red-text\">3600</span> seconds";
@@ -683,9 +683,9 @@ if($trace_production == 1) echo "• <span class=\"red-text\">Trace production</
 	} */
 if($settings_file <> '' AND file_exists($dir.$settings_file) AND $note_convention <> '') echo "• Note convention is <span class=\"red-text\">".strtoupper(note_convention(intval($note_convention)))."</span> as per <span class=\"green-text\">‘".$settings_file."’</span><br />";
 else echo "• Note convention is <span class=\"red-text\">ENGLISH</span> by default<br />";
-if($live_grammar) echo "• <span class=\"red-text\">Live grammar</span> is set as per <span class=\"green-text\">‘".$settings_file."’</span><br />";
-if($live_settings) echo "• <span class=\"red-text\">Live settings</span> is set as per <span class=\"green-text\">‘".$settings_file."’</span><br />";
-if($sync_change) echo "• <span class=\"red-text\">Synchronised change</span> is set as per <span class=\"green-text\">‘".$settings_file."’</span><br />";
+if($live_grammar) echo "• <span class=\"red-text\">Live grammar</span> is set by <span class=\"green-text\">‘".$settings_file."’</span><br />";
+if($live_settings) echo "• <span class=\"red-text\">Live settings</span> is set by <span class=\"green-text\">‘".$settings_file."’</span><br />";
+if($sync_change) echo "• <span class=\"red-text\">Synchronised change</span> is set by <span class=\"green-text\">‘".$settings_file."’</span><br />";
 if($file_format == "csound") {
 	if($csound_orchestra <> '' AND file_exists($dir.$csound_orchestra)) {
 		rename($dir.$csound_orchestra,$dir_csound_resources.$csound_orchestra);

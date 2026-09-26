@@ -103,6 +103,7 @@ if($pivspec == 1) {
 		$more += (($alpha * $pivot_pos) - $width);
 		}
 	}
+if($preroll < 0) $more -= $alpha * $preroll;
 
 $image_width = $width + 100 + $more;
 if($image_width < 800) $image_width = 800;
@@ -121,9 +122,6 @@ imagefilledrectangle($im,0,0,$image_width,625,$white);
 
 // Write title
 $text = "Sound-object prototype \"".$object_name."\"";
-/* https://www.php.net/manual/en/function.imagettftext.php
-$font = 'arial.ttf';
-imagettftext($im, 20, 0, $margin_left,30, $black, $font, $text); */
 imagestring($im,10,$margin_left,30,$text,$black);
 $text = "Duration (MIDI) ".$time_max_midi." ms";
 if($Tref > 0) $text .= " = ".round(($time_max_midi / $Tref),2)." beat(s)";
@@ -134,6 +132,7 @@ if(isset($time_max_csound) AND $time_max_csound > 0) {
 	imagestring($im,10,$margin_left,70,$text,$black);
 	}
 
+if($preroll < 0) $margin_left -= $alpha * $preroll;
 $x1 = $margin_left;
 
 // Draw Csound rectangle and events
@@ -390,6 +389,16 @@ $vshift += 30;
 if($BreakTempo) $mssg = "BreakTempo (organum)";
 else $mssg = "#BreakTempo";
 imagestring($im,10,$x2max - (imagefontwidth(10) * strlen($mssg)),$y2 + $vshift,$mssg,$black);
+
+if($preroll <> 0) {
+	$mssg = "Pre-roll = ".$preroll." ms";
+	$vshift += 30;
+	imagestring($im,10,$margin_left,$y2 + $vshift,$mssg,$black);
+	}
+if($postroll <> 0) {
+	$mssg = "Post-roll = ".$postroll." ms";
+	imagestring($im,10,$x2max - (imagefontwidth(10) * strlen($mssg)),$y2 + $vshift,$mssg,$black);
+	}
 
 $vshift += 40;
 

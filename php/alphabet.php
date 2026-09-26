@@ -66,10 +66,6 @@ $keyboard_file = $extract_data['keyboard'];
 $glossary_file = $extract_data['glossary'];
 $data_file = $weights_file = '';
 
-if(is_integer($pos=strpos($content,"-mi")) AND $pos > 0) {
-	// Some old files did not have ‘//’ in their headers
-	$content = substr($content,$pos,strlen($content)-$pos);
-	}
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 
 echo "<p style=\"text-align:left;\"><input class=\"save\" type=\"submit\" onclick=\"clearsave();\" name=\"savethisfile\" value=\"SAVE ‘".$filename."’\"></p>";

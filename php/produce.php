@@ -539,8 +539,8 @@ if(isset($data_path) AND $data_path <> '') {
 				$length = strlen($line);
 				if($length > 200)
 					$line_show = substr($line,0,50)."<br />&nbsp;&nbsp;... ... ...<br />".substr($line,-100,100);
-				if($line_show[0] == '[') $line_show = "<span class=\"red-text\">".$line_show;
-				$line_show = preg_replace("/\] /","]</span><br />",$line_show,1);
+				if($line_show[0] == '[') $line_show = "<span class=\"turquoise-text\">".$line_show;
+				$line_show = preg_replace("/\] /","]</span><br /><br />",$line_show,1);
 				echo "<span class=\"green-text\">".$line_show."</span><br />";
 				$k += strlen($line_show);
 				}
@@ -689,7 +689,7 @@ if($output <> '') {
 			}
 		}
 	}
-if($trace_production OR $instruction == "templates" OR $show_production) {
+if($trace_production OR $instruction == "templates" OR $show_production OR $tracefile <> '') {
     if(file_exists($trace_link) AND strlen($content_trace) > 20) 
         echo "<span class=\"red-text\">➡</span> Read the <a class=\"linkdotted\" onclick=\"window.open('".nice_url($trace_link)."','trace','width=800,height=600,left=400'); return false;\" href=\"".$trace_link."\">trace file</a> (or <a class=\"linkdotted\" href=\"".nice_url($trace_link)."\" download>download it</a>)";
     }

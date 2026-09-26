@@ -1438,7 +1438,7 @@ if(!isset($_POST['analyze_tonal'])) {
 		}
 	echo "•&nbsp;Time structure is <span class=\"red-text\">".nature_of_time($nature_of_time)."</span> by default but it may be changed in data<br />";
 	/* if($max_time_computing > 0) {
-		echo "• Max console computation time has been set to <span class=\"red-text\">".$max_time_computing."</span> seconds by <span class=\"green-text\">‘".$settings_file."’</span>";
+		echo "• Max console computation time is set to <span class=\"red-text\">".$max_time_computing."</span> seconds by <span class=\"green-text\">‘".$settings_file."’</span>";
 		if($max_time_computing < 10) echo "&nbsp;<span class=\"red-text\">➡</span>&nbsp;probably too small!";
 		if($max_time_computing > 3600) {
 			echo "<br /><span class=\"red-text\">➡</span>&nbsp;reduced to <span class=\"red-text\">3600</span> seconds";
