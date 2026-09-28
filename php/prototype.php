@@ -1,5 +1,6 @@
 <?php
 require_once("_basic_tasks.php");
+// require_once("_header.php");
 
 $url_this_page = "prototype.php";
 
@@ -2130,7 +2131,7 @@ fwrite($h_image,$line);
 fclose($h_image);
 
 echo $message_create_sound;
-echo "<form method=\"post\" action=\"prototype.php#csound\" enctype=\"multipart/form-data\">";
+echo "<form id=\"csound-form\" method=\"post\" action=\"prototype.php#csound\" enctype=\"multipart/form-data\">";
 echo "<input type=\"hidden\" name=\"object_name\" value=\"".$object_name."\">";
 echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";
 echo "<input type=\"hidden\" name=\"object_file\" value=\"".$object_file."\">";
@@ -2143,9 +2144,16 @@ echo "<input type=\"hidden\" name=\"Duration\" value=\"".$Duration."\">";
 echo "<input type=\"hidden\" name=\"division\" value=\"".$division."\">";
 echo "<input type=\"hidden\" name=\"tempo\" value=\"".$tempo."\">";
 echo "<input type=\"hidden\" name=\"timesig\" value=\"".$timesig."\">";
-echo "<textarea name=\"csound_score\" onchange=\"tellsave()\" rows=\"20\" style=\"width:700px;\">".$csound_score."</textarea><br />";
+echo "<textarea name=\"csound_score\" rows=\"20\" style=\"width:700px;\">".$csound_score."</textarea><br />";
 echo "<p><input class=\"save\" type=\"submit\" name=\"savecsound\" value=\"SAVE THIS CODE\"></p><p><input class=\"save\" type=\"submit\" name=\"createcsound\" value=\"CREATE Csound CODE\"> from MIDI codes in “<span class=\"green-text\">".$object_name."</span>”</p>";
+echo '<span id="timespan" style="display:none; color:red; position:fixed; right:20px; bottom:20px; background-color:white; padding:6px; border-radius:6px; z-index:1000;">
+  &nbsp;…&nbsp;Creating Csound score… Wait!</span>';
 echo "</form>";
+echo "<script>
+document.getElementById('csound-form').addEventListener('submit', function () {
+    document.getElementById('timespan').style.display = 'inline-block';
+});
+</script>";
 
 function fix_csound_score($csound_score,$csound_file,$temp_dir,$temp_folder) {
 	$table = explode(chr(10),$csound_score);

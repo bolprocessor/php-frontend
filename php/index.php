@@ -715,6 +715,7 @@ function display_directory($test,$dir,$filter) {
 			}
 		return;
 		}
+	natcasesort($dircontent);
 	$i_file = $files_shown = 0;
 	foreach($dircontent as $thisfile) { 
 		$i_file++;
