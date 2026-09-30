@@ -553,7 +553,6 @@ if(isset($_POST['createcsound'])) {
 			$command .= " -al ".$alphabet;
 			$command .= " -so \"".$prototypes_file."\"";
 			if($CsoundInstruments_file <> '') $command .= " -cs \"".$CsoundInstruments_file."\"";
-		//	$command .= " -d --csoundout ".$csound_file;
 			$command .= " --csoundout ".$csound_file;
 			// $command .= " --traceout ".$tracefile;
 			$message_create_sound = "<p id=\"timespan\"><span class=\"red-text\">➡ </span>MIDI codes to Csound conversion…<p>";
@@ -2131,6 +2130,8 @@ fwrite($h_image,$line);
 fclose($h_image);
 
 echo $message_create_sound;
+echo '<span id="csound-warning" style="display:none; color:red; position:fixed; right:20px; bottom:20px; background-color:white; padding:6px; border-radius:6px; z-index:1000;">
+  &nbsp;…&nbsp;Creating Csound score… Wait!</span>';
 echo "<form id=\"csound-form\" method=\"post\" action=\"prototype.php#csound\" enctype=\"multipart/form-data\">";
 echo "<input type=\"hidden\" name=\"object_name\" value=\"".$object_name."\">";
 echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";
@@ -2146,12 +2147,24 @@ echo "<input type=\"hidden\" name=\"tempo\" value=\"".$tempo."\">";
 echo "<input type=\"hidden\" name=\"timesig\" value=\"".$timesig."\">";
 echo "<textarea name=\"csound_score\" rows=\"20\" style=\"width:700px;\">".$csound_score."</textarea><br />";
 echo "<p><input class=\"save\" type=\"submit\" name=\"savecsound\" value=\"SAVE THIS CODE\"></p><p><input class=\"save\" type=\"submit\" name=\"createcsound\" value=\"CREATE Csound CODE\"> from MIDI codes in “<span class=\"green-text\">".$object_name."</span>”</p>";
-echo '<span id="timespan" style="display:none; color:red; position:fixed; right:20px; bottom:20px; background-color:white; padding:6px; border-radius:6px; z-index:1000;">
-  &nbsp;…&nbsp;Creating Csound score… Wait!</span>';
 echo "</form>";
 echo "<script>
-document.getElementById('csound-form').addEventListener('submit', function () {
-    document.getElementById('timespan').style.display = 'inline-block';
+document.getElementById('csound-form').addEventListener('submit', function (event) {
+    if (!event.submitter || event.submitter.name !== 'createcsound') return;
+    /* An existing score: submit normally so PHP displays its warning. */
+    if (event.target.elements['csound_score'].value.trim() !== '') return;
+    event.preventDefault();
+    document.getElementById('csound-warning').style.display = 'block';
+    const createField = document.createElement('input');
+    createField.type = 'hidden';
+    createField.name = 'createcsound';
+    createField.value = '1';
+    event.target.appendChild(createField);
+    requestAnimationFrame(function () {
+        setTimeout(function () {
+            event.target.submit();
+        }, 0);
+    });
 });
 </script>";
 
@@ -2159,9 +2172,22 @@ function fix_csound_score($csound_score,$csound_file,$temp_dir,$temp_folder) {
 	$table = explode(chr(10),$csound_score);
 	$changed = FALSE;
 	$table2 = array();
+	$move_back = 0;
 	for($i = 0; $i < count($table); $i++) {
 		$csound_instruction = trim($table[$i]);
 		$bad = FALSE;
+		if(is_integer($pos=strpos($csound_instruction,"t")) AND $pos == 0) {
+			$parts = preg_split('/\s+/', trim($csound_instruction));
+			$move_back = (float) $parts[1];
+			// For instance, in line "t 0.400 60" we'll extract $move_back = "0.400";
+			$csound_instruction = "t 0.000 60";
+			// This correction is necessary when the pivot of the object has a negative date
+			}
+		if(is_integer($pos=strpos($csound_instruction,"i")) AND $pos == 0) {
+			$parts = preg_split('/(\s+)/',$csound_instruction, -1, PREG_SPLIT_DELIM_CAPTURE);
+			$parts[2] = sprintf('%.3f', (float)$parts[2] - $move_back);
+			$csound_instruction = implode('', $parts);
+			}
 		if(is_integer($pos=strpos($csound_instruction,"e")) AND $pos == 0) $bad = TRUE;
 		if(is_integer($pos=strpos($csound_instruction,"f")) AND $pos == 0) $bad = TRUE;
 		if(is_integer($pos=strpos($csound_instruction,"s")) AND $pos == 0) $bad = TRUE;
