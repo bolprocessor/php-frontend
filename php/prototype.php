@@ -431,7 +431,6 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 		$PostRoll = 0;
 		$PostRollMode = -1;
 		}
-	if($PostRoll < 0) $PostRoll = 0;
 	fwrite($handle,$PreRoll."\n");
 	fwrite($handle,$PostRoll."\n");
 	fwrite($handle,$PreRollMode."\n");
