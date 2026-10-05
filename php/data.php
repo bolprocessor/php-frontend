@@ -1898,6 +1898,7 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 		delete_folder($temp_dir.$temp_folder,FALSE);
 		}
 	$is_minimised = array();
+	$ok_remarks = FALSE;
 	for($i = $i_item = 0; $i < $imax; $i++) {
 		$error_mssg = '';
 		if(file_exists($music_xml_file)) continue;
@@ -1905,8 +1906,18 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 		$line = str_replace(chr(10),'',$line);
 	//	echo "i = ".$i."<br />";
 		if(is_integer($pos=strpos($line,"<?xml")) AND $pos == 0) break;
-		if(is_integer($pos=strpos($line,"//")) AND $pos == 0) continue;
-		if(is_integer($pos=strpos($line,"-")) AND $pos == 0) continue;
+		if(!$ok_remarks AND is_integer($pos=strpos($line,"//")) AND $pos == 0) continue;
+		if(is_integer($pos=strpos($line,"-")) AND $pos == 0) {
+			$ok_remarks = TRUE;
+			continue;
+			}
+		if($ok_remarks AND (is_integer($pos=strpos($line,"[")) AND $pos == 0 AND preg_match('/^\[[^\]]*\]$/', $line)) OR (is_integer($pos=strpos($line,"//")) AND $pos == 0)) {
+			$line = str_replace("[",'',$line);
+			$line = str_replace("]",'',$line);
+			$line = trim(str_replace("//",'',$line));
+			echo "<tr><td colspan=2 style=\"background-color:Cornsilk; color:black;\">".$line."</td></tr>";
+			continue;
+			}
 	//	echo "imax = ".$imax."<br />";
 		$units_path = $temp_dir.$temp_folder.SLASH;
 		if($imax > 1) {

@@ -288,7 +288,7 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 		}
 	if($MaxBegGap < 0) $MaxBegGap = 0;
 	if($ContBegMode == 0 AND $MaxBegGap > 99) $MaxBegGap = 0;
-	if($ContBegMode == -1 AND $MaxBegGap > $Duration) $MaxBegGap = 0;
+	// if($ContBegMode == -1 AND $MaxBegGap > $Duration) $MaxBegGap = 0;
 	fwrite($handle,$ContBegMode."\n");
 	fwrite($handle,$MaxBegGap."\n");
 	
@@ -303,7 +303,7 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 		}
 	if($MaxEndGap < 0) $MaxEndGap = 0;
 	if($ContEndMode == 0 AND $MaxEndGap > 99) $MaxEndGap = 0;
-	if($ContEndMode == -1 AND $MaxEndGap > $Duration) $MaxEndGap = 0;
+	// if($ContEndMode == -1 AND $MaxEndGap > $Duration) $MaxEndGap = 0;
 	fwrite($handle,$ContEndMode."\n");
 	fwrite($handle,$MaxEndGap."\n");
 	
@@ -1001,7 +1001,7 @@ echo "<p>BREAK TEMPO (ORGANUM)</p>";
 
 echo "<input type=\"radio\" name=\"BreakTempo\" value=\"0\"";
 if($BreakTempo == 0) echo " checked";
-echo ">Never break after this object<br />";
+echo ">Never break tempo after this object<br />";
 echo "<input type=\"radio\" name=\"BreakTempo\" value=\"1\"";
 if($BreakTempo == 1) echo " checked";
 echo ">Break at will";
