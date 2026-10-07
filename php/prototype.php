@@ -172,7 +172,7 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 	$j++;
 	$quantization = $_POST["object_param_".$j++];
 	fwrite($handle,$quantization."\n"); // Quantization
-	if(isset($_POST['Pivot_mode']) AND $Tref > 0)
+	if(isset($_POST['Pivot_mode']))
 		$pivot_mode = $_POST['Pivot_mode'];
 	else $pivot_mode = $_POST['Pivot_mode'] = -1;
 	if($pivot_mode == -1 AND $Tref > 0) $pivot_mode = 0;
@@ -644,15 +644,18 @@ $object_comment = recode_tags($object_comment);
 $size = strlen($object_comment);
 if($size < 50) $size = 50;
 echo "<p>Comment on this prototype = <input type=\"text\" name=\"object_comment\" size=\"".$size."\" value=\"".$object_comment."\"></p>";
-echo "<p>OBJECT TYPE</p>";
+echo "<p>OBJECT TYPE<br /><i>Add or remove MIDI and Csound code to change this type</i></p>";
 $j = 0;
 $object_type = $object_param[$j++];
-echo "<input type=\"checkbox\" name=\"object_type1\"";
+echo "<input type=\"checkbox\" tabindex=\"-1\" style=\"pointer-events: none; accent-color: #0066cc; width: 12px; height: 12px; vertical-align: middle;\"";
    if($object_type == 1 OR $object_type == 5) echo " checked";
    echo "> MIDI sequence<br />";
-echo "<input type=\"checkbox\" name=\"object_type4\"";
+echo "<input type=\"checkbox\" tabindex=\"-1\" style=\"pointer-events: none; accent-color: #0066cc; width: 12px; height: 12px; vertical-align: middle;\"";
    if($object_type > 3) echo " checked";
-   echo "> Csound score";
+   echo "> Csound score<br />";
+echo "<input type=\"checkbox\" tabindex=\"-1\" style=\"pointer-events: none; accent-color: #0066cc; width: 12px; height: 12px; vertical-align: middle;\"";
+   if($object_type == 0) echo " checked";
+   echo "> Silent sound-object (time-object)";
 
 $resolution = $object_param[$j];
 if($resolution == '' OR $resolution == 0) $resolution = 1;
@@ -693,8 +696,8 @@ if(isset($_FILES['mid_upload']) AND isset($_POST['tempo'])) $Tref = $tempo / 100
 else $tempo = 1000 * $Tref;
 // echo "Tref = ".$Tref."<br />";
 echo "Tref = <input type=\"text\" name=\"Tref\" size=\"10\" value=\"".$Tref."\"> ms ➡ ";
-if($Tref > 0) echo "this object is <span class=\"green-text\">striated</span> (it has a pivot) and Tref is the period of its reference metronome.<br /><i>Set this value to zero if the object is smooth (no pivot).</i><br />";
-else echo "this object is <span class=\"green-text\">smooth</span> (it has no pivot)<br />";
+if($Tref > 0) echo "this object is <span class=\"green-text\">striated</span> (it has a pivot) and Tref is the period of its reference metronome.<br />";
+else echo "this object is <span class=\"green-text\"><b>smooth</b></span><br />";
 
 $object_quantization = $object_param[$j];
 if(intval($object_quantization) == $object_quantization) $object_quantization = intval($object_quantization);

@@ -951,6 +951,7 @@ if($n_messages > 0) {
 			$warnings++;
 			$mssg = str_replace("=&gt; ",'',$mssg);
 			$mssg = "<font color=\"red\">".$mssg."</font>";
+			echo "mssg = ".$mssg."<br />";
 			}
 		if($mssg == null) continue;
         $mssg = preg_replace("/(C:.+)$/u","<font color=#007BFF><small>$1</small></font>",$mssg);
