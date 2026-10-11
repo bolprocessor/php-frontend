@@ -1,5 +1,5 @@
 // Bol Processor BP3
-// Csound resource file saved as "-cs.tryTunings". Date: 2024-08-12 08:59:41
+// Csound resource file saved as "-cs.tryTunings". Date: 2026-09-23 11:17:22 GMT
 16
 -1
 -1
@@ -306,4 +306,4 @@ Created by Anthony
 _begin tables
 f1 0 256 10 1 ; This table may be changed
 _end tables
--to.tryTunings
+

@@ -3149,25 +3149,9 @@ function get_tonality_file($csound_instruments_file) {
 	return $tonality_filename;
 	}
 
-function get_csound_file($objects_file) {
-	$csound_file = '';
-	if(!file_exists($objects_file)) return $csound_file;
-	$content = @file_get_contents($objects_file);
-	if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
-	$table = explode(chr(10),$content);
-	$imax = count($table);
-	for($i = 0; $i < $imax; $i++) {
-		$line = trim($table[$i]);
-		if((is_integer(strpos($line,"-cs."))) OR (is_integer(strpos($line,".bpto")))) {
-			$csound_file= $line; break;
-			}
-		}
-	return $csound_file;
-	}
-
 function show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,$filename,$file_format) {
 	global $dir_csound_resources,$dir_tonality_resources,$csound_file,$tonality_file;
-	if($objects_file <> '') {
+	/* if($objects_file <> '') {
 		$new_csound_file = get_csound_file($dir.$objects_file);
 		$new_csound_file = str_replace("csound_resources/",'',$new_csound_file);
 		if($new_csound_file <> '' AND $new_csound_file <> $csound_file) {
@@ -3182,7 +3166,7 @@ function show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,
 				}
 			echo "</div>";
 			}
-		}
+		} */
 	if($csound_file <> '') {
 		$tonality_file_in_csound = get_tonality_file($dir_csound_resources.$csound_file);
 		if($tonality_file_in_csound <> '' AND $tonality_file_in_csound <> $tonality_file) {

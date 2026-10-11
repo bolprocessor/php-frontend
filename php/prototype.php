@@ -147,9 +147,10 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 	$object_type = 0;
 	$csound_score = @file_get_contents($csound_file);
 	$csound_score = trim($csound_score);
-	$midi_score = @file_get_contents($midi_file);
+	$midi_score = @file_get_contents($midi_bytes);
+//	echo "midi_bytes = ".$midi_bytes."<br />";
 	$midi_score = trim($midi_score);
-	if($midi_score  <> '') $object_type += 1;
+	if(strlen($midi_score) > 3) $object_type += 1;
 	if($csound_score  <> '') $object_type += 4;
 //	if(isset($_POST['object_type1'])) $object_type += 1;
 //	if(isset($_POST['object_type4'])) $object_type += 4;
@@ -647,6 +648,7 @@ echo "<p>Comment on this prototype = <input type=\"text\" name=\"object_comment\
 echo "<p>OBJECT TYPE<br /><i>Add or remove MIDI and Csound code to change this type</i></p>";
 $j = 0;
 $object_type = $object_param[$j++];
+// echo "object_type = ".$object_type."<br />";
 echo "<input type=\"checkbox\" tabindex=\"-1\" style=\"pointer-events: none; accent-color: #0066cc; width: 12px; height: 12px; vertical-align: middle;\"";
    if($object_type == 1 OR $object_type == 5) echo " checked";
    echo "> MIDI sequence<br />";
@@ -1259,7 +1261,7 @@ echo ">Strike NoteOn’s according to project settings";
 echo "<p>CSOUND</p>";
 echo "<input type=\"radio\" name=\"CsoundInstrumentMode\" value=\"0\"";
 if($CsoundInstrumentMode == 0) echo " checked";
-echo ">Force to instrument used in context<br />";
+echo ">Use instrument in context<br />";
 echo "<input type=\"radio\" name=\"CsoundInstrumentMode\" value=\"-1\"";
 if($CsoundInstrumentMode == -1) echo " checked";
 echo ">Do not change instrument<br />";
@@ -2040,7 +2042,7 @@ if(!$no_midi AND file_exists($midi_text)) {
 		}
 	echo "</tr></table>";
 	if($new_midi) echo " ... <span class=\"red-text\">from the file you have just loaded</span><br /><br />";
-echo "➡ <i>If changes are not visible on these pop-up windows, juste clear the cache!</i><br />";
+	echo "➡ <i>If changes are not visible on these pop-up windows, juste clear the cache!</i><br />";
 	}
 else echo "<p>No MIDI codes in this sound-object prototype</p>";
 

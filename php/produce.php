@@ -668,9 +668,22 @@ if($output <> '') {
 	if($file_format == "eventlist") {
 		if($objects_path <> '') {
 			$objects_link = str_replace("-so.",'',$objects_path).".json";
-			$objects_json = basename($objects_link);
+			$objects_json = "proto-".basename($objects_link);
 			$objects_link = $output_dir."/".$objects_json;
-			echo "<span class=\"red-text\">➡</span> Download the <a class=\"linkdotted\" href=\"".$objects_link."\" download>".$objects_json."</a> sound-object file<br />";
+			echo "<span class=\"red-text\">➡</span> Download the <a class=\"linkdotted\" href=\"".$objects_link."\" download>".$objects_json."</a> sound-object protoypes file<br />";
+			}
+		$ins_files = glob($output_dir.SLASH."instr-*.json");
+		if($ins_files != FALSE AND count($ins_files) > 0) {
+			usort($ins_files, function($a, $b) {
+				return filemtime($b) <=> filemtime($a); // newest first
+				});
+			foreach($ins_files as $ins_file) {
+				if(filemtime($ins_file) < $time_begin) continue;
+				$latest_ins = $ins_file;
+				$latest_ins_name = basename($latest_ins);
+				$ins_link = $output_dir."/".$latest_ins_name;
+				echo "<span class=\"red-text\">➡</span> Download the <a class=\"linkdotted\" href=\"".$ins_link."\" download>".$latest_ins_name."</a> Csound instrument file<br />";
+				}
 			}
 		$scl_files = glob($output_dir.SLASH."*.scl");
 		if($scl_files != FALSE AND count($scl_files) > 0) {
@@ -951,7 +964,6 @@ if($n_messages > 0) {
 			$warnings++;
 			$mssg = str_replace("=&gt; ",'',$mssg);
 			$mssg = "<font color=\"red\">".$mssg."</font>";
-			echo "mssg = ".$mssg."<br />";
 			}
 		if($mssg == null) continue;
         $mssg = preg_replace("/(C:.+)$/u","<font color=#007BFF><small>$1</small></font>",$mssg);
