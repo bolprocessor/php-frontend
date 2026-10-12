@@ -674,10 +674,10 @@ echo "<p>MIDI CHANNEL</p>";
 
 echo "<p><input type=\"radio\" name=\"channel_force\" value=\"0\"";
 if($MIDIchannel == 0) echo " checked";
-echo "> Force events to the current MIDI channel<br />";
+echo "> Force events to the current MIDI channel (GLOBAL_CH)<br />";
 echo "<input type=\"radio\" name=\"channel_force\" value=\"-1\"";
 if($MIDIchannel == -1) echo " checked";
-echo "> Do not change the MIDI channels of events in this object<br />";
+echo "> Do not change the MIDI channels of events in this object (LOCAL_CH)<br />";
 echo "<input type=\"radio\" name=\"channel_force\" value=\"1\"";
 if($MIDIchannel > 0) echo " checked";
 echo "> Force events to MIDI channel&nbsp;#";
@@ -1261,10 +1261,10 @@ echo ">Strike NoteOn’s according to project settings";
 echo "<p>CSOUND</p>";
 echo "<input type=\"radio\" name=\"CsoundInstrumentMode\" value=\"0\"";
 if($CsoundInstrumentMode == 0) echo " checked";
-echo ">Use instrument in context<br />";
+echo ">Use instrument in context (GLOBAL_CS)<br />";
 echo "<input type=\"radio\" name=\"CsoundInstrumentMode\" value=\"-1\"";
 if($CsoundInstrumentMode == -1) echo " checked";
-echo ">Do not change instrument<br />";
+echo ">Do not change instrument (LOCAL_CS)<br />";
 echo "<input type=\"radio\" name=\"CsoundInstrumentMode\" value=\"1\"";
 if($CsoundInstrumentMode == 1) {
 	echo " checked";
