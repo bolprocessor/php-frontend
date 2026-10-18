@@ -736,8 +736,13 @@ if($number_instruments > 0) {
 		echo "<input class=\"edit big\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" name=\"instrument_name\" value=\"".$CsoundInstrumentName[$j]."\">";
 		$folder_this_instrument = $temp_dir.$temp_folder.SLASH.$CsoundInstrumentName[$j];
 		$argmax_file = $folder_this_instrument.SLASH."argmax.php";
-		$argmax_all = max_argument($argmax_file);
+		$argmax_all = max_argument($argmax_file,$names);
 		echo "&nbsp;(".$argmax_all."&nbsp;args)</p>";
+		if(count($names) > 0) {
+			echo "<p>➡ <span class=\"red-text\"><big>";
+			foreach($names AS $this_name) echo $this_name." ";
+			echo "</big></span></p>";
+			}
 		echo "</td>";
 		echo "</form>";
 		echo "<td class=\"middle\">";

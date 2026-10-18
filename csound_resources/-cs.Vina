@@ -1,5 +1,5 @@
 // Bol Processor BP3
-// Csound resource file saved as "-cs.Vina". Date: 2024-08-12 05:15:23
+// Csound resource file saved as "-cs.Vina". Date: 2026-10-12 13:43:27 GMT
 16
 1
 -1
@@ -101,4 +101,4 @@ Simulates sliding from one fret to another
 _begin tables
 f1 0 256 1 "vina-wave-table.aiff" 0 4 0
 _end tables
--to.Vina
+

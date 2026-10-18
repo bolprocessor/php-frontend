@@ -2268,16 +2268,17 @@ function MIDIparameter_argument($i,$parameter,$StartIndex,$EndIndex,$TableIndex,
 	return $r;
 	}
 
-function max_argument($argmax_file) {
-	include($argmax_file);
-//	echo "argmax_file = ".$argmax_file."<br />";
-	$max = 0;
-	if(isset($last_argument)) {
-		foreach($last_argument as $value) {
-			if($value > $max) $max = $value;
-			}
-		}
-	return $max;
+function max_argument($argmax_file, &$names = null) {
+    include($argmax_file);
+    $max = 0;
+    $names = array();
+    if(isset($last_argument) && is_array($last_argument)) {
+        foreach($last_argument as $value) {
+            if($value > $max) $max = $value;
+        	}
+        $names = array_slice(array_keys($last_argument), 1);
+    	}
+    return $max;
 	}
 	
 function set_argmax_argument($argmax_file,$name,$arg) {

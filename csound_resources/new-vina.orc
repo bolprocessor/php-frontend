@@ -9,110 +9,90 @@ nchnls = 1
 ; p1 = 1
 ; p2 = start time
 ; p3 = duration
-; p4 = pitch in octave.pitchclass notation
+; p4 = pitch in octave.pitchclass notation (or Hz if >= 15)
 ; p5 = volume start value
 ; p6 = volume end value
 ; p7 = volume function table number
-; p8 = continuous PB start value
-; p9 = continuous PB end value
-; p10 = continuous PB function table number
-; p11 = discontinuous PB start value
-; p12 = discontinuous PB end value
-; p13 = discontinuous PB function table number
+; p8 = continuous pitchbend start value (cents)
+; p9 = continuous pitchbend end value (cents)
+; p10 = continuous pitchbend function table number
+; p11 = "slide" start value (cents, ADDval)
+; p12 = "slide" end value (cents, ADDval)
+; p13 = "slide" function table number
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
-; If any of the function table numbers are negative,
-; that corresponding parameter will be interpolated linearly.
-; (Bezier curves later!)
+; If a function table number is 0 or negative, the
+; corresponding parameter is interpolated linearly
+; between its start and end values.
+; Otherwise the table (e.g. GEN -7, not rescaled) is
+; read from beginning to end over the note duration,
+; and its values are used as they are.
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 instr 1
-; ihold
 ; Scaling factors
 ivolscale = 32767.0 / 127.0
 ipitchscale = log(2.0) / 1200.0
 
 ; sound duration
-idur  = p3
+idur = p3
 
 ; interpret p4 as frequency or octave point pitch-class
 if (p4 < 15.0) then
-icpspitch = cpspch(p4)
+  icpspitch = cpspch(p4)
 else
-icpspitch = p4
+  icpspitch = p4
 endif
 
-; set function table numbers
-ifdiscontpb = p13
+; function table numbers
+ifvol    = p7
 ifcontpb = p10
-ifvol  = p7
-
-; set continuous parameters
-ivol1  = p5
-ivol2  = p6
-icontpb1 = p8
-icontpb2 = p9
-idiscontpb1 = p11
-idiscontpb2 = p12
+ifslide  = p13
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; volume block
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-if (ifvol <= 0) goto linearvolume
-
-ivollength = ftlen(ifvol)
-kvolindex line 0, idur, ivollength
-kvol  tablei kvolindex, ifvol
-goto continuea
-
-linearvolume: kvol line ivol1, idur, ivol2
+if (ifvol > 0) then
+  kvolindex line 0, idur, 1
+  kvol tablei kvolindex, ifvol, 1
+else
+  kvol line p5, idur, p6
+endif
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; continuous pitch bend block
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-continuea: if (ifcontpb <= 0) goto linearcontpb
-
-icontpblength = ftlen(ifcontpb)
-kcontpbindex line 0, idur, icontpblength
-kcontpb   tablei kcontpbindex, ifcontpb
-goto continueb
-
-linearcontpb: kcontpb line icontpb1, idur, icontpb2
+if (ifcontpb > 0) then
+  kcontpbindex line 0, idur, 1
+  kcontpb tablei kcontpbindex, ifcontpb, 1
+else
+  kcontpb line p8, idur, p9
+endif
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; discontinuous pitch bend block
+; "slide" block (ADDval, in cents)
+; Smooth interpolation: NO quantisation
+; to semitone steps.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-continueb: if (ifdiscontpb <= 0) goto lineardiscontpb
-
-idiscontpblength = ftlen(ifdiscontpb)
-kdiscontpbindex  line 0, idur, idiscontpblength
-kdiscontpb   tablei kdiscontpbindex, ifdiscontpb
-goto continuec
-
-lineardiscontpb: kdiscontpb line idiscontpb1, idur, idiscontpb2
-
-continuec: kdiscontpb = int(kdiscontpb / 100.0) * 100.0
+if (ifslide > 0) then
+  kslideindex line 0, idur, 1
+  kslide tablei kslideindex, ifslide, 1
+else
+  kslide line p11, idur, p12
+endif
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Main section
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ADDval: pitch bend and slide (cents) are added,
+; then applied to the base frequency
+kcpspitch = icpspitch * exp(ipitchscale * (kcontpb + kslide))
+kamp = kvol * ivolscale
 
-;ioctpitch = octpch(p4)
-;icpspitch = cpspch(p4)
-;   print p4, ioctpitch, icpspitch
-;koctpitch = ioctpitch + ((kcontpb + kdiscontpb) / 1200.0)
+; display kslide, idur
+; display kcpspitch, idur
 
-kcpspitch = icpspitch * exp(ipitchscale * (kcontpb + kdiscontpb))
-kamp  = kvol * ivolscale
-
-display kcontpb, 2
-display kdiscontpb, 2
-display kcpspitch, 2
-display kvol, 2
 asignal pluck kamp, kcpspitch, icpspitch, 1, 5, 0.916, 0.083
 
 out asignal * 0.5
