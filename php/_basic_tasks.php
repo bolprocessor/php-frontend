@@ -2276,7 +2276,7 @@ function max_argument($argmax_file, &$names = null) {
         foreach($last_argument as $value) {
             if($value > $max) $max = $value;
         	}
-        $names = array_slice(array_keys($last_argument), 1);
+        $names = array_slice(array_keys($last_argument),1);
     	}
     return $max;
 	}

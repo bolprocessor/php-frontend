@@ -2149,7 +2149,16 @@ echo "<input type=\"hidden\" name=\"Duration\" value=\"".$Duration."\">";
 echo "<input type=\"hidden\" name=\"division\" value=\"".$division."\">";
 echo "<input type=\"hidden\" name=\"tempo\" value=\"".$tempo."\">";
 echo "<input type=\"hidden\" name=\"timesig\" value=\"".$timesig."\">";
-echo "<textarea name=\"csound_score\" rows=\"20\" style=\"width:700px;\">".$csound_score."</textarea><br />";
+
+$lines = preg_split('/\r\n|\r|\n/', $csound_score);
+$max_len = 0;
+foreach ($lines as $thisline) {
+    // Expand tabs so they count as their displayed width (8 by default in textareas)
+    $thisline = str_replace("\t", str_repeat(' ', 8),$thisline);
+    $max_len = max($max_len,mb_strlen($thisline,'UTF-8'));
+	}
+echo "<textarea name=\"csound_score\" rows=\"20\" wrap=\"off\" style=\"font-family:monospace; width:".($max_len + 2)."ch; min-width:700px; max-width:100%;\">".htmlspecialchars($csound_score)."</textarea><br />";
+
 echo "<p><input class=\"save\" type=\"submit\" name=\"savecsound\" value=\"SAVE THIS CODE\"></p><p><input class=\"save\" type=\"submit\" name=\"createcsound\" value=\"CREATE Csound CODE\"> from MIDI codes in “<span class=\"green-text\">".$object_name."</span>”</p>";
 echo "</form>";
 echo "<script>

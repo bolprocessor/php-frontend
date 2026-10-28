@@ -1,10 +1,10 @@
 // Bol Processor BP3
-// Csound resource file saved as "-cs.tryCsoundObjects". Date: 2024-08-12 20:19:21
+// Csound resource file saved as "-cs.tryCsoundObjects". Date: 2026-10-25 16:09:58 GMT
 16
 1
 3
 2
--1
+6
 -1
 -1
 -1
@@ -91,7 +91,7 @@ This is the default instrument used by &quot;BP2test.orc&quot;
 2147483647
 0
 Instrument_2
-Click the 'MORE…' button to see the "blurb" parameter
+Click the &quot;blurb&quot; button to see the additional parameter
 11
 2
 -1
@@ -99,7 +99,7 @@ Click the 'MORE…' button to see the "blurb" parameter
 -1
 4
 0
--1.0000
+200
 1
 1
 0
@@ -125,11 +125,11 @@ Click the 'MORE…' button to see the "blurb" parameter
 -1
 -1
 -1
-7
-7
-7
-7
-7
+07
+07
+07
+07
+07
 0
 0
 0
@@ -167,7 +167,7 @@ This is a test argument
 10
 11
 0.000
-7
+07
 1
 Instrument_3
 This instrument remaps pitch bend to a frequency ratio
@@ -383,7 +383,7 @@ This instrument uses pitchbender values to change its own pitch parameter (in cp
 2147483647
 0
 Instrument_6
-[Comment on this instrument]
+This instrument has 3 additional parameters
 17
 6
 -1
@@ -391,7 +391,7 @@ Instrument_6
 -1
 4
 0
--1.0000
+200
 1
 1
 0
@@ -417,11 +417,11 @@ Instrument_6
 -1
 -1
 -1
-7
-7
-7
-7
-7
+07
+07
+07
+07
+07
 0
 0
 0
@@ -461,8 +461,8 @@ blah
 231.500
 7
 1
-blurb
-This is a test argument
+blurb2
+Another test argument
 9
 10
 11

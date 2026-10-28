@@ -740,7 +740,10 @@ if($number_instruments > 0) {
 		echo "&nbsp;(".$argmax_all."&nbsp;args)</p>";
 		if(count($names) > 0) {
 			echo "<p>➡ <span class=\"red-text\"><big>";
-			foreach($names AS $this_name) echo $this_name." ";
+			foreach($names AS $this_name) {
+				if(!file_exists($folder_this_instrument.SLASH.$this_name.".txt.old"))
+					echo $this_name." ";
+				}
 			echo "</big></span></p>";
 			}
 		echo "</td>";
