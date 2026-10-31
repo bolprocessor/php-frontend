@@ -1,5 +1,10 @@
 ; New Csound instruments for BP3's default Csound score output.
 ; They follow the specifications handled by BP3 version 3.0.0 and above.
+;
+; This version uses only opcodes built into the Csound core.
+; Effects routing is done with global audio variables instead of the
+; signalflowgraph plugin (connect / alwayson / inleta / outleta), so it
+; runs on MacOS, Windows and Linux even if optional plugins fail to load.
 
 ; Instruments:
 ;        1    Plucked string (outputs to StereoDelay)
@@ -43,56 +48,45 @@ giMaxNoteAmp = 1.0/12.0
 
 giSine    ftgen  0, 0, 32769, 10, 1    ; sine wave
 
-; -- EFFECTS ROUTING --
+; -- EFFECTS BUSES (global audio variables) --
+; Instruments add their output to a bus; each effect reads its bus,
+; then clears it. Effects are named instruments defined after all
+; numbered instruments, so Csound runs them after the notes in each cycle.
 
-connect "1", "delaySend", "StereoDelay", "delayin"
+gaDelay     init    0
+gaChorusL   init    0
+gaChorusR   init    0
+gaReverbL   init    0
+gaReverbR   init    0
 
-; these extra routings allow any instrument to be renumbered as instr 1
-connect "1", "chorusSendL", "StereoChorus", "chorusinL"
-connect "1", "chorusSendR", "StereoChorus", "chorusinR"
-connect "1", "reverbSendL", "GlobalReverb", "reverbinL"
-connect "1", "reverbSendR", "GlobalReverb", "reverbinR"
+; -- CREATE EFFECTS (held for the whole performance) --
 
-connect "2", "chorusSendL", "StereoChorus", "chorusinL"
-connect "2", "chorusSendR", "StereoChorus", "chorusinR"
-connect "3", "reverbSendL", "GlobalReverb", "reverbinL"
-connect "3", "reverbSendR", "GlobalReverb", "reverbinR"
-connect "10", "reverbSendL", "GlobalReverb", "reverbinL"
-connect "10", "reverbSendR", "GlobalReverb", "reverbinR"
-
-connect "StereoDelay", "reverbSendL", "GlobalReverb", "reverbinL"
-connect "StereoDelay", "reverbSendR", "GlobalReverb", "reverbinR"
-connect "StereoChorus", "reverbSendL", "GlobalReverb", "reverbinL"
-connect "StereoChorus", "reverbSendR", "GlobalReverb", "reverbinR"
-
-; -- CREATE EFFECTS --
-
-alwayson "StereoDelay", 0.05, 0.08, 0.25
-alwayson "StereoChorus", 0.4, 0.5, 0.333, 0.80
-alwayson "GlobalReverb", 0.7, 16000, 0.3
+schedule "StereoDelay",  0, -1, 0.05, 0.08, 0.25
+schedule "StereoChorus", 0, -1, 0.4, 0.5, 0.333, 0.80
+schedule "GlobalReverb", 0, -1, 0.7, 16000, 0.3
 
 ; -- USER DEFINED OPCODES --
 
 ; An opcode to convert pitch parameters to cycles per second (cps).
-; Parameters less than 15.0 are interpreted as octave.pitchclass format, 
+; Parameters less than 15.0 are interpreted as octave.pitchclass format,
 ; otherwise they are assumed to be frequencies already in cps.
 opcode bp_pitch, i, i
     ipitchparm    xin
-    
-    if (p4 < 15.0) then
-        icps = cpspch(p4)
+
+    if (ipitchparm < 15.0) then
+        icps = cpspch(ipitchparm)
     else
-        icps = p4
+        icps = ipitchparm
     endif
 
     xout    icps
 endop
 
-; This opcode takes the default BP parameters p3 thru p10 and 
+; This opcode takes the default BP parameters p3 thru p10 and
 ; returns two k-rate signals for the instrument's pitch and volume.
 opcode bp_control, kk, iiiiiiii
     idur, ip4, ip5, ip6, ip7, ip8, ip9, ip10  xin
-    
+
     ik1    = 1.0 / 127.0        ; scale Midi-range volumes (0-127)
     ik2    = log(2.) / 1200.    ; constant to convert cents to frequency ratios
     icps  bp_pitch  ip4
@@ -114,7 +108,7 @@ volumelin:
 
 pitchbendlin:
     kpitch = icps * exp(kcents * ik2)
-    
+
     xout    kpitch, kvol * ik1
 endop
 
@@ -124,33 +118,31 @@ endop
 instr 1
     idur     = p3
     icps      bp_pitch  p4
-    
+
     kpitch, kvol  bp_control  idur, p4, p5, p6, p7, p8, p9, p10
-    
+
     kdclick    linseg    1.0, idur - 0.05, 1.0, 0.05, 0        ; declick envelope
     kamp    =        kvol * kdclick * giMaxNoteAmp
 
     a1        pluck    kamp, kpitch, icps, 0, 1
-        
-            ; outs    a1, a1
-            outleta    "delaySend", a1
+
+            gaDelay = gaDelay + a1
 endin
 
 ; Plucked string instrument with chorus
 instr 2
     idur     = p3
     icps      bp_pitch  p4
-    
+
     kpitch, kvol  bp_control  idur, p4, p5, p6, p7, p8, p9, p10
-    
+
     kdclick    linseg    1.0, idur - 0.05, 1.0, 0.05, 0        ; declick envelope
     kamp    =        kvol * kdclick * giMaxNoteAmp
 
     a1        pluck    kamp, kpitch, icps, 0, 1
-        
-            ; outs    a1, a1
-            outleta    "chorusSendL", a1
-            outleta    "chorusSendR", a1
+
+            gaChorusL = gaChorusL + a1
+            gaChorusR = gaChorusR + a1
 endin
 
 ; Synth Brass instrument
@@ -158,23 +150,23 @@ instr 3
     idur     = p3
     iStereo = 0.7                                                ; stereo separation (0 to 1)
     iDetune = 0.25                                                ; detune amount in Hz
-    
+
     ; BP's default score parameters don't include "attack velocity",
     ; but with a custom setup we could plug it in here to make the shape
     ; and max amplitude of the amplitude envelope dynamic.
     iAttVel        = 127                                            ; Midi Attack Velocity
     iAttDelta    = 1.0 - (iAttVel/127)                            ; diff btw max attack and this note's
     iamp        = iAttVel/127
-    
+
     ; parameters for the ADSR envelope controlling amplitude
     iAttTime    = 0.1 + 0.2 * iAttDelta                            ; envelope attack time
     iDecTime    = 1.5 * iAttTime                                ; envelope decay time
     iRelTime    = 0.1 * iAttDelta                                ; envelope release time
     iSusTime    = idur - (iAttTime + iDecTime)                    ; envelope sustain time
     iSusLevel    = 0.7
-    
+
     kpitch, kvol  bp_control  idur, p4, p5, p6, p7, p8, p9, p10
-    
+
     kaenv    xadsr    iAttTime, iDecTime, iSusLevel, iRelTime        ; amplitude envelope
     kdclick    linseg    1.0, idur - 0.05, 1.0, 0.05, 0                ; declick envelope
     kamp     =        iamp * kvol * kaenv * kdclick * giMaxNoteAmp
@@ -182,16 +174,15 @@ instr 3
     ; a pair of detuned sawtooth oscillators
     a1        vco2    kamp, kpitch + iDetune, 0                    ; 0 = sawtooth wave
     a2        vco2    kamp, kpitch - iDetune, 0                    ; 0 = sawtooth wave
-    
+
     ; mix the oscillators based on stereo separation amount
     imain     =        0.5 * (iStereo + 1.0)
     icross    =        1.0 - imain
     aleft     =        imain*a1 + icross*a2
     aright     =        imain*a2 + icross*a1
-        
-            ; outs    aleft, aright
-            outleta    "reverbSendL", aleft
-            outleta    "reverbSendR", aright
+
+            gaReverbL = gaReverbL + aleft
+            gaReverbR = gaReverbR + aright
 endin
 
 ; Simple sine wave instrument
@@ -199,14 +190,13 @@ instr 10
     idur = p3
 
     kpitch, kvol  bp_control  idur, p4, p5, p6, p7, p8, p9, p10
-    
+
     kdclick     linseg  0, 0.02, 1.0, idur - 0.07, 1.0, 0.05, 0    ; declick envelope
     kamp = kvol * kdclick * giMaxNoteAmp
 
     a1    oscili    kamp, kpitch, giSine
-        ; outs    a1, a1
-        outleta    "reverbSendL", a1
-        outleta    "reverbSendR", a1
+        gaReverbL = gaReverbL + a1
+        gaReverbR = gaReverbR + a1
 endin
 
 ; -- EFFECTS INSTRUMENTS --
@@ -225,15 +215,16 @@ instr StereoDelay
         iwet2 = 0
     endif
 
-    ain        inleta    "delayin"
+    ain        =        gaDelay
+    gaDelay    =        0
 
     adel1    delay    ain, idelay1
     adel2    delay    ain, idelay2
     aleft    =        ain*idry + adel1*iwet1
     aright    =        ain*idry + adel2*iwet2
-    
-            outleta    "reverbSendL", aleft
-            outleta    "reverbSendR", aright
+
+            gaReverbL = gaReverbL + aleft
+            gaReverbR = gaReverbR + aright
 endin
 
 ; Dual stereo chorus effect
@@ -247,33 +238,35 @@ instr StereoChorus
     iLFOrate2 = p6
     iwet = p7
     idry = 1.0 - iwet
-    
-    ainl    inleta    "chorusinL"
-    ainr    inleta    "chorusinR"
-    
+
+    ainl    =        gaChorusL
+    ainr    =        gaChorusR
+    gaChorusL =      0
+    gaChorusR =      0
+
     ; delay times and max variability (in milliseconds)
     ideltime1 = 37
     idelvar1  = 5
     ideltime2 = 23
     idelvar2  = 1.75
-    
+
     ; LFOs (low-frequency oscillators) modulate the delay times
     alfo1    oscili    idepth*idelvar1, iLFOrate1, giSine
     alfo2    oscili    idepth*idelvar2, iLFOrate2, giSine
-    
+
     ; left channel delays
     aldel1    vdelay    ainl, ideltime1+alfo1, ideltime1+idelvar1
     aldel2    vdelay    ainl, ideltime2-alfo2, ideltime2+idelvar2
-    
+
     ; right channel delays
     ardel1    vdelay    ainr, ideltime1-alfo1, ideltime1+idelvar1
     ardel2    vdelay    ainr, ideltime2+alfo2, ideltime2+idelvar2
 
     aleft    =        ainl*idry + (aldel1+aldel2)*iwet*0.5
     aright    =        ainr*idry + (ardel1+ardel2)*iwet*0.5
-    
-            outleta    "reverbSendL", aleft
-            outleta    "reverbSendR", aright
+
+            gaReverbL = gaReverbL + aleft
+            gaReverbR = gaReverbR + aright
 endin
 
 ; Global reverb effect
@@ -285,15 +278,16 @@ instr GlobalReverb
     icutoff = p5
     iwet = p6
     idry = 1.0 - iwet
-    
-    ainl    inleta    "reverbinL"
-    ainr    inleta    "reverbinR"
-    
+
+    ainl    =        gaReverbL
+    ainr    =        gaReverbR
+    gaReverbL =      0
+    gaReverbR =      0
+
     arevl, arevr  reverbsc  ainl, ainr, ifeedbk, icutoff
-    
+
     aoutl    dcblock2    idry*ainl + iwet*arevl
     aoutr    dcblock2    idry*ainr + iwet*arevr
-    
-            ; outs        idry*ainl + iwet*arevl, idry*ainr + iwet*arevr
+
             outs        aoutl, aoutr
 endin
