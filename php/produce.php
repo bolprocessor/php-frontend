@@ -855,8 +855,10 @@ if($no_error AND $file_format == "csound") {
 				$time_start = time();
                 if(windows_system())
                     $command = "\"".$programFiles.SLASH.$csound_path.SLASH.$csound_name."\"  --wave -o ".$sound_file_link." ".$dir_csound_resources.$csound_orchestra." ".$csound_file_link;
-		        else
+		        else {
+					putenv("LD_LIBRARY_PATH");   // remove XAMPP's /opt/lampp/lib so Csound uses the system libraries
                     $command = $csound_path.SLASH.$csound_name." --wave -o ".$sound_file_link." ".$dir_csound_resources.$csound_orchestra." ".$csound_file_link;
+					}
                 $trace_csound = $temp_dir_abs."trace_csound.txt";
                 $trace_csound_link = $temp_dir."trace_csound.txt";
                 $trace_csound_link = str_replace(SLASH,'/',$trace_csound_link);

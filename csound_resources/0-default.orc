@@ -41,8 +41,8 @@ nchnls = 2
 0dbfs = 1.0
 
 ; Maximum amplitude of individual notes (adjust if samples overflow)
-; Default value 1/12 should allow at least 12 simultaneous notes.
-giMaxNoteAmp = 1.0/12.0
+; Value 1/6 should allow at least 6 simultaneous notes at full volume.
+giMaxNoteAmp = 1.0/3.0
 
 ; -- WAVE TABLES --
 
