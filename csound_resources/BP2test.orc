@@ -1,6 +1,6 @@
-; This is a simple orchestra file for BP2's default Csound score output
-; It follows the new specfications handled by BP2 version 2.7.1 and above.
-; (See "Csound tables") 
+; This is a simple orchestra file for BP3
+; It follows the new specifications handled by BP2 version 2.7.1 and above.
+; (See "Csound tables")
 
 ; It contains one single instrument: an oscillator using wave-table 1
 ; Argument p2 is the start date, p3 the duration (as per the standard)

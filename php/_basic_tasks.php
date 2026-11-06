@@ -1395,6 +1395,7 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder,$force) {
 	fwrite($handle,"lock\n");
 	fclose($handle);
 	unlink($dir.$filename);
+	$exists_name = list_of_parameter_names($temp_dir,$temp_folder);
 	$handle = fopen($dir.$filename,"w");
 	$file_header = $top_header."\n// Csound resource file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s')." GMT";
 	fwrite($handle,$file_header."\n");
@@ -1441,6 +1442,7 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder,$force) {
 		$dir_instrument = scandir($folder_this_instrument);
 		foreach($dir_instrument as $thisparameter) {
 			if($thisparameter == '.' OR $thisparameter == ".." OR $thisparameter == ".DS_Store") continue;
+			if(!isset($exists_name[$thisparameter])) continue;
 			$table = explode(".",$thisparameter);
 			$extension = end($table);
 			if($extension <> "txt") continue;
@@ -1449,6 +1451,7 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder,$force) {
 		fwrite($handle,$number_param."\n");
 		foreach($dir_instrument as $thisparameter) {
 			if($thisparameter == '.' OR $thisparameter == ".." OR $thisparameter == ".DS_Store") continue;
+			if(!isset($exists_name[$thisparameter])) continue;
 			$table = explode(".",$thisparameter);
 			$extension = end($table);
 			if($extension <> "txt") continue;
@@ -2303,6 +2306,29 @@ function set_argmax_argument($argmax_file,$name,$arg) {
 	fwrite($handle,$text);
 	fclose($handle);
 	return;
+	}
+
+function list_of_parameter_names($temp_dir,$temp_folder) {
+	$test = FALSE;
+	$exists_name = array();
+	$dirallinstruments = scandir($temp_dir.$temp_folder);
+	foreach($dirallinstruments as $name_instrument) {
+		$dir_this_instrument = $temp_dir.$temp_folder.SLASH.$name_instrument;
+		if(!is_dir($dir_this_instrument) OR $name_instrument == '.' OR $name_instrument == "..") continue;
+		if($test) echo "dir_this_instrument = ".$dir_this_instrument."<br />";
+		$dircontent = scandir($dir_this_instrument);
+		foreach($dircontent as $oldfile) {
+			if($oldfile == '.' OR $oldfile == ".." OR $oldfile == ".DS_Store") continue;
+			if($test) echo "oldfile = ".$oldfile."<br />";
+			$table = explode(".",$oldfile);
+			$extension = end($table);
+			if($extension <> "old" AND $extension <> "txt") continue;
+			$thisfile = str_replace(".old",'',$oldfile);
+			$name = str_replace(".txt",'',$thisfile);
+			$exists_name[$name] = TRUE;
+			}
+		}
+	return $exists_name;
 	}
 
 function convert_empty($value) {

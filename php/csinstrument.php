@@ -2,7 +2,7 @@
 require_once("_basic_tasks.php");
 
 $url_this_page = "csinstrument.php";
-// $test = TRUE;
+$test = FALSE;
 $error_post = '';
 if(isset($_POST['instrument_name'])) {
 	$instrument_name = $_POST['instrument_name'];
@@ -30,12 +30,12 @@ display_darklight();
 echo $error_post;
 
 $instrument_folder_name = str_replace('-','_',$instrument_name);
+$folder_this_instrument = $temp_dir.$temp_folder.SLASH.$instrument_folder_name;
 
 if($test) echo "instrument_folder_name = ".$instrument_folder_name."<br />";
 if($test) echo "temp_dir = ".$temp_dir."<br />";
 if($test) echo "temp_folder = ".$temp_folder."<br />";
 
-$folder_this_instrument = $temp_dir.$temp_folder.SLASH.$instrument_folder_name;
 if($test) echo "folder_this_instrument = ".$folder_this_instrument."<br />";
 
 // echo "&nbsp;Instrument file: <span class=\"green-text\">".$instrument_file."</span>";
@@ -43,26 +43,16 @@ echo link_to_help();
 echo "<h2>Csound instrument <big><span class=\"green-text\">_ins(".$instrument_index.")</span> <span class=\"red-text\">".$instrument_name."</span></big></h2>";
 
 $argmax_file = $folder_this_instrument.SLASH."argmax.php";
-		
-$exists_name = array();
-$dircontent = scandir($folder_this_instrument);
-foreach($dircontent as $oldfile) {
-	if($oldfile == '.' OR $oldfile == ".." OR $oldfile == ".DS_Store") continue;
-	$table = explode(".",$oldfile);
-	$extension = end($table);
-	if($extension <> "old" AND $extension <> "txt") continue;
-	$thisfile = str_replace(".old",'',$oldfile);
-	$name = str_replace(".txt",'',$thisfile);
-	$exists_name[$name] = TRUE;
-	}
-		
+$exists_name = list_of_parameter_names($temp_dir,$temp_folder);
+$file_changed = $temp_dir.$temp_folder.SLASH."_changed";
+
 if(isset($_POST['create_parameter'])) {
 	$new_parameter = trim($_POST['new_parameter']);
 	$new_parameter = str_replace(' ','_',$new_parameter);
 	$new_parameter = str_replace('-','_',$new_parameter);
 	$new_parameter = str_replace('"','',$new_parameter);
 	if(isset($exists_name[$new_parameter])) {
-		echo "<p><span class=\"red-text\">A parameter with the same name “<span class=\"green-text\">".$new_parameter."</span>” already exists!</span></p>";
+		echo "<p><span class=\"red-text\">A parameter with the same name “<span class=\"green-text\">".$new_parameter."</span>” already exists (perhaps in another instrument)</span></p>";
 		}
 	else {
 		if($new_parameter <> '') {
@@ -75,6 +65,8 @@ if(isset($_POST['create_parameter'])) {
 			fwrite($handle,$template_content."\n");
 			fclose($handle);
 			chmod($new_parameter_file,$permissions);
+			$handle = fopen($file_changed,"w");
+			if($handle) fclose($handle);
 			}
 		}
 	}
@@ -83,8 +75,30 @@ if(isset($_POST['delete_parameter'])) {
 	$parameter_name = $_POST['parameter_name'];
 	echo "<p><span class=\"red-text\">Deleted </span><span class=\"green-text\"><big>“".$parameter_name."”</big></span>…</p>";
 	$this_parameter_file = $folder_this_instrument.SLASH.$parameter_name.".txt";
-//	echo $this_parameter_file."<br />";
 	rename($this_parameter_file,$this_parameter_file.".old");
+	$handle = fopen($file_changed,"w");
+	if($handle) fclose($handle);
+	}
+
+if (isset($_POST['rename_parameter'])) {
+    $parameter_name = trim($_POST['parameter_name']);
+    $new_parameter_name = trim(basename($_POST['new_parameter_name']));
+    if ($parameter_name !== '' && $new_parameter_name !== '' && $parameter_name !== $new_parameter_name) {
+        $this_parameter_file = $folder_this_instrument . SLASH . $parameter_name . ".txt";
+        $new_parameter_file = $folder_this_instrument . SLASH . $new_parameter_name . ".txt";
+        if (rename($this_parameter_file, $new_parameter_file)) {
+            $argmax_file = $folder_this_instrument . SLASH . "argmax.php";
+            $contents = file_get_contents($argmax_file);
+            if ($contents !== false) {
+                $contents = str_replace($parameter_name, $new_parameter_name, $contents);
+                file_put_contents($argmax_file, $contents, LOCK_EX);
+            	}
+			unlink($this_parameter_file);
+            $exists_name = list_of_parameter_names($temp_dir, $temp_folder);
+			$handle = fopen($file_changed,"w");
+			if($handle) fclose($handle);
+			}
+		}
 	}
 
 if(isset($_POST['restore'])) {
@@ -245,7 +259,6 @@ if(isset($_POST['saveinstrument'])) {
 	fclose($handle);
 	chmod($instrument_file,$permissions);
 	set_argmax_argument($argmax_file,$instrument_name,$argmax);
-	$file_changed = $temp_dir.$temp_folder.SLASH."_changed";
 	$handle = fopen($file_changed,"w");
 	if($handle) fclose($handle);
 	}
@@ -444,7 +457,11 @@ foreach($dir_instrument as $thisparameter) {
 	$deleted_parameters .= "“".$parameter_name."” ";
 	}
 if($deleted_parameters <> '') echo "<p><input class=\"save\" type=\"submit\" name=\"restore\" value=\"RESTORE ALL DELETED PARAMETERS\"> = <span class=\"green-text\"><big>".$deleted_parameters."</big></span></p>";
-echo "<p><input class=\"save\" type=\"submit\" name=\"create_parameter\" value=\"CREATE A NEW PARAMETER\"> named <input type=\"text\" name=\"new_parameter\" size=\"20\" value=\"\"></p>";
+echo "<p><input class=\"save\" type=\"submit\" name=\"create_parameter\" value=\"CREATE A NEW PARAMETER\"> named <input type=\"text\" name=\"new_parameter\" size=\"20\" value=\"\">&nbsp;👉&nbsp;<span class=\"red-text\">Don't use: </span><span class=\"green-text\"><b>";
+foreach($exists_name AS $thisname => $value) {
+	echo "&nbsp;&nbsp;".$thisname;
+	}
+echo "</b></span>&nbsp;&nbsp;<span class=\"red-text\">as they already exist!</span></p>";
 
 echo "</form>";
 $n = 0;
@@ -458,7 +475,7 @@ foreach($dir_instrument as $thisparameter) {
 if($n > 0) {
 	echo "<table class=\"thicktable\">";
 	echo "<tr>";
-	echo "<td colspan=\"3\"><span class=\"red-text\">➡</span> Click the blue button to edit…</td>";
+	echo "<td colspan=\"4\"><span class=\"red-text\">➡</span> Click the blue button to edit…</td>";
 	echo "</tr>";
 	foreach($dir_instrument as $thisparameter) {
 		if($thisparameter == '.' OR $thisparameter == ".." OR $thisparameter == ".DS_Store" OR $thisparameter == '') continue;
@@ -490,7 +507,11 @@ if($n > 0) {
 		echo "<input type=\"hidden\" name=\"parameter_name\" value=\"".$parameter_name."\">";
 		echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";
 		echo "<input type=\"hidden\" name=\"instrument_file\" value=\"".$instrument_file."\">";
-		echo "<input class=\"save\" type=\"submit\" name=\"delete_parameter\" value=\"DELETE\">";
+		echo "<input class=\"save\" type=\"submit\" name=\"delete_parameter\"  onclick=\"return confirm('Are you sure?');\" value=\"DELETE\">";
+		echo "</td>";
+		echo "<td>";
+		echo "<input class=\"save\" type=\"submit\" name=\"rename_parameter\" value=\"RENAME\">&nbsp;=&nbsp;";
+		echo "<input type=\"text\" name=\"new_parameter_name\" size=\"20\" value=\"\">";
 		echo "</td>";
 		echo "</form>";
 		echo "</tr>";

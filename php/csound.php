@@ -207,6 +207,7 @@ if($need_to_save OR isset($_POST['savealldata']) OR isset($_POST['delete_instrum
 		SaveTonality(FALSE,$dir_tonality,$tonality_filename,$temp_dir.$temp_folder,TRUE);
 		} */
 	}
+$exists_name = list_of_parameter_names($temp_dir,$temp_folder);
 
 try_create_new_file($this_file,$filename);
 $content = @file_get_contents($this_file);

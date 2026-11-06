@@ -2159,7 +2159,7 @@ foreach ($lines as $thisline) {
 	}
 echo "<textarea name=\"csound_score\" rows=\"20\" wrap=\"off\" style=\"font-family:monospace; width:".($max_len + 2)."ch; min-width:700px; max-width:100%;\">".htmlspecialchars($csound_score)."</textarea><br />";
 
-echo "<p><input class=\"save\" type=\"submit\" name=\"savecsound\" value=\"SAVE THIS CODE\"></p><p><input class=\"save\" type=\"submit\" name=\"createcsound\" value=\"CREATE Csound CODE\"> from MIDI codes in “<span class=\"green-text\">".$object_name."</span>”</p>";
+if($object_type == 1 OR $object_type == 5) echo "<p><input class=\"save\" type=\"submit\" name=\"savecsound\" value=\"SAVE THIS CODE\"></p><p><input class=\"save\" type=\"submit\" name=\"createcsound\" value=\"CREATE Csound CODE\"> from the MIDI codes in “<span class=\"green-text\">".$object_name."</span>”</p>";
 echo "</form>";
 echo "<script>
 document.getElementById('csound-form').addEventListener('submit', function (event) {
