@@ -1,5 +1,5 @@
 // Bol Processor BP3
-// Csound resource file saved as "-cs.checkAllCsound". Date: 2024-08-12 08:55:27
+// Csound resource file saved as "-cs.checkAllCsound". Date: 2026-11-07 14:56:12 GMT
 16
 2
 3
@@ -91,11 +91,11 @@ This instrument is assigned to channel 1 by default
 2147483647
 1
 blurb
-Test parameter
+Additional parameter @ 6-7-8
 6
 7
 8
-0.000
+0
 07
 1
 Harpsichord
@@ -169,7 +169,7 @@ This instrument is assigned to channel 2 by default
 4000
 90
 1
-blurb
+blurb3
 Test of &quot;blurb&quot; parameter
 9
 10
