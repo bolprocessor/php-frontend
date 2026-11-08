@@ -76,6 +76,15 @@ if(isset($_POST['delete_parameter'])) {
 	echo "<p><span class=\"red-text\">Deleted </span><span class=\"green-text\"><big>“".$parameter_name."”</big></span>…</p>";
 	$this_parameter_file = $folder_this_instrument.SLASH.$parameter_name.".txt";
 	rename($this_parameter_file,$this_parameter_file.".old");
+	$lines = file($argmax_file);
+	if($lines !== false) {
+		$key = '$last_argument["'. $parameter_name.'"]';
+		$lines = array_filter($lines, function ($line) use ($key) {
+			return strpos($line, $key) === false;
+		});
+		file_put_contents($argmax_file,implode('',$lines),LOCK_EX);
+		}
+	$exists_name = list_of_parameter_names($temp_dir,$temp_folder);
 	$handle = fopen($file_changed,"w");
 	if($handle) fclose($handle);
 	}
@@ -91,7 +100,7 @@ if (isset($_POST['rename_parameter'])) {
             $contents = file_get_contents($argmax_file);
             if ($contents !== false) {
                 $contents = str_replace($parameter_name, $new_parameter_name, $contents);
-                file_put_contents($argmax_file, $contents, LOCK_EX);
+                file_put_contents($argmax_file, $contents,LOCK_EX);
             	}
 			unlink($this_parameter_file);
             $exists_name = list_of_parameter_names($temp_dir, $temp_folder);

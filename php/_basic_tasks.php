@@ -1119,7 +1119,10 @@ function add_linefeeds_after_remarks($text) { // 2026-04-23
 	$table2 = array();
 	foreach($table AS $line) {
 		$line = trim($line);
-		if(str_starts_with($line,"//") OR str_starts_with($line,"-")) $is_comment = TRUE;
+		if(str_starts_with($line,"//") OR str_starts_with($line,"-")) {
+			if(!$is_comment) $table2[] = '';
+			$is_comment = TRUE;
+			}
 		else {
 			if($is_comment) {
 				if($line <> '') $table2[] = '';
@@ -1440,9 +1443,12 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder,$force) {
 		$folder_this_instrument = $temp_dir.$temp_folder.SLASH.$instrument_folder_name;
 		if(!is_dir($folder_this_instrument)) mkdir($folder_this_instrument);
 		$dir_instrument = scandir($folder_this_instrument);
+		// echo "@@@ folder_this_instrument = ".$folder_this_instrument."<br />";
 		foreach($dir_instrument as $thisparameter) {
+			// echo "@ thisparameter = ".$thisparameter."<br />";
 			if($thisparameter == '.' OR $thisparameter == ".." OR $thisparameter == ".DS_Store") continue;
-			if(!isset($exists_name[$thisparameter])) continue;
+			$thisname = str_replace(".txt",'',$thisparameter);
+			if(!isset($exists_name[$thisname])) continue;
 			$table = explode(".",$thisparameter);
 			$extension = end($table);
 			if($extension <> "txt") continue;
@@ -1451,15 +1457,21 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder,$force) {
 		fwrite($handle,$number_param."\n");
 		foreach($dir_instrument as $thisparameter) {
 			if($thisparameter == '.' OR $thisparameter == ".." OR $thisparameter == ".DS_Store") continue;
-			if(!isset($exists_name[$thisparameter])) continue;
+			$thisname = str_replace(".txt",'',$thisparameter);
+			if(!isset($exists_name[$thisname])) continue;
+			// echo "+ thisparameter = ".$thisparameter."<br />";
 			$table = explode(".",$thisparameter);
 			$extension = end($table);
 			if($extension <> "txt") continue;
+			// echo "++ thisparameter = ".$thisparameter."<br />";
 			$content_parameter = file_get_contents($folder_this_instrument.SLASH.$thisparameter);
 			$table = explode(chr(10),$content_parameter);
 			for($i = 0; $i < count($table); $i++) {
 				$line = trim($table[$i]);
-				if($line <> '' OR $i < 2) fwrite($handle,$line."\n");
+				if($line <> '' OR $i < 2) {
+					fwrite($handle,$line."\n");
+				//	echo "line = ".$line."<br />";
+					}
 				}
 			}
 		}

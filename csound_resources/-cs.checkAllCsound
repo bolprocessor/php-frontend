@@ -1,5 +1,5 @@
 // Bol Processor BP3
-// Csound resource file saved as "-cs.checkAllCsound". Date: 2026-11-07 14:56:12 GMT
+// Csound resource file saved as "-cs.checkAllCsound". Date: 2026-11-08 16:38:13 GMT
 16
 2
 3
@@ -17,7 +17,7 @@
 -1
 -1
 -1
-tryCsound.orc
+0-default.orc
 4
 Flute
 This instrument is assigned to channel 1 by default

@@ -1903,7 +1903,7 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 		$error_mssg = '';
 		if(file_exists($music_xml_file)) continue;
 		$line = trim($table[$i]);
-		$line = str_replace(chr(10),'',$line);
+	//	$line = str_replace(chr(10),"<br />",$line);
 	//	echo "i = ".$i."<br />";
 		if(is_integer($pos=strpos($line,"<?xml")) AND $pos == 0) break;
 		if(!$ok_remarks AND is_integer($pos=strpos($line,"//")) AND $pos == 0) continue;
@@ -1915,6 +1915,7 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 			$line = str_replace("[",'',$line);
 			$line = str_replace("]",'',$line);
 			$line = trim(str_replace("//",'',$line));
+			$line = str_replace(chr(10),"<br />",$line);
 			echo "<tr><td colspan=2 style=\"background-color:Cornsilk; color:black;\">".$line."</td></tr>";
 			continue;
 			}
@@ -2121,7 +2122,7 @@ function create_parts($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxch
 	if($label == "units" AND $p_clock <> $q_clock)
 		$initial_tempo = " _tempo(".$q_clock."/".$p_clock.") ";
 	if(is_integer($pos=strpos($line,"[")) AND $pos == 0)
-		$title_this = preg_replace("/\[([^\]]+)\].*/u",'$1',$line);
+		$title_this = preg_replace('/^\[([^\]]+)\].*/us', '$1', $line);
 	else $title_this = '';
 	$initial_controls = '';
 	if(is_integer($pos=strpos($line,"{"))) {
@@ -2137,11 +2138,13 @@ function create_parts($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxch
 			$initial_controls = '';
 			}
 		}
-	$line = preg_replace("/^i[0-9].*/u",'',$line); // Csound note statement
-	$line = preg_replace("/^f[0-9].*/u",'',$line); // Csound table statement
-	$line = preg_replace("/^t[ ].*/u",'',$line); // Csound tempo statement
-	$line = preg_replace("/^s\s*$/u",'',$line); // Csound "s" statement
-	$line = preg_replace("/^e\s*$/u",'',$line); // Csound "e" statement
+	// 2026-11-08 An item is now a paragraph, so Csound lines are removed from every line ('m' flag), not only from the first one - fixed by Claude
+	$line = preg_replace("/^i[0-9].*$/mu",'',$line); // Csound note statement
+	$line = preg_replace("/^f[0-9].*$/mu",'',$line); // Csound table statement
+	$line = preg_replace("/^t[ ].*$/mu",'',$line); // Csound tempo statement
+	$line = preg_replace("/^s[ \t]*$/mu",'',$line); // Csound "s" statement
+	$line = preg_replace("/^e[ \t]*$/mu",'',$line); // Csound "e" statement
+	$line = trim(preg_replace("/\n\s*\n/u","\n",$line)); // Remove the empty lines left
 	$restrict_analysis = FALSE;
 	// Beware that measure_min and measure_max may not be integers
 	if(!($measure_min === 0) AND strlen($measure_min) > 0) {
