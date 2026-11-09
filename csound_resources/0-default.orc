@@ -10,6 +10,8 @@
 ;        1    Plucked string (outputs to StereoDelay)
 ;        2    Plucked string (outputs to StereoChorus)
 ;        3    Synth brass (outputs to GlobalReverb)
+;        4    Bowed string, cello-like, with vibrato controlled by the "splash"
+;             parameter of instrument "Splashmachine" (outputs to GlobalReverb)
 ;        10    Sine wave (outputs to GlobalReverb)
 ;
 ; Effects:
@@ -46,7 +48,9 @@ giMaxNoteAmp = 2.0/3.0
 
 ; -- WAVE TABLES --
 
-giSine    ftgen  0, 0, 32769, 10, 1    ; sine wave
+; A fixed table number is required: "ftgen 0" would give number 101, which BP3 uses
+; for the first table of its scores (101, 102, ...), so a score would replace the sine.
+giSine    ftgen  99999, 0, 32769, 10, 1    ; sine wave
 
 ; -- EFFECTS BUSES (global audio variables) --
 ; Instruments add their output to a bus; each effect reads its bus,
@@ -183,6 +187,57 @@ aright     =        imain*a2 + icross*a1
 
 gaReverbL = gaReverbL + aleft
 gaReverbR = gaReverbR + aright
+endin
+
+; Bowed string instrument (cello-like), used by "Splashmachine"
+;    In addition to the default parameters p2 to p10, it takes the "splash" parameter as
+;        p11, p12    beginning & end values of "splash"
+;        p13         a table number containing the "splash" function (or 0)
+;    When p13 is positive, the table is used instead of the beginning & end values.
+;    "splash" sets the depth of the vibrato: |splash| / 10 cents
+;    (e.g. 120 gives +/- 12 cents, 0 gives no vibrato).
+instr 4
+idur     = p3
+ik2      = log(2.) / 1200.                                ; cents to frequency ratio
+
+kpitch, kvol  bp_control  idur, p4, p5, p6, p7, p8, p9, p10
+
+; "splash" parameter, read like volume and pitchbend in bp_control
+ifsplash = p13
+ksplash  line    p11, idur, p12
+if (ifsplash <= 0) goto splashlin
+ilensplash = ftlen(ifsplash)
+kndxsplash line  0, idur, ilensplash
+ksplash  tablei  kndxsplash, ifsplash
+
+splashlin:
+; vibrato: depth from "splash", fading in after the attack, rate slightly unsteady
+kvibdepth =      abs(ksplash) * 0.1                        ; depth in cents
+kvibenv  linseg  0, 0.3 * idur, 1                         ; holds 1 after the fade-in
+kvibrnd  randi   0.4, 3                                   ; +/- 0.4 Hz around 5.5 Hz
+kvib     oscili  kvibdepth * kvibenv, 5.5 + kvibrnd, giSine
+kfreq    =       kpitch * exp(kvib * ik2)
+
+; bowed envelope: soft attack, sustain, short release
+iatt     =       (idur * 0.3 < 0.15 ? idur * 0.3 : 0.15)
+irel     =       (idur * 0.3 < 0.2 ? idur * 0.3 : 0.2)
+kenv     linseg  0, iatt, 1, idur - iatt - irel, 0.85, irel, 0
+kamp     =       kvol * kenv * giMaxNoteAmp
+
+; sawtooth (bowed string) shaped by a lowpass filter and body resonances
+asaw     vco2    1, kfreq, 0                               ; 0 = sawtooth wave
+abody    butterlp asaw, 3000
+af1      butterbp abody, 280, 120                          ; wood resonance
+af2      butterbp abody, 1000, 400
+af3      butterbp abody, 2500, 800
+anoise   rand    0.02                                      ; bow noise
+anoise   butterbp anoise, 3000, 2000
+asig     =       0.5 * abody + 1.5 * af1 + 0.8 * af2 + 0.4 * af3
+asig     balance asig, abody                               ; keep the level of the filtered sawtooth
+asig     =       (asig + anoise) * kamp
+
+gaReverbL = gaReverbL + 0.8 * asig
+gaReverbR = gaReverbR + 0.6 * asig
 endin
 
 ; Simple sine wave instrument
