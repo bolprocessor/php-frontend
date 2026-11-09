@@ -76,6 +76,7 @@
 "VolumeController"	"Volume controller"	"(0..127) usually 7"	"0"	"7"
 "DeftPanoramic"	"Default panoramic"	"(0..127)"	"0"	"64"
 "PanoramicController"	"Panoramic controller"	"(0..127) usually 10"	"0"	"10"
+"DeftPitchbendRange"	"Default pitchbend range"	"cents, for all MIDI channels (e.g. 200); _pitchrange() changes it for one channel. With 0, _pitchbend() values are raw (0..16383, centre 8192)"	"0"	"0"
 "StopPauseContinue"	"Respond to  Stop/Continue"	"(if a MIDI input is active)"	"1"	"1"
 "MICROTONALITY"				
 "TraceMicrotonality"	"Trace microtonality"		"1"	"0"

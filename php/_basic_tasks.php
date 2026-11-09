@@ -3051,7 +3051,7 @@ function check_csound() {
 		echo "&nbsp;<input class=\"save\" type=\"submit\"  name=\"csound_path_change\" value=\"TRY\">";
 		echo "<br />";
 		if(linux_system()) {
-			echo "<br /><span class=\"red-text\">➡</span>&nbsp;Read instructions in the <a target=\"_blank\" //bolprocessor.org/misc/linux-scripts.zip\">script folder</a> to install Csound<br />";
+			echo "<br /><span class=\"red-text\">➡</span>&nbsp;Read instructions in the <a target=\"_blank\" class=\"linkdotted\" href=\"https://bolprocessor.org/misc/linux-scripts.zip\">script folder</a> to install Csound<br />";
 			}
 		else {
 			echo "<br /><span class=\"red-text\">➡</span>&nbsp;<a target=\"_blank\" class=\"linkdotted\" href=\"https://csound.com/download.html\">Follow this link</a> to install Csound<br />";
