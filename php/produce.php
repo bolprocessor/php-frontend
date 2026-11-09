@@ -505,6 +505,39 @@ if($instruction <> "help") {
 		echo "&nbsp;<button id=\"pauseBtn\" type=\"button\" class=\"produce\" onclick=\"pauseProcess();\">Pause</button>";
 		echo "&nbsp;<button id=\"continueBtn\" type=\"button\" class=\"produce disabled\" disabled onclick=\"continueProcess();\">Continue</button>";
 		}
+	if($file_format == "rtmidi" AND $instruction <> "enter_notes" AND $tracefile <> '') {
+		// Display the date of the performance, written by the console to the "_time" file every 200 ms
+		// The console removes from the trace path the characters not accepted by remove_spaces()
+		$timefile = preg_replace('/[^A-Za-z0-9():_.,-]/','',"trace_".my_session_id()."_".$project_fullname."_time");
+		@unlink($temp_dir.$timefile);
+		echo "<br /><br /><big><b>⏱ <span id=\"perfTime\" style=\"font-family:monospace;\">0:00.0</span></b></big>";
+		echo "<script>
+		(function() {
+			const url = 'time_poll.php?file=' + encodeURIComponent(".json_encode($timefile).");
+			const display = document.getElementById('perfTime');
+			function format(ms) {
+				const tenths = Math.floor(ms / 100);
+				const minutes = Math.floor(tenths / 600);
+				const seconds = Math.floor((tenths % 600) / 10);
+				return minutes + ':' + (seconds < 10 ? '0' : '') + seconds + '.' + (tenths % 10);
+				}
+			async function pollTime() {
+				const box = document.getElementById('wait');
+				if(box && box.style.display == 'none') return; // The console has finished
+				try {
+					const response = await fetch(url, {cache: 'no-store', credentials: 'same-origin'});
+					if(response.ok) {
+						const result = await response.json();
+						if(typeof result.ms === 'number') display.textContent = format(result.ms);
+						}
+					}
+				catch(error) {}
+				window.setTimeout(pollTime, 200);
+				}
+			pollTime();
+			})();
+		</script>";
+		}
 	echo "<br /><br /></p>\n";
 	}
 echo str_repeat(' ', 10240);  // send extra spaces to fill browser buffer, useful for standalone application
