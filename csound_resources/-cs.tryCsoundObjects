@@ -1,5 +1,5 @@
 // Bol Processor BP3
-// Csound resource file saved as "-cs.tryCsoundObjects". Date: 2026-11-07 13:39:42 GMT
+// Csound resource file saved as "-cs.tryCsoundObjects". Date: 2026-11-03 14:32:47 GMT
 16
 1
 3
@@ -160,7 +160,15 @@ This instrument has 1 additional parameter
 2147483647
 2147483647
 2147483647
-0
+1
+blurb
+This is a test argument
+9
+10
+11
+0.000
+07
+1
 Instrument_3
 This instrument remaps pitch bend to a frequency ratio
 5
@@ -444,6 +452,30 @@ This instrument has 3 additional parameters
 2147483647
 2147483647
 2147483647
+3
+blah
+
+15
+16
+17
+231.500
+7
+1
+blurb2
+Another test argument
+9
+10
+11
+0.000
+7
+1
+oops
+
+12
+13
+14
+1.000
+7
 0
 _begin tables
 f1 0 256 10 1 ; This table may be changed
