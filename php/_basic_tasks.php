@@ -1272,7 +1272,9 @@ function delete_folder($folder,$all) {
 
 function SaveObjectPrototypes($verbose,$dir,$filename,$temp_folder,$force) {
 	global $top_header,$test,$temp_dir,$csound_resources,$permissions;
-	$file_lock = $filename."_lock";
+	// 2026-11-10 Without the temporary folder (deleted as old), the file would be saved without its prototypes
+	if(!is_dir($temp_dir.$temp_folder)) return "missing";
+	$file_lock = $dir.$filename."_lock"; // 2026-11-10 The lock is next to the file, not in php/
 	$time_start = time();
 	$time_end = $time_start + 3;
 	$file_changed = $temp_dir.$temp_folder.SLASH."_changed";
@@ -1280,10 +1282,10 @@ function SaveObjectPrototypes($verbose,$dir,$filename,$temp_folder,$force) {
 	@unlink($file_changed);
 	while(TRUE) {
 		if(!file_exists($file_lock)) break;
-		if(time() > $time_end) unlink($file_lock);
+		if(time() > $time_end) @unlink($file_lock);
 		sleep(1);
 		}
-	$handle = fopen($dir.$file_lock,"w");
+	$handle = fopen($file_lock,"w");
 	fwrite($handle,"lock\n");
 	fclose($handle);
 	$handle = fopen($dir.$filename,"w");
@@ -1369,7 +1371,7 @@ function SaveObjectPrototypes($verbose,$dir,$filename,$temp_folder,$force) {
 	chmod($dir.$filename,$permissions);
 	if($verbose) echo "</font></p><hr>";
 //	sleep(1);
-	unlink($dir.$file_lock);
+	unlink($file_lock);
 	return "saved";
 	}
 
@@ -1381,7 +1383,9 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder,$force) {
 	if($verbose) echo "temp_folder = ".$temp_folder."<br />";
 	$file_lock2 = $dir.$filename."_lock2";
 	if(file_exists($file_lock2)) return "locked";
-	$file_lock = $filename."_lock";
+	// 2026-11-10 Without the temporary folder (deleted as old), the file would be saved without its instruments
+	if(!is_dir($temp_dir.$temp_folder)) return "missing";
+	$file_lock = $dir.$filename."_lock"; // 2026-11-10 The lock is next to the file, not in php/
 	$folder_scales = $temp_dir.$temp_folder.SLASH."scales";
 	$file_changed = $temp_dir.$temp_folder.SLASH."_changed";
 	if($verbose) echo "file_changed = ".$file_changed."<br />";
@@ -1391,10 +1395,10 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder,$force) {
 	$time_end = $time_start + 3;
 	while(TRUE) {
 		if(!file_exists($file_lock)) break;
-		if(time() > $time_end) unlink($file_lock);
+		if(time() > $time_end) @unlink($file_lock);
 		sleep(1);
 		}
-	$handle = fopen($dir.$file_lock,"w");
+	$handle = fopen($file_lock,"w");
 	fwrite($handle,"lock\n");
 	fclose($handle);
 	unlink($dir.$filename);
@@ -1511,7 +1515,7 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder,$force) {
 	fwrite($handle,$tonality_filename."\n");
 	fclose($handle);
 	chmod($dir.$filename,$permissions);
-	unlink($dir.$file_lock);
+	unlink($file_lock);
 	return $warn_not_empty;
 	}
 	
@@ -1614,6 +1618,8 @@ function SaveTonality($verbose,$dir,$filename,$temp_folder,$force) {
 	if(file_exists($file_lock3)) return "locked";
 	$file_lock = $dir.$filename."_lock";
 	$folder_scales = $temp_dir.$temp_folder.SLASH."scales";
+	// 2026-11-10 Without the temporary folder (deleted as old), the file would be saved without its scales
+	if(!is_dir($folder_scales)) return "missing";
 //	echo "temp_folder = ".$temp_folder."<br />";
 //	echo "folder_scales = ".$folder_scales."<br />";
 	$file_changed = $folder_scales.SLASH."_changed";
@@ -2318,6 +2324,33 @@ function set_argmax_argument($argmax_file,$name,$arg) {
 	fwrite($handle,$text);
 	fclose($handle);
 	return;
+	}
+
+function stale_temp_folder($temp_folder) {
+	// 2026-11-10 Returns TRUE if a form sent from a page of this file ('-cs', '-so', '-to') cannot be used, because the temporary folder built when the page was displayed has been deleted as old (see "Delete old temp directories" above), or belongs to a previous session (e.g. after restarting the browser). Saving it would write an incomplete file.
+	// Call it before creating the temporary folder. Forms that change the temporary folder must contain a hidden 'temp_folder' field.
+	global $temp_dir;
+	if(!isset($_POST['temp_folder'])) return FALSE;
+	$posted_folder = $_POST['temp_folder'];
+	$base = preg_replace("/_[0-9a-f]{10}_temp$/",'',$temp_folder);
+	// Forms sent by pages of other files (e.g. through display_more_buttons()) are not concerned
+	if(!preg_match("/^".preg_quote($base,'/')."_[0-9a-f]{10}_temp$/",$posted_folder)) return FALSE;
+	if($posted_folder <> $temp_folder) return TRUE;
+	return !is_dir($temp_dir.$temp_folder);
+	}
+
+function stale_page_message($filename) {
+	echo "<p><span class=\"red-text\">➡ This page had been open too long and its temporary data was deleted or belongs to a previous session. Changes were NOT saved, and “".$filename."” has NOT been modified.<br />The page has been reloaded from the file. Please make your changes again.</span></p>";
+	return;
+	}
+
+function stale_subpage($temp_folder) {
+	// 2026-11-10 For pages opened from a '-cs', '-so' or '-to' page, which work in its temporary folder
+	global $temp_dir;
+	if($temp_folder <> '' AND is_dir($temp_dir.$temp_folder)) return;
+	echo "<p><span class=\"red-text\">➡ The temporary data of this page has been deleted because the page it was opened from had been open too long, or belongs to a previous session.<br />Close this tab, then reload the page of the resource file and open this item again.</span></p>";
+	echo "</body></html>";
+	die();
 	}
 
 function list_of_parameter_names($temp_dir,$temp_folder) {

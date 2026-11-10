@@ -34,6 +34,11 @@ save_settings("last_name",$filename);
 if($test) echo "dir = ".$dir."<br />";
 
 $temp_folder = str_replace(' ','_',$filename)."_".my_session_id()."_temp";
+// 2026-11-10 Form actions are ignored if the temporary folder of the page is lost, and the page is rebuilt from the file on disk
+if(stale_temp_folder($temp_folder)) {
+	stale_page_message($filename);
+	$_POST = array();
+	}
 if(!file_exists($temp_dir.$temp_folder)) {
 	mkdir($temp_dir.$temp_folder);
 	}
@@ -190,7 +195,8 @@ if(isset($_POST['duplicate_instrument'])) {
 $lock2 = $dir.$filename."_lock2";
 if($need_to_save OR isset($_POST['savealldata']) OR isset($_POST['delete_instrument']) OR isset($_POST['restore']) OR isset($_POST['create_instrument'])) {
 		echo "<p id=\"timespan\"><span class=\"red-text\">Saving file:</span> <span class=\"green-text\">".$filename."</span></p>";
-		$warn_not_empty = SaveCsoundInstruments(FALSE,$dir,$filename,$temp_dir.$temp_folder,TRUE);
+		$warn_not_empty = SaveCsoundInstruments(FALSE,$dir,$filename,$temp_folder,TRUE);
+		if(!is_bool($warn_not_empty)) $warn_not_empty = FALSE; // "locked", "missing"
 		// We also save tonality data separately
 /*		$tonality_filename = str_replace("-cs.","-to.",$filename);
 		$tonality_filename = str_replace(".bpcs",".bpto",$tonality_filename);
@@ -671,7 +677,7 @@ if($max_scales > 1) {
 	// This is an old version of "-cs" file still containing scale definitions
 	$dir_tonality = $dir_tonality_resources;
 	// Save scale definitions to a "-to" file
-	SaveTonality(FALSE,$dir_tonality,$tonality_filename,$temp_dir.$temp_folder,TRUE);
+	SaveTonality(FALSE,$dir_tonality,$tonality_filename,$temp_folder,TRUE);
 	echo "<p><span class=\"red-text\">➡</span> Tonality file ‘<span class=\"green-text\">".$tonality_filename."</span>’ has been created or updated</p>";
 	}
 
@@ -759,6 +765,7 @@ if($number_instruments > 0) {
 		echo "<input type=\"hidden\" name=\"filename\" value=\"".$filename."\">";
 		echo "<input type=\"hidden\" name=\"InstrumentIndex\" value=\"".$this_index."\">";
 		echo "<input type=\"hidden\" name=\"instrument_name\" value=\"".$CsoundInstrumentName[$j]."\">";
+		echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";
 		echo "<input type=\"hidden\" name=\"number_channels\" value=\"".$number_channels."\">";
 		echo "<input type=\"hidden\" name=\"CsoundOrchestraName\" value=\"".$CsoundOrchestraName."\">";
 		echo "<input type=\"hidden\" name=\"number_instruments\" value=\"".$number_instruments."\">";

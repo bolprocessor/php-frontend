@@ -28,6 +28,7 @@ $instrument_name = str_replace(' ','_',$instrument_name);
 require_once("_header.php");
 display_darklight();
 echo $error_post;
+stale_subpage($temp_folder); // 2026-11-10
 
 $instrument_folder_name = str_replace('-','_',$instrument_name);
 $folder_this_instrument = $temp_dir.$temp_folder.SLASH.$instrument_folder_name;
@@ -466,11 +467,14 @@ foreach($dir_instrument as $thisparameter) {
 	$deleted_parameters .= "“".$parameter_name."” ";
 	}
 if($deleted_parameters <> '') echo "<p><input class=\"save\" type=\"submit\" name=\"restore\" value=\"RESTORE ALL DELETED PARAMETERS\"> = <span class=\"green-text\"><big>".$deleted_parameters."</big></span></p>";
-echo "<p><input class=\"save\" type=\"submit\" name=\"create_parameter\" value=\"CREATE A NEW PARAMETER\"> named <input type=\"text\" name=\"new_parameter\" size=\"20\" value=\"\">&nbsp;👉&nbsp;<span class=\"red-text\">Don't use: </span><span class=\"green-text\"><b>";
-foreach($exists_name AS $thisname => $value) {
-	echo "&nbsp;&nbsp;".$thisname;
+echo "<p><input class=\"save\" type=\"submit\" name=\"create_parameter\" value=\"CREATE A NEW PARAMETER\"> named <input type=\"text\" name=\"new_parameter\" size=\"20\" value=\"\">";
+if(count($exists_name) > 0) {
+	echo "&nbsp;👉&nbsp;<span class=\"red-text\">Don't use: </span><span class=\"green-text\"><b>";
+	foreach($exists_name AS $thisname => $value) {
+		echo "&nbsp;&nbsp;".$thisname;
+		}
+	echo "</b></span>&nbsp;&nbsp;<span class=\"red-text\">as they already exist!</span></p>";
 	}
-echo "</b></span>&nbsp;&nbsp;<span class=\"red-text\">as they already exist!</span></p>";
 
 echo "</form>";
 $n = 0;

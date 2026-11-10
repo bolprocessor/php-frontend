@@ -33,6 +33,7 @@ $this_title = $expression = $object_name;
 require_once("_header.php");
 display_darklight();
 echo $error_post;
+stale_subpage($temp_folder); // 2026-11-10
 
 if($midi_player == "MIDIjs") echo "<script type='text/javascript' src='https://www.midijs.net/lib/midi.js'></script>";
 else if($midi_player == "html-midi-player") echo "<script src=\"https://cdn.jsdelivr.net/combine/npm/tone@14.7.58,npm/@magenta/music@1.23.1/es6/core.js,npm/focus-visible@5,npm/html-midi-player@1.4.0\"></script>";

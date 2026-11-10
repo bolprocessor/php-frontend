@@ -31,6 +31,11 @@ echo link_to_help();
 
 $temp_folder = str_replace(' ','_',$filename)."_".my_session_id()."_temp";
 $dir_scales = $temp_dir.$temp_folder.SLASH."scales".SLASH;
+// 2026-11-10 Form actions are ignored if the temporary folder of the page is lost, and the page is rebuilt from the file on disk
+if(stale_temp_folder($temp_folder)) {
+	stale_page_message($filename);
+	$_POST = array();
+	}
 $need_to_save = FALSE;
 $scala_error = '';
 if($_SERVER['REQUEST_METHOD'] == 'POST' AND isset($_POST['import_files'])) {
@@ -316,6 +321,7 @@ for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
 	if(isset($_POST['copy_scale_'.$i_scale])) {
 		echo "<p><span class=\"red-text\">➡ The destination file should be closed to make sure that the export takes place</span></p>";
 		echo "<form method=\"post\" action=\"".$url_this_page."&scalefilename=".urlencode($scalefilename)."\" enctype=\"multipart/form-data\">";
+		echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";
 		echo "<input class=\"cancel\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\">&nbsp;<input type=\"submit\" style=\"background-color:aquamarine; font-size:large;\" name=\"\" onclick=\"this.form.target='_self';return true;\" value=\"Click to copy scale ‘".$scalefilename."’ to:\"><br />";
 		echo "<blockquote>";
 		echo "<input type=\"hidden\" name=\"copy_this_scale\" value=\"1\">";
@@ -370,11 +376,11 @@ if($need_to_save OR isset($_POST['savealldata'])) {
 		if(!$duplicated_scale) {
 			echo "<p><span class=\"red-text\">Saving file</span> <span class=\"green-text\">".$filename."</span> <span class=\"red-text\">was not possible this time because it has been modified by an external procedure…<br />Probably importing microtonal scales from another resource.<br />➡</span> Now the page has been refreshed and it can be saved</p>";
 			}
-		else $warn_not_empty = SaveTonality(FALSE,$dir,$filename,$temp_dir.$temp_folder,TRUE);
+		else $warn_not_empty = SaveTonality(FALSE,$dir,$filename,$temp_folder,TRUE);
 		}
 	else {
 		echo "<p id=\"timespan\"><span class=\"red-text\">Saving file:</span> <span class=\"green-text\">".$filename."</span></p>";
-		$warn_not_empty = SaveTonality(FALSE,$dir,$filename,$temp_dir.$temp_folder,TRUE);
+		$warn_not_empty = SaveTonality(FALSE,$dir,$filename,$temp_folder,TRUE);
 	//	sleep(1);
 		}
 	}
@@ -1108,6 +1114,7 @@ if($max_scales > 0) {
 		
 	if(isset($_POST['export_scales'])) {
 		echo "<form method=\"post\" action=\"".$url_this_page."#export\" enctype=\"multipart/form-data\">";
+		echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";
 		echo "<hr><table class=\"thicktable\">";
 		echo "<tr>";
 		echo "<td>";
@@ -1139,6 +1146,7 @@ echo $dir."<br />";
 	
 	if(isset($_POST['compare_scales'])) {
 		echo "<form method=\"post\" action=\"".$url_this_page."#export\" enctype=\"multipart/form-data\">";
+		echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";
 		echo "<hr><table class=\"thicktable\">";
 		echo "<tr>";
 		echo "<td style=\"padding-bottom:6px;\">";

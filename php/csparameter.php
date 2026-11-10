@@ -32,6 +32,7 @@ $this_title = $parameter_name;
 require_once("_header.php");
 display_darklight();
 echo $error_post;
+stale_subpage($temp_folder); // 2026-11-10
 
 if($test) echo "folder_this_instrument = ".$folder_this_instrument."<br />";
 if($test) echo "temp_dir = ".$temp_dir."<br />";

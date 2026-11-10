@@ -496,7 +496,7 @@ if($instruction <> "help") {
 		}
 	</script>";
 
-	echo "<p id=\"wait\" style=\"text-align:center; background-color:yellow; color:black;\"><br /><big><b><span class=\"blinking\">… Bol Processor console is working …</span></b></big><br />(Don't close this window!)<br /><br />";
+	echo "<p id=\"wait\" style=\"text-align:center; background-color:yellow; color:black;\"><br /><big><b><span class=\"blinking\" style=\"animation-duration:2.4s;\">… Bol Processor console is working …</span></b></big><br />(Don't close this window!)<br /><br />";
 
 	if($instruction == "templates") echo "👉 Creating/updating templates<br /><br />";
 	if($instruction == "enter_notes") echo "👉 Entering notes from the MIDI input device.<br /><br />Notes are displayed at the insertion point of your grammar or data.<br />The note convention is chosen in the settings file.<br /><br />👉 You can close this window when done.<br /><br />If it doesn't work, click STOP, then SHOW process, and check connected devices<br />&nbsp;&nbsp;to update the MIDI input.<br /><br />Read <a target=\"_blank\" href=\"https://bolprocessor.org/enter-notes/\">https://bolprocessor.org/enter-notes/</a> for details.<br /><br />";

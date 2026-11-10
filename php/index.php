@@ -105,7 +105,6 @@ if($path == '') {
 	select_a_skin($url_this_page,$path,$skin);
  	}
 
-
 if($test) echo "dir = ".$dir."<br />";
 if($test) echo "url_this_page = ".$url_this_page."<br />";
 

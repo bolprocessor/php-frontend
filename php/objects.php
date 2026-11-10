@@ -44,6 +44,11 @@ save_settings("last_name",$filename);
 if($test) echo "dir = ".$dir."<br />";
 
 $temp_folder = str_replace(' ','_',$filename)."_".my_session_id()."_temp";
+// 2026-11-10 Form actions are ignored if the temporary folder of the page is lost, and the page is rebuilt from the file on disk
+if(stale_temp_folder($temp_folder)) {
+	stale_page_message($filename);
+	$_POST = array();
+	}
 if(!file_exists($temp_dir.$temp_folder)) {
 	mkdir($temp_dir.$temp_folder);
 	chmod($temp_dir.$temp_folder,$permissions);
@@ -177,7 +182,7 @@ if(isset($_POST['savethisfile']) OR isset($_POST['create_object']) OR isset($_PO
 		}			
 	if(!$bad) {
 		echo "<span id=\"timespan\" style=\"color:red; float:right; background-color:white; padding:6px; border-radius:6px;\">&nbsp;Saved “".$filename."” file…</span>";
-		SaveObjectPrototypes(FALSE,$dir,$filename,$temp_dir.$temp_folder,TRUE);
+		SaveObjectPrototypes(FALSE,$dir,$filename,$temp_folder,TRUE);
 		}
 	}
 
@@ -198,6 +203,7 @@ $csound_file = $extract_data['csound'];
 $comment_on_file = '';
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 echo "<input type=\"hidden\" name=\"temp_dir\" value=\"".$temp_dir."\">";
+echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";
 echo "<input type=\"hidden\" name=\"filename\" value=\"".$filename."\">";
 $table = explode(chr(10),$content);
 $iobj = -1;
@@ -390,6 +396,7 @@ if($iobj >= 0) {
 		echo "<td style=\"padding:4px; vertical-align:middle;\">";
 		echo "<input type=\"hidden\" name=\"dir\" value=\"".$dir."\">";
 		echo "<input type=\"hidden\" name=\"filename\" value=\"".$filename."\">";
+		echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";
 		echo "<input type=\"hidden\" name=\"PrototypeTickKey\" value=\"".$PrototypeTickKey."\">";
 		echo "<input type=\"hidden\" name=\"PrototypeTickChannel\" value=\"".$PrototypeTickChannel."\">";
 		echo "<input type=\"hidden\" name=\"PrototypeTickVelocity\" value=\"".$PrototypeTickVelocity."\">";
