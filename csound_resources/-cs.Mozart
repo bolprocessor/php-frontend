@@ -1,25 +1,83 @@
-// Bol Processor BP3
-// Csound resource file saved as "-cs.Mozart". Date: 2024-08-12 09:17:39
-16
--1
--1
--1
--1
--1
--1
--1
--1
--1
--1
--1
--1
--1
--1
--1
--1
-0-default.orc
-0
-_begin tables
-f1 0 256 10 1 ; This table may be changed
-_end tables
--to.Mozart
+{
+    "header": "// Bol Processor BP3\n// Csound resource file saved as \"-cs.Mozart\". Date: 2024-08-12 09:17:39\n// Converted to JSON format. Date: 2026-11-11 14:35:31 GMT",
+    "Csound orchestra file": {
+        "key": "CsoundOrchestraName",
+        "value": "0-default.orc"
+    },
+    "Index of the instrument associated with MIDI channel 1 (-1 means none)": {
+        "key": "WhichCsoundInstrument[1]",
+        "value": -1
+    },
+    "Index of the instrument associated with MIDI channel 2 (-1 means none)": {
+        "key": "WhichCsoundInstrument[2]",
+        "value": -1
+    },
+    "Index of the instrument associated with MIDI channel 3 (-1 means none)": {
+        "key": "WhichCsoundInstrument[3]",
+        "value": -1
+    },
+    "Index of the instrument associated with MIDI channel 4 (-1 means none)": {
+        "key": "WhichCsoundInstrument[4]",
+        "value": -1
+    },
+    "Index of the instrument associated with MIDI channel 5 (-1 means none)": {
+        "key": "WhichCsoundInstrument[5]",
+        "value": -1
+    },
+    "Index of the instrument associated with MIDI channel 6 (-1 means none)": {
+        "key": "WhichCsoundInstrument[6]",
+        "value": -1
+    },
+    "Index of the instrument associated with MIDI channel 7 (-1 means none)": {
+        "key": "WhichCsoundInstrument[7]",
+        "value": -1
+    },
+    "Index of the instrument associated with MIDI channel 8 (-1 means none)": {
+        "key": "WhichCsoundInstrument[8]",
+        "value": -1
+    },
+    "Index of the instrument associated with MIDI channel 9 (-1 means none)": {
+        "key": "WhichCsoundInstrument[9]",
+        "value": -1
+    },
+    "Index of the instrument associated with MIDI channel 10 (-1 means none)": {
+        "key": "WhichCsoundInstrument[10]",
+        "value": -1
+    },
+    "Index of the instrument associated with MIDI channel 11 (-1 means none)": {
+        "key": "WhichCsoundInstrument[11]",
+        "value": -1
+    },
+    "Index of the instrument associated with MIDI channel 12 (-1 means none)": {
+        "key": "WhichCsoundInstrument[12]",
+        "value": -1
+    },
+    "Index of the instrument associated with MIDI channel 13 (-1 means none)": {
+        "key": "WhichCsoundInstrument[13]",
+        "value": -1
+    },
+    "Index of the instrument associated with MIDI channel 14 (-1 means none)": {
+        "key": "WhichCsoundInstrument[14]",
+        "value": -1
+    },
+    "Index of the instrument associated with MIDI channel 15 (-1 means none)": {
+        "key": "WhichCsoundInstrument[15]",
+        "value": -1
+    },
+    "Index of the instrument associated with MIDI channel 16 (-1 means none)": {
+        "key": "WhichCsoundInstrument[16]",
+        "value": -1
+    },
+    "Csound instruments": {
+        "key": "CsInstruments",
+        "value": []
+    },
+    "Csound table line #1": {
+        "key": "CsoundTables[0]",
+        "value": "f1 0 256 10 1 ; This table may be changed"
+    },
+    "Associated tonality file": {
+        "key": "TonalityFileName",
+        "value": "-to.Mozart"
+    }
+}

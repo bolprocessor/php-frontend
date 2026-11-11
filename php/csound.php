@@ -196,6 +196,7 @@ $lock2 = $dir.$filename."_lock2";
 if($need_to_save OR isset($_POST['savealldata']) OR isset($_POST['delete_instrument']) OR isset($_POST['restore']) OR isset($_POST['create_instrument'])) {
 		echo "<p id=\"timespan\"><span class=\"red-text\">Saving file:</span> <span class=\"green-text\">".$filename."</span></p>";
 		$warn_not_empty = SaveCsoundInstruments(FALSE,$dir,$filename,$temp_folder,TRUE);
+		if($warn_not_empty === "error") echo "<p class=\"red-text\">➡ The data of this page could not be converted. The file was not changed.</p>";
 		if(!is_bool($warn_not_empty)) $warn_not_empty = FALSE; // "locked", "missing"
 		// We also save tonality data separately
 /*		$tonality_filename = str_replace("-cs.","-to.",$filename);
@@ -222,9 +223,14 @@ if(strlen(trim($content)) == 0) {
 	$template = "csound_template";
 	$content = @file_get_contents($template);
 	}
-$extract_data = extract_data(FALSE,FALSE,$content);
-echo "<p class=\"green-text\">".$extract_data['headers']."</p>";
-$content = $extract_data['content'];
+// 2026-11-11 Csound resources are read in JSON format, by the keys of their values. A file in the former line format is converted to JSON first.
+$csound_json = csound_read_resource($content);
+if(!is_array($csound_json)) {
+	echo "<p class=\"red-text\">➡ ".$csound_json."</p>";
+	die();
+	}
+$csound_values = cs_values($csound_json);
+echo "<p class=\"green-text\">".str_replace("\n","<br />",cs_get($csound_json,'header',''))."</p>";
 
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 echo "<p style=\"text-align:left;\"><input class=\"save big\" type=\"submit\" name=\"savealldata\" onclick=\"this.form.target='_self';return true;\" value=\"SAVE ‘".$filename."’\"></p>";
@@ -240,21 +246,14 @@ echo "<input type=\"hidden\" name=\"csound_source\" value=\"".$filename."\">";
 $tonality_filename = str_replace("-cs.","-to.",$filename);
 $tonality_filename = str_replace(".bpcs",".bpto",$tonality_filename);
 
-$content_no_br = str_replace("<br>",chr(10),$content);
-$table = explode(chr(10),$content_no_br);
-$imax_file = count($table);
-if($verbose) echo "imax_file = ".$imax_file."<br />";
-$number_channels = $table[0];
-if($verbose) echo "number_channels = ".$number_channels."<br />";
+// 2026-11-11 Values are read by their keys. To add a value, also save it in csound_data_to_json() (_basic_tasks.php)
+$number_channels = 16; // MAXCHAN in the console
 echo "<input type=\"hidden\" name=\"number_channels\" value=\"".$number_channels."\">";
-
 for($j = 0; $j < $number_channels; $j++) {
-	$which = $table[$j + 1];
-	$ch = $j + 1;
-	$whichCsoundInstrument[$j] = $which;
-	if($verbose) echo "MIDI channel #".$ch." => instrument [index ".$whichCsoundInstrument[$j]."]<br />";
+	$whichCsoundInstrument[$j] = intval(cs_get($csound_values,"WhichCsoundInstrument[".($j + 1)."]",-1));
+	if($verbose) echo "MIDI channel #".($j + 1)." => instrument [index ".$whichCsoundInstrument[$j]."]<br />";
 	}
-$CsoundOrchestraName = preg_replace("/<\/?html>/u",'',$table[++$j]);
+$CsoundOrchestraName = cs_get($csound_values,"CsoundOrchestraName",'');
 if($CsoundOrchestraName == '') {
 	$CsoundOrchestraName = "default.orc";
 	$warn_not_empty = TRUE;
@@ -279,17 +278,18 @@ else {
 	echo "File not found: <a target=\"_blank\" href=\"csorchestra.php?file=".urlencode($path.$CsoundOrchestraName)."\">create it!</a>";
 	}
 echo "<br />";
-$number_instruments = $table[++$j];
+$instruments = cs_get($csound_values,"CsInstruments",array());
+if(!is_array($instruments)) $instruments = array();
+$number_instruments = count($instruments);
 if($verbose) echo "number_instruments = ".$number_instruments."<br />";
 echo "<input type=\"hidden\" name=\"number_instruments\" value=\"".$number_instruments."\">";
-$i = $j;
 $handle_instrument = FALSE;
 $name_index = $index_name = array();
-for($j = 0; $j < $number_instruments; $j++) {
-	$CsoundInstrumentName[$j] = preg_replace("/<\/?html>/u",'',$table[++$i]);
-	$CsoundInstrumentName[$j] = str_replace(' ','_',$CsoundInstrumentName[$j]);
+foreach($instruments as $j => $instrument_object) {
+	$instrument = cs_values($instrument_object);
+	$CsoundInstrumentName[$j] = str_replace(' ','_',cs_get($instrument,"CsInstrumentName",''));
 	if($verbose) echo "<br /><b>Instrument name = “".$CsoundInstrumentName[$j]."”</b><br />";
-	// Create temporary file and folder for this instrument
+	// Create temporary file and folder for this instrument. They are edited by csinstrument.php and csparameter.php
 	$filename_this_instrument = $CsoundInstrumentName[$j];
 	$folder_this_instrument = $temp_dir.$temp_folder.SLASH.$filename_this_instrument;
 	if(!is_dir($folder_this_instrument)) mkdir($folder_this_instrument);
@@ -300,11 +300,10 @@ for($j = 0; $j < $number_instruments; $j++) {
 	$file_header = $top_header."\n// Csound resources (instruments and scales) saved as \"".$CsoundInstrumentName[$j]."\". Date: ".gmdate('Y-m-d H:i:s');
 	$file_header .= "\n".$filename;
 	fwrite($handle_instrument,$file_header."\n");
-	$InstrumentComment[$j] = preg_replace("/<\/?html>/u",'',$table[++$i]);
+	$InstrumentComment[$j] = cs_value_to_line("text",cs_get($instrument,"CsInstrumentComment",''));
 	if($verbose) echo "Instrument comment = “".$InstrumentComment[$j]."”<br />";
 	fwrite($handle_instrument,$InstrumentComment[$j]."\n");
-	$argmax[$j] = $table[++$i];
-	$argmax_file = $folder_this_instrument.SLASH."argmax.php";
+	$argmax[$j] = intval(cs_get($instrument,"iargmax",0));
 	if(!file_exists($argmax_file)) {
 		$handle = fopen($argmax_file,"w");
 		$text = "<xxxphp\n";
@@ -322,213 +321,46 @@ for($j = 0; $j < $number_instruments; $j++) {
 	if($verbose) echo "argmax = ".$argmax[$j]."<br />";
 	fwrite($handle_instrument,$argmax[$j]."\n");
 	$argmax[$j] = 0;
-	$InstrumentIndex[$j] = $table[++$i];
+	$InstrumentIndex[$j] = intval(cs_get($instrument,"CsInstrumentIndex",0));
 	if($InstrumentIndex[$j] > $index_max) $index_max = $InstrumentIndex[$j];
 	$name_index[$CsoundInstrumentName[$j]] = $InstrumentIndex[$j];
 	$index_name[$InstrumentIndex[$j]] = $CsoundInstrumentName[$j];
 	if($verbose) echo "Instrument index = ".$InstrumentIndex[$j]."<br />";
 	fwrite($handle_instrument,$InstrumentIndex[$j]."\n");
-	$InstrumentDilationRatioIndex[$j] = $table[++$i];
-	if($InstrumentDilationRatioIndex[$j] > $argmax[$j]) $argmax[$j] = $InstrumentDilationRatioIndex[$j];
-	if($verbose) echo "Instrument dilation ratio argument = ".$InstrumentDilationRatioIndex[$j]."<br />";
-	fwrite($handle_instrument,$InstrumentDilationRatioIndex[$j]."\n");
-	$InstrumentAttackVelocityIndex[$j] = $table[++$i];
-	if($InstrumentAttackVelocityIndex[$j] > $argmax[$j]) $argmax[$j] = $InstrumentAttackVelocityIndex[$j];
-	if($verbose) echo "Instrument attack velocity argument = ".$InstrumentAttackVelocityIndex[$j]."<br />";
-	fwrite($handle_instrument,$InstrumentAttackVelocityIndex[$j]."\n");
-	$InstrumentReleaseVelocityIndex[$j] = $table[++$i];
-	if($InstrumentReleaseVelocityIndex[$j] > $argmax[$j]) $argmax[$j] = $InstrumentReleaseVelocityIndex[$j];
-	if($verbose) echo "Instrument release velocity argument = ".$InstrumentReleaseVelocityIndex[$j]."<br />";
-	fwrite($handle_instrument,$InstrumentReleaseVelocityIndex[$j]."\n");
-	$InstrumentPitchIndex[$j] = $table[++$i];
-	if($InstrumentPitchIndex[$j] > $argmax[$j]) $argmax[$j] = $InstrumentPitchIndex[$j];
-	if($verbose) echo "Instrument pitch argument = ".$InstrumentPitchIndex[$j]."<br />";
-	fwrite($handle_instrument,$InstrumentPitchIndex[$j]."\n");
-	$InstrumentPitchFormat[$j] = $table[++$i];
-	if($verbose) echo "Instrument pitch format = ".$InstrumentPitchFormat[$j]."<br />";
-	fwrite($handle_instrument,$InstrumentPitchFormat[$j]."\n");
-	$InstrumentPitchBendRange[$j] = $table[++$i];
-	if($verbose) echo "Instrument pichbend range = ".$InstrumentPitchBendRange[$j]."<br />";
-	fwrite($handle_instrument,$InstrumentPitchBendRange[$j]."\n");
-	$InstrumentPitchBendIsLogX[$j] = $table[++$i];
-	if($verbose) echo "Instrument pichbend islogx = ".$InstrumentPitchBendIsLogX[$j]."<br />";
-	fwrite($handle_instrument,$InstrumentPitchBendIsLogX[$j]."\n");
-	$InstrumentPitchBendIsLogY[$j] = $table[++$i];
-	if($verbose) echo "Instrument pichbend islogy = ".$InstrumentPitchBendIsLogY[$j]."<br />";
-	fwrite($handle_instrument,$InstrumentPitchBendIsLogY[$j]."\n");
-	$InstrumentVolumeIsLogX[$j] = $table[++$i];
-	if($verbose) echo "Instrument volume islogx = ".$InstrumentVolumeIsLogX[$j]."<br />";
-	fwrite($handle_instrument,$InstrumentVolumeIsLogX[$j]."\n");
-	$InstrumentVolumeIsLogY[$j] = $table[++$i];
-	if($verbose) echo "Instrument volume islogy = ".$InstrumentVolumeIsLogY[$j]."<br />";
-	fwrite($handle_instrument,$InstrumentVolumeIsLogY[$j]."\n");
-	$InstrumentPressureIsLogX[$j] = $table[++$i];
-	if($verbose) echo "Instrument pressure islogx = ".$InstrumentPressureIsLogX[$j]."<br />";
-	fwrite($handle_instrument,$InstrumentPressureIsLogX[$j]."\n");
-	$InstrumentPressureIsLogY[$j] = $table[++$i];
-	if($verbose) echo "Instrument pressure islogy = ".$InstrumentPressureIsLogY[$j]."<br />";
-	fwrite($handle_instrument,$InstrumentPressureIsLogY[$j]."\n");
-	$InstrumentModulationIsLogX[$j] = $table[++$i];
-	if($verbose) echo "Instrument modulation islogx = ".$InstrumentModulationIsLogX[$j]."<br />";
-	fwrite($handle_instrument,$InstrumentModulationIsLogX[$j]."\n");
-	$InstrumentModulationIsLogY[$j] = $table[++$i];
-	if($verbose) echo "Instrument modulation islogy = ".$InstrumentModulationIsLogY[$j]."<br />";
-	fwrite($handle_instrument,$InstrumentModulationIsLogY[$j]."\n");
-	$InstrumentPanoramicIsLogX[$j] = $table[++$i];
-	if($verbose) echo "Instrument panoramic islogx = ".$InstrumentPanoramicIsLogX[$j]."<br />";
-	fwrite($handle_instrument,$InstrumentPanoramicIsLogX[$j]."\n");
-	$InstrumentPanoramicIsLogY[$j] = $table[++$i];
-	if($verbose) echo "Instrument panoramic islogy = ".$InstrumentPanoramicIsLogY[$j]."<br />";
-	fwrite($handle_instrument,$InstrumentPanoramicIsLogY[$j]."\n");
-	$InstrumentPitchbendStartIndex[$j] = $table[++$i];
-	if($InstrumentPitchbendStartIndex[$j] > $argmax[$j]) $argmax[$j] = $InstrumentPitchbendStartIndex[$j];
-	if($verbose) echo "Instrument pitchbend start argument = ".$InstrumentPitchbendStartIndex[$j]."<br />";
-	fwrite($handle_instrument,$InstrumentPitchbendStartIndex[$j]."\n");
-	$InstrumentVolumeStartIndex[$j] = $table[++$i];
-	if($InstrumentVolumeStartIndex[$j] > $argmax[$j]) $argmax[$j] = $InstrumentVolumeStartIndex[$j];
-	if($verbose) echo "Instrument volume start argument = ".$InstrumentVolumeStartIndex[$j]."<br />";
-	fwrite($handle_instrument,$InstrumentVolumeStartIndex[$j]."\n");
-	$InstrumentPressureStartIndex[$j] = $table[++$i];
-	if($InstrumentPressureStartIndex[$j] > $argmax[$j]) $argmax[$j] = $InstrumentPressureStartIndex[$j];
-	if($verbose) echo "Instrument pressure start argument = ".$InstrumentPressureStartIndex[$j]."<br />";
-	fwrite($handle_instrument,$InstrumentPressureStartIndex[$j]."\n");
-	$InstrumentModulationStartIndex[$j] = $table[++$i];
-	if($InstrumentModulationStartIndex[$j] > $argmax[$j]) $argmax[$j] = $InstrumentModulationStartIndex[$j];
-	if($verbose) echo "Instrument modulation start argument = ".$InstrumentModulationStartIndex[$j]."<br />";
-	fwrite($handle_instrument,$InstrumentModulationStartIndex[$j]."\n");
-	$InstrumentPanoramicStartIndex[$j] = $table[++$i];
-	if($InstrumentPanoramicStartIndex[$j] > $argmax[$j]) $argmax[$j] = $InstrumentPanoramicStartIndex[$j];
-	if($verbose) echo "Instrument panoramic start argument = ".$InstrumentPanoramicStartIndex[$j]."<br />";
-	fwrite($handle_instrument,$InstrumentPanoramicStartIndex[$j]."\n");
-	$InstrumentPitchbendEndIndex[$j] = $table[++$i];
-	if($InstrumentPitchbendEndIndex[$j] > $argmax[$j]) $argmax[$j] = $InstrumentPitchbendEndIndex[$j];
-	if($verbose) echo "Instrument pitchbend end argument = ".$InstrumentPitchbendEndIndex[$j]."<br />";
-	fwrite($handle_instrument,$InstrumentPitchbendEndIndex[$j]."\n");
-	$InstrumentVolumeEndIndex[$j] = $table[++$i];
-	if($InstrumentVolumeEndIndex[$j] > $argmax[$j]) $argmax[$j] = $InstrumentVolumeEndIndex[$j];
-	if($verbose) echo "Instrument volume end argument = ".$InstrumentVolumeEndIndex[$j]."<br />";
-	fwrite($handle_instrument,$InstrumentVolumeEndIndex[$j]."\n");
-	$InstrumentPressureEndIndex[$j] = $table[++$i];
-	if($InstrumentPressureEndIndex[$j] > $argmax[$j]) $argmax[$j] = $InstrumentPressureEndIndex[$j];
-	if($verbose) echo "Instrument pressure end argument = ".$InstrumentPressureEndIndex[$j]."<br />";
-	fwrite($handle_instrument,$InstrumentPressureEndIndex[$j]."\n");
-	$InstrumentModulationEndIndex[$j] = $table[++$i];
-	if($InstrumentModulationEndIndex[$j] > $argmax[$j]) $argmax[$j] = $InstrumentModulationEndIndex[$j];
-	if($verbose) echo "Instrument modulation end argument = ".$InstrumentModulationEndIndex[$j]."<br />";
-	fwrite($handle_instrument,$InstrumentModulationEndIndex[$j]."\n");
-	$InstrumentPanoramicEndIndex[$j] = $table[++$i];
-	if($InstrumentPanoramicEndIndex[$j] > $argmax[$j]) $argmax[$j] = $InstrumentPanoramicEndIndex[$j];
-	if($verbose) echo "Instrument panoramic end argument = ".$InstrumentPanoramicEndIndex[$j]."<br />";
-	fwrite($handle_instrument,$InstrumentPanoramicEndIndex[$j]."\n");
-	$InstrumentPitchbendTable[$j] = $table[++$i];
-	if($InstrumentPitchbendTable[$j] > $argmax[$j]) $argmax[$j] = $InstrumentPitchbendTable[$j];
-	if($verbose) echo "Instrument pitchbend table = ".$InstrumentPitchbendTable[$j]."<br />";
-	fwrite($handle_instrument,$InstrumentPitchbendTable[$j]."\n");
-	$InstrumentVolumeTable[$j] = $table[++$i];
-	if($InstrumentVolumeTable[$j] > $argmax[$j]) $argmax[$j] = $InstrumentVolumeTable[$j];
-	if($verbose) echo "Instrument volume table = ".$InstrumentVolumeTable[$j]."<br />";
-	fwrite($handle_instrument,$InstrumentVolumeTable[$j]."\n");
-	$InstrumentPressureTable[$j] = $table[++$i];
-	if($InstrumentPressureTable[$j] > $argmax[$j]) $argmax[$j] = $InstrumentPressureTable[$j];
-	if($verbose) echo "Instrument pressure table = ".$InstrumentPressureTable[$j]."<br />";
-	fwrite($handle_instrument,$InstrumentPressureTable[$j]."\n");
-	$InstrumentModulationTable[$j] = $table[++$i];
-	if($InstrumentModulationTable[$j] > $argmax[$j]) $argmax[$j] = $InstrumentModulationTable[$j];
-	if($verbose) echo "Instrument modulation table = ".$InstrumentModulationTable[$j]."<br />";
-	fwrite($handle_instrument,$InstrumentModulationTable[$j]."\n");
-	$InstrumentPanoramicTable[$j] = $table[++$i];
-	if($InstrumentPanoramicTable[$j] > $argmax[$j]) $argmax[$j] = $InstrumentPanoramicTable[$j];
-	if($verbose) echo "Instrument panoramic table = ".$InstrumentPanoramicTable[$j]."<br />";
-	fwrite($handle_instrument,$InstrumentPanoramicTable[$j]."\n");
-	$InstrumentPitchbendGEN[$j] = $table[++$i];
-	if($verbose) echo "Instrument pitchbendGEN = ".$InstrumentPitchbendGEN[$j]."<br />";
-	fwrite($handle_instrument,$InstrumentPitchbendGEN[$j]."\n");
-	$InstrumentVolumeGEN[$j] = $table[++$i];
-	if($verbose) echo "Instrument volumeGEN = ".$InstrumentVolumeGEN[$j]."<br />";
-	fwrite($handle_instrument,$InstrumentVolumeGEN[$j]."\n");
-	$InstrumentPressureGEN[$j] = $table[++$i];
-	if($verbose) echo "Instrument pressureGEN = ".$InstrumentPressureGEN[$j]."<br />";
-	fwrite($handle_instrument,$InstrumentPressureGEN[$j]."\n");
-	$InstrumentModulationGEN[$j] = $table[++$i];
-	if($verbose) echo "Instrument modulationGEN = ".$InstrumentModulationGEN[$j]."<br />";
-	fwrite($handle_instrument,$InstrumentModulationGEN[$j]."\n");
-	$InstrumentPanoramicGEN[$j] = $table[++$i];
-	if($verbose) echo "Instrument panoramicGEN = ".$InstrumentPanoramicGEN[$j]."<br />";
-	fwrite($handle_instrument,$InstrumentPanoramicGEN[$j]."\n");
-	for($ii = 0; $ii < $number_midi_parameters_csound_instrument; $ii++) {
-		$InstrumentPitchbend[$j][$ii] = $table[++$i];
-		if($verbose) echo "Instrument Pitchbend[".$ii."] = ".$InstrumentPitchbend[$j][$ii]."<br />";
-		fwrite($handle_instrument,$InstrumentPitchbend[$j][$ii]."\n");
-		$InstrumentVolume[$j][$ii] = $table[++$i];
-		if($verbose) echo "Instrument Volume[".$ii."] = ".$InstrumentVolume[$j][$ii]."<br />";
-		fwrite($handle_instrument,$InstrumentVolume[$j][$ii]."\n");
-		$InstrumentPressure[$j][$ii] = $table[++$i];
-		if($verbose) echo "Instrument Pressure[".$ii."] = ".$InstrumentPressure[$j][$ii]."<br />";
-		fwrite($handle_instrument,$InstrumentPressure[$j][$ii]."\n");
-		$InstrumentModulation[$j][$ii] = $table[++$i];
-		if($verbose) echo "Instrument Modulation[".$ii."] = ".$InstrumentModulation[$j][$ii]."<br />";
-		fwrite($handle_instrument,$InstrumentModulation[$j][$ii]."\n");
-		$InstrumentPanoramic[$j][$ii] = $table[++$i];
-		if($verbose) echo "Instrument Panoramic[".$ii."] = ".$InstrumentPanoramic[$j][$ii]."<br />";
-		fwrite($handle_instrument,$InstrumentPanoramic[$j][$ii]."\n");
+	// The other values of this instrument, in the order of the temporary file
+	foreach(cs_instrument_fields() as $field) {
+		list($key,$default,$type) = $field;
+		if($key == "CsInstrumentComment" OR $key == "iargmax" OR $key == "CsInstrumentIndex") continue;
+		$value = cs_value_to_line($type,cs_get($instrument,$key,$default));
+		if($type == "argument" AND $value > $argmax[$j]) $argmax[$j] = $value;
+		if($verbose) echo $key." = ".$value."<br />";
+		fwrite($handle_instrument,$value."\n");
 		}
 	set_argmax_argument($argmax_file,$CsoundInstrumentName[$j],$argmax[$j]);
-	
-	// Line 655
-	$Instrument_ipmax = $table[++$i];
+	$Instrument_ipmax = intval(cs_get($instrument,"ipmax",0));
 	if($verbose) echo "Instrument ipmax = ".$Instrument_ipmax."<br />";
 	for($ip = 0; $ip < $Instrument_ipmax; $ip++) {
-		$empty_parameter = FALSE;
-		// $folder_this_instrument
-		$Instrument_paramlist_name = preg_replace("/<\/?html>/u",'',$table[++$i]);
-		$Instrument_paramlist_name = str_replace(' ','_',$Instrument_paramlist_name);
-		$handle_parameter = NULL;
+		$fields = cs_parameter_fields($ip);
+		$Instrument_paramlist_name = str_replace(' ','_',cs_get($instrument,$fields[0][0],''));
 		// Old ‘-cs’ files contain up to 6 parameters with empty names. We'll ignore them.
+		if($Instrument_paramlist_name == '') continue;
+		$parameter_file = $folder_this_instrument."/".$Instrument_paramlist_name.".txt";
+		$handle_parameter = fopen($parameter_file,"w");
 		$argmax_parameter = 0;
-		if($Instrument_paramlist_name == '') $empty_parameter = TRUE;
-		else {
-			$filename_this_parameter = $Instrument_paramlist_name;
-			$parameter_file = $folder_this_instrument."/".$filename_this_parameter.".txt";
-			$handle_parameter = fopen($parameter_file,"w");
+		foreach($fields as $field) {
+			list($key,$default,$type) = $field;
+			if($type == "name") $value = $Instrument_paramlist_name;
+			else $value = cs_value_to_line($type,cs_get($instrument,$key,$default));
+			if($type == "argument" AND $value > $argmax_parameter) $argmax_parameter = $value;
+			if($verbose) echo $key." = ".$value."<br />";
+			fwrite($handle_parameter,$value."\n");
 			}
-		if($verbose) echo "<br /><span class=\"darkblue-text\">Instrument paramlist name = “".$Instrument_paramlist_name."”<br />";
-		if(!$empty_parameter) fwrite($handle_parameter,$Instrument_paramlist_name."\n");
-		// Line 687
-		$Instrument_paramlist_comment = preg_replace("/<\/?html>/u",'',$table[++$i]);
-		if($verbose) echo "Instrument paramlist comment = “".$Instrument_paramlist_comment."”</span><br />";
-		if(!$empty_parameter) fwrite($handle_parameter,$Instrument_paramlist_comment."\n");
-		$Instrument_paramlist_startindex = $table[++$i];
-		if($Instrument_paramlist_startindex > $argmax_parameter) $argmax_parameter = $Instrument_paramlist_startindex;
-		if($verbose) echo "start argument = ".$Instrument_paramlist_startindex."<br />";
-		if(!$empty_parameter) fwrite($handle_parameter,$Instrument_paramlist_startindex."\n");
-		$Instrument_paramlist_endindex = $table[++$i];
-		if($Instrument_paramlist_endindex > $argmax_parameter) $argmax_parameter = $Instrument_paramlist_endindex;
-		if($verbose) echo "end argument = ".$Instrument_paramlist_endindex."<br />";
-		if(!$empty_parameter) fwrite($handle_parameter,$Instrument_paramlist_endindex."\n");
-		// line 701
-		$Instrument_paramlist_table = $table[++$i];
-		if($Instrument_paramlist_table > $argmax_parameter) $argmax_parameter = $Instrument_paramlist_table;
-		if($verbose) echo "table argument = ".$Instrument_paramlist_table."<br />";
-		if(!$empty_parameter) fwrite($handle_parameter,$Instrument_paramlist_table."\n");
-		$Instrument_paramlist_defaultvalue = $table[++$i];
-		if($verbose) echo "default value = ".$Instrument_paramlist_defaultvalue."<br />";
-		if(!$empty_parameter) fwrite($handle_parameter,$Instrument_paramlist_defaultvalue."\n");
-		$Instrument_paramlist_GENtype = $table[++$i];
-		if($verbose) echo "GEN type = ".$Instrument_paramlist_GENtype."<br />";
-		if(!$empty_parameter) fwrite($handle_parameter,$Instrument_paramlist_GENtype."\n");
-		$Instrument_paramlist_combinationtype = $table[++$i];
-		if($verbose) echo "combination type = ".$Instrument_paramlist_combinationtype."<br />";
-		if(!$empty_parameter) fwrite($handle_parameter,$Instrument_paramlist_combinationtype."\n");
-		if(!$empty_parameter) {
-			fclose($handle_parameter);
-			set_argmax_argument($argmax_file,$Instrument_paramlist_name,$argmax_parameter);
-			}
+		fclose($handle_parameter);
+		set_argmax_argument($argmax_file,$Instrument_paramlist_name,$argmax_parameter);
 		}
-	// line 724
 	}
 if($handle_instrument) fclose($handle_instrument);
-$begin_tables = $table[++$i];
-if($verbose) echo "<br /><b>begin tables = “".$begin_tables."”</b><br />";
+$begin_tables = "_begin tables";
 echo "<input type=\"hidden\" name=\"begin_tables\" value=\"".$begin_tables."\">";
 echo "<input type=\"hidden\" name=\"index_max\" value=\"".$index_max."\">";
 echo "<table><tr><td>";
@@ -544,23 +376,10 @@ $done_table = TRUE;
 // because they are now stored separately on '-to' files
 // We read them together with Csound tables that should not be deleted
 $scale_name = $scale_table = $scale_fraction = $scale_series = $comma_line = $scale_note_names = $scale_keys = $scale_comment = $baseoctave = array();
-for($i = $i + 1; $i < $imax_file; $i++) {
-	$line = trim($table[$i]);
+for($k = 0; array_key_exists("CsoundTables[".$k."]",$csound_values); $k++) {
+	$line = trim($csound_values["CsoundTables[".$k."]"]);
 //	if($verbose) echo $line."<br />";
 	if($line == '') continue;
-	if($line == "_end tables") {
-		$done_table = FALSE;
-//		if($handle) fclose($handle);
-		if($i < ($imax_file - 1)) {
-			// Now we get the name of the associated tonality file here
-			$line = trim($table[$i + 1]);
-			if((is_integer($pos=strpos($line,"-to")) AND $pos == 0) OR (is_integer(strpos($line,".bpto"))))
-				$tonality_filename = $line;
-			else if($i_scale ==  0) $tonality_filename = "No associated tonality file";
-			}
-		else if($i_scale ==  0) $tonality_filename = "No associated tonality file";
-		break;
-		}
 	if($line[0] == '"') {
 		$i_scale++;
 		$scale_name[$i_scale] = str_replace('"','',$line);
@@ -656,6 +475,11 @@ for($i = $i + 1; $i < $imax_file; $i++) {
 		$cstables .= $line."\n";
 		}
 	}
+$done_table = FALSE;
+// Name of the associated tonality file. By default, the name of this file with "-to." (used when old scale definitions are found)
+$line = trim(cs_get($csound_values,"TonalityFileName",''));
+if(str_starts_with($line,"-to") OR is_integer(strpos($line,".bpto"))) $tonality_filename = $line;
+else if($i_scale == 0) $tonality_filename = "No associated tonality file";
 echo "</textarea><br />";
 
 echo "<h3>Associated tonality file</h3>";

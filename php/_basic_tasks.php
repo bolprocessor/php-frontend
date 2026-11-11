@@ -128,9 +128,6 @@ $minchunk_size = 15; // Min number of measures contained in a chunk
 
 $max_term_in_fraction = 32768; // Used to simplify fractions when importing MusicXML scores
 
-$number_fields_csound_instrument = 67; // Never change this!
-$number_midi_parameters_csound_instrument = 6; // Never change this!
-
 $bad_settings = FALSE;
 
 $oldmask = umask(0);
@@ -258,6 +255,9 @@ if($test) {
 $html_help_file = "BP_help.html";
 $help = compile_help($text_help_file,$html_help_file);
 $top_header = "// Bol Processor BP3";
+
+// 2026-11-12 Csound resources in the former line format are converted to JSON (originals copied to the trash as NAME_old_format)
+convert_csound_resources_to_json($dir_csound_resources,$dir_trash_folder);
 
 $KeyString = "key#";
 $Englishnote = array("C","C#","D","D#","E","F","F#","G","G#","A","A#","B","C");
@@ -1376,6 +1376,7 @@ function SaveObjectPrototypes($verbose,$dir,$filename,$temp_folder,$force) {
 	}
 
 function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder,$force) {
+	// 2026-11-11 Csound resources are saved in JSON format. Values are stored by their key, see csound_data_to_json()
 	global $top_header, $test, $temp_dir, $permissions;
 //	$verbose = TRUE;
 	if($verbose) echo "dir = ".$dir."<br />";
@@ -1386,7 +1387,6 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder,$force) {
 	// 2026-11-10 Without the temporary folder (deleted as old), the file would be saved without its instruments
 	if(!is_dir($temp_dir.$temp_folder)) return "missing";
 	$file_lock = $dir.$filename."_lock"; // 2026-11-10 The lock is next to the file, not in php/
-	$folder_scales = $temp_dir.$temp_folder.SLASH."scales";
 	$file_changed = $temp_dir.$temp_folder.SLASH."_changed";
 	if($verbose) echo "file_changed = ".$file_changed."<br />";
 	if(!$force AND !file_exists($file_changed)) return "skipped";
@@ -1401,124 +1401,387 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder,$force) {
 	$handle = fopen($file_lock,"w");
 	fwrite($handle,"lock\n");
 	fclose($handle);
-	unlink($dir.$filename);
 	$exists_name = list_of_parameter_names($temp_dir,$temp_folder);
-	$handle = fopen($dir.$filename,"w");
 	$file_header = $top_header."\n// Csound resource file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s')." GMT";
-	fwrite($handle,$file_header."\n");
-	$number_channels = $_POST['number_channels'];
-	fwrite($handle,$number_channels."\n");
-	for($ch = 0; $ch < $number_channels; $ch++) {
-		$arg = "whichCsoundInstrument_".$ch;
-		$whichCsoundInstrument = convert_empty($_POST[$arg]);
-		fwrite($handle,$whichCsoundInstrument."\n");
-		}
-	$CsoundOrchestraName = $_POST['CsoundOrchestraName'];
+	$data = array();
 	$warn_not_empty = FALSE;
-	if($CsoundOrchestraName == '') {
-		$CsoundOrchestraName = "0-default.orc";
+	$data['orchestra'] = $_POST['CsoundOrchestraName'];
+	if($data['orchestra'] == '') {
+		$data['orchestra'] = "0-default.orc";
 		$warn_not_empty = TRUE;
 		}
-	fwrite($handle,$CsoundOrchestraName."\n");
-	$number_instruments = $_POST['number_instruments'];
-	fwrite($handle,$number_instruments."\n");
+	$data['channels'] = array();
+	$number_channels = $_POST['number_channels'];
+	for($ch = 0; $ch < $number_channels; $ch++)
+		$data['channels'][$ch + 1] = intval(convert_empty($_POST["whichCsoundInstrument_".$ch]));
+	// Instruments are read from the temporary files edited by csinstrument.php and csparameter.php
+	$data['instruments'] = array();
 	$dircontent = scandir($temp_dir.$temp_folder);
-	foreach($dircontent as $thisfile) {
-		if($thisfile == '.' OR $thisfile == ".." OR $thisfile == ".DS_Store") continue;
-		$table = explode(".",$thisfile);
-		$extension = end($table);
-		if($extension <> "txt") continue;
-		$instrument_label = str_replace(".".$extension,'',$thisfile);
-		if($verbose) echo $instrument_label." ";
-		$content = file_get_contents($temp_dir.$temp_folder.SLASH.$thisfile);
-		$extract_data = extract_data(FALSE,FALSE,$content);
-		$headers = $extract_data['headers'];
-		if(!is_integer($pos=strpos($headers,"//"))) continue;
-		$content = $extract_data['content'];
-		$table = explode(chr(10),$content);
-		fwrite($handle,$instrument_label."\n");
-		for($i = 1; $i < count($table); $i++) {
-			$line = $table[$i];
-			fwrite($handle,$line."\n");
-			}
-		$number_param = 0;
-		$instrument_folder_name = str_replace(' ','_',$instrument_label);
-		$instrument_folder_name = str_replace('-','_',$instrument_folder_name);
-		$folder_this_instrument = $temp_dir.$temp_folder.SLASH.$instrument_folder_name;
-		if(!is_dir($folder_this_instrument)) mkdir($folder_this_instrument);
-		$dir_instrument = scandir($folder_this_instrument);
-		// echo "@@@ folder_this_instrument = ".$folder_this_instrument."<br />";
-		foreach($dir_instrument as $thisparameter) {
-			// echo "@ thisparameter = ".$thisparameter."<br />";
-			if($thisparameter == '.' OR $thisparameter == ".." OR $thisparameter == ".DS_Store") continue;
-			$thisname = str_replace(".txt",'',$thisparameter);
-			if(!isset($exists_name[$thisname])) continue;
-			$table = explode(".",$thisparameter);
+	try {
+		foreach($dircontent as $thisfile) {
+			if($thisfile == '.' OR $thisfile == ".." OR $thisfile == ".DS_Store") continue;
+			$table = explode(".",$thisfile);
 			$extension = end($table);
 			if($extension <> "txt") continue;
-			$number_param++;
-			}
-		fwrite($handle,$number_param."\n");
-		foreach($dir_instrument as $thisparameter) {
-			if($thisparameter == '.' OR $thisparameter == ".." OR $thisparameter == ".DS_Store") continue;
-			$thisname = str_replace(".txt",'',$thisparameter);
-			if(!isset($exists_name[$thisname])) continue;
-			// echo "+ thisparameter = ".$thisparameter."<br />";
-			$table = explode(".",$thisparameter);
-			$extension = end($table);
-			if($extension <> "txt") continue;
-			// echo "++ thisparameter = ".$thisparameter."<br />";
-			$content_parameter = file_get_contents($folder_this_instrument.SLASH.$thisparameter);
-			$table = explode(chr(10),$content_parameter);
-			for($i = 0; $i < count($table); $i++) {
-				$line = trim($table[$i]);
-				if($line <> '' OR $i < 2) {
-					fwrite($handle,$line."\n");
-				//	echo "line = ".$line."<br />";
-					}
+			$instrument_label = str_replace(".".$extension,'',$thisfile);
+			if($verbose) echo $instrument_label." ";
+			$content = file_get_contents($temp_dir.$temp_folder.SLASH.$thisfile);
+			$extract_data = extract_data(FALSE,FALSE,$content);
+			if(!is_integer(strpos($extract_data['headers'],"//"))) continue;
+			$lines = explode(chr(10),$extract_data['content']);
+			$i = 1; // Line 0 is the name of the Csound resource file
+			$instrument = array("CsInstrumentName" => $instrument_label);
+			cs_read_fields(cs_instrument_fields(),$lines,$i,$instrument);
+			$instrument_folder_name = str_replace(' ','_',$instrument_label);
+			$instrument_folder_name = str_replace('-','_',$instrument_folder_name);
+			$folder_this_instrument = $temp_dir.$temp_folder.SLASH.$instrument_folder_name;
+			if(!is_dir($folder_this_instrument)) mkdir($folder_this_instrument);
+			$ip = 0;
+			foreach(scandir($folder_this_instrument) as $thisparameter) {
+				if($thisparameter == '.' OR $thisparameter == ".." OR $thisparameter == ".DS_Store") continue;
+				$thisname = str_replace(".txt",'',$thisparameter);
+				if(!isset($exists_name[$thisname])) continue;
+				$table = explode(".",$thisparameter);
+				$extension = end($table);
+				if($extension <> "txt") continue;
+				$lines = explode(chr(10),file_get_contents($folder_this_instrument.SLASH.$thisparameter));
+				$i = 0;
+				cs_read_fields(cs_parameter_fields($ip),$lines,$i,$instrument);
+				$ip++;
 				}
+			$instrument['ipmax'] = $ip;
+			$data['instruments'][] = $instrument;
 			}
 		}
-	$begin_tables = $_POST['begin_tables'];
-	fwrite($handle,$begin_tables."\n");
-	if($verbose) echo "<br />".$begin_tables."<br />";
+	catch(Exception $e) { // The file is left unchanged
+		error_log("SaveCsoundInstruments(): ".$e->getMessage());
+		unlink($file_lock);
+		return "error";
+		}
 	if(isset($_POST['cstables'])) $cstables = $_POST['cstables'];
 	else {
 		if($verbose) echo "Used 'the_tables'<br />";
 		$cstables = $_POST['the_tables']; // We need a different POST used by autosave
 		}
-	$table = explode(chr(10),$cstables);
-	for($i = 0; $i < count($table); $i++) {
-		$line = trim($table[$i]);
+	$data['tables'] = array();
+	foreach(explode(chr(10),$cstables) as $line) {
+		$line = trim($line);
 		if($verbose) echo $line."<br />";
-		if($line == '') continue;
-		fwrite($handle,$line."\n");
+		if($line <> '') $data['tables'][] = $line;
 		}
-
-// 2024-08-10 We no longer store scales here as they are stored in '-to' files
-/*	$dir_scale = scandir($folder_scales); 
-	foreach($dir_scale as $this_scale) {
-		if($this_scale == '.' OR $this_scale == ".." OR $this_scale == ".DS_Store") continue;
-		$table = explode(".",$this_scale);
-		$extension = end($table);
-		if($extension <> "txt") continue;
-		$content_scale = file_get_contents($folder_scales.SLASH.$this_scale);
-		$table = explode(chr(10),$content_scale);
-		for($i = 0; $i < count($table); $i++) {
-			$line = trim($table[$i]);
-			if($line <> '') fwrite($handle,$line."\n");
-			}
-		} */
-
-	fwrite($handle,"_end tables\n");
-	$tonality_filename = $_POST['tonality_filename'];
-	fwrite($handle,$tonality_filename."\n");
-	fclose($handle);
+	$data['tonality'] = trim($_POST['tonality_filename']);
+	if($data['tonality'] == "No associated tonality file") $data['tonality'] = '';
+	$json = csound_data_to_json($file_header,$data);
+	@unlink($dir.$filename);
+	file_put_contents($dir.$filename,$json);
 	chmod($dir.$filename,$permissions);
 	unlink($file_lock);
 	return $warn_not_empty;
 	}
-	
+
+// 2026-11-11 Csound resources ("-cs" files) are stored in JSON format.
+// Labels and keys are those of the instrument exports "instr-NAME.json" made by ExportJsonCsoundInstrument() in the console.
+// Values are read by their key, so that labels can be changed and new keys added.
+// An instrument is handled as an array of values indexed by their keys.
+
+function cs_controls() {
+	return array("PitchBend" => "pitchbend","Volume" => "volume","Pressure" => "pressure","Modulation" => "modulation","Panoramic" => "panoramic");
+	}
+
+function cs_instrument_fields() {
+	// Values of an instrument following its name, in the order of the temporary instrument files (csinstrument.php)
+	// and of the former line format: array(key, default value, type)
+	$no_mapping = 2147483647.;
+	$fields = array();
+	$fields[] = array("CsInstrumentComment",'',"text");
+	$fields[] = array("iargmax",0,"int");
+	$fields[] = array("CsInstrumentIndex",0,"int");
+	$fields[] = array("CsDilationRatioIndex",-1,"argument");
+	$fields[] = array("CsAttackVelocityIndex",-1,"argument");
+	$fields[] = array("CsReleaseVelocityIndex",-1,"argument");
+	$fields[] = array("CsPitchIndex",-1,"argument");
+	$fields[] = array("CsPitchFormat","OPPC","pitchformat");
+	$fields[] = array("pitchbendrange",-1.,"float");
+	foreach(cs_controls() as $c => $word) {
+		$fields[] = array("r".$c.".islogx",0,"int");
+		$fields[] = array("r".$c.".islogy",0,"int");
+		}
+	foreach(cs_controls() as $c => $word) $fields[] = array("Cs".$c."StartIndex",-1,"argument");
+	foreach(cs_controls() as $c => $word) $fields[] = array("Cs".$c."EndIndex",-1,"argument");
+	foreach(cs_controls() as $c => $word) $fields[] = array($word."table",-1,"argument");
+	foreach(cs_controls() as $c => $word) $fields[] = array($word."GEN",7,"int");
+	for($k = 0; $k < 6; $k++)
+		foreach(cs_controls() as $c => $word) $fields[] = array("Cs".$c."[".$k."]",$no_mapping,"float");
+	return $fields;
+	}
+
+function cs_parameter_fields($ip) {
+	// Values of additional parameter $ip, in the order of the temporary parameter files (csparameter.php)
+	$p = "paramlist[".$ip."].";
+	$fields = array();
+	$fields[] = array($p."name",'',"name");
+	$fields[] = array($p."comment",'',"text");
+	$fields[] = array($p."startindex",-1,"argument");
+	$fields[] = array($p."endindex",-1,"argument");
+	$fields[] = array($p."table",-1,"argument");
+	$fields[] = array($p."defaultvalue",0.,"float");
+	$fields[] = array($p."GENtype",7,"int");
+	$fields[] = array($p."combinationtype","ADD","combination");
+	return $fields;
+	}
+
+function cs_line_to_value($type,$line,$key) {
+	// Converts a line of the former format to a JSON value, or throws an exception
+	if($line === NULL) throw new Exception("missing value of ‘".$key."’");
+	$line = trim(rtrim($line,"\r"));
+	switch($type) {
+		case "text": return decode_tags($line); // Text is stored in lines with recode_tags()
+		case "name": return $line;
+		}
+	if(!is_numeric($line)) throw new Exception("‘".$key."’ should be a number, found ‘".$line."’");
+	switch($type) {
+		case "float": return floatval($line);
+		case "pitchformat":
+			$formats = array(0 => "OPPC",1 => "OPD",2 => "CPS");
+			return isset($formats[intval($line)]) ? $formats[intval($line)] : intval($line);
+		case "combination": return (intval($line) == 0) ? "MULT" : "ADD";
+		}
+	return intval($line);
+	}
+
+function cs_value_to_line($type,$value) {
+	// Converts a JSON value to a line of the temporary files
+	switch($type) {
+		case "text": return recode_tags($value);
+		case "name": return $value;
+		case "float": return strval(floatval($value));
+		case "pitchformat":
+			$formats = array("OPPC" => 0,"OPD" => 1,"CPS" => 2);
+			return isset($formats[$value]) ? $formats[$value] : intval($value);
+		case "combination": return ($value === "MULT" OR $value === 0) ? 0 : 1;
+		}
+	return intval($value);
+	}
+
+function cs_read_fields($fields,$lines,&$i,&$values) {
+	// Reads $fields from $lines starting at line $i into $values indexed by their keys
+	foreach($fields as $field) {
+		list($key,$default,$type) = $field;
+		$line = ($i < count($lines)) ? $lines[$i] : NULL;
+		$values[$key] = cs_line_to_value($type,$line,$key);
+		$i++;
+		}
+	}
+
+function cs_get($values,$key,$default) {
+	if(!is_array($values) OR !array_key_exists($key,$values) OR $values[$key] === NULL) return $default;
+	return $values[$key];
+	}
+
+function cs_values($object) {
+	// Returns the values of a JSON object indexed by their "key"
+	$values = array();
+	if(!is_array($object)) return $values;
+	foreach($object as $label => $item)
+		if(is_array($item) AND isset($item['key']) AND array_key_exists('value',$item)) $values[$item['key']] = $item['value'];
+	return $values;
+	}
+
+function cs_item($key,$value,$unit = '') {
+	$item = array("key" => $key,"value" => $value);
+	if($unit <> '') $item['unit'] = $unit;
+	return $item;
+	}
+
+function csound_lines_to_data($lines) {
+	// Parses a Csound resource in the former line format, as read by LoadCsoundInstruments() in the console.
+	// Header lines starting with "//" are ignored. Returns an array, or throws an exception.
+	$table = array();
+	foreach($lines as $line) {
+		$line = rtrim($line,"\r");
+		if(count($table) == 0 AND (trim($line) == '' OR substr(trim($line),0,2) == "//")) continue;
+		$table[] = $line;
+		}
+	$lines = $table;
+	$i = 0;
+	$data = array();
+	$read = array();
+	cs_read_fields(array(array("number_channels",0,"int")),$lines,$i,$read);
+	$data['channels'] = array();
+	for($ch = 1; $ch <= $read['number_channels']; $ch++) {
+		cs_read_fields(array(array("channel",-1,"int")),$lines,$i,$read);
+		$data['channels'][$ch] = $read['channel'];
+		}
+	cs_read_fields(array(array("CsoundOrchestraName",'',"name")),$lines,$i,$read);
+	$data['orchestra'] = $read['CsoundOrchestraName'];
+	cs_read_fields(array(array("number_instruments",0,"int")),$lines,$i,$read);
+	$data['instruments'] = array();
+	for($j = 0; $j < $read['number_instruments']; $j++) {
+		$instrument = array();
+		cs_read_fields(array(array("CsInstrumentName",'',"name")),$lines,$i,$instrument);
+		cs_read_fields(cs_instrument_fields(),$lines,$i,$instrument);
+		cs_read_fields(array(array("ipmax",0,"int")),$lines,$i,$instrument);
+		for($ip = 0; $ip < $instrument['ipmax']; $ip++)
+			cs_read_fields(cs_parameter_fields($ip),$lines,$i,$instrument);
+		$data['instruments'][] = $instrument;
+		}
+	$data['tables'] = array();
+	while($i < count($lines) AND trim($lines[$i]) == '') $i++;
+	$line = ($i < count($lines)) ? trim($lines[$i++]) : NULL;
+	if($line === "_begin tables") {
+		while($i < count($lines)) {
+			$line = trim($lines[$i++]);
+			if($line == '') continue;
+			if($line == "_end tables") break;
+			$data['tables'][] = $line;
+			}
+		while($i < count($lines) AND trim($lines[$i]) == '') $i++;
+		$line = ($i < count($lines)) ? trim($lines[$i++]) : NULL;
+		}
+	$data['tonality'] = '';
+	if($line !== NULL AND $line <> "No associated tonality file") $data['tonality'] = $line;
+	return $data;
+	}
+
+function cs_instrument_json($instrument) {
+	// Returns the JSON object of an instrument given as values indexed by their keys
+	$v = $instrument;
+	$x = array();
+	$x["Name of this instrument"] = cs_item("CsInstrumentName",cs_get($v,"CsInstrumentName",''));
+	$x["Index of this instrument"] = cs_item("CsInstrumentIndex",cs_get($v,"CsInstrumentIndex",0));
+	$x["Comment on this instrument"] = cs_item("CsInstrumentComment",cs_get($v,"CsInstrumentComment",''));
+	$x["Number of arguments"] = cs_item("iargmax",cs_get($v,"iargmax",0));
+	$x["Argument of dilation ratio (-1 means empty)"] = cs_item("CsDilationRatioIndex",cs_get($v,"CsDilationRatioIndex",-1));
+	$x["Argument of attack velocity (-1 means empty)"] = cs_item("CsAttackVelocityIndex",cs_get($v,"CsAttackVelocityIndex",-1));
+	$x["Argument of release velocity (-1 means empty)"] = cs_item("CsReleaseVelocityIndex",cs_get($v,"CsReleaseVelocityIndex",-1));
+	$x["Argument of pitch"] = cs_item("CsPitchIndex",cs_get($v,"CsPitchIndex",-1));
+	$x["CsPitchFormat"] = cs_item("CsPitchFormat",cs_get($v,"CsPitchFormat","OPPC"),"enum");
+	foreach(cs_controls() as $c => $word) {
+		$x["Argument of start ".$word] = cs_item("Cs".$c."StartIndex",cs_get($v,"Cs".$c."StartIndex",-1));
+		$x["Argument of end ".$word] = cs_item("Cs".$c."EndIndex",cs_get($v,"Cs".$c."EndIndex",-1));
+		}
+	$x["pitchbendrange"] = cs_item("pitchbendrange",floatval(cs_get($v,"pitchbendrange",-1.)),"cents");
+	foreach(cs_controls() as $c => $word)
+		$x["Argument of ".$word." table (-1 means empty)"] = cs_item($word."table",cs_get($v,$word."table",-1));
+	foreach(cs_controls() as $c => $word)
+		$x[ucfirst($word)." GEN type"] = cs_item($word."GEN",cs_get($v,$word."GEN",7));
+	foreach(cs_controls() as $c => $word) {
+		$x["MIDI ".$word." is logarithmic"] = cs_item("r".$c.".islogx",cs_get($v,"r".$c.".islogx",0),"boolean");
+		$x["Csound ".$word." is logarithmic"] = cs_item("r".$c.".islogy",cs_get($v,"r".$c.".islogy",0),"boolean");
+		}
+	foreach(cs_controls() as $c => $word) {
+		if($c == "PitchBend") $label = "MIDI to Csound pitchbend conversion (number > 100000 means no mapping) #";
+		else $label = "MIDI to Csound ".$word." mapping (number > 100000 means no mapping) #";
+		for($k = 0; $k < 6; $k++)
+			$x[$label.($k + 1)] = cs_item("Cs".$c."[".$k."]",floatval(cs_get($v,"Cs".$c."[".$k."]",2147483647.)));
+		}
+	$ipmax = intval(cs_get($v,"ipmax",0));
+	$x["Number of additional parameters"] = cs_item("ipmax",$ipmax);
+	for($ip = 0; $ip < $ipmax; $ip++) {
+		$n = $ip + 1;
+		$p = "paramlist[".$ip."].";
+		$x["Name of additional parameter #".$n] = cs_item($p."name",cs_get($v,$p."name",''));
+		$x["Comment on additional parameter #".$n] = cs_item($p."comment",cs_get($v,$p."comment",''));
+		$x["Start index of additional parameter #".$n] = cs_item($p."startindex",cs_get($v,$p."startindex",-1));
+		$x["End index of additional parameter #".$n] = cs_item($p."endindex",cs_get($v,$p."endindex",-1));
+		$x["Table index of additional parameter #".$n] = cs_item($p."table",cs_get($v,$p."table",-1));
+		$x["Default value of additional parameter #".$n] = cs_item($p."defaultvalue",floatval(cs_get($v,$p."defaultvalue",0.)));
+		$x["GEN type of additional parameter #".$n] = cs_item($p."GENtype",cs_get($v,$p."GENtype",7));
+		$x["Combination mode of additional parameter #".$n] = cs_item($p."combinationtype",cs_get($v,$p."combinationtype","ADD"),"enum");
+		}
+	return $x;
+	}
+
+function csound_data_to_json($file_header,$data) {
+	// Returns the JSON text of a Csound resource. To add a value to the file, add it here and read it by its key in csound.php.
+	$json = array();
+	$json['header'] = $file_header;
+	$json["Csound orchestra file"] = cs_item("CsoundOrchestraName",$data['orchestra']);
+	foreach($data['channels'] as $ch => $index)
+		$json["Index of the instrument associated with MIDI channel ".$ch." (-1 means none)"] = cs_item("WhichCsoundInstrument[".$ch."]",$index);
+	$instruments = array();
+	foreach($data['instruments'] as $instrument) $instruments[] = cs_instrument_json($instrument);
+	$json["Csound instruments"] = cs_item("CsInstruments",$instruments);
+	foreach($data['tables'] as $k => $line)
+		$json["Csound table line #".($k + 1)] = cs_item("CsoundTables[".$k."]",$line);
+	$json["Associated tonality file"] = cs_item("TonalityFileName",$data['tonality']);
+	return json_encode($json,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE|JSON_PRESERVE_ZERO_FRACTION)."\n";
+	}
+
+function csound_is_json($content) {
+	// A Csound resource in JSON format starts with '{', possibly after a byte order mark
+	$content = ltrim(str_replace("\xEF\xBB\xBF",'',$content));
+	return ($content <> '' AND $content[0] == '{');
+	}
+
+function csound_json_decode($content) {
+	// Returns the decoded JSON of a Csound resource, or FALSE
+	$json = json_decode(str_replace("\xEF\xBB\xBF",'',$content),TRUE);
+	if(!is_array($json)) return FALSE;
+	return $json;
+	}
+
+function convert_csound_resources_to_json($dir,$dir_trash) {
+	// 2026-11-12 Converts to JSON all Csound resources ("-cs" files) of $dir that are in the former line format.
+	// The original is copied to the trash as NAME_old_format. Returns the names of converted files.
+	global $top_header,$permissions;
+	$converted = array();
+	$dircontent = @scandir($dir);
+	if($dircontent === FALSE) return $converted;
+	foreach($dircontent as $thisfile) {
+		if(!str_starts_with($thisfile,"-cs") AND !str_ends_with($thisfile,".bpcs")) continue;
+		if(preg_match("/_lock[0-9]*$/u",$thisfile)) continue;
+		$path = $dir.$thisfile;
+		if(!is_file($path)) continue;
+		if(file_exists($path."_lock") OR file_exists($path."_lock2")) continue; // Being saved
+		$handle = @fopen($path,"r");
+		if(!$handle) continue;
+		$start = fread($handle,64);
+		fclose($handle);
+		if($start === FALSE OR trim($start) == '' OR csound_is_json($start)) continue;
+		$content = @file_get_contents($path);
+		if($content === FALSE) continue;
+		$extract_data = extract_data(FALSE,FALSE,$content);
+		try {
+			$data = csound_lines_to_data(explode(chr(10),$extract_data['content']));
+			}
+		catch(Exception $e) {
+			error_log("convert_csound_resources_to_json(): ".$thisfile." could not be converted: ".$e->getMessage());
+			continue;
+			}
+		$header = str_replace("<br />","\n",$extract_data['headers']);
+		if($header == '') $header = $top_header;
+		$header .= "\n// Converted to JSON format. Date: ".gmdate('Y-m-d H:i:s')." GMT";
+		$json = csound_data_to_json($header,$data);
+		if($dir_trash <> '' AND is_dir($dir_trash)) @copy($path,$dir_trash.$thisfile."_old_format");
+		$temp_file = $dir.".converting".$thisfile; // Replaces the file in a single step
+		if(@file_put_contents($temp_file,$json) === FALSE) continue;
+		@chmod($temp_file,$permissions);
+		if(@rename($temp_file,$path)) $converted[] = $thisfile;
+		else @unlink($temp_file);
+		}
+	return $converted;
+	}
+
+function csound_read_resource($content) {
+	// Returns the decoded JSON of a Csound resource, or an error message.
+	// A file in the former line format is converted to JSON first.
+	if(csound_is_json($content)) {
+		$json = csound_json_decode($content);
+		if($json === FALSE) return "This file is not valid JSON: ".json_last_error_msg();
+		return $json;
+		}
+	$extract_data = extract_data(FALSE,FALSE,$content);
+	$header = str_replace("<br />","\n",$extract_data['headers']);
+	try {
+		$data = csound_lines_to_data(explode(chr(10),$extract_data['content']));
+		}
+	catch(Exception $e) {
+		return "This file could not be read: ".$e->getMessage();
+		}
+	return csound_json_decode(csound_data_to_json($header,$data));
+	}
+
 function reformat_grammar($verbose,$this_file) {
 	global $temp_weights_file,$section_headers;
 	if(!file_exists($this_file)) return;
@@ -2717,7 +2980,11 @@ function get_orchestra_filename($csound_file) {
 	$csound_orchestra = '';
 	$content = @file_get_contents($csound_file);
 	if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
-	if($content != FALSE) {
+	if($content != FALSE AND csound_is_json($content)) { // 2026-11-11
+		$json = csound_json_decode($content);
+		if($json !== FALSE) $csound_orchestra = cs_get(cs_values($json),"CsoundOrchestraName",'');
+		}
+	else if($content != FALSE) {
 		$extract_data = extract_data(FALSE,FALSE,$content);
 		$content = $extract_data['content'];
 		$content_no_br = str_replace("<br>",chr(10),$content);
@@ -3204,6 +3471,11 @@ function get_tonality_file($csound_instruments_file) {
 	if(!file_exists($csound_instruments_file)) return $tonality_filename;
 	$content = @file_get_contents($csound_instruments_file);
 	if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
+	if(csound_is_json($content)) { // 2026-11-11
+		$json = csound_json_decode($content);
+		if($json !== FALSE) $tonality_filename = cs_get(cs_values($json),"TonalityFileName",'');
+		return $tonality_filename;
+		}
 	$table = explode(chr(10),$content);
 	$imax = count($table);
 	for($i = 0; $i < $imax; $i++) {
@@ -3349,39 +3621,26 @@ function list_of_tonal_scales($tonality_file) {
 	}
 
 function list_of_instruments($csound_instruments_file) {
-	global $number_fields_csound_instrument, $number_midi_parameters_csound_instrument;
+	// 2026-11-11 Reads the JSON format of Csound resources, or converts the former line format
 	$list_of_instruments['list'] = $list_of_instruments['index'] = $list_of_instruments['param'] = array();
-//	echo "csound_instruments_file = ".$csound_instruments_file."<br />";
 	if(!file_exists($csound_instruments_file)) return $list_of_instruments;
 	$content = @file_get_contents($csound_instruments_file);
+	if($content === FALSE) return $list_of_instruments;
 	if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
-	$extract_data = extract_data(FALSE,FALSE,$content);
-	$content = $extract_data['content'];
-	$content_no_br = str_replace("<br>",chr(10),$content);
-	$table = explode(chr(10),$content_no_br);
-	$imax_file = count($table);
-//	echo "imax_file = ".$imax_file."<br />";
-	$number_channels = $table[0];
-	$i = $number_channels;
-	$CsoundOrchestraName = preg_replace("/<\/?html>/u",'',$table[++$i]);
-	$number_instruments = $table[++$i];
-	for($j = 0; $j < $number_instruments; $j++) {
-		$CsoundInstrumentName[$j] = preg_replace("/<\/?html>/u",'',$table[++$i]);
-		$list_of_instruments['list'][$j] = str_replace(' ','_',$CsoundInstrumentName[$j]);
-	//	echo "<br />CsoundInstrumentName = ".$CsoundInstrumentName[$j]."<br />";
-		$InstrumentComment[$j] = preg_replace("/<\/?html>/u",'',$table[++$i]);
-		$argmax[$j] = $table[++$i];
-		$list_of_instruments['index'][$j] = $table[++$i];
-		$i += ($number_fields_csound_instrument - 1);
+	$json = csound_read_resource($content);
+	if(!is_array($json)) return $list_of_instruments; // Error message
+	$instruments = cs_get(cs_values($json),"CsInstruments",array());
+	if(!is_array($instruments)) return $list_of_instruments;
+	$j = 0;
+	foreach($instruments as $instrument_object) {
+		$instrument = cs_values($instrument_object);
+		$list_of_instruments['list'][$j] = str_replace(' ','_',cs_get($instrument,"CsInstrumentName",''));
+		$list_of_instruments['index'][$j] = cs_get($instrument,"CsInstrumentIndex",0);
 		$list_of_instruments['param'][$j] = array();
-		$Instrument_ipmax = $table[++$i];
-	//	echo $i." Instrument_ipmax = ".$Instrument_ipmax."<br />";
-		for($ip = 0; $ip < $Instrument_ipmax; $ip++) {
-			$Instrument_paramlist_name = preg_replace("/<\/?html>/u",'',$table[++$i]);
-		//	echo $i." Instrument_paramlist_name = ".$Instrument_paramlist_name."<br />";
-			$list_of_instruments['param'][$j][] = $Instrument_paramlist_name;
-			$i += ($number_midi_parameters_csound_instrument + 1);
-			}
+		$ipmax = intval(cs_get($instrument,"ipmax",0));
+		for($ip = 0; $ip < $ipmax; $ip++)
+			$list_of_instruments['param'][$j][] = cs_get($instrument,"paramlist[".$ip."].name",'');
+		$j++;
 		}
 	return $list_of_instruments;
 	}
@@ -5566,10 +5825,13 @@ function save($this_file,$filename,$top_header,$save_content) {
 	$the_warning = '';
 	if(trim($save_content) == '') return;
     if(file_exists($this_file)) {
-    	$backup_file = fix_new_name($this_file,FALSE)."_bak";
-        if(!copy($this_file,$backup_file))
-            echo "<p>👉 <span class=\"red-text\">Failed to create backup of the file.</span></p>";
-		else @chmod($backup_file,$permissions);
+		// No "_bak" copy in the shared test folder
+		if(!is_integer(strpos($this_file,"ctests_git"))) {
+			$backup_file = fix_new_name($this_file,FALSE)."_bak";
+			if(!copy($this_file,$backup_file))
+				echo "<p>👉 <span class=\"red-text\">Failed to create backup of the file.</span></p>";
+			else @chmod($backup_file,$permissions);
+			}
 		$handle = @fopen($this_file,"w");
 		if($handle) {
 			$file_header = $top_header."\n// Data saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s');
