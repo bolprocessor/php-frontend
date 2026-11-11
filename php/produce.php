@@ -510,11 +510,12 @@ if($instruction <> "help") {
 		// The console removes from the trace path the characters not accepted by remove_spaces()
 		$timefile = preg_replace('/[^A-Za-z0-9():_.,-]/','',"trace_".my_session_id()."_".$project_fullname."_time");
 		@unlink($temp_dir.$timefile);
-		echo "<br /><br /><big><b>⏱ <span id=\"perfTime\" style=\"font-family:monospace;\">0:00.0</span></b></big>";
+		echo "<br /><br /><big><b>⏱ <span id=\"perfTime\" style=\"font-family:monospace;\">0:00.0</span><span id=\"perfEnd\" style=\"font-family:monospace;\"></span></b></big>";
 		echo "<script>
 		(function() {
 			const url = 'time_poll.php?file=' + encodeURIComponent(".json_encode($timefile).");
 			const display = document.getElementById('perfTime');
+			const displayEnd = document.getElementById('perfEnd');
 			function format(ms) {
 				const tenths = Math.floor(ms / 100);
 				const minutes = Math.floor(tenths / 600);
@@ -529,6 +530,8 @@ if($instruction <> "help") {
 					if(response.ok) {
 						const result = await response.json();
 						if(typeof result.ms === 'number') display.textContent = format(result.ms);
+						// Expected end of the performance (of the current item if there are several)
+						if(typeof result.end === 'number' && result.end > 0) displayEnd.textContent = ' / ' + format(result.end);
 						}
 					}
 				catch(error) {}
@@ -930,7 +933,23 @@ $terminated = FALSE;
 if(file_exists($stopfile) OR file_exists($panicfile)) $terminated = TRUE;
 @unlink($pausefile); @unlink($continuefile);
 @unlink($stopfile);
-if($terminated AND $instruction <> "enter_notes") echo "<p class=\"attention\" style=\"color:red;\"><big>👉 The process has been interrupted</big></p>";
+$time_stopped = '';
+if(isset($timefile) AND $timefile <> '') {
+	// When the performance is stopped, the console keeps the "_time" file with the date at which it stopped
+	$content = trim((string)@file_get_contents($temp_dir.$timefile));
+	// It contains the date and the expected end (milliseconds)
+	if($terminated AND preg_match('/^([0-9]+)(?:\s+(-?[0-9]+))?$/',$content,$match)) {
+		$time_stopped = format_performance_time((int)$match[1]);
+		if(isset($match[2]) AND (int)$match[2] > 0) $time_stopped .= " of ".format_performance_time((int)$match[2]);
+		}
+	@unlink($temp_dir.$timefile);
+	}
+if($terminated AND $instruction <> "enter_notes") {
+	echo "<p class=\"attention\"><big>👉 <span style=\"color:red;\">The process has been interrupted";
+	if($time_stopped <> '') echo " at</span> ⏱ ".$time_stopped;
+	else echo "</span>";
+	echo "</big></p>";
+	}
 
 $capture_file = $temp_dir_abs."trace_".my_session_id()."_".$project_fullname."_capture";
 if(file_exists($capture_file)) {
@@ -1001,9 +1020,13 @@ if($n_messages > 0) {
 			$mssg = "<font color=\"red\">".$mssg."</font>";
 			}
 		if($mssg == null) continue;
-        $mssg = preg_replace("/(C:.+)$/u","<font color=#007BFF><small>$1</small></font>",$mssg);
-		if($mssg == null) continue;
-		$mssg = preg_replace("/(\.\.\/.+)$/u","<font color=#007BFF><small>$1</small></font>",$mssg);
+		if(preg_match("/https?:\/\//u",$mssg))
+			$mssg = preg_replace("/(https?:\/\/.+)$/u","<font color=#007BFF><small>$1</small></font>",$mssg);
+		else {
+			$mssg = preg_replace("/(C:.+)$/u","<font color=#007BFF><small>$1</small></font>",$mssg);
+			if($mssg == null) continue;
+			$mssg = preg_replace("/(\.\.\/.+)$/u","<font color=#007BFF><small>$1</small></font>",$mssg);
+			}
 		if($mssg == null) continue;
 		if($mssg == "(null)") continue;
 		if(($this_count = substr_count((string)$mssg,"Creating new weights file:")) > 0) {
@@ -1069,6 +1092,12 @@ if($instruction == "enter_notes" AND $warnings == 0) {
 	}
 $handle = fopen($stopfile,"w");
 if($handle) fclose($handle);
+
+function format_performance_time($ms) {
+	// Same format as the clock displayed during the performance, e.g. "1:05.4"
+	$tenths = intdiv($ms,100);
+	return intdiv($tenths,600).":".sprintf("%02d",intdiv($tenths % 600,10)).".".($tenths % 10);
+	}
 
 function check_image($link) {
 	$result = '';
