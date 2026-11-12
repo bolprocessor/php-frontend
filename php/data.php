@@ -232,6 +232,14 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 					}
 				}
 			$ignore_trills = isset($_POST['ignore_trills']);
+			// 2026-11-12: hidden notes (print-object="no"), see remove_hidden_notes(). On the first import, they are ignored by default
+			// only if some are the playback notes of the editor, also marked print-spacing="no" (e.g. Finale's realisation of trills).
+			// Other hidden notes (e.g. in MuseScore) are heard in the editor, so they are included by default - added by Claude
+			if($reload_musicxml) $ignore_hidden_notes = isset($_POST['ignore_hidden_notes']);
+			else $ignore_hidden_notes = FALSE; // Set after reading the file
+			$found_hidden_notes = $found_playback_notes = FALSE;
+			// 2026-11-13: keep the length of overfull measures (notes that exceed the time signature are played faster) - added by Claude
+			$compress_overfull = isset($_POST['compress_overfull']);
 			$ignore_fermata = isset($_POST['ignore_fermata']);
 			$ignore_mordents = isset($_POST['ignore_mordents']);
 			$chromatic_trills = isset($_POST['chromatic_trills']);
@@ -437,6 +445,10 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 					continue;
 					}
 				if(is_integer($pos=strpos($line,"<trill-mark"))) $found_trill = TRUE;
+				if(is_integer(strpos($line,"<note ")) AND is_integer(strpos($line,"print-object=\"no\""))) {
+					$found_hidden_notes = TRUE;
+					if(is_integer(strpos($line,"print-spacing=\"no\""))) $found_playback_notes = TRUE;
+					}
 				if(is_integer($pos=strpos($line,"<inverted-mordent"))) $found_mordent = TRUE;
 				if(is_integer($pos=strpos($line,"<mordent"))) $found_mordent = TRUE;
 				if(is_integer($pos=strpos($line,"<turn"))) $found_turn = TRUE;
@@ -487,6 +499,18 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 					$this_score[$section][$i_measure][$part][] = $line;
 					}
 				}
+			$number_hidden_notes = 0;
+			if(!$reload_musicxml) $ignore_hidden_notes = $found_playback_notes;
+			if($found_hidden_notes AND $ignore_hidden_notes) {
+				foreach($this_score as $section => $the_section)
+					foreach($the_section as $i_measure => $the_measure)
+						foreach($the_measure as $part => $the_lines) {
+							$result_hidden = remove_hidden_notes($the_lines);
+							$this_score[$section][$i_measure][$part] = $result_hidden['lines'];
+							$number_hidden_notes += $result_hidden['removed'];
+							}
+				unset($the_section,$the_measure,$the_lines);
+				}
 			$i_section =  0;
 			foreach($this_score as $section => $the_section) {
 			//	echo "section = ".$section."<br />";
@@ -516,6 +540,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 					}
 				if($accept_signs) $list_settings .= "// Reading tempo signs: “allegro” etc.\n";
 				if($extend_last_measure > 0) $list_settings .= "// Extended duration of last measure by ".$extend_last_measure." %\n";
+				if($compress_overfull) $list_settings .= "// Keeping the length of overfull measures\n";
 				for($i = 0; $i < $number_parts; $i++) {
 					if($apply_rndtime[$i])
 						$list_settings .= "// Time randomisation = ".$rndtime[$i]." ms in part ‘".$part_label[$i]."’\n";
@@ -532,6 +557,9 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 						if($chromatic_trills) $list_settings .= " (chromatic)";
 						$list_settings .= "\n";
 						}
+				if($found_hidden_notes)
+					if($ignore_hidden_notes) $list_settings .= "// Ignoring ".$number_hidden_notes." hidden notes\n";
+					else $list_settings .= "// Including hidden notes\n";
 				if($found_fermata)
 					if($ignore_fermata) $list_settings .= "// Ignoring fermata\n";
 					else $list_settings .= "// Including fermata\n";
@@ -571,7 +599,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				if(isset($_POST[$index])) $accept_pedal[$i] = $_POST[$index];
 				else $accept_pedal[$i] = FALSE;
 				}
-			$convert_score = convert_musicxml($this_score,$repeat_section,$divisions,$fifths,$mode,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$create_channels,$include_breaths,$include_slurs,$include_measures,$ignore_fermata,$ignore_mordents,$chromatic_mordents,$ignore_turns,$chromatic_turns,$ignore_trills,$chromatic_trills,$ignore_arpeggios,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections,$trace_tempo,$trace_ornamentations,$breath_length,$breath_tag,$trace_measures,$measures,$accept_signs,$include_parts,$number_parts,$apply_rndtime,$rndtime,$apply_rndvel,$rndvel,$extend_last_measure,$number_measures,$accept_pedal);
+			$convert_score = convert_musicxml($this_score,$repeat_section,$divisions,$fifths,$mode,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$create_channels,$include_breaths,$include_slurs,$include_measures,$ignore_fermata,$ignore_mordents,$chromatic_mordents,$ignore_turns,$chromatic_turns,$ignore_trills,$chromatic_trills,$ignore_arpeggios,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections,$trace_tempo,$trace_ornamentations,$breath_length,$breath_tag,$trace_measures,$measures,$accept_signs,$include_parts,$number_parts,$apply_rndtime,$rndtime,$apply_rndvel,$rndvel,$extend_last_measure,$number_measures,$accept_pedal,$compress_overfull);
 			$data .= $convert_score['data'];
 			$report = $convert_score['report'];
 	//		$data = normalize_ampersand($data); // Added 2025-12-15, was used in La Campanella
@@ -711,6 +739,11 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				echo ">&nbsp;➡&nbsp;make them chromatic<br />";
 				}
 			else $ignore_trills = FALSE;
+			if($found_hidden_notes) {
+				echo "<input type=\"checkbox\" name=\"ignore_hidden_notes\"";
+				if($ignore_hidden_notes) echo " checked";
+				echo ">&nbsp;<span class=\"red-text\">➡</span> Ignore hidden notes (some have been found in this score: they may be the editor's playback of trills, tremolos, etc.)<br />";
+				}
 			if($found_mordent) {
 				echo "<input type=\"checkbox\" name=\"ignore_mordents\"";
 				if($ignore_mordents) echo " checked";
@@ -765,6 +798,9 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			else $include_slurs = FALSE;
 
 			if($found_pedal_command OR $found_trill OR $found_arpeggio OR $found_mordent OR $found_turn OR $found_fermata OR $found_slur) echo "<hr>";
+			echo "<input type=\"checkbox\" name=\"compress_overfull\"";
+			if($compress_overfull) echo " checked";
+			echo ">&nbsp;Keep the length of measures containing more notes than their time signature (these notes are played faster)<br />";
 			echo "Extend duration of last measure by <input type=\"text\" style=\"border:none; text-align:center;\" name=\"extend_last_measure\" size=\"3\" value=\"".$extend_last_measure."\">% (100 % recommended)<br />";
 			echo "<hr>";
 			echo "Apply time randomization:<br />";

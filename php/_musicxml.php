@@ -7,7 +7,7 @@ $super_trace = FALSE;
 $trace_breath = TRUE;
 $trace_breath = FALSE;
 
-function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$create_channels,$include_breaths,$include_slurs,$include_measures,$ignore_fermata,$ignore_mordents,$chromatic_mordents,$ignore_turns,$chromatic_turns,$ignore_trills,$chromatic_trills,$ignore_arpeggios,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections,$trace_tempo,$trace_ornamentations,$breath_length,$breath_tag,$trace_measures,$measures,$accept_signs,$include_parts,$number_parts,$apply_rndtime,$rndtime,$apply_rndvel,$rndvel,$extend_last_measure,$number_measures,$accept_pedal) {
+function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$midi_channel,$dynamic_control,$select_part,$ignore_dynamics,$tempo_option,$create_channels,$include_breaths,$include_slurs,$include_measures,$ignore_fermata,$ignore_mordents,$chromatic_mordents,$ignore_turns,$chromatic_turns,$ignore_trills,$chromatic_trills,$ignore_arpeggios,$reload_musicxml,$test_musicxml,$change_metronome_average,$change_metronome_min,$change_metronome_max,$current_metronome_average,$current_metronome_min,$current_metronome_max,$list_corrections,$trace_tempo,$trace_ornamentations,$breath_length,$breath_tag,$trace_measures,$measures,$accept_signs,$include_parts,$number_parts,$apply_rndtime,$rndtime,$apply_rndvel,$rndvel,$extend_last_measure,$number_measures,$accept_pedal,$compress_overfull = FALSE) {
 	global $super_trace,$trace_breath;
 	global $max_term_in_fraction;
 	global $notes_diesis,$notes_bemol,$standard_diatonic_scale;
@@ -77,6 +77,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 		$default_tempo[$section] = $current_tempo; // Fixed by BB 2022-03-13
 		if($list_this OR $trace_tempo) $report .= "Default tempo set to ".$default_tempo[$section]." in section #".$section."<br />";
 		$beat_type = $beat_unit = $last_notes = array();
+		if(!isset($time_beats)) $time_beats = $time_beat_type = array(); // Time signature of each part, kept across sections
 		for($i_repeat = 1; $i_repeat <= $repeat_section[$section]; $i_repeat++) {
 			$tie_type_start = $tie_type_stop = FALSE;
 			if($test_musicxml) echo "• Repetition ".$i_repeat."/".$repeat_section[$section]." section ".$section."<br />";
@@ -171,8 +172,25 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							$note_on = TRUE;
 							$rest = $fermata = FALSE;
 							$is_chord = FALSE;
+							$note_type = ''; $note_dots = $tuplet_actual = $tuplet_normal = 0;
 							}
+						if($note_on AND preg_match("/<type(\s[^>]*)?>/u",$line)) { // Also <type size="cue">
+							$note_type = trim(preg_replace("/.*<type(\s[^>]*)?>([^<]+)<\/type>.*/u","$2",$line));
+							}
+						if($note_on AND is_integer($pos=strpos($line,"<dot/>"))) $note_dots++;
 						if($note_on AND is_integer($pos=strpos($line,"</note>"))) {
+							// 2026-11-12: in a tuplet, the duration is rounded to an integer number of divisions, e.g. a triplet eighth
+							// with 1024 divisions per quarter note is 341 or 342 instead of 1024/3. These durations created
+							// very long ratios in the polymetric structure (Beethoven's Grosse Fuge). If the exact duration
+							// calculated from <type>, <dot/> and <time-modification> differs by less than one division,
+							// it replaces <duration> - added by Claude
+							if($tuplet_actual > 0 AND $tuplet_normal > 0 AND isset($divisions[$score_part]) AND $curr_event[$score_part][$j]['p_dur'] > 0 AND $curr_event[$score_part][$j]['q_dur'] == 1) {
+								$exact = exact_tuplet_duration($divisions[$score_part],$note_type,$note_dots,$tuplet_actual,$tuplet_normal);
+								if($exact <> NULL AND abs(($exact['p'] / $exact['q']) - $curr_event[$score_part][$j]['p_dur']) < 1) {
+									$curr_event[$score_part][$j]['p_dur'] = $exact['p'];
+									$curr_event[$score_part][$j]['q_dur'] = $exact['q'];
+									}
+								}
 							if($is_chord) {
 								// This is the first note tagged ‘chord’ which means the preceding one belongs to the same chord
 								if($j > 0) $curr_event[$score_part][$j-1]['type'] = "chord";
@@ -391,6 +409,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							if(isset($beat_unit[$score_part])) $old_beat_unit = $beat_unit[$score_part];
 							else $old_beat_unit = 0;
 							$beat_unit[$score_part] = trim(preg_replace("/<beats>(.+)<\/beats>/u","$1",$line));
+						$time_beats[$score_part] = array_sum(array_map('intval',explode('+',$beat_unit[$score_part]))); // e.g. "3+2" 
 							if($trace_tempo OR $list_this) $report .= "••• Beat unit = ".$beat_unit[$score_part]." (tag “beats”)<br />";
 							continue;
 							}
@@ -398,6 +417,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							if(isset($beat_type[$score_part])) $old_beat_type = $beat_type[$score_part];
 							else $old_beat_type = 0;
 							$new_beat_type = trim(preg_replace("/<beat-type>(.+)<\/beat-type>/u","$1",$line));
+						$time_beat_type[$score_part] = intval($new_beat_type);
 							if($trace_tempo OR $list_this) $report .= "••• Beat type = ".$new_beat_type." score_metronome = ".$score_metronome.", preceding time signature ".$old_beat_unit."/".$old_beat_type."<br />";
 						/*	if(isset($beat_type[$score_part]) AND $new_beat_type <> $beat_type[$score_part] AND $score_metronome > 0) { 
 								$beat_type[$score_part] = $new_beat_type;
@@ -646,9 +666,11 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							}
 						if($time_modification AND is_integer($pos=strpos($line,"<actual-notes>"))) {
 							$actual_notes = trim(preg_replace("/<actual\-notes>([0-9]+)<\/actual\-notes>/u","$1",$line));
+							$tuplet_actual = intval($actual_notes);
 							}
 						if($time_modification AND is_integer($pos=strpos($line,"<normal-notes>"))) {
 							$normal_notes = trim(preg_replace("/<normal\-notes>([0-9]+)<\/normal\-notes>/u","$1",$line));
+							$tuplet_normal = intval($normal_notes);
 							}
 						if($note_on AND is_integer($pos=strpos($line,"</time-modification>"))) {
 							$time_modification = FALSE;
@@ -1481,6 +1503,28 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 					$fraction = $p_time_measure."/".($q_time_measure * $divisions[$score_part]);
 					$simplify = simplify($fraction,$max_term_in_fraction);
 					$fraction = $simplify['fraction'];
+					// 2026-11-13: option to keep the length of overfull measures. If this part is longer than its time signature
+					// (plus fermata and breath extensions), its duration is set to the length of the measure, so that the fields
+					// that are too long are played faster. The 2024 converter did this with a _tempo() (Watch What Happens) - added by Claude
+					$compressed = FALSE;
+					if($compress_overfull AND isset($time_beats[$score_part]) AND isset($time_beat_type[$score_part]) AND $time_beats[$score_part] > 0 AND $time_beat_type[$score_part] > 0) {
+						$p_length = $time_beats[$score_part] * 4 * $divisions[$score_part]; // Divisions are per quarter note
+						$q_length = $time_beat_type[$score_part];
+						$add = add($p_length,$q_length,$p_fermata_total_duration[$i_measure][$score_part],$q_fermata_total_duration[$i_measure][$score_part]);
+						$p_length = $add['p']; $q_length = $add['q'];
+						if($found_breath) {
+							$add = add($p_length,$q_length,$breath_length['p'] * $divisions[$score_part],$breath_length['q']);
+							$p_length = $add['p']; $q_length = $add['q'];
+							}
+						$add = add($p_time_measure,$q_time_measure,-$p_length,$q_length);
+						if(($add['p'] * $add['q']) > 0) {
+							$compressed = TRUE;
+							$simplify = simplify($p_length."/".($q_length * $divisions[$score_part]),$max_term_in_fraction);
+							if($list_this OR $trace_tempo) $report .= "<span class=\"red-text\">Overfull</span> measure #".$i_measure." part ".$score_part.": ".$fraction." beats played in ".$simplify['fraction']." beats<br />";
+							$fraction = $simplify['fraction'];
+							$p_length_quarters = $p_length; $q_length_quarters = $q_length * $divisions[$score_part];
+							}
+						}
 					$data .= "{".$fraction;
 					$data .= ",".$convert_measure[$score_part];
 					$data .= "}";
@@ -1498,7 +1542,11 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							$p_duration_this_measure = $p_field_duration[$j];
 							$q_duration_this_measure = $q_field_duration[$j];
 							}
-						}				
+						}
+					if($compressed) { // Shorter fields are only filled up to the length of the measure
+						$p_duration_this_measure = $p_length_quarters;
+						$q_duration_this_measure = $q_length_quarters;
+						}
 					// Add missing rests to fill up gaps
 					for($j = 0; $j < $i_field_of_part; $j++) {
 						$add = add($p_duration_this_measure,$q_duration_this_measure,-$p_field_duration[$j],$q_field_duration[$j]);
@@ -2201,5 +2249,119 @@ function add_breath_to_stream_duration($p,$q,$div,$breath_length,$stream,$stream
 	$new_rest = $simplify['fraction'];
 	$result['stream'] = str_replace("_rest",$new_rest,$stream);
 	return $result;
+	}
+
+function exact_tuplet_duration($divisions,$type,$dots,$actual,$normal) {
+	// 2026-11-12: exact duration (in divisions) of a note of graphic $type with $dots in a tuplet $actual:$normal
+	// Returns ['p' => , 'q' => ] or NULL if the type is unknown - added by Claude
+	$value_in_quarters = array("maxima" => array(32,1),"long" => array(16,1),"breve" => array(8,1),"whole" => array(4,1),"half" => array(2,1),"quarter" => array(1,1),"eighth" => array(1,2),"16th" => array(1,4),"32nd" => array(1,8),"64th" => array(1,16),"128th" => array(1,32),"256th" => array(1,64),"512th" => array(1,128),"1024th" => array(1,256));
+	if(!isset($value_in_quarters[$type])) return NULL;
+	$power = pow(2,$dots); // A note with n dots lasts (2^(n+1) - 1) / 2^n times its value
+	$p = intval($divisions) * $value_in_quarters[$type][0] * $normal * (2 * $power - 1);
+	$q = $value_in_quarters[$type][1] * $actual * $power;
+	$g = intval(gcd($p,$q));
+	if($g > 1) {
+		$p = intdiv($p,$g); $q = intdiv($q,$g);
+		}
+	return array('p' => $p,'q' => $q);
+	}
+
+function remove_hidden_notes($lines) {
+	// 2026-11-12: Removes hidden notes (print-object="no") from the lines of a measure in a part. Some editors (e.g. Finale)
+	// export their playback realisation of trills, tremolos, etc. as hidden notes in an extra voice. Importing them
+	// doubled the ornaments realised by the converter, and their durations (e.g. 115/512) created very long ratios in
+	// the polymetric structure, which disturbed the timing of other parts (Beethoven's Grosse Fuge) - fixed by Claude
+	// A voice containing only hidden notes is deleted with its <backup> and <forward>, and the next <backup> is adjusted.
+	// In a voice with visible notes, a hidden note is replaced with a <forward> of the same duration, and consecutive
+	// <forward> are merged. Returns ['lines' => ..., 'removed' => number of hidden notes].
+	// Split the lines into segments: 'note', 'hidden', 'backup', 'forward', 'other'
+	$segments = array();
+	$jmax = count($lines);
+	for($j = 0; $j < $jmax; $j++) {
+		$line = $lines[$j];
+		$type = '';
+		if(is_integer(strpos($line,"<note ")) OR is_integer(strpos($line,"<note>"))) {
+			$type = "note"; $end_tag = "</note>";
+			if(is_integer(strpos($line,"print-object=\"no\""))) $type = "hidden";
+			}
+		else if(is_integer(strpos($line,"<backup>"))) {
+			$type = "backup"; $end_tag = "</backup>";
+			}
+		else if(is_integer(strpos($line,"<forward>"))) {
+			$type = "forward"; $end_tag = "</forward>";
+			}
+		if($type == '') {
+			$segments[] = array('type' => "other",'lines' => array($line),'duration' => 0);
+			continue;
+			}
+		$these_lines = array($line);
+		while(!is_integer(strpos($line,$end_tag)) AND $j < ($jmax - 1)) {
+			$j++; $line = $lines[$j];
+			$these_lines[] = $line;
+			}
+		$text = implode("\n",$these_lines);
+		$duration = 0;
+		if(preg_match("/<duration>\s*([0-9.]+)\s*<\/duration>/u",$text,$m)) $duration = $m[1];
+		if($type == "hidden" AND (is_integer(strpos($text,"<chord/>")) OR is_integer(strpos($text,"<grace")))) $duration = 0;
+		$segments[] = array('type' => $type,'lines' => $these_lines,'duration' => $duration,'chord' => is_integer(strpos($text,"<chord/>")));
+		}
+	// Group the segments in voices: a new voice starts at each <backup>
+	$voices = array(); $iv = 0; $removed = 0;
+	$voices[$iv] = array();
+	foreach($segments as $segment) {
+		if($segment['type'] == "backup") $iv++;
+		$voices[$iv][] = $segment;
+		if($segment['type'] == "hidden") $removed++;
+		}
+	if($removed == 0) return array('lines' => $lines,'removed' => 0);
+	$new_lines = array();
+	$shift = 0; // Date in the original minus date in the new lines, caused by deleted voices, to be compensated by the next <backup>
+	foreach($voices as $iv => $voice) {
+		$visible = FALSE; $voice_advance = 0;
+		foreach($voice as $segment) {
+			if($segment['type'] == "note") $visible = TRUE;
+			if($segment['type'] == "backup") $voice_advance -= $segment['duration'];
+			if(($segment['type'] == "note" AND !$segment['chord']) OR $segment['type'] == "hidden" OR $segment['type'] == "forward")
+				$voice_advance += $segment['duration'];
+			}
+		if(!$visible AND $iv > 0) {
+			// Delete this voice, keeping only its other lines (directions, etc.)
+			foreach($voice as $segment)
+				if($segment['type'] == "other") foreach($segment['lines'] as $line) $new_lines[] = $line;
+			$shift += $voice_advance;
+			continue;
+			}
+		$forward = 0; // Pending duration of merged <forward>
+		foreach($voice as $segment) {
+			if($segment['type'] == "hidden" OR $segment['type'] == "forward") {
+				$forward += $segment['duration'];
+				continue;
+				}
+			if($segment['type'] == "other") {
+				foreach($segment['lines'] as $line) $new_lines[] = $line;
+				continue;
+				}
+			if($forward > 0) {
+				$new_lines[] = "<forward>"; $new_lines[] = "<duration>".$forward."</duration>"; $new_lines[] = "</forward>";
+				$forward = 0;
+				}
+			if($segment['type'] == "backup") {
+				$new_backup = $segment['duration'] - $shift;
+				$shift = 0;
+				if($new_backup > 0) {
+					$new_lines[] = "<backup>"; $new_lines[] = "<duration>".$new_backup."</duration>"; $new_lines[] = "</backup>";
+					}
+				else if($new_backup < 0) {
+					$new_lines[] = "<forward>"; $new_lines[] = "<duration>".(- $new_backup)."</duration>"; $new_lines[] = "</forward>";
+					}
+				continue;
+				}
+			foreach($segment['lines'] as $line) $new_lines[] = $line;
+			}
+		if($forward > 0) { // Keep the trailing rest, otherwise the field of this voice would be stretched
+			$new_lines[] = "<forward>"; $new_lines[] = "<duration>".$forward."</duration>"; $new_lines[] = "</forward>";
+			}
+		}
+	return array('lines' => $new_lines,'removed' => $removed);
 	}
 ?>
