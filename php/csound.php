@@ -115,14 +115,12 @@ if(isset($_POST['create_instrument'])) {
 		}
 	else if($new_instrument <> '') {
 		$new_instrument_file = $temp_dir.$temp_folder.SLASH.$new_instrument.".txt";
-		$template = "instrument_template";
-		$template_content = @file_get_contents($template);
-		$template_content = str_replace("[[index]]",$new_index,$template_content);
 		$handle = fopen($new_instrument_file,"w");
 		$file_header = $top_header."\n// Object prototype saved as \"".$new_instrument."\". Date: ".gmdate('Y-m-d H:i:s');
 		fwrite($handle,$file_header."\n");
 		fwrite($handle,$filename."\n");
-		fwrite($handle,$template_content."\n");
+		// 2026-11-12 A new instrument gets the values of cs_new_instrument()
+		foreach(cs_values_to_lines(cs_instrument_fields(),cs_new_instrument($new_index)) as $line) fwrite($handle,$line."\n");
 		fclose($handle);
 		$number_instruments = $_POST['number_instruments'] + 1;
 		$_POST['number_instruments'] = $number_instruments;
@@ -219,10 +217,7 @@ $exists_name = list_of_parameter_names($temp_dir,$temp_folder);
 try_create_new_file($this_file,$filename);
 $content = @file_get_contents($this_file);
 if($content === FALSE) ask_create_new_file($url_this_page,$filename);
-if(strlen(trim($content)) == 0) {
-	$template = "csound_template";
-	$content = @file_get_contents($template);
-	}
+if(strlen(trim($content)) == 0) $content = csound_data_to_json($top_header,cs_new_data()); // 2026-11-12 An empty file gets default values
 // 2026-11-11 Csound resources are read in JSON format, by the keys of their values. A file in the former line format is converted to JSON first.
 $csound_json = csound_read_resource($content);
 if(!is_array($csound_json)) {

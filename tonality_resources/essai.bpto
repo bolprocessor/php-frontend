@@ -1,24 +1,630 @@
-// Bol Processor BP3
-// Tonality resource file saved as "essai.bpto". Date: 2024-08-12 09:11:09
-_begin tables
-"beta"
-/• • • • • • • • • • • •/
-[1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 3 2]
-f2 0 128 -51 11 1.5 261.63 60 1 1.038 1.077 1.117 1.159 1.202 1.248 1.294 1.343 1.393 1.446 1.5
-<html>An equal-tempered version of the Bohlen–Pierce scale designed by Wendy Carlos.<br />Read https://en.wikipedia.org/wiki/Equal_temperament<br /></html>
-"fifteen_scale"
-/one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen one/
-[1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 1]
-f2 0 128 -51 15 2 263 60 1 1.066 1.125 1.2 1.25 1.333 1.42 1.5 1.6 1.666 1.777 1.6875 1.9 1.92 1.95 2
-<html>A test scale with 15 intervals and arbitrary ratios<br />For experiments only!<br /></html>
-"grama"
-/sa_ r1_ r2_ r3_ r4_ g1_ g2_ g3_ g4_ m1_ m2_ m3p1_ m4p2_ p3_ p4_ d1_ d2_ d3_ d4_ n1_ n2_ n3_ n4_ sa_/
-[1 1 256 243 16 15 10 9 9 8 32 27 6 5 5 4 81 64 4 3 27 20 45 32 64 45 40 27 3 2 128 81 8 5 5 3 27 16 16 9 9 5 15 8 243 128 2 1]
-f2 0 128 -51 23 2 261.63 60 1 1.053 1.067 1.111 1.125 1.185 1.2 1.25 1.266 1.333 1.35 1.406 1.422 1.481 1.5 1.58 1.6 1.667 1.688 1.778 1.8 1.875 1.898 2
-<html>The Indian grama scale as conceptualized by E. J. Arnold.<br />Publication: ‘L'intonation juste dans la théorie ancienne de l'Inde : les applications aux musiques modale et harmonique’. Revue de Musicologie, vol. 71c n° 1-2, 1985, p. 11-38. Edited and translated by Bernard Bel<br /></html>
-"meantone1"
-/do • re • mi fa • sol • la • si do/
-[1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1011 500]
-f2 0 128 -51 12 2.0226 261.63 60 1 1.0664 1.1246 1.1993 1.2647 1.3487 1.4222 1.4997 1.5993 1.6865 1.7986 1.8966 2.022
-<html>This is a new scale for BP3.  Creation 2020-11-17 22:55:31<br /></html>
-_end tables
+{
+    "header": "// Bol Processor BP3\n// Tonality resource file saved as \"essai.bpto\". Date: 2024-08-12 09:11:09\n// Converted to JSON format. Date: 2026-11-11 19:59:59 GMT",
+    "Tonal scales": {
+        "key": "Scales",
+        "value": [
+            {
+                "Name of this scale": {
+                    "key": "ScaleName",
+                    "value": "beta"
+                },
+                "Note names": {
+                    "key": "NoteNames",
+                    "value": [
+                        "•",
+                        "•",
+                        "•",
+                        "•",
+                        "•",
+                        "•",
+                        "•",
+                        "•",
+                        "•",
+                        "•",
+                        "•",
+                        "•"
+                    ]
+                },
+                "Ratios as fractions": {
+                    "key": "Fractions",
+                    "value": [
+                        [
+                            1,
+                            1
+                        ],
+                        [
+                            0,
+                            0
+                        ],
+                        [
+                            0,
+                            0
+                        ],
+                        [
+                            0,
+                            0
+                        ],
+                        [
+                            0,
+                            0
+                        ],
+                        [
+                            0,
+                            0
+                        ],
+                        [
+                            0,
+                            0
+                        ],
+                        [
+                            0,
+                            0
+                        ],
+                        [
+                            0,
+                            0
+                        ],
+                        [
+                            0,
+                            0
+                        ],
+                        [
+                            0,
+                            0
+                        ],
+                        [
+                            3,
+                            2
+                        ]
+                    ]
+                },
+                "Csound table number": {
+                    "key": "TableNumber",
+                    "value": 2
+                },
+                "Csound table start time": {
+                    "key": "TableStart",
+                    "value": 0
+                },
+                "Csound table size": {
+                    "key": "TableSize",
+                    "value": 128
+                },
+                "Csound GEN routine": {
+                    "key": "TableGEN",
+                    "value": -51
+                },
+                "Number of grades": {
+                    "key": "NumGrades",
+                    "value": 11
+                },
+                "Interval (ratio of the period)": {
+                    "key": "Interval",
+                    "value": 1.5
+                },
+                "Base frequency": {
+                    "key": "BaseFrequency",
+                    "value": 261.63,
+                    "unit": "Hz"
+                },
+                "Base key": {
+                    "key": "BaseKey",
+                    "value": 60
+                },
+                "Ratios": {
+                    "key": "Ratios",
+                    "value": [
+                        1,
+                        1.038,
+                        1.077,
+                        1.117,
+                        1.159,
+                        1.202,
+                        1.248,
+                        1.294,
+                        1.343,
+                        1.393,
+                        1.446,
+                        1.5
+                    ]
+                },
+                "Comment on this scale": {
+                    "key": "ScaleComment",
+                    "value": "An equal-tempered version of the Bohlen–Pierce scale designed by Wendy Carlos.\nRead https://en.wikipedia.org/wiki/Equal_temperament\n"
+                }
+            },
+            {
+                "Name of this scale": {
+                    "key": "ScaleName",
+                    "value": "fifteen_scale"
+                },
+                "Note names": {
+                    "key": "NoteNames",
+                    "value": [
+                        "one",
+                        "two",
+                        "three",
+                        "four",
+                        "five",
+                        "six",
+                        "seven",
+                        "eight",
+                        "nine",
+                        "ten",
+                        "eleven",
+                        "twelve",
+                        "thirteen",
+                        "fourteen",
+                        "fifteen",
+                        "one"
+                    ]
+                },
+                "Ratios as fractions": {
+                    "key": "Fractions",
+                    "value": [
+                        [
+                            1,
+                            1
+                        ],
+                        [
+                            0,
+                            0
+                        ],
+                        [
+                            0,
+                            0
+                        ],
+                        [
+                            0,
+                            0
+                        ],
+                        [
+                            0,
+                            0
+                        ],
+                        [
+                            0,
+                            0
+                        ],
+                        [
+                            0,
+                            0
+                        ],
+                        [
+                            0,
+                            0
+                        ],
+                        [
+                            0,
+                            0
+                        ],
+                        [
+                            0,
+                            0
+                        ],
+                        [
+                            0,
+                            0
+                        ],
+                        [
+                            0,
+                            0
+                        ],
+                        [
+                            0,
+                            0
+                        ],
+                        [
+                            0,
+                            0
+                        ],
+                        [
+                            0,
+                            0
+                        ],
+                        [
+                            2,
+                            1
+                        ]
+                    ]
+                },
+                "Csound table number": {
+                    "key": "TableNumber",
+                    "value": 2
+                },
+                "Csound table start time": {
+                    "key": "TableStart",
+                    "value": 0
+                },
+                "Csound table size": {
+                    "key": "TableSize",
+                    "value": 128
+                },
+                "Csound GEN routine": {
+                    "key": "TableGEN",
+                    "value": -51
+                },
+                "Number of grades": {
+                    "key": "NumGrades",
+                    "value": 15
+                },
+                "Interval (ratio of the period)": {
+                    "key": "Interval",
+                    "value": 2
+                },
+                "Base frequency": {
+                    "key": "BaseFrequency",
+                    "value": 263,
+                    "unit": "Hz"
+                },
+                "Base key": {
+                    "key": "BaseKey",
+                    "value": 60
+                },
+                "Ratios": {
+                    "key": "Ratios",
+                    "value": [
+                        1,
+                        1.066,
+                        1.125,
+                        1.2,
+                        1.25,
+                        1.333,
+                        1.42,
+                        1.5,
+                        1.6,
+                        1.666,
+                        1.777,
+                        1.6875,
+                        1.9,
+                        1.92,
+                        1.95,
+                        2
+                    ]
+                },
+                "Comment on this scale": {
+                    "key": "ScaleComment",
+                    "value": "A test scale with 15 intervals and arbitrary ratios\nFor experiments only!\n"
+                }
+            },
+            {
+                "Name of this scale": {
+                    "key": "ScaleName",
+                    "value": "grama"
+                },
+                "Note names": {
+                    "key": "NoteNames",
+                    "value": [
+                        "sa_",
+                        "r1_",
+                        "r2_",
+                        "r3_",
+                        "r4_",
+                        "g1_",
+                        "g2_",
+                        "g3_",
+                        "g4_",
+                        "m1_",
+                        "m2_",
+                        "m3p1_",
+                        "m4p2_",
+                        "p3_",
+                        "p4_",
+                        "d1_",
+                        "d2_",
+                        "d3_",
+                        "d4_",
+                        "n1_",
+                        "n2_",
+                        "n3_",
+                        "n4_",
+                        "sa_"
+                    ]
+                },
+                "Ratios as fractions": {
+                    "key": "Fractions",
+                    "value": [
+                        [
+                            1,
+                            1
+                        ],
+                        [
+                            256,
+                            243
+                        ],
+                        [
+                            16,
+                            15
+                        ],
+                        [
+                            10,
+                            9
+                        ],
+                        [
+                            9,
+                            8
+                        ],
+                        [
+                            32,
+                            27
+                        ],
+                        [
+                            6,
+                            5
+                        ],
+                        [
+                            5,
+                            4
+                        ],
+                        [
+                            81,
+                            64
+                        ],
+                        [
+                            4,
+                            3
+                        ],
+                        [
+                            27,
+                            20
+                        ],
+                        [
+                            45,
+                            32
+                        ],
+                        [
+                            64,
+                            45
+                        ],
+                        [
+                            40,
+                            27
+                        ],
+                        [
+                            3,
+                            2
+                        ],
+                        [
+                            128,
+                            81
+                        ],
+                        [
+                            8,
+                            5
+                        ],
+                        [
+                            5,
+                            3
+                        ],
+                        [
+                            27,
+                            16
+                        ],
+                        [
+                            16,
+                            9
+                        ],
+                        [
+                            9,
+                            5
+                        ],
+                        [
+                            15,
+                            8
+                        ],
+                        [
+                            243,
+                            128
+                        ],
+                        [
+                            2,
+                            1
+                        ]
+                    ]
+                },
+                "Csound table number": {
+                    "key": "TableNumber",
+                    "value": 2
+                },
+                "Csound table start time": {
+                    "key": "TableStart",
+                    "value": 0
+                },
+                "Csound table size": {
+                    "key": "TableSize",
+                    "value": 128
+                },
+                "Csound GEN routine": {
+                    "key": "TableGEN",
+                    "value": -51
+                },
+                "Number of grades": {
+                    "key": "NumGrades",
+                    "value": 23
+                },
+                "Interval (ratio of the period)": {
+                    "key": "Interval",
+                    "value": 2
+                },
+                "Base frequency": {
+                    "key": "BaseFrequency",
+                    "value": 261.63,
+                    "unit": "Hz"
+                },
+                "Base key": {
+                    "key": "BaseKey",
+                    "value": 60
+                },
+                "Ratios": {
+                    "key": "Ratios",
+                    "value": [
+                        1,
+                        1.053,
+                        1.067,
+                        1.111,
+                        1.125,
+                        1.185,
+                        1.2,
+                        1.25,
+                        1.266,
+                        1.333,
+                        1.35,
+                        1.406,
+                        1.422,
+                        1.481,
+                        1.5,
+                        1.58,
+                        1.6,
+                        1.667,
+                        1.688,
+                        1.778,
+                        1.8,
+                        1.875,
+                        1.898,
+                        2
+                    ]
+                },
+                "Comment on this scale": {
+                    "key": "ScaleComment",
+                    "value": "The Indian grama scale as conceptualized by E. J. Arnold.\nPublication: ‘L'intonation juste dans la théorie ancienne de l'Inde : les applications aux musiques modale et harmonique’. Revue de Musicologie, vol. 71c n° 1-2, 1985, p. 11-38. Edited and translated by Bernard Bel\n"
+                }
+            },
+            {
+                "Name of this scale": {
+                    "key": "ScaleName",
+                    "value": "meantone1"
+                },
+                "Note names": {
+                    "key": "NoteNames",
+                    "value": [
+                        "do",
+                        "•",
+                        "re",
+                        "•",
+                        "mi",
+                        "fa",
+                        "•",
+                        "sol",
+                        "•",
+                        "la",
+                        "•",
+                        "si",
+                        "do"
+                    ]
+                },
+                "Ratios as fractions": {
+                    "key": "Fractions",
+                    "value": [
+                        [
+                            1,
+                            1
+                        ],
+                        [
+                            0,
+                            0
+                        ],
+                        [
+                            0,
+                            0
+                        ],
+                        [
+                            0,
+                            0
+                        ],
+                        [
+                            0,
+                            0
+                        ],
+                        [
+                            0,
+                            0
+                        ],
+                        [
+                            0,
+                            0
+                        ],
+                        [
+                            0,
+                            0
+                        ],
+                        [
+                            0,
+                            0
+                        ],
+                        [
+                            0,
+                            0
+                        ],
+                        [
+                            0,
+                            0
+                        ],
+                        [
+                            0,
+                            0
+                        ],
+                        [
+                            1011,
+                            500
+                        ]
+                    ]
+                },
+                "Csound table number": {
+                    "key": "TableNumber",
+                    "value": 2
+                },
+                "Csound table start time": {
+                    "key": "TableStart",
+                    "value": 0
+                },
+                "Csound table size": {
+                    "key": "TableSize",
+                    "value": 128
+                },
+                "Csound GEN routine": {
+                    "key": "TableGEN",
+                    "value": -51
+                },
+                "Number of grades": {
+                    "key": "NumGrades",
+                    "value": 12
+                },
+                "Interval (ratio of the period)": {
+                    "key": "Interval",
+                    "value": 2.0226
+                },
+                "Base frequency": {
+                    "key": "BaseFrequency",
+                    "value": 261.63,
+                    "unit": "Hz"
+                },
+                "Base key": {
+                    "key": "BaseKey",
+                    "value": 60
+                },
+                "Ratios": {
+                    "key": "Ratios",
+                    "value": [
+                        1,
+                        1.0664,
+                        1.1246,
+                        1.1993,
+                        1.2647,
+                        1.3487,
+                        1.4222,
+                        1.4997,
+                        1.5993,
+                        1.6865,
+                        1.7986,
+                        1.8966,
+                        2.022
+                    ]
+                },
+                "Comment on this scale": {
+                    "key": "ScaleComment",
+                    "value": "This is a new scale for BP3.  Creation 2020-11-17 22:55:31\n"
+                }
+            }
+        ]
+    }
+}

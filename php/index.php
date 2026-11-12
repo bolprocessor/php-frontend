@@ -182,9 +182,7 @@ if(isset($_POST['create_alphabet'])) {
 			}
 		else {
 			$handle = fopen($dir.SLASH.$filename,"w");
-			$template = "alphabet_template";
-			$template_content = @file_get_contents($template);
-			fwrite($handle,$template_content."\n");
+			fwrite($handle,"*\n\n"); // 2026-11-12 Content of the former "alphabet_template"
 			fclose($handle);
 			chmod($dir.SLASH.$filename,$permissions);
 			}
@@ -242,9 +240,8 @@ if(isset($_POST['create_prototypes'])) {
 			}
 		else {
 			$handle = fopen($dir.SLASH.$filename,"w");
-			$template = "prototypes_template";
-			$template_content = @file_get_contents($template);
-			fwrite($handle,$template_content."\n");
+			$file_header = $top_header."\n// Object prototypes file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s')." GMT";
+			fwrite($handle,so_data_to_json($file_header,so_new_data())); // 2026-11-12 JSON format with default values
 			fclose($handle);
 			chmod($dir.SLASH.$filename,$permissions);
 			}
@@ -263,9 +260,8 @@ if(isset($_POST['create_csound'])) {
 			}
 		else {
 			$handle = fopen($dir.SLASH.$filename,"w");
-			$template = "csound_template";
-			$template_content = @file_get_contents($template);
-			fwrite($handle,$template_content."\n");
+			$file_header = $top_header."\n// Csound resource file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s')." GMT";
+			fwrite($handle,csound_data_to_json($file_header,cs_new_data())); // 2026-11-12 JSON format with default values
 			fclose($handle);
 			chmod($dir.SLASH.$filename,$permissions);
 			}

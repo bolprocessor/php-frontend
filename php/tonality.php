@@ -261,56 +261,14 @@ if(isset($_POST['copy_this_scale'])) {
 					}
 				sleep(1);
 				}
-			$content = file_get_contents($dir.$destination,TRUE);
-			if(!$content) echo "<p><span class=\"red-text\">For an unknown reason the destination file </span> <span class=\"green-text\">‘".$file_lock."’</span> is empty</p>";
-			else {
-				$file_lock3 = $dir.$destination."_lock3";
-				$handle = fopen($file_lock3,"w");
-				if($handle) fclose($handle);
-				$table = explode("\n",$content);
-				$handle = fopen($dir.$destination,"w");
-			//	echo "dest = ".$dir.$destination.".txt<br />";
-				$found_scale = FALSE; $can_copy = TRUE;
-				for($i = 0; $i < count($table); $i++) {
-					$line = trim($table[$i]);
-					if($found_scale AND $line <> '' AND $line[0] == "\"") {
-						$some_scale = trim(str_replace("\"",'',$line));
-						if($some_scale == $scalefilename) $can_copy = FALSE;
-						}
-					if($line == "_begin tables") $found_scale = TRUE;
-					if($line == "_end tables") {
-						if($can_copy) {
-							$folder_scales = $temp_dir.$temp_folder.SLASH."scales";
-					//		echo $folder_scales."<br />";
-							$dir_scale = scandir($folder_scales);
-							foreach($dir_scale as $this_scale) {
-						//		echo "this_scale = ".$this_scale."<br />";
-								if($this_scale == '.' OR $this_scale == ".." OR $this_scale == ".DS_Store") continue;
-								$table2 = explode(".",$this_scale);
-								$extension = end($table2);
-								if($extension <> "txt") continue;
-								$this_scale_name = str_replace(".txt",'',$this_scale);
-								if($this_scale_name == $scalefilename) {
-									$content_scale = file_get_contents($folder_scales.SLASH.$this_scale,TRUE);
-									$table3 = explode(chr(10),$content_scale);
-									for($j = 0; $j < count($table3); $j++) {
-										$line3 = trim($table3[$j]);
-							//			echo $line3."<br />";
-										if($line3 <> '') fwrite($handle,$line3."\n");
-										}
-									}
-								}
-							}
-						}
-					fwrite($handle,$line."\n");
-			//		echo $line."<br />";
-					}
-				fclose($handle);
-				chmod($dir.$destination,$permissions);
-			//	unlink($file_lock3);
-				if(!$can_copy) {
-					echo "<p><span class=\"red-text\">A scale with the same name</span> <span class=\"green-text\">‘".$scalefilename."’</span> <span class=\"red-text\">already exists in</span> <span class=\"green-text\">‘".$destination."’</span><span class=\"red-text\">. You need to delete it before copying this version</span></p>";
-					}
+			// 2026-11-12 The scale is added to the JSON data of the destination file
+			$file_lock3 = $dir.$destination."_lock3";
+			$handle = fopen($file_lock3,"w");
+			if($handle) fclose($handle);
+			$result = to_add_scales_to_file($dir.$destination,array($temp_dir.$temp_folder.SLASH."scales".SLASH.to_scale_file_name($scalefilename)));
+			if(!is_array($result)) echo "<p><span class=\"red-text\">".$result."</span></p>";
+			else if(isset($result[$scalefilename]) AND !$result[$scalefilename]) {
+				echo "<p><span class=\"red-text\">A scale with the same name</span> <span class=\"green-text\">‘".$scalefilename."’</span> <span class=\"red-text\">already exists in</span> <span class=\"green-text\">‘".$destination."’</span><span class=\"red-text\">. You need to delete it before copying this version</span></p>";
 				}
 			}
 		echo "<hr>";
@@ -394,9 +352,13 @@ if(strlen(trim($content)) == 0) {
 	$template = "tonality_template";
 	$content = @file_get_contents($template);
 	}
-$extract_data = extract_data(FALSE,FALSE,$content);
-echo "<p class=\"green-text\">".$extract_data['headers']."</p>";
-$content = $extract_data['content'];
+// 2026-11-12 Tonality resources are read in JSON format, by the keys of their values. A file in the former line format is converted first.
+$tonality_data = to_read_resource($content);
+if(!is_array($tonality_data)) {
+	echo "<p class=\"red-text\">➡ ".$tonality_data."</p>";
+	die();
+	}
+echo "<p class=\"green-text\">".str_replace("\n","<br />",$tonality_data['header'])."</p>";
 // echo $content."<br />";
 
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
@@ -414,11 +376,7 @@ if($autosave) {
 echo "<input type=\"hidden\" name=\"tonality_source\" value=\"".$filename."\">";
 echo "<input type=\"hidden\" name=\"duplicated_scale\" value=\"".$duplicated_scale."\">";
 
-$content_no_br = str_replace("<br>",chr(10),$content);
-$table = explode(chr(10),$content_no_br);
-$imax_file = count($table);
-
-$begin_tables = $table[0];
+$begin_tables = "_begin tables";
 if($verbose) echo "<br /><b>begin tables = “".$begin_tables."”</b><br />";
 echo "<input type=\"hidden\" name=\"begin_tables\" value=\"".$begin_tables."\">";
 // echo "<input type=\"hidden\" name=\"index_max\" value=\"".$index_max."\">";
@@ -460,108 +418,28 @@ if($error_create <> '') echo $error_create;
 
 // echo "<textarea name=\"cstables\" rows=\"5\" style=\"width:400px;\">";
 $cstables = '';
-$handle = FALSE; $i_scale = 0;
-$done_table = TRUE;
+$i_scale = 0;
 $scale_name = $scale_table = $scale_fraction = $scale_series = $comma_line = $scale_note_names = $scale_keys = $scale_comment = $baseoctave = array();
-for($i = 1; $i < $imax_file; $i++) {
-	$line = trim($table[$i]);
-//	if($verbose) echo "   ".$line."<br />";
-	if($line == '') continue;
-	if($line == "_end tables") break;
-	if($line[0] == '"') {
-		$i_scale++;
-		$scale_name[$i_scale] = str_replace('"','',$line);
-		$clean_name_of_file = str_replace("#","_",$scale_name[$i_scale]);
-		$clean_name_of_file = str_replace("/","_",$clean_name_of_file);
-		$table_name = $dir_scales.$clean_name_of_file.".txt";
-	//	echo "table_name = ".$table_name."<br />";
-		if(!file_exists($table_name)) {
-			$handle = fopen($table_name,"w");
-			fclose($handle);
+// Each scale is copied to a temporary file in the former line format, edited by scale.php. Its lines are also used for the display
+foreach($tonality_data['scales'] as $scale) {
+	if(!isset($scale["ScaleName"])) continue;
+	$i_scale++;
+	$scale_name[$i_scale] = $scale["ScaleName"];
+	$scale_lines = to_scale_lines($scale);
+	$table_name = $dir_scales.to_scale_file_name($scale_name[$i_scale]);
+	file_put_contents($table_name,implode("\n",$scale_lines)."\n");
+	chmod($table_name,$permissions);
+	foreach($scale_lines as $line) {
+		switch($line[0]) {
+			case '/': $scale_note_names[$i_scale] = $line; break;
+			case '<': $scale_comment[$i_scale] = $line; break;
+			case '[': $scale_fraction[$i_scale] = $line; break;
+			case 'k': $scale_keys[$i_scale] = $line; break;
+			case 's': $scale_series[$i_scale] = $line; break;
+			case 'c': $comma_line[$i_scale] = $line; break;
+			case '|': $baseoctave[$i_scale] = $line; break;
+			case 'f': $scale_table[$i_scale] = $line; break;
 			}
-		$handle = fopen($table_name,"w");
-		fwrite($handle,$line."\n");
-		$done_table = FALSE;
-		continue;
-		}
-	$clean_line = preg_replace("/<\/?html>/u",'',$line);
-	$clean_line = relocate_function_table($dir,$clean_line);
-	if($line[0] == '/') {
-		if(!$done_table) $scale_note_names[$i_scale] = $line;
-		else $scale_note_names[$i_scale + 1] = $line;
-		continue;
-		}
-	if($line[0] == '<') {
-		if($done_table) {
-			fwrite($handle,$line."\n");
-			fclose($handle);
-			chmod($table_name,$permissions);
-			$scale_comment[$i_scale] = $line;
-			}
-		continue;
-		}
-	if($line[0] == '[') {
-		fwrite($handle,$line."\n");
-		$scale_fraction[$i_scale] = $line;
-		continue;
-		}
-	if($line[0] == 'k') {
-		fwrite($handle,$line."\n");
-		$scale_keys[$i_scale] = $line;
-		continue;
-		}
-	if($line[0] == 's') {
-		fwrite($handle,$line."\n");
-		$scale_series[$i_scale] = $line;
-		continue;
-		}
-	if($line[0] == 'c') {
-		fwrite($handle,$line."\n");
-		$comma_line[$i_scale] = $line;
-		continue;
-		}
-	if($line[0] == '|') {
-		fwrite($handle,$line."\n");
-		$baseoctave[$i_scale] = $line;
-		continue;
-		}
-	$table2 = explode(' ',$line);
-	if(count($table2) < 5) continue;
-	$p3 = abs(intval($table2[3]));
-	if(abs(intval($p3)) == 51) {
-		if($done_table) {
-			$i_scale++;
-			$scale_name[$i_scale] = "scale_".$i_scale;
-			}
-		$clean_name_of_file = str_replace("#","_",$scale_name[$i_scale]);
-		$clean_name_of_file = str_replace("/","_",$clean_name_of_file);
-		$table_name = $dir_scales.$clean_name_of_file.".txt";
-		if(!file_exists($table_name)) {
-			$handle = fopen($table_name,"w");
-			fclose($handle);
-			chmod($table_name,$permissions);
-			}
-		$handle = fopen($table_name,"w");
-		fwrite($handle,"\"".$scale_name[$i_scale]."\"\n");
-		if(isset($scale_note_names[$i_scale]))
-			fwrite($handle,$scale_note_names[$i_scale]."\n");
-		if(isset($comma_line[$i_scale]))
-			fwrite($handle,$comma_line[$i_scale]."\n");
-		if(isset($scale_keys[$i_scale]))
-			fwrite($handle,$scale_keys[$i_scale]."\n");
-		if(isset($scale_fraction[$i_scale]))
-			fwrite($handle,$scale_fraction[$i_scale]."\n");
-		if(isset($scale_series[$i_scale]))
-			fwrite($handle,$scale_series[$i_scale]."\n");
-		if(isset($baseoctave[$i_scale]))
-			fwrite($handle,$baseoctave[$i_scale]."\n");
-		$scale_table[$i_scale] = $line;
-		fwrite($handle,$line."\n");
-		$done_table = TRUE;
-		}
-	else {
-		echo $clean_line."\n";
-		$cstables .= $line."\n";
 		}
 	}
 // echo "</textarea><br />";
@@ -938,11 +816,10 @@ if($max_scales > 0) {
 		$clean_name_of_file = str_replace("#","_",$scale_name[$i_scale]);
 		$clean_name_of_file = str_replace("/","_",$clean_name_of_file);
 	//	$dir = $dir_scales.$clean_name_of_file.".png";
-		$dir = $dir_scale_images.$clean_name_of_file.".png";
-	//	echo "dir = ".$dir."<br />";
-		if(file_exists($dir)) {
+		$image_file = $dir_scale_images.$clean_name_of_file.".png"; // 2026-11-12 Was $dir, which is the folder of the file used later by the export of scales
+		if(file_exists($image_file)) {
 			$k++; if($k > 10) $k = 0;
-			echo "➡&nbsp;".popup_link($clean_name_of_file,"image",500,410,(100 * $k),$dir);
+			echo "➡&nbsp;".popup_link($clean_name_of_file,"image",500,410,(100 * $k),$image_file);
 			}
 		echo "&nbsp;<input type=\"submit\" class=\"edit\" name=\"export_scale_".$i_scale."\" formaction=\"".$url_this_page."&scalefilename=".urlencode($scale_name[$i_scale])."#".$i_scale."\" onclick=\"this.form.target='_self';return true;\" value=\"Export to SCALA\">";
 		if(file_exists($scala_file) OR isset($_POST['export_scale_'.$i_scale])) echo "<span style=\"padding-right:1em;\">➡&nbsp;<a href=\"".nice_url($scala_file)."\" download=\"".$scale_name[$i_scale].".scl\">Download</a></span>";
@@ -1060,56 +937,28 @@ if($max_scales > 0) {
 				}
 			sleep(1);
 			}
-		$content = file_get_contents($dir.$destination,TRUE);
-		if(!$content) echo "<p><span class=\"red-text\">For an unknown reason the destination file </span> <span class=\"green-text\">‘".$file_lock."’</span> is empty</p>";
-		else {
-			echo "<ul>";
-			$table = explode("\n",$content);
-			$found_scale = FALSE;
-			$some_scale = array();
-			$handle = fopen($dir.$destination,"w");
-			for($i = $k = 0; $i < count($table); $i++) {
-				$line = trim($table[$i]);
-				if($found_scale AND $line <> '' AND $line[0] == "\"") {
-					$some_scale[$k++] = trim(str_replace("\"",'',$line));
-					}
-				if($line == "_begin tables") $found_scale = TRUE;
-				if($line == "_end tables") {
-					for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
-						if(isset($_POST['export_'.$i_scale])) {
-							$scalefilename = $scale_name[$i_scale];
-							echo "<li class=\"morespace\"><span class=\"turquoise-text\"><b>".$scalefilename."</b></span>";
-							if(in_array($scalefilename,$some_scale)) {
-								echo "<br />&nbsp;&nbsp;<span class=\"red-text\">➡ A scale with the same name</span> <span class=\"green-text\">‘".$scalefilename."’</span> <span class=\"red-text\">already exists in</span> <span class=\"green-text\">‘".$destination."’</span><span class=\"red-text\">. You need to delete it before copying this version</span>";
-								}
-							else {
-								$content2 = file_get_contents($dir_scales.$scalefilename.".txt",TRUE);
-								$table2 = explode("\n",$content2);
-								$jm = count($table2);
-								fwrite($handle,"\"".$scalefilename."\"\n");
-								for($j = 1; $j < $jm; $j++) {
-									$line2 = trim($table2[$j]);
-									if($line2 == '') continue;
-									if($line2[0] == "\"") continue;
-									fwrite($handle,$line2."\n");
-								//	echo $line2."<br />";
-									}
-								}
-							echo "</li>";
-							}
-						}
-					}
-				fwrite($handle,$line."\n");
-			//	echo $line."<br />";
-				}
-			fclose($handle);
-			chmod($dir.$destination,$permissions);
-			$file_lock3 = $dir.$destination."_lock3";
-			$handle_lock3 = fopen($file_lock3,"w");
-			fwrite($handle_lock3,"lock\n");
-			if($handle_lock3) fclose($handle_lock3);
-			echo "</ul>";
+		// 2026-11-12 The selected scales are added to the JSON data of the destination file
+		echo "<ul>";
+		$scale_files = $exported = array();
+		for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
+			if(!isset($_POST['export_'.$i_scale])) continue;
+			$exported[] = $scale_name[$i_scale];
+			$scale_files[] = $dir_scales.to_scale_file_name($scale_name[$i_scale]);
 			}
+		$result = to_add_scales_to_file($dir.$destination,$scale_files);
+		if(!is_array($result)) echo "<li><span class=\"red-text\">".$result."</span></li>";
+		else foreach($exported as $scalefilename) {
+			echo "<li class=\"morespace\"><span class=\"turquoise-text\"><b>".$scalefilename."</b></span>";
+			if(isset($result[$scalefilename]) AND !$result[$scalefilename]) {
+				echo "<br />&nbsp;&nbsp;<span class=\"red-text\">➡ A scale with the same name</span> <span class=\"green-text\">‘".$scalefilename."’</span> <span class=\"red-text\">already exists in</span> <span class=\"green-text\">‘".$destination."’</span><span class=\"red-text\">. You need to delete it before copying this version</span>";
+				}
+			echo "</li>";
+			}
+		$file_lock3 = $dir.$destination."_lock3";
+		$handle_lock3 = fopen($file_lock3,"w");
+		fwrite($handle_lock3,"lock\n");
+		if($handle_lock3) fclose($handle_lock3);
+		echo "</ul>";
 		}
 		
 	if(isset($_POST['export_scales'])) {

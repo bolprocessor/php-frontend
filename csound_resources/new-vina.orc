@@ -93,7 +93,19 @@ kamp = kvol * ivolscale
 ; display kslide, idur
 ; display kcpspitch, idur
 
-asignal pluck kamp, kcpspitch, icpspitch, 1, 5, 0.916, 0.083
+; pluck's buffer holds sr/icps samples, filled from table 1.
+; If the buffer is longer than the table (below sr/ftlen(1),
+; i.e. 86 Hz with 256 points), it gets filled with a constant
+; and the output is silent DC. So the buffer frequency is kept
+; at or above this limit, and kcpspitch alone sets the pitch,
+; which allows notes down to C2 (65.4 Hz) and below.
+ibufcps = icpspitch
+iminbufcps = sr / ftlen(1)
+if (ibufcps < iminbufcps) then
+  ibufcps = iminbufcps
+endif
+
+asignal pluck kamp, kcpspitch, ibufcps, 1, 5, 0.916, 0.083
 
 out asignal * 0.5
 

@@ -11,6 +11,9 @@ if(isset($_GET['save'])) {
 		if($result === "missing") {
 			echo "<span class=\"red-text\"> ➡ CANNOT autosave: the temporary data of this page was deleted. Please close this page and</span> <a href=\"objects.php?file=".urlencode(str_replace($bp_application_path,'',$dir).$filename)."\">RELOAD</a> it!";
 			}
+		else if($result === "error") {
+			echo "<span class=\"red-text\"> ➡ CANNOT autosave: the data of a prototype could not be converted. The file was not changed.</span>";
+			}
 		else if($result !== "skipped") echo "&nbsp;&nbsp;&nbsp;<span class=\"red-text\">".date('H\hi')."</span> ➡ <span class=\"red-text\">Autosaved all prototypes in</span> “<span class=\"green-text\">".$filename."</span>”";
 		}
 	}

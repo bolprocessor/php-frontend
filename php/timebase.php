@@ -82,81 +82,46 @@ if(isset($_FILES['mid_upload']) AND $_FILES['mid_upload']['tmp_name'] <> '') {
 		}
 	}
 
+// 2026-11-12 Time base files are stored in JSON format, see tb_data_to_json() in _basic_tasks.php
 if(isset($_POST['changestatus'])) {
-	$new_track = isset($_POST['addtrack']);
-//	echo "<p id=\"timespan\" style=\"color:red;\">Saved all data…</p>";
-	$handle = fopen($this_file,"w");
-	$file_header = $top_header."\n// Time base file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s')." GMT";
-	fwrite($handle,$file_header."\n");
-	$maxticks = $_POST['maxticks'];
-	if($new_track) {
-		$i_cycle = $maxticks;
-		$_POST['TickKey_'.$i_cycle] = 60;
-		$_POST['TickChannel_'.$i_cycle] = 1;
-		$_POST['TickVelocity_'.$i_cycle] = 64;
-		$_POST['TickCycle_'.$i_cycle] = 4;
-		$_POST['Ptick_'.$i_cycle] = 1;
-		$_POST['Qtick_'.$i_cycle] = 1;
-		$_POST['TickDuration_'.$i_cycle] = 50;
-		$maxticks++;
-		}
-	$maxbeats = $_POST['maxbeats'];
-	fwrite($handle,$maxticks."\n");
-	fwrite($handle,$maxbeats."\n");
+	$maxticks = intval($_POST['maxticks']);
+	$timebase_data = array('tracks' => array(),'comment' => isset($_POST['comment']) ? trim($_POST['comment']) : '');
 	for($i_cycle = 0; $i_cycle < $maxticks; $i_cycle++) {
-		fwrite($handle,"1\n"); // Obsolete variable
-		fwrite($handle,"7\n"); // Obsolete variable
-		$key = intval($_POST['TickKey_'.$i_cycle]);
-		if($key < 0) $key = 0;
-		if($key > 127) $key = 127;
-		fwrite($handle,$key."\n");
-		$channel = intval($_POST['TickChannel_'.$i_cycle]);
-		if($channel < 1) $channel = 1;
-		if($channel > 16) $channel = 16;
-		fwrite($handle,$channel."\n");
-		$velocity = intval($_POST['TickVelocity_'.$i_cycle]);
-		if($velocity < 0) $velocity = 0;
-		if($velocity > 127) $velocity = 127;
-		fwrite($handle,$velocity."\n");
-		$TickCycle[$i_cycle] = intval($_POST['TickCycle_'.$i_cycle]);
-		if($TickCycle[$i_cycle] > 40) $TickCycle[$i_cycle] = 40;
-		if($TickCycle[$i_cycle] < 1) $TickCycle[$i_cycle] = 1;
-		fwrite($handle,$TickCycle[$i_cycle]."\n");
-		$p_tick = intval($_POST['Ptick_'.$i_cycle]);
-		$q_tick = intval($_POST['Qtick_'.$i_cycle]);
-		$gcd = gcd($p_tick,$q_tick);
-		$p_tick = $p_tick / $gcd;
-		$q_tick = $q_tick / $gcd;
-		fwrite($handle,$p_tick."\n");
-		fwrite($handle,$q_tick."\n");
-		fwrite($handle,intval($_POST['TickDuration_'.$i_cycle])."\n");
-		for($i = 0; $i < $maxbeats; $i++) {
-			if(isset($_POST['ThisTick_'.$i_cycle.'_'.$i])) fwrite($handle,"1\n");
-			else fwrite($handle,"0\n");
-			}
+		$track = array();
+		foreach(tb_track_fields() as $key => $field)
+			if(isset($_POST[$key.'_'.$i_cycle])) $track[$key] = $_POST[$key.'_'.$i_cycle];
+		$track["Ticks"] = array();
+		for($i = 0; $i < TB_MAXBEATS; $i++) $track["Ticks"][$i] = isset($_POST['ThisTick_'.$i_cycle.'_'.$i]) ? 1 : 0;
+		$timebase_data['tracks'][] = $track; // Values are checked by tb_data_to_json()
 		}
-	fwrite($handle,"DATA: ".recode_tags($_POST['comment'])."\n");
-	fclose($handle);
+	if(isset($_POST['addtrack'])) $timebase_data['tracks'][] = tb_new_track();
+	$file_header = $top_header."\n// Time base file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s')." GMT";
+	file_put_contents($this_file,tb_data_to_json($file_header,$timebase_data));
 	}
 try_create_new_file($this_file,$filename);
+// A file in the former line format is converted when it is opened (the original is copied to the trash as NAME_old_format)
+$converted = convert_timebase_to_json($this_file,$dir_trash_folder);
+if($converted === TRUE) echo "<p class=\"red-text\">➡ This file has been converted to JSON format. The original is in the trash as ‘".$filename."_old_format’</p>";
+else if($converted !== FALSE) {
+	echo "<p class=\"red-text\">➡ ".$converted."</p>";
+	die();
+	}
 $content = @file_get_contents($this_file);
 if($content === FALSE) ask_create_new_file($url_this_page,$filename);
-if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
 if(trim($content) == '') $content = @file_get_contents("timebase_template");
 if($content === FALSE) {
 	echo "<p>👉 “timebase_template” is missing in the “php” folder</p>";
 	die();
 	}
 if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
-$extract_data = extract_data(FALSE,TRUE,$content);
-echo "<p class=\"green-text\">".$extract_data['headers']."</p>";
-$content = $extract_data['content'];
-$j = 0;
-$table = explode(chr(10),$content);
-$maxticks = $table[$j++];
-// echo "maxticks = ".$maxticks."<br />";
-$maxbeats = $table[$j++];
-// echo "maxbeats = ".$maxbeats."<br />";
+$timebase_data = tb_read_resource($content);
+if(!is_array($timebase_data)) {
+	echo "<p class=\"red-text\">➡ ".$timebase_data."</p>";
+	die();
+	}
+echo "<p class=\"green-text\">".str_replace("\n","<br />",htmlspecialchars($timebase_data['header']))."</p>";
+$maxticks = count($timebase_data['tracks']);
+$maxbeats = TB_MAXBEATS;
 
 $p_clock = 1;
 $q_clock = 1;
@@ -201,15 +166,15 @@ for($i_cycle = 0; $i_cycle < $maxticks; $i_cycle++) {
 	if(isset($_POST['inactivate_'.$i_cycle])) $mute[$i_cycle] = TRUE;
 	if(isset($_POST['activate_'.$i_cycle])) $mute[$i_cycle] = FALSE;
 	echo "<input type=\"hidden\" name=\"mute_".$i_cycle."\" value=\"".$mute[$i_cycle]."\">";
-	$j += 2;
-	$TickKey[$i_cycle] = $table[$j++];
-	$TickChannel[$i_cycle] = $table[$j++];
-	$TickVelocity[$i_cycle] = $table[$j++];
-	$TickCycle[$i_cycle] = $table[$j++];
-	$Ptick[$i_cycle] = $table[$j++];
-	$Qtick[$i_cycle] = $table[$j++];
-	$TickDuration[$i_cycle] = $table[$j++];
-	for($i = 0; $i < $maxbeats; $i++) $ThisTick[$i_cycle][$i] = $table[$j++];
+	$track = $timebase_data['tracks'][$i_cycle]; // Values read by their keys, see tb_read_resource()
+	$TickKey[$i_cycle] = $track["TickKey"];
+	$TickChannel[$i_cycle] = $track["TickChannel"];
+	$TickVelocity[$i_cycle] = $track["TickVelocity"];
+	$TickCycle[$i_cycle] = $track["TickCycle"];
+	$Ptick[$i_cycle] = $track["Ptick"];
+	$Qtick[$i_cycle] = $track["Qtick"];
+	$TickDuration[$i_cycle] = $track["TickDuration"];
+	for($i = 0; $i < $maxbeats; $i++) $ThisTick[$i_cycle][$i] = $track["Ticks"][$i];
 	echo "<tr>";
 	echo "<td style=\"text-align: center; vertical-align: middle; background-color: gold; font-size: x-large; color:red;\" rowspan = \"2\"><b>";
 	if($mute[$i_cycle]) echo "(<font color=\"white\">".($i_cycle + 1)."</font>)";
@@ -280,15 +245,11 @@ echo "Load (or replace) MIDI file (*.mid): <input type=\"file\" name=\"mid_uploa
 if(file_exists($midi_import_mf2t))
 	echo "&nbsp;&nbsp;<input class=\"save\" type=\"submit\" name=\"delete_midifile\" value=\"DELETE MIDI FILE\">";
 echo "</td></tr>";
-if(isset($table[$j])) $comment = $table[$j];
-else $comment = '';
-$comment = trim(str_replace("DATA:",'',$comment));
-$comment = str_ireplace("<HTML>",'',$comment);
-$comment = str_ireplace("</HTML>",'',$comment);
+$comment = $timebase_data['comment'];
 echo "<tr><td colspan=\"4\" style=\"padding:6px;\">";
 echo "<div style=\"float:right;\"><input class=\"save\" type=\"submit\" name=\"addtrack\" value=\"ADD ANOTHER TRACK\"></div>";
 
-echo "Comment on this timebase:<br /><input type=\"text\" name=\"comment\" size=\"80\" value=\"".$comment."\">";
+echo "Comment on this timebase:<br /><input type=\"text\" name=\"comment\" size=\"80\" value=\"".htmlspecialchars($comment)."\">";
 echo "</td></tr>";
 echo "</table>";
 

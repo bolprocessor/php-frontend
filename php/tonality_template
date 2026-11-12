@@ -1,5 +1,7 @@
-// Bol Processor BP3
-// Tonality resource file (template)
-_begin tables
-_end tables
-
+{
+    "header": "// Bol Processor BP3\n// Tonality resource file (template)",
+    "Tonal scales": {
+        "key": "Scales",
+        "value": []
+    }
+}

@@ -258,6 +258,8 @@ $top_header = "// Bol Processor BP3";
 
 // 2026-11-12 Csound resources in the former line format are converted to JSON (originals copied to the trash as NAME_old_format)
 convert_csound_resources_to_json($dir_csound_resources,$dir_trash_folder);
+// 2026-11-12 Tonality resources in the former line format are converted to JSON (originals copied to the trash as NAME_old_format)
+convert_tonality_resources_to_json($dir_tonality_resources,$dir_trash_folder);
 
 $KeyString = "key#";
 $Englishnote = array("C","C#","D","D#","E","F","F#","G","G#","A","A#","B","C");
@@ -1271,6 +1273,7 @@ function delete_folder($folder,$all) {
 	}
 
 function SaveObjectPrototypes($verbose,$dir,$filename,$temp_folder,$force) {
+	// 2026-11-12 Sound-object prototypes are saved in JSON format. Values are stored by their key, see so_data_to_json()
 	global $top_header,$test,$temp_dir,$csound_resources,$permissions;
 	// 2026-11-10 Without the temporary folder (deleted as old), the file would be saved without its prototypes
 	if(!is_dir($temp_dir.$temp_folder)) return "missing";
@@ -1288,89 +1291,62 @@ function SaveObjectPrototypes($verbose,$dir,$filename,$temp_folder,$force) {
 	$handle = fopen($file_lock,"w");
 	fwrite($handle,"lock\n");
 	fclose($handle);
-	$handle = fopen($dir.$filename,"w");
 	$file_header = $top_header."\n// Object prototypes file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s')." GMT";
-	fwrite($handle,$file_header."\n");
-	$PrototypeTickKey = $_POST['PrototypeTickKey'];
-	fwrite($handle,$PrototypeTickKey."\n");
-	$PrototypeTickChannel = $_POST['PrototypeTickChannel'];
-	fwrite($handle,$PrototypeTickChannel."\n");
-	$PrototypeTickVelocity = $_POST['PrototypeTickVelocity'];
-	fwrite($handle,$PrototypeTickVelocity."\n");
-	$CsoundInstruments_filename = trim($_POST['CsoundInstruments_filename']);
-	if(!is_integer($pos=strpos($CsoundInstruments_filename,$csound_resources)) AND $CsoundInstruments_filename <> '')
-		$CsoundInstruments_filename = $csound_resources.SLASH.$CsoundInstruments_filename;
-	fwrite($handle,$CsoundInstruments_filename."\n");
-	$maxsounds = $_POST['maxsounds'];
-	fwrite($handle,$maxsounds."\n");
-	$dircontent = scandir($temp_dir.$temp_folder);
-	foreach($dircontent as $thisfile) {
-		if($thisfile == '.' OR $thisfile == ".." OR $thisfile == ".DS_Store") continue;
-		$table = explode(".",$thisfile);
-		$extension = end($table);
-		if($extension <> "txt") continue;
-		$object_label = str_replace(".".$extension,'',$thisfile);
-		if($verbose) echo $object_label." ";
-		$content = file_get_contents($temp_dir.$temp_folder.SLASH.$thisfile);
-		$extract_data = extract_data(FALSE,TRUE,$content);
-		$headers = $extract_data['headers'];
-		if(!is_integer($pos=strpos($headers,"//"))) continue;
-		$content = $extract_data['content'];
-		$table = explode(chr(10),$content);
-		$line = "<HTML>".$object_label."</HTML>";
-		fwrite($handle,$line."\n");
-		$object_foldername = clean_folder_name($object_label);
-		$save_codes_dir = $temp_dir.$temp_folder.SLASH.$object_foldername."_codes";
-		$midi_bytes = $save_codes_dir."/midibytes.txt";
-		$comment_this_prototype = '';
-		for($i = 1; $i < count($table); $i++) {
-			if($i > 10 AND trim($table[$i]) == '') break;
-			$line = $table[$i];
-			if(is_integer($pos=strpos($line,"<HTML>"))) {
-				$comment_this_prototype = $line;
-				$comment_this_prototype = str_replace("<HTML>",'',$comment_this_prototype);
-				$comment_this_prototype = trim(str_replace("</HTML>",'',$comment_this_prototype));
+	$data = array();
+	try {
+		$data['PrototypeTickKey'] = so_line_to_value("int",$_POST['PrototypeTickKey'],"PrototypeTickKey");
+		$data['PrototypeTickChannel'] = so_line_to_value("int",$_POST['PrototypeTickChannel'],"PrototypeTickChannel");
+		$data['PrototypeTickVelocity'] = so_line_to_value("int",$_POST['PrototypeTickVelocity'],"PrototypeTickVelocity");
+		$CsoundInstruments_filename = trim($_POST['CsoundInstruments_filename']);
+		if(!is_integer($pos=strpos($CsoundInstruments_filename,$csound_resources)) AND $CsoundInstruments_filename <> '')
+			$CsoundInstruments_filename = $csound_resources.SLASH.$CsoundInstruments_filename;
+		$data['CsoundInstrumentsFile'] = $CsoundInstruments_filename;
+		$data['PrototypesComment'] = trim($_POST['comment_on_file']);
+		// Prototypes are read from the temporary files edited by prototype.php
+		$data['Prototypes'] = array();
+		$dircontent = scandir($temp_dir.$temp_folder);
+		foreach($dircontent as $thisfile) {
+			if($thisfile == '.' OR $thisfile == ".." OR $thisfile == ".DS_Store") continue;
+			$table = explode(".",$thisfile);
+			$extension = end($table);
+			if($extension <> "txt") continue;
+			$object_label = str_replace(".".$extension,'',$thisfile);
+			if($verbose) echo $object_label." ";
+			$content = file_get_contents($temp_dir.$temp_folder.SLASH.$thisfile);
+			$extract_data = extract_data(FALSE,TRUE,$content);
+			if(!is_integer($pos=strpos($extract_data['headers'],"//"))) continue;
+			$lines = explode(chr(10),$extract_data['content']);
+			$i = 1; // Line 0 is the name of the prototypes file
+			$p = array("Name" => $object_label);
+			so_read_prototype_lines($lines,$i,$p);
+			$p["Comment"] = '';
+			for(; $i < count($lines); $i++) {
+				if(is_integer(stripos($lines[$i],"<HTML>"))) {
+					$p["Comment"] = decode_tags(so_strip_html($lines[$i]));
+					break;
+					}
 				}
-			else fwrite($handle,$line."\n");
+			$save_codes_dir = $temp_dir.$temp_folder.SLASH.clean_folder_name($object_label)."_codes";
+			$csound_score = @file_get_contents($save_codes_dir."/csound.txt");
+			if($csound_score === FALSE) $csound_score = '';
+			if(MB_CONVERT_OK) $csound_score = mb_convert_encoding($csound_score,'UTF-8','UTF-8');
+			$p["Csound score"] = so_text_to_score($csound_score);
+			// MIDI codes are fetched from a separate "midibytes.txt" file, which may be empty
+			$all_bytes = @file_get_contents($save_codes_dir."/midibytes.txt");
+			$p['MIDIcodes'] = so_text_to_codes(($all_bytes === FALSE) ? '' : $all_bytes);
+			$data['Prototypes'][] = $p;
 			}
-		fwrite($handle,"_beginCsoundScore_\n");
-		$csound_file = $save_codes_dir."/csound.txt";
-		$csound_score = @file_get_contents($csound_file);
-		if(MB_CONVERT_OK) $csound_score = mb_convert_encoding($csound_score,'UTF-8','UTF-8');
-		$table2 = explode(chr(10),$csound_score);
-		$csound_score = "<HTML>";
-		for($k = 0; $k < count($table2); $k++) {
-			$line = trim($table2[$k]);
-			if($line <> '') $csound_score .= $line."<BR>";
-			}
-		$csound_score .= "</HTML>";
-		
-		fwrite($handle,$csound_score."\n");
-		fwrite($handle,"_endCsoundScore_\n");
-		// We fetch MIDI codes from a separate "midibytes.txt" file
-		$all_bytes = @file_get_contents($midi_bytes);
-		$table_bytes = explode(chr(10),$all_bytes);
-		$found = FALSE;
-		for($j = 0; $j < count($table_bytes); $j++) {
-			$byte = trim($table_bytes[$j]);
-			if($byte <> '') {
-				fwrite($handle,$byte."\n");
-				$found = TRUE;
-				}
-			}
-		if(!$found) fwrite($handle,"0\n"); // This is required because "midibytes.txt" might be empty when there is no MIDI code. The first number in the prototypes file is the number of MIDI codes that follow.
-		$comment_this_prototype = "<HTML>".$comment_this_prototype."</HTML>";
-		fwrite($handle,$comment_this_prototype."\n");
 		}
-	fwrite($handle,"DATA:\n");
-	$comment_on_file = $_POST['comment_on_file'];
-	$comment_on_file = recode_tags($comment_on_file);
-	fwrite($handle,"<HTML>".$comment_on_file."</HTML>\n");
-	fwrite($handle,"_endSoundObjectFile_\n");
-	fclose($handle);
+	catch(Exception $e) { // The file is left unchanged
+		error_log("SaveObjectPrototypes(): ".$e->getMessage());
+		unlink($file_lock);
+		return "error";
+		}
+	$json = so_data_to_json($file_header,$data);
+	@unlink($dir.$filename);
+	file_put_contents($dir.$filename,$json);
 	chmod($dir.$filename,$permissions);
 	if($verbose) echo "</font></p><hr>";
-//	sleep(1);
 	unlink($file_lock);
 	return "saved";
 	}
@@ -1528,6 +1504,46 @@ function cs_parameter_fields($ip) {
 	$fields[] = array($p."GENtype",7,"int");
 	$fields[] = array($p."combinationtype","ADD","combination");
 	return $fields;
+	}
+
+function cs_new_instrument($index) {
+	// 2026-11-12 Returns the values of a new instrument (formerly "instrument_template"). Other keys get the defaults of cs_instrument_fields()
+	$values = array();
+	foreach(cs_instrument_fields() as $field) $values[$field[0]] = $field[1];
+	$new = array("CsInstrumentComment" => "(Comment on this instrument)","iargmax" => 10,"CsInstrumentIndex" => intval($index),
+		"CsPitchIndex" => 4,"pitchbendrange" => 200.,"rPitchBend.islogx" => 1,"rPitchBend.islogy" => 1,
+		"CsPitchBendStartIndex" => 8,"CsPitchBendEndIndex" => 9,"pitchbendtable" => 10,
+		"CsVolumeStartIndex" => 5,"CsVolumeEndIndex" => 6,"volumetable" => 7,
+		"CsPitchBend[0]" => 0.,"CsPitchBend[1]" => 8191.5,"CsPitchBend[2]" => 16383.,
+		"CsPitchBend[3]" => -200.,"CsPitchBend[4]" => 0.,"CsPitchBend[5]" => 200.,
+		"CsModulation[0]" => 0.,"CsModulation[1]" => 8192.,"CsModulation[2]" => 16383.);
+	foreach(array("Volume","Pressure","Panoramic") as $c) {
+		$new["Cs".$c."[0]"] = 0.; $new["Cs".$c."[1]"] = 64.; $new["Cs".$c."[2]"] = 127.;
+		}
+	return array_merge($values,$new);
+	}
+
+function cs_new_parameter($ip,$name) {
+	// 2026-11-12 Returns the values of new parameter $ip (formerly "parameter_template")
+	$p = "paramlist[".$ip."].";
+	return array($p."name" => $name,$p."comment" => "(Comment on this parameter)",$p."startindex" => 11,$p."endindex" => 12,$p."table" => 13,$p."defaultvalue" => 0.,$p."GENtype" => 7,$p."combinationtype" => "ADD");
+	}
+
+function cs_new_data() {
+	// 2026-11-12 Returns the values of a new Csound resource file (formerly "csound_template"), see csound_data_to_json()
+	$channels = array();
+	for($ch = 1; $ch <= 16; $ch++) $channels[$ch] = -1;
+	return array("orchestra" => "0-default.orc","channels" => $channels,"instruments" => array(),"tables" => array("f1 0 256 10 1 ; This table may be changed"),"tonality" => '');
+	}
+
+function cs_values_to_lines($fields,$values) {
+	// Returns the lines of a temporary file (csinstrument.php, csparameter.php) for $values indexed by the keys of $fields
+	$lines = array();
+	foreach($fields as $field) {
+		list($key,$default,$type) = $field;
+		$lines[] = cs_value_to_line($type,cs_get($values,$key,$default));
+		}
+	return $lines;
 	}
 
 function cs_line_to_value($type,$line,$key) {
@@ -1782,6 +1798,896 @@ function csound_read_resource($content) {
 	return csound_json_decode(csound_data_to_json($header,$data));
 	}
 
+// 2026-11-12 Sound-object prototypes ("-so" files) are stored in JSON format.
+// Labels and keys are those of the export "proto-NAME.json" made by ExportPrototypeAsJson() in the console.
+// Values are read by their key. As in the export, a few items have no key and are read by their label:
+// "Prototypes", and in each prototype "Csound score", "byte_N", "time_N" and "Comment".
+// A prototype is handled as an array of values indexed by their keys. Its MIDI codes are in 'MIDIcodes',
+// as numbers time * 256 + byte, as in the former line format.
+// The temporary files edited by prototype.php keep the former line format, see so_temp_lines().
+
+function so_enum_names($enum) {
+	switch($enum) {
+		case "type": return array(0 => "SILENT",1 => "MIDI_TYPE",4 => "CSOUND_TYPE",5 => "MIDI_CSOUND_TYPE");
+		case "channel": return array(0 => "GLOBAL_CH",-1 => "LOCAL_CH");
+		case "mode": return array(0 => "PERCENT",-1 => "FIXVALUE",1 => "IRRELEVANT");
+		case "pivot": return array(1 => "PIVBEG",2 => "PIVEND",3 => "PIVBEGON",4 => "PIVENDOFF",5 => "PIVMIDDLE",6 => "PIVMIDDLEONOFF",7 => "SETPIVOT");
+		case "rescale": return array(0 => "OK_RESCALE",1 => "NEVER_RESCALE",2 => "DILATION_RATIO");
+		case "strike": return array(1 => "ALWAYS",0 => "NEVER",-1 => "DEFAULT");
+		case "csound": return array(-1 => "LOCAL_CS",0 => "GLOBAL_CS");
+		}
+	return array();
+	}
+
+function so_prototype_fields() {
+	// Values of a prototype in the order of the JSON file: key => array(label, type, default value, unit)
+	// These default values are used for new prototypes and for missing keys. LoadObjectPrototypesJSON() in the console uses the same ones.
+	// To add a value, add it here, in so_temp_lines() if prototype.php edits it, and in the console.
+	$f = array();
+	$f["Name"] = array("Name","text",'','');
+	$f["Type"] = array("Object type","enum:type",1,'');
+	$f["Resolution"] = array("Resolution","int",1,"ms");
+	$f["DefaultChannel"] = array("Default MIDI channel","enum:channel",-1,'');
+	$f["Tref"] = array("Tref","int",1000,"ms");
+	$f["Quan"] = array("Quantization","number",10,"ms");
+	$f["PivType"] = array("Pivot type","enum:pivot",1,'');
+	$f["PivMode"] = array("Pivot mode","enum:mode",-1,'');
+	$f["PivPos"] = array("Pivot position","float",0.,"ms or percent");
+	$f["RescaleMode"] = array("Rescale mode","enum:rescale",0,'');
+	$f["FixScale"] = array("Never rescale","bool",0,"boolean");
+	$f["OkExpand"] = array("Expand","bool",1,"boolean");
+	$f["OkCompress"] = array("Compress","bool",1,"boolean");
+	$f["AlphaMin"] = array("Minimum ratio","float",0.,'');
+	$f["AlphaMax"] = array("Maximum ratio","float",0.,'');
+	$f["AlphaCtrl"] = array("Alpha control","bool",0,"boolean");
+	$f["AlphaCtrlNr"] = array("Send ratio to controller number","int",-1,'');
+	$f["AlphaCtrlChan"] = array("Send ratio to controller channel","int",0,'');
+	$f["OkTransp"] = array("Accept transposition","bool",1,"boolean");
+	$f["OkArticul"] = array("Accept articulation","bool",1,"boolean");
+	$f["OkVolume"] = array("Accept volume changes","bool",1,"boolean");
+	$f["OkPan"] = array("Accept panoramic changes","bool",1,"boolean");
+	$f["OkMap"] = array("Accept key expand and mapping","bool",1,"boolean");
+	$f["OkVelocity"] = array("Accept velocity changes","bool",1,"boolean");
+	$f["OkRelocate"] = array("Relocate","bool",1,"boolean");
+	$f["DelayMode"] = array("Delay mode","enum:mode",1,'');
+	$f["MaxDelay"] = array("Max delay","int",0,"ms");
+	$f["ForwardMode"] = array("Forward mode","enum:mode",1,'');
+	$f["MaxForward"] = array("Max forward","int",0,"ms");
+	$f["BreakTempo"] = array("Break tempo after this object (organum)","bool",1,"boolean");
+	$f["ContBeg"] = array("Force continuity at the beginning","bool",0,"boolean");
+	$f["ContBegMode"] = array("Max gap at beginning mode","enum:mode",1,'');
+	$f["MaxBegGap"] = array("Max gap at beginning","int",0,"ms");
+	$f["ContEnd"] = array("Force continuity at the end","bool",0,"boolean");
+	$f["ContEndMode"] = array("Max gap at end mode","enum:mode",1,'');
+	$f["MaxEndGap"] = array("Max gap at end (ms or percent)","int",0,"ms");
+	$f["CoverBeg"] = array("Cover beginning","bool",1,"boolean");
+	$f["CoverBegMode"] = array("Cover beginning mode","enum:mode",0,'');
+	$f["MaxCoverBeg"] = array("Max cover at beginning","int",100,"ms or percent");
+	$f["CoverEnd"] = array("Cover end","bool",1,"boolean");
+	$f["CoverEndMode"] = array("Cover end mode","enum:mode",1,'');
+	$f["MaxCoverEnd"] = array("Max cover at end","int",100,"ms or percent");
+	$f["TruncBeg"] = array("Truncate beginning","bool",1,"boolean");
+	$f["TruncBegMode"] = array("Truncate beginning mode","enum:mode",1,'');
+	$f["MaxTruncBeg"] = array("Max truncate beginning","int",0,"ms or percent");
+	$f["TruncEnd"] = array("Truncate end","bool",1,"boolean");
+	$f["TruncEndMode"] = array("Truncate end mode","enum:mode",1,'');
+	$f["MaxTruncEnd"] = array("Max truncate end","int",0,"ms or percent");
+	$f["PreRollMode"] = array("Preroll mode","enum:mode",-1,'');
+	$f["Preroll"] = array("Preroll value","float",0.,"ms or percent");
+	$f["PostRollMode"] = array("Postroll mode","enum:mode",-1,'');
+	$f["Postroll"] = array("Postroll value","float",0.,"ms or percent");
+	$f["CyclicMode"] = array("Cyclic mode","enum:mode",1,'');
+	$f["CyclicAfter"] = array("Cyclic after","float",0.,"ms or percent");
+	$f["ForceIntegerCycles"] = array("Force integer number of cycles","bool",0,"boolean");
+	$f["StrikeAgain"] = array("Strike again NoteOn's","enum:strike",-1,'');
+	$f["CsoundInstrumentMode"] = array("Csound instrument mode","enum:csound",-1,'');
+	$f["CsoundInstr"] = array("Csound instrument #","int",-1,'');
+	$f["Tpict"] = array("Tempo of MF2T code","int",0,"ms");
+	$f["division"] = array("Division of MF2T code","number",1,'');
+	return $f;
+	}
+
+function so_new_prototype() {
+	// Returns a new prototype with default values. Its name is given by the temporary file name, see SaveObjectPrototypes()
+	$p = array();
+	foreach(so_prototype_fields() as $key => $field) $p[$key] = $field[2];
+	$p["Csound score"] = "<HTML></HTML>";
+	$p['MIDIcodes'] = array();
+	$p["Comment"] = "(Comment on this prototype)";
+	return $p;
+	}
+
+function so_new_data() {
+	// Returns the values of a new sound-object prototypes file, without prototypes
+	return array("PrototypeTickKey" => 84,"PrototypeTickChannel" => 1,"PrototypeTickVelocity" => 64,"CsoundInstrumentsFile" => '',"PrototypesComment" => '',"Prototypes" => array());
+	}
+
+function so_bits() {
+	// Positions of the values stored as digits in a single line of the former format. PivType uses positions 0 to 5 and 18
+	return array("FixScale" => 7,"OkExpand" => 8,"OkCompress" => 9,"OkRelocate" => 10,"BreakTempo" => 11,"ContBeg" => 12,"ContEnd" => 13,"CoverBeg" => 14,"CoverEnd" => 15,"TruncBeg" => 16,"TruncEnd" => 17,"AlphaCtrl" => 19);
+	}
+
+function so_temp_lines() {
+	// Values of a prototype in the order of the temporary files edited by prototype.php, which is that of the former line format.
+	// "#bits" is the line of digits (see so_bits()), the other "#..." lines are no longer used and get a constant value.
+	return array("Type","Resolution","DefaultChannel","Tref","Quan","#bits","RescaleMode","AlphaMin","AlphaMax","DelayMode","MaxDelay","ForwardMode","MaxForward","#notused","division","ContBegMode","MaxBegGap","ContEndMode","MaxEndGap","CoverBegMode","MaxCoverBeg","CoverEndMode","MaxCoverEnd","TruncBegMode","MaxTruncBeg","TruncEndMode","MaxTruncEnd","PivMode","PivPos","AlphaCtrlNr","AlphaCtrlChan","OkTransp","OkArticul","OkVolume","OkPan","OkMap","OkVelocity","Preroll","Postroll","PreRollMode","PostRollMode","CyclicMode","CyclicAfter","ForceIntegerCycles","#discardnoteoffs","StrikeAgain","CsoundInstrumentMode","CsoundInstr","Tpict","#color","#color","#color");
+	}
+
+function so_type_of($type) {
+	// Returns the base type and the enum name of a type in so_prototype_fields()
+	if(str_starts_with($type,"enum:")) return array("enum",substr($type,5));
+	return array($type,'');
+	}
+
+function so_line_to_value($type,$line,$key) {
+	// Converts a line of the former format to a JSON value, or throws an exception
+	if($line === NULL) throw new Exception("missing value of ‘".$key."’");
+	$line = trim(rtrim($line,"\r"));
+	list($base,$enum) = so_type_of($type);
+	if($base == "text") return $line;
+	if(!is_numeric($line)) throw new Exception("‘".$key."’ should be a number, found ‘".$line."’");
+	switch($base) {
+		case "float": return floatval($line);
+		case "number": return so_number("number",$line);
+		case "enum":
+			$names = so_enum_names($enum);
+			$x = intval($line);
+			if($x == -2 AND ($enum == "mode" OR $enum == "rescale")) $x = 1; // Fixing an old bug, as in the console
+			return isset($names[$x]) ? $names[$x] : $x;
+		}
+	return intval($line);
+	}
+
+function so_number($type,$value) {
+	// Returns the number of a JSON value. An enum may be a name or a number.
+	list($base,$enum) = so_type_of($type);
+	if($base == "enum" AND is_string($value)) {
+		$numbers = array_flip(so_enum_names($enum));
+		if(isset($numbers[$value])) return $numbers[$value];
+		}
+	switch($base) {
+		case "float": return floatval($value);
+		case "number": return (floatval($value) == intval($value)) ? intval($value) : floatval($value); // As in the export, e.g. Quan
+		}
+	return intval($value);
+	}
+
+function so_json_value($type,$value) {
+	// Normalises a value before saving it in JSON
+	list($base,$enum) = so_type_of($type);
+	if($base == "text") return strval($value);
+	$x = so_number($type,$value);
+	if($base == "enum") {
+		$names = so_enum_names($enum);
+		if(isset($names[$x])) return $names[$x];
+		}
+	return $x;
+	}
+
+function so_value_to_line($type,$value) {
+	// Converts a JSON value to a line of the temporary files
+	list($base,$enum) = so_type_of($type);
+	if($base == "text") return $value;
+	$x = so_number($type,$value);
+	if(is_float($x) AND round($x,4) == $x) return sprintf("%.4f",$x); // As in the former files
+	return strval($x);
+	}
+
+function so_read_prototype_lines($lines,&$i,&$p) {
+	// Reads the values of a prototype from $lines in the order of so_temp_lines(), starting at line $i.
+	// The colour lines, which old versions don't have, are read only if they are numbers.
+	$fields = so_prototype_fields();
+	foreach(so_temp_lines() as $token) {
+		$line = ($i < count($lines)) ? trim(rtrim($lines[$i],"\r")) : NULL;
+		if($token == "#color") {
+			if($line !== NULL AND is_numeric($line)) $i++;
+			continue;
+			}
+		$i++;
+		if($line === NULL) throw new Exception("missing value of ‘".$token."’");
+		if($token == "#notused" OR $token == "#discardnoteoffs") continue;
+		if($token == "#bits") {
+			// As in the console: PivType = pivbeg + 2 * pivend + ... + 6 * pivmiddleonoff + 7 * pivspec
+			$digit = array();
+			for($k = 0; $k < 20; $k++) $digit[$k] = ($k < strlen($line) AND ctype_digit($line[$k])) ? intval($line[$k]) : 0;
+			if(strlen($line) < 20) $digit[19] = 1; // A missing AlphaCtrl is TRUE in the console and in prototype.php
+			$pivtype = 0;
+			for($k = 0; $k < 6; $k++) $pivtype += ($k + 1) * $digit[$k];
+			$pivtype += 7 * $digit[18];
+			$p["PivType"] = so_line_to_value($fields["PivType"][1],strval($pivtype),"PivType");
+			foreach(so_bits() as $key => $k) $p[$key] = $digit[$k];
+			continue;
+			}
+		$p[$token] = so_line_to_value($fields[$token][1],$line,$token);
+		}
+	}
+
+function so_prototype_to_lines($p) {
+	// Returns the lines of a prototype in the order of so_temp_lines(), with default values for missing keys
+	$fields = so_prototype_fields();
+	$lines = array();
+	foreach(so_temp_lines() as $token) {
+		switch($token) {
+			case "#notused": $lines[] = "1"; break;
+			case "#discardnoteoffs": $lines[] = "0"; break;
+			case "#color": $lines[] = "65535"; break;
+			case "#bits":
+				$digits = str_repeat("0",20);
+				$pivtype = so_number($fields["PivType"][1],cs_get($p,"PivType",$fields["PivType"][2]));
+				if($pivtype >= 1 AND $pivtype <= 6) $digits[$pivtype - 1] = "1";
+				if($pivtype == 7) $digits[18] = "1";
+				$rescale = so_number($fields["RescaleMode"][1],cs_get($p,"RescaleMode",$fields["RescaleMode"][2]));
+				if($rescale == 0) $digits[6] = "1"; // okrescale, which is the same as RescaleMode = OK_RESCALE
+				foreach(so_bits() as $key => $k)
+					if(intval(cs_get($p,$key,$fields[$key][2])) <> 0) $digits[$k] = "1";
+				$lines[] = $digits;
+				break;
+			default:
+				$lines[] = so_value_to_line($fields[$token][1],cs_get($p,$token,$fields[$token][2]));
+				break;
+			}
+		}
+	return $lines;
+	}
+
+function so_strip_html($line) {
+	$line = str_ireplace("<HTML>",'',$line);
+	return trim(str_ireplace("</HTML>",'',$line));
+	}
+
+function so_score_to_text($score) {
+	// Csound score as stored in the file ("<HTML>line<BR>line<BR></HTML>") => text of "csound.txt"
+	$score = str_ireplace("<HTML>",'',$score);
+	$score = str_ireplace("</HTML>",'',$score);
+	return str_ireplace("<BR>","\n",$score);
+	}
+
+function so_text_to_score($text) {
+	// Text of "csound.txt" => Csound score as stored in the file
+	$score = "<HTML>";
+	foreach(explode(chr(10),$text) as $line) {
+		$line = trim($line);
+		if($line <> '') $score .= $line."<BR>";
+		}
+	return $score."</HTML>";
+	}
+
+function so_codes_to_text($codes) {
+	// MIDI codes => text of "midibytes.txt": the number of codes, then one code per line
+	return count($codes)."\n".(count($codes) > 0 ? implode("\n",$codes)."\n" : '');
+	}
+
+function so_text_to_codes($text) {
+	// Text of "midibytes.txt" => MIDI codes, or throws an exception
+	$lines = array();
+	foreach(explode(chr(10),$text) as $line) {
+		$line = trim($line);
+		if($line <> '') $lines[] = $line;
+		}
+	$codes = array();
+	if(count($lines) == 0) return $codes;
+	$number = so_line_to_value("int",$lines[0],"number of MIDI codes");
+	for($n = 1; $n <= $number AND $n < count($lines); $n++)
+		$codes[] = so_line_to_value("int",$lines[$n],"MIDI code #".$n);
+	return $codes;
+	}
+
+function so_lines_to_data($lines) {
+	// Parses sound-object prototypes in the former line format, as read by LoadObjectPrototypes() in the console.
+	// Header lines starting with "//" are ignored. Returns an array of values indexed by keys, or throws an exception.
+	$table = array();
+	foreach($lines as $line) {
+		$line = rtrim($line,"\r");
+		if(count($table) == 0 AND (trim($line) == '' OR substr(trim($line),0,2) == "//")) continue;
+		$table[] = $line;
+		}
+	$lines = $table;
+	$i = 0;
+	$data = array();
+	foreach(array("PrototypeTickKey","PrototypeTickChannel","PrototypeTickVelocity") as $key)
+		$data[$key] = so_line_to_value("int",($i < count($lines)) ? $lines[$i++] : NULL,$key);
+	$data['CsoundInstrumentsFile'] = so_line_to_value("text",($i < count($lines)) ? $lines[$i++] : NULL,"CsoundInstrumentsFile");
+	so_line_to_value("int",($i < count($lines)) ? $lines[$i++] : NULL,"maxsounds"); // Number of prototypes, not used
+	$data['PrototypesComment'] = '';
+	$data['Prototypes'] = array();
+	while($i < count($lines)) {
+		$line = trim($lines[$i++]);
+		if($line == '' OR $line == "_endSoundObjectFile_" OR $line == "TABLES:") break;
+		if($line == "DATA:") {
+			if($i < count($lines)) $data['PrototypesComment'] = decode_tags(so_strip_html($lines[$i]));
+			break;
+			}
+		$p = array("Name" => so_strip_html($line));
+		so_read_prototype_lines($lines,$i,$p);
+		$line = ($i < count($lines)) ? trim($lines[$i++]) : NULL;
+		if($line !== "_beginCsoundScore_") throw new Exception("‘_beginCsoundScore_’ not found in ‘".$p['Name']."’");
+		$text = '';
+		while(TRUE) {
+			if($i >= count($lines)) throw new Exception("‘_endCsoundScore_’ not found in ‘".$p['Name']."’");
+			$line = rtrim($lines[$i++],"\r");
+			if(trim($line) == "_endCsoundScore_") break;
+			$text .= so_score_to_text($line)."\n";
+			}
+		$p["Csound score"] = so_text_to_score($text);
+		$number = so_line_to_value("int",($i < count($lines)) ? $lines[$i++] : NULL,"number of MIDI codes in ‘".$p['Name']."’");
+		$p['MIDIcodes'] = array();
+		for($n = 1; $n <= $number; $n++)
+			$p['MIDIcodes'][] = so_line_to_value("int",($i < count($lines)) ? $lines[$i++] : NULL,"MIDI code #".$n." in ‘".$p['Name']."’");
+		$line = ($i < count($lines)) ? $lines[$i++] : NULL;
+		if($line === NULL OR !is_integer(stripos($line,"<HTML>"))) throw new Exception("comment not found in ‘".$p['Name']."’");
+		$p["Comment"] = decode_tags(so_strip_html($line));
+		$data['Prototypes'][] = $p;
+		}
+	return $data;
+	}
+
+function so_prototype_json($p) {
+	// Returns the JSON object of a prototype given as values indexed by their keys
+	$x = array();
+	foreach(so_prototype_fields() as $key => $field) {
+		list($label,$type,$default,$unit) = $field;
+		$value = so_json_value($type,cs_get($p,$key,$default));
+		if(str_starts_with($type,"enum:")) $unit = is_string($value) ? "enum" : '';
+		$x[$label] = cs_item($key,$value,$unit);
+		}
+	$x["Csound score"] = strval(cs_get($p,"Csound score","<HTML></HTML>"));
+	$codes = cs_get($p,'MIDIcodes',array());
+	$x["Size of MIDI code"] = cs_item("MIDIcodesize",count($codes));
+	foreach(array_values($codes) as $n => $code) {
+		$code = intval($code);
+		$x["byte_".($n + 1)] = $code % 256;
+		$x["time_".($n + 1)] = intdiv($code,256);
+		}
+	$x["Comment"] = strval(cs_get($p,"Comment",''));
+	return $x;
+	}
+
+function so_data_to_json($file_header,$data) {
+	// Returns the JSON text of sound-object prototypes. To add a value to the file, add it here and read it by its key in objects.php.
+	$json = array();
+	$json['header'] = $file_header;
+	$json["Prototype tick key"] = cs_item("PrototypeTickKey",intval(cs_get($data,"PrototypeTickKey",84)));
+	$json["Prototype tick channel"] = cs_item("PrototypeTickChannel",intval(cs_get($data,"PrototypeTickChannel",1)));
+	$json["Prototype tick velocity"] = cs_item("PrototypeTickVelocity",intval(cs_get($data,"PrototypeTickVelocity",64)));
+	$json["Csound resource file"] = cs_item("CsoundInstrumentsFile",strval(cs_get($data,"CsoundInstrumentsFile",'')));
+	$json["Comment on this file"] = cs_item("PrototypesComment",strval(cs_get($data,"PrototypesComment",'')));
+	$prototypes = array();
+	foreach(cs_get($data,'Prototypes',array()) as $p) $prototypes[] = so_prototype_json($p);
+	$json["Prototypes"] = $prototypes;
+	return json_encode($json,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE|JSON_PRESERVE_ZERO_FRACTION)."\n";
+	}
+
+function so_values($object) {
+	// Returns the values of a JSON object indexed by their "key". Items without a key are indexed by their label.
+	$values = array();
+	if(!is_array($object)) return $values;
+	foreach($object as $label => $item) {
+		if(is_array($item) AND isset($item['key']) AND array_key_exists('value',$item)) $values[$item['key']] = $item['value'];
+		else $values[$label] = $item;
+		}
+	return $values;
+	}
+
+function so_prototype_values($object) {
+	// Returns the values of a prototype read in JSON, with its MIDI codes in 'MIDIcodes'
+	$p = so_values($object);
+	$codes = array();
+	$number = intval(cs_get($p,"MIDIcodesize",0));
+	for($n = 1; $n <= $number; $n++) {
+		if(!isset($p["byte_".$n]) OR !isset($p["time_".$n])) break;
+		$codes[] = 256 * intval($p["time_".$n]) + intval($p["byte_".$n]);
+		unset($p["byte_".$n],$p["time_".$n]);
+		}
+	$p['MIDIcodes'] = $codes;
+	if(!array_key_exists("CsoundInstrumentMode",$p) AND array_key_exists("CsoundInstr",$p))
+		$p["CsoundInstrumentMode"] = 1; // As in the console export, which only gives the instrument when one is specified
+	return $p;
+	}
+
+function so_read_resource($content) {
+	// Returns sound-object prototypes as an array of values indexed by keys, or an error message.
+	// A file in the former line format is converted.
+	if(csound_is_json($content)) {
+		$json = csound_json_decode($content);
+		if($json === FALSE) return "This file is not valid JSON: ".json_last_error_msg();
+		$data = so_values($json);
+		$prototypes = array();
+		if(isset($data['Prototypes']) AND is_array($data['Prototypes']))
+			foreach($data['Prototypes'] as $object) $prototypes[] = so_prototype_values($object);
+		$data['Prototypes'] = $prototypes;
+		return $data;
+		}
+	$extract_data = extract_data(FALSE,FALSE,$content);
+	try {
+		$data = so_lines_to_data(explode(chr(10),$extract_data['content']));
+		}
+	catch(Exception $e) {
+		return "This file could not be read: ".$e->getMessage();
+		}
+	$data['header'] = str_replace("<br />","\n",$extract_data['headers']);
+	return $data;
+	}
+
+function convert_prototypes_to_json($path,$dir_trash) {
+	// 2026-11-12 Converts to JSON a sound-object prototypes file ("-so") in the former line format.
+	// The original is copied to the trash as NAME_old_format. Returns TRUE if converted, FALSE if it was not needed, or an error message.
+	global $top_header,$permissions;
+	$content = @file_get_contents($path);
+	if($content === FALSE OR trim($content) == '' OR csound_is_json($content)) return FALSE;
+	$data = so_read_resource($content);
+	if(!is_array($data)) return $data;
+	$header = ($data['header'] <> '') ? $data['header'] : $top_header;
+	$header .= "\n// Converted to JSON format. Date: ".gmdate('Y-m-d H:i:s')." GMT";
+	$json = so_data_to_json($header,$data);
+	$table = explode(SLASH,$path);
+	$thisfile = end($table);
+	if($dir_trash <> '' AND is_dir($dir_trash)) @copy($path,$dir_trash.$thisfile."_old_format");
+	$temp_file = dirname($path).SLASH.".converting".$thisfile; // Replaces the file in a single step
+	if(@file_put_contents($temp_file,$json) === FALSE) return "Could not write ".$temp_file;
+	@chmod($temp_file,$permissions);
+	if(!@rename($temp_file,$path)) {
+		@unlink($temp_file);
+		return "Could not replace ".$path;
+		}
+	return TRUE;
+	}
+
+// 2026-11-12 Tonality resources ("-to" files) are stored in JSON format.
+// Each scale is an object of values read by their key. Values that are missing are not used, as missing lines in the former format.
+// The temporary files edited by scale.php keep the former line format, see to_scale_lines().
+
+function to_scale_fields() {
+	// Values of a scale in the order of the JSON file and of the temporary scale files: key => array(label, type, unit, first character of its line)
+	// A line of type "table" holds the values whose type is "table" (Csound GEN51 function table).
+	$f = array();
+	$f["ScaleName"] = array("Name of this scale","name",'','"');
+	$f["NoteNames"] = array("Note names","words",'','/');
+	$f["Comma"] = array("Comma: size in cents, then ratio","numbers","cents",'c');
+	$f["KeyNumbers"] = array("Key numbers","integers",'','k');
+	$f["Fractions"] = array("Ratios as fractions","fractions",'','[');
+	$f["Series"] = array("Series","words",'','s');
+	$f["BaseOctave"] = array("Base octave","integer",'','|');
+	$f["TableNumber"] = array("Csound table number","table",'','f');
+	$f["TableStart"] = array("Csound table start time","table",'','f');
+	$f["TableSize"] = array("Csound table size","table",'','f');
+	$f["TableGEN"] = array("Csound GEN routine","table",'','f');
+	$f["NumGrades"] = array("Number of grades","table",'','f');
+	$f["Interval"] = array("Interval (ratio of the period)","table",'','f');
+	$f["BaseFrequency"] = array("Base frequency","table","Hz",'f');
+	$f["BaseKey"] = array("Base key","table",'','f');
+	$f["Ratios"] = array("Ratios","table",'','f');
+	$f["ScaleComment"] = array("Comment on this scale","comment",'','<');
+	return $f;
+	}
+
+function to_table_keys() {
+	// Values of the GEN51 table line "f2 0 128 -51 numgrades interval basefrequency basekey ratio ratio ..."
+	return array("TableNumber","TableStart","TableSize","TableGEN","NumGrades","Interval","BaseFrequency","BaseKey");
+	}
+
+function to_number($token,$key) {
+	// Returns the number of a token, or throws an exception
+	if(!is_numeric($token)) throw new Exception("‘".$key."’ should contain numbers, found ‘".$token."’");
+	return (strpbrk($token,".eE") === FALSE) ? intval($token) : floatval($token);
+	}
+
+function to_number_string($x) {
+	// Shortest text giving the same number
+	if(is_int($x)) return strval($x);
+	return json_encode(floatval($x),JSON_PRESERVE_ZERO_FRACTION);
+	}
+
+function to_tokens($text) {
+	$text = trim($text);
+	if($text == '') return array();
+	return preg_split("/\s+/u",$text);
+	}
+
+function to_read_line($line,&$scale) {
+	// Reads a line of the former format into $scale (values indexed by their keys), or throws an exception
+	$line = trim($line);
+	if($line == '') return;
+	$c = $line[0];
+	if($c == '"') {
+		$scale["ScaleName"] = trim(str_replace('"','',$line));
+		return;
+		}
+	if($c == '<') {
+		$text = preg_replace("/^<html>/iu",'',$line);
+		$text = preg_replace("/<\/html>$/iu",'',$text);
+		$scale["ScaleComment"] = str_replace("<br />","\n",$text);
+		return;
+		}
+	if($c == 'f') {
+		$tokens = to_tokens(substr($line,1));
+		if(count($tokens) < 9) throw new Exception("incomplete table ‘".$line."’");
+		foreach(to_table_keys() as $k => $key) $scale[$key] = to_number($tokens[$k],$key);
+		$scale["Ratios"] = array();
+		for($k = 8; $k < count($tokens); $k++) $scale["Ratios"][] = to_number($tokens[$k],"Ratios");
+		return;
+		}
+	$closing = array('/' => '/','c' => 'c','k' => 'k','[' => ']','s' => 's','|' => '|');
+	if(!isset($closing[$c]) OR strlen($line) < 2 OR substr($line,-1) != $closing[$c])
+		throw new Exception("unknown line ‘".$line."’");
+	$inside = substr($line,1,-1);
+	switch($c) {
+		case '/': $scale["NoteNames"] = to_tokens($inside); break;
+		case 's': $scale["Series"] = to_tokens($inside); break;
+		case 'c':
+			$scale["Comma"] = array();
+			foreach(to_tokens($inside) as $t) $scale["Comma"][] = to_number($t,"Comma");
+			break;
+		case 'k':
+			$scale["KeyNumbers"] = array();
+			foreach(to_tokens($inside) as $t) $scale["KeyNumbers"][] = intval(to_number($t,"KeyNumbers"));
+			break;
+		case '[':
+			$tokens = to_tokens($inside);
+			if(count($tokens) % 2 != 0) throw new Exception("odd number of values in fractions ‘".$line."’");
+			$scale["Fractions"] = array();
+			for($k = 0; $k < count($tokens); $k += 2)
+				$scale["Fractions"][] = array(intval(to_number($tokens[$k],"Fractions")),intval(to_number($tokens[$k + 1],"Fractions")));
+			break;
+		case '|': $scale["BaseOctave"] = intval(to_number($inside,"BaseOctave")); break;
+		}
+	}
+
+function to_scale_lines($scale) {
+	// Returns the lines of a scale in the former format (temporary scale files), in the order of to_scale_fields(). Missing values give no line.
+	$lines = array();
+	if(isset($scale["ScaleName"])) $lines[] = "\"".$scale["ScaleName"]."\"";
+	if(isset($scale["NoteNames"])) $lines[] = "/".implode(' ',$scale["NoteNames"])."/";
+	if(isset($scale["Comma"])) $lines[] = "c".implode(' ',array_map('to_number_string',$scale["Comma"]))."c";
+	if(isset($scale["KeyNumbers"])) $lines[] = "k".implode(' ',array_map('intval',$scale["KeyNumbers"]))."k";
+	if(isset($scale["Fractions"])) {
+		$tokens = array();
+		foreach($scale["Fractions"] as $fraction) { $tokens[] = intval($fraction[0]); $tokens[] = intval($fraction[1]); }
+		$lines[] = "[".implode(' ',$tokens)."]";
+		}
+	if(isset($scale["Series"])) $lines[] = "s".implode(' ',$scale["Series"])."s";
+	if(isset($scale["BaseOctave"])) $lines[] = "|".intval($scale["BaseOctave"])."|";
+	if(isset($scale["Ratios"])) {
+		$tokens = array();
+		foreach(to_table_keys() as $key) $tokens[] = to_number_string(cs_get($scale,$key,0));
+		foreach($scale["Ratios"] as $x) $tokens[] = to_number_string($x);
+		$lines[] = "f".implode(' ',$tokens);
+		}
+	if(isset($scale["ScaleComment"])) $lines[] = "<html>".str_replace("\n","<br />",$scale["ScaleComment"])."</html>";
+	return $lines;
+	}
+
+function to_lines_to_scale($lines) {
+	// Reads the lines of a temporary scale file, or throws an exception
+	$scale = array();
+	foreach($lines as $line) to_read_line($line,$scale);
+	return $scale;
+	}
+
+function to_lines_to_data($lines) {
+	// Parses a tonality resource in the former line format, as read by LoadTonality() in the console. Returns an array, or throws an exception.
+	// As in tonality.php, a table without a name gets the name "scale_N", and lines after a table, except its comment, belong to the next scale.
+	$data = array('scales' => array());
+	$found = FALSE;
+	$scale = $pending = array();
+	$done_table = FALSE;
+	foreach($lines as $line) {
+		$line = trim($line);
+		if($line == '') continue;
+		if(!$found) {
+			if($line == "_begin tables") $found = TRUE;
+			continue;
+			}
+		if($line == "_end tables") break;
+		if($line[0] == '"') {
+			if(count($scale) > 0) $data['scales'][] = $scale;
+			$scale = $pending; $pending = array();
+			to_read_line($line,$scale);
+			$done_table = FALSE;
+			continue;
+			}
+		if($line[0] == '<') {
+			if($done_table) to_read_line($line,$scale);
+			continue;
+			}
+		if($line[0] == 'f') {
+			if($done_table) {
+				$data['scales'][] = $scale;
+				$scale = $pending; $pending = array();
+				}
+			if(!isset($scale["ScaleName"])) $scale["ScaleName"] = "scale_".(count($data['scales']) + 1);
+			to_read_line($line,$scale);
+			$done_table = TRUE;
+			continue;
+			}
+		if($done_table) to_read_line($line,$pending);
+		else to_read_line($line,$scale);
+		}
+	if(count($scale) > 0) $data['scales'][] = $scale;
+	return $data;
+	}
+
+function to_scale_json($scale) {
+	// Returns the JSON object of a scale given as values indexed by their keys
+	$x = array();
+	foreach(to_scale_fields() as $key => $field) {
+		if(!array_key_exists($key,$scale)) continue;
+		$x[$field[0]] = cs_item($key,$scale[$key],$field[2]);
+		}
+	return $x;
+	}
+
+function to_data_to_json($file_header,$data) {
+	// Returns the JSON text of a tonality resource. To add a value, add it to to_scale_fields() or here, and read it by its key.
+	$json = array();
+	$json['header'] = $file_header;
+	$scales = array();
+	foreach($data['scales'] as $scale) $scales[] = to_scale_json($scale);
+	$json["Tonal scales"] = cs_item("Scales",$scales);
+	return json_encode($json,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE|JSON_PRESERVE_ZERO_FRACTION)."\n";
+	}
+
+function to_read_resource($content) {
+	// Returns a tonality resource as array('header' => ..., 'scales' => array of scales), or an error message.
+	// A file in the former line format is converted.
+	if(csound_is_json($content)) {
+		$json = csound_json_decode($content);
+		if($json === FALSE) return "This file is not valid JSON: ".json_last_error_msg();
+		$data = array('header' => cs_get($json,'header',''),'scales' => array());
+		$scales = cs_get(cs_values($json),"Scales",array());
+		if(is_array($scales)) foreach($scales as $object) $data['scales'][] = cs_values($object);
+		return $data;
+		}
+	$extract_data = extract_data(FALSE,FALSE,$content);
+	try {
+		$data = to_lines_to_data(explode(chr(10),str_replace("\r",'',$content)));
+		}
+	catch(Exception $e) {
+		return "This file could not be read: ".$e->getMessage();
+		}
+	$data['header'] = str_replace("<br />","\n",$extract_data['headers']);
+	return $data;
+	}
+
+function to_scale_file_name($scale_name) {
+	// Name of the temporary file of a scale, as in tonality.php
+	$clean_name_of_file = str_replace("#","_",$scale_name);
+	return str_replace("/","_",$clean_name_of_file).".txt";
+	}
+
+function to_add_scales_to_file($path,$scale_files) {
+	// Adds the scales of temporary scale files to the tonality resource $path. Returns array(name => TRUE if added, FALSE if the name already exists), or an error message
+	global $top_header,$permissions;
+	$content = @file_get_contents($path);
+	if($content === FALSE) return "Cannot read ".$path;
+	$data = to_read_resource($content);
+	if(!is_array($data)) return $data;
+	$names = array();
+	foreach($data['scales'] as $scale) $names[cs_get($scale,"ScaleName",'')] = TRUE;
+	$result = array();
+	try {
+		foreach($scale_files as $scale_file) {
+			$scale = to_lines_to_scale(explode(chr(10),file_get_contents($scale_file)));
+			$name = cs_get($scale,"ScaleName",'');
+			if(isset($names[$name])) {
+				$result[$name] = FALSE;
+				continue;
+				}
+			$data['scales'][] = $scale;
+			$names[$name] = $result[$name] = TRUE;
+			}
+		}
+	catch(Exception $e) {
+		return "A scale could not be read: ".$e->getMessage();
+		}
+	$header = ($data['header'] <> '') ? $data['header'] : $top_header;
+	file_put_contents($path,to_data_to_json($header,$data));
+	@chmod($path,$permissions);
+	return $result;
+	}
+
+function convert_tonality_resources_to_json($dir,$dir_trash) {
+	// 2026-11-12 Converts to JSON all tonality resources ("-to" files) of $dir that are in the former line format.
+	// The original is copied to the trash as NAME_old_format. Returns the names of converted files.
+	global $top_header,$permissions;
+	$converted = array();
+	$dircontent = @scandir($dir);
+	if($dircontent === FALSE) return $converted;
+	foreach($dircontent as $thisfile) {
+		if(!str_starts_with($thisfile,"-to") AND !str_ends_with($thisfile,".bpto")) continue;
+		if(preg_match("/_lock[0-9]*$/u",$thisfile)) continue;
+		$path = $dir.$thisfile;
+		if(!is_file($path)) continue;
+		if(file_exists($path."_lock") OR file_exists($path."_lock3")) continue; // Being saved
+		$handle = @fopen($path,"r");
+		if(!$handle) continue;
+		$start = fread($handle,64);
+		fclose($handle);
+		if($start === FALSE OR trim($start) == '' OR csound_is_json($start)) continue;
+		$content = @file_get_contents($path);
+		if($content === FALSE) continue;
+		$data = to_read_resource($content);
+		if(!is_array($data)) {
+			error_log("convert_tonality_resources_to_json(): ".$thisfile." could not be converted: ".$data);
+			continue;
+			}
+		$header = ($data['header'] <> '') ? $data['header'] : $top_header;
+		$header .= "\n// Converted to JSON format. Date: ".gmdate('Y-m-d H:i:s')." GMT";
+		$json = to_data_to_json($header,$data);
+		if($dir_trash <> '' AND is_dir($dir_trash)) @copy($path,$dir_trash.$thisfile."_old_format");
+		$temp_file = $dir.".converting".$thisfile; // Replaces the file in a single step
+		if(@file_put_contents($temp_file,$json) === FALSE) continue;
+		@chmod($temp_file,$permissions);
+		if(@rename($temp_file,$path)) $converted[] = $thisfile;
+		else @unlink($temp_file);
+		}
+	return $converted;
+	}
+
+// 2026-11-12 Time base files ("-tb") are stored in JSON format.
+// Each track is an object of values read by their key. Missing values take the defaults of tb_track_fields().
+
+define('TB_MAXBEATS',40); // Number of beats (check boxes) of each track. A cycle is limited to this number.
+
+function tb_track_fields() {
+	// Values of a track in the order of the JSON file and of the former line format: key => array(label, default, unit, minimum, maximum)
+	$f = array();
+	$f["TickKey"] = array("Key",60,'',0,127);
+	$f["TickChannel"] = array("MIDI channel",1,'',1,16);
+	$f["TickVelocity"] = array("Velocity",64,'',0,127);
+	$f["TickCycle"] = array("Cycle",4,"beats",1,TB_MAXBEATS);
+	$f["Ptick"] = array("Speed ratio: numerator",1,'',1,NULL);
+	$f["Qtick"] = array("Speed ratio: denominator",1,'',1,NULL);
+	$f["TickDuration"] = array("Duration of a tick",50,"ms",0,NULL);
+	return $f;
+	}
+
+function tb_new_track() {
+	// Values of a new track (button ADD ANOTHER TRACK)
+	$track = array();
+	foreach(tb_track_fields() as $key => $field) $track[$key] = $field[1];
+	$track["Ticks"] = array_fill(0,TB_MAXBEATS,0);
+	return $track;
+	}
+
+function tb_check_track($track) {
+	// Returns the values of a track with defaults for missing values, numbers within their limits, a reduced speed ratio, and TB_MAXBEATS ticks equal to 0 or 1
+	$checked = array();
+	foreach(tb_track_fields() as $key => $field) {
+		list($label,$default,$unit,$min,$max) = $field;
+		$x = cs_get($track,$key,$default);
+		$x = is_numeric($x) ? intval($x) : $default;
+		if($min !== NULL AND $x < $min) $x = $min;
+		if($max !== NULL AND $x > $max) $x = $max;
+		$checked[$key] = $x;
+		}
+	$g = gcd($checked["Ptick"],$checked["Qtick"]);
+	if($g > 1) {
+		$checked["Ptick"] = intdiv($checked["Ptick"],$g);
+		$checked["Qtick"] = intdiv($checked["Qtick"],$g);
+		}
+	$ticks = cs_get($track,"Ticks",array());
+	if(!is_array($ticks)) $ticks = array();
+	$checked["Ticks"] = array();
+	for($i = 0; $i < TB_MAXBEATS; $i++) // A tick is on if its value is odd, as in BP2
+		$checked["Ticks"][$i] = (isset($ticks[$i]) AND is_numeric($ticks[$i]) AND intval($ticks[$i]) % 2 <> 0) ? 1 : 0;
+	return $checked;
+	}
+
+function tb_lines_to_data($content) {
+	// Parses a time base in the former line format, as read by LoadTimeBase() in BP2:
+	// header lines, number of tracks, number of beats, then for each track: type (ignored), number of arguments (4, 6 or 7),
+	// key, channel, velocity, cycle, [numerator, denominator of speed ratio], [duration], ticks; then the comment.
+	// Returns array('header' => ..., 'tracks' => ..., 'comment' => ...), or throws an exception.
+	$content = str_replace("\xEF\xBB\xBF",'',$content);
+	$lines = explode("\n",str_replace(array("\r\n","\r"),"\n",$content));
+	$header = array();
+	$n = count($lines);
+	$j = 0;
+	while($j < $n AND !preg_match('/^-?[0-9]+$/',trim($lines[$j]))) { // Header lines, e.g. "// Bol Processor..." or "V.2.6" and "Date:..." in old files
+		$line = trim($lines[$j++]);
+		if($line == '') continue;
+		if(!str_starts_with($line,"//")) $line = "// ".$line;
+		$header[] = $line;
+		}
+	$next = function($what) use ($lines,$n,&$j) {
+		while($j < $n AND trim($lines[$j]) == '') $j++;
+		if($j >= $n) throw new Exception("missing ".$what);
+		$line = trim($lines[$j++]);
+		if(!preg_match('/^-?[0-9]+$/',$line)) throw new Exception("“".$line."” is not an integer (".$what.", line ".$j.")");
+		return intval($line);
+		};
+	$maxticks = $next("number of tracks");
+	$maxbeats = $next("number of beats");
+	if($maxticks < 0 OR $maxticks > 100 OR $maxbeats < 0 OR $maxbeats > TB_MAXBEATS) throw new Exception("incorrect numbers of tracks (".$maxticks.") or beats (".$maxbeats.")");
+	$tracks = array();
+	for($i = 0; $i < $maxticks; $i++) {
+		$next("type of track ".($i + 1));
+		$arg = $next("number of arguments of track ".($i + 1));
+		$track = array();
+		foreach(array("TickKey","TickChannel","TickVelocity","TickCycle") as $key) $track[$key] = $next($key." of track ".($i + 1));
+		if($arg > 4) {
+			$track["Ptick"] = $next("Ptick of track ".($i + 1));
+			$track["Qtick"] = $next("Qtick of track ".($i + 1));
+			}
+		if($arg > 6) $track["TickDuration"] = $next("TickDuration of track ".($i + 1));
+		$track["Ticks"] = array();
+		for($k = 0; $k < $maxbeats; $k++) $track["Ticks"][] = $next("tick ".($k + 1)." of track ".($i + 1));
+		$tracks[] = tb_check_track($track);
+		}
+	$comment = array();
+	for(; $j < $n; $j++) {
+		$line = trim($lines[$j]);
+		if($line <> '') $comment[] = $line;
+		}
+	$comment = implode(" ",$comment);
+	$comment = trim(preg_replace('/^DATA:/u','',$comment));
+	$comment = trim(str_ireplace(array("<HTML>","</HTML>"),'',$comment));
+	$comment = decode_tags($comment);
+	return array('header' => implode("\n",$header),'tracks' => $tracks,'comment' => $comment);
+	}
+
+function tb_data_to_json($file_header,$data) {
+	// Returns the JSON text of a time base. To add a value, add it to tb_track_fields() or here, and read it by its key.
+	$fields = tb_track_fields();
+	$tracks = array();
+	foreach($data['tracks'] as $track) {
+		$track = tb_check_track($track);
+		$x = array();
+		foreach($fields as $key => $field) $x[$field[0]] = cs_item($key,$track[$key],$field[2]);
+		$x["Beats with a tick (1) or without (0)"] = cs_item("Ticks",$track["Ticks"]);
+		$tracks[] = $x;
+		}
+	$json = array();
+	$json['header'] = $file_header;
+	$json["Tracks"] = cs_item("Tracks",$tracks);
+	$json["Comment on this time base"] = cs_item("Comment",$data['comment']);
+	return json_encode($json,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE)."\n";
+	}
+
+function tb_read_resource($content) {
+	// Returns a time base as array('header' => ..., 'tracks' => array of tracks, 'comment' => ...), or an error message.
+	// A file in the former line format is converted.
+	if(csound_is_json($content)) {
+		$json = csound_json_decode($content);
+		if($json === FALSE) return "This file is not valid JSON: ".json_last_error_msg();
+		$values = cs_values($json);
+		$data = array('header' => cs_get($json,'header',''),'tracks' => array(),'comment' => strval(cs_get($values,"Comment",'')));
+		$tracks = cs_get($values,"Tracks",array());
+		if(is_array($tracks)) foreach($tracks as $object) $data['tracks'][] = tb_check_track(cs_values($object));
+		return $data;
+		}
+	try {
+		return tb_lines_to_data($content);
+		}
+	catch(Exception $e) {
+		return "This file could not be read: ".$e->getMessage();
+		}
+	}
+
+function convert_timebase_to_json($path,$dir_trash) {
+	// 2026-11-12 Converts to JSON a time base file ("-tb") in the former line format.
+	// The original is copied to the trash as NAME_old_format. Returns TRUE if converted, FALSE if it was not needed, or an error message.
+	global $top_header,$permissions;
+	$content = @file_get_contents($path);
+	if($content === FALSE OR trim($content) == '' OR csound_is_json($content)) return FALSE;
+	$data = tb_read_resource($content);
+	if(!is_array($data)) return $data;
+	$header = ($data['header'] <> '') ? $data['header'] : $top_header;
+	$header .= "\n// Converted to JSON format. Date: ".gmdate('Y-m-d H:i:s')." GMT";
+	$json = tb_data_to_json($header,$data);
+	$table = explode(SLASH,$path);
+	$thisfile = end($table);
+	if($dir_trash <> '' AND is_dir($dir_trash)) @copy($path,$dir_trash.$thisfile."_old_format");
+	$temp_file = dirname($path).SLASH.".converting".$thisfile; // Replaces the file in a single step
+	if(@file_put_contents($temp_file,$json) === FALSE) return "Could not write ".$temp_file;
+	@chmod($temp_file,$permissions);
+	if(!@rename($temp_file,$path)) {
+		@unlink($temp_file);
+		return "Could not replace ".$path;
+		}
+	return TRUE;
+	}
+
 function reformat_grammar($verbose,$this_file) {
 	global $temp_weights_file,$section_headers;
 	if(!file_exists($this_file)) return;
@@ -1899,29 +2805,27 @@ function SaveTonality($verbose,$dir,$filename,$temp_folder,$force) {
 	$handle_lock = fopen($file_lock,"w");
 	fwrite($handle_lock,"lock\n");
 	if($handle_lock) fclose($handle_lock);
-	@unlink($dir.$filename);
-	$handle = fopen($dir.$filename,"w");
+	// 2026-11-12 Tonality resources are saved in JSON format. Scales are read from the temporary files edited by scale.php
 	$file_header = $top_header."\n// Tonality resource file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s')." GMT";
-	fwrite($handle,$file_header."\n");
-	if(isset($_POST['begin_tables'])) $begin_tables = $_POST['begin_tables'];
-	else $begin_tables = "_begin tables";
-	fwrite($handle,$begin_tables."\n");
-	if($verbose) echo "<br />".$begin_tables."<br />";
-	$dir_scale = scandir($folder_scales);
-	foreach($dir_scale as $this_scale) {
-		if($this_scale == '.' OR $this_scale == ".." OR $this_scale == ".DS_Store") continue;
-		$table = explode(".",$this_scale);
-		$extension = end($table);
-		if($extension <> "txt") continue;
-		$content_scale = file_get_contents($folder_scales.SLASH.$this_scale);
-		$table = explode(chr(10),$content_scale);
-		for($i = 0; $i < count($table); $i++) {
-			$line = trim($table[$i]);
-			if($line <> '') fwrite($handle,$line."\n");
+	$data = array('scales' => array());
+	try {
+		$dir_scale = scandir($folder_scales);
+		foreach($dir_scale as $this_scale) {
+			if($this_scale == '.' OR $this_scale == ".." OR $this_scale == ".DS_Store") continue;
+			$table = explode(".",$this_scale);
+			$extension = end($table);
+			if($extension <> "txt") continue;
+			$scale = to_lines_to_scale(explode(chr(10),file_get_contents($folder_scales.SLASH.$this_scale)));
+			if(count($scale) > 0) $data['scales'][] = $scale;
 			}
 		}
-	fwrite($handle,"_end tables\n");
-	fclose($handle);
+	catch(Exception $e) { // The file is left unchanged
+		error_log("SaveTonality(): ".$e->getMessage());
+		unlink($file_lock);
+		return "error";
+		}
+	@unlink($dir.$filename);
+	file_put_contents($dir.$filename,to_data_to_json($file_header,$data));
 	chmod($dir.$filename,$permissions);
 	unlink($file_lock);
 	return "saved";
@@ -3583,37 +4487,28 @@ function show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,
 	}
 
 function list_of_tonal_scales($tonality_file) {
+	// 2026-11-12 Reads the JSON format of tonality resources, or converts the former line format
 	global $dir_scale_images;
 	$list = array();
 	if(!file_exists($tonality_file)) return $list;
 	$content = @file_get_contents($tonality_file);
 	if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
-	$table = explode(chr(10),$content);
-	$imax = count($table);
-	$found = FALSE;
-	for($i = $k = 0, $j = -1; $i < $imax; $i++) {
-		$line = trim($table[$i]);
-		if($line == '') continue;
-		if($line == "_begin tables") $found = TRUE;
-		if($line == "_end tables") break;
-		if($found) {
-			if($line[0] == "\"") {
-				$name_of_file = str_replace('"','',$line);
-				$list[++$j] = "<span class=\"turquoise-text\">".$name_of_file."</span>";
-				}
-			if($line[0] == "/")
-				$list[$j] .= " = <span class=\"tonalnotes\"><b>".str_replace("/",'',$line)."</b></span>";
-			if($line[0] == "|") {
-				$list[$j] .= " baseoctave = ".str_replace("|",'',$line);
-				$clean_name_of_file = str_replace("#","_",$name_of_file);
-				$clean_name_of_file = str_replace(SLASH,"_",$clean_name_of_file);
-				$dir_image = $dir_scale_images.$clean_name_of_file.".png";
-				if(file_exists($dir_image)) {
-					$k++; if($k > 10) $k = 0;
-			//		echo "dir_image = ".$dir_image."<br />";
-					$clean_name_of_file = str_replace("#","_",$name_of_file);
-					$list[$j] .= " <span class=\"red-text\">➡</span>&nbsp;".popup_link($clean_name_of_file,"image",500,410,(100 * $k),$dir_image);
-					}
+	$data = to_read_resource($content);
+	if(!is_array($data)) return $list;
+	$k = 0;
+	foreach($data['scales'] as $j => $scale) {
+		$name_of_file = cs_get($scale,"ScaleName",'');
+		$list[$j] = "<span class=\"turquoise-text\">".$name_of_file."</span>";
+		if(isset($scale["NoteNames"]))
+			$list[$j] .= " = <span class=\"tonalnotes\"><b>".implode(' ',$scale["NoteNames"])."</b></span>";
+		if(isset($scale["BaseOctave"])) {
+			$list[$j] .= " baseoctave = ".$scale["BaseOctave"];
+			$clean_name_of_file = str_replace("#","_",$name_of_file);
+			$clean_name_of_file = str_replace(SLASH,"_",$clean_name_of_file);
+			$dir_image = $dir_scale_images.$clean_name_of_file.".png";
+			if(file_exists($dir_image)) {
+				$k++; if($k > 10) $k = 0;
+				$list[$j] .= " <span class=\"red-text\">➡</span>&nbsp;".popup_link($clean_name_of_file,"image",500,410,(100 * $k),$dir_image);
 				}
 			}
 		}
