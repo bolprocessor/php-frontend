@@ -1,71 +1,191 @@
 {
-    "header": "// Bol Processor BP3\n// Csound resource file saved as \"-cs.tryTunings\". Date: 2026-10-12 04:33:37 GMT\n// Converted to JSON format. Date: 2026-11-11 14:35:31 GMT",
+    "header": "// Bol Processor BP3\n// Csound resource file saved as \"-cs.tryTunings\". Date: 2026-11-12 11:17:21 GMT",
     "Csound orchestra file": {
         "key": "CsoundOrchestraName",
         "value": "0-default.orc"
     },
     "Index of the instrument associated with MIDI channel 1 (-1 means none)": {
-        "key": "WhichCsoundInstrument[1]",
+        "key": "WhichCsoundInstrumentForChannel[1]",
         "value": 3
     },
     "Index of the instrument associated with MIDI channel 2 (-1 means none)": {
-        "key": "WhichCsoundInstrument[2]",
+        "key": "WhichCsoundInstrumentForChannel[2]",
         "value": -1
     },
     "Index of the instrument associated with MIDI channel 3 (-1 means none)": {
-        "key": "WhichCsoundInstrument[3]",
+        "key": "WhichCsoundInstrumentForChannel[3]",
         "value": -1
     },
     "Index of the instrument associated with MIDI channel 4 (-1 means none)": {
-        "key": "WhichCsoundInstrument[4]",
+        "key": "WhichCsoundInstrumentForChannel[4]",
         "value": -1
     },
     "Index of the instrument associated with MIDI channel 5 (-1 means none)": {
-        "key": "WhichCsoundInstrument[5]",
+        "key": "WhichCsoundInstrumentForChannel[5]",
         "value": -1
     },
     "Index of the instrument associated with MIDI channel 6 (-1 means none)": {
-        "key": "WhichCsoundInstrument[6]",
+        "key": "WhichCsoundInstrumentForChannel[6]",
         "value": -1
     },
     "Index of the instrument associated with MIDI channel 7 (-1 means none)": {
-        "key": "WhichCsoundInstrument[7]",
+        "key": "WhichCsoundInstrumentForChannel[7]",
         "value": -1
     },
     "Index of the instrument associated with MIDI channel 8 (-1 means none)": {
-        "key": "WhichCsoundInstrument[8]",
+        "key": "WhichCsoundInstrumentForChannel[8]",
         "value": -1
     },
     "Index of the instrument associated with MIDI channel 9 (-1 means none)": {
-        "key": "WhichCsoundInstrument[9]",
+        "key": "WhichCsoundInstrumentForChannel[9]",
         "value": -1
     },
     "Index of the instrument associated with MIDI channel 10 (-1 means none)": {
-        "key": "WhichCsoundInstrument[10]",
+        "key": "WhichCsoundInstrumentForChannel[10]",
         "value": -1
     },
     "Index of the instrument associated with MIDI channel 11 (-1 means none)": {
-        "key": "WhichCsoundInstrument[11]",
+        "key": "WhichCsoundInstrumentForChannel[11]",
         "value": -1
     },
     "Index of the instrument associated with MIDI channel 12 (-1 means none)": {
-        "key": "WhichCsoundInstrument[12]",
+        "key": "WhichCsoundInstrumentForChannel[12]",
         "value": -1
     },
     "Index of the instrument associated with MIDI channel 13 (-1 means none)": {
-        "key": "WhichCsoundInstrument[13]",
+        "key": "WhichCsoundInstrumentForChannel[13]",
         "value": -1
     },
     "Index of the instrument associated with MIDI channel 14 (-1 means none)": {
-        "key": "WhichCsoundInstrument[14]",
+        "key": "WhichCsoundInstrumentForChannel[14]",
         "value": -1
     },
     "Index of the instrument associated with MIDI channel 15 (-1 means none)": {
-        "key": "WhichCsoundInstrument[15]",
+        "key": "WhichCsoundInstrumentForChannel[15]",
         "value": -1
     },
     "Index of the instrument associated with MIDI channel 16 (-1 means none)": {
-        "key": "WhichCsoundInstrument[16]",
+        "key": "WhichCsoundInstrumentForChannel[16]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 1 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[1]",
+        "value": 2
+    },
+    "Index of the instrument associated with part 2 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[2]",
+        "value": 3
+    },
+    "Index of the instrument associated with part 3 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[3]",
+        "value": 1
+    },
+    "Index of the instrument associated with part 4 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[4]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 5 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[5]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 6 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[6]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 7 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[7]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 8 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[8]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 9 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[9]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 10 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[10]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 11 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[11]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 12 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[12]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 13 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[13]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 14 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[14]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 15 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[15]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 16 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[16]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 17 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[17]",
+        "value": 1
+    },
+    "Index of the instrument associated with part 18 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[18]",
+        "value": 3
+    },
+    "Index of the instrument associated with part 19 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[19]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 20 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[20]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 21 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[21]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 22 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[22]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 23 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[23]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 24 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[24]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 25 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[25]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 26 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[26]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 27 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[27]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 28 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[28]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 29 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[29]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 30 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[30]",
         "value": -1
     },
     "Csound instruments": {

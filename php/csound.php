@@ -245,8 +245,15 @@ $tonality_filename = str_replace(".bpcs",".bpto",$tonality_filename);
 $number_channels = 16; // MAXCHAN in the console
 echo "<input type=\"hidden\" name=\"number_channels\" value=\"".$number_channels."\">";
 for($j = 0; $j < $number_channels; $j++) {
-	$whichCsoundInstrument[$j] = intval(cs_get($csound_values,"WhichCsoundInstrument[".($j + 1)."]",-1));
+	// 2026-11-12 Key "WhichCsoundInstrumentForChannel[n]", formerly "WhichCsoundInstrument[n]" which is still accepted
+	$whichCsoundInstrument[$j] = intval(cs_get($csound_values,"WhichCsoundInstrumentForChannel[".($j + 1)."]",cs_get($csound_values,"WhichCsoundInstrument[".($j + 1)."]",-1)));
 	if($verbose) echo "MIDI channel #".($j + 1)." => instrument [index ".$whichCsoundInstrument[$j]."]<br />";
+	}
+// 2026-11-12 Assignment of parts to instruments. It takes precedence over that of MIDI channels - fixed by Claude
+$whichCsoundInstrumentForPart = array();
+for($part = 1; $part <= MAXPARTS; $part++) {
+	$whichCsoundInstrumentForPart[$part] = intval(cs_get($csound_values,"WhichCsoundInstrumentForPart[".$part."]",-1));
+	if($verbose) echo "Part #".$part." => instrument [index ".$whichCsoundInstrumentForPart[$part]."]<br />";
 	}
 $CsoundOrchestraName = cs_get($csound_values,"CsoundOrchestraName",'');
 if($CsoundOrchestraName == '') {
@@ -503,7 +510,9 @@ if($max_scales > 1) {
 echo "</td>";
 echo "<td>";
 if($number_instruments > 0) {
-	echo "<h3>MIDI channel association of instruments:</h3>";
+	echo "<h3>Instrument assignations:</h3>";
+	echo "<p><small>The assignation of a part takes precedence over that of a MIDI channel</small></p>";
+	echo "<table style=\"border:none;\"><tr><td style=\"vertical-align:top; border:none;\">";
 	echo "<table class=\"thicktable\">";
 	echo "<tr>";
 	echo "<td style=\"padding: 5px; vertical-align:middle;\">MIDI<br />channel</td><td>Instrument index</td>";
@@ -521,11 +530,42 @@ if($number_instruments > 0) {
 		echo "</td></tr>";
 		}
 	echo "</table>";
+	echo "</td><td style=\"vertical-align:top; border:none;\">";
+	echo "<table class=\"thicktable\">";
+	echo "<tr>";
+	// Parts are displayed on two columns: 1 to 15, then 16 to 30
+	$rows_parts = intval(ceil(MAXPARTS / 2));
+	echo "<td style=\"padding: 5px; vertical-align:middle;\">Part</td><td>Instrument index</td>";
+	echo "<td style=\"padding: 5px; vertical-align:middle;\">Part</td><td>Instrument index</td>";
+	echo "</tr>";
+	for($row = 1; $row <= $rows_parts; $row++) {
+		echo "<tr>";
+		for($part = $row; $part <= MAXPARTS; $part += $rows_parts) {
+			echo "<td>".$part."</td>";
+			echo "<td style=\"padding: 5px; vertical-align:middle;\">";
+			$arg = "whichCsoundInstrumentForPart_".$part;
+			$x = $whichCsoundInstrumentForPart[$part];
+			$name = '';
+			if($x < 0) $x = '';
+			else if(isset($index_name[$x])) $name = $index_name[$x];
+			echo "<input type=\"text\" name=\"".$arg."\" size=\"4\" value=\"".$x."\"> <i>".$name."</i>";
+			echo "</td>";
+			}
+		echo "</tr>";
+		}
+	echo "</table>";
+	echo "</td></tr></table>";
 	}
 else {
 	for($ch = 0; $ch < 16; $ch++) {
 		$arg = "whichCsoundInstrument_".$ch;
 		$x = $whichCsoundInstrument[$ch];
+		if($x < 0) $x = '';
+		echo "<input type=\"hidden\" name=\"".$arg."\" value=\"".$x."\">";
+		}
+	for($part = 1; $part <= MAXPARTS; $part++) {
+		$arg = "whichCsoundInstrumentForPart_".$part;
+		$x = $whichCsoundInstrumentForPart[$part];
 		if($x < 0) $x = '';
 		echo "<input type=\"hidden\" name=\"".$arg."\" value=\"".$x."\">";
 		}
@@ -593,6 +633,10 @@ if($number_instruments > 0) {
 		for($ch = 0; $ch < $number_channels; $ch++) {
 			$arg = "whichCsoundInstrument_".$ch;
 			echo "<input type=\"hidden\" name=\"".$arg."\" value=\"".$whichCsoundInstrument[$ch]."\">";
+			}
+		for($part = 1; $part <= MAXPARTS; $part++) {
+			$arg = "whichCsoundInstrumentForPart_".$part;
+			echo "<input type=\"hidden\" name=\"".$arg."\" value=\"".$whichCsoundInstrumentForPart[$part]."\">";
 			}
 		echo "<input class=\"save\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"delete_instrument\" value=\"DELETE\">";
 		echo "</td>";

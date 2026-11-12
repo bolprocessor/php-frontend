@@ -6,6 +6,10 @@ if(isset($_POST['change_skin']) AND $_POST['change_skin'] >= 0) {
 	$skin = $_POST['change_skin'];
 	save_settings("skin",$skin);
 	}
+if($path == '' AND isset($_POST['change_midi_player']) AND in_array($_POST['change_midi_player'],$midi_players)) {
+	$midi_player = $_POST['change_midi_player'];
+	save_settings("midi_player",$midi_player);
+	}
 require_once("_header.php");
 $url_this_page = $this_page = "index.php";
 $error_opening = FALSE;
@@ -103,6 +107,7 @@ $folder = str_replace($bp_application_path,'',$dir);
 echo link_to_help();
 if($path == '') {
 	select_a_skin($url_this_page,$path,$skin);
+	select_a_midi_player($url_this_page,$midi_player);
  	}
 
 if($test) echo "dir = ".$dir."<br />";

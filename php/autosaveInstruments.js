@@ -24,6 +24,13 @@ function getData2() {
 		arg = 'whichCsoundInstrument_' + ch;
 		fd.append(arg,whichCsoundInstrument[ch]);
 		}
+	// 2026-11-12 Assignment of parts to instruments - fixed by Claude
+	var part,input;
+	for(part = 1; part <= 30; part++) { // MAXPARTS
+		arg = 'whichCsoundInstrumentForPart_' + part;
+		input = document.getElementsByName(arg)[0];
+		if(input) fd.append(arg,input.value);
+		}
 	fd.append('CsoundOrchestraName',CsoundOrchestraName);
 	fd.append('number_instruments',number_instruments);
 	fd.append('begin_tables',begin_tables);

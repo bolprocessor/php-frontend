@@ -1489,7 +1489,7 @@ if(isset($_POST['output_file'])) {
 $output_file = add_proper_extension($file_format,$output_file);
 // echo "<p>output_file = ".$output_file."</p>";
 
-if(!is_connected() AND $file_format == "midi") {
+if($midi_player <> "SpessaSynth" AND !is_connected() AND $file_format == "midi") {
 	echo "<p style=\"color:red;\">➡ Cannot find the MIDI file player “midijs.net”… Are you connected to Internet?</p>";
 	}
 

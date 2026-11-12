@@ -5,67 +5,67 @@
         "value": "default.orc"
     },
     "Index of the instrument associated with MIDI channel 1 (-1 means none)": {
-        "key": "WhichCsoundInstrument[1]",
+        "key": "WhichCsoundInstrumentForChannel[1]",
         "value": -1
     },
     "Index of the instrument associated with MIDI channel 2 (-1 means none)": {
-        "key": "WhichCsoundInstrument[2]",
+        "key": "WhichCsoundInstrumentForChannel[2]",
         "value": -1
     },
     "Index of the instrument associated with MIDI channel 3 (-1 means none)": {
-        "key": "WhichCsoundInstrument[3]",
+        "key": "WhichCsoundInstrumentForChannel[3]",
         "value": -1
     },
     "Index of the instrument associated with MIDI channel 4 (-1 means none)": {
-        "key": "WhichCsoundInstrument[4]",
+        "key": "WhichCsoundInstrumentForChannel[4]",
         "value": -1
     },
     "Index of the instrument associated with MIDI channel 5 (-1 means none)": {
-        "key": "WhichCsoundInstrument[5]",
+        "key": "WhichCsoundInstrumentForChannel[5]",
         "value": -1
     },
     "Index of the instrument associated with MIDI channel 6 (-1 means none)": {
-        "key": "WhichCsoundInstrument[6]",
+        "key": "WhichCsoundInstrumentForChannel[6]",
         "value": -1
     },
     "Index of the instrument associated with MIDI channel 7 (-1 means none)": {
-        "key": "WhichCsoundInstrument[7]",
+        "key": "WhichCsoundInstrumentForChannel[7]",
         "value": -1
     },
     "Index of the instrument associated with MIDI channel 8 (-1 means none)": {
-        "key": "WhichCsoundInstrument[8]",
+        "key": "WhichCsoundInstrumentForChannel[8]",
         "value": -1
     },
     "Index of the instrument associated with MIDI channel 9 (-1 means none)": {
-        "key": "WhichCsoundInstrument[9]",
+        "key": "WhichCsoundInstrumentForChannel[9]",
         "value": -1
     },
     "Index of the instrument associated with MIDI channel 10 (-1 means none)": {
-        "key": "WhichCsoundInstrument[10]",
+        "key": "WhichCsoundInstrumentForChannel[10]",
         "value": -1
     },
     "Index of the instrument associated with MIDI channel 11 (-1 means none)": {
-        "key": "WhichCsoundInstrument[11]",
+        "key": "WhichCsoundInstrumentForChannel[11]",
         "value": -1
     },
     "Index of the instrument associated with MIDI channel 12 (-1 means none)": {
-        "key": "WhichCsoundInstrument[12]",
+        "key": "WhichCsoundInstrumentForChannel[12]",
         "value": -1
     },
     "Index of the instrument associated with MIDI channel 13 (-1 means none)": {
-        "key": "WhichCsoundInstrument[13]",
+        "key": "WhichCsoundInstrumentForChannel[13]",
         "value": -1
     },
     "Index of the instrument associated with MIDI channel 14 (-1 means none)": {
-        "key": "WhichCsoundInstrument[14]",
+        "key": "WhichCsoundInstrumentForChannel[14]",
         "value": -1
     },
     "Index of the instrument associated with MIDI channel 15 (-1 means none)": {
-        "key": "WhichCsoundInstrument[15]",
+        "key": "WhichCsoundInstrumentForChannel[15]",
         "value": -1
     },
     "Index of the instrument associated with MIDI channel 16 (-1 means none)": {
-        "key": "WhichCsoundInstrument[16]",
+        "key": "WhichCsoundInstrumentForChannel[16]",
         "value": -1
     },
     "Csound instruments": {

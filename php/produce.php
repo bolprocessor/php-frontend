@@ -11,8 +11,7 @@ $trace_production = $show_production = FALSE;
 $file_format = '';
 
 echo "<head>";
-if($midi_player == "MIDIjs") echo "<script type='text/javascript' src='https://www.midijs.net/lib/midi.js'></script>";
-else if($midi_player == "html-midi-player") echo "<script src=\"https://cdn.jsdelivr.net/combine/npm/tone@14.7.58,npm/@magenta/music@1.23.1/es6/core.js,npm/focus-visible@5,npm/html-midi-player@1.4.0\"></script>";
+echo midi_player_script('');
 echo "<script src=\"darkmode.js\"></script>";
 echo "<link rel=\"stylesheet\" href=\"bp-light.css\" />\n";
 echo "</head>";
@@ -748,7 +747,7 @@ if($file_format == "midi" AND $instruction <> "create_set") {
 	$midi_file_link = $midi_file;
 	if(file_exists($midi_file_link) AND filesize($midi_file_link) > 59) {
 //		echo "midi_file_link = ".$midi_file_link."<br />";
-		if(!is_connected() AND $file_format == "midi") {
+		if($midi_player <> "SpessaSynth" AND !is_connected() AND $file_format == "midi") {
 			echo "<p style=\"color:red;\">➡ Cannot find the MIDI file player “cdn.jsdelivr.net”… Are you connected to the Internet?</p>";
 			echo "<p><a href=\"".nice_url($midi_file_link)."\" download>Download the MIDI file</a></p>";
 			}
@@ -967,8 +966,7 @@ else {
 		$header .= "<meta content=\"text/html; charset=utf-8\" http-equiv=\"Content-Type\" />\n";
 		$header .= "<link rel=\"stylesheet\" href=\"".$bp_application_path."php/bp-light.css\" />\n";
 		$header .= "<title>".$result_file."</title>\n";
-		$header .= "<script type='text/javascript' src='https://www.midijs.net/lib/midi.js'></script>\n";
-		$header .= "<script src=\"https://cdn.jsdelivr.net/combine/npm/tone@14.7.58,npm/@magenta/music@1.23.1/es6/core.js,npm/focus-visible@5,npm/html-midi-player@1.4.0\"></script>";
+		$header .= midi_player_script($bp_application_path."php/")."\n";
 		$header .= "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js\"></script>\n";
 		$header .= "<style>
 		body, p {

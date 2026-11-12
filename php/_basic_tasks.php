@@ -56,11 +56,14 @@ if(!file_exists($file_path)) {
     }
 
 $skin = 1; // Blue by default
-$midi_player = "MIDIjs";
+$midi_player = "SpessaSynth"; // Off-line player in php/spessasynth/
+// $midi_player = "MIDIjs";
 // $midi_player = "html-midi-player";
 $minimised_token = "MINIMISED";
 
 require_once("_settings.php");
+$midi_players = array("SpessaSynth","MIDIjs","html-midi-player");
+if(!in_array($midi_player,$midi_players)) $midi_player = "SpessaSynth";
 $bp_application_path = "..".SLASH;
 $url_this_page = "_basic_tasks.php";
 $absolute_application_path = str_replace("php".SLASH.$url_this_page,'',realpath(__FILE__));
@@ -1390,6 +1393,12 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder,$force) {
 	$number_channels = $_POST['number_channels'];
 	for($ch = 0; $ch < $number_channels; $ch++)
 		$data['channels'][$ch + 1] = intval(convert_empty($_POST["whichCsoundInstrument_".$ch]));
+	// 2026-11-12 Assignment of parts to instruments - fixed by Claude
+	$data['parts'] = array();
+	for($part = 1; $part <= MAXPARTS; $part++) {
+		if(isset($_POST["whichCsoundInstrumentForPart_".$part])) $data['parts'][$part] = intval(convert_empty($_POST["whichCsoundInstrumentForPart_".$part]));
+		else $data['parts'][$part] = -1;
+		}
 	// Instruments are read from the temporary files edited by csinstrument.php and csparameter.php
 	$data['instruments'] = array();
 	$dircontent = scandir($temp_dir.$temp_folder);
@@ -1533,7 +1542,9 @@ function cs_new_data() {
 	// 2026-11-12 Returns the values of a new Csound resource file (formerly "csound_template"), see csound_data_to_json()
 	$channels = array();
 	for($ch = 1; $ch <= 16; $ch++) $channels[$ch] = -1;
-	return array("orchestra" => "0-default.orc","channels" => $channels,"instruments" => array(),"tables" => array("f1 0 256 10 1 ; This table may be changed"),"tonality" => '');
+	$parts = array();
+	for($part = 1; $part <= MAXPARTS; $part++) $parts[$part] = -1;
+	return array("orchestra" => "0-default.orc","channels" => $channels,"parts" => $parts,"instruments" => array(),"tables" => array("f1 0 256 10 1 ; This table may be changed"),"tonality" => '');
 	}
 
 function cs_values_to_lines($fields,$values) {
@@ -1714,7 +1725,13 @@ function csound_data_to_json($file_header,$data) {
 	$json['header'] = $file_header;
 	$json["Csound orchestra file"] = cs_item("CsoundOrchestraName",$data['orchestra']);
 	foreach($data['channels'] as $ch => $index)
-		$json["Index of the instrument associated with MIDI channel ".$ch." (-1 means none)"] = cs_item("WhichCsoundInstrument[".$ch."]",$index);
+		$json["Index of the instrument associated with MIDI channel ".$ch." (-1 means none)"] = cs_item("WhichCsoundInstrumentForChannel[".$ch."]",$index); // 2026-11-12 Same name as in the console
+	// 2026-11-12 Assignment of parts to instruments, which takes precedence over that of MIDI channels - fixed by Claude
+	for($part = 1; $part <= MAXPARTS; $part++) {
+		if(isset($data['parts'][$part])) $index = intval($data['parts'][$part]);
+		else $index = -1;
+		$json["Index of the instrument associated with part ".$part." (-1 means none)"] = cs_item("WhichCsoundInstrumentForPart[".$part."]",$index);
+		}
 	$instruments = array();
 	foreach($data['instruments'] as $instrument) $instruments[] = cs_instrument_json($instrument);
 	$json["Csound instruments"] = cs_item("CsInstruments",$instruments);
@@ -6267,11 +6284,27 @@ function make_links_clickable($text) {
 	}
 
 
+function midi_player_script($path_to_php) {
+	// Returns the script tag of the MIDI file player. $path_to_php leads from the page to the "php" folder
+	global $midi_player;
+	if($midi_player == "SpessaSynth") return "<script type=\"module\" src=\"".$path_to_php."spessasynth/bp_midi_player.js\"></script>";
+	if($midi_player == "MIDIjs") return "<script type='text/javascript' src='https://www.midijs.net/lib/midi.js'></script>";
+	if($midi_player == "html-midi-player") return "<script src=\"https://cdn.jsdelivr.net/combine/npm/tone@14.7.58,npm/@magenta/music@1.23.1/es6/core.js,npm/focus-visible@5,npm/html-midi-player@1.4.0\"></script>";
+	return '';
+	}
+
 function midifile_player($midi_file_link, $filename, $width, $piano_roll) {
 	global $bp_application_path,$midi_player;
 	$text = "<table><tr>";
 	$text .= "<td style=\"padding-right:2em; padding-bottom:1em;\"><p class=\"shadow\" style=\"width:".$width."em;\">";
-	if($midi_player == "MIDIjs") {
+	if($midi_player == "SpessaSynth") {
+		$text .= "<p class=\"shadow\" style=\"width:25em;\"><a style=\"color:#007BFF;\" href=\"#midi\" onClick=\"BPMidi.play('".nice_url($midi_file_link)."');\"><img src=\"".$bp_application_path."php/pict/loudspeaker.png\" width=\"70px;\" style=\"vertical-align:middle;\" />PLAY</a>";
+		$text .= " (<a style=\"color:#007BFF;\" href=\"#midi\" onClick=\"BPMidi.pause();\">Pause</a>) ";
+		$text .= " <a style=\"color:#007BFF;\" href=\"#midi\" onClick=\"BPMidi.resume();\">Resume</a>";
+		$text .= " (<a style=\"color:#007BFF;\" href=\"#midi\" onClick=\"BPMidi.stop();\">STOP</a>)";
+		$text .= "<br /><small class=\"bp-midi-status\" style=\"display:inline-block; margin-left:1cm; position:relative; top:-1.2em;\"></small></p>";
+		}
+	else if($midi_player == "MIDIjs") {
 		$text .= "<p class=\"shadow\" style=\"width:25em;\"><a style=\"color:#007BFF;\" href=\"#midi\" onClick=\"MIDIjs.play('".nice_url($midi_file_link)."');\"><img src=\"".$bp_application_path."php/pict/loudspeaker.png\" width=\"70px;\" style=\"vertical-align:middle;\" />PLAY</a>";
 		$text .= " (<a style=\"color:#007BFF;\" href=\"#midi\" onClick=\"MIDIjs.pause();\">Pause</a>) ";
 		$text .= " <a style=\"color:#007BFF;\" href=\"#midi\" onClick=\"MIDIjs.resume();\">Resume</a>";
@@ -6285,7 +6318,7 @@ function midifile_player($midi_file_link, $filename, $width, $piano_roll) {
 	if($filename <> '') $text .= "<td style=\"vertical-align:middle;\">".$filename."</td>";
 	if($midi_player == "html-midi-player")
 		$text .= "<td style=\"text-align:right;\"><a href=\"".nice_url($midi_file_link)."\" download>Download&nbsp;MIDI&nbsp;file</a><br /><small>This player does not support<br />volume, pitchbend, pan, etc.<br /><a target=\"_blank\" href=\"https://github.com/cifkao/html-midi-player/\">Visit html-midi-player</a></small></td>";
-	else if($midi_player == "MIDIjs")
+	else if($midi_player == "MIDIjs" OR $midi_player == "SpessaSynth")
 		$text .= "<td style=\"text-align:right; vertical-align:middle;\"><a href=\"".nice_url($midi_file_link)."\" download>Download&nbsp;MIDI&nbsp;file</a></td>";
 	$text .= "</tr></table>";
 	return $text;
@@ -6658,6 +6691,28 @@ function select_a_skin($url_this_page,$path,$skin) {
 	if($skin == 4) echo " checked";
 	echo ">Gold</p>";
 	echo "<p><input type=\"submit\" class=\"edit\"  value=\"CHANGE\"></p>";
+	echo "</form>";
+	echo "</div>";
+	return;
+	}
+
+function select_a_midi_player($url_this_page,$midi_player) {
+	// MIDI file player used in all projects, saved in "_settings.php"
+	$players = array(
+		"SpessaSynth" => "SpessaSynth (off-line)",
+		"MIDIjs" => "MIDIjs (Internet)",
+		"html-midi-player" => "html-midi-player (Internet,<br />no pitchbend, volume, pan…)"
+		);
+	echo "<div class=\"thinborder\" style=\"float:right; padding:0.5em; margin-left:3em; text-align:left;\">";
+	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+	echo "<p style=\"text-align:center;\">MIDI file player:</p><p>";
+	foreach($players as $value => $label) {
+		echo "<input type=\"radio\" name=\"change_midi_player\" value=\"".$value."\"";
+		if($midi_player == $value) echo " checked";
+		echo ">".$label."<br />";
+		}
+	echo "</p>";
+	echo "<p style=\"text-align:center;\"><input type=\"submit\" class=\"edit\" value=\"CHANGE\"></p>";
 	echo "</form>";
 	echo "</div>";
 	return;
