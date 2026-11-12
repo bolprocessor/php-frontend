@@ -40,6 +40,16 @@
 ;        p11       attack velocity (_vel(), range 1-127)
 ;        p12, p13  beginning & end modulation (_mod(), range 0-16383)
 ;        p14       a table number containing the modulation function (or 0)
+;        p15, p16  beginning & end panoramic (_pan(), range 0-127: 0 = left, 64 = centre, 127 = right)
+;        p17       a table number containing the panoramic function (or 0)
+;
+; Stereo position:
+;    It is set by the score with _pan(), and can change during a note (_pancont).
+;    A _pan() value applies to the following notes of its part (or of its MIDI channel
+;    if no part is specified), so "-da.Beethoven-fugue-b-flat-major" sets it only in
+;    the first measure. Notes without any _pan() get 64 (centre).
+;    Only when the score has no panoramic parameters (fewer than 17 parameters) is
+;    the position taken from giPan below.
 ;
 ; Dynamics:
 ;    The velocity selects the recording (pp below 50, mf from 50 to 95, ff from 96)
@@ -77,9 +87,10 @@ giRecordings[] fillarray 0, 1, 2, 3, 1
 giVibDepth[] fillarray 0, 16, 15, 13, 15
 giVibRate[]  fillarray 0, 5.9, 5.6, 5.3, 5.7
 
-; Stereo position (0 = left, 1 = right), as a quartet is seated from left to right:
-; first violin, second violin, viola, cello
-giPan[]      fillarray 0, 0.18, 0.60, 0.80, 0.38
+; Stereo position (0 = left, 1 = right) used when the score has no panoramic parameters.
+; As a quartet is seated from left to right: first violin, second violin, viola, cello.
+; The values are those of _pan(23), _pan(76), _pan(102), _pan(48) in the score.
+giPan[]      fillarray 0, 23/127, 76/127, 102/127, 48/127
 
 ; Release time (seconds) after the end of a note
 giRelease[]  fillarray 0, 0.10, 0.12, 0.16, 0.10
@@ -270,9 +281,18 @@ imod1  = (ipc >= 12 ? p(12) : 0)
 imod2  = (ipc >= 13 ? p(13) : 0)
 imodt  = (ipc >= 14 ? p(14) : 0)
 asig   StringNote  $INST, idur, p4, p5, p6, p7, p8, p9, p10, ivel, imod1, imod2, imodt, irel
-ipan   = giPan[$INST] * $M_PI_2
-gaDryL = gaDryL + asig * cos(ipan)
-gaDryR = gaDryR + asig * sin(ipan)
+if (ipc >= 17) then
+kpan   bp_param  idur, p(15) / 127, p(16) / 127, p(17)
+if (p(17) > 0) then
+kpan   = kpan / 127
+endif
+kpan   limit  kpan, 0, 1
+else
+kpan   = giPan[$INST]
+endif
+kpan   = kpan * $M_PI_2
+gaDryL = gaDryL + asig * cos(kpan)
+gaDryR = gaDryR + asig * sin(kpan)
 gaRevIn = gaRevIn + asig
 #
 

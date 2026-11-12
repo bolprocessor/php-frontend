@@ -206,7 +206,7 @@
                 },
                 "Number of arguments": {
                     "key": "iargmax",
-                    "value": 14
+                    "value": 17
                 },
                 "Argument of dilation ratio (-1 means empty)": {
                     "key": "CsDilationRatioIndex",
@@ -263,11 +263,11 @@
                 },
                 "Argument of start panoramic": {
                     "key": "CsPanoramicStartIndex",
-                    "value": -1
+                    "value": 15
                 },
                 "Argument of end panoramic": {
                     "key": "CsPanoramicEndIndex",
-                    "value": -1
+                    "value": 16
                 },
                 "pitchbendrange": {
                     "key": "pitchbendrange",
@@ -292,7 +292,7 @@
                 },
                 "Argument of panoramic table (-1 means empty)": {
                     "key": "panoramictable",
-                    "value": -1
+                    "value": 17
                 },
                 "Pitchbend GEN type": {
                     "key": "pitchbendGEN",
@@ -504,7 +504,7 @@
                 },
                 "Number of arguments": {
                     "key": "iargmax",
-                    "value": 14
+                    "value": 17
                 },
                 "Argument of dilation ratio (-1 means empty)": {
                     "key": "CsDilationRatioIndex",
@@ -561,11 +561,11 @@
                 },
                 "Argument of start panoramic": {
                     "key": "CsPanoramicStartIndex",
-                    "value": -1
+                    "value": 15
                 },
                 "Argument of end panoramic": {
                     "key": "CsPanoramicEndIndex",
-                    "value": -1
+                    "value": 16
                 },
                 "pitchbendrange": {
                     "key": "pitchbendrange",
@@ -590,7 +590,7 @@
                 },
                 "Argument of panoramic table (-1 means empty)": {
                     "key": "panoramictable",
-                    "value": -1
+                    "value": 17
                 },
                 "Pitchbend GEN type": {
                     "key": "pitchbendGEN",
@@ -802,7 +802,7 @@
                 },
                 "Number of arguments": {
                     "key": "iargmax",
-                    "value": 14
+                    "value": 17
                 },
                 "Argument of dilation ratio (-1 means empty)": {
                     "key": "CsDilationRatioIndex",
@@ -859,11 +859,11 @@
                 },
                 "Argument of start panoramic": {
                     "key": "CsPanoramicStartIndex",
-                    "value": -1
+                    "value": 15
                 },
                 "Argument of end panoramic": {
                     "key": "CsPanoramicEndIndex",
-                    "value": -1
+                    "value": 16
                 },
                 "pitchbendrange": {
                     "key": "pitchbendrange",
@@ -888,7 +888,7 @@
                 },
                 "Argument of panoramic table (-1 means empty)": {
                     "key": "panoramictable",
-                    "value": -1
+                    "value": 17
                 },
                 "Pitchbend GEN type": {
                     "key": "pitchbendGEN",
@@ -1100,7 +1100,7 @@
                 },
                 "Number of arguments": {
                     "key": "iargmax",
-                    "value": 14
+                    "value": 17
                 },
                 "Argument of dilation ratio (-1 means empty)": {
                     "key": "CsDilationRatioIndex",
@@ -1157,11 +1157,11 @@
                 },
                 "Argument of start panoramic": {
                     "key": "CsPanoramicStartIndex",
-                    "value": -1
+                    "value": 15
                 },
                 "Argument of end panoramic": {
                     "key": "CsPanoramicEndIndex",
-                    "value": -1
+                    "value": 16
                 },
                 "pitchbendrange": {
                     "key": "pitchbendrange",
@@ -1186,7 +1186,7 @@
                 },
                 "Argument of panoramic table (-1 means empty)": {
                     "key": "panoramictable",
-                    "value": -1
+                    "value": 17
                 },
                 "Pitchbend GEN type": {
                     "key": "pitchbendGEN",
