@@ -6307,16 +6307,18 @@ function midifile_player($midi_file_link, $filename, $width, $piano_roll) {
 		$text .= " (<a style=\"color:#007BFF;\" href=\"#midi\" onClick=\"BPMidi.pause();\">Pause</a>) ";
 		$text .= " <a style=\"color:#007BFF;\" href=\"#midi\" onClick=\"BPMidi.resume();\">Resume</a>";
 		$text .= " (<a style=\"color:#007BFF;\" href=\"#midi\" onClick=\"BPMidi.stop();\">STOP</a>)";
-		$text .= "<br /><small class=\"bp-midi-status\" style=\"display:inline-block; margin-left:1cm; position:relative; top:-1.2em;\"></small></p>";
+		$text .= "<br /><span style=\"display:flex; justify-content:space-between; margin-left:calc(1cm - 12px); padding-right:12px; position:relative; top:calc(-1.2em + 6px);\"><small class=\"bp-midi-status\"></small>".midi_player_name_link()."</span></p>";
 		}
 	else if($midi_player == "MIDIjs") {
 		$text .= "<p class=\"shadow\" style=\"width:25em;\"><a style=\"color:#007BFF;\" href=\"#midi\" onClick=\"MIDIjs.play('".nice_url($midi_file_link)."');\"><img src=\"".$bp_application_path."php/pict/loudspeaker.png\" width=\"70px;\" style=\"vertical-align:middle;\" />PLAY</a>";
 		$text .= " (<a style=\"color:#007BFF;\" href=\"#midi\" onClick=\"MIDIjs.pause();\">Pause</a>) ";
 		$text .= " <a style=\"color:#007BFF;\" href=\"#midi\" onClick=\"MIDIjs.resume();\">Resume</a>";
-		$text .= " (<a style=\"color:#007BFF;\" href=\"#midi\" onClick=\"MIDIjs.stop();\">STOP</a>)</p>";
+		$text .= " (<a style=\"color:#007BFF;\" href=\"#midi\" onClick=\"MIDIjs.stop();\">STOP</a>)";
+		$text .= "<br /><span style=\"display:flex; justify-content:flex-end; padding-right:12px; position:relative; top:calc(-1.2em + 6px);\">".midi_player_name_link()."</span></p>";
 		}
 	else if($midi_player == "html-midi-player") {
 		$text .= "<midi-player src=\"".nice_url($midi_file_link)."\" sound-font=\"https://storage.googleapis.com/magentadata/js/soundfonts/sgm_plus\" visualizer=\"#myVisualizer\"></midi-player>";
+		$text .= "<br /><span style=\"display:flex; justify-content:flex-end; padding-right:24px;\">".midi_player_name_link()."</span>";
 		if($piano_roll) $text .= "<midi-visualizer type=\"piano-roll\" id=\"myVisualizer\"></midi-visualizer>";
 		}
 	$text .= "</td>";
@@ -6327,6 +6329,18 @@ function midifile_player($midi_file_link, $filename, $width, $piano_roll) {
 		$text .= "<td style=\"text-align:right; vertical-align:middle;\"><a href=\"".nice_url($midi_file_link)."\" download>Download&nbsp;MIDI&nbsp;file</a></td>";
 	$text .= "</tr></table>";
 	return $text;
+	}
+
+function midi_player_name_link() {
+	// Name of the MIDI file player, linked to the page from which it can be downloaded
+	global $midi_player;
+	$urls = array(
+		"SpessaSynth" => "https://github.com/spessasus/spessasynth_lib",
+		"MIDIjs" => "https://www.midijs.net/",
+		"html-midi-player" => "https://github.com/cifkao/html-midi-player/"
+		);
+	if(!isset($urls[$midi_player])) return '';
+	return "<small><a target=\"_blank\" href=\"".$urls[$midi_player]."\">".$midi_player."</a></small>";
 	}
 
 function begin_with($n_chars,$text) {

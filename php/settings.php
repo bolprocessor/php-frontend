@@ -116,6 +116,14 @@ if(isset($_POST['saveparameters'])) {
 				$warning .= "<p>👉 <span class=\"red-text\">Values of Pclock and Qclock must be positive integers: “</span><span class=\"green-text\">".$value."</span><span class=\"red-text\">” has been replaced with “</span><span class=\"green-text\">".$newvalue."</span><span class=\"red-text\">”.</span></p>";
 				$value = $newvalue;
 				}
+			if($param == "MaxOutputFileSize") { // 2026-11-13
+				if($value === '') $value = 500;
+				else if(!is_numeric($value) OR $value < 1) {
+					$warning .= "<p>👉 <span class=\"red-text\">Max output file size must be at least 1 MB: “</span><span class=\"green-text\">".$value."</span><span class=\"red-text\">” has been replaced with “</span><span class=\"green-text\">1</span><span class=\"red-text\">”.</span></p>";
+					$value = 1;
+					}
+				else $value = intval($value);
+				}
 			if($param == "Improvize") $improvize = $value;
 			if($param == "MaxItemsProduce") { // Max items produced
 				$value = abs(intval($value));
