@@ -1,4 +1,6 @@
 <?php
+// Comments "// note N" (in this file, _musicxml.php and _basic_tasks.php) refer to the numbered notes of the technical description of this algorithm: https://bolprocessor.org/tech-analysis-of-musicxml-php
+
 if(isset($_POST['download_capture_file'])) {
 	$capture_file_name = $_POST['capture_file_name'];
 	$capture_file = $_POST['capture_file'];
@@ -308,10 +310,12 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
     		$xml_content = str_replace("\r","\n",$xml_content);
     	//	$xml_content = str_replace("\n\n","\n",$xml_content);
 			if(MB_CONVERT_OK) $xml_content = mb_convert_encoding($xml_content,'UTF-8','UTF-8');
+			// note 1
 			$xml_table = explode(chr(10),$xml_content);
 			$print_info = FALSE;
 			$new_section = FALSE;
-			$beat_unit = "quarter";
+			$beat_unit = "quarter"; $beat_unit_dots = 0;
+			$part_position = FALSE;
 			$fifths = $mode = array();
 			$jmax = count($xml_table);
 			if($jmax == 0) {
@@ -329,6 +333,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 					$timewise = TRUE;
 					continue;
 					}
+				// note 2
 				if(is_integer($pos=strpos($line,"<score-part "))) {
 					if (preg_match('/\bid\s*=\s*(["\'])(.*?)\1/', $line, $m))
         				$score_part = $m[2];
@@ -386,9 +391,11 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				if($partwise AND is_integer($pos=strpos($line,"<part "))) {
 					$i_measure = -1;
 					$part = trim(preg_replace("/.*id=\"([^\"]+)\".*/u","$1",$line));
+					$part_position = array_search($part,$part_label); // 2026-11-13: position in the part list - added by Claude
 					$fifths[$part] = 0;
 					continue;
 					}
+				// note 3
 				if(is_integer($pos=strpos($line,"<attributes>"))) {
 					$attributes = TRUE;
 					$changed_attributes = FALSE;
@@ -420,10 +427,13 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 					}
 				if(is_integer($pos=strpos($line,"<beat-unit>"))) {
 					$beat_unit = trim(preg_replace("/<beat-unit>(.+)<\/beat-unit>/u","$1",$line));
+					$beat_unit_dots = 0;
 					}
+				if(is_integer($pos=strpos($line,"<beat-unit-dot"))) $beat_unit_dots++; // 2026-11-13: dotted beat units - added by Claude
 				if(is_integer($pos=strpos($line,"<pedal"))) {
-					$found_pedal[$i_part - 1] = TRUE;
+					if($part_position !== FALSE) $found_pedal[$part_position] = TRUE; // 2026-11-13: was always the last part - fixed by Claude
 					}
+				// note 4
 				$metronome = 0;
 				if(is_integer($pos=strpos($line,"<sound tempo"))) {
 					$metronome = round(trim(preg_replace("/.+tempo=\"([^\"]+)\"\/>/u","$1",$line)));
@@ -431,7 +441,8 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				if(($tempo_option == "all" OR $tempo_option == "score" OR $tempo_option == "allbutmeasures") AND is_integer($pos=strpos($line,"<per-minute>"))) {
 					$per_minute = trim(preg_replace("/<per\-minute>([^<]+)<\/per\-minute>/u","$1",$line));
 					$beat_divide = beat_divide($beat_unit);
-					$metronome = round(($per_minute * $beat_divide['p']) / $beat_divide['q']);
+					$dots_factor = (2 * pow(2,$beat_unit_dots) - 1) / pow(2,$beat_unit_dots);
+					$metronome = round(($per_minute * $beat_divide['p'] * $dots_factor) / $beat_divide['q']);
 					}
 				if($metronome > 0) {
 					$sum_metronome += $metronome;
@@ -444,6 +455,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 					$attributes = FALSE;
 					continue;
 					}
+				// note 5
 				if(is_integer($pos=strpos($line,"<trill-mark"))) $found_trill = TRUE;
 				if(is_integer(strpos($line,"<note ")) AND is_integer(strpos($line,"print-object=\"no\""))) {
 					$found_hidden_notes = TRUE;
@@ -456,6 +468,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 				if(is_integer($pos=strpos($line,"<arpeggiate"))) $found_arpeggio = TRUE;
 				if(is_integer($pos=strpos($line,"<breath-mark")))$found_breath = TRUE;
 				if(is_integer($pos=strpos($line,"<slur")))$found_slur = TRUE;
+				// note 6
 				if(is_integer($pos=strpos($line,"<measure "))) {
 					$reading_measure = TRUE;
 					$i_measure = trim(preg_replace("/.*number=\"([^\"]+)\".*/u","$1",$line));
@@ -475,6 +488,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 					$new_section = FALSE;
 					$number_measures++;
 					}
+				// note 6
 				if($reading_measure AND is_integer($pos=strpos($line,"<repeat "))) {
 					$repeat_direction = trim(preg_replace("/.+direction=\"([^\"]+)\"\/>/u","$1",$line));
 					if($test_musicxml) echo "repeat direction = “".$repeat_direction."” section ".$section."<br />";
@@ -499,6 +513,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 					$this_score[$section][$i_measure][$part][] = $line;
 					}
 				}
+			// note 7
 			$number_hidden_notes = 0;
 			if(!$reload_musicxml) $ignore_hidden_notes = $found_playback_notes;
 			if($found_hidden_notes AND $ignore_hidden_notes) {
@@ -608,6 +623,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$data .= $convert_score['data'];
 			$report = $convert_score['report'];
 	//		$data = normalize_ampersand($data); // Added 2025-12-15, was used in La Campanella
+			// note 8
 			$data = cleanup_score($data);
 			$data = str_replace(" 0 "," ",$data); // Added by BB 2022-02-12
 			$data = str_replace(",1 ",", - ",$data); // Added by BB 2022-02-12
@@ -873,6 +889,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			echo "<input type=\"hidden\" name=\"number_parts\" value=\"".$number_parts."\">";
 			echo "<span class=\"red-text\">➡</span> Now, select parts and <input class=\"produce\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"select_parts\" value=\"CONVERT\">&nbsp;or&nbsp;<input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"cancel\" value=\"QUIT IMPORTING\">";
 			echo "</div>";
+			// note 39
 			if($found_pedal_command AND $reload_musicxml) {
 				for($i = 0; $i < $number_parts; $i++) {
 					if(!isset($sustain_controler[$i]) OR !isset($sustain_channel[$i])) {

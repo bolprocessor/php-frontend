@@ -1,4 +1,8 @@
 <?php
+// MusicXML to Bol Processor converter, called by data.php
+// Comments "// note N" (in this file, data.php and _basic_tasks.php) refer to the numbered notes of the technical description of this algorithm: https://bolprocessor.org/tech-analysis-of-musicxml-php
+// Search for "// note N" to find the code that a note describes.
+
 $notes_diesis = array("C","C#","D","D#","E","F","F#","G","G#","A","A#","B");
 $notes_bemol = array("C","Db","D","Eb","E","F","Gb","G","Ab","A","Bb","B");
 $standard_diatonic_scale = array(0,2,4,5,7,9,11); // These are pitch classes
@@ -20,8 +24,10 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 	$measure_label = array();
 	$sum_metronome = $number_metronome = $metronome_max = $metronome_min = $number_metronome_markers = 0;
 	$said_tempo = FALSE;
+	$metronome_unit = "quarter"; $metronome_dots = 0; // Beat unit of the current metronome mark
 	$list_this = $list_corrections;
 	if($super_trace OR $trace_breath) $list_this = TRUE;
+	// note 9
 	if(($current_metronome_min * $current_metronome_average * $current_metronome_max * $change_metronome_min * $change_metronome_average * $change_metronome_max) > 0) {
 		$change_metronome = $quad = TRUE;
 		// Quadratic mapping:
@@ -78,7 +84,10 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 		if($list_this OR $trace_tempo) $report .= "Default tempo set to ".$default_tempo[$section]." in section #".$section."<br />";
 		$beat_type = $beat_unit = $last_notes = array();
 		if(!isset($time_beats)) $time_beats = $time_beat_type = array(); // Time signature of each part, kept across sections
+		// note 10
+		$old_volume_section = $old_volume; // Volume of each part at the start of the section, restored on each repetition
 		for($i_repeat = 1; $i_repeat <= $repeat_section[$section]; $i_repeat++) {
+			if($i_repeat > 1) $old_volume = $old_volume_section;
 			$tie_type_start = $tie_type_stop = FALSE;
 			if($test_musicxml) echo "• Repetition ".$i_repeat."/".$repeat_section[$section]." section ".$section."<br />";
 			$p_fermata_date = $q_fermata_date = $p_fermata_duration = $q_fermata_duration = $p_fermata_total_duration = $q_fermata_total_duration = $p_date = $q_date = array();
@@ -87,6 +96,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 			$score_metronome = 0;
 		//	ksort($the_section); Never do this because $i_measure may not be an integer
 		//  Beware that there are empty sessions
+			// note 11
 			foreach($the_section as $i_measure => $the_measure) {
 				if($i_measure < 0) continue;
 				if($list_this) $report .= "<br />";
@@ -119,12 +129,16 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 				$value_new_tempo = $p_date_new_tempo = $q_date_new_tempo = $p_field_duration = $q_field_duration = $empty_field = array(); // Check location of these on multipart scores BB 2022-02-12
 				$p_date[$i_measure] = $q_date[$i_measure] = array();
 				ksort($the_measure);
+				// note 12
 				foreach($the_measure as $score_part => $the_part) {
 					if(!$reload_musicxml OR !$select_part[$score_part]) {
 						if($test_musicxml AND $reload_musicxml) echo "Score part ".$score_part." not selected in section ".$section."<br />";
 						continue;
 						}
 					$i_part++;
+					// 2026-11-13: position of this part in the part list, which data.php uses to choose the controller and channel
+					// of pedal commands. Pedal commands of all parts were assigned to the last part ($i_part) - fixed by Claude
+					$part_index = array_search($score_part,array_keys($select_part));
 					$breath_location = array();
 					$i_breath = $n_breath = 0;
 					if(isset($fifths[$score_part])) $current_fifths = $fifths[$score_part];
@@ -165,6 +179,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 					$curr_event[$score_part][$j]['fermata'] = FALSE;
 					$breath_in_stream = FALSE;
 					
+					// note 13
 					foreach($the_part as $i_line => $line) {
 						if($test_musicxml)
 							echo "<small>".$j." ".recode_tags($line)."</small><br />";
@@ -184,6 +199,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							// very long ratios in the polymetric structure (Beethoven's Grosse Fuge). If the exact duration
 							// calculated from <type>, <dot/> and <time-modification> differs by less than one division,
 							// it replaces <duration> - added by Claude
+							// note 14
 							if($tuplet_actual > 0 AND $tuplet_normal > 0 AND isset($divisions[$score_part]) AND $curr_event[$score_part][$j]['p_dur'] > 0 AND $curr_event[$score_part][$j]['q_dur'] == 1) {
 								$exact = exact_tuplet_duration($divisions[$score_part],$note_type,$note_dots,$tuplet_actual,$tuplet_normal);
 								if($exact <> NULL AND abs(($exact['p'] / $exact['q']) - $curr_event[$score_part][$j]['p_dur']) < 1) {
@@ -191,6 +207,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 									$curr_event[$score_part][$j]['q_dur'] = $exact['q'];
 									}
 								}
+							// note 15
 							if($is_chord) {
 								// This is the first note tagged ‘chord’ which means the preceding one belongs to the same chord
 								if($j > 0) $curr_event[$score_part][$j-1]['type'] = "chord";
@@ -218,6 +235,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 								$curr_event[$score_part][$j]['p_dur'] = $p_this_dur;
 								$curr_event[$score_part][$j]['q_dur'] = $q_this_dur;
 								}
+							// note 16
 							if($fermata AND $i_field_of_part2 == 0 AND $curr_event[$score_part][$j]['p_dur'] > 0) {
 								if($fermata_show) $this_note .= "fermata";
 								$add = add($p_fermata_total_duration[$i_measure][$score_part],$q_fermata_total_duration[$i_measure][$score_part],$curr_event[$score_part][$j]['p_dur'],$curr_event[$score_part][$j]['q_dur']);
@@ -258,6 +276,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 									if($alter == -2) $curr_event[$score_part][$j]['note'] .= "bb";
 									}
 								if($this_octave >= 0) $curr_event[$score_part][$j]['note'] .= $this_octave;
+								// note 17
 								if($tie_type_start) $curr_event[$score_part][$j]['note'] .= "&";
 								if($tie_type_stop) $curr_event[$score_part][$j]['note'] = "&".$curr_event[$score_part][$j]['note'];
 								if($slur_type <> '') $curr_event[$score_part][$j]['slur'] = $slur_type;
@@ -310,6 +329,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							$unpitched = FALSE;
 							$alter = 0;
 							}
+						// note 17
 						if($note_on AND is_integer($pos=strpos($line,"<pitch>"))) {
 							$pitch = TRUE;
 							$alter = 0;
@@ -335,6 +355,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 						if(!$ignore_fermata AND is_integer($pos=strpos($line,"<fermata"))) {
 							$fermata = TRUE;
 							}
+						// note 18
 						if($note_on AND is_integer($pos=strpos($line,"<duration>"))) {
 							$duration = round(trim(preg_replace("/<duration>([^<]+)<\/duration>/u","$1",$line)));
 							$curr_event[$score_part][$j]['p_dur'] = $duration;
@@ -344,6 +365,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							$curr_event[$score_part][$j]['p_dur'] = 0;
 							$curr_event[$score_part][$j]['q_dur'] = 1;
 							}
+						// note 15
 						if($note_on AND is_integer($pos=strpos($line,"<chord/>"))) {
 							$is_chord = TRUE;
 							$curr_event[$score_part][$j]['type'] = "chord";
@@ -354,6 +376,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							if($tie_type == "stop") $tie_type_stop = TRUE;
 							}
 							
+						// note 19
 						if(($tempo_option <> "score" AND $tempo_option <> "ignore") AND is_integer($pos=strpos($line,"<sound tempo"))) {
 							$tempo = $score_metronome = round(trim(preg_replace("/.+tempo=\"([^\"]+)\"\/>/u","$1",$line)));
 							// This tempo is the number of quarternotes per minute
@@ -403,8 +426,14 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							else $old_beat_unit = 0;
 							$beat_unit[$score_part] = trim(preg_replace("/<beat-unit>(.+)<\/beat-unit>/u","$1",$line));
 							if($trace_tempo OR $list_this) $report .= "••• Beat unit = ".$beat_unit[$score_part]." (tag “beat-unit”)<br />";
+							$metronome_unit = $beat_unit[$score_part]; $metronome_dots = 0; // Unit of the next <per-minute>
 							continue;
 							}
+						if(is_integer($pos=strpos($line,"<beat-unit-dot"))) {
+							$metronome_dots++;
+							continue;
+							}
+						// note 20
 						if(is_integer($pos=strpos($line,"<beats>"))) {
 							if(isset($beat_unit[$score_part])) $old_beat_unit = $beat_unit[$score_part];
 							else $old_beat_unit = 0;
@@ -435,13 +464,19 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							$beat_type[$score_part] = $new_beat_type;
 							continue;
 							}
+						// note 19
 						if(($tempo_option == "all" OR $tempo_option == "score" OR $tempo_option == "allbutmeasures") AND is_integer($pos=strpos($line,"<per-minute>"))) {
 							$per_minute = $score_metronome = round(trim(preg_replace("/<per\-minute>([^<]+)<\/per\-minute>/u","$1",$line)));
 							if(!isset($beat_unit[$score_part])) $beat_unit[$score_part] = 4;
 							if(!isset($beat_type[$score_part])) $beat_type[$score_part] = 4;
-							$beat_divide = beat_divide($new_beat_type);
-							$tempo = round(($per_minute * $beat_divide['p']) / $beat_divide['q']);
-							if($list_this OR $trace_tempo) $report .= "••• Metronome will be set to ".$tempo." <i>prescriptive</i> (".$score_metronome." in HTML score, time signature ".$beat_unit[$score_part]."/".($beat_divide['q'] * 4 / $beat_divide['p']).")<br />";
+							// 2026-11-13: the value is converted to quarter notes per minute using the <beat-unit> and <beat-unit-dot/>
+							// of the metronome mark. The beat type of the time signature was used, which was wrong when it differed
+							// from the beat unit, e.g. "dotted quarter = 60" in 6/8 gave 30 instead of 90 - fixed by Claude
+							$beat_divide = beat_divide($metronome_unit);
+							$dots_factor = (2 * pow(2,$metronome_dots) - 1) / pow(2,$metronome_dots);
+							$tempo = round(($per_minute * $beat_divide['p'] * $dots_factor) / $beat_divide['q']);
+							$metronome_unit = "quarter"; $metronome_dots = 0;
+							if($list_this OR $trace_tempo) $report .= "••• Metronome will be set to ".$tempo." <i>prescriptive</i> (".$score_metronome." in printed score)<br />";
 							if($change_metronome) {
 								if(!$said_tempo) {
 									if($quad AND $list_this) $report .= "<p><b>Tempo changed using quadratic mapping</b></p>";
@@ -476,6 +511,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							// This may create a problem if they don't appear in the first selected part
 							}
 						
+						// note 21
 						if(!$ignore_dynamics AND is_integer($pos=strpos($line,"<sound dynamics"))) {
 							$volume = trim(preg_replace("/.+dynamics=\"([^\"]+)\"\/>/u","$1",$line));
 						//	echo $score_part." volume = ".$volume." at measure ".$i_measure."<br />";
@@ -484,7 +520,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							// This may cancel the value estimated from the graphic sign previously encountered
 							}
 						
-						if(!$ignore_dynamics AND is_integer($pos=strpos($line,"<dynamics "))) {
+						if(!$ignore_dynamics AND preg_match("/<dynamics[\s>]/u",$line)) { // 2026-11-13: also <dynamics> without attributes - fixed by Claude
 							$dynamics = TRUE; continue;
 							}
 						if(is_integer($pos=strpos($line,"</dynamics>"))) $dynamics = FALSE;
@@ -498,6 +534,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 								}
 							}
 						
+						// note 19
 						if(($tempo_option == "all" OR $tempo_option == "score" OR $tempo_option == "allbutmeasures") AND $accept_signs AND is_integer($pos=strpos($line,"<words"))) {
 							$some_words = trim(preg_replace("/.*<words[^>]*>([^<]+)\s*<\/.+/u","$1",$line));
 							if(strlen($some_words) > 2) {
@@ -531,6 +568,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							$some_words = '';
 							continue;
 							}
+						// note 22
 						if(is_integer($pos=strpos($line,"<backup>"))) {
 							$backup = TRUE;
 							$is_chord = FALSE;
@@ -559,6 +597,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 						if(is_integer($pos=strpos($line,"</backup>"))) {
 							$backup = FALSE;
 							}
+						// note 23
 						if($include_breaths AND is_integer($pos=strpos($line,"<breath-mark"))) {
 							$curr_event[$score_part][$j]['breath_mark'] = TRUE;
 							if(!isset($breath_location[$n_breath])) {
@@ -580,6 +619,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 									}
 								}
 							}
+						// note 22
 						if(is_integer($pos=strpos($line,"<forward>"))) {
 							$forward = TRUE;
 							$is_chord = FALSE;
@@ -602,6 +642,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 						if(is_integer($pos=strpos($line,"</forward>"))) {
 							$forward = FALSE;
 							}
+						// note 24
 						if($note_on AND !$ignore_arpeggios AND is_integer($pos=strpos($line,"<arpeggiate "))) {
 							$curr_event[$score_part][$j]['arpeggio'] = TRUE;
 							}
@@ -618,6 +659,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 								$trill_beats = trim(preg_replace("/.*trill-beats\s*=\s*\"(.+)\".*>/u","$1",$line));
 							else $trill_beats = 3;
 							}
+						// note 39
 						if(is_integer($pos=strpos($line,"<pedal"))) {
 							$this_xml = simplexml_load_string($line);
 							$pedal_type = (string)$this_xml['type'];
@@ -681,6 +723,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 						}
 					unset($line);
 					
+					// note 25
 					// Now let us transfer events of this measure to $data
 					$convert_measure[$score_part] = '';
 					if(count($the_measure) > 1) $convert_measure[$score_part] .= "{";
@@ -734,6 +777,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 								}
 							if($list_this) $report .= "measure #".$i_measure." field #".($i_field_of_measure + 1)."<br />";
 							}
+						// note 26
 						if($the_event['type'] == "mm" AND $i_field_of_measure == 0) { // Fixed by BB 2022-02-01
 							$new_tempo = $the_event['value'];
 							$fraction = $new_tempo."/60";
@@ -765,6 +809,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							continue; // Added by BB 2022-02-01
 							}
 						if($i_field_of_measure > 0) {
+							// note 26
 							// Find date of next new tempo 
 							if($i_new_tempo == 0 AND isset($p_date_new_tempo[$i_new_tempo])) {
 								$p_next_date_new_tempo = $p_date_new_tempo[$i_new_tempo];
@@ -813,6 +858,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							$old_tempo = $current_tempo = $fraction; // Fixed by BB 2022-02-14
 							$new_tempo = 0;
 							}
+						// note 27
 						if($the_event['type'] == "back" OR ($p_stream_duration > 0 AND $new_tempo > 0)) {
 							if($is_chord) {
 								$convert_measure[$score_part] .= "}";
@@ -925,6 +971,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 									$p_date_next_fermata = $p_fermata_date[$i_measure][$score_part][$i_fermata];
 									$q_date_next_fermata = $q_fermata_date[$i_measure][$score_part][$i_fermata];
 									}
+								// note 27
 								// Find whether there is time for a rest
 								// Fermata of previous field have not been counted in the backup value. We'll add them
 								$p_duration = $the_event['p_dur']; $q_duration = $the_event['q_dur'];
@@ -987,6 +1034,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							$fraction_date = $simplify_date['fraction'];
 							if($list_this) $report .= "<span class=\"turquoise-text\">f+ </span> Measure #".$i_measure." part ".$score_part." field #".($i_field_of_part + 1)." note ‘".$the_event['note']."’ at date ".$fraction_date." increased by ".$fraction ." beat(s) as per fermata #".($i_fermata + 1)."<br />";
 							}
+						// note 28
 						if($i_field_of_part > 0 AND $p_date_next_fermata >= 0 AND ($starting_chord OR $the_event['type'] == "seq") AND $the_event['note'] <> '') {
 							$add = add($p_time_field,$q_time_field,$p_stream_duration,$q_stream_duration);
 							$add = add($add['p'],$add['q'],-$p_date_next_fermata,$q_date_next_fermata);
@@ -1044,6 +1092,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							$next_is_arpeggio = TRUE;
 							}
 
+						// note 29
 						if(!$is_chord AND $the_event['type'] == "chord") {
 							$last_notes = array();
 							if($next_is_arpeggio) $convert_measure[$score_part] .= "arpeggio(".$i_measure.")";
@@ -1065,6 +1114,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							//	$report .= "*<br />";
 								if($test_musicxml)
 									echo $the_event['note']." time_field = ".$p_time_field."/".$q_time_field." stream_duration = ".$p_stream_duration."/".$q_stream_duration." stream_units = ".$stream_units." closing stream = “".$stream."”<br />";
+								// note 30
 								if($p_stream_duration == 0) { // Grace notes
 									$this_grace_ratio = $grace_ratio;
 									if($stream_units < 2) $this_grace_ratio = 4 * $grace_ratio;
@@ -1103,13 +1153,11 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 								echo "measure #".$i_measure." note ".$the_event['note']." (in chord) field #".($i_field_of_part + 1)." time_field = ".$p_time_field."/".$q_time_field." event_dur = ".$the_event['p_dur']."/".$the_event['q_dur']." divisions[score_part] = ".$divisions[$score_part]."<br />";
 							if($the_event['p_dur'] > 0 AND is_integer($pos=strpos($convert_measure[$score_part],"FRACTION_0"))) {
 								// Fixing duration of grace notes in preceding chord
-								$p_grace = $p_duration;
-								$q_grace = $q_duration * 2 * $grace_ratio;
-								
-								$fraction2 = $p_grace."/".($q_grace * $divisions[$score_part]);
-								$simplify = simplify($fraction2,$max_term_in_fraction);
-								$fraction2 = $simplify['fraction'];
-								$convert_measure[$score_part] = str_replace("FRACTION_0",$fraction2,$convert_measure[$score_part]);
+								$grace_chords = grace_chords($convert_measure[$score_part],$p_duration,$q_duration,$divisions[$score_part],$grace_ratio);
+								$convert_measure[$score_part] = $grace_chords['text'];
+								$p_duration = $grace_chords['p']; $q_duration = $grace_chords['q'];
+								$add = add($p_time_field,$q_time_field,$grace_chords['p_grace'],$grace_chords['q_grace']);
+								$p_time_field = $add['p']; $q_time_field = $add['q'];
 								}
 							if(isset($the_event['arpeggio']) AND !$next_is_arpeggio) {
 								$convert_measure[$score_part] .= "arpeggio(".$i_measure.")";
@@ -1150,6 +1198,15 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 								}
 							}
 						$p_duration = $the_event['p_dur']; $q_duration = $the_event['q_dur'];
+						if(!$is_chord AND $p_duration > 0 AND is_integer($pos=strpos($convert_measure[$score_part],"FRACTION_0"))) {
+							// 2026-11-13: grace notes in a chord followed by a single note - added by Claude
+							$grace_chords = grace_chords($convert_measure[$score_part],$p_duration,$q_duration,$divisions[$score_part],$grace_ratio);
+							$convert_measure[$score_part] = $grace_chords['text'];
+							$p_duration = $the_event['p_dur'] = $grace_chords['p'];
+							$q_duration = $the_event['q_dur'] = $grace_chords['q'];
+							$add = add($p_time_field,$q_time_field,$grace_chords['p_grace'],$grace_chords['q_grace']);
+							$p_time_field = $add['p']; $q_time_field = $add['q'];
+							}
 						if(isset($the_event['breath_mark']) AND !$found_breath) {
 							$found_breath = TRUE;
 							$add_breath = add($p_duration,$q_duration,$p_stream_duration,$q_stream_duration);
@@ -1167,16 +1224,18 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							if(isset($the_event['forward'])) $forward = TRUE;
 							$fraction = $the_event['p_dur']."/".($divisions[$score_part] * $the_event['q_dur']);
 							if($super_trace) $report .= "•• measure #".$i_measure." note “".$the_event['note']."”, duration = ".$p_duration."/".$q_duration.", field #".($i_field_of_part + 1)." time_field = ".$p_time_field."/".$q_time_field." stream_duration = ".$p_stream_duration."/".$q_stream_duration." stream_units = ".$stream_units." event_dur = ".$the_event['p_dur']."/".$the_event['q_dur'].", new_tempo = ".$new_tempo."<br />";
+							// note 25
 							if(($p_duration * $q_old_duration) == ($p_old_duration * $q_duration)) {
 								if($breath) {
 									if($trace_breath) $report .= "Breath in stream<br />";
 								//	$stream .= $breath_trace_tag.$breath_rest;
+									// note 31
 									$stream .= $breath_trace_tag." _rest ";
 									$breath = FALSE;
 									$i_breath++;
 									$breath_in_stream = TRUE;
 									}
-								$stream = add_note($stream,$i_measure,$the_event,$long_ornamentation,$approach_ornamentation,$diatonic_scale_string,$accept_pedal[$i_part - 1],$last_notes);
+								$stream = add_note($stream,$i_measure,$the_event,$long_ornamentation,$approach_ornamentation,$diatonic_scale_string,$accept_pedal[$part_index],$last_notes);
 								if($the_event['note'] <> "-" AND $the_event['note'] <> '') {
 									$empty_field[$i_field_of_part] = FALSE;
 									$last_notes = array(); $last_notes[] = $the_event['note'];
@@ -1187,6 +1246,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 								}
 							else {
 								if($stream_units > 0) {
+									// note 30
 									if($p_stream_duration == 0 AND !$forward) { // Grace notes
 										if($super_trace) $report .= "Grace stream = “".$stream."” measure #".$i_measure." field #".($i_field_of_part + 1)."<br />";
 										$this_grace_ratio = $grace_ratio;
@@ -1264,6 +1324,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 								$simplify_date = simplify($fraction_date,$max_term_in_fraction);
 								$fraction_date = $simplify_date['fraction'];
 								
+								// note 26
 								// Check whether changes of tempo occur during a rest
 								while(TRUE) {
 									if($i_field_of_part > 0 AND $new_tempo == 0 AND $p_next_date_new_tempo > 0 AND $the_event['note'] == "-") {
@@ -1327,7 +1388,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 									else break;
 									}
 								$stream = '';
-								$stream = add_note($stream,$i_measure,$the_event,$long_ornamentation,$approach_ornamentation,$diatonic_scale_string,$accept_pedal[$i_part - 1],$last_notes);
+								$stream = add_note($stream,$i_measure,$the_event,$long_ornamentation,$approach_ornamentation,$diatonic_scale_string,$accept_pedal[$part_index],$last_notes);
 								$stream_units = 1;
 								if($the_event['note'] <> "-" AND $the_event['note'] <> '') {
 									$empty_field[$i_field_of_part] = FALSE;
@@ -1342,19 +1403,19 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 								if($the_event['slur'] == "start") $convert_measure[$score_part] .= " _legato_ ";
 								else if($the_event['slur'] == "stop") $convert_measure[$score_part] .= " _nolegato_ ";
 								}
-							if(isset($the_event['sustain']) AND $accept_pedal[$i_part - 1]) {
+							if(isset($the_event['sustain']) AND $accept_pedal[$part_index]) {
 								// This is unlikely to happen: pedal command in upper notes of a chord
 								if($the_event['sustain'] == "start") $convert_measure[$score_part] .= " _sustainstart_ ";
 								else if($the_event['sustain'] == "stop") $convert_measure[$score_part] .= " _sustainstop_ ";
 								else if($the_event['sustain'] == "stopstart") $convert_measure[$score_part] .= " _sustainstopstart_ ";
 								}
-							if(isset($the_event['sostenuto']) AND $accept_pedal[$i_part - 1]) {
+							if(isset($the_event['sostenuto']) AND $accept_pedal[$part_index]) {
 								// This is unlikely to happen: pedal command in upper notes of a chord
 								if($the_event['sostenuto'] == "start") $convert_measure[$score_part] .= " _sostenutostart_ ";
 								else if($the_event['sostenuto'] == "stop") $convert_measure[$score_part] .= " _sostenutostop_ ";
 								else if($the_event['sostenuto'] == "stopstart") $convert_measure[$score_part] .= " _sostenutostopstart_ ";
 								}
-							if(isset($the_event['soft']) AND $accept_pedal[$i_part - 1]) {
+							if(isset($the_event['soft']) AND $accept_pedal[$part_index]) {
 								// This is unlikely to happen: pedal command in upper notes of a chord
 								if($the_event['soft'] == "start") $convert_measure[$score_part] .= " _softstart_ ";
 								else if($the_event['soft'] == "stop") $convert_measure[$score_part] .= " _softstop_ ";
@@ -1379,6 +1440,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 						}
 					unset($the_event);
 					
+					// note 32
 					$convert_measure[$score_part] = process_arpeggios($convert_measure[$score_part],$divisions[$score_part],$trace_ornamentations);
 					if($stream_units > 0) {
 						if($list_this) $report .= "Before last field of measure ".$i_measure.", time_field = ".$p_time_field."/".$q_time_field." stream_duration = ".$p_stream_duration."/".$q_stream_duration." stream = “".$stream."”<br />";
@@ -1464,7 +1526,9 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 							$metronome_this_measure = round($simplify['p'] * 60 / $simplify['q']);
 							$current_tempo = $old_tempo;
 							}
+					// note 33
 					$data .= "_tempo(TEMPO_THIS_MEASURE)";
+					// note 34
 					if(!$ignore_dynamics) { // Added by BB 2022-03-13
 						if($number_volume_part[$section][$score_part] > 0) {
 							$volume = round($sum_volume_part[$section][$score_part] / $number_volume_part[$section][$score_part]);
@@ -1476,16 +1540,15 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 						//	if(!isset($old_volume[$score_part])) $old_volume[$score_part] = $volume;
 							$old_volume[$score_part] = $volume; // Fixed by BB 2022-02-15
 							}
-						else if(isset($default_volume[$section][$score_part])) {
+						// 2026-11-13: a measure without dynamics took the first value of the section ($default_volume) instead of
+						// the last value heard, e.g. 'p' again after a crescendo to 'ff'. It now takes the last value ($old_volume),
+						// which is reset at the start of each repetition of the section - fixed by Claude
+						else {
 							// We must repeat volume on each measure to play it separately
-								if($dynamic_control[$score_part] == "volume") $data .= " _volume(".$default_volume[$section][$score_part].")";
-								else $data .= " _vel(".$default_volume[$section][$score_part].")";
-								}
-							else {
-								if(!isset($old_volume[$score_part])) $old_volume[$score_part] = 64;
-								if($dynamic_control[$score_part] == "volume") $data .= " _volume(".$old_volume[$score_part].")";
-								else $data .= " _vel(".$old_volume[$score_part].")";
-								}
+							if(!isset($old_volume[$score_part])) $old_volume[$score_part] = 64;
+							if($dynamic_control[$score_part] == "volume") $data .= " _volume(".$old_volume[$score_part].")";
+							else $data .= " _vel(".$old_volume[$score_part].")";
+							}
 						}
 					if($test_musicxml)
 						echo "End measure ".$i_measure." time_measure = ".$p_time_field."/".$q_time_field." tempo_this_measure = ".$sum_tempo_measure[$section][$i_measure]."/".$number_tempo_measure[$section][$i_measure]." default_tempo[section] = ".$default_tempo[$section]." implicit = ".(1 * $implicit[$section][$i_measure])." old_tempo = ".$old_tempo."<br /><br />";
@@ -1496,6 +1559,12 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 						if($apply_rndvel[$i_part - 1]) $data .= " _rndvel(".$rndvel[$i_part - 1].") ";
 						}
 					$convert_measure[$score_part] = fix_alterations($convert_measure[$score_part]);
+					// note 36
+					// 2026-11-13: ornaments are realised for each part with its own key signature, before pedal commands are renamed.
+					// They were realised for the whole score with the key of the last part - changed by Claude
+					$convert_measure[$score_part] = process_ornamentation($convert_measure[$score_part],$current_fifths,$trace_ornamentations);
+					// note 39
+					$convert_measure[$score_part] = rename_pedals($convert_measure[$score_part],$part_index + 1);
 					if($found_breath) { // Adjust the total duration of this measure
 						$add = add($p_time_measure,$q_time_measure,$breath_length['p'] * $divisions[$score_part],$breath_length['q']);
 						$p_time_measure = $add['p']; $q_time_measure = $add['q'];
@@ -1506,6 +1575,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 					// 2026-11-13: option to keep the length of overfull measures. If this part is longer than its time signature
 					// (plus fermata and breath extensions), its duration is set to the length of the measure, so that the fields
 					// that are too long are played faster. The 2024 converter did this with a _tempo() (Watch What Happens) - added by Claude
+					// note 32
 					$compressed = FALSE;
 					if($compress_overfull AND isset($time_beats[$score_part]) AND isset($time_beat_type[$score_part]) AND $time_beats[$score_part] > 0 AND $time_beat_type[$score_part] > 0) {
 						$p_length = $time_beats[$score_part] * 4 * $divisions[$score_part]; // Divisions are per quarter note
@@ -1530,6 +1600,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 					$data .= "}";
 					$data .= ","; // This may be erased later if not followed with new field
 					
+					// note 32
 					// Now we will normalize durations of fields
 					$p_duration_this_measure = 0;
 					$q_duration_this_measure = 1;
@@ -1652,6 +1723,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 					if($fraction <> "1") $data = str_replace("TEMPO_THIS_MEASURE",$fraction,$data);
 					else $data = str_replace("_tempo(TEMPO_THIS_MEASURE)",'',$data);
 					
+					// note 33
 					// Calculate relative tempo() values inside this measure
 					$start_search = 0;
 					$p_metronome_this_measure = $metronome_this_measure;
@@ -1689,19 +1761,6 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 	if(isset($score_part) AND isset($fifths[$score_part])) $current_fifths = $fifths[$score_part];
 	else $current_fifths = 0;
 	// if(MB_CONVERT_OK) $data = mb_convert_encoding($data,'UTF-8','UTF-8');
-	if($found_mordent OR $found_turn OR $found_trill OR $found_turn)
-		$data = process_ornamentation($data,$current_fifths,$trace_ornamentations);
-	if(isset($i_part)) {
-		$data = str_replace("_sustainstart_","_switch_on_sustain_part(".$i_part.") ",$data);
-		$data = str_replace("_sustainstop_","_switch_off_sustain_part(".$i_part.") ",$data);
-		$data = str_replace("_sustainstopstart_","_switch_off_sustain_part(".$i_part.") _switch_on_sustain_part(".$i_part.") ",$data);
-		$data = str_replace("_sostenutostart_","_switch_on_sostenuto_part(".$i_part.") ",$data);
-		$data = str_replace("_sostenutostop_","_switch_off_sostenuto_part(".$i_part.") ",$data);
-		$data = str_replace("_sostenutostopstart_","_switch_off_sostenuto_part(".$i_part.") _switch_on_sostenuto_part(".$i_part.") ",$data);
-		$data = str_replace("_softstart_","_switch_on_soft_part(".$i_part.") ",$data);
-		$data = str_replace("_softstop_","_switch_off_soft_part(".$i_part.") ",$data);
-		$data = str_replace("_softstopstart_","_switch_off_soft_part(".$i_part.") _switch_on_soft_part(".$i_part.") ",$data);
-		}
 	$convert_score['data'] = $data;
 	$convert_score['metronome_min'] = $metronome_min;
 	$convert_score['metronome_max'] = $metronome_max;
@@ -1718,6 +1777,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 	return $convert_score;
 	}
 
+// note 25
 function add_note($stream,$i_measure,$the_event,$long_ornamentation,$approach_ornamentation,$diatonic_scale_string,$ok_pedal,$last_notes) {
 	if(isset($the_event['ornament']) OR isset($the_event['turn'])) {
 		if($the_event['chromatic']) $mode = "chromatic";
@@ -1779,6 +1839,7 @@ function add_note($stream,$i_measure,$the_event,$long_ornamentation,$approach_or
 	return $stream;
 	}
 
+// note 37
 function diatonic_scale($fifths) {
 	// Construct diatonic scale with its alterations according to fifths
 	global $notes_diesis,$notes_bemol,$standard_diatonic_scale;
@@ -1802,6 +1863,7 @@ function diatonic_scale($fifths) {
 	return $diatonic_scale;
 	}
 
+// note 37
 function adjust_scale($diatonic_scale,$altered_diatonic_scale,$note) {
 	global $notes_diesis,$notes_bemol,$standard_diatonic_scale;
 	$note_class = preg_replace("/(.+)[0-9]+/u","$1",$note);
@@ -1835,6 +1897,45 @@ function adjust_scale($diatonic_scale,$altered_diatonic_scale,$note) {
 			}
 		}
 	return $altered_diatonic_scale;
+	}
+
+// note 36
+// note 30
+function grace_chords($text,$p_duration,$q_duration,$divisions,$grace_ratio) {
+	// 2026-11-13: grace notes in a chord get the duration "FRACTION_0" until the next note or chord of duration $p/$q
+	// is known. Each grace chord takes 1/(2 * $grace_ratio) of that duration, and no more than half of it in total.
+	// This duration is now deducted from the next note or chord. Before, it was added to the field, which became
+	// longer than the measure - fixed by Claude
+	global $max_term_in_fraction;
+	$n = substr_count($text,"FRACTION_0");
+	$p_grace = $p_duration;
+	$q_grace = $q_duration * 2 * $grace_ratio;
+	if(($n * $p_grace / $q_grace) > ($p_duration / $q_duration / 2)) {
+		$p_grace = $p_duration;
+		$q_grace = $q_duration * 2 * $n;
+		}
+	$simplify = simplify($p_grace."/".($q_grace * $divisions),$max_term_in_fraction);
+	$result['text'] = str_replace("FRACTION_0",$simplify['fraction'],$text);
+	$add = add($p_duration,$q_duration,- $n * $p_grace,$q_grace);
+	$result['p'] = $add['p']; $result['q'] = $add['q'];
+	$add = add(0,1,$n * $p_grace,$q_grace); // Total duration of the grace chords, to be added to the date of the field
+	$result['p_grace'] = $add['p']; $result['q_grace'] = $add['q'];
+	return $result;
+	}
+
+// note 39
+function rename_pedals($text,$n) {
+	// Pedal placeholders written by add_note() become commands of part $n, which data.php converts to _switchon() and _switchoff()
+	$text = str_replace("_sustainstart_","_switch_on_sustain_part(".$n.") ",$text);
+	$text = str_replace("_sustainstop_","_switch_off_sustain_part(".$n.") ",$text);
+	$text = str_replace("_sustainstopstart_","_switch_off_sustain_part(".$n.") _switch_on_sustain_part(".$n.") ",$text);
+	$text = str_replace("_sostenutostart_","_switch_on_sostenuto_part(".$n.") ",$text);
+	$text = str_replace("_sostenutostop_","_switch_off_sostenuto_part(".$n.") ",$text);
+	$text = str_replace("_sostenutostopstart_","_switch_off_sostenuto_part(".$n.") _switch_on_sostenuto_part(".$n.") ",$text);
+	$text = str_replace("_softstart_","_switch_on_soft_part(".$n.") ",$text);
+	$text = str_replace("_softstop_","_switch_off_soft_part(".$n.") ",$text);
+	$text = str_replace("_softstopstart_","_switch_off_soft_part(".$n.") _switch_on_soft_part(".$n.") ",$text);
+	return $text;
 	}
 
 function process_ornamentation($data,$fifths,$trace_ornamentations) {
@@ -1890,6 +1991,7 @@ function process_ornamentation($data,$fifths,$trace_ornamentations) {
 	return $data;
 	}
 
+// note 36
 function ornament($note,$long,$link,$diatonic_scale,$direction,$fifths,$trill,$trill_beats,$turn,$turn_beats,$chromatic,$trace_ornamentations) {
 	// Read https://bolprocessor.org/importing-musicxml/#ornaments
 	global $notes_diesis,$notes_bemol;
@@ -1939,6 +2041,14 @@ function ornament($note,$long,$link,$diatonic_scale,$direction,$fifths,$trill,$t
 		$note = trim(str_replace("_softstopstart_",'',$note));
 		}
 
+	// 2026-11-13: $link was "&" whenever the note was tied, and was appended to the end of the expression. A note ending
+	// a tie (&D5) then became the start of a tie (D5&). Both sides of the tie are now kept in their place:
+	// $tie_stop puts '&' before the first note of the expression if it is the main note, $tie_start puts it after the
+	// last one, which is always the main note - fixed by Claude
+	$tie_stop = (substr($note,0,1) == '&');
+	$tie_start = (substr($note,-1) == '&');
+	$stop = $tie_stop ? '&' : '';
+	$start = $tie_start ? '&' : '';
 	$note = str_replace('&','',$note);
 	$alt_note = $note2 = '';
 	$note_class = preg_replace("/(.+)[0-9]+/u","$1",$note);
@@ -2024,11 +2134,11 @@ function ornament($note,$long,$link,$diatonic_scale,$direction,$fifths,$trill,$t
 		if($long) $dur = 2 + ($turn_beats - 4);
 		else $dur = 1 + ($turn_beats - 4);
 		if($direction == "up") {
-			$expression = "{1,".$note."{".$dur.",".$note_up." ".$note." ".$note_down;
+			$expression = "{1,".$stop.$note."{".$dur.",".$note_up." ".$note." ".$note_down;
 			$next_step = +1;
 			}
 		else {
-			$expression = "{1,".$note."{".$dur.",".$note_down." ".$note." ".$note_up;
+			$expression = "{1,".$stop.$note."{".$dur.",".$note_down." ".$note." ".$note_up;
 			$next_step = -1;
 			}
 		for($i = 4; $i < $turn_beats; $i++) {
@@ -2038,33 +2148,36 @@ function ornament($note,$long,$link,$diatonic_scale,$direction,$fifths,$trill,$t
 			$next_step = - $next_step;
 			}
 		if($long) {
-			$expression .= "} ".$note;
+			$expression .= "} ".$note.$start;
 			}
-		else $expression .= "} ".$note."_";
+		else $expression .= "} ".$note.$start."_";
 		$expression .= "}";
 		}
 	else if($trill) {
 		// https://en.wikipedia.org/wiki/Trill_(music)
 		// https://www.w3.org/2021/06/musicxml40/musicxml-reference/elements/trill-mark/
 		// trill beats = the number of distinct notes during playback, counting the starting note but not the two-note turn. It is 3 if not specified.
-		if($link == '' AND $direction == "up") $trill_step = $note." ".$note2;
+		// A trill on a note ending a tie starts on the main note, which is joined to the tied note, so it is not repeated
+		if($tie_stop OR (!$tie_start AND $direction == "up")) $trill_step = $note." ".$note2;
 		else {
 			$trill_step = $note2." ".$note;
 	//		if($direction <> "up") echo "=> trill down on ".$note."<br /><br />";
 			}
-		$expression = "{1,".$trill_step;
+		$expression = "{1,".$stop.$trill_step;
 		for($i = 0; $i < ($trill_beats - 1); $i++) $expression .= " ".$trill_step;
-		$expression .= $link."}";
+		if($tie_stop AND $tie_start) $expression .= " ".$note; // The tie must start on the main note
+		$expression .= $start."}";
 		}
 	else { // Mordent
 		// https://en.wikipedia.org/wiki/Mordent
 		// https://www.w3.org/2021/06/musicxml40/musicxml-reference/elements/inverted-mordent/
 		// https://www.w3.org/2021/06/musicxml40/musicxml-reference/elements/mordent/
 		// https://bolprocessor.org/importing-musicxml/#mordents
+		// A long mordent starts on the auxiliary note, so the end of a tie cannot be kept
 		if($long)
-			$expression = "{1/4,".$note2." ".$note." ".$note2."}{3/4,".$note.$link."}";
+			$expression = "{1/4,".$note2." ".$note." ".$note2."}{3/4,".$note.$start."}";
 		else
-			$expression = "{1/8,".$note." ".$note2."}{7/8,".$note.$link."}";
+			$expression = "{1/8,".$stop.$note." ".$note2."}{7/8,".$note.$start."}";
 		}
 	if($legato) $expression = " _legato_ ".$expression;
 	if($nolegato) $expression = " _nolegato_ ".$expression;
@@ -2080,6 +2193,7 @@ function ornament($note,$long,$link,$diatonic_scale,$direction,$fifths,$trill,$t
 	return $expression;
 	}
 
+// note 38
 function process_arpeggios($data,$score_divisions,$trace_ornamentations) {
 	global $max_term_in_fraction;
 //	return $data;
@@ -2200,7 +2314,11 @@ function process_arpeggios($data,$score_divisions,$trace_ornamentations) {
 	return $data;
 	}
 	
+// note 35
 function fix_alterations($text) {
+	// 2026-11-13: B## and Cbb change octave: B##4 = C#5 and Cbb4 = Bb3. The octave was kept unchanged - fixed by Claude
+	$text = preg_replace_callback("/B##([0-9]+)/u",function($m) { return "C#".($m[1] + 1); },$text);
+	$text = preg_replace_callback("/Cbb([0-9]+)/u",function($m) { return "Bb".($m[1] - 1); },$text);
 	$search = array("C##","D##","E##","F##","G##","A##","B##");
 	$replace = array("D","E","F#","G","A","B","C#");
 	$text = str_ireplace($search,$replace,$text);
@@ -2210,6 +2328,7 @@ function fix_alterations($text) {
 	return $text;
 	}
 
+// note 19
 function beat_divide($beat_unit) {
 	$beat_divide['p'] = $beat_divide['q'] = 1;
 	if(is_numeric($beat_unit)) {
@@ -2233,6 +2352,7 @@ function beat_divide($beat_unit) {
 	return $beat_divide;
 	}
 
+// note 31
 function add_breath_to_stream_duration($p,$q,$div,$breath_length,$stream,$stream_units) {
 	global $trace_breath,$max_term_in_fraction;
 	$add = add($p,$q,($breath_length['p'] * $div),$breath_length['q']);
@@ -2251,6 +2371,7 @@ function add_breath_to_stream_duration($p,$q,$div,$breath_length,$stream,$stream
 	return $result;
 	}
 
+// note 14
 function exact_tuplet_duration($divisions,$type,$dots,$actual,$normal) {
 	// 2026-11-12: exact duration (in divisions) of a note of graphic $type with $dots in a tuplet $actual:$normal
 	// Returns ['p' => , 'q' => ] or NULL if the type is unknown - added by Claude
@@ -2266,6 +2387,7 @@ function exact_tuplet_duration($divisions,$type,$dots,$actual,$normal) {
 	return array('p' => $p,'q' => $q);
 	}
 
+// note 7
 function remove_hidden_notes($lines,$realised_ornaments) {
 	// 2026-11-12: Removes hidden notes (print-object="no") from the lines of a measure in a part. Some editors (e.g. Finale)
 	// export their playback realisation of trills, tremolos, etc. as hidden notes in an extra voice. Importing them

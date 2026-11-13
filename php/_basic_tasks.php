@@ -1,5 +1,7 @@
 <!DOCTYPE html>
 <?php
+// Comments "// note N" (in this file, data.php and _musicxml.php) refer to the numbered notes of the technical description of this algorithm: https://bolprocessor.org/tech-analysis-of-musicxml-php
+
 /* if(strtoupper(substr(PHP_OS,0,3)) === 'WIN' && isset($_SERVER['HTTP_HOST']) && $_SERVER['HTTP_HOST'] === 'localhost') {
 	// This avoids slowing down access on Windows machines
     header(
@@ -1021,6 +1023,7 @@ function add_help_links($line) {
 	return $line;
 	}
 
+// note 40
 function gcd($a,$b) {
 	if($a < 0) $a = - $a;
 	if($b < 0) $b = - $b;
@@ -4863,6 +4866,7 @@ function merge_names($name1,$name2) {
 	return $result;
 	}
 
+// note 40
 function simplify($fraction,$max_term) {
 	$fraction = trim($fraction);
 	$simplify['fraction'] = $fraction;
@@ -4898,24 +4902,24 @@ function simplify($fraction,$max_term) {
 	if($num > $max_term) $the_max = $num;
 	if($den > $num AND $den > $max_term) $the_max = $den;
 	if($the_max == 0) return $simplify;
+	// 2026-11-13: the approximated fraction is returned as text too. The text was the original fraction while 'p' and 'q'
+	// were approximated. If the approximation rounds a term to 0, the reduced exact fraction is kept - fixed by Claude
 	$ratio = $max_term / $the_max;
-	$num = round($num * $ratio);
-	$den = round($den * $ratio);
-	if(($num * $den) ==  0) $fraction = '';
-	else {
-		$gcd = gcd($num,$den);
-		$num = $num / $gcd;
-		$den = $den / $gcd;
-		if($den <> 1) $simplify['fraction'] = $num."/".$den;
-		else $simplify['fraction'] = $num;
-		}
+	$num_approx = round($num * $ratio);
+	$den_approx = round($den * $ratio);
+	if(($num_approx * $den_approx) ==  0) return $simplify;
+	$gcd = gcd($num_approx,$den_approx);
+	$num = intval($num_approx / $gcd);
+	$den = intval($den_approx / $gcd);
+	if($den <> 1) $simplify['fraction'] = $num."/".$den;
+	else $simplify['fraction'] = $num;
 	$simplify['p'] = $num;
 	$simplify['q'] = $den;
-	$simplify['fraction'] = $fraction;
 	$simplify['done'] = TRUE;
 	return $simplify;
 	}
 
+// note 40
 function add($p1,$q1,$p2,$q2) {
 	$q3 = $q1 * $q2;
 	$p3 = ($p1 * $q2) + ($p2 * $q1);
@@ -4967,6 +4971,7 @@ function search_value($type,$data,$operator) {
 	return $this_value;
 	}
 
+// note 9
 function quadratic_mapping($x1,$x2,$x3,$y1,$y2,$y3) {
 	if((($x1*$x1 - $x2*$x2) * ($x1 - $x3) - ($x1*$x1 - $x3*$x3) * ($x1 - $x2)) == 0 OR $x1 == $x2) {
 		$result['a'] = $result['b'] = $result['c'] = 0;
@@ -7234,6 +7239,7 @@ function is_performance_control($text) {
 	return $it_is;
 	}
 
+// note 8
 function cleanup_score($data) {
 	$data = preg_replace("/\s+/u"," ",$data);
 	$data = str_replace(",}","}",$data);
@@ -7270,6 +7276,7 @@ function cleanup_score($data) {
 	return $data;
 	}
 
+// note 8
 function normalize_rests($line) {
 	$line = preg_replace('/([{}\.,-])/',' $1 ',$line);
 	$line = str_replace(" 0 "," ",$line);
