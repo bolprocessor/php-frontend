@@ -2266,7 +2266,7 @@ function exact_tuplet_duration($divisions,$type,$dots,$actual,$normal) {
 	return array('p' => $p,'q' => $q);
 	}
 
-function remove_hidden_notes($lines) {
+function remove_hidden_notes($lines,$realised_ornaments) {
 	// 2026-11-12: Removes hidden notes (print-object="no") from the lines of a measure in a part. Some editors (e.g. Finale)
 	// export their playback realisation of trills, tremolos, etc. as hidden notes in an extra voice. Importing them
 	// doubled the ornaments realised by the converter, and their durations (e.g. 115/512) created very long ratios in
@@ -2274,6 +2274,10 @@ function remove_hidden_notes($lines) {
 	// A voice containing only hidden notes is deleted with its <backup> and <forward>, and the next <backup> is adjusted.
 	// In a voice with visible notes, a hidden note is replaced with a <forward> of the same duration, and consecutive
 	// <forward> are merged. Returns ['lines' => ..., 'removed' => number of hidden notes].
+	// 2026-11-13: the hidden notes are only removed if a visible note of the measure carries an ornament that the converter
+	// realises itself ($realised_ornaments, e.g. "<trill-mark"). Otherwise they are the only realisation of something
+	// the converter ignores, e.g. a tremolo or repeated notes written as an abbreviation (Beethoven's Grosse Fuge m.177,
+	// Prelude to a Tragedy), and they are kept - fixed by Claude
 	// Split the lines into segments: 'note', 'hidden', 'backup', 'forward', 'other'
 	$segments = array();
 	$jmax = count($lines);
@@ -2314,6 +2318,16 @@ function remove_hidden_notes($lines) {
 		if($segment['type'] == "hidden") $removed++;
 		}
 	if($removed == 0) return array('lines' => $lines,'removed' => 0);
+	$realised = FALSE;
+	foreach($segments as $segment) {
+		if($segment['type'] <> "note") continue;
+		$text = implode("\n",$segment['lines']);
+		foreach($realised_ornaments as $tag)
+			if(is_integer(strpos($text,$tag))) {
+				$realised = TRUE; break 2;
+				}
+		}
+	if(!$realised) return array('lines' => $lines,'removed' => 0);
 	$new_lines = array();
 	$shift = 0; // Date in the original minus date in the new lines, caused by deleted voices, to be compensated by the next <backup>
 	foreach($voices as $iv => $voice) {

@@ -502,10 +502,15 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 			$number_hidden_notes = 0;
 			if(!$reload_musicxml) $ignore_hidden_notes = $found_playback_notes;
 			if($found_hidden_notes AND $ignore_hidden_notes) {
+				// Hidden notes are only removed in measures with an ornament that the converter realises
+				$realised_ornaments = array();
+				if(!$ignore_trills) array_push($realised_ornaments,"<trill-mark","<wavy-line");
+				if(!$ignore_mordents) array_push($realised_ornaments,"<mordent","<inverted-mordent");
+				if(!$ignore_turns) array_push($realised_ornaments,"<turn","<inverted-turn","<delayed-turn");
 				foreach($this_score as $section => $the_section)
 					foreach($the_section as $i_measure => $the_measure)
 						foreach($the_measure as $part => $the_lines) {
-							$result_hidden = remove_hidden_notes($the_lines);
+							$result_hidden = remove_hidden_notes($the_lines,$realised_ornaments);
 							$this_score[$section][$i_measure][$part] = $result_hidden['lines'];
 							$number_hidden_notes += $result_hidden['removed'];
 							}
@@ -558,7 +563,7 @@ if($reload_musicxml OR (isset($_FILES['music_xml_import']) AND $_FILES['music_xm
 						$list_settings .= "\n";
 						}
 				if($found_hidden_notes)
-					if($ignore_hidden_notes) $list_settings .= "// Ignoring ".$number_hidden_notes." hidden notes\n";
+					if($ignore_hidden_notes AND $number_hidden_notes > 0) $list_settings .= "// Ignoring ".$number_hidden_notes." hidden notes\n";
 					else $list_settings .= "// Including hidden notes\n";
 				if($found_fermata)
 					if($ignore_fermata) $list_settings .= "// Ignoring fermata\n";
