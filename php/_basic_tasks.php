@@ -71,46 +71,47 @@ $url_this_page = "_basic_tasks.php";
 $absolute_application_path = str_replace("php".SLASH.$url_this_page,'',realpath(__FILE__));
 
 if(isset($_POST['csound_path_change'])) {
-	$csound_path = trim($_POST['csound_path']);
+	$new_name = trim($_POST['csound_name'] ?? '');
+	if($new_name <> '') $csound_name = $new_name;
+	$csound_path = rtrim(trim($_POST['csound_path'] ?? ''),"/\\");
+	// Accept the full path of the program, e.g. "/Applications/Csound/csound"
+	if(isset($csound_name) AND basename($csound_path) == $csound_name AND is_file($csound_path))
+		$csound_path = dirname($csound_path);
 	save_settings("csound_path",$csound_path);
-	$csound_name = trim($_POST['csound_name']);
-	if($csound_name <> '') {
-		save_settings("csound_name",$csound_name);
-		}
+	if(isset($csound_name) AND $csound_name <> '') save_settings("csound_name",$csound_name);
 	}
 
+// Csound: the Bol Processor requires CSOUND_MIN_VERSION or later, see check_csound() (2026-11-14)
+define("CSOUND_MIN_VERSION","7.0");
+// $csound_path is the absolute path of the folder containing Csound on all systems
+// $programFiles is kept empty for compatibility (it used to be the "Program Files" folder on Windows)
+$programFiles = '';
+if(!isset($csound_path)) $csound_path = '';
 if(windows_system()) {
-    $console = "bp.exe";
-    if (!isset($csound_name) || $csound_name == '') $csound_name = "csound.exe";
-    $programFiles = findCsoundPath($csound_name);
-    $programFiles = str_replace("\Csound6_x64\bin",'',$programFiles);
- //   echo "programFiles = ".$programFiles."<br />";
-    if (!isset($csound_path) || $csound_path == '') {
-        if(file_exists($programFiles."\\Csound6_x64\\bin\\csound.exe")) {
-            $csound_path = "\\Csound6_x64\\bin";
-            $csound_name = "csound.exe";
-            }
-        else $csound_path = "";
-        }
-    }
-else {
-    $programFiles = '';
-	if(linux_system()) {
-		$console = "bp3";
-		if(!isset($csound_name) OR $csound_name == '') $csound_name = "csound";
-		if(!isset($csound_path) OR $csound_path == '') {
-			if(file_exists("/usr/bin/csound")) {
-				$csound_path = SLASH."usr".SLASH."bin";
-				}
-			else $csound_path = "";
+	$console = "bp.exe";
+	if(!isset($csound_name) OR $csound_name == '') $csound_name = "csound.exe";
+	$csound_path = str_replace('/',SLASH,$csound_path);
+	// Older settings gave the path relative to "Program Files", e.g. "\Csound6_x64\bin"
+	if($csound_path <> '' AND !preg_match('/^[A-Za-z]:/',$csound_path))
+		$csound_path = windows_program_files().SLASH.ltrim($csound_path,SLASH);
+	}
+else if(linux_system()) {
+	$console = "bp3";
+	if(!isset($csound_name) OR $csound_name == '') $csound_name = "csound";
+	}
+else { // MacOS
+	$console = "bp";
+	if(!isset($csound_name) OR $csound_name == '') $csound_name = "csound";
+	}
+if($csound_path == '' OR !file_exists($csound_path.SLASH.$csound_name)) {
+	// Csound is not where it was: look in its usual locations, Csound 7 first
+	foreach(csound_candidate_dirs() as $dir) {
+		if(file_exists($dir.SLASH.$csound_name)) {
+			$csound_path = $dir;
+			break;
 			}
 		}
-	else { // MacOS
-		$console = "bp";
-		if(!isset($csound_name) OR $csound_name == '') $csound_name = "csound";
-		if(!isset($csound_path)) $csound_path = SLASH."usr".SLASH."local".SLASH."bin";
-		}
-    }
+	}
 if($csound_name <> '') save_settings("csound_name",$csound_name);
 save_settings("csound_path",$csound_path);
 
@@ -517,17 +518,39 @@ echo "</script>";
 	return false;
 	} */
 
-function findCsoundPath($exeName) {
-    $paths = explode(PATH_SEPARATOR, getenv('PATH'));
-    foreach ($paths as $path) {
-        $fullPath = $path.DIRECTORY_SEPARATOR;
-        if (file_exists($fullPath.$exeName) && is_executable($fullPath.$exeName)) {
-            return rtrim($path, '/\\');
+function windows_program_files() {
+	// The "Program Files" folder of 64-bit programs
+	$folder = getenv('ProgramW6432');
+	if($folder === FALSE OR $folder == '') $folder = getenv('ProgramFiles');
+	if($folder === FALSE OR $folder == '') $folder = "C:\\Program Files";
+	return rtrim($folder,"/\\");
+	}
+
+function csound_candidate_dirs() {
+	// Folders where Csound is usually installed, in order of preference: Csound 7 first, then the folders in PATH, then Csound 6
+	global $csound_name;
+	if(windows_system()) {
+		$dirs = array(windows_program_files()."\\Csound7\\bin");
+		$old = array(windows_program_files()."\\Csound6_x64\\bin");
+		}
+	else if(linux_system()) {
+		$dirs = array("/usr/local/bin","/usr/bin");
+		$old = array();
+		}
+	else { // MacOS
+		$dirs = array("/Applications/Csound");
+		$old = array("/usr/local/bin","/opt/homebrew/bin");
+		}
+	$env_path = getenv('PATH');
+	if($env_path !== FALSE) {
+		foreach(explode(PATH_SEPARATOR,$env_path) as $dir) {
+			$dir = rtrim(trim($dir),"/\\");
+			if($dir <> '' AND file_exists($dir.SLASH.$csound_name)) $dirs[] = $dir;
 			}
 		}
-	return false;
-    }
-	
+	return array_values(array_unique(array_merge($dirs,$old)));
+	}
+
 function extract_data($is_grammar,$compact,$content) {
 	global $true_bp_grammar,$grammar_has_structures,$thistype,$reason_not_true;
 	$said = FALSE;
@@ -4258,50 +4281,168 @@ function link_to_tonality() {
 	echo "<p class=\"thinborder\" style=\"background-color:azure; color:black; padding:4px; border-radius:6px; line-height:2;\">&nbsp;🎶&nbsp;&nbsp;Using microtonality?<br />&nbsp;👉&nbsp;&nbsp;<a class=\"darkblue-text\" target=\"_blank\" href=\"index.php?path=tonality_resources\">TONALITY resource folder</a></p>";
 	}
 
-function check_csound() {
+function check_csound($inside_form = FALSE) {
+	// $inside_form: the caller has already opened a form, which will carry the TRY button
     global $csound_path,$csound_name, $csound_resources, $path, $url_this_page, $file_format,$programFiles;
+	$own_form = FALSE;
+	// "csound_version.txt" exists only if a suitable version of Csound is responding. Other pages check it.
 	$this_file = "csound_version.txt";
-    @unlink($this_file);
-	$command = "\"".$programFiles.SLASH.$csound_path.SLASH.$csound_name."\" --version 2>csound_version.txt";
-	if(file_exists($programFiles.SLASH.$csound_path.SLASH.$csound_name)) {
-        send_to_console($command);
+	@unlink($this_file);
+	$info = csound_probe($csound_path);
+	if($info === FALSE OR !csound_version_ok($info)) {
+		// Missing or too old: look for a suitable version elsewhere, e.g. Csound 7 installed next to Csound 6
+		foreach(csound_candidate_dirs() as $dir) {
+			if($dir == $csound_path) continue;
+			$other = csound_probe($dir);
+			if($other !== FALSE AND csound_version_ok($other)) {
+				$csound_path = $dir;
+				save_settings("csound_path",$csound_path);
+				$info = $other;
+				break;
+				}
+			}
 		}
-    if(!file_exists($this_file)) {
+	if($info === FALSE OR !csound_version_ok($info)) {
 		echo "&nbsp;&nbsp;&nbsp;<small><span class=\"red-text\">".$csound_path.SLASH.$csound_name."</span></small>";
+		if(!$inside_form) {
+			echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+			$own_form = TRUE;
+			}
 		if(isset($file_format)) echo "<input type=\"hidden\" name=\"file_format\" value=\"".$file_format."\">";
-		echo "<p><img src=\"pict/logo_csound.png\" width=\"90px;\" style=\"vertical-align:middle;\" />&nbsp;is not responding<br />or its path (<span class=\"green-text\">".$csound_path."</span>) is incorrect<br /><br />";
+		if($info === FALSE)
+			echo "<p><img src=\"pict/logo_csound.png\" width=\"90px;\" style=\"vertical-align:middle;\" />&nbsp;is not responding<br />or its path (<span class=\"green-text\">".$csound_path."</span>) is incorrect<br /><br />";
+		else {
+			$old = ($info['version'] <> '') ? $info['version'] : "(unknown version)";
+			echo "<p><img src=\"pict/logo_csound.png\" width=\"90px;\" style=\"vertical-align:middle;\" />&nbsp;<span class=\"red-text\">".$old."</span> is too old:<br />the Bol Processor requires <b>Csound ".CSOUND_MIN_VERSION."</b> or later.<br />";
+			echo "There is no need to uninstall this version:<br />Csound ".CSOUND_MIN_VERSION." will be found once installed.<br /><br />";
+			}
 		echo "Name: <span class=\"green-text\">path_to_csound".SLASH." </span><input type=\"text\" name=\"csound_name\" size=\"14\" style=\"background-color:CornSilk;\" value=\"".$csound_name."\"><br />";
 		echo "Path: <input type=\"text\" name=\"csound_path\" size=\"30\" style=\"background-color:CornSilk;text-align:right;\" value=\"".$csound_path."\"><span class=\"green-text\">".SLASH.$csound_name."</span>";
 		echo "&nbsp;<input class=\"save\" type=\"submit\"  name=\"csound_path_change\" value=\"TRY\">";
 		echo "<br />";
+		$latest = csound_latest_release();
+		$which = ($latest !== FALSE) ? "Csound ".$latest['tag'] : "Csound";
 		if(linux_system()) {
-			echo "<br /><span class=\"red-text\">➡</span>&nbsp;Read instructions in the <a target=\"_blank\" class=\"linkdotted\" href=\"https://bolprocessor.org/misc/linux-scripts.zip\">script folder</a> to install Csound<br />";
+			echo "<br /><span class=\"red-text\">➡</span>&nbsp;Read instructions in the <a target=\"_blank\" class=\"linkdotted\" href=\"https://bolprocessor.org/misc/linux-scripts.zip\">script folder</a> to install ".$which."<br />";
 			}
 		else {
-			echo "<br /><span class=\"red-text\">➡</span>&nbsp;<a target=\"_blank\" class=\"linkdotted\" href=\"https://csound.com/download.html\">Follow this link</a> to install Csound<br />";
+			echo "<br /><span class=\"red-text\">➡</span>&nbsp;<a target=\"_blank\" class=\"linkdotted\" href=\"".csound_download_url()."\">Follow this link</a> to install ".$which."<br />";
 			}
-	    $result = FALSE;
+		$result = FALSE;
 		}
 	else {
-		$version = '';
-		if(file_exists($this_file)) {
-			$content = @file_get_contents($this_file);
-			if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
-			$table = explode(chr(10),$content);
-			$imax = count($table);
-			for($i = 0; $i < $imax; $i++) {
-				$line = trim($table[$i]);
-				if(!is_integer(strpos($line,"Csound version "))) continue;
-				$version = "(".preg_replace("/.+version\s(.+)\(.+/u",'$1',$line).")&nbsp;";
-				break;
-				}
-			}
+		@file_put_contents($this_file,$info['content']);
+		$version = ($info['version'] <> '') ? "(".$info['version'].")&nbsp;" : '';
 		echo "<p class=\"thinborder\" style=\"vertical-align:middle; background-color:azure; color:black; padding-top:4px; padding-left:4px; padding-right:4px; padding-bottom:12px; border-radius:6px;\"><img src=\"pict/logo_csound.png\" width=\"90px;\" style=\"vertical-align:middle;\" />".$version."is responding<br />";
+		$latest = csound_latest_release();
+		if($latest !== FALSE AND csound_newer_release($info,$latest))
+			echo "&nbsp;🆕&nbsp;&nbsp;<a class=\"darkblue-text\" target=\"_blank\" href=\"".csound_download_url()."\">Csound ".$latest['tag']." is available</a><br />";
 		$result = TRUE;
 		}
 	if($path <> $csound_resources) echo "&nbsp;👉&nbsp;&nbsp;<a class=\"darkblue-text\" target=\"_blank\" href=\"index.php?path=csound_resources\">CSOUND resource folder</a><br />";
 	echo "</p>";
+	if($own_form) echo "</form>";
 	return $result;
+	}
+
+function csound_environment($dir) {
+	// On Linux, Csound may be a folder unpacked from "csound-linux-minimal-…zip", holding "csound", "libcsound64.so" and "plugins".
+	// Also remove XAMPP's /opt/lampp/lib so that Csound uses the system libraries.
+	// "csound" may be a link, e.g. /usr/local/bin/csound -> /opt/csound7/csound: the folder is that of the actual file.
+	global $csound_name;
+	if(!linux_system()) return;
+	$real = realpath($dir."/".$csound_name);
+	if($real !== FALSE) $dir = dirname($real);
+	if(glob($dir."/libcsound64.so*")) putenv("LD_LIBRARY_PATH=".$dir);
+	else putenv("LD_LIBRARY_PATH");
+	if(is_dir($dir."/plugins")) putenv("OPCODE7DIR64=".$dir."/plugins");
+	}
+
+function csound_probe($dir) {
+	// Run "csound --version" in folder $dir. Return FALSE if Csound is not responding, otherwise
+	// 'version' (e.g. "7.0", or '' if not found), 'date' (build date, Unix time, or 0) and 'content' (full output)
+	global $csound_name;
+	if($dir == '' OR !file_exists($dir.SLASH.$csound_name)) return FALSE;
+	$probe_file = "csound_probe.txt";
+	@unlink($probe_file);
+	csound_environment($dir);
+	send_to_console("\"".$dir.SLASH.$csound_name."\" --version 2>".$probe_file);
+	$content = @file_get_contents($probe_file);
+	@unlink($probe_file);
+	if($content === FALSE OR trim($content) == '') return FALSE;
+	return csound_parse_version($content);
+	}
+
+function csound_parse_version($content) {
+	// Read the output of "csound --version", e.g. "--Csound version 7.0 (double samples) Oct 21 2026"
+	// The pattern is ASCII and has no 'u' flag, so that it works whatever the encoding of the output (Windows)
+	$info = array('version' => '','date' => 0,'content' => $content);
+	if(preg_match('/Csound version ([0-9]+(?:\.[0-9]+)*)([^\n]*)/',$content,$match)) {
+		$info['version'] = $match[1];
+		// Build date, on the same line, possibly followed by colour codes
+		if(preg_match('/([A-Z][a-z]{2} +[0-9]{1,2} +[0-9]{4})/',$match[2],$date_match) AND ($date = strtotime($date_match[1])) !== FALSE)
+			$info['date'] = $date;
+		}
+	return $info;
+	}
+
+function csound_ready() {
+	// TRUE if "csound_version.txt", written by check_csound(), shows a suitable version of Csound.
+	// The file may be older than the current interface and show Csound 6.
+	$content = @file_get_contents("csound_version.txt");
+	if($content === FALSE) return FALSE;
+	return csound_version_ok(csound_parse_version($content));
+	}
+
+function csound_major_minor($version) {
+	// "7.0.1" -> "7.0"
+	$parts = explode('.',$version);
+	return $parts[0].".".($parts[1] ?? "0");
+	}
+
+function csound_version_ok($info) {
+	// A version that can't be read is not accepted
+	if($info['version'] == '') return FALSE;
+	return version_compare(csound_major_minor($info['version']),CSOUND_MIN_VERSION,'>=');
+	}
+
+function csound_latest_release() {
+	// Latest release of Csound on GitHub: 'tag' (e.g. "7.0.0"), 'published' (date) and 'url', or FALSE if unknown.
+	// GitHub is asked at most once a day, and once an hour when it did not answer. The answer is kept in "csound_latest.json".
+	$cache_file = "csound_latest.json";
+	$data = FALSE;
+	$content = @file_get_contents($cache_file);
+	if($content !== FALSE) $data = json_decode($content,TRUE);
+	if(!is_array($data)) $data = array();
+	if(isset($data['checked']) AND (time() - $data['checked']) < 86400)
+		return isset($data['tag']) ? $data : FALSE;
+	$context = stream_context_create(array('http' => array('timeout' => 3,'header' => "User-Agent: BolProcessor\r\nAccept: application/vnd.github+json\r\n")));
+	$json = @file_get_contents("https://api.github.com/repos/csound/csound/releases/latest",FALSE,$context);
+	$release = ($json !== FALSE) ? json_decode($json,TRUE) : NULL;
+	if(is_array($release) AND isset($release['tag_name']) AND preg_match('/^v?([0-9]+(?:\.[0-9]+)*)$/',$release['tag_name'],$match)) {
+		$data = array('checked' => time(),'tag' => $match[1],'published' => $release['published_at'] ?? '','url' => $release['html_url'] ?? '');
+		}
+	else $data['checked'] = time() - 86400 + 3600; // Keep the previous answer, if any, and try again in an hour
+	@file_put_contents($cache_file,json_encode($data));
+	return isset($data['tag']) ? $data : FALSE;
+	}
+
+function csound_newer_release($info,$latest) {
+	// TRUE if the latest release of Csound is newer than the installed one
+	if($info['version'] == '') return FALSE;
+	$installed = csound_major_minor($info['version']);
+	$last = csound_major_minor($latest['tag']);
+	if(version_compare($installed,$last,'<')) return TRUE;
+	if(version_compare($installed,$last,'>')) return FALSE;
+	// Same major and minor numbers: "csound --version" doesn't show the patch number (6.18.1 displays "6.18"),
+	// so a patch release (e.g. 7.0.1) is detected by comparing the build date with the release date
+	if($info['date'] > 0 AND $latest['published'] <> '' AND ($published = strtotime($latest['published'])) !== FALSE)
+		return ($published > $info['date'] + 3 * 86400);
+	return FALSE;
+	}
+
+function csound_download_url() {
+	return "https://csound.com/download.html";
 	}
 
 function is_connected() {
@@ -6759,7 +6900,7 @@ function show_file_format_choice($type,$file_format,$url_this_page,$filename) {
 	echo "<br /><input type=\"radio\" style=\"margin-bottom:0.5em;\" name=\"new_file_format\" value=\"midi\"";
 	if($file_format == "midi") echo " checked";
 	echo ">MIDI file";
-	if(file_exists("csound_version.txt")) {
+	if(csound_ready()) {
 		echo "<br /><input type=\"radio\" style=\"margin-bottom:0.5em;\" name=\"new_file_format\" value=\"csound\"";
 		if($file_format == "csound") echo " checked";
 		echo ">Csound score";

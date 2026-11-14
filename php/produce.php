@@ -881,18 +881,18 @@ if($no_error AND $file_format == "csound") {
 			if(time() > $time_end) break;
 			}
 		if(file_exists($csound_file_link)) {
-            $this_file = "csound_version.txt";
-            if(!file_exists($this_file)) {
-				echo "<p><span class=\"red-text\">➡</span> Test of Csound was unsuccessful. May be not installed?</p>";
+            if(!csound_ready()) {
+				echo "<p><span class=\"red-text\">➡</span> Csound ".CSOUND_MIN_VERSION." or later was not found. Reload the project page to check the installation of Csound.</p>";
 				}
 			else {
 				sleep(1);
 				$time_start = time();
+                // $csound_path is absolute on all systems (2026-11-14)
                 if(windows_system())
-                    $command = "\"".$programFiles.SLASH.$csound_path.SLASH.$csound_name."\"  --wave -o ".$sound_file_link." ".$dir_csound_resources.$csound_orchestra." ".$csound_file_link;
+                    $command = "\"".$csound_path.SLASH.$csound_name."\"  --wave -o ".$sound_file_link." ".$dir_csound_resources.$csound_orchestra." ".$csound_file_link;
 		        else {
-					putenv("LD_LIBRARY_PATH");   // remove XAMPP's /opt/lampp/lib so Csound uses the system libraries
-                    $command = $csound_path.SLASH.$csound_name." --wave -o ".$sound_file_link." ".$dir_csound_resources.$csound_orchestra." ".$csound_file_link;
+					csound_environment($csound_path);   // Linux: remove XAMPP's /opt/lampp/lib so Csound uses the system libraries, or use those next to Csound
+                    $command = "\"".$csound_path.SLASH.$csound_name."\" --wave -o ".$sound_file_link." ".$dir_csound_resources.$csound_orchestra." ".$csound_file_link;
 					}
                 $trace_csound = $temp_dir_abs."trace_csound.txt";
                 $trace_csound_link = $temp_dir."trace_csound.txt";

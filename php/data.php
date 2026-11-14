@@ -1558,7 +1558,7 @@ $content = show_instruments_and_scales($dir,$objects_file,$content,$url_this_pag
 
 if(!isset($_POST['analyze_tonal'])) {
 	echo "<div style=\"float:right; padding-right:6px; padding-left:6px; background-color:transparent;\">";
-	$csound_is_responsive = check_csound();
+	$csound_is_responsive = check_csound(TRUE); // Inside the form opened at the top of the page
 	link_to_tonality();
 	echo "</div>";
 	}
