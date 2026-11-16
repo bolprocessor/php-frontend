@@ -120,13 +120,22 @@ function csoundrt_start($csound,$orchestra,&$message) {
 			return FALSE;
 			}
 		}
-	// First try with the sample rate of the orchestra. If the audio device does not accept it
-	// (e.g. 44100 Hz on a Windows device working at 48000 Hz), try again with the sample rate of the device.
-	// Csound then adjusts kr so that ksmps remains the same.
-	foreach(array('',' --use-system-sr') as $option) {
+	// Audio outputs tried in turn:
+	// - the default output, with the sample rate of the orchestra
+	// - if the device does not accept this sample rate (e.g. 44100 Hz on a Windows device working at 48000 Hz),
+	//   the default output with the sample rate of the device. Csound then adjusts kr so that ksmps remains the same.
+	// - on Linux, if the default output cannot be opened, the ALSA devices of the sound cards. The default output
+	//   goes through PulseAudio or PipeWire, which do not accept user 'daemon' of XAMPP, while this user belongs to group 'audio'.
+	$attempts = array(array('option' => "-odac",'label' => "default output"));
+	$tried = array();
+	$added_alsa = $added_sr = FALSE;
+	$log = '';
+	for($i = 0; $i < count($attempts); $i++) {
+		$attempt = $attempts[$i];
+		$tried[] = $attempt['label'];
 		@unlink($files['ping']);
 		@unlink($files['state']);
-		$command = "\"".$csound."\" -odac".$option." -d -m0 -+msg_color=0 --port=".$port." --orc \"".$orchestra_path."\"";
+		$command = "\"".$csound."\" ".$attempt['option']." -d -m0 -+msg_color=0 --port=".$port." --orc \"".$orchestra_path."\"";
 		if(stripos(PHP_OS,"WIN") === 0) {
 			// "start /B" returns at once, leaving Csound running in the background
 			pclose(popen("start \"BP3 Csound\" /B ".$command." > \"".$files['log']."\" 2>&1","r"));
@@ -137,9 +146,10 @@ function csoundrt_start($csound,$orchestra,&$message) {
 		$stopped = FALSE;
 		while(microtime(TRUE) < $end) {
 			if(csoundrt_ping(0.5)) {
+				$signature['audio'] = $attempt['label'];
 				file_put_contents($files['state'],json_encode($signature));
 				$message = $restart ? "restarted" : "started";
-				if($option <> '') $message .= " at the sample rate of the audio device, which does not accept the one of the orchestra,";
+				if($i > 0) $message .= " (audio: ".$attempt['label'].")";
 				return TRUE;
 				}
 			// No need to wait if Csound has given up
@@ -154,10 +164,34 @@ function csoundrt_start($csound,$orchestra,&$message) {
 			$message = "Csound did not respond after 10 seconds";
 			return FALSE;
 			}
-		if(!preg_match('/Failed to initialise real time audio output|Invalid sample rate/i',$log)) break; // Not a problem of sample rate
+		if(!preg_match('/Failed to initialise real time audio output|Invalid sample rate|Cannot open device/i',$log)) break; // Not a problem of audio output
+		if(!$added_sr AND $i == 0 AND preg_match('/Invalid sample rate/i',$log)) {
+			$attempts[] = array('option' => "-odac --use-system-sr",'label' => "default output at the sample rate of the device");
+			$added_sr = TRUE;
+			}
+		else if(!$added_alsa AND stripos(PHP_OS,"Linux") === 0) {
+			foreach(csoundrt_alsa_devices() as $device => $name)
+				$attempts[] = array('option' => "-+rtaudio=alsa -odac:plughw:".$device,'label' => "ALSA device plughw:".$device." (".$name.")");
+			$added_alsa = TRUE;
+			}
 		}
-	$message = "Csound could not start";
+	$message = "Csound could not open an audio output. Tried: ".implode(", ",$tried);
+	if(preg_match('/busy/i',$log)) $message .= "<br />The sound card is used by another program, perhaps PipeWire or PulseAudio playing the sound of another application. Stop it and try again.";
 	return FALSE;
+	}
+
+function csoundrt_alsa_devices($pcm_file = "/proc/asound/pcm") {
+	// Linux: ALSA playback devices, e.g. "0,0" => "ALC257 Analog", analog outputs before HDMI and DisplayPort ones
+	$first = $last = array();
+	foreach(@file($pcm_file,FILE_IGNORE_NEW_LINES) ?: array() as $line) {
+		// "00-00: ALC257 Analog : ALC257 Analog : playback 1 : capture 1"
+		if(!preg_match('/^([0-9]+)-([0-9]+): *([^:]*):.*playback/',$line,$match)) continue;
+		$device = intval($match[1]).",".intval($match[2]);
+		$name = trim($match[3]);
+		if(preg_match('/HDMI|DisplayPort|\bDP\b/i',$name)) $last[$device] = $name;
+		else $first[$device] = $name;
+		}
+	return $first + $last;
 	}
 
 function csound_errors_summary($text) {
