@@ -4314,7 +4314,7 @@ function check_csound($inside_form = FALSE) {
 		else {
 			$old = ($info['version'] <> '') ? $info['version'] : "(unknown version)";
 			echo "<p><img src=\"pict/logo_csound.png\" width=\"90px;\" style=\"vertical-align:middle;\" />&nbsp;<span class=\"red-text\">".$old."</span> is too old:<br />the Bol Processor requires <b>Csound ".CSOUND_MIN_VERSION."</b> or later.<br />";
-			echo "There is no need to uninstall this version:<br />Csound ".CSOUND_MIN_VERSION." will be found once installed.<br /><br />";
+			echo "There is no need to uninstall the old version.<br />Csound ".CSOUND_MIN_VERSION." will be found once installed.<br /><br />";
 			}
 		echo "Name: <span class=\"green-text\">path_to_csound".SLASH." </span><input type=\"text\" name=\"csound_name\" size=\"14\" style=\"background-color:CornSilk;\" value=\"".$csound_name."\"><br />";
 		echo "Path: <input type=\"text\" name=\"csound_path\" size=\"30\" style=\"background-color:CornSilk;text-align:right;\" value=\"".$csound_path."\"><span class=\"green-text\">".SLASH.$csound_name."</span>";
