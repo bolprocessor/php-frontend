@@ -9,6 +9,8 @@ $trace_link = $output = $dir = '';
 $trace_production = $show_production = FALSE;
 $file_format = '';
 $trace_csound = '';
+$csound_report = array(); // Errors reported by Csound, see csound_errors_report() (2026-11-16)
+$csound_orchestra_used = '';
 
 echo "<head>";
 echo midi_player_script('');
@@ -186,6 +188,9 @@ else {
 			case "csound":
 				$command .= " --csoundout ".$score_file;
 				break;
+			case "csoundrt": // Real-time Csound, see _csoundrt.php
+				$command .= " --csoundrt ".CSOUND_RT_PORT;
+				break;
 			case "eventlist":
 				$command .= " --eventlistout ".$eventlist_file;
 				break;
@@ -297,7 +302,7 @@ if($instruction <> "help") {
 	if($instruction == "templates") echo "👉 Creating/updating templates<br /><br />";
 	if($instruction == "enter_notes") echo "👉 Entering notes from the MIDI input device.<br /><br />Notes are displayed at the insertion point of your grammar or data.<br />The note convention is chosen in the settings file.<br /><br />👉 You can close this window when done.<br /><br />If it doesn't work, click STOP, then SHOW process, and check connected devices<br />&nbsp;&nbsp;to update the MIDI input.<br /><br />Read <a target=\"_blank\" href=\"https://bolprocessor.org/enter-notes/\">https://bolprocessor.org/enter-notes/</a> for details.<br /><br />";
 	echo "<button id=\"stopBtn\" type=\"button\" class=\"produce\" onclick=\"stopProcess();\">Click to STOP</button>";
-	if($file_format == "rtmidi" AND $instruction <> "enter_notes") {
+	if(($file_format == "rtmidi" OR $file_format == "csoundrt") AND $instruction <> "enter_notes") {
 		echo "&nbsp;<button id=\"pauseBtn\" type=\"button\" class=\"produce\" onclick=\"pauseProcess();\">Pause</button>";
 		echo "&nbsp;<button id=\"continueBtn\" type=\"button\" class=\"produce disabled\" disabled onclick=\"continueProcess();\">Continue</button>";
 		// Display the date of the performance, written by the console to the "_time" file every 200 ms
@@ -377,8 +382,50 @@ session_abort();
 while(file_exists($stopfile)) { // Probably useless because the file will be deleted when starting the console, see remove(StopfileName) in ConsoleMain.c
 	usleep(200000); // 0.2 sec
 	}
+// Real-time Csound: start the Csound server, or check that it is running with the orchestra of this project (2026-11-16)
+if($file_format == "csoundrt" AND $instruction <> "help") {
+	$this_orchestra = ($csound_orchestra <> '') ? $csound_orchestra : "0-default.orc";
+	$csoundrt_message = '';
+	if(!csound_ready())
+		$csoundrt_message = "Csound ".CSOUND_MIN_VERSION." or later was not found. Reload the project page to check the installation of Csound.";
+	else if(!file_exists($dir_csound_resources.$this_orchestra))
+		$csoundrt_message = "The orchestra file was not found: ".$dir_csound_resources.$this_orchestra;
+	else {
+		// Linux: the library path is set for Csound, then restored for the console
+		$saved_library_path = getenv("LD_LIBRARY_PATH");
+		if(!windows_system()) csound_environment($csound_path);
+		$csoundrt_ok = csoundrt_start($csound_path.SLASH.$csound_name,$dir_csound_resources.$this_orchestra,$csoundrt_status);
+		if(!windows_system()) {
+			if($saved_library_path === FALSE) putenv("LD_LIBRARY_PATH");
+			else putenv("LD_LIBRARY_PATH=".$saved_library_path);
+			}
+		if($csoundrt_ok) {
+			$csound_orchestra_used = $this_orchestra;
+			$csoundrt_log_offset = csoundrt_log_size(); // Csound's messages during this performance will be checked
+			if($csoundrt_status <> "running") echo "<p><small><b><span class=\"red-text\">Csound ➡</span></b> The real-time Csound server has been ".$csoundrt_status." with orchestra <span class=\"green-text\">".$this_orchestra."</span> on UDP port ".CSOUND_RT_PORT."</small></p>\n";
+			csoundrt_begin_performance();
+			}
+		else {
+			$csoundrt_message = $csoundrt_status;
+			$tail = csoundrt_log_tail();
+			if($tail <> '') $csoundrt_message .= "<br />Csound said:<br /><small><span class=\"green-text\">".nl2br(htmlspecialchars($tail))."</span></small>";
+			}
+		}
+	if($csoundrt_message <> '') {
+		echo "<script>[\"warning\",\"wait\"].forEach(function(id) { var el = document.getElementById(id); if(el) el.style.display = \"none\"; });</script>";
+		echo "<p><span class=\"red-text\">➡ Real-time Csound could not start:</span> ".$csoundrt_message."</p>";
+		die();
+		}
+	if(ob_get_level() > 0) ob_flush();
+	flush();
+	}
 // $command = "ASAN_OPTIONS=detect_leaks=0 ".$command; // This is for debugging
 $o = send_to_console($command);
+if($file_format == "csoundrt") {
+	csoundrt_end_performance(); // The server will quit if it is not used for a while
+	usleep(300000); // Let Csound write its last messages
+	$csound_report = csound_errors_report(csound_errors_summary(csoundrt_log_since($csoundrt_log_offset)),$csound_file,$csound_orchestra_used);
+	}
 echo "<hr style=\"border: 1px solid black;\">";
 session_reset();
 
@@ -554,6 +601,8 @@ if($no_error AND $file_format == "csound") {
 				}
 			echo "<p><small><b><span class=\"red-text\">Csound ➡</span></b> ".$command_show."</small></p>";
 			exec($command,$result_csound,$return_var);
+			$csound_orchestra_used = $csound_orchestra;
+			$csound_report = csound_errors_report(csound_errors_summary(@file_get_contents($trace_csound)),$csound_file,$csound_orchestra);
 			if($return_var <> 0) {
 				echo "<p><span class=\"red-text\">➡</span> Csound returned error code <span class=\"red-text\">‘".$return_var."’</span>.<br /><i>Maybe you are trying to use instruments that do not match</i> <span class=\"green-text\">‘".$csound_orchestra."’</span></p>";
 				}
@@ -629,6 +678,19 @@ else if($result_file <> '' AND ($handle = fopen($result_file,"w"))) {
 	fwrite($handle,"<p><b>Messages:</b></p>\n");
 	}
 
+// Csound: orchestra used, and errors showing that the instruments may not match the orchestra (2026-11-16)
+if($csound_orchestra_used <> '') {
+	$o[] = "Csound orchestra used: ".$csound_orchestra_used;
+	$n_messages = count($o);
+	}
+if(count($csound_report) > 0) {
+	// Only the first line pulses, the details are stable
+	echo "<p class=\"attention\"><span class=\"red-text\">⚠️ ".$csound_report[0]."</span></p>";
+	echo "<p><small>";
+	for($i = 1; $i < count($csound_report); $i++) echo ($i > 1 ? "<br />" : '').$csound_report[$i];
+	echo "</small></p><hr>";
+	}
+
 // Display the first and last messages, and collect the results of analysis
 $weights_file_path = '';
 $created_templates = FALSE;
@@ -647,6 +709,9 @@ if($n_messages > 0) {
 		// Show URLs and paths in small blue characters
 		if(preg_match("/https?:\/\//u",$mssg))
 			$mssg = preg_replace("/(https?:\/\/.+)$/u","<font color=#007BFF><small>$1</small></font>",$mssg);
+		else if(preg_match("/^(Csound orchestra named in this file|Csound orchestra used): /u",$mssg))
+			// Orchestra names are displayed like paths (2026-11-16)
+			$mssg = preg_replace("/^(Csound orchestra named in this file|Csound orchestra used): (.+)$/u","$1: <font color=#007BFF><small>$2</small></font>",$mssg);
 		else
 			$mssg = preg_replace(["/(C:.+)$/u","/(\.\.\/.+)$/u"],"<font color=#007BFF><small>$1</small></font>",$mssg);
 		if($mssg == null OR $mssg == "(null)") continue;

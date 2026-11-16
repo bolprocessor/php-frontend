@@ -1575,9 +1575,15 @@ if(!isset($_POST['analyze_tonal'])) {
 			echo "<input type=\"hidden\" name=\"MIDIinput_".$i."\" value=\"".$MIDIinput[$i]."\">";
 			echo "<input type=\"hidden\" name=\"MIDIinputname_".$i."\" value=\"".$MIDIinputname[$i]."\">";
 			}
-		echo "<p>Name of output file (with proper extension):<br />";
-		echo "<input type=\"text\" name=\"output_file\" size=\"25\" value=\"".$output_file."\">&nbsp;";
-		echo "</p>";
+		if($file_format == "csoundrt") {
+			echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
+			csoundrt_panel($csound_orchestra);
+			}
+		else {
+			echo "<p>Name of output file (with proper extension):<br />";
+			echo "<input type=\"text\" name=\"output_file\" size=\"25\" value=\"".$output_file."\">&nbsp;";
+			echo "</p>";
+			}
 		}
 	else {
 		echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
@@ -1649,7 +1655,7 @@ if($csound_file <> '') {
 		}
 	else {
 		$link_options .= "&csound_file=".urlencode($csound_file);
-		if($file_format == "csound" AND file_exists($dir_csound_resources.$csound_orchestra)) $link_options .= "&csound_orchestra=".urlencode($csound_orchestra);
+		if(($file_format == "csound" OR $file_format == "csoundrt") AND file_exists($dir_csound_resources.$csound_orchestra)) $link_options .= "&csound_orchestra=".urlencode($csound_orchestra);
 		}
 	}
 if($tonality_file <> '') {

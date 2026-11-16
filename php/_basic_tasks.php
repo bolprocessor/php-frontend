@@ -83,6 +83,8 @@ if(isset($_POST['csound_path_change'])) {
 
 // Csound: the Bol Processor requires CSOUND_MIN_VERSION or later, see check_csound() (2026-11-14)
 define("CSOUND_MIN_VERSION","7.0");
+// Real-time Csound: functions starting and stopping the Csound server (2026-11-16)
+require_once("_csoundrt.php");
 // $csound_path is the absolute path of the folder containing Csound on all systems
 // $programFiles is kept empty for compatibility (it used to be the "Program Files" folder on Windows)
 $programFiles = '';
@@ -4210,7 +4212,7 @@ function display_console_state() {
 		$panicfile = str_replace(SLASH,'/',$panicfile);
 		if(isset($filename) AND $filename <> "Compilation" AND $filename <> "Produce" AND  $filename <> "Bol Processor" AND $url_this_page <> "index.php") {
 			echo "<div style=\"display:flex; justify-content:flex-end; align-items:center; background-color:transparent;\">";
-			if($file_format == "rtmidi") echo "<button type=\"button\" class=\"produce\" style=\"font-size: small;\" title=\"Stop all sound production!\" onclick=\"createFile('".$panicfile."');\">PANIC!</button>";
+			if($file_format == "rtmidi" OR $file_format == "csoundrt") echo "<button type=\"button\" class=\"produce\" style=\"font-size: small;\" title=\"Stop all sound production!\" onclick=\"createFile('".$panicfile."');\">PANIC!</button>";
 			echo "&nbsp;&nbsp;";
 			echo "<div title=\"Switch on/off the light\" id=\"darkModeToggle\" class=\"myswitch\"/></div>";
 			echo "</div>\n";
@@ -6904,11 +6906,32 @@ function show_file_format_choice($type,$file_format,$url_this_page,$filename) {
 		echo "<br /><input type=\"radio\" style=\"margin-bottom:0.5em;\" name=\"new_file_format\" value=\"csound\"";
 		if($file_format == "csound") echo " checked";
 		echo ">Csound score";
+		echo "<br /><input type=\"radio\" style=\"margin-bottom:0.5em;\" name=\"new_file_format\" value=\"csoundrt\"";
+		if($file_format == "csoundrt") echo " checked";
+		echo ">Real-time Csound";
 		}
 	echo "<br /><input type=\"radio\" style=\"margin-bottom:0.5em;\" name=\"new_file_format\" value=\"eventlist\"";
 	if($file_format == "eventlist") echo " checked";
 	echo ">Event list";
 	echo "<br /><input class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topmidiports\" name=\"savethisfile\" value=\"SAVE format\">";
+	return;
+	}
+
+function csoundrt_panel($orchestra) {
+	// Displayed on project pages instead of the name of the output file, when the output is real-time Csound (2026-11-16)
+	echo "<p><b>Real-time Csound</b><br />";
+	echo "Notes are sent to Csound, which plays them<br />on the audio output of this computer.<br />";
+	if($orchestra <> '') echo "Orchestra: <span class=\"green-text\">".$orchestra."</span><br />";
+	else echo "Orchestra: <span class=\"green-text\">0-default.orc</span> (default)<br />";
+	if(!csound_ready()) echo "<span class=\"red-text\">Csound ".CSOUND_MIN_VERSION." or later is not responding.</span><br />";
+	if(csoundrt_running()) {
+		$state = csoundrt_state();
+		echo "<span id=\"csoundrt_status\">The Csound server is running";
+		if(isset($state['orchestra'])) echo " with <span class=\"green-text\">".basename($state['orchestra'])."</span>";
+		echo "&nbsp;<button type=\"button\" class=\"edit\" style=\"font-size:small;\" title=\"Csound quits by itself after ".round(CSOUND_RT_IDLE / 60)." minutes without a performance\" onclick=\"fetch('csoundrt_quit.php',{cache:'no-store'}).then(function(r) {return r.json();}).then(function(d) {document.getElementById('csoundrt_status').textContent = d.stopped ? 'The Csound server has quit.' : 'The Csound server did not quit.';});\">QUIT CSOUND</button></span>";
+		}
+	else echo "Csound will be started when you play.";
+	echo "</p>";
 	return;
 	}
 

@@ -443,8 +443,15 @@ if($file_format <> "rtmidi") {
 		echo "<input type=\"hidden\" name=\"MIDIinput_".$i."\" value=\"".$MIDIinput[$i]."\">";
 		echo "<input type=\"hidden\" name=\"MIDIinputname_".$i."\" value=\"".$MIDIinputname[$i]."\">";
 		}
-	echo "<p>Name of output file (with proper extension):<br />";
-	echo "<input type=\"text\" name=\"output_file\" size=\"25\" value=\"".$output_file."\"></p>";
+	if($file_format == "csoundrt") {
+		echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
+		$this_orchestra = ($csound_orchestra <> '') ? $csound_orchestra : $csound_default_orchestra;
+		csoundrt_panel($this_orchestra);
+		}
+	else {
+		echo "<p>Name of output file (with proper extension):<br />";
+		echo "<input type=\"text\" name=\"output_file\" size=\"25\" value=\"".$output_file."\"></p>";
+		}
 	}
 else {
 	echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
@@ -559,7 +566,7 @@ if($file_format == "eventlist") {
 	$eventlist_file = $output_file;
 	$link_produce .= "&eventlistfile=".urlencode($output.SLASH.$eventlist_file);
 	}
-if(($file_format == "rtmidi" OR $file_format == "csound" OR $file_format == "midi") AND $action == "produce-all") $output_file .= ".bpda";
+if(($file_format == "rtmidi" OR $file_format == "csoundrt" OR $file_format == "csound" OR $file_format == "midi") AND $action == "produce-all") $output_file .= ".bpda";
 /* if($file_format == "rtmidi" AND file_exists($refresh_file)) $refresh_instruction = "document.getElementById('refresh').style.display = 'inline';";
 else $refresh_instruction = ''; */
 $window_name = window_name($filename);
@@ -651,7 +658,7 @@ else echo "•&nbsp;Time is <span class=\"red-text\">".nature_of_time($nature_of
 if($non_stop_improvize > 0) {
 	if($max_items == 0) $max_items = 20;
 	echo "• <span class=\"red-text\">Non-stop improvize</span> as per <span class=\"green-text\">‘".$settings_file."’</span>";
-	if($file_format <> "rtmidi") echo ": <i>only ".$max_items." variations will be produced</i>";
+	if($file_format <> "rtmidi" AND $file_format <> "csoundrt") echo ": <i>only ".$max_items." variations will be produced</i>";
 	echo "<br />";
 	}
 if($play_each_sub > 0) {
@@ -667,7 +674,7 @@ if($C4key <> 60) {
 if($found_elsewhere AND $objects_file <> '') echo "• <span class=\"red-text\">Sound-object prototype</span> file = <span class=\"green-text\">‘".$objects_file."’</span> found in <span class=\"green-text\">‘".$alphabet_file."’</span><br />";
 if($produce_all_items == 1) {
 	echo "• <span class=\"red-text\">Produce all items</span> is set ON by <span class=\"green-text\">‘".$settings_file."’</span>";
-	if($file_format <> "rtmidi") echo ": <i>only ".$max_items." variations will be produced</i>";
+	if($file_format <> "rtmidi" AND $file_format <> "csoundrt") echo ": <i>only ".$max_items." variations will be produced</i>";
 	echo "<br />";
 	}
 else if($show_production == 1) echo "• <span class=\"red-text\">Show production</span> is set ON by <span class=\"green-text\">‘".$settings_file."’</span><br />";
