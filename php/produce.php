@@ -1,14 +1,14 @@
 <?php
 require_once("_basic_tasks.php");
 $url_this_page = "produce.php";
-if(isset($_GET['title'])) $this_title = urldecode($_GET['title']);
-else $this_title = '';
+$this_title = urldecode($_GET['title'] ?? '');
 
 $learn = $anal = FALSE;
 $failed_parsing = $failed_template = $success_parsing = 0;
 $trace_link = $output = $dir = '';
 $trace_production = $show_production = FALSE;
 $file_format = '';
+$trace_csound = '';
 
 echo "<head>";
 echo midi_player_script('');
@@ -19,20 +19,15 @@ echo "</head>";
 echo "<body>\n";
 set_time_limit(0);
 $time_begin = time();
-if(windows_system()) {
-    if(isset($_GET['keepalive'])) {
-        echo " "; // Send a space to keep connection alive
-        flush();
-        }
-    }
+if(windows_system() AND isset($_GET['keepalive'])) {
+	echo " "; // Send a space to keep connection alive
+	flush();
+	}
 
 $application_path = $bp_application_path;
 if(!file_exists($bp_application_path.$console)) {
 	echo "<p style=\"text-align:center; width:90%;\">The console application (file “bp”) is not working, or missing, or misplaced…</p>";
-	$source = $application_path."source";
-	if(file_exists($source)) {
-	//	$link = "compile.php";
-		$link = "compile.php?keepalive=1";
+	if(file_exists($application_path."source")) {
 		echo "<p style=\"text-align:center; width:90%;\">The source files of BP3 have been found. You can (re)compile the console.<br />";
 		if(!check_gcc())
 			if(windows_system()) echo "👉&nbsp;&nbsp;However, ‘gcc’ is not responding.<br />You first need to <a class=\"linkdotted\" target=\"_blank\" href=\"https://bolprocessor.org/install-mingw/\">install and set up MinGW</a>.";
@@ -47,323 +42,177 @@ if(!file_exists($bp_application_path.$console)) {
 $bad_image = FALSE;
 
 if(isset($_POST['ignore'])) {
-	if(isset($_POST['running_trace'])) {
-		$running_trace = $_POST['running_trace'];
-		if(file_exists($running_trace)) {
-			@unlink($running_trace);
-			echo "<p>Now you can run this project.</p>";
-			}
+	if(isset($_POST['running_trace']) AND file_exists($_POST['running_trace'])) {
+		@unlink($_POST['running_trace']);
+		echo "<p>Now you can run this project.</p>";
 		}
 	echo "<p style=\"text-align:center; width:90%;\"><big>👉&nbsp;&nbsp;<a href=\"\" onclick=\"window.close();\">Close this page</a></big></p><p>You can also click PANIC to stop concurrent processes…</p>";
 	echo "</div>";
 	die();
 	}
 
-if(isset($_GET['startup'])) $startup = $_GET['startup'];
-else $startup = '';
+$startup = $_GET['startup'] ?? '';
+$instruction = $_GET['instruction'] ?? '';
+if($instruction == '') die_with_close_link("ERROR: No instruction has been sent");
 
-$is_minimised = isset($_GET['minimised']);
+$here = isset($_GET['here']) ? urldecode($_GET['here']) : '???';
+$csound_file = $_GET['csound_file'] ?? '';
+$score_file = $_GET['score'] ?? '';
+$midi_file = $_GET['midifile'] ?? '';
+$eventlist_file = $_GET['eventlistfile'] ?? '';
+$tonality_file = $_GET['tonality_file'] ?? '';
+$item = $_GET['item'] ?? 0;
 
-if(isset($_GET['instruction'])) $instruction = $_GET['instruction'];
-else $instruction = '';
-// echo "instruction = ".$instruction."<br />";
-if($instruction == '') {
-	echo "ERROR: No instruction has been sent";
-	echo "<p style=\"text-align:center; width:90%;\"><big>👉&nbsp;&nbsp;<a href=\"\" onclick=\"window.close();\">Close this page</a></big></p>";
-echo "</div>";
-	die();
-	}
-
-if(isset($_GET['here'])) $here = urldecode($_GET['here']);
-else $here = '???';
-if(isset($_GET['csound_file'])) $csound_file = $_GET['csound_file'];
-else $csound_file = '';
-if(isset($_GET['score'])) $score_file = $_GET['score'];
-else $score_file = '';
-if(isset($_GET['midifile'])) $midi_file = $_GET['midifile'];
-else $midi_file = '';
-if(isset($_GET['eventlistfile'])) $eventlist_file = $_GET['eventlistfile'];
-else $eventlist_file = '';
-if(isset($_GET['tonality_file'])) $tonality_file = $_GET['tonality_file'];
-else $tonality_file = '';
-if(isset($_GET['item'])) $item = $_GET['item'];
-else $item = 0;
-
-// ob_start();
-@unlink($temp_dir."trace_notes_txt");
+$trace_notes_file = $temp_dir."trace_notes_txt";
+@unlink($trace_notes_file);
 $check_command_line = FALSE;
-$sound_file_link = $result_file = $tracefile = '';
+$result_file = $tracefile = '';
 $project_fullname = '';
-// echo "temp_dir = ".$temp_dir."<br />";
 if($instruction == "help") {
 	$command = $application_path.$console." --help";
 	}
 else {
-	if(isset($_GET['grammar'])) $project_fullname = $grammar_path = urldecode($_GET['grammar']);
-	else $grammar_path = '';
+	$grammar_path = urldecode($_GET['grammar'] ?? '');
+	if(isset($_GET['grammar'])) $project_fullname = $grammar_path;
 	if(isset($_GET['startstring'])) {
 		$data_path = urldecode($_GET['startstring']);
 		$instruction = "produce";
 		}
 	else {
-		if(isset($_GET['data'])) $project_fullname = $data_path = urldecode($_GET['data']);
-		else $data_path = '';
+		$data_path = urldecode($_GET['data'] ?? '');
+		if(isset($_GET['data'])) $project_fullname = $data_path;
 		}
-	if($instruction <> "enter_notes" AND $grammar_path == '' AND $data_path == '') {
-		echo "Link to data and/or grammar is missing";
-		echo "<p style=\"text-align:center; width:90%;\"><big>👉&nbsp;&nbsp;<a href=\"\" onclick=\"window.close();\">Close this page</a></big></p>";
-		echo "</div>";
-		die();
-		}
+	if($instruction <> "enter_notes" AND $grammar_path == '' AND $data_path == '')
+		die_with_close_link("Link to data and/or grammar is missing");
 	if($instruction == "create_grammar") {
-		$create_grammar = create_grammar($data_path);
-		echo $create_grammar;
+		echo create_grammar($data_path);
 		die();
 		}
-	if(isset($_GET['settings'])) $settings_path = urldecode($_GET['settings']);
-	else $settings_path = '';
-	if(isset($_GET['objects'])) $objects_path = $_GET['objects'];
-	else $objects_path = '';
-	if(isset($_GET['weights'])) $weights_path = $_GET['weights'];
-	else $weights_path = '';
-	if(isset($_GET['note_convention'])) $note_convention = $_GET['note_convention'];
-	else $note_convention = '';
-	if(isset($_GET['alphabet'])) $alphabet_path = urldecode($_GET['alphabet']);
-	else $alphabet_path = '';
-	if(isset($_GET['format'])) $file_format = $_GET['format'];
-	else $file_format = '';
+	$settings_path = urldecode($_GET['settings'] ?? '');
+	$objects_path = $_GET['objects'] ?? '';
+	$weights_path = $_GET['weights'] ?? '';
+	$note_convention = $_GET['note_convention'] ?? '';
+	$alphabet_path = urldecode($_GET['alphabet'] ?? '');
 	if($instruction == "enter_notes") $file_format = "rtmidi";
-	if(isset($_GET['mode'])) $mode = $_GET['mode'];
-	else $mode = '';
-	$output = '';
-	if(($instruction == "produce-all" OR $instruction == "templates" OR $instruction == "analyze" OR $file_format <> '') AND isset($_GET['output'])) {
-		$output = urldecode($_GET['output']);
-	//	echo "@output = ".$output."<br />";
+	else $file_format = $_GET['format'] ?? '';
+	$mode = $_GET['mode'] ?? '';
+	$output = urldecode($_GET['output'] ?? '');
+	if($instruction == "analyze" AND $grammar_path <> '') {
+		$learn = ($mode == "LEARN");
+		$anal = ($mode == "ANAL");
 		}
-	if(isset($_GET['output'])) $output = urldecode($_GET['output']);
-	if($instruction == "analyze" AND $mode == "LEARN" AND $grammar_path <> '') $learn = TRUE;
-	if($instruction == "analyze" AND $mode == "ANAL" AND $grammar_path <> '') $anal = TRUE;
-	if($instruction == "create_set" AND isset($_GET['output']))
-		$output = urldecode($_GET['output']);
-	if(isset($_GET['show_production'])) $show_production = TRUE;
-	else $show_production = FALSE;
-	if(isset($_GET['trace_production'])) $trace_production = TRUE;
-	else $trace_production = FALSE;
-	
-	$new_random_seed =  FALSE;
-	if(isset($_GET['random_seed'])) {
-		$random_seed = $_GET['random_seed'];
-		$new_random_seed = TRUE;
-		}
-	if(isset($_GET['test'])) $check_command_line = TRUE;
+	$show_production = isset($_GET['show_production']);
+	$trace_production = isset($_GET['trace_production']);
+	$check_command_line = isset($_GET['test']);
 
+	$training_set_folder = '';
 	if($instruction == "create_set") {
 		$training_set_folder = $midi_file;
-	//	$unitsfilename = preg_replace("/.+\/([0-9]+_units\.txt)/","$1",$data_path);
-		$unitsfilename = "all_units.txt";
 		if(!file_exists($training_set_folder)) mkdir($training_set_folder,0777,true);
-		copy($data_path,$training_set_folder.SLASH.$unitsfilename); // Copy "0_units.txt" and the like
+		copy($data_path,$training_set_folder.SLASH."all_units.txt");
 		}
-	else $training_set_folder = '';
 
-	if($instruction == "produce" OR $instruction == "produce-all" OR $instruction == "play" OR $instruction == "play-all" OR $instruction == "create_set" OR $instruction == "expand") {
+	if(in_array($instruction,["produce","produce-all","play","play-all","create_set","expand"])) {
 		echo "<script>";
 		echo "var sometext = \"<span id=warning><i>Process might take more than ".$max_sleep_time_after_bp_command." seconds.<br />To reduce computation time, you can increase </i>‘<b>Quantization</b>’<i> in the settings</span>\";";
 		echo "document.body.innerHTML = sometext";
 		echo "</script>";
 		}
-	$grammar_name = '';
-	$data_name = '';
+	$grammar_name = $data_name = '';
 	if($grammar_path <> '') {
 		$table = explode(SLASH,$grammar_path);
-		$grammar_name = $table[count($table) - 1];
+		$grammar_name = end($table);
 		$dir = str_replace($grammar_name,'',$grammar_path);
 		}
-		
 	if($data_path <> '') {
 		$table = explode(SLASH,$data_path);
-		$data_name = $table[count($table) - 1];	
+		$data_name = end($table);
 		$dir = str_replace($data_name,'',$here);
 		}
-	
-	if(isset($_GET['csound_orchestra'])) {
-		$csound_orchestra = $_GET['csound_orchestra'];
-		if($csound_orchestra <> '' AND file_exists($dir.$csound_orchestra)) {
-			rename($dir.$csound_orchestra,$dir_csound_resources.$csound_orchestra);
-			sleep(1);
-			}
+
+	$csound_orchestra = $_GET['csound_orchestra'] ?? '';
+	if($csound_orchestra <> '' AND file_exists($dir.$csound_orchestra)) {
+		rename($dir.$csound_orchestra,$dir_csound_resources.$csound_orchestra);
+		sleep(1);
 		}
-	else $csound_orchestra = '';
-	
+
 	$grammar_name = str_replace(" ","_",$grammar_name);
 	$data_name = str_replace(" ","_",$data_name);
-//	echo "output = ".$output."<br />";
 	$project_name = preg_replace("/\.[a-z]+$/u",'',$output);
-	if($instruction == "play" OR $instruction == "play-all" OR $instruction == "analyze" OR $instruction == "create_set" OR $instruction == "templates")
+	if(in_array($instruction,["play","play-all","analyze","create_set","templates"]))
 		$result_file = $project_name."_".$instruction."-result.html";
 	else $result_file = $project_name."-result.html";
-    $result_file = str_replace(SLASH,'/',$result_file);
-//	echo "project_name = ".$project_name."<br />";
-//	echo "result_file = ".$result_file."<br />";
+	$result_file = str_replace(SLASH,'/',$result_file);
+
+	// Reduce the project path to the name of the project, e.g. "-gr.Mozart"
 	if($instruction == "create_set" OR $instruction == "enter_notes") $project_fullname = $this_title;
 	$project_fullname = str_replace($temp_dir,'',$project_fullname);
-    $project_fullname = str_replace(SLASH,'/',$project_fullname);
-	$project_fullname = preg_replace("/\/[0-9]+\.bpda/u",'',$project_fullname);
-	$project_fullname = preg_replace("/\/[0-9]+-chunk\.bpda/u",'',$project_fullname);
+	$project_fullname = str_replace(SLASH,'/',$project_fullname);
+	$project_fullname = preg_replace("/\/[0-9]+(-chunk)?\.bpda/u",'',$project_fullname);
 	$project_fullname = str_replace("_".my_session_id()."_temp",'',$project_fullname);
 	$table = explode('/',$project_fullname);
 	$project_fullname = end($table);
-    // echo "<br />project_fullname = ".$project_fullname."<br />";
-    $trace_link = $temp_dir."trace_".my_session_id()."_".$project_fullname.".txt";
-	$tracefile = $temp_dir."trace_".my_session_id()."_".$project_fullname.".txt";
-    $trace_link = str_replace(SLASH,'/',$trace_link);
-    $tracefile = str_replace(SLASH,'/',$tracefile);
-//	echo "<p>Trace link = ".$trace_link."</p>";
+
+	$tracefile = $trace_link = str_replace(SLASH,'/',$temp_dir."trace_".my_session_id()."_".$project_fullname.".txt");
 	$midiport = str_replace(".txt","_midiport",$tracefile);
-//	echo "<p>midiport file = ".$midiport."</p>";
 	if($file_format == "rtmidi" AND !file_exists($midiport)) {
-		$file1 = $midiport;
-		$file2 = $dir_midi_resources.$project_fullname."_midiport";
-	//	echo "<p>file2 = ".$file2."</p>";
-		if(file_exists($file2)) copy($file2,$file1);
-		else {
-			echo "<p style=\"text-align:center;\"><big>You first need to SAVE MIDI ports</big></p>";
-			echo "<p style=\"text-align:center; width:90%;\"><big>👉&nbsp;&nbsp;<a href=\"\" onclick=\"window.close();\">Close this page</a></big></p>";
-			echo "</div>";
-			die();
-			}
+		$saved_midiport = $dir_midi_resources.$project_fullname."_midiport";
+		if(!file_exists($saved_midiport))
+			die_with_close_link("<p style=\"text-align:center;\"><big>You first need to SAVE MIDI ports</big></p>");
+		copy($saved_midiport,$midiport);
 		}
-	$midifile = $project_name.".mid";
-	if(file_exists($midifile)) {
-	//	echo "<p>midifile = ".$midifile."</p>";
-		@unlink($midifile);
-		}
-	$htmlfile = $project_name.".html";
-	if(file_exists($htmlfile)) {
-	//	echo "<p>htmlfile = ".$htmlfile."</p>";
-		@unlink($htmlfile);
-		}
-
-	$file_path = $temp_dir.$tracelive_folder.SLASH."_saved_grammar";
-	@unlink($file_path);
-	$file_path = $temp_dir.$tracelive_folder.SLASH."_saved_alphabet";
-	@unlink($file_path);
-	$file_path = $temp_dir.$tracelive_folder.SLASH."_saved_settings";
-	@unlink($file_path);
-	$file_path = $temp_dir.$tracelive_folder.SLASH."_sync_grammar";
-	@unlink($file_path);
-
-	$time_start = time();
-	$time_end = $time_start + 3;
-/*	while(TRUE) {
-		if(!file_exists($output) AND !file_exists($tracefile) AND !file_exists($result_file)) break;
-		if(time() > $time_end) break;
-		sleep(1);
-		} */
-//	@unlink($result_file);
+	@unlink($project_name.".mid");
+	@unlink($project_name.".html");
+	foreach(["_saved_grammar","_saved_alphabet","_saved_settings","_sync_grammar"] as $saved_file)
+		@unlink($temp_dir.$tracelive_folder.SLASH.$saved_file);
 	if($output <> '') @unlink($output);
-	@unlink($trace_csound);
-	$trace_csound = '';
-	
+
 	$command = $application_path.$console." ".$instruction;
-
-	// echo "<p>command = ".$command."</p>";
-	
-	if($grammar_path <> '') {
-		$thisgrammar = $grammar_path;
-		if(is_integer(strpos($thisgrammar,' ')))
-			$thisgrammar = '"'.$thisgrammar.'"';
-		}
-	
-	if($data_path <> '') {
-		$thisdata = $data_path;
-		if(is_integer(strpos($thisdata,' ')))
-			$thisdata = '"'.$thisdata.'"';
-		}
-	
-	if($settings_path <> '') {
-		$thissettings = $settings_path;
-		if(is_integer(strpos($thissettings,' ')))
-			$thissettings = '"'.$thissettings.'"';
-		}
-	if($weights_path <> '') {
-		$thisweights = $weights_path;
-		if(is_integer(strpos($thisweights,' ')))
-			$thisweights = '"'.$thisweights.'"';
-		}
-
-
-	$thisalphabet = $alphabet_path;
-	if(is_integer(strpos($thisalphabet,' '))) $thisalphabet = '"'.$thisalphabet.'"';
-		
-	$thisobject = $objects_path;
-	if(is_integer(strpos($thisobject,' '))) $thisobject = '"'.$thisobject.'"';
-	
-	if(is_integer(strpos($output,' '))) $output = '"'.$output.'"';
-		
-	if($settings_path <> '') $command .= " -se ".$thissettings;
-	if($data_path <> '') $command .= " -da ".$thisdata;
-	if($grammar_path <> '') $command .= " -gr ".$thisgrammar;
-	if($alphabet_path <> '') $command .= " -al ".$thisalphabet;
-	if($weights_path <> '') $command .= " -wg ".$thisweights;
-	if($objects_path <> '') $command .= " -so ".$thisobject;
-
+	$input_files = ["-se" => $settings_path, "-da" => $data_path, "-gr" => $grammar_path, "-al" => $alphabet_path, "-wg" => $weights_path, "-so" => $objects_path];
+	foreach($input_files as $option => $path)
+		if($path <> '') $command .= " ".$option." ".quote_if_spaces($path);
 	if($note_convention <> '') $command .= " --".$note_convention;
 	if($csound_file <> '') $command .= " -cs ".$dir_csound_resources.$csound_file;
 	if($tonality_file <> '') $command .= " -to ".$dir_tonality_resources.$tonality_file;
-	
 	if($startup <> '') $command .= " --start ".$startup;
-	if($instruction == "produce" OR $instruction == "produce-all" OR $instruction == "play" OR $instruction == "play-all" OR $instruction == "expand" OR $instruction == "create_set" OR $instruction == "enter_notes") {
+	$plays_or_produces = in_array($instruction,["produce","produce-all","play","play-all","expand","create_set","enter_notes"]);
+	if($plays_or_produces) {
 		switch($file_format) {
-			case "data":
-			//	$command .= " -d -o ".$output;
-				$command .= " -o ".$output;
+			case "data": // "-o" is added below
 				break;
 			case "midi":
-			//	$command .= " -d --midiout ".$output;
 				$command .= " --midiout ".$midi_file;
-				if($instruction == "produce-all") $command .= " -o ".$output;
 				break;
 			case "csound":
-			//	$command .= " -d --csoundout ".$output;
 				$command .= " --csoundout ".$score_file;
-				if($instruction == "produce-all") $command .= " -o ".$output;
 				break;
 			case "eventlist":
-			//	$command .= " -d --eventlistout ".$output;
 				$command .= " --eventlistout ".$eventlist_file;
-			//	if($instruction == "produce-all") $command .= " -o ".$output;
 				break;
 			default:
 				$command .= " --rtmidi"; // We use the default destination
-				if($instruction == "produce-all") $command .= " -o ".$output;
-		//		$command .= " -d --rtmidi"; // We use the default destination
 				break;
 			}
 		}
-	if($instruction == "produce-all" OR $instruction == "templates") $command .= " -o ".$output;
-	if($tracefile <> '') $command .= " --traceout ".$tracefile;
+	if($instruction == "produce-all" OR $instruction == "templates" OR ($plays_or_produces AND $file_format == "data"))
+		$command .= " -o ".quote_if_spaces($output);
+	$command .= " --traceout ".$tracefile;
 	if($show_production) $command .= " --show-production";
 	if($trace_production) $command .= " --trace-production";
-	if($new_random_seed) $command .= " --seed ".$random_seed;
+	if(isset($_GET['random_seed'])) $command .= " --seed ".$_GET['random_seed'];
 	}
 
-$stopfile = $temp_dir_abs."trace_".my_session_id()."_".$project_fullname."_stop";
-
-$donefile = $temp_dir_abs."trace_".my_session_id()."_".$project_fullname."_done";
-// This one is created by the console to tell its job is over
-
-$stopfile = str_replace(SLASH,'/',$stopfile);
+$trace_prefix = $temp_dir_abs."trace_".my_session_id()."_".$project_fullname;
+// Example: trace_dnh20dhdkjj9nd1ehr9kj360ec_-gr.Mozart.txt
+$stopfile = str_replace(SLASH,'/',$trace_prefix."_stop");
+$donefile = $trace_prefix."_done"; // Created by the console to tell its job is over
 $pausefile = str_replace(SLASH,'/',$pausefile);
 $continuefile = str_replace(SLASH,'/',$continuefile);
-
 @unlink($pausefile); @unlink($continuefile);
-// @unlink($stopfile);
 
 if($instruction <> "help") {
 	// Check that the same project is not already running in the same sesssion
-	$running_trace = $temp_dir_abs."trace_".my_session_id()."_".$project_fullname.".txt";
-	// Example: trace_dnh20dhdkjj9nd1ehr9kj360ec_-gr.Mozart.txt
+	$running_trace = $trace_prefix.".txt";
 	if(!windows_system() AND file_exists($running_trace)) {
 		echo "<form  id=\"topchanges\" method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		echo "<p style=\"color:red;\">Project “".$project_fullname."” is already running in the same session.</p>";
@@ -373,37 +222,11 @@ if($instruction <> "help") {
 		echo "</form>";
 		die();
 		}
-	// Delete old images
-	$dircontent = scandir($temp_dir_abs);
-	foreach($dircontent as $thisfile) {
-		$time_saved = filemtime($temp_dir_abs.$thisfile);
-	//	echo $thisfile." ➡ ".date('Y-m-d H\hi',$time_saved)."<br />";
-		$table = explode('_',$thisfile);
-		if($table[0] <> "trace") continue;
-		if(!isset($table[2]) OR $table[1] <> my_session_id()) continue;
-		$found = FALSE; $this_name = '';
-		for($i = 2; $i < (count($table) - 1); $i++) {
-			if($table[$i] == "image" AND is_integer(strpos($thisfile,$project_fullname))) {
-				$this_name = $table[$i - 1];
-				$found = TRUE;
-				break;
-				}
-			}
-		if(!$found) continue;
-		// Delete this image to be replaced with the current one
-		$rep = @unlink($temp_dir_abs.$thisfile);
-//		echo "deleted<br />"; 
-		// Make sure deletion is complete before launching the command
-		$time_start = time();
-		$time_end = $time_start + 5;
-		if($rep) while(TRUE) {
-			if(!file_exists($temp_dir_abs.$thisfile)) break;
-			if(time() > $time_end) break;
-			sleep(1);
-			}
+	// Delete old images, to be replaced with the current ones, and make sure deletion is complete before launching the command
+	foreach(scandir($temp_dir_abs) as $thisfile) {
+		if(trace_image_suffix($thisfile,$project_fullname) === FALSE) continue;
+		if(@unlink($temp_dir_abs.$thisfile)) wait_while_exists($temp_dir_abs.$thisfile,5);
 		}
-//	echo "<p>running_trace = ".$running_trace."</p>";
-	$trace_notes_file = $temp_dir."trace_notes_txt";
 	echo "<script>
 	window.addEventListener('pagehide', function () {
 		navigator.sendBeacon(
@@ -427,47 +250,21 @@ if($check_command_line) {
 	echo "<p><span class=\"red-text\">➡</span> ".$command."</p>";
 	die();
 	}
-$command_show = $command;
-if(windows_system()) {
-    $command_show = $command = windows_command($command);
-    $command_show = str_replace('^','',$command_show);
-    }
-$command_show = str_replace("[","\[",$command_show);
-$command_show = str_replace("]","\]",$command_show);
-
+// send_to_console() converts the command for Windows, so it is only converted here for display
+if(windows_system()) $command_show = str_replace('^','',windows_command($command));
+else $command_show = $command;
+$command_show = str_replace(["[","]"],["\[","\]"],$command_show);
 echo "<p><small><b><span class=\"red-text\">BP3 (for geeks) ➡</span></b> ".$command_show."</small></p>\n";
 
 if($instruction <> "help") {
-	if($tracefile <> '') @unlink($tracefile);
+	@unlink($tracefile);
 	if(file_exists($dir_midi_resources."midiport_".$project_fullname))
 		// We need to use midisetup of this project
 		copy($dir_midi_resources."midiport_".$project_fullname, $dir_midi_resources."last_midiport");
-	if($csound_file <> '') {
-		$lock_file = $dir_csound_resources.$csound_file."_lock";
-	//	echo "Csound instruments lock_file = ".$lock_file."<br />";
-		$time_start = time();
-		$time_end = $time_start + 5;
-		while(TRUE) {
-			if(!file_exists($lock_file)) break;
-			if(time() > $time_end) {
-				echo "<p id=\"cswait\"><span class=\"red-text\">Maximum time (5 seconds) spent waiting for the Csound resource file to be unlocked:</span> <span class=\"green-text\">".$dir_csound_resources.$csound_file."</span></p>";
-				break;
-				}
-			}
-		}
-	if($objects_path <> '') {
-		$lock_file = $objects_path."_lock";
-	//	echo "Sound-object prototypes lock_file = ".$lock_file."<br />";
-		$time_start = time();
-		$time_end = $time_start + 5;
-		while(TRUE) {
-			if(!file_exists($lock_file)) break;
-			if(time() > $time_end) {
-				echo "<p id=\"miwait\"><span class=\"red-text\">Maximum time (5 seconds) spent waiting for the sound-object prototypes file to be unlocked:</span> <span class=\"green-text\">".$objects_path."</span></p>";
-				break;
-				}
-			}
-		}
+	if($csound_file <> '' AND !wait_while_exists($dir_csound_resources.$csound_file."_lock",5))
+		echo "<p id=\"cswait\"><span class=\"red-text\">Maximum time (5 seconds) spent waiting for the Csound resource file to be unlocked:</span> <span class=\"green-text\">".$dir_csound_resources.$csound_file."</span></p>";
+	if($objects_path <> '' AND !wait_while_exists($objects_path."_lock",5))
+		echo "<p id=\"miwait\"><span class=\"red-text\">Maximum time (5 seconds) spent waiting for the sound-object prototypes file to be unlocked:</span> <span class=\"green-text\">".$objects_path."</span></p>";
 
 	echo "<script>
 	function setButtonState(button, disabled) {
@@ -503,8 +300,6 @@ if($instruction <> "help") {
 	if($file_format == "rtmidi" AND $instruction <> "enter_notes") {
 		echo "&nbsp;<button id=\"pauseBtn\" type=\"button\" class=\"produce\" onclick=\"pauseProcess();\">Pause</button>";
 		echo "&nbsp;<button id=\"continueBtn\" type=\"button\" class=\"produce disabled\" disabled onclick=\"continueProcess();\">Continue</button>";
-		}
-	if($file_format == "rtmidi" AND $instruction <> "enter_notes" AND $tracefile <> '') {
 		// Display the date of the performance, written by the console to the "_time" file every 200 ms
 		// The console removes from the trace path the characters not accepted by remove_spaces()
 		$timefile = preg_replace('/[^A-Za-z0-9():_.,-]/','',"trace_".my_session_id()."_".$project_fullname."_time");
@@ -546,41 +341,34 @@ echo str_repeat(' ', 10240);  // send extra spaces to fill browser buffer, usefu
 if(ob_get_level() > 0) ob_flush();
 flush();
 
-if(isset($data_path) AND $data_path <> '') {
-	$content = @file_get_contents($data_path);
-	if($content <> FALSE) {
-		if($instruction == "play" OR $instruction == "produce") echo "<p><b>Playing";
-		if($instruction == "play-all") echo "<p><b>Playing chunks";
-		if($instruction == "expand") echo "<p><b>Expanding";
-		if($instruction == "analyze" AND $learn) echo "<p><b>Analysing and learning weights from all items in <span class=\"green-text\">‘".$data_name."’</span>";
-		else if($instruction == "analyze" AND $anal) echo "<p><b>Analysing all items in <span class=\"green-text\">‘".$data_name."’</span>";
-		else if($instruction == "analyze") echo "<p><b>Analysing";
-		if($instruction == "create_set") echo "<p><b>Creating AI training set</b>";
-		else if(!$learn AND !$anal) {
-			if($item <> 0) echo " #".$item;
-			else echo ":";
-			echo "</b></p>";
-			echo "<p style=\"overflow-wrap:break-word;\"><b>";
-			$table = explode(chr(10),$content);
-			for($i = $k = 0; $i < count($table); $i++) {
-				if($k > 800) {
-					echo "… … …<br />";
-					break;
-					}
-				$line = trim($table[$i]);
-				$line = recode_tags($line);
-				$line_show = $line;
-				if($line == '') continue;
-				$length = strlen($line);
-				if($length > 200)
-					$line_show = substr($line,0,50)."<br />&nbsp;&nbsp;... ... ...<br />".substr($line,-100,100);
-				if($line_show[0] == '[') $line_show = "<span class=\"turquoise-text\">".$line_show;
-				$line_show = preg_replace("/\] /","]</span><br /><br />",$line_show,1);
-				echo "<span class=\"green-text\">".$line_show."</span><br />";
-				$k += strlen($line_show);
+// Display the data being played
+if(isset($data_path) AND $data_path <> '' AND ($content = @file_get_contents($data_path)) <> FALSE) {
+	if($instruction == "play" OR $instruction == "produce") echo "<p><b>Playing";
+	if($instruction == "play-all") echo "<p><b>Playing chunks";
+	if($instruction == "expand") echo "<p><b>Expanding";
+	if($instruction == "analyze" AND $learn) echo "<p><b>Analysing and learning weights from all items in <span class=\"green-text\">‘".$data_name."’</span>";
+	else if($instruction == "analyze" AND $anal) echo "<p><b>Analysing all items in <span class=\"green-text\">‘".$data_name."’</span>";
+	else if($instruction == "analyze") echo "<p><b>Analysing";
+	if($instruction == "create_set") echo "<p><b>Creating AI training set</b>";
+	else if(!$learn AND !$anal) {
+		echo ($item <> 0) ? " #".$item : ":";
+		echo "</b></p>";
+		echo "<p style=\"overflow-wrap:break-word;\"><b>";
+		$k = 0;
+		foreach(explode(chr(10),$content) as $line) {
+			if($k > 800) {
+				echo "… … …<br />";
+				break;
 				}
-			echo "</b></p>";
+			$line = recode_tags(trim($line));
+			if($line == '') continue;
+			if(strlen($line) > 200) $line = substr($line,0,50)."<br />&nbsp;&nbsp;... ... ...<br />".substr($line,-100,100);
+			if($line[0] == '[') $line = "<span class=\"turquoise-text\">".$line;
+			$line = preg_replace("/\] /","]</span><br /><br />",$line,1);
+			echo "<span class=\"green-text\">".$line."</span><br />";
+			$k += strlen($line);
 			}
+		echo "</b></p>";
 		}
 	}
 @unlink($stopfile);
@@ -600,76 +388,35 @@ echo "<link rel=\"stylesheet\" href=\"skin".$skin.".css\" />\n";
 
 $n_messages = count($o);
 $no_error = FALSE;
-for($i = 0; $i < $n_messages; $i++) {
-	$mssg = $o[$i];
-	if(is_integer($pos=strpos($mssg,"Errors: 0")) AND $pos == 0) $no_error = TRUE;
+foreach($o as $mssg) {
+	if(str_starts_with($mssg,"Errors: 0")) {
+		$no_error = TRUE;
+		break;
+		}
 	}
 
 if($instruction == "help") {
-	for($i=0; $i < $n_messages; $i++) {
-		$mssg = $o[$i];
-		$mssg = clean_up_encoding(FALSE,TRUE,$mssg);
-		echo $mssg."<br />";
-		}
+	foreach($o as $mssg) echo clean_up_encoding(FALSE,TRUE,$mssg)."<br />";
 	die();
 	}
 
-$last_warning = $time_start = time();
-$time_end = $time_start + $max_sleep_time_after_bp_command;
-// echo "donefile = ".$donefile."<br />";
-/*	echo "<p id=\"donestatus\">Waiting for ‘done’ file…</p>";
-$dots = 0;
-while(TRUE) {
-	if(file_exists($donefile)) break;
+$time_end = time() + $max_sleep_time_after_bp_command;
+while(!file_exists($donefile)) {
 	if(time() > $time_end) {
 		echo "<p><span class=\"red-text\">Maximum time (".$max_sleep_time_after_bp_command." seconds) spent waiting for the 'done.txt' file… The process is incomplete!</span></p>";
 		break;
 		}
 	sleep(1);
-	$time_done = time() - $last_warning;
-	if($time_done > 1) {
-		if($dots == 0) echo "<br /><br />Waiting ";
-		else echo ".";
-		$last_warning = time();
-		$dots++;
-		}
-	}
-if($dots > 0) echo "<br /><br />"; */
-
-$dots = 0;
-while(TRUE) {
-	if(file_exists($donefile) AND file_exists($tracefile)) break;
-	if(file_exists($donefile)) break;
-	if(time() > $time_end) {
-		echo "<p><span class=\"red-text\">Maximum time (".$max_sleep_time_after_bp_command." seconds) spent waiting for the 'done.txt' file… The process is incomplete!</span></p>";
-		break;
-		}
-	sleep(1);
-	$time_done = time() - $last_warning;
-	if($time_done > 1) {
-		$last_warning = time();
-		$dots++;
-		}
 	}
 sleep(1);
 @unlink($donefile);
-// @unlink($temp_dir."trace_notes_txt");
-$content_trace = $tracefile_html = '';
+$content_trace = '';
 if(file_exists($tracefile)) {
-    $content_trace = file_get_contents($tracefile,TRUE);
-    $tracefile_html = clean_up_file_to_html($tracefile);
-    }
+	$content_trace = file_get_contents($tracefile,TRUE);
+	clean_up_file_to_html($tracefile); // Creates the HTML file of $trace_link
+	}
 $trace_link = str_replace(".txt",".html",$trace_link);
 $output = str_replace(SLASH,'/',$output);
-$output_link = $output;
-$test = FALSE;
-if($test) echo "<br />output = ".$output."<br />";
-if($test) echo "tracefile = ".$tracefile."<br />";
-if($test) echo "tracefile_html = ".$tracefile_html."<br />";
-if($test) echo "dir = ".$dir."<br />";
-if($test) echo "trace_link = ".$trace_link."<br />";
-if($test) echo "output_link = ".$output_link."<br />";
-if($test) echo "file_format = ".$file_format."<br />";
 
 echo '<script>
 ["warning","wait","miwait","cswait"].forEach(function(id) {
@@ -678,11 +425,9 @@ echo '<script>
 });
 </script>';
 
-if(!$no_error) {
-	if(strlen($content_trace) > 4) {
-		echo "<p class=\"attention\"><big><span class=\"red-text\"><b>Errors found… </b></span> ";
-		echo "Check the <a class=\"linkdotted\" onclick=\"window.open('".nice_url($trace_link)."','errors','width=800,height=500,left=400'); return false;\" href=\"".$trace_link."\">error trace</a> file!</big></p>";
-		}
+if(!$no_error AND strlen($content_trace) > 4) {
+	echo "<p class=\"attention\"><big><span class=\"red-text\"><b>Errors found… </b></span> ";
+	echo "Check the <a class=\"linkdotted\" onclick=\"window.open('".nice_url($trace_link)."','errors','width=800,height=500,left=400'); return false;\" href=\"".$trace_link."\">error trace</a> file!</big></p>";
 	}
 echo "<p>";
 
@@ -694,68 +439,34 @@ if($output <> '') {
 		$download_link = $eventlist_file;
 		$output_dir = dirname($eventlist_file);
 		}
-	else {
-		$output_html = clean_up_file_to_html($output);
-		$output_link = $download_link = str_replace(SLASH,'/',$output_html);
-		}
-	$title_out = rand(10000,99999);
-	if($output_link <> '') echo "<span class=\"red-text\">➡</span> Read the <a class=\"linkdotted\" onclick=\"window.open('".$output_link."','".$title_out."','width=800,height=400,left=300'); return false;\" href=\"".$output_link."\">output file</a> (or <a class=\"linkdotted\" href=\"".$download_link."\" download>download it</a>)<br />";
+	else $output_link = $download_link = str_replace(SLASH,'/',clean_up_file_to_html($output));
+	if($output_link <> '') echo "<span class=\"red-text\">➡</span> Read the <a class=\"linkdotted\" onclick=\"window.open('".$output_link."','".rand(10000,99999)."','width=800,height=400,left=300'); return false;\" href=\"".$output_link."\">output file</a> (or <a class=\"linkdotted\" href=\"".$download_link."\" download>download it</a>)<br />";
 	if($file_format == "eventlist") {
 		if($objects_path <> '') {
-			$objects_link = str_replace("-so.",'',$objects_path).".json";
-			$objects_json = "proto-".basename($objects_link);
-			$objects_link = $output_dir."/".$objects_json;
-			echo "<span class=\"red-text\">➡</span> Download the <a class=\"linkdotted\" href=\"".$objects_link."\" download>".$objects_json."</a> sound-object protoypes file<br />";
+			$objects_json = "proto-".basename(str_replace("-so.",'',$objects_path)).".json";
+			echo "<span class=\"red-text\">➡</span> Download the <a class=\"linkdotted\" href=\"".$output_dir."/".$objects_json."\" download>".$objects_json."</a> sound-object protoypes file<br />";
 			}
-		$ins_files = glob($output_dir.SLASH."instr-*.json");
-		if($ins_files != FALSE AND count($ins_files) > 0) {
-			usort($ins_files, function($a, $b) {
-				return filemtime($b) <=> filemtime($a); // newest first
-				});
-			foreach($ins_files as $ins_file) {
-				if(filemtime($ins_file) < $time_begin) continue;
-				$latest_ins = $ins_file;
-				$latest_ins_name = basename($latest_ins);
-				$ins_link = $output_dir."/".$latest_ins_name;
-				echo "<span class=\"red-text\">➡</span> Download the <a class=\"linkdotted\" href=\"".$ins_link."\" download>".$latest_ins_name."</a> Csound instrument file<br />";
-				}
+		foreach(files_created_since($output_dir.SLASH."instr-*.json",$time_begin) as $ins_file) {
+			$ins_name = basename($ins_file);
+			echo "<span class=\"red-text\">➡</span> Download the <a class=\"linkdotted\" href=\"".$output_dir."/".$ins_name."\" download>".$ins_name."</a> Csound instrument file<br />";
 			}
-		$scl_files = glob($output_dir.SLASH."*.scl");
-		if($scl_files != FALSE AND count($scl_files) > 0) {
-			usort($scl_files, function($a, $b) {
-				return filemtime($b) <=> filemtime($a); // newest first
-				});
-			foreach($scl_files as $scl_file) {
-				if(filemtime($scl_file) < $time_begin) continue;
-				$latest_scl = $scl_file;
-				$latest_scl_name = basename($latest_scl);
-				$latest_kbm_name = str_replace(".scl",".kbm",$latest_scl_name);
-				$scl_link = $output_dir."/".$latest_scl_name;
-				$kbm_link = $output_dir."/".$latest_kbm_name;
-				echo "<span class=\"red-text\">➡</span> Download the <a class=\"linkdotted\" href=\"".$scl_link."\" download>".$latest_scl_name."</a> and <a class=\"linkdotted\" href=\"".$kbm_link."\" download>".$latest_kbm_name."</a> scale files<br />";
-				}
+		foreach(files_created_since($output_dir.SLASH."*.scl",$time_begin) as $scl_file) {
+			$scl_name = basename($scl_file);
+			$kbm_name = str_replace(".scl",".kbm",$scl_name);
+			echo "<span class=\"red-text\">➡</span> Download the <a class=\"linkdotted\" href=\"".$output_dir."/".$scl_name."\" download>".$scl_name."</a> and <a class=\"linkdotted\" href=\"".$output_dir."/".$kbm_name."\" download>".$kbm_name."</a> scale files<br />";
 			}
 		}
 	}
-if($trace_production OR $instruction == "templates" OR $show_production OR $tracefile <> '') {
-    if(file_exists($trace_link) AND strlen($content_trace) > 20) 
-        echo "<span class=\"red-text\">➡</span> Read the <a class=\"linkdotted\" onclick=\"window.open('".nice_url($trace_link)."','trace','width=800,height=600,left=400'); return false;\" href=\"".$trace_link."\">trace file</a> (or <a class=\"linkdotted\" href=\"".nice_url($trace_link)."\" download>download it</a>)";
-    }
+if(file_exists($trace_link) AND strlen($content_trace) > 20)
+	echo "<span class=\"red-text\">➡</span> Read the <a class=\"linkdotted\" onclick=\"window.open('".nice_url($trace_link)."','trace','width=800,height=600,left=400'); return false;\" href=\"".$trace_link."\">trace file</a> (or <a class=\"linkdotted\" href=\"".nice_url($trace_link)."\" download>download it</a>)";
 echo "</p>";
-	
-if($file_format == "midi" AND $instruction <> "create_set") {
-	$midi_file_link = $midi_file;
-	if(file_exists($midi_file_link) AND filesize($midi_file_link) > 59) {
-//		echo "midi_file_link = ".$midi_file_link."<br />";
-		if($midi_player <> "SpessaSynth" AND !is_connected() AND $file_format == "midi") {
-			echo "<p style=\"color:red;\">➡ Cannot find the MIDI file player “cdn.jsdelivr.net”… Are you connected to the Internet?</p>";
-			echo "<p><a href=\"".nice_url($midi_file_link)."\" download>Download the MIDI file</a></p>";
-			}
-		else {
-			$midi_file_link_url = nice_url($midi_file_link);
-			echo midifile_player($midi_file_link_url,'',25,0);
-			}
+
+if($file_format == "midi" AND $instruction <> "create_set" AND file_exists($midi_file) AND filesize($midi_file) > 59) {
+	if($midi_player <> "SpessaSynth" AND !is_connected()) {
+		echo "<p style=\"color:red;\">➡ Cannot find the MIDI file player “cdn.jsdelivr.net”… Are you connected to the Internet?</p>";
+		echo "<p><a href=\"".nice_url($midi_file)."\" download>Download the MIDI file</a></p>";
 		}
+	else echo midifile_player(nice_url($midi_file),'',25,0);
 	}
 
 if($instruction == "create_set" AND $training_set_folder <> '') {
@@ -765,83 +476,44 @@ if($instruction == "create_set" AND $training_set_folder <> '') {
 		echo "<hr><p><big>👉 Download <a href=\"".$training_set_folder.".zip\">zipped AI training set</a> (".(($number_zip - 1) / 4)." samples)</big></p><hr>";
 	}
 
-// Prepare images if any
+// Display links to images if any
 if($instruction <> "templates") {
-	$dircontent = scandir($temp_dir_abs);
 	echo "<table style=\"background-color:snow; color:black; padding:0px;\"><tr>";
-	$position_image = 0;
-	foreach($dircontent as $thisfile) {
-		$table = explode('_',$thisfile);
-		if($table[0] <> "trace") continue;
-		if(!isset($table[2]) OR $table[1] <> my_session_id()) continue;
-		$found = FALSE; $this_name = '';
-	//	echo "<p>".$thisfile."</p>";
-		for($i = 2; $i < (count($table) - 1); $i++) {
-			if($table[$i] == "image" AND is_integer(strpos($thisfile,$project_fullname))) {
-				$this_name = $table[$i - 1];
-				$found = TRUE;
-				break;
-				}
-			}
-		if(!$found) continue;
-	//	echo "<p>FOUND: ".$thisfile."</p>";
-		echo "<td style=\"border-radius: 6px; border: 4px solid Gold; background-color:azure; color:black;vertical-align:middle; text-align: center; padding:8px; margin:0px;\>";
-		$number_and_time = str_replace(".html",'',$table[$i + 1]);
-		$table_number = explode('-',$number_and_time);
+	$images_per_row = 6;
+	$column = 0;
+	foreach(scandir($temp_dir_abs) as $thisfile) {
+		$suffix = trace_image_suffix($thisfile,$project_fullname);
+		if($suffix === FALSE) continue;
+		echo "<td style=\"border-radius: 6px; border: 4px solid Gold; background-color:azure; color:black;vertical-align:middle; text-align: center; padding:8px; margin:0px;\">";
+		// $suffix is "<number>-<time>.html" or "<number>.html"
+		$table_number = explode('-',str_replace(".html",'',$suffix));
 		$number = $table_number[0];
-		$image_time = '';
-		if(count($table_number) > 1) $image_time = $table_number[1]."s";
-	//		if($image_time == "0.00s") $image_time = '';
-	//		$number = intval($number_and_time);
-		$content = @file_get_contents($temp_dir_abs.$thisfile);
-		$table2 = explode(chr(10),$content);
-		$imax = count($table2);
-		$table3 = array();
-	//	$title1 = $this_name."_Image_".$number;
-		$title1 = rand(10000,99999); // Added 2025-10-28
+		$image_time = isset($table_number[1]) ? $table_number[1]."s" : '';
 		$WidthMax = $HeightMax = 0;
-		$position_image++;
-		for($i = 0; $i < $imax; $i++) {
-			$line = trim($table2[$i]);
-		//	echo $i." ".recode_tags($line)."<br />";
-			if(is_integer($pos=strpos($line,"canvas.width"))) {
-				$table4 = explode("=",$line);
-				$WidthMax = round(intval($table4[2])) + 10;
-			//	echo $i.") WidthMax = ".$WidthMax."<br />";
-				}
-			if(is_integer($pos=strpos($line,"canvas.height"))) {
-				$table4 = explode("=",$line);
-				$HeightMax = round(intval($table4[2]));
-			//	echo $i.") HeightMax = ".$HeightMax."<br />";
-				}
-			}
-		for($i = $j = 0; $i < $imax; $i++) {
-			$line = trim($table2[$i]);
-			$table3[$j] = $line;
-			$j++;
+		foreach(explode(chr(10),(string)@file_get_contents($temp_dir_abs.$thisfile)) as $line) {
+			if(str_contains($line,"canvas.width")) $WidthMax = intval(explode("=",$line)[2]) + 10;
+			if(str_contains($line,"canvas.height")) $HeightMax = intval(explode("=",$line)[2]);
 			}
 		$link = $temp_dir.$thisfile;
-		$left = 10 + (50 * ($position_image - 1));
-		$window_height = 600;
-		if($HeightMax < $window_height) $window_height = $HeightMax + 60;
-		$window_width = 1200;
-		if($WidthMax < $window_width) $window_width = $WidthMax +  20;
-		echo "<div style=\"border:2px solid gray; background-color:azure; color:black; width:8em;  padding:2px; text-align:center; border-radius: 6px;\"><a class=\"darkblue-text\" onclick=\"window.open('".nice_url($link)."','".$title1."','width=".$window_width.",height=".$window_height.",left=".$left."'); return false;\" href=\"".nice_url($link)."\">Image ".$number."</a><br />".$image_time;
+		$left = 10 + (100 * $column); // Windows of successive images are shifted to the right
+		$window_height = ($HeightMax < 600) ? $HeightMax + 60 : 600;
+		$window_width = ($WidthMax < 1200) ? $WidthMax + 20 : 1200;
+		echo "<a class=\"darkblue-text\" onclick=\"window.open('".nice_url($link)."','".rand(10000,99999)."','width=".$window_width.",height=".$window_height.",left=".$left."'); return false;\" href=\"".nice_url($link)."\">Image ".$number."</a><br />".$image_time;
 		if(check_image($link) <> '') {
 			$bad_image = TRUE;
 			echo " <span class=\"red-text\"><b>*</b></span>";
 			}
-		echo "</div>&nbsp;";
+		echo "&nbsp;";
 		echo "</td>";
-		if(++$position_image > 11) {
-			$position_image = 0;
+		if(++$column == $images_per_row) {
+			$column = 0;
 			echo "</tr><tr>";
 			}
 		}
 	echo "</tr></table>";
 	echo "<br />";
 	}
-	
+
 // Process Csound score if possible
 if($no_error AND $file_format == "csound") {
 	if($csound_orchestra == '') {
@@ -852,91 +524,59 @@ if($no_error AND $file_format == "csound") {
 		echo "<p><span class=\"red-text\">➡</span> No orchestra file has been found here: <span class=\"green-text\">".$dir_csound_resources.$csound_orchestra."</span>. Csound will not create a sound file.</p>";
 		}
 	else {
-		$csound_file_link = $score_file;
-      //  echo "csound_file_link = ".$csound_file_link."<br />";
-		$sound_file_link = str_replace(".sco",'',$csound_file_link);
 		// We change the name of the sound file every time to force the browser to refresh the audio tag
-       // echo "sound_file_link = ".$sound_file_link."<br />";
-        $sound_file_link .= "@".rand(10000,99999).".wav";
-      //  echo "sound_file_link = ".$sound_file_link."<br />";
-		$table = explode(SLASH,$csound_file_link);
+		$sound_file_link = str_replace(".sco",'',$score_file)."@".rand(10000,99999).".wav";
+		$table = explode(SLASH,$score_file);
 		$csound_file_name = end($table);
-       // echo "csound_file_name = ".$csound_file_name."<br />";
 		$project_name = str_replace(".sco",'',$csound_file_name);
-      //  echo "project_name = ".$project_name."<br />";
-		$dir = str_replace($csound_file_name,'',$csound_file_link);
-      //  echo "dir = ".$dir."<br />";
-		$dircontent = scandir($dir);
-		foreach($dircontent as $thisfile) {
+		$dir = str_replace($csound_file_name,'',$score_file);
+		// Delete the sound files of previous runs
+		foreach(scandir($dir) as $thisfile) {
 			$table = explode('.',$thisfile);
-			$extension = end($table);
-			if($extension <> "wav") continue;
-			$table = explode('@',$table[0]);
-			if($table[0] == $project_name) @unlink($dir.$thisfile);
+			if(end($table) == "wav" AND explode('@',$table[0])[0] == $project_name) @unlink($dir.$thisfile);
 			}
-		$time_start = time();
-		$time_end = $time_start + 5;
-		while(TRUE) {
-			if(!file_exists($sound_file_link)) break;
-			if(time() > $time_end) break;
-			}
-		if(file_exists($csound_file_link)) {
-            if(!csound_ready()) {
-				echo "<p><span class=\"red-text\">➡</span> Csound ".CSOUND_MIN_VERSION." or later was not found. Reload the project page to check the installation of Csound.</p>";
+		if(!file_exists($score_file))
+			echo "<p><span class=\"red-text\">➡</span> The score file (".$score_file.") was not found by Csound.</p>";
+		else if(!csound_ready())
+			echo "<p><span class=\"red-text\">➡</span> Csound ".CSOUND_MIN_VERSION." or later was not found. Reload the project page to check the installation of Csound.</p>";
+		else {
+			sleep(1);
+			$time_start = time();
+			// Linux: remove XAMPP's /opt/lampp/lib so Csound uses the system libraries, or use those next to Csound
+			if(!windows_system()) csound_environment($csound_path);
+			$trace_csound = $temp_dir_abs."trace_csound.txt";
+			// $csound_path is absolute on all systems (2026-11-14)
+			$command = "\"".$csound_path.SLASH.$csound_name."\" --wave -o ".$sound_file_link." ".$dir_csound_resources.$csound_orchestra." ".$score_file." 2>".$trace_csound;
+			$command_show = $command;
+			if(windows_system()) {
+				$command = windows_command($command);
+				$command_show = str_replace('^','',$command);
+				}
+			echo "<p><small><b><span class=\"red-text\">Csound ➡</span></b> ".$command_show."</small></p>";
+			exec($command,$result_csound,$return_var);
+			if($return_var <> 0) {
+				echo "<p><span class=\"red-text\">➡</span> Csound returned error code <span class=\"red-text\">‘".$return_var."’</span>.<br /><i>Maybe you are trying to use instruments that do not match</i> <span class=\"green-text\">‘".$csound_orchestra."’</span></p>";
 				}
 			else {
-				sleep(1);
-				$time_start = time();
-                // $csound_path is absolute on all systems (2026-11-14)
-                if(windows_system())
-                    $command = "\"".$csound_path.SLASH.$csound_name."\"  --wave -o ".$sound_file_link." ".$dir_csound_resources.$csound_orchestra." ".$csound_file_link;
-		        else {
-					csound_environment($csound_path);   // Linux: remove XAMPP's /opt/lampp/lib so Csound uses the system libraries, or use those next to Csound
-                    $command = "\"".$csound_path.SLASH.$csound_name."\" --wave -o ".$sound_file_link." ".$dir_csound_resources.$csound_orchestra." ".$csound_file_link;
-					}
-                $trace_csound = $temp_dir_abs."trace_csound.txt";
-                $trace_csound_link = $temp_dir."trace_csound.txt";
-                $trace_csound_link = str_replace(SLASH,'/',$trace_csound_link);
-				$command .= " 2>".$trace_csound;
-                $command_show = $command;
-                if(windows_system()) {
-                    $command_show = $command = windows_command($command);
-                    $command_show = str_replace('^','',$command_show);
-                    }
-                echo "<p><small><b><span class=\"red-text\">Csound ➡</span></b> ".$command_show."</small></p>";
-				exec($command,$result_csound,$return_var);
-				if($return_var <> 0) {
-					echo "<p><span class=\"red-text\">➡</span> Csound returned error code <span class=\"red-text\">‘".$return_var."’</span>.<br /><i>Maybe you are trying to use instruments that do not match</i> <span class=\"green-text\">‘".$csound_orchestra."’</span></p>";
-					}
-				else {
-					$time_spent = time() - $time_start;
-					if($time_spent > 10)
-						echo "<p><span class=\"red-text\">➡</span> Sorry for the long time (".$time_spent." seconds) waiting for Csound to complete the conversion…</p>";
-					$audio_tag = "<audio controls class=\"shadow\">";
-					$audio_tag .= "<source src=\"".$sound_file_link."\" type=\"audio/wav\">";
-					$audio_tag .= "Your browser does not support the audio tag.";
-					$audio_tag .= "</audio>";
-					echo $audio_tag;
-			//		echo $sound_file_link."<br />";
-					echo "<p><a target=\"_blank\" href=\"".nice_url($sound_file_link)."\" download>Download this sound file</a> (<span class=\"green-text\">".nice_url($sound_file_link)."</span>)</p>";
-					echo "<p><span class=\"red-text\">➡</span> If you hear garbage sound or silence it may be due to a mismatch between Csound score and orchestra<br />&nbsp;&nbsp;&nbsp;or some overflow in Csound…</p>";
-					}
+				$time_spent = time() - $time_start;
+				if($time_spent > 10)
+					echo "<p><span class=\"red-text\">➡</span> Sorry for the long time (".$time_spent." seconds) waiting for Csound to complete the conversion…</p>";
+				echo "<audio controls class=\"shadow\"><source src=\"".$sound_file_link."\" type=\"audio/wav\">Your browser does not support the audio tag.</audio>";
+				echo "<p><a target=\"_blank\" href=\"".nice_url($sound_file_link)."\" download>Download this sound file</a> (<span class=\"green-text\">".nice_url($sound_file_link)."</span>)</p>";
+				echo "<p><span class=\"red-text\">➡</span> If you hear garbage sound or silence it may be due to a mismatch between Csound score and orchestra<br />&nbsp;&nbsp;&nbsp;or some overflow in Csound…</p>";
 				}
 			}
-		else echo "<p><span class=\"red-text\">➡</span> The score file (".$csound_file_link.") was not found by Csound.</p>";
 		}
 	}
 
-$handle = FALSE;
-$terminated = FALSE;
-if(file_exists($stopfile) OR file_exists($panicfile)) $terminated = TRUE;
+$terminated = (file_exists($stopfile) OR file_exists($panicfile));
 @unlink($pausefile); @unlink($continuefile);
 @unlink($stopfile);
 $time_stopped = '';
-if(isset($timefile) AND $timefile <> '') {
+if(isset($timefile)) {
 	// When the performance is stopped, the console keeps the "_time" file with the date at which it stopped
-	$content = trim((string)@file_get_contents($temp_dir.$timefile));
 	// It contains the date and the expected end (milliseconds)
+	$content = trim((string)@file_get_contents($temp_dir.$timefile));
 	if($terminated AND preg_match('/^([0-9]+)(?:\s+(-?[0-9]+))?$/',$content,$match)) {
 		$time_stopped = format_performance_time((int)$match[1]);
 		if(isset($match[2]) AND (int)$match[2] > 0) $time_stopped .= " of ".format_performance_time((int)$match[2]);
@@ -950,127 +590,97 @@ if($terminated AND $instruction <> "enter_notes") {
 	echo "</big></p>";
 	}
 
-$capture_file = $temp_dir_abs."trace_".my_session_id()."_".$project_fullname."_capture";
-if(file_exists($capture_file)) {
+if(file_exists($trace_prefix."_capture")) {
 	echo "<p>👉 Reload the <span class=\"green-text\">".$project_fullname."</span> project to see <span class=\"red-text\">captured MIDI events</span> at the end of the data…</p>";
 	}
 
+// Write the "Show process" page
+$handle = FALSE;
 if($n_messages > 30000) echo "<p><span class=\"red-text\">➡</span> Too many messages produced! (".$n_messages.")</p>";
-else {
-	if($result_file <> '') $handle = fopen($result_file,"w");
-	if($handle) {
-	//	echo "@@@ writing ".$result_file."<br />";
-		$header = "<!DOCTYPE HTML>";
-		$header .= "<html lang=\"en\">";
-		$header .= "<head>\n";
-		$header .= "<meta content=\"text/html; charset=utf-8\" http-equiv=\"Content-Type\" />\n";
-		$header .= "<link rel=\"stylesheet\" href=\"".$bp_application_path."php/bp-light.css\" />\n";
-		$header .= "<title>".$result_file."</title>\n";
-		$header .= midi_player_script($bp_application_path."php/")."\n";
-		$header .= "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js\"></script>\n";
-		$header .= "<style>
+else if($result_file <> '' AND ($handle = fopen($result_file,"w"))) {
+	$header = "<!DOCTYPE HTML>";
+	$header .= "<html lang=\"en\">";
+	$header .= "<head>\n";
+	$header .= "<meta content=\"text/html; charset=utf-8\" http-equiv=\"Content-Type\" />\n";
+	$header .= "<link rel=\"stylesheet\" href=\"".$bp_application_path."php/bp-light.css\" />\n";
+	$header .= "<title>".$result_file."</title>\n";
+	$header .= midi_player_script($bp_application_path."php/")."\n";
+	$header .= "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js\"></script>\n";
+	$header .= "<style>
 		body, p {
 			overflow-wrap: anywhere;
 			word-break: break-word;
 			}
 		</style>\n";
-		$header .= "</head><body>\n";
-		fwrite($handle,$header."\n");
-		fwrite($handle,"<h2 id=\"midi\">".$grammar_name."</h2>\n");
-		fwrite($handle,"<small>Results as per ".date('Y-m-d H:i:s')."</small><br />\n");
-		if(file_exists($project_name.".wav")) {
-			$audio_tag = "<p><b>Csound:</b></p><audio controls class=\"shadow\">";
-			$audio_tag .= "<source src=\"".$project_name.".wav\" type=\"audio/wav\">";
-			$audio_tag .= "Your browser does not support the audio tag.";
-			$audio_tag .= "</audio>";
-			fwrite($handle,$audio_tag."<p>\n");
-			if(file_exists($project_name.".sco")) {
-				fwrite($handle,"<br /><a target=\"_blank\" href=\"".$project_name.".sco\" download>Download Csound score</a> (<span class=\"green-text\">".$project_name.".sco</span>)<br />");
-				}
-			fwrite($handle,"<a target=\"_blank\" href=\"".$project_name.".wav\" download>Download this sound file</a> (<span class=\"green-text\">".$project_name.".wav</span>)</p>");
-			}
-		if(file_exists($project_name.".mid") AND filesize($project_name.".mid") > 59) {
-            $midi_url = str_replace(SLASH,'/',$project_name.".mid");
-			$audio_tag = midifile_player($midi_url,'',25,0);
-			fwrite($handle,$audio_tag."\n");
-			}
-		if(file_exists($project_name.".html")) {
-			fwrite($handle,"<p><span class=\"red-text\">➡</span> Read the <a class=\"linkdotted\" onclick=\"window.open('".$project_name.".html','".$file_format."','width=800,height=700,left=300'); return false;\" href=\"".$project_name.".html\">data file</a> (or <a class=\"linkdotted\" href=\"".nice_url($project_name).".bpda\" download>download it</a>)</p>\n");
-			}
-		fwrite($handle,"<p><b>Messages:</b></p>\n");
+	$header .= "</head><body>\n";
+	fwrite($handle,$header."\n");
+	fwrite($handle,"<h2 id=\"midi\">".$grammar_name."</h2>\n");
+	fwrite($handle,"<small>Results as per ".date('Y-m-d H:i:s')."</small><br />\n");
+	if(file_exists($project_name.".wav")) {
+		fwrite($handle,"<p><b>Csound:</b></p><audio controls class=\"shadow\"><source src=\"".$project_name.".wav\" type=\"audio/wav\">Your browser does not support the audio tag.</audio><p>\n");
+		if(file_exists($project_name.".sco"))
+			fwrite($handle,"<br /><a target=\"_blank\" href=\"".$project_name.".sco\" download>Download Csound score</a> (<span class=\"green-text\">".$project_name.".sco</span>)<br />");
+		fwrite($handle,"<a target=\"_blank\" href=\"".$project_name.".wav\" download>Download this sound file</a> (<span class=\"green-text\">".$project_name.".wav</span>)</p>");
 		}
+	if(file_exists($project_name.".mid") AND filesize($project_name.".mid") > 59)
+		fwrite($handle,midifile_player(str_replace(SLASH,'/',$project_name.".mid"),'',25,0)."\n");
+	if(file_exists($project_name.".html"))
+		fwrite($handle,"<p><span class=\"red-text\">➡</span> Read the <a class=\"linkdotted\" onclick=\"window.open('".$project_name.".html','".$file_format."','width=800,height=700,left=300'); return false;\" href=\"".$project_name.".html\">data file</a> (or <a class=\"linkdotted\" href=\"".nice_url($project_name).".bpda\" download>download it</a>)</p>\n");
+	fwrite($handle,"<p><b>Messages:</b></p>\n");
 	}
+
+// Display the first and last messages, and collect the results of analysis
 $weights_file_path = '';
 $created_templates = FALSE;
 $warnings = 0;
 if($n_messages > 0) {
 	$analyzing_success = $analyzing_failure = FALSE;
-	for($i=0; $i < $n_messages; $i++) {
+	for($i = 0; $i < $n_messages; $i++) {
 		$mssg = trim($o[$i]);
-		if($mssg == null) continue;
 		if($mssg == '') continue;
 		$mssg = clean_up_encoding(FALSE,TRUE,$mssg);
-		$mssg = str_replace('<',"&lt;",$mssg);
-		$mssg = str_replace('>',"&gt;",$mssg);
+		$mssg = str_replace(['<','>'],["&lt;","&gt;"],$mssg);
 		if(str_starts_with($mssg,"=&gt; ")) {
 			$warnings++;
-			$mssg = str_replace("=&gt; ",'',$mssg);
-			$mssg = "<font color=\"red\">".$mssg."</font>";
+			$mssg = "<font color=\"red\">".str_replace("=&gt; ",'',$mssg)."</font>";
 			}
-		if($mssg == null) continue;
+		// Show URLs and paths in small blue characters
 		if(preg_match("/https?:\/\//u",$mssg))
 			$mssg = preg_replace("/(https?:\/\/.+)$/u","<font color=#007BFF><small>$1</small></font>",$mssg);
-		else {
-			$mssg = preg_replace("/(C:.+)$/u","<font color=#007BFF><small>$1</small></font>",$mssg);
-			if($mssg == null) continue;
-			$mssg = preg_replace("/(\.\.\/.+)$/u","<font color=#007BFF><small>$1</small></font>",$mssg);
-			}
-		if($mssg == null) continue;
-		if($mssg == "(null)") continue;
-		if(($this_count = substr_count((string)$mssg,"Creating new weights file:")) > 0) {
+		else
+			$mssg = preg_replace(["/(C:.+)$/u","/(\.\.\/.+)$/u"],"<font color=#007BFF><small>$1</small></font>",$mssg);
+		if($mssg == null OR $mssg == "(null)") continue;
+		if(str_contains($mssg,"Creating new weights file:"))
 			$weights_file_path = trim(str_replace("Creating new weights file:",'',$mssg));
-			}
-		if(($this_count = substr_count((string)$mssg,"templates have been produced")) > 0) {
-			$created_templates = TRUE;
-			}
-		if(($this_count = substr_count((string)$mssg,"Analyzing item")) > 0) {
-			$analyzing_failure = TRUE;
-			$analyzing_success = TRUE;
-			}
-		if(($this_count = substr_count((string)$mssg,"Analyzing new")) > 0) {
-			$analyzing_failure = TRUE;
-			$analyzing_success = TRUE;
-			}
-		if(($this_count = substr_count((string)$mssg,"rejected by")) > 0 AND $analyzing_failure) {
+		if(str_contains($mssg,"templates have been produced")) $created_templates = TRUE;
+		if(str_contains($mssg,"Analyzing item") OR str_contains($mssg,"Analyzing new"))
+			$analyzing_failure = $analyzing_success = TRUE;
+		if($analyzing_failure AND str_contains($mssg,"rejected by")) {
 			$failed_parsing++;
 			$analyzing_failure = FALSE;
 			}
-		if(($this_count = substr_count((string)$mssg,"accepted by")) > 0 AND $analyzing_success) {
+		if($analyzing_success AND ($this_count = substr_count($mssg,"accepted by")) > 0) {
 			$success_parsing += $this_count;
 			$analyzing_success = FALSE;
 			}
-		if(($this_count = substr_count((string)$mssg,"matched no template")) > 0) $failed_template += $this_count;
+		$failed_template += substr_count($mssg,"matched no template");
 		if($handle) fwrite($handle,$mssg."<br />\n");
 		if($i == 7) echo "… … …<br />";
 		if($i < 7 OR $i > ($n_messages - 4)) echo $mssg."<br />";
 		}
 	if($handle) {
-		$window_name = $grammar_name."_".rand(0,99)."_result";
 		if($bad_image) echo "<p>(<span class=\"red-text\"><b>*</b></span>) Syntax error in image: negative argument</p>";
-		echo "<p style=\"font-size:larger;\"><input class=\"save big\" onclick=\"window.open('".nice_url($result_file)."','".$window_name."','width=600,height=600,left=100'); return false;\" type=\"submit\" value=\"Show process (".$n_messages." lines)\">";
-		if($warnings == 1) echo " <span class=\"blinking\">=> ".$warnings." warning</span>";
-		if($warnings > 1) echo " <span class=\"blinking\">=> ".$warnings." warnings</span>";
-		}
-	if($handle) {
+		echo "<p style=\"font-size:larger;\"><input class=\"save big\" onclick=\"window.open('".nice_url($result_file)."','".$grammar_name."_".rand(0,99)."_result','width=600,height=600,left=100'); return false;\" type=\"submit\" value=\"Show process (".$n_messages." lines)\">";
+		if($warnings > 0) echo " <span class=\"blinking\">=> ".$warnings." warning".($warnings > 1 ? "s" : "")."</span>";
 		fwrite($handle,"</body>\n");
 		fclose($handle);
 		chmod($result_file,$permissions);
 		}
 	}
 else echo "<p>No message produced…";
-if(isset($trace_csound) AND $trace_csound <> '' AND file_exists($trace_csound)) {
-	$window_name = $grammar_name."_".rand(0,99)."_result";
-	echo "&nbsp;<input class=\"save big\" onclick=\"window.open('".nice_url($trace_csound_link)."','".$window_name."','width=800,height=600,left=100'); return false;\" type=\"submit\" value=\"Show Csound trace\">";
+if($trace_csound <> '' AND file_exists($trace_csound)) {
+	$trace_csound_link = str_replace(SLASH,'/',$temp_dir."trace_csound.txt");
+	echo "&nbsp;<input class=\"save big\" onclick=\"window.open('".nice_url($trace_csound_link)."','".$grammar_name."_".rand(0,99)."_result','width=800,height=600,left=100'); return false;\" type=\"submit\" value=\"Show Csound trace\">";
 	}
 echo "</p>";
 
@@ -1080,16 +690,51 @@ if($failed_template > 0) echo "<p><big>❌&nbsp;&nbsp;".$failed_template." item(
 if($weights_file_path <> '' AND $learn) echo "<p><big>👉  New weights are saved in ".$weights_file_path."</big><br />&nbsp;&nbsp;&nbsp;&nbsp;(Click the button below the grammar)</p>";
 if($created_templates) echo "<p><big>👉  Templates have been created. Click the “<span class=\"green-text\">output file</span>” link!</big></p>";
 
-// @unlink($running_trace);
-if($instruction == "enter_notes" AND $warnings == 0) {
-	$file = $temp_dir."trace_notes_txt";
-	if(file_exists($file) && filesize($file) > 3) {
-		@unlink($file);
-		echo "<script>window.close();</script>";
-		}
+if($instruction == "enter_notes" AND $warnings == 0 AND file_exists($trace_notes_file) AND filesize($trace_notes_file) > 3) {
+	@unlink($trace_notes_file);
+	echo "<script>window.close();</script>";
 	}
 $handle = fopen($stopfile,"w");
 if($handle) fclose($handle);
+
+function die_with_close_link($message) {
+	echo $message;
+	echo "<p style=\"text-align:center; width:90%;\"><big>👉&nbsp;&nbsp;<a href=\"\" onclick=\"window.close();\">Close this page</a></big></p>";
+	echo "</div>";
+	die();
+	}
+
+function quote_if_spaces($path) {
+	return str_contains($path,' ') ? '"'.$path.'"' : $path;
+	}
+
+function wait_while_exists($file,$seconds) {
+	// Waits until $file no longer exists, at most $seconds. Returns FALSE on timeout
+	$time_end = time() + $seconds;
+	while(file_exists($file)) {
+		if(time() > $time_end) return FALSE;
+		usleep(100000); // 0.1 sec
+		}
+	return TRUE;
+	}
+
+function trace_image_suffix($thisfile,$project_fullname) {
+	// If $thisfile is an image of this project in this session, e.g. "trace_<session>_<project>_image_<number>-<time>.html",
+	// returns the part following "image", otherwise FALSE
+	$table = explode('_',$thisfile);
+	if($table[0] <> "trace" OR !isset($table[2]) OR $table[1] <> my_session_id()) return FALSE;
+	if(!str_contains($thisfile,$project_fullname)) return FALSE;
+	for($i = 2; $i < (count($table) - 1); $i++)
+		if($table[$i] == "image") return $table[$i + 1];
+	return FALSE;
+	}
+
+function files_created_since($pattern,$time) {
+	// Files matching $pattern modified since $time, newest first
+	$files = array_filter(glob($pattern) ?: [],fn($file) => filemtime($file) >= $time);
+	usort($files,fn($a,$b) => filemtime($b) <=> filemtime($a));
+	return $files;
+	}
 
 function format_performance_time($ms) {
 	// Same format as the clock displayed during the performance, e.g. "1:05.4"
@@ -1114,23 +759,17 @@ function check_image($link) {
 
 function check_training_folder($folder) {
 	$rootPath = realpath($folder);
-//	echo "<p>".$rootPath."</p>";
-	$dircontent = scandir($folder);
-	foreach($dircontent as $thisfile) {
+	foreach(scandir($folder) as $thisfile) {
 		$ext = pathinfo($thisfile,PATHINFO_EXTENSION);
 		if($ext == "txt" OR $ext == "tab" OR $ext == "tsv") {
-		//	echo $thisfile."<br />";
 			$table = explode('.',$thisfile);
-			$number = $table[0];
-			$midifile = $rootPath.SLASH.$number.".mid";
-		//	echo $midifile."<br />";
-			if(!file_exists($midifile) AND !is_integer(strpos($thisfile,"_units.txt"))) {
+			$midifile = $rootPath.SLASH.$table[0].".mid";
+			if(!file_exists($midifile) AND !str_contains($thisfile,"_units.txt")) {
 				echo "<span class=\"red-text\">➡</span> Deleting invalid sample ‘<span class=\"green-text\">".$thisfile."</span>’<br />";
 				unlink($rootPath.SLASH.$thisfile);
 				}
 			}
 		}
-	return;
 	}
 
 ?>
