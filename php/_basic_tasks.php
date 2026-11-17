@@ -6119,7 +6119,7 @@ function filter_buttons_in($i,$param) {
 
 function filter_input_explanation() {
 	global $file_format;
-	if($file_format <> "rtmidi") return;
+	if($file_format <> "rtmidi" AND $file_format <> "csoundrt") return;
 	echo "<p>MIDI input filters are used to process incoming events, for example<br />from a connected piano keyboard or other MIDI devices — including<br />another instance of the BP3.</p>
 	<ul>
 	<li>By default (option ‘0’), events are ‘rejected’ and nothing happens.</li>
@@ -6131,7 +6131,7 @@ function filter_input_explanation() {
 
 function filter_output_explanation() {
 	global $file_format;
-	if($file_format <> "rtmidi") return;
+	if($file_format <> "rtmidi" AND $file_format <> "csoundrt") return;
 	echo "<ul>";
 	echo "<li>Event filter specifies which MIDI events can be sent to this output.</li>";
 	echo "<li>Channel filter specifies which MIDI channels can be sent to this output.</li>";
@@ -6914,24 +6914,77 @@ function show_file_format_choice($type,$file_format,$url_this_page,$filename) {
 	if($file_format == "eventlist") echo " checked";
 	echo ">Event list";
 	echo "<br /><input class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topmidiports\" name=\"savethisfile\" value=\"SAVE format\">";
+	if($file_format == "csoundrt") csoundrt_format_notes();
 	return;
 	}
 
 function csoundrt_panel($orchestra) {
 	// Displayed on project pages instead of the name of the output file, when the output is real-time Csound (2026-11-16)
-	echo "<p><b>Real-time Csound</b><br />";
-	echo "Notes are sent to Csound, which plays them<br />on the audio output of this computer.<br />";
+	// The description and the QUIT CSOUND button are displayed below the SAVE format button by csoundrt_format_notes()
+	echo "<p>";
 	if($orchestra <> '') echo "Orchestra: <span class=\"green-text\">".$orchestra."</span><br />";
 	else echo "Orchestra: <span class=\"green-text\">0-default.orc</span> (default)<br />";
 	if(!csound_ready()) echo "<span class=\"red-text\">Csound ".CSOUND_MIN_VERSION." or later is not responding.</span><br />";
+	// The status is updated by the script of csoundrt_format_notes()
+	echo "<span id=\"csoundrt_status\">";
 	if(csoundrt_running()) {
 		$state = csoundrt_state();
-		echo "<span id=\"csoundrt_status\">The Csound server is running";
+		echo "The Csound server is running";
 		if(isset($state['orchestra'])) echo " with <span class=\"green-text\">".basename($state['orchestra'])."</span>";
-		echo "&nbsp;<button type=\"button\" class=\"edit\" style=\"font-size:small;\" title=\"Csound quits by itself after ".round(CSOUND_RT_IDLE / 60)." minutes without a performance\" onclick=\"fetch('csoundrt_quit.php',{cache:'no-store'}).then(function(r) {return r.json();}).then(function(d) {document.getElementById('csoundrt_status').textContent = d.stopped ? 'The Csound server has quit.' : 'The Csound server did not quit.';});\">QUIT CSOUND</button></span>";
 		}
 	else echo "Csound will be started when you play.";
+	echo "</span><br />";
+	echo "The MIDI ports below are used for interaction,<br />e.g. <i>_script(wait for C3 channel 1)</i>, once saved.";
 	echo "</p>";
+	return;
+	}
+
+function csoundrt_format_notes() {
+	// Displayed below the SAVE format button when the output is real-time Csound
+	// The QUIT CSOUND button is shown while the server is running. Since the server is started by produce.php in another window,
+	// the page asks csoundrt_status.php every 2 seconds, and updates the button and the status displayed by csoundrt_panel().
+	echo "<br /><br />Notes are sent to Csound, which plays them<br />on the audio output of this computer.";
+	echo "<br /><button id=\"csoundrt_quit\" type=\"button\" class=\"edit\" style=\"font-size:small; margin-top:6px;";
+	if(!csoundrt_running()) echo " display:none;";
+	echo "\" title=\"Csound quits by itself after ".round(CSOUND_RT_IDLE / 60)." minutes without a performance\" onclick=\"csoundrtQuit();\">QUIT CSOUND</button>";
+	echo "<script>
+	function csoundrtShow(running,orchestra,text) {
+		var button = document.getElementById('csoundrt_quit');
+		var status = document.getElementById('csoundrt_status');
+		if(button) button.style.display = running ? '' : 'none';
+		if(!status) return;
+		if(text) status.textContent = text;
+		else if(running) {
+			status.textContent = 'The Csound server is running' + (orchestra ? ' with ' : '');
+			if(orchestra) {
+				var name = document.createElement('span');
+				name.className = 'green-text';
+				name.textContent = orchestra;
+				status.appendChild(name);
+				}
+			}
+		else status.textContent = 'Csound will be started when you play.';
+		}
+	function csoundrtQuit() {
+		fetch('csoundrt_quit.php',{cache:'no-store'}).then(function(r) {return r.json();}).then(function(d) {
+			csoundrtShow(!d.stopped,'',d.stopped ? 'The Csound server has quit.' : 'The Csound server did not quit.');
+			});
+		}
+	(function() {
+		var last = null;
+		function poll() {
+			fetch('csoundrt_status.php',{cache:'no-store',credentials:'same-origin'}).then(function(r) {return r.json();}).then(function(d) {
+				var key = d.running + '|' + d.orchestra;
+				if(key !== last) {
+					if(last !== null) csoundrtShow(d.running,d.orchestra,'');
+					last = key;
+					}
+				}).catch(function() {});
+			window.setTimeout(poll,2000);
+			}
+		poll();
+		})();
+	</script>";
 	return;
 	}
 

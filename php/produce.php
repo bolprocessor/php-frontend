@@ -163,6 +163,13 @@ else {
 			die_with_close_link("<p style=\"text-align:center;\"><big>You first need to SAVE MIDI ports</big></p>");
 		copy($saved_midiport,$midiport);
 		}
+	// Real-time Csound uses the MIDI ports for interaction if they have been saved (2026-11-17)
+	$csoundrt_midi = FALSE;
+	if($file_format == "csoundrt") {
+		$saved_midiport = $dir_midi_resources.$project_fullname."_midiport";
+		if(!file_exists($midiport) AND file_exists($saved_midiport)) copy($saved_midiport,$midiport);
+		$csoundrt_midi = file_exists($midiport);
+		}
 	@unlink($project_name.".mid");
 	@unlink($project_name.".html");
 	foreach(["_saved_grammar","_saved_alphabet","_saved_settings","_sync_grammar"] as $saved_file)
@@ -190,6 +197,7 @@ else {
 				break;
 			case "csoundrt": // Real-time Csound, see _csoundrt.php
 				$command .= " --csoundrt ".CSOUND_RT_PORT;
+				if($csoundrt_midi) $command .= " --rtmidi"; // MIDI ports for interaction, e.g. _script(wait for C3 channel 1)
 				break;
 			case "eventlist":
 				$command .= " --eventlistout ".$eventlist_file;

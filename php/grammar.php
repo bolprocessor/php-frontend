@@ -146,7 +146,7 @@ if(isset($_POST['savemidiport'])) {
 
 if(isset($_POST['new_file_format'])) {
 	$file_format = $_POST['new_file_format'];
-	if($file_format == "rtmidi") read_midiressources($filename);
+	if($file_format == "rtmidi" OR $file_format == "csoundrt") read_midiressources($filename);
 	$no_save_midiresources = TRUE;
 	}
 save_settings2("grammar_file_format",$filename,$file_format); // To _settings.php
@@ -186,7 +186,8 @@ if($need_to_save OR isset($_POST['savethisfile']) OR isset($_POST['compilegramma
 		@chmod($file_path,$permissions);
 		}
 	else @unlink($file_path);
-	if($file_format == "rtmidi" AND !$no_save_midiresources) {
+	// Real-time Csound uses the MIDI ports for interaction, e.g. _script(wait for C3 channel 1)
+	if(($file_format == "rtmidi" OR $file_format == "csoundrt") AND !$no_save_midiresources) {
 		if(file_exists($refresh_file)) {
 			read_midiressources($filename);
 			store_midiressources($filename);
@@ -434,7 +435,7 @@ echo "</div>";
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 echo "<table cellpadding=\"8px;\" id=\"topmidiports\" class=\"thinborder\"><tr>";
 echo "<td style=\"white-space:nowrap;\">";
-if($file_format <> "rtmidi") {
+if($file_format <> "rtmidi" AND $file_format <> "csoundrt") {
 	for($i = 0; $i < $NumberMIDIoutputs; $i++) {
 		echo "<input type=\"hidden\" name=\"MIDIoutput_".$i."\" value=\"".$MIDIoutput[$i]."\">";
 		echo "<input type=\"hidden\" name=\"MIDIoutputname_".$i."\" value=\"".$MIDIoutputname[$i]."\">";
@@ -443,15 +444,15 @@ if($file_format <> "rtmidi") {
 		echo "<input type=\"hidden\" name=\"MIDIinput_".$i."\" value=\"".$MIDIinput[$i]."\">";
 		echo "<input type=\"hidden\" name=\"MIDIinputname_".$i."\" value=\"".$MIDIinputname[$i]."\">";
 		}
-	if($file_format == "csoundrt") {
-		echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
-		$this_orchestra = ($csound_orchestra <> '') ? $csound_orchestra : $csound_default_orchestra;
-		csoundrt_panel($this_orchestra);
-		}
-	else {
-		echo "<p>Name of output file (with proper extension):<br />";
-		echo "<input type=\"text\" name=\"output_file\" size=\"25\" value=\"".$output_file."\"></p>";
-		}
+	echo "<p>Name of output file (with proper extension):<br />";
+	echo "<input type=\"text\" name=\"output_file\" size=\"25\" value=\"".$output_file."\"></p>";
+	}
+else if($file_format == "csoundrt") {
+	// Real-time Csound: notes are played by Csound, MIDI ports are used for interaction
+	echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
+	$this_orchestra = ($csound_orchestra <> '') ? $csound_orchestra : $csound_default_orchestra;
+	csoundrt_panel($this_orchestra);
+	display_midi_ports($filename);
 	}
 else {
 	echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
