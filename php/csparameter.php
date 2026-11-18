@@ -73,9 +73,7 @@ if(isset($_POST['saveparameter'])) {
 	fclose($handle);
 	$argmax_file = $folder_this_instrument.SLASH."argmax.php";
 	set_argmax_argument($argmax_file,$parameter_name,$argmax);
-	$file_changed = $temp_dir.$temp_folder.SLASH."_changed";
-	$handle = fopen($file_changed,"w");
-	if($handle) fclose($handle);
+	csound_temp_changed($temp_folder); // 2026-11-18 Saves the '-cs' file at once - by Claude
 	}
 
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
@@ -100,7 +98,7 @@ echo "<td>end</td>";
 echo "<td>table</td>";
 echo "</tr>";
 echo "<tr>";
-echo "<td style=\"text-align:right;\">Arguments:</td>";
+echo "<td style=\"text-align:right;\">Fields:</td>";
 echo "<td style=\"padding: 5px;\">";
 $start_index = $table[2];
 if($start_index == -1) $start_index = '';

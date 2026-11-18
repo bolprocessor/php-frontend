@@ -45,6 +45,8 @@ if(!file_exists($temp_dir.$temp_folder)) {
 if(!file_exists($temp_dir.$temp_folder.SLASH."scales")) {
 	mkdir($temp_dir.$temp_folder.SLASH."scales");
 	}
+// 2026-11-18 Location of this file, so that csinstrument.php and csparameter.php can save it as soon as they change something (see csound_temp_changed()) - by Claude
+file_put_contents($temp_dir.$temp_folder.SLASH."_source",$dir."\n".$filename."\n");
 $dir_scales = $temp_dir.$temp_folder.SLASH."scales".SLASH;
 $need_to_save = FALSE;
 
@@ -340,6 +342,8 @@ foreach($instruments as $j => $instrument_object) {
 		}
 	set_argmax_argument($argmax_file,$CsoundInstrumentName[$j],$argmax[$j]);
 	$Instrument_ipmax = intval(cs_get($instrument,"ipmax",0));
+	// 2026-11-18 If parameters were changed (created, renamed, deleted or edited) and not yet saved, the temporary parameter files are newer than the file on disk, so they are kept. Otherwise reloading this page before the autosave recreated a renamed parameter under its old name, and a deleted one - fixed by Claude
+	if(file_exists($temp_dir.$temp_folder.SLASH."_changed")) $Instrument_ipmax = 0;
 	if($verbose) echo "Instrument ipmax = ".$Instrument_ipmax."<br />";
 	for($ip = 0; $ip < $Instrument_ipmax; $ip++) {
 		$fields = cs_parameter_fields($ip);
@@ -603,7 +607,7 @@ if($number_instruments > 0) {
 		$folder_this_instrument = $temp_dir.$temp_folder.SLASH.$CsoundInstrumentName[$j];
 		$argmax_file = $folder_this_instrument.SLASH."argmax.php";
 		$argmax_all = max_argument($argmax_file,$names);
-		echo "&nbsp;(".$argmax_all."&nbsp;args)</p>";
+		echo "&nbsp;(".$argmax_all."&nbsp;fields)</p>";
 		if(count($names) > 0) {
 			echo "<p>➡ <span class=\"red-text\"><big>";
 			foreach($names AS $this_name) {

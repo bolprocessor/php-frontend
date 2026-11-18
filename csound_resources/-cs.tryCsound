@@ -1,5 +1,5 @@
 {
-    "header": "// Bol Processor BP3\n// Csound resource file saved as \"-cs.tryCsound\". Date: 2024-08-12 08:56:26\n// Converted to JSON format. Date: 2026-11-11 14:35:31 GMT",
+    "header": "// Bol Processor BP3\n// Csound resource file saved as \"-cs.tryCsound\". Date: 2026-11-15 15:37:41 GMT",
     "Csound orchestra file": {
         "key": "CsoundOrchestraName",
         "value": "tryCsound.orc"
@@ -66,6 +66,126 @@
     },
     "Index of the instrument associated with MIDI channel 16 (-1 means none)": {
         "key": "WhichCsoundInstrumentForChannel[16]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 1 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[1]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 2 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[2]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 3 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[3]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 4 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[4]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 5 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[5]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 6 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[6]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 7 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[7]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 8 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[8]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 9 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[9]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 10 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[10]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 11 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[11]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 12 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[12]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 13 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[13]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 14 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[14]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 15 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[15]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 16 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[16]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 17 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[17]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 18 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[18]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 19 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[19]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 20 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[20]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 21 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[21]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 22 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[22]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 23 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[23]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 24 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[24]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 25 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[25]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 26 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[26]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 27 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[27]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 28 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[28]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 29 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[29]",
+        "value": -1
+    },
+    "Index of the instrument associated with part 30 (-1 means none)": {
+        "key": "WhichCsoundInstrumentForPart[30]",
         "value": -1
     },
     "Csound instruments": {
@@ -466,19 +586,19 @@
                 },
                 "Argument of start modulation": {
                     "key": "CsModulationStartIndex",
-                    "value": 11
+                    "value": 9
                 },
                 "Argument of end modulation": {
                     "key": "CsModulationEndIndex",
-                    "value": 12
+                    "value": 10
                 },
                 "Argument of start panoramic": {
                     "key": "CsPanoramicStartIndex",
-                    "value": 13
+                    "value": 11
                 },
                 "Argument of end panoramic": {
                     "key": "CsPanoramicEndIndex",
-                    "value": -1
+                    "value": 12
                 },
                 "pitchbendrange": {
                     "key": "pitchbendrange",
@@ -503,7 +623,7 @@
                 },
                 "Argument of panoramic table (-1 means empty)": {
                     "key": "panoramictable",
-                    "value": -1
+                    "value": 13
                 },
                 "Pitchbend GEN type": {
                     "key": "pitchbendGEN",
@@ -542,7 +662,7 @@
                 },
                 "Csound volume is logarithmic": {
                     "key": "rVolume.islogy",
-                    "value": 1,
+                    "value": 0,
                     "unit": "boolean"
                 },
                 "MIDI pressure is logarithmic": {
@@ -613,15 +733,15 @@
                 },
                 "MIDI to Csound volume mapping (number > 100000 means no mapping) #4": {
                     "key": "CsVolume[3]",
-                    "value": -24.0
+                    "value": 2147483647.0
                 },
                 "MIDI to Csound volume mapping (number > 100000 means no mapping) #5": {
                     "key": "CsVolume[4]",
-                    "value": 0.0
+                    "value": 2147483647.0
                 },
                 "MIDI to Csound volume mapping (number > 100000 means no mapping) #6": {
                     "key": "CsVolume[5]",
-                    "value": 24.0
+                    "value": 2147483647.0
                 },
                 "MIDI to Csound pressure mapping (number > 100000 means no mapping) #1": {
                     "key": "CsPressure[0]",
@@ -697,40 +817,7 @@
                 },
                 "Number of additional parameters": {
                     "key": "ipmax",
-                    "value": 1
-                },
-                "Name of additional parameter #1": {
-                    "key": "paramlist[0].name",
-                    "value": "blurb"
-                },
-                "Comment on additional parameter #1": {
-                    "key": "paramlist[0].comment",
-                    "value": "Test of \"blurb\" parameter"
-                },
-                "Start index of additional parameter #1": {
-                    "key": "paramlist[0].startindex",
-                    "value": 9
-                },
-                "End index of additional parameter #1": {
-                    "key": "paramlist[0].endindex",
-                    "value": 10
-                },
-                "Table index of additional parameter #1": {
-                    "key": "paramlist[0].table",
-                    "value": -1
-                },
-                "Default value of additional parameter #1": {
-                    "key": "paramlist[0].defaultvalue",
-                    "value": 0.0
-                },
-                "GEN type of additional parameter #1": {
-                    "key": "paramlist[0].GENtype",
-                    "value": 7
-                },
-                "Combination mode of additional parameter #1": {
-                    "key": "paramlist[0].combinationtype",
-                    "value": "ADD",
-                    "unit": "enum"
+                    "value": 0
                 }
             },
             {

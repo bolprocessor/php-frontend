@@ -131,8 +131,7 @@ if(isset($_POST['savecsound'])) {
 	$csound_score = $_POST['csound_score'];
 	fwrite($handle,$csound_score."\n");
 	fclose($handle);
-	$handle = fopen($temp_dir.$temp_folder.SLASH."_changed",'w');
-	fclose($handle);
+	so_temp_changed($temp_folder,$prototypes_file); // 2026-11-18 Saves the '-so' file at once - by Claude
 	}
 
 if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR isset($_POST['suppress_pitchbend']) OR isset($_POST['suppress_polyphonic_pressure']) OR isset($_POST['suppress_volume']) OR isset($_POST['suppress_modulation']) OR isset($_POST['suppress_panoramic']) OR isset($_POST['suppress_program']) OR isset($_POST['adjust_duration']) OR isset($_POST['adjust_beats']) OR isset($_POST['adjust_duration']) OR isset($_POST['silence_before']) OR isset($_POST['silence_after']) OR isset($_POST['add_allnotes_off']) OR isset($_POST['suppress_allnotes_off']) OR isset($_POST['quantize_NoteOn']) OR isset($_POST['delete_midi']) OR isset($_POST['cancel'])) {
@@ -318,7 +317,7 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 		$CoverBegMode = 1;
 		}
 	if($MaxCoverBeg < 0) $MaxCoverBeg = 0;
-	if($CoverBegMode == 0 AND $MaxCoverBeg > 99) $MaxCoverBeg = 0;
+	if($CoverBegMode == 0 AND $MaxCoverBeg > 100) $MaxCoverBeg = 0; // 2026-11-18 100% is valid (the default in the console), but was replaced by 0%, which forbids covering - fixed by Claude
 	if($CoverBegMode == -1 AND $MaxCoverBeg > $Duration) $MaxCoverBeg = 0;
 	fwrite($handle,$CoverBegMode."\n");
 	fwrite($handle,$MaxCoverBeg."\n");
@@ -333,7 +332,7 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 		$CoverEndMode = 1;
 		}
 	if($MaxCoverEnd < 0) $MaxCoverEnd = 0;
-	if($CoverEndMode == 0 AND $MaxCoverEnd > 99) $MaxCoverEnd = 0;
+	if($CoverEndMode == 0 AND $MaxCoverEnd > 100) $MaxCoverEnd = 0; // 2026-11-18 100% is valid (the default in the console), but was replaced by 0%, which forbids covering - fixed by Claude
 	if($CoverEndMode == -1 AND $MaxCoverEnd > $Duration) $MaxCoverEnd = 0;
 	fwrite($handle,$CoverEndMode."\n");
 	fwrite($handle,$MaxCoverEnd."\n");
@@ -487,8 +486,7 @@ if(isset($_POST['savethisprototype']) OR isset($_POST['suppress_pressure']) OR i
 	$line = "<HTML>".$object_comment."</HTML>\n";
 	fwrite($handle,$line."\n");
 	fclose($handle);
-	$handle = fopen($temp_dir.$temp_folder.SLASH."_changed",'w');
-	fclose($handle);
+	so_temp_changed($temp_folder,$prototypes_file); // 2026-11-18 Saves the '-so' file at once - by Claude
 	}
 
 echo "</p>";
@@ -628,7 +626,7 @@ echo "<form method=\"post\" action=\"prototype.php\" enctype=\"multipart/form-da
 
 echo "<p style=\"text-align:left;\"><input class=\"save big\" type=\"submit\" name=\"savethisprototype\" value=\"SAVE THIS PROTOTYPE\"></p>";
 
-/* echo "<p style=\"text-align:left;\"><input class=\"edit\" type=\"submit\" name=\"playexpression\" value=\"PLAY THIS EXPRESSION (real-time MIDI):\">&nbsp;➡&nbsp;<input type=\"text\" name=\"expression\" size=\"30\" value=\"".$expression."\"></p>"; */
+// echo "<p style=\"text-align:left;\"><input class=\"edit\" type=\"submit\" name=\"playexpression\" value=\"PLAY THIS EXPRESSION (real-time MIDI):\">&nbsp;➡&nbsp;<input type=\"text\" name=\"expression\" size=\"30\" value=\"".$expression."\"></p>";
 
 echo "<input type=\"hidden\" name=\"object_name\" value=\"".$object_name."\">";
 echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";
@@ -873,7 +871,7 @@ echo ">Set pivot:<br />";
 echo "&nbsp;<input type=\"radio\" name=\"PivMode\" value=\"-1\"";
 if($pivspec == 1 AND $PivMode == -1) {
 	echo " checked";
-	$value = intval($PivPos);
+	$value = strval(round(floatval($PivPos),4)); // 2026-11-18 intval() truncated decimals, e.g. 45.45% was saved as 45% - fixed by Claude
 	}
 else $value = '';
 echo ">&nbsp;<input type=\"text\" name=\"PivPos1\" size=\"5\" value=\"".$value."\"> ms from beginning<br />";
@@ -881,7 +879,7 @@ echo "&nbsp;<input type=\"radio\" name=\"PivMode\" value=\"0\"";
 $value = '';
 if($pivspec == 1 AND $PivMode == 0) {
 	echo " checked";
-	$value = intval($PivPos);
+	$value = strval(round(floatval($PivPos),4)); // 2026-11-18 intval() truncated decimals, e.g. 45.45% was saved as 45% - fixed by Claude
 	}
 echo ">&nbsp;<input type=\"text\" name=\"PivPos2\" size=\"5\" value=\"".$value."\"> % duration from beginning<br /><br />";
 
@@ -936,7 +934,7 @@ if($alpha_controller) echo " checked";
 echo ">Send dilation ratio to controller ";
 echo "&nbsp;<input type=\"text\" name=\"AlphaCtrlNr\" size=\"5\" value=\"".$value_controller."\"> channel <input type=\"text\" name=\"AlphaCtrlChan\" size=\"5\" value=\"".$value_channel."\"><br />";
 
-/* echo "<p>RescaleMode = <input type=\"text\" name=\"RescaleMode\" size=\"5\" value=\"".$RescaleMode."\"></p>"; */
+// echo "<p>RescaleMode = <input type=\"text\" name=\"RescaleMode\" size=\"5\" value=\"".$RescaleMode."\"></p>";
 
 echo "<p>MIDI CHANGES</p>";
 
@@ -1075,7 +1073,7 @@ echo "<input type=\"radio\" name=\"CoverBeg\" value=\"0\"";
 if($CoverBeg == 0) echo " checked";
 echo ">Never cover<br />";
 echo "<input type=\"radio\" name=\"CoverBegMode\" value=\"-1\"";
-if($CoverBeg AND $CoverBegMode == -1 AND $MaxCoverBeg > 0) {
+if($CoverBeg AND $CoverBegMode == -1) { // 2026-11-18 A limit of 0 is shown, and kept when saving. It was hidden, and saving made the limit irrelevant (unlimited) - fixed by Claude
 	echo " checked";
 	$value = $MaxCoverBeg;
 	}
@@ -1083,7 +1081,7 @@ else $value = '';
 echo ">Not more than";
 echo "&nbsp;<input type=\"text\" name=\"MaxCoverBeg1\" size=\"5\" value=\"".$value."\"> ms<br />";
 echo "<input type=\"radio\" name=\"CoverBegMode\" value=\"0\"";
-if($CoverBeg AND $CoverBegMode == 0 AND $MaxCoverBeg > 0) {
+if($CoverBeg AND $CoverBegMode == 0) { // 2026-11-18 A limit of 0 is shown, and kept when saving. It was hidden, and saving made the limit irrelevant (unlimited) - fixed by Claude
 	echo " checked";
 	$value = $MaxCoverBeg;
 	}
@@ -1105,7 +1103,7 @@ echo "<input type=\"radio\" name=\"CoverEnd\" value=\"0\"";
 if($CoverEnd == 0) echo " checked";
 echo ">Never cover<br />";
 echo "<input type=\"radio\" name=\"CoverEndMode\" value=\"-1\"";
-if($CoverEnd AND $CoverEndMode == -1 AND $MaxCoverEnd > 0) {
+if($CoverEnd AND $CoverEndMode == -1) { // 2026-11-18 A limit of 0 is shown, and kept when saving. It was hidden, and saving made the limit irrelevant (unlimited) - fixed by Claude
 	echo " checked";
 	$value = $MaxCoverEnd;
 	}
@@ -1113,7 +1111,7 @@ else $value = '';
 echo ">Not more than";
 echo "&nbsp;<input type=\"text\" name=\"MaxCoverEnd1\" size=\"5\" value=\"".$value."\"> ms<br />";
 echo "<input type=\"radio\" name=\"CoverEndMode\" value=\"0\"";
-if($CoverEnd AND $CoverEndMode == 0 AND $MaxCoverEnd > 0) {
+if($CoverEnd AND $CoverEndMode == 0) { // 2026-11-18 A limit of 0 is shown, and kept when saving. It was hidden, and saving made the limit irrelevant (unlimited) - fixed by Claude
 	echo " checked";
 	$value = $MaxCoverEnd;
 	}
@@ -1133,7 +1131,7 @@ if($TruncBeg == 0) echo " checked";
 echo ">Never truncate<br />";
 
 echo "<input type=\"radio\" name=\"TruncBegMode\" value=\"-1\"";
-if($TruncBeg AND $TruncBegMode == -1 AND $MaxTruncBeg > 0) {
+if($TruncBeg AND $TruncBegMode == -1) { // 2026-11-18 A limit of 0 is shown, and kept when saving. It was hidden, and saving made the limit irrelevant (unlimited) - fixed by Claude
 	echo " checked";
 	$value = $MaxTruncBeg;
 	}
@@ -1141,7 +1139,7 @@ else $value = '';
 echo ">Not more than";
 echo "&nbsp;<input type=\"text\" name=\"MaxTruncBeg1\" size=\"5\" value=\"".$value."\"> ms<br />";
 echo "<input type=\"radio\" name=\"TruncBegMode\" value=\"0\"";
-if($TruncBeg AND $TruncBegMode == 0 AND $MaxTruncBeg > 0) {
+if($TruncBeg AND $TruncBegMode == 0) { // 2026-11-18 A limit of 0 is shown, and kept when saving. It was hidden, and saving made the limit irrelevant (unlimited) - fixed by Claude
 	echo " checked";
 	$value = $MaxTruncBeg;
 	}
@@ -1159,7 +1157,7 @@ echo "<input type=\"radio\" name=\"TruncEnd\" value=\"0\"";
 if($TruncEnd == 0) echo " checked";
 echo ">Never truncate<br />";
 echo "<input type=\"radio\" name=\"TruncEndMode\" value=\"-1\"";
-if($TruncEnd AND $TruncEndMode == -1 AND $MaxTruncEnd > 0) {
+if($TruncEnd AND $TruncEndMode == -1) { // 2026-11-18 A limit of 0 is shown, and kept when saving. It was hidden, and saving made the limit irrelevant (unlimited) - fixed by Claude
 	echo " checked";
 	$value = $MaxTruncEnd;
 	}
@@ -1167,7 +1165,7 @@ else $value = '';
 echo ">Not more than";
 echo "&nbsp;<input type=\"text\" name=\"MaxTruncEnd1\" size=\"5\" value=\"".$value."\"> ms<br />";
 echo "<input type=\"radio\" name=\"TruncEndMode\" value=\"0\"";
-if($TruncEnd AND $TruncEndMode == 0 AND $MaxTruncEnd > 0) {
+if($TruncEnd AND $TruncEndMode == 0) { // 2026-11-18 A limit of 0 is shown, and kept when saving. It was hidden, and saving made the limit irrelevant (unlimited) - fixed by Claude
 	echo " checked";
 	$value = $MaxTruncEnd;
 	}
@@ -2096,7 +2094,7 @@ echo "</form>";
 echo "<hr>";
 echo "<p id=\"csound\">CSOUND</p>";
 $csound_score = @file_get_contents($csound_file);
-$csound_score = fix_csound_score($csound_score,$csound_file,$temp_dir,$temp_folder);
+$csound_score = fix_csound_score($csound_score,$csound_file,$temp_dir,$temp_folder,$prototypes_file);
 $csound_period = 0;
 $time_max_csound = 0;
 $table = explode(chr(10),$csound_score);
@@ -2164,7 +2162,7 @@ echo "</form>";
 echo "<script>
 document.getElementById('csound-form').addEventListener('submit', function (event) {
     if (!event.submitter || event.submitter.name !== 'createcsound') return;
-    /* An existing score: submit normally so PHP displays its warning. */
+    // An existing score: submit normally so PHP displays its warning.
     if (event.target.elements['csound_score'].value.trim() !== '') return;
     event.preventDefault();
     document.getElementById('csound-warning').style.display = 'block';
@@ -2181,7 +2179,7 @@ document.getElementById('csound-form').addEventListener('submit', function (even
 });
 </script>";
 
-function fix_csound_score($csound_score,$csound_file,$temp_dir,$temp_folder) {
+function fix_csound_score($csound_score,$csound_file,$temp_dir,$temp_folder,$prototypes_file) {
 	$table = explode(chr(10),$csound_score);
 	$changed = FALSE;
 	$table2 = array();
@@ -2215,8 +2213,7 @@ function fix_csound_score($csound_score,$csound_file,$temp_dir,$temp_folder) {
 		if($handle) {
 			fwrite($handle,$score."\n");
 			fclose($handle);
-			$handle = fopen($temp_dir.$temp_folder.SLASH."_changed",'w');
-			fclose($handle);
+			so_temp_changed($temp_folder,$prototypes_file); // 2026-11-18 Saves the '-so' file at once - by Claude
 			}
 		}
 	return $score;

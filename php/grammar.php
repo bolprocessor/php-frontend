@@ -137,6 +137,15 @@ if(isset($_POST['apply_changes_instructions'])) {
 	$no_save_midiresources = TRUE;
 	}
 
+if(isset($_POST['set_csound_file']) AND isset($_POST['new_csound_file']) AND $_POST['new_csound_file'] <> '') {
+	// "Change instruments": the selected "-cs" file is added on top of the grammar (2026-11-18)
+	$content = @file_get_contents($this_file,TRUE);
+	$extract_data = extract_data(TRUE,TRUE,$content);
+	$_POST['thistext'] = add_csound_resource_to_content($extract_data['content'],basename($_POST['new_csound_file']));
+	$no_save_midiresources = TRUE;
+	$need_to_save = TRUE;
+	}
+
 $refresh_file = $temp_dir."trace_".my_session_id()."_".$filename."_midiport_refresh";
 if(isset($_POST['savemidiport'])) {
 	save_midiressources($filename,TRUE);
@@ -446,12 +455,17 @@ if($file_format <> "rtmidi" AND $file_format <> "csoundrt") {
 		}
 	echo "<p>Name of output file (with proper extension):<br />";
 	echo "<input type=\"text\" name=\"output_file\" size=\"25\" value=\"".$output_file."\"></p>";
+	if($file_format == "csound") {
+		echo "<p>";
+		csound_orchestra_line(($csound_orchestra <> '') ? $csound_orchestra : $csound_default_orchestra,$csound_file);
+		echo "</p>";
+		}
 	}
 else if($file_format == "csoundrt") {
 	// Real-time Csound: notes are played by Csound, MIDI ports are used for interaction
 	echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
 	$this_orchestra = ($csound_orchestra <> '') ? $csound_orchestra : $csound_default_orchestra;
-	csoundrt_panel($this_orchestra);
+	csoundrt_panel($this_orchestra,$csound_file);
 	display_midi_ports($filename);
 	}
 else {
@@ -736,7 +750,7 @@ if($file_format == "csound") {
 	}
 echo "</div>";
 
-$content = show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,$filename,$file_format);
+$content = show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,$filename,$file_format,($csound_orchestra <> '') ? $csound_orchestra : $csound_default_orchestra);
 	
 echo "<input type=\"hidden\" name=\"produce_all_items\" value=\"".$produce_all_items."\">";
 echo "<input type=\"hidden\" name=\"show_production\" value=\"".$show_production."\">";

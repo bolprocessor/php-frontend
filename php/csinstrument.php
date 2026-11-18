@@ -63,8 +63,7 @@ if(isset($_POST['create_parameter'])) {
 			foreach(cs_values_to_lines(cs_parameter_fields(0),cs_new_parameter(0,$new_parameter)) as $line) fwrite($handle,$line."\n");
 			fclose($handle);
 			chmod($new_parameter_file,$permissions);
-			$handle = fopen($file_changed,"w");
-			if($handle) fclose($handle);
+			csound_temp_changed($temp_folder); // 2026-11-18 Saves the '-cs' file at once - by Claude
 			}
 		}
 	}
@@ -83,28 +82,41 @@ if(isset($_POST['delete_parameter'])) {
 		file_put_contents($argmax_file,implode('',$lines),LOCK_EX);
 		}
 	$exists_name = list_of_parameter_names($temp_dir,$temp_folder);
-	$handle = fopen($file_changed,"w");
-	if($handle) fclose($handle);
+	csound_temp_changed($temp_folder); // 2026-11-18 Saves the '-cs' file at once - by Claude
 	}
 
-if (isset($_POST['rename_parameter'])) {
-    $parameter_name = trim($_POST['parameter_name']);
-    $new_parameter_name = trim(basename($_POST['new_parameter_name']));
-    if ($parameter_name !== '' && $new_parameter_name !== '' && $parameter_name !== $new_parameter_name) {
-        $this_parameter_file = $folder_this_instrument . SLASH . $parameter_name . ".txt";
-        $new_parameter_file = $folder_this_instrument . SLASH . $new_parameter_name . ".txt";
-        if (rename($this_parameter_file, $new_parameter_file)) {
-            $argmax_file = $folder_this_instrument . SLASH . "argmax.php";
-            $contents = file_get_contents($argmax_file);
-            if ($contents !== false) {
-                $contents = str_replace($parameter_name, $new_parameter_name, $contents);
-                file_put_contents($argmax_file, $contents,LOCK_EX);
-            	}
-			unlink($this_parameter_file);
-            $exists_name = list_of_parameter_names($temp_dir, $temp_folder);
-			$handle = fopen($file_changed,"w");
-			if($handle) fclose($handle);
+if(isset($_POST['rename_parameter'])) {
+	// 2026-11-18 The name is also changed in the first line of the parameter file, which is the one saved in the '-cs' file. It was left unchanged, so that saving the '-cs' file kept the old name, and the page then recreated the old parameter next to the renamed one, giving two parameters with the same name. The new name is cleaned like that of a new parameter, and may not be that of an existing parameter - fixed by Claude
+	$parameter_name = trim($_POST['parameter_name']);
+	$new_parameter_name = trim(basename($_POST['new_parameter_name']));
+	$new_parameter_name = str_replace(' ','_',$new_parameter_name);
+	$new_parameter_name = str_replace('-','_',$new_parameter_name);
+	$new_parameter_name = str_replace('"','',$new_parameter_name);
+	$this_parameter_file = $folder_this_instrument.SLASH.$parameter_name.".txt";
+	$new_parameter_file = $folder_this_instrument.SLASH.$new_parameter_name.".txt";
+	if($parameter_name == '' OR $new_parameter_name == '' OR $parameter_name == $new_parameter_name) {
+		// Nothing to do
+		}
+	else if(strcasecmp($parameter_name,$new_parameter_name) <> 0 AND (isset($exists_name[$new_parameter_name]) OR file_exists($new_parameter_file))) { // A change of case only is accepted, although macOS file names ignore case
+		echo "<p><span class=\"red-text\">A parameter with the same name “<span class=\"green-text\">".$new_parameter_name."</span>” already exists (perhaps in another instrument, or deleted)</span></p>";
+		}
+	else if(!file_exists($this_parameter_file)) {
+		echo "<p><span class=\"red-text\">Parameter “<span class=\"green-text\">".$parameter_name."</span>” was not found</span></p>";
+		}
+	else if(rename($this_parameter_file,$new_parameter_file)) {
+		$lines = file($new_parameter_file);
+		if($lines !== false AND count($lines) > 0) {
+			$lines[0] = $new_parameter_name."\n";
+			file_put_contents($new_parameter_file,implode('',$lines),LOCK_EX);
 			}
+		$contents = @file_get_contents($argmax_file);
+		if($contents !== false) {
+			$contents = str_replace('$last_argument["'.$parameter_name.'"]','$last_argument["'.$new_parameter_name.'"]',$contents);
+			file_put_contents($argmax_file,$contents,LOCK_EX);
+			}
+		echo "<p><span class=\"red-text\">Renamed </span><span class=\"green-text\"><big>“".$parameter_name."”</big></span> <span class=\"red-text\">as</span> <span class=\"green-text\"><big>“".$new_parameter_name."”</big></span></p>";
+		$exists_name = list_of_parameter_names($temp_dir,$temp_folder);
+		csound_temp_changed($temp_folder); // 2026-11-18 Saves the '-cs' file at once - by Claude
 		}
 	}
 
@@ -122,6 +134,8 @@ if(isset($_POST['restore'])) {
 		rename($this_parameter_file,str_replace(".old",'',$this_parameter_file));
 		}
 	echo "</p>";
+	$exists_name = list_of_parameter_names($temp_dir,$temp_folder);
+	csound_temp_changed($temp_folder); // 2026-11-18 Restored parameters were not saved, even by the autosave, because '_changed' was not created - fixed by Claude
 	}
 
 if(isset($_POST['saveinstrument'])) {
@@ -266,8 +280,7 @@ if(isset($_POST['saveinstrument'])) {
 	fclose($handle);
 	chmod($instrument_file,$permissions);
 	set_argmax_argument($argmax_file,$instrument_name,$argmax);
-	$handle = fopen($file_changed,"w");
-	if($handle) fclose($handle);
+	csound_temp_changed($temp_folder); // 2026-11-18 Saves the '-cs' file at once - by Claude
 	}
 
 $content = file_get_contents($instrument_file);
@@ -295,13 +308,13 @@ if(isset($_POST['instrument_index'])) $instrument_index = $_POST['instrument_ind
 // echo "<input type=\"hidden\" name=\"instrument_index\" value=\"".$instrument_index."\">";
 if($verbose) echo "Instrument index = ".$instrument_index."<br />";
 $InstrumentDilationRatioIndex = $table[++$i];
-if($verbose) echo "Instrument dilation ratio argument = ".$InstrumentDilationRatioIndex."<br />";
+if($verbose) echo "Instrument dilation ratio field = ".$InstrumentDilationRatioIndex."<br />";
 $InstrumentAttackVelocityIndex = $table[++$i];
-if($verbose) echo "Instrument attack velocity argument = ".$InstrumentAttackVelocityIndex."<br />";
+if($verbose) echo "Instrument attack velocity field = ".$InstrumentAttackVelocityIndex."<br />";
 $InstrumentReleaseVelocityIndex = $table[++$i];
-if($verbose) echo "Instrument release velocity argument = ".$InstrumentReleaseVelocityIndex."<br />";
+if($verbose) echo "Instrument release velocity field = ".$InstrumentReleaseVelocityIndex."<br />";
 $InstrumentPitchIndex = $table[++$i];
-if($verbose) echo "Instrument pitch argument = ".$InstrumentPitchIndex."<br />";
+if($verbose) echo "Instrument pitch field = ".$InstrumentPitchIndex."<br />";
 $InstrumentPitchFormat = $table[++$i];
 if($verbose) echo "Instrument pitch format = ".$InstrumentPitchFormat."<br />";
 $InstrumentPitchBendRange = $table[++$i];
@@ -327,35 +340,35 @@ if($verbose) echo "Instrument panoramic islogx = ".$InstrumentPanoramicIsLogX."<
 $InstrumentPanoramicIsLogY = $table[++$i];
 if($verbose) echo "Instrument panoramic islogy = ".$InstrumentPanoramicIsLogY."<br />";
 $InstrumentPitchbendStartIndex = $table[++$i];
-if($verbose) echo "Instrument pitchbend start argument = ".$InstrumentPitchbendStartIndex."<br />";
+if($verbose) echo "Instrument pitchbend start field = ".$InstrumentPitchbendStartIndex."<br />";
 $InstrumentVolumeStartIndex = $table[++$i];
-if($verbose) echo "Instrument volume start argument = ".$InstrumentVolumeStartIndex."<br />";
+if($verbose) echo "Instrument volume start field = ".$InstrumentVolumeStartIndex."<br />";
 $InstrumentPressureStartIndex = $table[++$i];
-if($verbose) echo "Instrument pressure start argument = ".$InstrumentPressureStartIndex."<br />";
+if($verbose) echo "Instrument pressure start field = ".$InstrumentPressureStartIndex."<br />";
 $InstrumentModulationStartIndex = $table[++$i];
-if($verbose) echo "Instrument modulation start argument = ".$InstrumentModulationStartIndex."<br />";
+if($verbose) echo "Instrument modulation start field = ".$InstrumentModulationStartIndex."<br />";
 $InstrumentPanoramicStartIndex = $table[++$i];
-if($verbose) echo "Instrument panoramic start argument = ".$InstrumentPanoramicStartIndex."<br />";
+if($verbose) echo "Instrument panoramic start field = ".$InstrumentPanoramicStartIndex."<br />";
 $InstrumentPitchbendEndIndex = $table[++$i];
-if($verbose) echo "Instrument pitchbend end argument = ".$InstrumentPitchbendEndIndex."<br />";
+if($verbose) echo "Instrument pitchbend end field = ".$InstrumentPitchbendEndIndex."<br />";
 $InstrumentVolumeEndIndex = $table[++$i];
-if($verbose) echo "Instrument volume end argument = ".$InstrumentVolumeEndIndex."<br />";
+if($verbose) echo "Instrument volume end field = ".$InstrumentVolumeEndIndex."<br />";
 $InstrumentPressureEndIndex = $table[++$i];
-if($verbose) echo "Instrument pressure end argument = ".$InstrumentPressureEndIndex."<br />";
+if($verbose) echo "Instrument pressure end field = ".$InstrumentPressureEndIndex."<br />";
 $InstrumentModulationEndIndex = $table[++$i];
-if($verbose) echo "Instrument modulation end argument = ".$InstrumentModulationEndIndex."<br />";
+if($verbose) echo "Instrument modulation end field = ".$InstrumentModulationEndIndex."<br />";
 $InstrumentPanoramicEndIndex = $table[++$i];
-if($verbose) echo "Instrument panoramic end argument = ".$InstrumentPanoramicEndIndex."<br />";
+if($verbose) echo "Instrument panoramic end field = ".$InstrumentPanoramicEndIndex."<br />";
 $InstrumentPitchbendTableIndex = $table[++$i];
-if($verbose) echo "Instrument pitchbend table argument = ".$InstrumentPitchbendTableIndex."<br />";
+if($verbose) echo "Instrument pitchbend table field = ".$InstrumentPitchbendTableIndex."<br />";
 $InstrumentVolumeTableIndex = $table[++$i];
-if($verbose) echo "Instrument volume table argument = ".$InstrumentVolumeTableIndex."<br />";
+if($verbose) echo "Instrument volume table field = ".$InstrumentVolumeTableIndex."<br />";
 $InstrumentPressureTableIndex = $table[++$i];
-if($verbose) echo "Instrument pressure table argument = ".$InstrumentPressureTableIndex."<br />";
+if($verbose) echo "Instrument pressure table field = ".$InstrumentPressureTableIndex."<br />";
 $InstrumentModulationTableIndex = $table[++$i];
-if($verbose) echo "Instrument modulation table argument = ".$InstrumentModulationTableIndex."<br />";
+if($verbose) echo "Instrument modulation table field = ".$InstrumentModulationTableIndex."<br />";
 $InstrumentPanoramicTableIndex = $table[++$i];
-if($verbose) echo "Instrument panoramic table argument = ".$InstrumentPanoramicTableIndex."<br />";
+if($verbose) echo "Instrument panoramic table field = ".$InstrumentPanoramicTableIndex."<br />";
 $InstrumentPitchbendGEN = $table[++$i];
 if($verbose) echo "Instrument pitchbendGEN = ".$InstrumentPitchbendGEN."<br />";
 $InstrumentVolumeGEN = $table[++$i];
@@ -389,18 +402,18 @@ echo "<p style=\"text-align:right;\">Index of this instrument: <input type=\"tex
 // echo "<p style=\"text-align:right;\">Index of this instrument: <input type=\"text\" name=\"InstrumentIndex\" size=\"4\" value=\"".$instrument_index."\"><br/>";
 $x = $InstrumentDilationRatioIndex;
 if($x == -1) $x = '';
-echo "Dilation ratio argument: <input type=\"text\" name=\"InstrumentDilationRatioIndex\" size=\"4\" value=\"".$x."\"><br/>";
+echo "Dilation ratio field: <input type=\"text\" name=\"InstrumentDilationRatioIndex\" size=\"4\" value=\"".$x."\"><br/>";
 $x = $InstrumentAttackVelocityIndex;
 if($x == -1) $x = '';
-echo "Attack velocity argument: <input type=\"text\" name=\"InstrumentAttackVelocityIndex\" size=\"4\" value=\"".$x."\"><br />";
+echo "Attack velocity field: <input type=\"text\" name=\"InstrumentAttackVelocityIndex\" size=\"4\" value=\"".$x."\"><br />";
 $x = $InstrumentReleaseVelocityIndex;
 if($x == -1) $x = '';
-echo "Release velocity argument: <input type=\"text\" name=\"InstrumentReleaseVelocityIndex\" size=\"4\" value=\"".$x."\"></p>";
+echo "Release velocity field: <input type=\"text\" name=\"InstrumentReleaseVelocityIndex\" size=\"4\" value=\"".$x."\"></p>";
 echo "</td>";
 echo "<td>";
 echo "<table>";
 echo "<tr>";
-echo "<td>Instrument pitch argument:</td>";
+echo "<td>Instrument pitch field:</td>";
 echo "<td style=\"padding: 5px;\"><input type=\"text\" name=\"InstrumentPitchIndex\" size=\"4\" value=\"".$InstrumentPitchIndex."\"></td>";
 echo "</tr><tr>";
 echo "<td style=\"text-align:right;\">Pitch format:</td>";

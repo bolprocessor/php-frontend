@@ -228,7 +228,7 @@ function csound_errors_report($summary,$csound_file,$orchestra) {
 		$report[] = htmlspecialchars($message['example']).($message['count'] > 1 ? " (".$message['count']." times)" : "");
 		}
 	$which = ($csound_file <> '') ? "the instruments of ‘".htmlspecialchars($csound_file)."’" : "the default instrument";
-	$report[] = "Maybe ".$which." do not match orchestra ‘".htmlspecialchars($orchestra)."’: check that the arguments (p-fields) of each instrument are the ones expected by the orchestra.";
+	$report[] = "Maybe ".$which." do not match orchestra ‘".htmlspecialchars($orchestra)."’: check that the fields (p4, p5…) of each instrument are the ones expected by the orchestra.";
 	return $report;
 	}
 

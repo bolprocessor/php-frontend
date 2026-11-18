@@ -137,6 +137,12 @@ else {
 		rename($dir.$csound_orchestra,$dir_csound_resources.$csound_orchestra);
 		sleep(1);
 		}
+	// 2026-11-18 Without a '-cs' file, Csound output uses the default orchestra "0-default.orc", whose instruments
+	// are described by CSOUND_DEFAULT_RESOURCE: it supplies the parameters of the piano and flute (velocity, modulation, panoramic)
+	if($csound_file == '' AND ($file_format == "csound" OR $file_format == "csoundrt")
+			AND ($csound_orchestra == '' OR $csound_orchestra == "0-default.orc")
+			AND file_exists($dir_csound_resources.CSOUND_DEFAULT_RESOURCE))
+		$csound_file = CSOUND_DEFAULT_RESOURCE;
 
 	$grammar_name = str_replace(" ","_",$grammar_name);
 	$data_name = str_replace(" ","_",$data_name);

@@ -76,6 +76,7 @@ else {
 	echo "<table class=\"thinborder\"><tr>";
 	echo "<td style=\"padding:1em; white-space:nowrap; text-align:center; vertical-align:middle; border-radius:1em;\">";
 	echo "<h2><i>Welcome to</i></h2><h2>Bol Processor ‘BP3’</h2>";
+	echo "<p style=\"text-align:center;\"><a target=\"_blank\" class=\"linkdotted\" href=\"../Credits.txt\">Credits</a></p>";
 	echo "<span class=\"night\"><img title=\"Asad Ali Khan (binkar)\" src=\"pict/Asad-Ali-binkar.png\" width=\"120px;\"/></span>";
 	echo "<span class=\"day\"><img src=\"pict/playing-piano.png\" width=\"120px;\"/></span>";
 	echo "</td>";

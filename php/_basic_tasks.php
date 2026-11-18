@@ -83,6 +83,8 @@ if(isset($_POST['csound_path_change'])) {
 
 // Csound: the Bol Processor requires CSOUND_MIN_VERSION or later, see check_csound() (2026-11-14)
 define("CSOUND_MIN_VERSION","7.0");
+// Csound resource file describing the instruments of "0-default.orc", attached by produce.php when a project names no '-cs' file (2026-11-18)
+define("CSOUND_DEFAULT_RESOURCE","-cs.0-default");
 // Real-time Csound: functions starting and stopping the Csound server (2026-11-16)
 require_once("_csoundrt.php");
 // $csound_path is the absolute path of the folder containing Csound on all systems
@@ -244,6 +246,10 @@ foreach($dircontent as $thisfile) {
 			}
 		}
 	}
+
+// 2026-11-18 Delete files older than 7 days in the output folder chosen in the settings
+if(output_folder_cleanable($output_folder))
+	delete_old_files($bp_application_path.$output_folder,$now - (7 * 24 * 3600));
 
 if(isset($_GET['path'])) $path = urldecode($_GET['path']);
 else $path = '';
@@ -1291,6 +1297,47 @@ function my_rmdir($src) {
     return;
 	}
 
+function output_folder_cleanable($folder) {
+	// 2026-11-18 The output folder is cleaned by delete_old_files(). Refuse folders of the program, or that may contain projects, in case one of them has been chosen as the output folder.
+	$folder = trim($folder);
+	if($folder == '' OR $folder == '.' OR is_integer(strpos($folder,"..")) OR $folder[0] == '/' OR $folder[0] == '\\' OR is_integer(strpos($folder,':'))) return FALSE;
+	$top = preg_split("/[\/\\\\]/",$folder)[0];
+	if(hidden_directory($top)) return FALSE;
+	if(is_integer($pos=strpos($top,"BP2-")) AND $pos == 0) return FALSE;
+	switch($top) {
+		case "resources":
+		case "trash_bolprocessor":
+		case "scripts":
+		case "ctests":
+		case "data":
+		case "my_data":
+		case "bp_old_versions":
+		case "bp_trace_versions":
+		case "Csound examples":
+			return FALSE;
+		}
+	return TRUE;
+	}
+
+function delete_old_files($folder,$limit) {
+	// 2026-11-18 Deletes files modified before date $limit in $folder and its subfolders, and the subfolders left empty
+	if(!is_dir($folder)) return;
+	$dircontent = scandir($folder);
+	foreach($dircontent as $thisfile) {
+		if($thisfile == '.' OR $thisfile == ".." OR $thisfile == ".DS_Store") continue;
+		$full = $folder.SLASH.$thisfile;
+		if(is_dir($full)) {
+			delete_old_files($full,$limit);
+			if(count(array_diff(scandir($full),array('.','..','.DS_Store'))) == 0) {
+				@unlink($full.SLASH.".DS_Store");
+				@rmdir($full);
+				}
+			}
+		else if(filemtime($full) < $limit) @unlink($full);
+		}
+	return;
+	}
+
 function delete_folder($folder,$all) {
 	if(!file_exists($folder)) return;
 	$dircontent = scandir($folder);
@@ -1303,8 +1350,9 @@ function delete_folder($folder,$all) {
 	return;
 	}
 
-function SaveObjectPrototypes($verbose,$dir,$filename,$temp_folder,$force) {
+function SaveObjectPrototypes($verbose,$dir,$filename,$temp_folder,$force,$page = NULL) {
 	// 2026-11-12 Sound-object prototypes are saved in JSON format. Values are stored by their key, see so_data_to_json()
+	// 2026-11-18 '$page' gives the values of the form of objects.php (named as in this form). By default they are read from $_POST - by Claude
 	global $top_header,$test,$temp_dir,$csound_resources,$permissions;
 	// 2026-11-10 Without the temporary folder (deleted as old), the file would be saved without its prototypes
 	if(!is_dir($temp_dir.$temp_folder)) return "missing";
@@ -1324,15 +1372,16 @@ function SaveObjectPrototypes($verbose,$dir,$filename,$temp_folder,$force) {
 	fclose($handle);
 	$file_header = $top_header."\n// Object prototypes file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s')." GMT";
 	$data = array();
+	if($page === NULL) $page = $_POST;
 	try {
-		$data['PrototypeTickKey'] = so_line_to_value("int",$_POST['PrototypeTickKey'],"PrototypeTickKey");
-		$data['PrototypeTickChannel'] = so_line_to_value("int",$_POST['PrototypeTickChannel'],"PrototypeTickChannel");
-		$data['PrototypeTickVelocity'] = so_line_to_value("int",$_POST['PrototypeTickVelocity'],"PrototypeTickVelocity");
-		$CsoundInstruments_filename = trim($_POST['CsoundInstruments_filename']);
+		$data['PrototypeTickKey'] = so_line_to_value("int",$page['PrototypeTickKey'],"PrototypeTickKey");
+		$data['PrototypeTickChannel'] = so_line_to_value("int",$page['PrototypeTickChannel'],"PrototypeTickChannel");
+		$data['PrototypeTickVelocity'] = so_line_to_value("int",$page['PrototypeTickVelocity'],"PrototypeTickVelocity");
+		$CsoundInstruments_filename = trim($page['CsoundInstruments_filename']);
 		if(!is_integer($pos=strpos($CsoundInstruments_filename,$csound_resources)) AND $CsoundInstruments_filename <> '')
 			$CsoundInstruments_filename = $csound_resources.SLASH.$CsoundInstruments_filename;
 		$data['CsoundInstrumentsFile'] = $CsoundInstruments_filename;
-		$data['PrototypesComment'] = trim($_POST['comment_on_file']);
+		$data['PrototypesComment'] = trim($page['comment_on_file']);
 		// Prototypes are read from the temporary files edited by prototype.php
 		$data['Prototypes'] = array();
 		$dircontent = scandir($temp_dir.$temp_folder);
@@ -1382,8 +1431,27 @@ function SaveObjectPrototypes($verbose,$dir,$filename,$temp_folder,$force) {
 	return "saved";
 	}
 
-function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder,$force) {
+function so_temp_changed($temp_folder,$prototypes_file) {
+	// 2026-11-18 Called by prototype.php when a prototype has been changed in the temporary folder of a '-so' file. The file is saved at once, with the other values (tick, Csound resource file, comment on the file) it has on disk, which prototype.php doesn't change. Previously it was saved by the autosave of objects.php within 30 seconds, and reloading objects.php before discarded the changes. If it can't be saved now, '_changed' tells the autosave to do it - by Claude
+	global $temp_dir;
+	$handle = fopen($temp_dir.$temp_folder.SLASH."_changed","w");
+	if($handle) fclose($handle);
+	$content = @file_get_contents($prototypes_file);
+	if($content === FALSE OR trim($content) == '') return "unreadable";
+	$values = so_read_resource($content);
+	if(!is_array($values)) return "unreadable";
+	$page = array();
+	$page['PrototypeTickKey'] = strval(intval(cs_get($values,"PrototypeTickKey",84)));
+	$page['PrototypeTickChannel'] = strval(intval(cs_get($values,"PrototypeTickChannel",1)));
+	$page['PrototypeTickVelocity'] = strval(intval(cs_get($values,"PrototypeTickVelocity",64)));
+	$page['CsoundInstruments_filename'] = trim(cs_get($values,"CsoundInstrumentsFile",''));
+	$page['comment_on_file'] = cs_get($values,"PrototypesComment",'');
+	return SaveObjectPrototypes(FALSE,dirname($prototypes_file).SLASH,basename($prototypes_file),$temp_folder,FALSE,$page);
+	}
+
+function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder,$force,$page = NULL) {
 	// 2026-11-11 Csound resources are saved in JSON format. Values are stored by their key, see csound_data_to_json()
+	// 2026-11-18 '$page' gives the values of the form of csound.php (orchestra, channels, parts, tables, tonality). By default they are read from $_POST - by Claude
 	global $top_header, $test, $temp_dir, $permissions;
 //	$verbose = TRUE;
 	if($verbose) echo "dir = ".$dir."<br />";
@@ -1412,21 +1480,15 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder,$force) {
 	$file_header = $top_header."\n// Csound resource file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s')." GMT";
 	$data = array();
 	$warn_not_empty = FALSE;
-	$data['orchestra'] = $_POST['CsoundOrchestraName'];
+	if($page === NULL) $page = csound_page_values_from_post();
+	$data['orchestra'] = $page['orchestra'];
 	if($data['orchestra'] == '') {
 		$data['orchestra'] = "0-default.orc";
 		$warn_not_empty = TRUE;
 		}
-	$data['channels'] = array();
-	$number_channels = $_POST['number_channels'];
-	for($ch = 0; $ch < $number_channels; $ch++)
-		$data['channels'][$ch + 1] = intval(convert_empty($_POST["whichCsoundInstrument_".$ch]));
+	$data['channels'] = $page['channels'];
 	// 2026-11-12 Assignment of parts to instruments - fixed by Claude
-	$data['parts'] = array();
-	for($part = 1; $part <= MAXPARTS; $part++) {
-		if(isset($_POST["whichCsoundInstrumentForPart_".$part])) $data['parts'][$part] = intval(convert_empty($_POST["whichCsoundInstrumentForPart_".$part]));
-		else $data['parts'][$part] = -1;
-		}
+	$data['parts'] = $page['parts'];
 	// Instruments are read from the temporary files edited by csinstrument.php and csparameter.php
 	$data['instruments'] = array();
 	$dircontent = scandir($temp_dir.$temp_folder);
@@ -1460,6 +1522,8 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder,$force) {
 				$lines = explode(chr(10),file_get_contents($folder_this_instrument.SLASH.$thisparameter));
 				$i = 0;
 				cs_read_fields(cs_parameter_fields($ip),$lines,$i,$instrument);
+				// 2026-11-18 The name of a parameter is that of its file, which RENAME changes (csinstrument.php) - fixed by Claude
+				$instrument["paramlist[".$ip."].name"] = $thisname;
 				$ip++;
 				}
 			$instrument['ipmax'] = $ip;
@@ -1471,25 +1535,79 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder,$force) {
 		unlink($file_lock);
 		return "error";
 		}
-	if(isset($_POST['cstables'])) $cstables = $_POST['cstables'];
-	else {
-		if($verbose) echo "Used 'the_tables'<br />";
-		$cstables = $_POST['the_tables']; // We need a different POST used by autosave
-		}
-	$data['tables'] = array();
-	foreach(explode(chr(10),$cstables) as $line) {
-		$line = trim($line);
-		if($verbose) echo $line."<br />";
-		if($line <> '') $data['tables'][] = $line;
-		}
-	$data['tonality'] = trim($_POST['tonality_filename']);
-	if($data['tonality'] == "No associated tonality file") $data['tonality'] = '';
+	$data['tables'] = $page['tables'];
+	$data['tonality'] = $page['tonality'];
 	$json = csound_data_to_json($file_header,$data);
 	@unlink($dir.$filename);
 	file_put_contents($dir.$filename,$json);
 	chmod($dir.$filename,$permissions);
 	unlink($file_lock);
 	return $warn_not_empty;
+	}
+
+function csound_page_values_from_post() {
+	// Values of the form of csound.php, posted by its SAVE buttons or by the autosave (autosaveInstruments.js)
+	$page = array();
+	$page['orchestra'] = $_POST['CsoundOrchestraName'];
+	$page['channels'] = array();
+	$number_channels = $_POST['number_channels'];
+	for($ch = 0; $ch < $number_channels; $ch++)
+		$page['channels'][$ch + 1] = intval(convert_empty($_POST["whichCsoundInstrument_".$ch]));
+	$page['parts'] = array();
+	for($part = 1; $part <= MAXPARTS; $part++) {
+		if(isset($_POST["whichCsoundInstrumentForPart_".$part])) $page['parts'][$part] = intval(convert_empty($_POST["whichCsoundInstrumentForPart_".$part]));
+		else $page['parts'][$part] = -1;
+		}
+	if(isset($_POST['cstables'])) $cstables = $_POST['cstables'];
+	else $cstables = $_POST['the_tables']; // We need a different POST used by autosave
+	$page['tables'] = array();
+	foreach(explode(chr(10),$cstables) as $line) {
+		$line = trim($line);
+		if($line <> '') $page['tables'][] = $line;
+		}
+	$page['tonality'] = trim($_POST['tonality_filename']);
+	if($page['tonality'] == "No associated tonality file") $page['tonality'] = '';
+	return $page;
+	}
+
+function csound_page_values_from_file($path) {
+	// 2026-11-18 Values of the form of csound.php as they are in the '-cs' file on disk, or FALSE - by Claude
+	$content = @file_get_contents($path);
+	if($content === FALSE OR trim($content) == '') return FALSE;
+	$json = csound_read_resource($content);
+	if(!is_array($json)) return FALSE;
+	$values = cs_values($json);
+	$page = array();
+	$page['orchestra'] = cs_get($values,"CsoundOrchestraName",'');
+	$page['channels'] = array();
+	for($ch = 1; $ch <= 16; $ch++) // MAXCHAN in the console
+		$page['channels'][$ch] = intval(cs_get($values,"WhichCsoundInstrumentForChannel[".$ch."]",cs_get($values,"WhichCsoundInstrument[".$ch."]",-1)));
+	$page['parts'] = array();
+	for($part = 1; $part <= MAXPARTS; $part++)
+		$page['parts'][$part] = intval(cs_get($values,"WhichCsoundInstrumentForPart[".$part."]",-1));
+	$page['tables'] = array();
+	for($k = 0; array_key_exists("CsoundTables[".$k."]",$values); $k++) {
+		$line = trim($values["CsoundTables[".$k."]"]);
+		if($line <> '') $page['tables'][] = $line;
+		}
+	$page['tonality'] = trim(cs_get($values,"TonalityFileName",''));
+	return $page;
+	}
+
+function csound_temp_changed($temp_folder) {
+	// 2026-11-18 Called by csinstrument.php and csparameter.php when instruments or parameters have been changed in the temporary folder of a '-cs' file. The file is saved at once, with the other values (orchestra, channels, parts, tables, tonality) it has on disk, which these pages don't change. Previously it was saved by the autosave of csound.php within 30 seconds, and reloading csound.php before discarded the changes. If it can't be saved now, '_changed' tells the autosave to do it - by Claude
+	global $temp_dir;
+	$file_changed = $temp_dir.$temp_folder.SLASH."_changed";
+	$handle = fopen($file_changed,"w");
+	if($handle) fclose($handle);
+	$source = @file($temp_dir.$temp_folder.SLASH."_source",FILE_IGNORE_NEW_LINES);
+	if($source === FALSE OR count($source) < 2) return "unknown";
+	$dir = $source[0]; $filename = $source[1];
+	$page = csound_page_values_from_file($dir.$filename);
+	if($page === FALSE) return "unreadable";
+	$result = SaveCsoundInstruments(FALSE,$dir,$filename,$temp_folder,FALSE,$page);
+	if(is_bool($result)) return "saved";
+	return $result;
 	}
 
 // 2026-11-11 Csound resources ("-cs" files) are stored in JSON format.
@@ -1705,19 +1823,19 @@ function cs_instrument_json($instrument) {
 	$x["Name of this instrument"] = cs_item("CsInstrumentName",cs_get($v,"CsInstrumentName",''));
 	$x["Index of this instrument"] = cs_item("CsInstrumentIndex",cs_get($v,"CsInstrumentIndex",0));
 	$x["Comment on this instrument"] = cs_item("CsInstrumentComment",cs_get($v,"CsInstrumentComment",''));
-	$x["Number of arguments"] = cs_item("iargmax",cs_get($v,"iargmax",0));
-	$x["Argument of dilation ratio (-1 means empty)"] = cs_item("CsDilationRatioIndex",cs_get($v,"CsDilationRatioIndex",-1));
-	$x["Argument of attack velocity (-1 means empty)"] = cs_item("CsAttackVelocityIndex",cs_get($v,"CsAttackVelocityIndex",-1));
-	$x["Argument of release velocity (-1 means empty)"] = cs_item("CsReleaseVelocityIndex",cs_get($v,"CsReleaseVelocityIndex",-1));
-	$x["Argument of pitch"] = cs_item("CsPitchIndex",cs_get($v,"CsPitchIndex",-1));
+	$x["Number of fields"] = cs_item("iargmax",cs_get($v,"iargmax",0));
+	$x["Field of dilation ratio (-1 means empty)"] = cs_item("CsDilationRatioIndex",cs_get($v,"CsDilationRatioIndex",-1));
+	$x["Field of attack velocity (-1 means empty)"] = cs_item("CsAttackVelocityIndex",cs_get($v,"CsAttackVelocityIndex",-1));
+	$x["Field of release velocity (-1 means empty)"] = cs_item("CsReleaseVelocityIndex",cs_get($v,"CsReleaseVelocityIndex",-1));
+	$x["Field of pitch"] = cs_item("CsPitchIndex",cs_get($v,"CsPitchIndex",-1));
 	$x["CsPitchFormat"] = cs_item("CsPitchFormat",cs_get($v,"CsPitchFormat","OPPC"),"enum");
 	foreach(cs_controls() as $c => $word) {
-		$x["Argument of start ".$word] = cs_item("Cs".$c."StartIndex",cs_get($v,"Cs".$c."StartIndex",-1));
-		$x["Argument of end ".$word] = cs_item("Cs".$c."EndIndex",cs_get($v,"Cs".$c."EndIndex",-1));
+		$x["Field of start ".$word] = cs_item("Cs".$c."StartIndex",cs_get($v,"Cs".$c."StartIndex",-1));
+		$x["Field of end ".$word] = cs_item("Cs".$c."EndIndex",cs_get($v,"Cs".$c."EndIndex",-1));
 		}
 	$x["pitchbendrange"] = cs_item("pitchbendrange",floatval(cs_get($v,"pitchbendrange",-1.)),"cents");
 	foreach(cs_controls() as $c => $word)
-		$x["Argument of ".$word." table (-1 means empty)"] = cs_item($word."table",cs_get($v,$word."table",-1));
+		$x["Field of ".$word." table (-1 means empty)"] = cs_item($word."table",cs_get($v,$word."table",-1));
 	foreach(cs_controls() as $c => $word)
 		$x[ucfirst($word)." GEN type"] = cs_item($word."GEN",cs_get($v,$word."GEN",7));
 	foreach(cs_controls() as $c => $word) {
@@ -2493,6 +2611,69 @@ function to_read_resource($content) {
 	return $data;
 	}
 
+function export_scala($dir_scales,$scale_name) {
+	// 2026-11-18 Writes the SCALA file of a scale from its temporary file (former line format). Called by scale.php and by the "Export to SCALA" button of tonality.php, so that both exports are identical
+	// All grades are exported, including unnamed ones ('•'), which are written without a name
+	global $permissions;
+	$content = @file_get_contents($dir_scales.to_scale_file_name($scale_name));
+	if($content === FALSE) return FALSE;
+	$names = $fractions = $ratios = array();
+	$numgrades = 0; $comment = '';
+	foreach(explode("\n",$content) as $line) {
+		$line = trim($line);
+		if($line == '') continue;
+		switch($line[0]) {
+			case '/':
+				$names = explode(' ',preg_replace("/\s+/u",' ',trim(str_replace('/','',$line))));
+				break;
+			case '[':
+				$fractions = explode(' ',preg_replace("/\s+/u",' ',trim(str_replace(array('[',']'),'',$line))));
+				break;
+			case 'f':
+				$table = explode(' ',preg_replace("/\s+/u",' ',$line));
+				$numgrades = intval($table[4]);
+				$ratios = array_slice($table,8);
+				break;
+			case '<':
+				$comment = $line;
+				break;
+			}
+		}
+	if($numgrades < 1) return FALSE;
+	$text = "! ".$scale_name.".scl\n";
+	$text .= "! Scala file, ref. https://www.huygens-fokker.org/scala/scl_format.html\n";
+	$description = '';
+	if(strlen($comment) > 5) {
+		$description = html_to_text($comment,'txt');
+		if(is_integer($pos = strpos($description,"<br />"))) $description = substr($description,0,$pos);
+		$description = trim(str_replace("-cs.","-to.",$description));
+		}
+	if($description == '') $description = "This scale is called '".$scale_name."'";
+	$text .= $description."\n";
+	$text .= "! Created by the Bol Processor\n";
+	$text .= $numgrades."\n";
+	// Degree 0 (1/1) is implicit in SCALA files, so the name of the first note is given in a comment, read again by create_from_scl()
+	if(isset($names[0]) AND $names[0] <> '' AND $names[0] <> "•") $text .= "! 1/1 ".$names[0]."\n";
+	for($k = 1; $k <= $numgrades; $k++) {
+		$name = (isset($names[$k]) AND $names[$k] <> "•") ? $names[$k] : '';
+		$p = isset($fractions[2 * $k]) ? intval($fractions[2 * $k]) : 0;
+		$q = isset($fractions[(2 * $k) + 1]) ? intval($fractions[(2 * $k) + 1]) : 0;
+		if(($p * $q) > 0) $line = $p."/".$q;
+		else {
+			$ratio = isset($ratios[$k]) ? floatval($ratios[$k]) : 0.;
+			if($ratio <= 0.) $ratio = pow(2,$k / $numgrades);
+			$line = round(1200 * log($ratio) / log(2))." cents";
+			}
+		$text .= trim($line." ".$name)."\n";
+		}
+	$file = $dir_scales.$scale_name.".scl";
+	if(@file_get_contents($file) !== $text) {
+		file_put_contents($file,$text);
+		@chmod($file,$permissions);
+		}
+	return $file;
+	}
+
 function to_scale_file_name($scale_name) {
 	// Name of the temporary file of a scale, as in tonality.php
 	$clean_name_of_file = str_replace("#","_",$scale_name);
@@ -2874,6 +3055,16 @@ function SaveTonality($verbose,$dir,$filename,$temp_folder,$force) {
 	chmod($dir.$filename,$permissions);
 	unlink($file_lock);
 	return "saved";
+	}
+
+function to_temp_changed($dir_scales) {
+	// 2026-11-18 A scale changed on scale.php is saved at once to its tonality resource file. Otherwise, the change was lost if the '-to' page was reloaded before its autosave
+	$handle = fopen($dir_scales."_changed","w");
+	if($handle) fclose($handle);
+	$temp_path = dirname($dir_scales);
+	$source = @file($temp_path.SLASH."_source",FILE_IGNORE_NEW_LINES);
+	if(!is_array($source) OR count($source) < 2) return "unknown";
+	return SaveTonality(FALSE,$source[0],$source[1],basename($temp_path),FALSE);
 	}
 
 function clean_folder_name($name) {
@@ -3422,7 +3613,7 @@ function MIDIparameter_argument($i,$parameter,$StartIndex,$EndIndex,$TableIndex,
 	$r .= "</tr>";
 	$r .= "<tr>";
 	$r .= "<td style=\"padding: 5px;\">";
-	$r .= "<span class=\"red-text\">".$parameter."</span> continuous arguments";
+	$r .= "<span class=\"red-text\">".$parameter."</span> continuous fields";
 	$r .= "</td>";
 	$r .= "<td>";
 	$x = $StartIndex;
@@ -4560,7 +4751,50 @@ function get_tonality_file($csound_instruments_file) {
 	return $tonality_filename;
 	}
 
-function show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,$filename,$file_format) {
+function orchestra_instruments($orchestra_path) {
+	// 2026-11-18 Numbered instruments of a Csound orchestra, as an array number => description.
+	// The descriptions are taken from the "; Instruments:" block at the top of the file (as in "0-default.orc"),
+	// in which a line starting with a number begins an instrument and the following lines continue its description.
+	// Otherwise, the numbers of the "instr" lines are listed without a description.
+	$list = array();
+	$content = @file_get_contents($orchestra_path);
+	if($content === FALSE) return $list;
+	$table = explode("\n",str_replace("\r",'',$content));
+	$in_block = FALSE; $current = $indent = 0;
+	foreach($table as $line) {
+		$line = trim($line);
+		if(!$in_block) {
+			if(preg_match("/^;\s*Instruments\s*:\s*$/i",$line)) $in_block = TRUE;
+			continue;
+			}
+		if(!str_starts_with($line,";")) break;
+		$raw = substr($line,1);
+		$text = trim($raw);
+		if($text == '') {
+			if(count($list) > 0) break;
+			continue;
+			}
+		$this_indent = strlen($raw) - strlen(ltrim($raw));
+		if(preg_match("/^([0-9]+)\s+(.+)$/u",$text,$m)) {
+			$current = intval($m[1]);
+			$list[$current] = $m[2];
+			$indent = $this_indent;
+			}
+		else if($current > 0 AND $this_indent > $indent) $list[$current] .= " ".$text; // Continuation, indented further than the number
+		else break; // e.g. "; Effect:"
+		}
+	if(count($list) == 0) {
+		// Without this block, only the numbers are listed, because the comments above "instr" lines are not reliable descriptions
+		foreach($table as $line) {
+			if(preg_match("/^\s*instr\s+([0-9]+)\b/u",$line,$m)) $list[intval($m[1])] = '';
+			}
+		}
+	foreach($list as $i => $text) $list[$i] = trim(preg_replace("/\s+/u",' ',preg_replace("/\s*\(outputs to [^\)]*\)/iu",'',$text)));
+	ksort($list);
+	return $list;
+	}
+
+function show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,$filename,$file_format,$orchestra = '') {
 	global $dir_csound_resources,$dir_tonality_resources,$csound_file,$tonality_file;
 	/* if($objects_file <> '') {
 		$new_csound_file = get_csound_file($dir.$objects_file);
@@ -4618,9 +4852,30 @@ function show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,
 		echo "<p>Csound instruments have been loaded but scales cannot be used because no tonality file ‘-to’ has been found.<br />";
 		echo "➡ Instruction “_scale()” will be ignored</p>";
 		}
-	if($csound_file == '' AND $file_format == "csound") {
-		echo "<p>Csound instruments have not been loaded (no ‘-cs’ file) although the file format is CSOUND.<br />";
-		echo "➡ Instruction “_ins()” will be ignored</p>";
+	if($csound_file == '' AND ($file_format == "csound" OR $file_format == "csoundrt") AND !isset($_POST['analyze_tonal'])) {
+		// 2026-11-18 No '-cs' file: _ins(n) selects instrument n of the orchestra, "0-default.orc" by default
+		if($orchestra == '' OR !file_exists($dir_csound_resources.$orchestra)) $orchestra = "0-default.orc";
+		$list = orchestra_instruments($dir_csound_resources.$orchestra);
+		// The default orchestra is described by CSOUND_DEFAULT_RESOURCE, which produce.php attaches: its names can be used in _ins()
+		$names = array();
+		if($orchestra == "0-default.orc" AND file_exists($dir_csound_resources.CSOUND_DEFAULT_RESOURCE)) {
+			$default_instruments = list_of_instruments($dir_csound_resources.CSOUND_DEFAULT_RESOURCE);
+			foreach($default_instruments['list'] as $i => $name) $names[intval($default_instruments['index'][$i])] = $name;
+			}
+		if(count($list) > 0) {
+			echo "<p style=\"margin-bottom:0px;\">No ‘-cs’ file: orchestra <span class=\"green-text\">‘".$orchestra."’</span> contains instrument(s)";
+			if(count($names) > 0) echo " described in <span class=\"green-text\">‘".CSOUND_DEFAULT_RESOURCE."’</span>";
+			echo ":<ul style=\"margin-top:0px; margin-bottom:0px\">";
+			foreach($list as $number => $text) {
+				echo "<li>";
+				if(isset($names[$number])) echo "<b>_ins(</b><span class=\"turquoise-text\">".$names[$number]."</span><b>)</b> = ";
+				echo "<b>_ins(".$number.")</b>";
+				if($text <> '') echo " ➡ ".htmlspecialchars($text);
+				echo "</li>";
+				}
+			echo "</ul>";
+			echo "Notes without “_ins()” are played by instrument 1.</p>";
+			}
 		}
 	if($csound_file <> '' AND !isset($_POST['analyze_tonal'])) {
 		$list_of_instruments = list_of_instruments($dir_csound_resources.$csound_file);
@@ -4704,9 +4959,10 @@ function list_of_instruments($csound_instruments_file) {
 	}
 
 function check_duplicate_name($dir,$file) {
+	// 2026-11-18 Case is ignored: on MacOS and Windows, a file 'Abc.txt' would replace 'abc.txt'
 	$dircontent = scandir($dir);
 	foreach($dircontent as $some_file) {
-		if($some_file == $file) return TRUE;
+		if(strcasecmp($some_file,$file) == 0) return TRUE;
 	//	echo $some_file."<br />".$file."<br />";
 		}
 	return FALSE;
@@ -5468,7 +5724,7 @@ function footer_keyboard_mapping($dir,$keyboard_file) {
 				}
 			}
         textarea.addEventListener("keydown", function (e) {
-            /* Toggle with ESC */
+            // Toggle with ESC
             if (e.key === "Escape") {
                 mappingEnabled = !mappingEnabled;
                 console.log("Mapping:", mappingEnabled ? "ON" : "OFF");
@@ -5501,7 +5757,7 @@ function footer_keyboard_mapping($dir,$keyboard_file) {
                 return;
             	}
             if (key.length === 1) {
-                /* Only English letters are mapped */
+                // Only English letters are mapped
                 if (/^[a-zA-Z]$/.test(key)) {
                     const mapKey = key.toUpperCase();
                     if (keyboardMap[mapKey] !== undefined) {
@@ -5512,7 +5768,7 @@ function footer_keyboard_mapping($dir,$keyboard_file) {
                     e.preventDefault();
                     return;
                 	}
-                /* Other characters → normal typing */
+                // Other characters → normal typing
                 return;
 				}
 			});
@@ -5609,10 +5865,15 @@ function ok_output_location($folder,$talk) {
 	global $output_folder;
 	$result = TRUE;
 	if(hidden_directory($folder)) $result = FALSE;
+	if($folder == "ctests") $result = FALSE;
 	if($folder == "csound_resources") $result = FALSE;
 	if($folder == "midi_resources") $result = FALSE;
+	if($folder == "tonality_resources") $result = FALSE;
 	if($folder == "resources") $result = FALSE;
 	if($folder == "trash_bolprocessor") $result = FALSE;
+	if($folder == "docs-developer") $result = FALSE;
+	if($folder == "source") $result = FALSE;
+	if($folder == "php") $result = FALSE;
 	if($folder == "scripts") $result = FALSE;
 	if(is_integer($pos=strpos($folder,"BP2-")) AND $pos == 0) $result = FALSE;
 	if($folder == $output_folder AND !$talk) $result = FALSE;
@@ -6918,19 +7179,102 @@ function show_file_format_choice($type,$file_format,$url_this_page,$filename) {
 	return;
 	}
 
-function csoundrt_panel($orchestra) {
+function list_of_csound_resources() {
+	// Names of the "-cs" files in the Csound resources folder, except backups and locks
+	global $dir_csound_resources;
+	$list = array();
+	$dircontent = @scandir($dir_csound_resources);
+	if($dircontent === FALSE) return $list;
+	foreach($dircontent as $thisfile) {
+		if(!str_starts_with($thisfile,"-cs.") AND !str_ends_with($thisfile,".bpcs")) continue;
+		if(str_ends_with($thisfile,"_bak") OR preg_match("/_lock[0-9]*$/u",$thisfile)) continue;
+		if(!is_file($dir_csound_resources.$thisfile)) continue;
+		$list[] = $thisfile;
+		}
+	natcasesort($list);
+	return array_values($list);
+	}
+
+function add_csound_resource_to_content($content,$csound_file) {
+	// Inserts the line naming a "-cs" file after the resource files ("-se.", "-al.", "x.bpse", ...) at the top of a grammar or data,
+	// and removes the line of another "-cs" file found there (2026-11-18)
+	$content = str_replace(chr(13).chr(10),chr(10),$content);
+	$table = explode(chr(10),$content);
+	$out = array();
+	$insert_at = -1;
+	$top = TRUE;
+	foreach($table as $line) {
+		$trimmed = trim($line);
+		if($top) {
+			if(preg_match("/^-[a-zA-Z]{2}\.\S/u",$trimmed) OR preg_match("/^\S+\.bp[a-z]{2}$/u",$trimmed)) {
+				if(str_starts_with($trimmed,"-cs.") OR str_ends_with($trimmed,".bpcs")) continue;
+				$out[] = $line;
+				$insert_at = count($out);
+				continue;
+				}
+			if($trimmed <> '' AND !str_starts_with($trimmed,"//")) $top = FALSE;
+			}
+		$out[] = $line;
+		}
+	if($insert_at < 0) array_unshift($out,$csound_file);
+	else array_splice($out,$insert_at,0,array($csound_file));
+	return implode(chr(10),$out);
+	}
+
+function change_instruments_form() {
+	// "Change instruments" button, displayed when the default orchestra is used because the project names no "-cs" file.
+	// It shows the list of "-cs" files. The selected file is added on top of the grammar or data, which is saved
+	// (handled by 'set_csound_file' in grammar.php and data.php). Must be called inside the form of the page.
+	global $url_this_page;
+	$list = list_of_csound_resources();
+	if(count($list) == 0) {
+		echo "<br />";
+		return;
+		}
+	echo " <button type=\"button\" class=\"save\" onclick=\"if(checksaved()) { var d = document.getElementById('change_instruments'); d.style.display = (d.style.display == 'none') ? 'inline' : 'none'; }\">Change instruments</button><br />";
+	echo "<span id=\"change_instruments\" style=\"display:none;\">";
+	echo "<select name=\"new_csound_file\">";
+	foreach($list as $thisfile) echo "<option value=\"".htmlspecialchars($thisfile)."\">".htmlspecialchars($thisfile)."</option>";
+	echo "</select> ";
+	echo "<input class=\"save\" type=\"submit\" onclick=\"this.form.target='_self'; return true;\" name=\"set_csound_file\" formaction=\"".$url_this_page."#topmidiports\" value=\"USE THESE INSTRUMENTS\"><br />";
+	echo "</span>";
+	return;
+	}
+
+function csound_orchestra_line($orchestra,$csound_file = 'none') {
+	// Orchestra used for Csound scores and real-time Csound, displayed on project pages (2026-11-18)
+	// "➡ edit" opens the orchestra in csorchestra.php, whose 'file' argument is relative to the root of the application
+	// If $csound_file is empty (the project names no "-cs" file), the "Change instruments" button is displayed
+	global $csound_resources,$dir_csound_resources;
+	$default = ($orchestra == '');
+	if($default) $orchestra = "0-default.orc";
+	echo "Orchestra: <span class=\"green-text\">".$orchestra."</span>";
+	if($default) echo " (default)";
+	if(file_exists($dir_csound_resources.$orchestra))
+		echo " ➡ <a class=\"linkdotted\" target=\"_blank\" href=\"csorchestra.php?file=".urlencode($csound_resources.SLASH.$orchestra)."\">edit</a>";
+	if($csound_file == '') change_instruments_form();
+	else echo "<br />";
+	return;
+	}
+
+function csoundrt_panel($orchestra,$csound_file = 'none') {
 	// Displayed on project pages instead of the name of the output file, when the output is real-time Csound (2026-11-16)
 	// The description and the QUIT CSOUND button are displayed below the SAVE format button by csoundrt_format_notes()
 	echo "<p>";
-	if($orchestra <> '') echo "Orchestra: <span class=\"green-text\">".$orchestra."</span><br />";
-	else echo "Orchestra: <span class=\"green-text\">0-default.orc</span> (default)<br />";
+	csound_orchestra_line($orchestra,$csound_file);
 	if(!csound_ready()) echo "<span class=\"red-text\">Csound ".CSOUND_MIN_VERSION." or later is not responding.</span><br />";
 	// The status is updated by the script of csoundrt_format_notes()
-	echo "<span id=\"csoundrt_status\">";
+	// data-orchestra is the orchestra of this project, compared with the one of the running server (2026-11-18)
+	$page_orchestra = ($orchestra <> '') ? $orchestra : "0-default.orc";
+	echo "<span id=\"csoundrt_status\" data-orchestra=\"".htmlspecialchars($page_orchestra)."\">";
 	if(csoundrt_running()) {
 		$state = csoundrt_state();
 		echo "The Csound server is running";
-		if(isset($state['orchestra'])) echo " with <span class=\"green-text\">".basename($state['orchestra'])."</span>";
+		if(isset($state['orchestra'])) {
+			$server_orchestra = basename($state['orchestra']);
+			echo " with <span class=\"green-text\">".$server_orchestra."</span>";
+			if($server_orchestra <> $page_orchestra) echo "<br />It will be restarted with <span class=\"green-text\">".$page_orchestra."</span> when you play.";
+			}
 		}
 	else echo "Csound will be started when you play.";
 	echo "</span><br />";
@@ -6961,6 +7305,17 @@ function csoundrt_format_notes() {
 				name.className = 'green-text';
 				name.textContent = orchestra;
 				status.appendChild(name);
+				// The orchestra of this project is used when the server is restarted, i.e. at the next performance
+				var wanted = status.getAttribute('data-orchestra');
+				if(wanted && wanted !== orchestra) {
+					status.appendChild(document.createElement('br'));
+					status.appendChild(document.createTextNode('It will be restarted with '));
+					var next = document.createElement('span');
+					next.className = 'green-text';
+					next.textContent = wanted;
+					status.appendChild(next);
+					status.appendChild(document.createTextNode(' when you play.'));
+					}
 				}
 			}
 		else status.textContent = 'Csound will be started when you play.';
@@ -7034,7 +7389,7 @@ function save($this_file,$filename,$top_header,$save_content) {
 			if(linux_system()) $the_warning .= "<p><b>Linux user:</b> Open your terminal and type: <span class=\"red-text\">sudo /opt/lampp/htdocs/bolprocessor/change_permissions.sh</span><br />(Your password will be required...)</p>";
 			if(mac_system()) $the_warning .= "<p><b>Mac user:</b> In the <i>Finder info</i>, set to read-write permission the whole content of your <span class=\"red-text\">“".$current_directory."”</span> data folder</p>";
 			if(windows_system()) $the_warning .= "<p><b>Windows user:</b> I can't explain this issue.</p>";
-		/*	if(file_exists($backup_file)) $the_warning .= "<p>👉 Another solution is to work with the backup <span class=\"red-text\">“".$filename."_bak”</span> which has now been created. Click the <b>Workspace button</b> at the top of this page to access it.</p>"; */
+		// if(file_exists($backup_file)) $the_warning .= "<p>👉 Another solution is to work with the backup <span class=\"red-text\">“".$filename."_bak”</span> which has now been created. Click the <b>Workspace button</b> at the top of this page to access it.</p>";
 			$the_warning .= "</div>";
 			}
 		}

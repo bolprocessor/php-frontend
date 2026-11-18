@@ -1,5 +1,5 @@
 {
-    "header": "// Bol Processor BP3\n// Csound resource file saved as \"-cs.tryTunings\". Date: 2026-11-12 11:17:21 GMT",
+    "header": "// Bol Processor BP3\n// Csound resource file saved as \"-cs.tryTunings\". Date: 2026-11-18 18:02:14 GMT",
     "Csound orchestra file": {
         "key": "CsoundOrchestraName",
         "value": "0-default.orc"
@@ -198,29 +198,29 @@
                 },
                 "Index of this instrument": {
                     "key": "CsInstrumentIndex",
-                    "value": 1
+                    "value": 5
                 },
                 "Comment on this instrument": {
                     "key": "CsInstrumentComment",
                     "value": "Default instrument created by template"
                 },
-                "Number of arguments": {
+                "Number of fields": {
                     "key": "iargmax",
                     "value": 10
                 },
-                "Argument of dilation ratio (-1 means empty)": {
+                "Field of dilation ratio (-1 means empty)": {
                     "key": "CsDilationRatioIndex",
                     "value": -1
                 },
-                "Argument of attack velocity (-1 means empty)": {
+                "Field of attack velocity (-1 means empty)": {
                     "key": "CsAttackVelocityIndex",
                     "value": -1
                 },
-                "Argument of release velocity (-1 means empty)": {
+                "Field of release velocity (-1 means empty)": {
                     "key": "CsReleaseVelocityIndex",
                     "value": -1
                 },
-                "Argument of pitch": {
+                "Field of pitch": {
                     "key": "CsPitchIndex",
                     "value": 4
                 },
@@ -229,43 +229,43 @@
                     "value": "OPPC",
                     "unit": "enum"
                 },
-                "Argument of start pitchbend": {
+                "Field of start pitchbend": {
                     "key": "CsPitchBendStartIndex",
                     "value": 8
                 },
-                "Argument of end pitchbend": {
+                "Field of end pitchbend": {
                     "key": "CsPitchBendEndIndex",
                     "value": 9
                 },
-                "Argument of start volume": {
+                "Field of start volume": {
                     "key": "CsVolumeStartIndex",
                     "value": 5
                 },
-                "Argument of end volume": {
+                "Field of end volume": {
                     "key": "CsVolumeEndIndex",
                     "value": 6
                 },
-                "Argument of start pressure": {
+                "Field of start pressure": {
                     "key": "CsPressureStartIndex",
                     "value": -1
                 },
-                "Argument of end pressure": {
+                "Field of end pressure": {
                     "key": "CsPressureEndIndex",
                     "value": -1
                 },
-                "Argument of start modulation": {
+                "Field of start modulation": {
                     "key": "CsModulationStartIndex",
                     "value": -1
                 },
-                "Argument of end modulation": {
+                "Field of end modulation": {
                     "key": "CsModulationEndIndex",
                     "value": -1
                 },
-                "Argument of start panoramic": {
+                "Field of start panoramic": {
                     "key": "CsPanoramicStartIndex",
                     "value": -1
                 },
-                "Argument of end panoramic": {
+                "Field of end panoramic": {
                     "key": "CsPanoramicEndIndex",
                     "value": -1
                 },
@@ -274,23 +274,23 @@
                     "value": 200.0,
                     "unit": "cents"
                 },
-                "Argument of pitchbend table (-1 means empty)": {
+                "Field of pitchbend table (-1 means empty)": {
                     "key": "pitchbendtable",
                     "value": 10
                 },
-                "Argument of volume table (-1 means empty)": {
+                "Field of volume table (-1 means empty)": {
                     "key": "volumetable",
                     "value": 7
                 },
-                "Argument of pressure table (-1 means empty)": {
+                "Field of pressure table (-1 means empty)": {
                     "key": "pressuretable",
                     "value": -1
                 },
-                "Argument of modulation table (-1 means empty)": {
+                "Field of modulation table (-1 means empty)": {
                     "key": "modulationtable",
                     "value": -1
                 },
-                "Argument of panoramic table (-1 means empty)": {
+                "Field of panoramic table (-1 means empty)": {
                     "key": "panoramictable",
                     "value": -1
                 },
@@ -502,23 +502,23 @@
                     "key": "CsInstrumentComment",
                     "value": "Default instrument created by template"
                 },
-                "Number of arguments": {
+                "Number of fields": {
                     "key": "iargmax",
                     "value": 10
                 },
-                "Argument of dilation ratio (-1 means empty)": {
+                "Field of dilation ratio (-1 means empty)": {
                     "key": "CsDilationRatioIndex",
                     "value": -1
                 },
-                "Argument of attack velocity (-1 means empty)": {
+                "Field of attack velocity (-1 means empty)": {
                     "key": "CsAttackVelocityIndex",
                     "value": -1
                 },
-                "Argument of release velocity (-1 means empty)": {
+                "Field of release velocity (-1 means empty)": {
                     "key": "CsReleaseVelocityIndex",
                     "value": -1
                 },
-                "Argument of pitch": {
+                "Field of pitch": {
                     "key": "CsPitchIndex",
                     "value": 4
                 },
@@ -527,43 +527,43 @@
                     "value": "OPPC",
                     "unit": "enum"
                 },
-                "Argument of start pitchbend": {
+                "Field of start pitchbend": {
                     "key": "CsPitchBendStartIndex",
                     "value": 8
                 },
-                "Argument of end pitchbend": {
+                "Field of end pitchbend": {
                     "key": "CsPitchBendEndIndex",
                     "value": 9
                 },
-                "Argument of start volume": {
+                "Field of start volume": {
                     "key": "CsVolumeStartIndex",
                     "value": 5
                 },
-                "Argument of end volume": {
+                "Field of end volume": {
                     "key": "CsVolumeEndIndex",
                     "value": 6
                 },
-                "Argument of start pressure": {
+                "Field of start pressure": {
                     "key": "CsPressureStartIndex",
                     "value": -1
                 },
-                "Argument of end pressure": {
+                "Field of end pressure": {
                     "key": "CsPressureEndIndex",
                     "value": -1
                 },
-                "Argument of start modulation": {
+                "Field of start modulation": {
                     "key": "CsModulationStartIndex",
                     "value": -1
                 },
-                "Argument of end modulation": {
+                "Field of end modulation": {
                     "key": "CsModulationEndIndex",
                     "value": -1
                 },
-                "Argument of start panoramic": {
+                "Field of start panoramic": {
                     "key": "CsPanoramicStartIndex",
                     "value": -1
                 },
-                "Argument of end panoramic": {
+                "Field of end panoramic": {
                     "key": "CsPanoramicEndIndex",
                     "value": -1
                 },
@@ -572,23 +572,23 @@
                     "value": -1.0,
                     "unit": "cents"
                 },
-                "Argument of pitchbend table (-1 means empty)": {
+                "Field of pitchbend table (-1 means empty)": {
                     "key": "pitchbendtable",
                     "value": 10
                 },
-                "Argument of volume table (-1 means empty)": {
+                "Field of volume table (-1 means empty)": {
                     "key": "volumetable",
                     "value": 7
                 },
-                "Argument of pressure table (-1 means empty)": {
+                "Field of pressure table (-1 means empty)": {
                     "key": "pressuretable",
                     "value": -1
                 },
-                "Argument of modulation table (-1 means empty)": {
+                "Field of modulation table (-1 means empty)": {
                     "key": "modulationtable",
                     "value": -1
                 },
-                "Argument of panoramic table (-1 means empty)": {
+                "Field of panoramic table (-1 means empty)": {
                     "key": "panoramictable",
                     "value": -1
                 },
@@ -800,23 +800,23 @@
                     "key": "CsInstrumentComment",
                     "value": "no comment"
                 },
-                "Number of arguments": {
+                "Number of fields": {
                     "key": "iargmax",
                     "value": 10
                 },
-                "Argument of dilation ratio (-1 means empty)": {
+                "Field of dilation ratio (-1 means empty)": {
                     "key": "CsDilationRatioIndex",
                     "value": -1
                 },
-                "Argument of attack velocity (-1 means empty)": {
+                "Field of attack velocity (-1 means empty)": {
                     "key": "CsAttackVelocityIndex",
                     "value": -1
                 },
-                "Argument of release velocity (-1 means empty)": {
+                "Field of release velocity (-1 means empty)": {
                     "key": "CsReleaseVelocityIndex",
                     "value": -1
                 },
-                "Argument of pitch": {
+                "Field of pitch": {
                     "key": "CsPitchIndex",
                     "value": 4
                 },
@@ -825,43 +825,43 @@
                     "value": "OPPC",
                     "unit": "enum"
                 },
-                "Argument of start pitchbend": {
+                "Field of start pitchbend": {
                     "key": "CsPitchBendStartIndex",
                     "value": 8
                 },
-                "Argument of end pitchbend": {
+                "Field of end pitchbend": {
                     "key": "CsPitchBendEndIndex",
                     "value": 9
                 },
-                "Argument of start volume": {
+                "Field of start volume": {
                     "key": "CsVolumeStartIndex",
                     "value": 5
                 },
-                "Argument of end volume": {
+                "Field of end volume": {
                     "key": "CsVolumeEndIndex",
                     "value": 6
                 },
-                "Argument of start pressure": {
+                "Field of start pressure": {
                     "key": "CsPressureStartIndex",
                     "value": -1
                 },
-                "Argument of end pressure": {
+                "Field of end pressure": {
                     "key": "CsPressureEndIndex",
                     "value": -1
                 },
-                "Argument of start modulation": {
+                "Field of start modulation": {
                     "key": "CsModulationStartIndex",
                     "value": -1
                 },
-                "Argument of end modulation": {
+                "Field of end modulation": {
                     "key": "CsModulationEndIndex",
                     "value": -1
                 },
-                "Argument of start panoramic": {
+                "Field of start panoramic": {
                     "key": "CsPanoramicStartIndex",
                     "value": -1
                 },
-                "Argument of end panoramic": {
+                "Field of end panoramic": {
                     "key": "CsPanoramicEndIndex",
                     "value": -1
                 },
@@ -870,23 +870,23 @@
                     "value": 200.0,
                     "unit": "cents"
                 },
-                "Argument of pitchbend table (-1 means empty)": {
+                "Field of pitchbend table (-1 means empty)": {
                     "key": "pitchbendtable",
                     "value": 10
                 },
-                "Argument of volume table (-1 means empty)": {
+                "Field of volume table (-1 means empty)": {
                     "key": "volumetable",
                     "value": 7
                 },
-                "Argument of pressure table (-1 means empty)": {
+                "Field of pressure table (-1 means empty)": {
                     "key": "pressuretable",
                     "value": -1
                 },
-                "Argument of modulation table (-1 means empty)": {
+                "Field of modulation table (-1 means empty)": {
                     "key": "modulationtable",
                     "value": -1
                 },
-                "Argument of panoramic table (-1 means empty)": {
+                "Field of panoramic table (-1 means empty)": {
                     "key": "panoramictable",
                     "value": -1
                 },
@@ -1098,23 +1098,23 @@
                     "key": "CsInstrumentComment",
                     "value": "Created by Anthony"
                 },
-                "Number of arguments": {
+                "Number of fields": {
                     "key": "iargmax",
                     "value": 10
                 },
-                "Argument of dilation ratio (-1 means empty)": {
+                "Field of dilation ratio (-1 means empty)": {
                     "key": "CsDilationRatioIndex",
                     "value": -1
                 },
-                "Argument of attack velocity (-1 means empty)": {
+                "Field of attack velocity (-1 means empty)": {
                     "key": "CsAttackVelocityIndex",
                     "value": -1
                 },
-                "Argument of release velocity (-1 means empty)": {
+                "Field of release velocity (-1 means empty)": {
                     "key": "CsReleaseVelocityIndex",
                     "value": -1
                 },
-                "Argument of pitch": {
+                "Field of pitch": {
                     "key": "CsPitchIndex",
                     "value": 4
                 },
@@ -1123,43 +1123,43 @@
                     "value": "OPPC",
                     "unit": "enum"
                 },
-                "Argument of start pitchbend": {
+                "Field of start pitchbend": {
                     "key": "CsPitchBendStartIndex",
                     "value": 8
                 },
-                "Argument of end pitchbend": {
+                "Field of end pitchbend": {
                     "key": "CsPitchBendEndIndex",
                     "value": 9
                 },
-                "Argument of start volume": {
+                "Field of start volume": {
                     "key": "CsVolumeStartIndex",
                     "value": 5
                 },
-                "Argument of end volume": {
+                "Field of end volume": {
                     "key": "CsVolumeEndIndex",
                     "value": 6
                 },
-                "Argument of start pressure": {
+                "Field of start pressure": {
                     "key": "CsPressureStartIndex",
                     "value": -1
                 },
-                "Argument of end pressure": {
+                "Field of end pressure": {
                     "key": "CsPressureEndIndex",
                     "value": -1
                 },
-                "Argument of start modulation": {
+                "Field of start modulation": {
                     "key": "CsModulationStartIndex",
                     "value": -1
                 },
-                "Argument of end modulation": {
+                "Field of end modulation": {
                     "key": "CsModulationEndIndex",
                     "value": -1
                 },
-                "Argument of start panoramic": {
+                "Field of start panoramic": {
                     "key": "CsPanoramicStartIndex",
                     "value": -1
                 },
-                "Argument of end panoramic": {
+                "Field of end panoramic": {
                     "key": "CsPanoramicEndIndex",
                     "value": -1
                 },
@@ -1168,23 +1168,23 @@
                     "value": -1.0,
                     "unit": "cents"
                 },
-                "Argument of pitchbend table (-1 means empty)": {
+                "Field of pitchbend table (-1 means empty)": {
                     "key": "pitchbendtable",
                     "value": 10
                 },
-                "Argument of volume table (-1 means empty)": {
+                "Field of volume table (-1 means empty)": {
                     "key": "volumetable",
                     "value": 7
                 },
-                "Argument of pressure table (-1 means empty)": {
+                "Field of pressure table (-1 means empty)": {
                     "key": "pressuretable",
                     "value": -1
                 },
-                "Argument of modulation table (-1 means empty)": {
+                "Field of modulation table (-1 means empty)": {
                     "key": "modulationtable",
                     "value": -1
                 },
-                "Argument of panoramic table (-1 means empty)": {
+                "Field of panoramic table (-1 means empty)": {
                     "key": "panoramictable",
                     "value": -1
                 },

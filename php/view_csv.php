@@ -1,5 +1,5 @@
 <?php
-/* view_csv.php */
+// view_csv.php
 
 if(isset($_GET['file'])) $file_path = urldecode($_GET['file']);
 else exit('CSV file not found.');

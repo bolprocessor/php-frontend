@@ -104,7 +104,8 @@ giKeyHigh[]  fillarray 0, 100, 93, 81
 ; A fixed table number is required: "ftgen 0" would give number 101, which BP3 uses
 ; for the first table of its scores (101, 102, ...), so a score would replace the sine.
 giSine    ftgen  99999, 0, 32769, 10, 1    ; sine wave
-; Recordings are loaded when first played, as tables 20000 to 21151 (see StringNote)
+; Recordings are loaded when first played, as tables 20000 to 21151 (see StringNote).
+; In real time, they are all loaded when the orchestra starts (see below).
 
 ; Sample map, filled at the end of this file
 gSSmpFile[]       init 1152
@@ -125,6 +126,14 @@ gaRevIn   init    0
 
 ;                     reverb feedback, cutoff, wet level, pre-delay (s)
 schedule "Room", 0, -1, 0.82, 9000, 0.30, 0.025
+
+; -- LOAD THE RECORDINGS IN REAL TIME --
+
+; Loading a file when a note starts may interrupt the real-time output (clicks, distortion)
+; when several notes need new files together. In real time (e.g. output to "dac"), all the
+; recordings are loaded when the orchestra starts, before the Csound server accepts notes.
+; This takes a second or two and about 360 MB of memory.
+; This code runs after the sample map, which is filled at the end of this file.
 
 ; -- USER DEFINED OPCODES --
 
@@ -555,8 +564,8 @@ giSmpAttack[81] = 0.477
 giSmpGain[81] = 1.000
 gSSmpFile[82] = "Iowa_strings/violin/violin_pp_082_E.flac"
 giSmpPitch[82] = 81.993
-giSmpLoopStart[82] = 0.47975
-giSmpLoopEnd[82] = 1.36000
+giSmpLoopStart[82] = 0.59422
+giSmpLoopEnd[82] = 1.13424
 giSmpXfade[82] = 0.100
 giSmpAttack[82] = 0.052
 giSmpGain[82] = 1.000
@@ -639,8 +648,8 @@ giSmpAttack[93] = 0.563
 giSmpGain[93] = 1.000
 gSSmpFile[94] = "Iowa_strings/violin/violin_pp_094_E.flac"
 giSmpPitch[94] = 94.004
-giSmpLoopStart[94] = 0.74027
-giSmpLoopEnd[94] = 1.26000
+giSmpLoopStart[94] = 0.78299
+giSmpLoopEnd[94] = 1.29789
 giSmpXfade[94] = 0.100
 giSmpAttack[94] = 0.363
 giSmpGain[94] = 1.000
@@ -681,9 +690,9 @@ giSmpAttack[99] = 0.156
 giSmpGain[99] = 1.000
 gSSmpFile[100] = "Iowa_strings/violin/violin_pp_100_E.flac"
 giSmpPitch[100] = 100.141
-giSmpLoopStart[100] = 1.14020
-giSmpLoopEnd[100] = 1.88000
-giSmpXfade[100] = 0.040
+giSmpLoopStart[100] = 1.47812
+giSmpLoopEnd[100] = 1.94671
+giSmpXfade[100] = 0.060
 giSmpAttack[100] = 0.166
 giSmpGain[100] = 1.000
 gSSmpFile[183] = "Iowa_strings/violin/violin_mf_055_G.flac"
@@ -891,16 +900,16 @@ giSmpAttack[211] = 0.002
 giSmpGain[211] = 1.000
 gSSmpFile[212] = "Iowa_strings/violin/violin_mf_084_A.flac"
 giSmpPitch[212] = 83.806
-giSmpLoopStart[212] = 0.75905
-giSmpLoopEnd[212] = 2.00000
-giSmpXfade[212] = 0.150
+giSmpLoopStart[212] = 1.14016
+giSmpLoopEnd[212] = 1.70311
+giSmpXfade[212] = 0.060
 giSmpAttack[212] = 0.084
 giSmpGain[212] = 1.000
 gSSmpFile[213] = "Iowa_strings/violin/violin_mf_085_A.flac"
 giSmpPitch[213] = 85.193
-giSmpLoopStart[213] = 1.13923
-giSmpLoopEnd[213] = 2.74000
-giSmpXfade[213] = 0.040
+giSmpLoopStart[213] = 0.65934
+giSmpLoopEnd[213] = 1.17048
+giSmpXfade[213] = 0.060
 giSmpAttack[213] = 0.341
 giSmpGain[213] = 1.000
 gSSmpFile[214] = "Iowa_strings/violin/violin_mf_086_A.flac"
@@ -1003,9 +1012,9 @@ giSmpAttack[227] = 0.008
 giSmpGain[227] = 1.000
 gSSmpFile[228] = "Iowa_strings/violin/violin_mf_100_E.flac"
 giSmpPitch[228] = 100.147
-giSmpLoopStart[228] = 0.85980
-giSmpLoopEnd[228] = 1.34000
-giSmpXfade[228] = 0.040
+giSmpLoopStart[228] = 0.31639
+giSmpLoopEnd[228] = 0.89927
+giSmpXfade[228] = 0.100
 giSmpAttack[228] = 0.004
 giSmpGain[228] = 1.000
 gSSmpFile[311] = "Iowa_strings/violin/violin_ff_055_G.flac"
@@ -1164,9 +1173,9 @@ giSmpAttack[332] = 0.493
 giSmpGain[332] = 1.000
 gSSmpFile[333] = "Iowa_strings/violin/violin_ff_077_A.flac"
 giSmpPitch[333] = 76.958
-giSmpLoopStart[333] = 0.40088
-giSmpLoopEnd[333] = 0.82000
-giSmpXfade[333] = 0.150
+giSmpLoopStart[333] = 0.50465
+giSmpLoopEnd[333] = 0.96499
+giSmpXfade[333] = 0.060
 giSmpAttack[333] = 0.305
 giSmpGain[333] = 1.000
 gSSmpFile[334] = "Iowa_strings/violin/violin_ff_078_A.flac"
@@ -1283,9 +1292,9 @@ giSmpAttack[349] = 0.082
 giSmpGain[349] = 1.000
 gSSmpFile[350] = "Iowa_strings/violin/violin_ff_094_E.flac"
 giSmpPitch[350] = 93.969
-giSmpLoopStart[350] = 0.72073
-giSmpLoopEnd[350] = 1.78000
-giSmpXfade[350] = 0.150
+giSmpLoopStart[350] = 0.92279
+giSmpLoopEnd[350] = 1.60392
+giSmpXfade[350] = 0.100
 giSmpAttack[350] = 0.629
 giSmpGain[350] = 1.000
 gSSmpFile[351] = "Iowa_strings/violin/violin_ff_095_E.flac"
@@ -1962,8 +1971,8 @@ giSmpAttack[603] = 0.503
 giSmpGain[603] = 1.000
 gSSmpFile[604] = "Iowa_strings/viola/viola_mf_092_A.flac"
 giSmpPitch[604] = 91.780
-giSmpLoopStart[604] = 1.20009
-giSmpLoopEnd[604] = 1.76000
+giSmpLoopStart[604] = 1.00955
+giSmpLoopEnd[604] = 1.45669
 giSmpXfade[604] = 0.040
 giSmpAttack[604] = 0.740
 giSmpGain[604] = 1.000
@@ -3262,3 +3271,20 @@ giSmpLoopEnd[1105] = 0.68000
 giSmpXfade[1105] = 0.100
 giSmpAttack[1105] = 0.004
 giSmpGain[1105] = 1.000
+
+; -- LOAD THE RECORDINGS IN REAL TIME (see above) --
+
+if (strcmp(getcfg(4), "1") == 0) then
+it0    rtclock
+inum   = 0
+idx    = 0
+while (idx < 1152) do
+if (strlen(gSSmpFile[idx]) > 0) then
+ifn    ftgenonce  20000 + idx, 0, 0, 1, gSSmpFile[idx], 0, 0, 1
+inum   = inum + 1
+endif
+idx    = idx + 1
+od
+it1    rtclock
+prints "Beethoven.orc: %d recordings loaded in %.1f s\n", inum, it1 - it0
+endif

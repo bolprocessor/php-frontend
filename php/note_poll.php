@@ -20,7 +20,7 @@ clearstatcache(true, $file);
 if (is_file($file)) {
     $size = filesize($file);
 
-    /* A new recording may have replaced a previous, longer file. */
+    // A new recording may have replaced a previous, longer file.
     if ($pos > $size) {
         $pos = 0;
     }

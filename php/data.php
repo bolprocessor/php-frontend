@@ -1308,6 +1308,15 @@ if(isset($_POST['apply_changes_instructions'])) {
 	$need_to_save = TRUE;
 	}
 
+if(isset($_POST['set_csound_file']) AND isset($_POST['new_csound_file']) AND $_POST['new_csound_file'] <> '') {
+	// "Change instruments": the selected "-cs" file is added on top of the data (2026-11-18)
+	$content = @file_get_contents($this_file,TRUE);
+	$extract_data = extract_data(FALSE,TRUE,$content);
+	$_POST['thistext'] = add_csound_resource_to_content($extract_data['content'],basename($_POST['new_csound_file']));
+	$no_save_midiresources = TRUE;
+	$need_to_save = TRUE;
+	}
+
 $refresh_file = $temp_dir."trace_".my_session_id()."_".$filename."_midiport_refresh";
 if(isset($_POST['savemidiport'])) {
 	save_midiressources($filename,TRUE);
@@ -1555,7 +1564,7 @@ if($midi_player <> "SpessaSynth" AND !is_connected() AND $file_format == "midi")
 $project_name = preg_replace("/\.[a-z]+$/u",'',$output_file);
 $result_file = $bp_application_path.$output_folder.SLASH.$project_name."-result.html";
 
-$content = show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,$filename,$file_format);
+$content = show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,$filename,$file_format,$csound_orchestra);
 
 if(!isset($_POST['analyze_tonal'])) {
 	echo "<div style=\"float:right; padding-right:6px; padding-left:6px; background-color:transparent;\">";
@@ -1579,11 +1588,16 @@ if(!isset($_POST['analyze_tonal'])) {
 		echo "<p>Name of output file (with proper extension):<br />";
 		echo "<input type=\"text\" name=\"output_file\" size=\"25\" value=\"".$output_file."\">&nbsp;";
 		echo "</p>";
+		if($file_format == "csound") {
+			echo "<p>";
+			csound_orchestra_line($csound_orchestra,$csound_file);
+			echo "</p>";
+			}
 		}
 	else if($file_format == "csoundrt") {
 		// Real-time Csound: notes are played by Csound, MIDI ports are used for interaction
 		echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
-		csoundrt_panel($csound_orchestra);
+		csoundrt_panel($csound_orchestra,$csound_file);
 		display_midi_ports($filename);
 		}
 	else {

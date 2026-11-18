@@ -96,8 +96,9 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' AND isset($_POST['import_files'])) {
 				$scl_name = str_replace("#","_",$scl_name);
 				$scl_name = str_replace("/","_",$scl_name);
 				$scale_file = $dir_scales.$scl_name.".txt";
-				@unlink($new_filename1);
-				rename($dir_scales."temp_scale_file.txt",$new_filename1);
+				// 2026-11-18 The scale was renamed to a file in the 'php' folder, so the KBM file was ignored
+				@unlink($scale_file);
+				rename($dir_scales."temp_scale_file.txt",$scale_file);
 				}
 			}
 		@unlink($file_lock);
@@ -114,6 +115,9 @@ if(!file_exists($temp_dir.$temp_folder)) {
 if(!file_exists($temp_dir.$temp_folder.SLASH."scales")) {
 	mkdir($temp_dir.$temp_folder.SLASH."scales");
 	}
+// 2026-11-18 Tells scale.php which file to save when a scale is changed
+$source_file = $temp_dir.$temp_folder.SLASH."_source";
+if(@file_get_contents($source_file) !== $dir."\n".$filename."\n") file_put_contents($source_file,$dir."\n".$filename."\n");
 
 if(isset($_POST['max_scales'])) $max_scales = $_POST['max_scales'];
 else $max_scales = 0;
@@ -237,12 +241,8 @@ if(isset($_POST['copy_this_scale'])) {
 						}
 					fclose($handle);
 					chmod($dir_scales.$new_scale_file,$permissions);
-					$file_lock = $dir.$filename."_lock3";
-					$handle_lock = fopen($file_lock,"w");
-					fwrite($handle_lock,"lock\n");
-					if($handle) fclose($handle_lock);
-					echo "<p><span class=\"red-text\">Please SAVE THIS PAGE</span> to refresh the display!</p>";
-					/* $need_to_save = */ $duplicated_scale = TRUE;
+					// 2026-11-18 Saved at once. Before, the copy was saved only by the next click on SAVE
+					$need_to_save = TRUE;
 					}
 				else echo "<p><span class=\"red-text\">ERROR: couldn't open</span><span class=\"green-text\">".$dir_scales.$new_scale_file."</span></p>";
 				}
@@ -326,7 +326,7 @@ if(isset($_POST['restore'])) {
 	}
 
 $lock3 = $dir.$filename."_lock3";
-if($need_to_save OR isset($_POST['savealldata'])) {
+if($need_to_save OR isset($_POST['savealldata']) OR file_exists($dir_scales."_changed")) {
 	if(isset($_POST['duplicated_scale'])) $duplicated_scale = $_POST['duplicated_scale'];
 	else $duplicated_scale = FALSE;
 	if(file_exists($lock3)) {
@@ -531,7 +531,8 @@ if($max_scales > 0) {
 			chmod($dir_scales.$this_file,$permissions);
 			}
 		echo "</span></b><br />";
-		echo "<p><span class=\"red-text\">➡ Click SAVE ‘".$filename."’ to display fixed scales</span></p>";
+		SaveTonality(FALSE,$dir,$filename,$temp_folder,TRUE); // 2026-11-18 Saved at once, otherwise the change was lost if the page was reloaded
+		echo "<p><span class=\"red-text\">➡ Saved. Click SAVE ‘".$filename."’ to display fixed scales</span></p>";
 		}
 	
 	if(isset($_POST['record_new_keys'])) {
@@ -566,7 +567,7 @@ if($max_scales > 0) {
 							else if(($kfound = array_search($this_note,$Frenchnote)) !== FALSE) $k = $kfound;
 							else if(($kfound = array_search($this_note,$AltFrenchnote)) !== FALSE) $k = $kfound;
 							if($j == (count($table2) - 1)) $k = 12;
-							$this_key = $newkey[$k];
+							$this_key = ($k >= 0) ? $newkey[$k] : "0";
 							if($this_note == '•') $this_key = "0";
 							$new_keys_line .= $this_key." ";
 							}
@@ -590,6 +591,8 @@ if($max_scales > 0) {
 				chmod($dir_scales.$some_scale,$permissions);
 				}
 			}
+		SaveTonality(FALSE,$dir,$filename,$temp_folder,TRUE); // 2026-11-18 Saved at once, otherwise the change was lost if the page was reloaded
+		echo "<p><span class=\"red-text\">➡ Saved. Click SAVE ‘".$filename."’ to display the new keys</span></p>";
 		}
 	
 	if(isset($_POST['align_scales'])) {
@@ -696,7 +699,10 @@ if($max_scales > 0) {
 				}
 			}
 		unlink($file_lock);
-		if($need_to_save) echo "<p><span class=\"red-text\">➡ Now click the SAVE ‘".$filename."’ button to refresh the display</span> </p>";
+		if($need_to_save) {
+			SaveTonality(FALSE,$dir,$filename,$temp_folder,TRUE); // 2026-11-18 Saved at once, otherwise the change was lost if the page was reloaded
+			echo "<p><span class=\"red-text\">➡ Saved. Now click the SAVE ‘".$filename."’ button to refresh the display</span> </p>";
+			}
 		}	
 		
 	if(isset($_POST['reassign_keys'])) {
@@ -838,47 +844,28 @@ if($max_scales > 0) {
 			$names_string = trim(str_replace('/','',$scale_note_names[$i_scale]));
 			$names_string = preg_replace("/\s+/u",' ',$names_string);
 			$table_names[$i_scale] = explode(' ',$names_string);
-			$p_interval[$i_scale] = $q_interval[$i_scale] = $ratio_interval[$i_scale] = array();
-			$p_old = $q_old = 0;
-			$oldratio = 1;
-			$note_name[$i_scale][0] = $table_names[$i_scale][0];
-			for($i_fraction = $k = 0; $i_fraction < (count($table_fraction) - 1); $i_fraction += 2) {
-				if(!isset($table_names[$i_scale][$i_fraction / 2]) OR $table_names[$i_scale][$i_fraction / 2] == "•") continue;
-				$note_name[$i_scale][$k + 1] = $table_names[$i_scale][$i_fraction / 2];
-				$ratio[$i_scale][$k] = $table_tonality_line[($i_fraction / 2) + 8];
-				$ratio_interval[$i_scale][$k] = 1;
+			$p_interval[$i_scale] = $q_interval[$i_scale] = $ratio_interval[$i_scale] = $note_name[$i_scale] = array();
+			// 2026-11-19 Interval k is the step between named grades k and k + 1. It is a fraction only if both grades have one, otherwise it is computed from their ratios. Before, a fraction following grades without fractions was divided by the last fraction found (e.g. "2/1" instead of "20c"), and the reverse step used an outdated ratio
+			$named = array();
+			for($i = 0; ($i + 8) < count($table_tonality_line); $i++) {
+				if(!isset($table_names[$i_scale][$i]) OR $table_names[$i_scale][$i] == "•") continue;
+				$p = isset($table_fraction[2 * $i]) ? intval($table_fraction[2 * $i]) : 0;
+				$q = isset($table_fraction[(2 * $i) + 1]) ? intval($table_fraction[(2 * $i) + 1]) : 0;
+				$this_ratio = floatval($table_tonality_line[$i + 8]);
+				if(($p * $q) > 0) $this_ratio = $p / $q;
+				$named[] = array('name' => $table_names[$i_scale][$i],'p' => $p,'q' => $q,'ratio' => $this_ratio);
+				}
+			if(count($named) > 0 AND $named[0]['ratio'] > 0) $cent_position[$i_scale] = 1200 * log($named[0]['ratio']) / log(2);
+			else $cent_position[$i_scale] = 0;
+			for($k = 0; $k < count($named); $k++) $note_name[$i_scale][$k] = $named[$k]['name'];
+			for($k = 0; $k < (count($named) - 1); $k++) {
+				$a = $named[$k]; $b = $named[$k + 1];
 				$p_interval[$i_scale][$k] = $q_interval[$i_scale][$k] = 0;
-				$p = intval($table_fraction[$i_fraction]);
-				$q = intval($table_fraction[$i_fraction + 1]);
-				$p_position[$i_scale][$k] = $p;
-				$q_position[$i_scale][$k] = $q;
-				if(($p * $q) > 0) {
-				//	echo $p."/".$q." ";
-					if($i_fraction  == 0)
-						$cent_position[$i_scale] = 1200 * log($p/$q) /log(2);
-					if($i_fraction > 1) {
-						$p_this_interval = $p * $q_old;
-						$q_this_interval = $q * $p_old;
-						$simple_fraction = simplify_fraction_eliminate_schisma($p_this_interval,$q_this_interval);
-						if($simple_fraction['p'] <> $p_this_interval) {
-							$p_this_interval = $simple_fraction['p'];
-							$q_this_interval = $simple_fraction['q'];
-							}
-						$p_interval[$i_scale][$k] = $p_this_interval;
-						$q_interval[$i_scale][$k] = $q_this_interval;
-						$k++;
-						}
-					$p_old = $p;
-					$q_old = $q;
-					}
-				else {
-				//	echo " <small>".round($ratio[$i_scale][$k],4)." </small>";
-					if($i_fraction > 1) {
-						$ratio_interval[$i_scale][$k] = $ratio[$i_scale][$k] / $oldratio;
-						}
-					$oldratio = $ratio[$i_scale][$k];
-					$p_interval[$i_scale][$k] = $q_interval[$i_scale][$k] = 0;
-					$k++;
+				$ratio_interval[$i_scale][$k] = ($a['ratio'] > 0 AND $b['ratio'] > 0) ? $b['ratio'] / $a['ratio'] : 1;
+				if(($a['p'] * $a['q'] * $b['p'] * $b['q']) > 0) {
+					$simple_fraction = simplify_fraction_eliminate_schisma($b['p'] * $a['q'],$b['q'] * $a['p']);
+					$p_interval[$i_scale][$k] = $simple_fraction['p'];
+					$q_interval[$i_scale][$k] = $simple_fraction['q'];
 					}
 				}
 			}
@@ -899,18 +886,21 @@ if($max_scales > 0) {
 		$file_lock = $dir.$filename."_lock3";
 		$handle_lock = fopen($file_lock,"w");
 		fwrite($handle_lock,"lock\n");
-		if($handle) fclose($handle_lock);
+		if($handle_lock) fclose($handle_lock);
 		$found_one = FALSE;
 		for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
 			if(isset($_POST['delete_scale_'.$i_scale])) {
-				$scalefile = $dir_scales.$scale_name[$i_scale].".txt";
+				$scalefile = $dir_scales.to_scale_file_name($scale_name[$i_scale]);
 				echo "Deleting <span class=\"turquoise-text\"><b>‘".$scale_name[$i_scale]."’</b></span><br />";
-				unlink($scalefile);
+				@unlink($scalefile);
 				$found_one = TRUE;
 				}
 			}
-		if($found_one) echo "<p><span class=\"red-text\">➡ Click SAVE ‘".$filename."’ to update the list</span></p>";
 		unlink($file_lock);
+		if($found_one) {
+			SaveTonality(FALSE,$dir,$filename,$temp_folder,TRUE); // 2026-11-18 Saved at once, otherwise the change was lost if the page was reloaded
+			echo "<p><span class=\"red-text\">➡ Saved. Click SAVE ‘".$filename."’ to update the list</span></p>";
+			}
 		}
 	
 	if(isset($_POST['delete_scales'])) {
@@ -1020,25 +1010,22 @@ echo $dir."<br />";
 			if($kmaxi == 0) continue;
 			echo "<li class=\"morespace\"><span class=\"green-text\">".$scale_name[$i_scale]."</span> = ";
 			$p_prod = $q_prod = 1;
-			for($i_fraction = $k = 0; $k < $kmaxi; $i_fraction += 2) {
-				if($table_names[$i_scale][$i_fraction / 2] == "•") continue;
+			for($k = 0; $k < $kmaxi; $k++) {
 				echo "<span class=\"tonalnotes\">".$note_name[$i_scale][$k]."</span> ";
 				if(($p_interval[$i_scale][$k] * $q_interval[$i_scale][$k]) > 0) {
 					echo "<small>".$p_interval[$i_scale][$k]."/".$q_interval[$i_scale][$k]."</small> ";
 					$p_prod = $p_prod * $p_interval[$i_scale][$k]; // Only required for checking
 					$q_prod = $q_prod * $q_interval[$i_scale][$k]; // Only required for checking
-					$k++;
 					}
 				else {
 					$cents = round(1200 * log($ratio_interval[$i_scale][$k]) / log(2));
 					echo "<small>".$cents."c</small> ";
-					$k++;
 					}
 				}
 			for($j_scale = 1; $j_scale <= $max_scales; $j_scale++) {
 				if($i_scale == $j_scale) continue;
 				if(!isset($p_interval[$j_scale])) continue;	// Scale incorrecctly saved
-				$kmaxj = count($p_interval[$i_scale]);
+				$kmaxj = count($p_interval[$j_scale]); // 2026-11-19 Was $i_scale
 				if(($kmaxj <> $kmaxi) OR $kmaxj == 0) continue;
 				if(count($p_interval[$j_scale]) == 0) continue;
 				for($k = 0; $k < $kmaxi; $k++) {
@@ -1074,41 +1061,7 @@ echo "</tr></table>";
 for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
 	if(isset($scale_fraction[$i_scale]) AND isset($table_names[$i_scale])) {
 		if(isset($_POST['export_scale_'.$i_scale])) {
-			$olddir = getcwd();
-			chdir($dir_scales);
-			$file = $scale_name[$i_scale].".scl";
-		//	echo $dir_scales."@@".$file."@<br />";
-			$text = "! ".$file."\n";
-			$text .= "! Scala file, ref. https://www.huygens-fokker.org/scala/scl_format.html\n";
-			if(isset($scale_comment[$i_scale])) {
-				$this_comment = html_to_text($scale_comment[$i_scale],'txt');
-				$this_comment = substr($this_comment, 0, strpos($this_comment, "<br />"));
-				$this_comment = str_replace("-cs.","-to.",$this_comment);
-				$text .= $this_comment."\n";
-				}
-			else $text .= "This scale is called '".$scale_name[$i_scale]."'\n";
-			$text .= "! Created by the Bol Processor\n";
-			$kmaxi = count($p_interval[$i_scale]);
-			$text .= $kmaxi."\n";
-			for($i_fraction = $k = 0; $k < $kmaxi; $i_fraction += 2) {
-				if($table_names[$i_scale][$i_fraction / 2] == "•") continue;
-				if(($p_interval[$i_scale][$k] * $q_interval[$i_scale][$k]) > 0) {
-					$text .= $p_position[$i_scale][$k]."/".$q_position[$i_scale][$k]." ".$note_name[$i_scale][$k + 1]."\n";
-					$k++;
-					}
-				else {
-					$cents = round(1200 * log($ratio[$i_scale][$k]) / log(2));
-					$text .= $cents." cents ".$note_name[$i_scale][$k + 1]."\n";
-					$k++;
-					}
-				}
-			$handle = fopen($file,"w");
-			if($handle) {
-				fwrite($handle,$text);
-				fclose($handle);
-				chmod($file,$permissions);
-				}
-			chdir($olddir);
+			export_scala($dir_scales,$scale_name[$i_scale]); // 2026-11-18 Same export as scale.php, including unnamed grades
 			break;
 			}
 		}
@@ -1163,7 +1116,7 @@ function create_from_scl($scale_name,$scala_filename,$content) {
 		$frac[$jfrac++] = 1;
 		$frac[$jfrac++] = 1;
 		$ratio[$jratio++] = 1;
-		$note[0] = '';
+		$note[0] = $first_note = '';
 		for($i = 0; $i < $imax; $i++) {
 			$line = trim($table[$i]);
 			if($comment_done AND $line == '') continue;
@@ -1190,7 +1143,11 @@ function create_from_scl($scale_name,$scala_filename,$content) {
 				// echo "<p>@@".$line."@@</p>";
 				if($line == '') break;
 				$j++;
-				if(is_integer($pos=strpos($line,"!")) AND $pos == 0) continue;
+				if(is_integer($pos=strpos($line,"!")) AND $pos == 0) {
+					// 2026-11-18 Name of the first note, in the comment "! 1/1 name" written by scale.php before the first grade
+					if($jj == 0 AND preg_match("/^!\s*1\/1\s+(\S+)\s*$/u",$line,$matches)) $first_note = $matches[1];
+					continue;
+					}
 				$jj++;
 				$line = str_replace('\t',' ',$line);
 				$line = preg_replace("/\s+/u",' ',$line);
@@ -1235,7 +1192,8 @@ function create_from_scl($scale_name,$scala_filename,$content) {
 			}
 		$names = "/";
 	//	$note[0] = $note[$numgrades_fullscale];
-		$note[0] = "key#".$basekey;
+		if($first_note <> '') $note[0] = $first_note;
+		else $note[0] = "key#".$basekey;
 		$convention = '';
 		if(is_integer($pos=strpos($note[0],"do"))) $convention = "fr"; 
 		for($j = 0; $j <= $numgrades_fullscale; $j++) {

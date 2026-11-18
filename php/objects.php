@@ -89,8 +89,9 @@ if(isset($_POST['duplicate_object'])) {
 	if(!file_exists($copy_object_file)) {
 		copy($this_object_file,$copy_object_file);
 		@unlink($temp_dir.$temp_folder.SLASH.$copy_object.".txt.old");
-		$this_object_codes = $temp_dir.$temp_folder.SLASH.$object."_codes";
-		$copy_object_codes = $temp_dir.$temp_folder.SLASH.$copy_object."_codes";
+		// 2026-11-18 Codes are in the folder named by clean_folder_name(), where SaveObjectPrototypes() reads them - fixed by Claude
+		$this_object_codes = $temp_dir.$temp_folder.SLASH.clean_folder_name($object)."_codes";
+		$copy_object_codes = $temp_dir.$temp_folder.SLASH.clean_folder_name($copy_object)."_codes";
 		rcopy($this_object_codes,$copy_object_codes);
 		}
 	else echo "<p><span class=\"red-text\">Cannot create</span> <span class=\"green-text\"><big>“".$copy_object."”</big></span> <span class=\"red-text\">because an object with that name already exists</span></p>";
@@ -114,17 +115,26 @@ if(isset($_POST['rename_object'])) {
 	$new_object = str_replace('#','-',$new_object);
 	$new_object = str_replace('_','-',$new_object);
 	$new_object = str_replace('"','',$new_object);
-	if($new_object <> '') {
+	$this_object_file = $temp_dir.$temp_folder.SLASH.$object.".txt";
+	$new_object_file = $temp_dir.$temp_folder.SLASH.$new_object.".txt";
+	// 2026-11-18 Renaming as an existing prototype replaced it, and mixed the codes of both. A change of case only is accepted, although macOS file names ignore case - fixed by Claude
+	if($new_object <> '' AND $new_object <> $object AND strcasecmp($new_object,$object) <> 0 AND (file_exists($new_object_file) OR file_exists($new_object_file.".old"))) {
+		echo "<p><span class=\"red-text\">Cannot rename</span> <span class=\"green-text\"><big>“".$object."”</big></span> <span class=\"red-text\">because a prototype named</span> <span class=\"green-text\"><big>“".$new_object."”</big></span> <span class=\"red-text\">already exists (perhaps deleted)</span></p>";
+		$new_object = '';
+		}
+	if($new_object <> '' AND $new_object <> $object) {
 		echo "<p><span class=\"red-text\">Renamed </span><span class=\"green-text\"><big>“".$object."”</big></span> as <span class=\"green-text\"><big>“".$new_object."”</big></span>…</p>";
-		$this_object_file = $temp_dir.$temp_folder.SLASH.$object.".txt";
-		$new_object_file = $temp_dir.$temp_folder.SLASH.$new_object.".txt";
 	//	echo $new_object_file."<br />";
 		if(file_exists($this_object_file)) {
 			rename($this_object_file,$new_object_file);
 		//	unlink($this_object_file);
-			$this_object_codes = $temp_dir.$temp_folder.SLASH.$object."_codes";
-			$new_object_codes = $temp_dir.$temp_folder.SLASH.$new_object."_codes";
-			rcopy($this_object_codes,$new_object_codes);
+			// 2026-11-18 Codes are in the folder named by clean_folder_name(), where SaveObjectPrototypes() reads them. They are moved, not copied - fixed by Claude
+			$this_object_codes = $temp_dir.$temp_folder.SLASH.clean_folder_name($object)."_codes";
+			$new_object_codes = $temp_dir.$temp_folder.SLASH.clean_folder_name($new_object)."_codes";
+			if($new_object_codes <> $this_object_codes) {
+				if(is_dir($new_object_codes)) my_rmdir($new_object_codes);
+				if(is_dir($this_object_codes)) rename($this_object_codes,$new_object_codes);
+				}
 			$handle = fopen($temp_dir.$temp_folder.SLASH."_changed",'w');
 			fclose($handle);
 			}
@@ -254,6 +264,9 @@ foreach(cs_get($prototypes_data,'Prototypes',array()) as $p) {
 		mkdir($save_codes_dir);
 		chmod($save_codes_dir,$permissions);
 		}
+	// 2026-11-18 If prototypes were changed and not yet saved, their temporary files are newer than the file on disk, so they are kept - fixed by Claude
+	$keep_temp = file_exists($temp_dir.$temp_folder.SLASH."_changed") AND file_exists($object_file[$iobj]);
+	if(!$keep_temp) {
 	$handle_object = fopen($object_file[$iobj],"w");
 	$file_header = $top_header."\n// Data saved as \"".$object_name[$iobj]."\". Date: ".gmdate('Y-m-d H:i:s');
 	$file_header .= "\n".$filename;
@@ -262,17 +275,23 @@ foreach(cs_get($prototypes_data,'Prototypes',array()) as $p) {
 	$object_comment[$iobj] = recode_tags(cs_get($p,"Comment",''));
 	fwrite($handle_object,"<HTML>".$object_comment[$iobj]."</HTML>\n");
 	fclose($handle_object);
+	}
+	else $object_comment[$iobj] = recode_tags(cs_get($p,"Comment",''));
 	echo "<input type=\"hidden\" name=\"object_name_".$iobj."\" value=\"".$object_name[$iobj]."\">";
 	// MIDI codes are sent to a separate file "midibytes.txt"
 	$codes = cs_get($p,'MIDIcodes',array());
 	$midi_bytes = $save_codes_dir."/midibytes.txt";
-	file_put_contents($midi_bytes,so_codes_to_text($codes));
-	chmod($midi_bytes,$permissions);
+	if(!$keep_temp) {
+		file_put_contents($midi_bytes,so_codes_to_text($codes));
+		chmod($midi_bytes,$permissions);
+		}
 	$has_midi[$iobj] = (count($codes) > 0);
 	$csound_score = so_score_to_text(cs_get($p,"Csound score",''));
 	$csound_file_this_object = $save_codes_dir."/csound.txt";
-	file_put_contents($csound_file_this_object,$csound_score."\n");
-	chmod($csound_file_this_object,$permissions);
+	if(!$keep_temp) {
+		file_put_contents($csound_file_this_object,$csound_score."\n");
+		chmod($csound_file_this_object,$permissions);
+		}
 	$has_csound[$iobj] = (preg_match("/i[0-9]\s/u",$csound_score) == 1);
 	}
 $maxsounds = $iobj + 1;

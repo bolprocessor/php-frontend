@@ -106,6 +106,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' AND isset($_POST['import_kbm']) AND isse
 				rename($dir_scales."temp_scale_file.txt",$file_link);
 				}
 			@unlink($file_lock);
+			if($kbm_error == '') to_temp_changed($dir_scales); // 2026-11-18 Before, the KBM file was saved only if the scale was saved again
   			}
 		else {
             $kbm_error = "<p><span class=\"red-text\">➡ Please select a KBM file!</span></p>";
@@ -168,7 +169,9 @@ if($need_to_save OR isset($_POST['interpolate']) OR isset($_POST['savethisfile']
 	$clean_scale_name = str_replace("/","_",$clean_scale_name);
 	$result1 = check_duplicate_name($dir_scales,$clean_scale_name.".txt");
 	$result2 = check_duplicate_name($dir_scales,$clean_scale_name.".old");
-	if($new_scale_name <> $filename AND ($result1 OR $result2)) {
+	$clean_scale_name1 = str_replace("#","_",$filename);
+	$clean_scale_name1 = str_replace("/","_",$clean_scale_name1);
+	if($new_scale_name <> $filename AND strcasecmp($clean_scale_name,$clean_scale_name1) <> 0 AND ($result1 OR $result2)) {
 		echo "<p><span class=\"red-text\">WARNING</span>: This name <span class=\"green-text\">‘".$new_scale_name."’</span> already exists</p>";
 		$scale_name = $filename;
 		}
@@ -885,9 +888,7 @@ if(isset($_POST['savethisfile']) OR isset($_POST['fixkeynumbers']) OR isset($_PO
 	if($scale_comment <> '')
 		fwrite($handle,$scale_comment);
 	fclose($handle);
-	$file_changed = $dir_scales."_changed";
-	$handle = fopen($file_changed,"w");
-	fclose($handle);
+	to_temp_changed($dir_scales); // 2026-11-18 Saved at once, otherwise the change was lost if the '-to' page was reloaded before its autosave
 	}
 
 $content = file_get_contents($file_link,TRUE);
@@ -1993,6 +1994,7 @@ if($done AND $numgrades_with_labels > 2 AND !$warned_ratios) {
 					$some_comment .= "<br />Created ".date('Y-m-d H:i:s')."</html>";
 					fwrite($handle,$some_comment."\n");
 					fclose($handle);
+					to_temp_changed($dir_scales); // 2026-11-18 The new scale is saved at once
 					}
 				}
 			else $error_create .= "<br /><span class=\"red-text\"> ➡ ERROR: unknown ‘sensitive note’ option</span>";
@@ -2333,6 +2335,7 @@ if($done AND $numgrades_with_labels > 2 AND !$warned_ratios) {
 			$some_comment .= "Created ".date('Y-m-d H:i:s')."</html>";
 			fwrite($handle,$some_comment."\n");
 			fclose($handle);
+			to_temp_changed($dir_scales); // 2026-11-18 The new scale is saved at once
 			$transpose_from_note = $transpose_to_note  = '';
 			}
 		}
@@ -2757,38 +2760,11 @@ $line = str_replace('§','?',$line);
 fwrite($h_image,$line);
 fclose($h_image);
 
+// Store SCALA
+export_scala($dir_scales,$scale_name); // 2026-11-18 Shared with the "Export to SCALA" button of tonality.php. Called before chdir() because $dir_scales is a relative path
+
 $olddir = getcwd();
 chdir($dir_scales);
-
-// Store SCALA
-$file = $scale_name.".scl";
-$text = "! ".$file."\n";
-$text .= "! Scala file, ref. https://www.huygens-fokker.org/scala/scl_format.html\n";
-if(isset($scale_comment) AND strlen($scale_comment) > 5) {
-	$this_comment = html_to_text($scale_comment,'txt');
-	$this_comment = substr($this_comment, 0, strpos($this_comment, "<br />"));
-	$this_comment = str_replace("-cs.","-to.",$this_comment);
-	$text .= $this_comment."\n";
-	}
-else $text .= "This scale is called '".$scale_name."'\n";
-$text .= "! Created by the Bol Processor\n";
-$kmaxi = $numgrades_fullscale;
-$text .= $kmaxi."\n";
-for($k = 1; $k <= $kmaxi; $k++) {
-	if($name[$k] == "•") continue;
-	if(($p[$k] * $q[$k]) > 0) {
-		$text .= $p[$k]."/".$q[$k]." ".$name[$k]."\n";
-		}
-	else {
-		$cents = round(1200 * log($ratio[$k]) / log(2));
-		$text .= $cents." cents ".$name[$k]."\n";
-		}
-	}
-$handle = fopen($file,"w");
-if($handle) {
-	fwrite($handle,$text);
-	fclose($handle);
-	}
 
 // Store KBM
 $file = $scale_name.".kbm";
@@ -2809,10 +2785,10 @@ $text .= $basefreq."\n";
 $text .= "! Scale degree to consider as formal octave:\n";
 $text .= $numgrades_fullscale."\n";
 $text .= "! Mapping\n";
-$kk = 0;
 for($k = 0; $k < $numgrades_fullscale; $k++) {
+	// 2026-11-18 The SCALA file contains all grades, so a named grade is mapped to its own degree. Before, only named grades were counted
 	if($name[$k] == '' OR $name[$k] == "•") $text .= "x\n";
-	else $text .= $kk++."\n";
+	else $text .= $k."\n";
 	}
 $handle = fopen($file,"w");
 if($handle) {
@@ -2824,7 +2800,7 @@ chdir($olddir);
 echo "</body>";
 echo "</html>";
 
-/* ===========  FUNCTIONS ============== */
+// ===========  FUNCTIONS ==============
 
 function find_neighbours($syntonic_comma,$note,$ratio,$name,$i,$j,$numgrades_fullscale,$level,$levelmax) {
 	global $table,$done_note,$perfect_fifth,$perfect_fourth,$harmonic_third,$harmonic_minor_sixth,$pythagorean_third,$pythagorean_minor_sixth;

@@ -376,7 +376,7 @@
                 },
                 "Index of this instrument": {
                     "key": "CsInstrumentIndex",
-                    "value": 1
+                    "value": 5
                 },
                 "Comment on this instrument": {
                     "key": "CsInstrumentComment",
