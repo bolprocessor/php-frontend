@@ -71,6 +71,15 @@ else {
 	echo "‘tonality_source’ is not known. It should be set in the ‘-to’ file.";
 	die();
 	}
+// 2026-11-19 A scale of a fixed tonality resource can only be viewed (see "_source" written by tonality.php) - by Claude
+$ro_source = @file(dirname(rtrim($dir_scales,"/\\")).SLASH."_source",FILE_IGNORE_NEW_LINES); // Names not used elsewhere on this page ($key is the table of keys)
+$read_only = ($ro_source !== FALSE AND count($ro_source) >= 2 AND read_only_resource_folder($ro_source[0]));
+if($read_only) {
+	foreach(array_keys($_POST) as $ro_post_key)
+		if(!in_array($ro_post_key,array('dir_scales','tonality_source','csound_source','scroll'))) unset($_POST[$ro_post_key]);
+	echo "<p><span class=\"red-text\">➡ This scale belongs to a fixed tonality resource of the distribution: it can be viewed but not changed.</span></p>";
+	read_only_page_script();
+	}
 
 $kbm_error = '';
 if($_SERVER['REQUEST_METHOD'] == 'POST' AND isset($_POST['import_kbm']) AND isset($_POST['forgood'])) {
@@ -79,7 +88,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' AND isset($_POST['import_kbm']) AND isse
     if(isset($_FILES['file'])) {
         // Check for any upload errors
         if($_FILES['file']['error'] === UPLOAD_ERR_OK) {
-			$file_lock = $dir_tonality_resources.$tonality_source."_lock";
+			$file_lock = tonality_resource_dir($tonality_source).$tonality_source."_lock";
 		//	echo "file_lock = ".$file_lock."<br />";
 			$time_start = time();
 			$time_end = $time_start + 3;
@@ -942,7 +951,7 @@ for($i = 0; $i < $imax; $i++) {
 echo "<p>";
 echo "&nbsp;&nbsp;<a target=\"_blank\" class=\"linkdotted\" href=\"https://www.csound.com/docs/manual/GEN51.html\">Csound GEN51</a> table: <span class=\"green-text\">".$scale_table."</span>";
 if($message <> '') echo $message;
-echo "<div style=\"float:right; margin-top:1em; padding:1em; border-radius:5%;\"><h2>Scale “".$filename."”</h2><h3>This version of the scale is stored in “<a href=\"tonality.php?file=tonality_resources%2F".$tonality_source."\"><span class=\"green-text\">".$tonality_source."</span></a>”</h3>";
+echo "<div style=\"float:right; margin-top:1em; padding:1em; border-radius:5%;\"><h2>Scale “".$filename."”</h2><h3>This version of the scale is stored in “<a href=\"tonality.php?file=".urlencode(tonality_resource_folder($tonality_source).SLASH.$tonality_source)."\"><span class=\"green-text\">".$tonality_source."</span></a>”</h3>";
 
 $link = "scale_image.php?save_codes_dir=".urlencode($save_codes_dir)."&dir_scale_images=".urlencode($dir_scale_images)."&tonality_source=".urlencode($tonality_source);
 $link_no_marks = $link."&no_marks=1";

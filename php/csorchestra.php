@@ -4,12 +4,18 @@ require_once("_basic_tasks.php");
 if(isset($_GET['file'])) $file = urldecode($_GET['file']);
 else $file = '';
 if($file == '') die();
+// 2026-11-19 An orchestra of "csound_resources" or "my_csound_resources" is opened in the folder where it is, "my_csound_resources" first - by Claude
+$table = explode(SLASH,$file);
+if(count($table) == 2 AND ($table[0] == $csound_resources OR $table[0] == $my_csound_resources))
+	$file = csound_resource_folder($table[1]).SLASH.$table[1];
 $url_this_page = "csorchestra.php?file=".urlencode($file);
 $table = explode(SLASH,$file);
 $filename = end($table);
 $this_file = $bp_application_path.$file;
 $dir = str_replace($filename,'',$this_file);
 $current_directory = str_replace(SLASH.$filename,'',$file);
+$read_only = read_only_resource_folder($dir); // 2026-11-19 A fixed file of "csound_resources" can only be viewed
+if($current_directory == $my_csound_resources) $current_directory = $csound_resources; // Both folders are listed together
 
 require_once("_header.php");
 display_darklight();
@@ -17,7 +23,14 @@ display_darklight();
 echo "<p><small>Current directory = <a class=\"linkdotted\" href=\"index.php?path=".urlencode($current_directory)."\">".$dir."</a></small></p>";
 echo link_to_help();
 	
-echo "<h2>Csound orchestra file <big>“<span class=\"turquoise-text\">".$filename."</span>”</big></h2>";
+echo "<h2>Csound orchestra file <big>“<span class=\"turquoise-text\">".$filename."</span>”</big>";
+if(same_folder($dir,$dir_csound_resources)) echo " <small>(fixed)</small>";
+echo "</h2>";
+if($read_only) {
+	read_only_message($filename,"Csound orchestra");
+	read_only_page_script();
+	unset($_POST['savethisfile'],$_POST['createfile']);
+	}
 
 if(isset($_POST['savethisfile'])) {
 	$content = $_POST['thistext'];

@@ -1390,8 +1390,8 @@ if($alphabet_file <> '' AND $objects_file == '') {
 $found_orchestra_in_instruments = FALSE;
 if($csound_file <> '') {
 	if(file_exists($dir.$csound_file))
-		rename($dir.$csound_file,$dir_csound_resources.$csound_file);
-	$csound_orchestra = get_orchestra_filename($dir_csound_resources.$csound_file);
+		move_to_csound_resources($dir,$csound_file);
+	$csound_orchestra = get_orchestra_filename(csound_resource_path($csound_file));
 	if($csound_orchestra <> '') $found_orchestra_in_instruments = TRUE;
 	}
 else $csound_orchestra = '';
@@ -1664,18 +1664,18 @@ if($keyboard_file <> '') {
 		}
 	}
 if($csound_file <> '') {
-	if(!file_exists($dir_csound_resources.$csound_file)) {
+	if(!file_exists(csound_resource_path($csound_file))) {
 		$upload_mssg .= "<br /><span class=\"red-text\">WARNING:</span> <span class=\"green-text\">".$csound_file."</span> not found<br />";
 		$error = TRUE;
 		}
 	else {
 		$link_options .= "&csound_file=".urlencode($csound_file);
-		if(($file_format == "csound" OR $file_format == "csoundrt") AND file_exists($dir_csound_resources.$csound_orchestra)) $link_options .= "&csound_orchestra=".urlencode($csound_orchestra);
+		if(($file_format == "csound" OR $file_format == "csoundrt") AND file_exists(csound_resource_path($csound_orchestra))) $link_options .= "&csound_orchestra=".urlencode($csound_orchestra);
 		}
 	}
 if($tonality_file <> '') {
-	if(!file_exists($dir_tonality_resources.$tonality_file)) {
-		$upload_mssg .= "<br /><span class=\"red-text\">WARNING: </span><span class=\"green-text\">".$dir_tonality_resources.$tonality_file."</span> not found<br />";
+	if(!file_exists(tonality_resource_path($tonality_file))) {
+		$upload_mssg .= "<br /><span class=\"red-text\">WARNING: </span><span class=\"green-text\">".tonality_resource_path($tonality_file)."</span> not found<br />";
 		$error = TRUE;
 		}
 	else {
@@ -1913,7 +1913,7 @@ if($imax > 0 AND (substr_count($content,'{') > 0 OR substr_count($content,"-da."
 		if(!$tonal_analysis_possible) echo " disabled";
 		echo ">";
 		echo "Melodic and harmonic tonal intervals of (all) item(s)<br /><i>ignoring channels, instruments, periods, sound-objects and random performance controls.</i></p>";
-		if($tonality_file <> '') echo "<div style=\"padding:6px;\"><span class=\"red-text\">➡</span> It may be necessary to <a class=\"linkdotted\" target=\"_blank\" href=\"tonality.php?file=".urlencode($tonality_resources.SLASH.$tonality_file)."\">open</a> the ‘<span class=\"green-text\">".$tonality_file."</span>’ tonality resource file, allowing access to its tonal scale definitions.</div>";
+		if($tonality_file <> '') echo "<div style=\"padding:6px;\"><span class=\"red-text\">➡</span> It may be necessary to <a class=\"linkdotted\" target=\"_blank\" href=\"tonality.php?file=".urlencode(tonality_resource_folder($tonality_file).SLASH.$tonality_file)."\">open</a> the ‘<span class=\"green-text\">".$tonality_file."</span>’ tonality resource file, allowing access to its tonal scale definitions.</div>";
 		echo "</form>";
 	//	echo "<hr>";
 		}

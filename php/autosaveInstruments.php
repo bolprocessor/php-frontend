@@ -9,10 +9,10 @@ if(isset($_GET['save'])) {
 	if(!$test) {
 		$result = SaveCsoundInstruments(FALSE,$dir,$filename,$temp_folder,FALSE);
 		if($result === "locked") {
-			echo "<span class=\"red-text\"> ➡ CANNOT autosave: please</span> <a href=\"csound.php?file=".urlencode($csound_resources.SLASH.$filename)."\">RELOAD</a> this page!";
+			echo "<span class=\"red-text\"> ➡ CANNOT autosave: please</span> <a href=\"csound.php?file=".urlencode(csound_resource_folder($filename).SLASH.$filename)."\">RELOAD</a> this page!";
 			}
 		else if($result === "missing") {
-			echo "<span class=\"red-text\"> ➡ CANNOT autosave: the temporary data of this page was deleted. Please close this page and</span> <a href=\"csound.php?file=".urlencode($csound_resources.SLASH.$filename)."\">RELOAD</a> it!";
+			echo "<span class=\"red-text\"> ➡ CANNOT autosave: the temporary data of this page was deleted. Please close this page and</span> <a href=\"csound.php?file=".urlencode(csound_resource_folder($filename).SLASH.$filename)."\">RELOAD</a> it!";
 			}
 		else if($result === "error") {
 			echo "<span class=\"red-text\"> ➡ CANNOT autosave: the data of this page could not be converted. The file was not changed.</span>";

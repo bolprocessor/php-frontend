@@ -134,14 +134,14 @@ else {
 
 	$csound_orchestra = $_GET['csound_orchestra'] ?? '';
 	if($csound_orchestra <> '' AND file_exists($dir.$csound_orchestra)) {
-		rename($dir.$csound_orchestra,$dir_csound_resources.$csound_orchestra);
+		move_to_csound_resources($dir,$csound_orchestra);
 		sleep(1);
 		}
 	// 2026-11-18 Without a '-cs' file, Csound output uses the default orchestra "0-default.orc", whose instruments
 	// are described by CSOUND_DEFAULT_RESOURCE: it supplies the parameters of the piano and flute (velocity, modulation, panoramic)
 	if($csound_file == '' AND ($file_format == "csound" OR $file_format == "csoundrt")
 			AND ($csound_orchestra == '' OR $csound_orchestra == "0-default.orc")
-			AND file_exists($dir_csound_resources.CSOUND_DEFAULT_RESOURCE))
+			AND file_exists(csound_resource_path(CSOUND_DEFAULT_RESOURCE)))
 		$csound_file = CSOUND_DEFAULT_RESOURCE;
 
 	$grammar_name = str_replace(" ","_",$grammar_name);
@@ -187,8 +187,8 @@ else {
 	foreach($input_files as $option => $path)
 		if($path <> '') $command .= " ".$option." ".quote_if_spaces($path);
 	if($note_convention <> '') $command .= " --".$note_convention;
-	if($csound_file <> '') $command .= " -cs ".$dir_csound_resources.$csound_file;
-	if($tonality_file <> '') $command .= " -to ".$dir_tonality_resources.$tonality_file;
+	if($csound_file <> '') $command .= " -cs ".csound_resource_path($csound_file);
+	if($tonality_file <> '') $command .= " -to ".tonality_resource_path($tonality_file);
 	if($startup <> '') $command .= " --start ".$startup;
 	$plays_or_produces = in_array($instruction,["produce","produce-all","play","play-all","expand","create_set","enter_notes"]);
 	if($plays_or_produces) {
@@ -280,8 +280,8 @@ if($instruction <> "help") {
 	if(file_exists($dir_midi_resources."midiport_".$project_fullname))
 		// We need to use midisetup of this project
 		copy($dir_midi_resources."midiport_".$project_fullname, $dir_midi_resources."last_midiport");
-	if($csound_file <> '' AND !wait_while_exists($dir_csound_resources.$csound_file."_lock",5))
-		echo "<p id=\"cswait\"><span class=\"red-text\">Maximum time (5 seconds) spent waiting for the Csound resource file to be unlocked:</span> <span class=\"green-text\">".$dir_csound_resources.$csound_file."</span></p>";
+	if($csound_file <> '' AND !wait_while_exists(csound_resource_path($csound_file)."_lock",5))
+		echo "<p id=\"cswait\"><span class=\"red-text\">Maximum time (5 seconds) spent waiting for the Csound resource file to be unlocked:</span> <span class=\"green-text\">".csound_resource_path($csound_file)."</span></p>";
 	if($objects_path <> '' AND !wait_while_exists($objects_path."_lock",5))
 		echo "<p id=\"miwait\"><span class=\"red-text\">Maximum time (5 seconds) spent waiting for the sound-object prototypes file to be unlocked:</span> <span class=\"green-text\">".$objects_path."</span></p>";
 
@@ -402,13 +402,13 @@ if($file_format == "csoundrt" AND $instruction <> "help") {
 	$csoundrt_message = '';
 	if(!csound_ready())
 		$csoundrt_message = "Csound ".CSOUND_MIN_VERSION." or later was not found. Reload the project page to check the installation of Csound.";
-	else if(!file_exists($dir_csound_resources.$this_orchestra))
-		$csoundrt_message = "The orchestra file was not found: ".$dir_csound_resources.$this_orchestra;
+	else if(!file_exists(csound_resource_path($this_orchestra)))
+		$csoundrt_message = "The orchestra file was not found: ".csound_resource_path($this_orchestra);
 	else {
 		// Linux: the library path is set for Csound, then restored for the console
 		$saved_library_path = getenv("LD_LIBRARY_PATH");
 		if(!windows_system()) csound_environment($csound_path);
-		$csoundrt_ok = csoundrt_start($csound_path.SLASH.$csound_name,$dir_csound_resources.$this_orchestra,$csoundrt_status);
+		$csoundrt_ok = csoundrt_start($csound_path.SLASH.$csound_name,csound_resource_path($this_orchestra),$csoundrt_status);
 		if(!windows_system()) {
 			if($saved_library_path === FALSE) putenv("LD_LIBRARY_PATH");
 			else putenv("LD_LIBRARY_PATH=".$saved_library_path);
@@ -579,10 +579,10 @@ if($instruction <> "templates") {
 if($no_error AND $file_format == "csound") {
 	if($csound_orchestra == '') {
 		$csound_orchestra = "0-default.orc";
-		echo "<p><span class=\"red-text\">➡</span> Csound orchestra file was not specified. I tried the default orchestra: <span class=\"green-text\">".$dir_csound_resources.$csound_orchestra."</span>.</p>";
+		echo "<p><span class=\"red-text\">➡</span> Csound orchestra file was not specified. I tried the default orchestra: <span class=\"green-text\">".csound_resource_path($csound_orchestra)."</span>.</p>";
 		}
-	if(!file_exists($dir_csound_resources.$csound_orchestra)) {
-		echo "<p><span class=\"red-text\">➡</span> No orchestra file has been found here: <span class=\"green-text\">".$dir_csound_resources.$csound_orchestra."</span>. Csound will not create a sound file.</p>";
+	if(!file_exists(csound_resource_path($csound_orchestra))) {
+		echo "<p><span class=\"red-text\">➡</span> No orchestra file has been found here: <span class=\"green-text\">".csound_resource_path($csound_orchestra)."</span>. Csound will not create a sound file.</p>";
 		}
 	else {
 		// We change the name of the sound file every time to force the browser to refresh the audio tag
@@ -607,7 +607,7 @@ if($no_error AND $file_format == "csound") {
 			if(!windows_system()) csound_environment($csound_path);
 			$trace_csound = $temp_dir_abs."trace_csound.txt";
 			// $csound_path is absolute on all systems (2026-11-14)
-			$command = "\"".$csound_path.SLASH.$csound_name."\" --wave -o ".$sound_file_link." ".$dir_csound_resources.$csound_orchestra." ".$score_file." 2>".$trace_csound;
+			$command = "\"".$csound_path.SLASH.$csound_name."\"".csound_sample_option()." --wave -o ".$sound_file_link." ".csound_resource_path($csound_orchestra)." ".$score_file." 2>".$trace_csound;
 			$command_show = $command;
 			if(windows_system()) {
 				$command = windows_command($command);

@@ -1,5 +1,6 @@
 <?php
 require_once("_basic_tasks.php");
+require_once("_cs_copy.php");
 $autosave = TRUE;
 // $autosave = FALSE;
 $verbose = TRUE;
@@ -8,6 +9,10 @@ $verbose = FALSE;
 if(isset($_GET['file'])) $file = urldecode($_GET['file']);
 else $file = '';
 if($file == '') die();
+// 2026-11-19 A '-cs' file of "csound_resources" or "my_csound_resources" is opened in the folder where it is, "my_csound_resources" first - by Claude
+$table = explode(SLASH,$file);
+if(count($table) == 2 AND ($table[0] == $csound_resources OR $table[0] == $my_csound_resources))
+	$file = csound_resource_folder($table[1]).SLASH.$table[1];
 $url_this_page = "csound.php?file=".urlencode($file);
 save_settings("last_page",$url_this_page);
 $table = explode(SLASH,$file);
@@ -17,6 +22,8 @@ $dir = str_replace($filename,'',$this_file);
 $warn_not_empty = FALSE;
 $max_scales = 0;
 $current_directory = str_replace(SLASH.$filename,'',$file);
+$read_only = read_only_resource_folder($dir); // 2026-11-19 A fixed file of "csound_resources" can only be viewed
+if($current_directory == $my_csound_resources) $current_directory = $csound_resources; // Both folders are listed together
 save_settings("last_directory",$current_directory);
 
 require_once("_header.php");
@@ -28,8 +35,16 @@ echo "</a>   <span id='message2' style=\"margin-bottom:1em;\"></span>";
 echo "</p>";
 echo link_to_help();
 
-echo "<h2>Csound resource “".$filename."”</h2>";
+echo "<h2>Csound resource “".$filename."”";
+if(same_folder($dir,$dir_csound_resources)) echo " <small>(fixed)</small>";
+echo "</h2>";
 save_settings("last_name",$filename);
+if($read_only) {
+	read_only_message($filename);
+	read_only_page_script();
+	// Nothing is changed in a read-only file. Copying one of its instruments to another file is possible.
+	foreach(array('delete_instrument','restore','create_instrument','duplicate_instrument','savealldata') as $action) unset($_POST[$action]);
+	}
 
 if($test) echo "dir = ".$dir."<br />";
 
@@ -192,6 +207,38 @@ if(isset($_POST['duplicate_instrument'])) {
 		}
 	}
 
+// 2026-11-19 Copying an instrument to another '-cs' file, with the code it needs in the orchestra of that file (see _cs_copy.php) - by Claude
+if(isset($_POST['copy_instrument_to'])) {
+	$instrument = $_POST['instrument_name'];
+	echo "<hr><p><span class=\"red-text\">➡ The code of the instrument will be added to the orchestra of the destination file if needed.</span></p>";
+	echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+	echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";
+	echo "<input type=\"hidden\" name=\"instrument_name\" value=\"".$instrument."\">";
+	echo "<input class=\"cancel\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"cancel_copy\" value=\"CANCEL\">&nbsp;<input type=\"submit\" style=\"background-color:aquamarine; font-size:large;\" name=\"copy_this_instrument\" onclick=\"this.form.target='_self';return true;\" value=\"Click to copy instrument ‘".$instrument."’ to:\"><br />";
+	echo "<blockquote>";
+	// 2026-11-19 Files of both Csound resource folders, except fixed ones that can't be changed
+	foreach(list_of_csound_resources() as $thisfile) {
+		if($thisfile == $filename) continue;
+		if(read_only_resource_folder(csound_resource_dir($thisfile))) continue;
+		echo "<input type=\"radio\" class=\"read-only-keep\" name=\"file_choice\" value=\"".$thisfile."\">".$thisfile."<br />";
+		}
+	echo "</blockquote>";
+	echo "</form><hr>";
+	}
+if(isset($_POST['copy_this_instrument'])) {
+	echo "<hr>";
+	if(!isset($_POST['file_choice'])) echo "<p><span class=\"red-text\">➡ No destination file was selected</span></p>";
+	else {
+		// Changes of this page not yet saved are saved first, since the instrument is read from the file
+		if(!$read_only AND file_exists($temp_dir.$temp_folder.SLASH."_changed")) {
+			$page = csound_page_values_from_file($dir.$filename);
+			if($page !== FALSE) SaveCsoundInstruments(FALSE,$dir,$filename,$temp_folder,FALSE,$page);
+			}
+		echo cs_copy_instrument($dir,$filename,$_POST['instrument_name'],$_POST['file_choice']);
+		}
+	echo "<hr>";
+	}
+
 $lock2 = $dir.$filename."_lock2";
 if($need_to_save OR isset($_POST['savealldata']) OR isset($_POST['delete_instrument']) OR isset($_POST['restore']) OR isset($_POST['create_instrument'])) {
 		echo "<p id=\"timespan\"><span class=\"red-text\">Saving file:</span> <span class=\"green-text\">".$filename."</span></p>";
@@ -232,7 +279,7 @@ echo "<p class=\"green-text\">".str_replace("\n","<br />",cs_get($csound_json,'h
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 echo "<p style=\"text-align:left;\"><input class=\"save big\" type=\"submit\" name=\"savealldata\" onclick=\"this.form.target='_self';return true;\" value=\"SAVE ‘".$filename."’\"></p>";
 
-if($autosave) {
+if($autosave AND !$read_only) {
 	echo "<p><span class=\"red-text\">➡</span> All data is <span class=\"red-text\">autosaved</span> every 30 seconds if changes occurred.<br />Keep this page open as long as you are editing instruments or scales!</p>";
 	echo "<script type=\"text/javascript\" src=\"autosaveInstruments.js\"></script>";
 	}
@@ -263,24 +310,27 @@ if($CsoundOrchestraName == '') {
 	$warn_not_empty = TRUE;
 	}
 echo "Csound orchestra file = <input type=\"text\" name=\"CsoundOrchestraName\" size=\"30\" value=\"".$CsoundOrchestraName."\">";
-$link = "file_list.php?dir=".urlencode($dir_csound_resources)."&extension=orc";
+$link = "file_list.php?dir=".urlencode($dir_csound_resources)."&extension=orc"; // Lists both Csound resource folders
 echo "<input class=\"save\" type=\"submit\" name=\"savealldata\" onclick=\"this.form.target='_self';return true;\" value=\"SAVE\">";
 echo " <input class=\"edit\" onclick=\"window.open('".$link."','listorchestra','width=200,height=300,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"which one?\">";
 	echo " ➡ ";
 if($warn_not_empty)
 	echo "<span class=\"red-text\">WARNING: this field should’nt be empty. By default it has been set to ‘default.orc’. </span>";
-$orchestra_filename = $dir_csound_resources.$CsoundOrchestraName;
-if(file_exists($dir.$CsoundOrchestraName)) {
-	rename($dir.$CsoundOrchestraName,$orchestra_filename);
+if(file_exists($dir.$CsoundOrchestraName) AND !is_csound_resource_folder($dir)) {
+	move_to_csound_resources($dir,$CsoundOrchestraName);
 	sleep(1);
 	}
-$path = str_replace($bp_application_path,'',$dir_csound_resources);
+$orchestra_filename = csound_resource_path($CsoundOrchestraName);
+$url_orchestra = "csorchestra.php?file=".urlencode(csound_resource_folder($CsoundOrchestraName).SLASH.$CsoundOrchestraName);
 if(file_exists($orchestra_filename)) {
-	echo "<a class=\"linkdotted\" target=\"_blank\" href=\"csorchestra.php?file=".urlencode($path.$CsoundOrchestraName)."\">Edit this file</a>";
+	if(read_only_resource_folder(csound_resource_dir($CsoundOrchestraName))) $label = "View this file";
+	else $label = "Edit this file";
+	echo "<a class=\"linkdotted\" target=\"_blank\" href=\"".$url_orchestra."\">".$label."</a>";
 	}
-else {
-	echo "File not found: <a target=\"_blank\" href=\"csorchestra.php?file=".urlencode($path.$CsoundOrchestraName)."\">create it!</a>";
+else if(!$read_only) {
+	echo "File not found: <a target=\"_blank\" href=\"".$url_orchestra."\">create it!</a>";
 	}
+else echo "File not found";
 echo "<br />";
 $instruments = cs_get($csound_values,"CsInstruments",array());
 if(!is_array($instruments)) $instruments = array();
@@ -497,7 +547,7 @@ echo "<input type=\"hidden\" name=\"the_tables\" value='".$cstables."'>";  // Fo
 echo "<input type=\"hidden\" name=\"dir_scales\" value=\"".$dir_scales."\">";
 
 if(is_integer(strpos($tonality_filename,"-to.")) OR is_integer(strpos($tonality_filename,".bpto"))) {
-	$url_tonality = "tonality.php?file=".urlencode($tonality_resources.SLASH.$tonality_filename);
+	$url_tonality = "tonality.php?file=".urlencode(tonality_resource_folder($tonality_filename).SLASH.$tonality_filename);
 	echo "<input class=\"edit\" type=\"submit\" formaction=\"".$url_tonality."\" target=\"_blank\" name=\"opentonality\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$tonality_filename."’\">&nbsp;";
 	}
 $max_scales = $i_scale; // Beware that we count scales from 1 because 0 is the default equal-tempered scale
@@ -505,7 +555,7 @@ $max_scales = $i_scale; // Beware that we count scales from 1 because 0 is the d
 if($max_scales > 1) {
 	echo "<p><span class=\"red-text\">➡</span> This old version of Csound instruments file contained ".$max_scales." scale definitions. These will be deleted and transfered to a tonality file</p>";
 	// This is an old version of "-cs" file still containing scale definitions
-	$dir_tonality = $dir_tonality_resources;
+	$dir_tonality = tonality_resource_dir($tonality_filename); // 2026-11-19
 	// Save scale definitions to a "-to" file
 	SaveTonality(FALSE,$dir_tonality,$tonality_filename,$temp_folder,TRUE);
 	echo "<p><span class=\"red-text\">➡</span> Tonality file ‘<span class=\"green-text\">".$tonality_filename."</span>’ has been created or updated</p>";
@@ -577,7 +627,7 @@ else {
 
 echo "</tr><tr><td colspan=\"2\">";
 echo "<h2 id=\"instruments\">Instruments</h2>";
-if($deleted_instruments <> '') echo "<p><input class=\"edit\" type=\"submit\" name=\"restore\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#instruments\" value=\"RESTORE ALL DELETED INSTRUMENTS\">&nbsp;<span class=\"green-text\"><big>".$deleted_instruments."</big></span></p>";
+if($deleted_instruments <> '' AND !$read_only) echo "<p><input class=\"edit\" type=\"submit\" name=\"restore\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#instruments\" value=\"RESTORE ALL DELETED INSTRUMENTS\">&nbsp;<span class=\"green-text\"><big>".$deleted_instruments."</big></span></p>";
 echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";
 echo "<input type=\"hidden\" name=\"filename\" value=\"".$filename."\">";
 
@@ -645,7 +695,8 @@ if($number_instruments > 0) {
 		echo "<input class=\"save\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"delete_instrument\" value=\"DELETE\">";
 		echo "</td>";
 		echo "<td class=\"middle\" style=\"text-align:right; padding:5px;\">";
-		echo "<input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"duplicate_instrument\" value=\"DUPLICATE AS\">: <input type=\"text\" name=\"copy_instrument\" size=\"15\" value=\"\">";
+		if(!$read_only) echo "<input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"duplicate_instrument\" value=\"DUPLICATE AS\">: <input type=\"text\" name=\"copy_instrument\" size=\"15\" value=\"\"><br />";
+		echo "<input class=\"edit\" style=\"background-color:yellow;\" type=\"submit\" formaction=\"".$url_this_page."\" onclick=\"this.form.target='_self';return true;\" name=\"copy_instrument_to\" value=\"COPY TO ANOTHER FILE\">";
 		echo "</td>";
 		echo "</form>";
 		echo "</tr>";

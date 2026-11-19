@@ -1,5 +1,12 @@
 <?php
 require_once("_basic_tasks.php");
+// 2026-11-19 "my_csound_resources" is listed together with "csound_resources", and "my_tonality_resources" with "tonality_resources" - by Claude
+if($path == $my_csound_resources) $path = $csound_resources;
+if($path == $my_tonality_resources) $path = $tonality_resources;
+$csound_folder = ($path == $csound_resources);
+$tonality_folder = ($path == $tonality_resources);
+$resource_kind = $csound_folder ? "csound" : ($tonality_folder ? "tonality" : '');
+$resource_folder = ($resource_kind <> '');
 if($path <> '') $filename = $path;
 else $filename = "Bol Processor";
 if(isset($_POST['change_skin']) AND $_POST['change_skin'] >= 0) {
@@ -16,6 +23,7 @@ $error_opening = FALSE;
 
 if($path <> '' AND $_SERVER['REQUEST_METHOD'] === 'POST') {
     $targetDirectory = $bp_application_path.$path;
+	if($resource_folder) $targetDirectory = rtrim(resource_dirs($resource_kind)['my'],"/\\"); // 2026-11-19 Imported resources belong to the user
     if(isset($_FILES['files'])) {
         foreach($_FILES['files']['tmp_name'] as $key => $tmpName) {
             if ($_FILES['files']['error'][$key] === UPLOAD_ERR_OK) {
@@ -24,6 +32,15 @@ if($path <> '' AND $_SERVER['REQUEST_METHOD'] === 'POST') {
 				$type_of_file = type_of_file($fileName);
 				if($type_of_file['type'] == '') {
 					echo "File '$fileName' ignored (not for Bol Processor)<br>";
+					unlink($tmpName);
+					}
+				// 2026-11-19 Only resources of the right kind are imported to a resource folder, and they may not replace or hide a file with the same name in either folder - by Claude
+				else if($resource_folder AND resource_kind_of_type($type_of_file['type']) <> $resource_kind) {
+					echo "<span class=\"red-text\">➡</span> File '".htmlspecialchars($fileName)."' ignored (not a ".($resource_kind == "csound" ? "Csound" : "tonality")." resource)<br>";
+					unlink($tmpName);
+					}
+				else if($resource_folder AND file_exists(resource_path($resource_kind,$fileName))) {
+					echo "<span class=\"red-text\">➡</span> File '".htmlspecialchars($fileName)."' not imported: there is already a file with this name. Rename the file before importing it.<br>";
 					unlink($tmpName);
 					}
 				else {
@@ -253,6 +270,25 @@ if(isset($_POST['create_prototypes'])) {
 			}
 		}
 	}
+// 2026-11-19 Duplicate button of the Csound and tonality resource lists - by Claude
+if($resource_folder AND isset($_POST['duplicate_resource']) AND isset($_POST['duplicate_name'])) {
+	echo duplicate_resource($resource_kind,basename(trim($_POST['duplicate_resource'])),trim($_POST['duplicate_name']));
+	}
+// 2026-11-19 'delete' button of the Csound and tonality resource lists: the file goes to the trash, from which MOVE brings it back to the user folder - by Claude
+if($resource_folder AND isset($_POST['trash_resource'])) {
+	$thisfile = basename(trim($_POST['trash_resource']));
+	$thistype = type_of_file($thisfile)['type'];
+	$source = resource_path($resource_kind,$thisfile);
+	if($thisfile == '' OR $thisfile[0] == '.' OR !is_file($source) OR resource_kind_of_type($thistype) <> $resource_kind)
+		echo "<p><span class=\"red-text\">➡ Can't delete</span> ‘".htmlspecialchars($thisfile)."’</p>";
+	else if(read_only_resource_folder(resource_dir($resource_kind,$thisfile)))
+		echo "<p><span class=\"red-text\">➡ Can't delete fixed file</span> ‘<span class=\"green-text\">".$thisfile."</span>’</p>";
+	else {
+		rename($source,$dir_trash_folder.$thisfile);
+		delete_settings($thisfile);
+		echo "<p><span class=\"red-text\">➡</span> Deleted ‘<span class=\"green-text\">".$thisfile."</span>’ (moved to <a target=\"_blank\" href=\"index.php?path=".$trash_folder."\">trash folder</a>)</p>";
+		}
+	}
 if(isset($_POST['create_csound'])) {
 	$type = $_POST['type'];
 	$name_mode = $_POST['name_mode'];
@@ -260,16 +296,18 @@ if(isset($_POST['create_csound'])) {
 	if($filename <> '') {
 		$filename = good_name($type,$filename,$name_mode);
 		$new_file = $filename;
-		if(file_exists($dir.SLASH.$filename)) {
+		// 2026-11-19 New Csound resources are created in "my_csound_resources", or in "csound_resources" by the designer if requested. The name may not be that of a file in either folder - by Claude
+		$create_dir = new_csound_resource_folder();
+		if(file_exists($dir_csound_resources.$filename) OR file_exists($dir_my_csound_resources.$filename)) {
 			echo "<p><span class=\"red-text\">This file already exists:</span> <span class=\"red-text\">".$filename."</span></p>";
 			unset($_POST['create_csound']);
 			}
 		else {
-			$handle = fopen($dir.SLASH.$filename,"w");
+			$handle = fopen($create_dir.$filename,"w");
 			$file_header = $top_header."\n// Csound resource file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s')." GMT";
 			fwrite($handle,csound_data_to_json($file_header,cs_new_data())); // 2026-11-12 JSON format with default values
 			fclose($handle);
-			chmod($dir.SLASH.$filename,$permissions);
+			chmod($create_dir.$filename,$permissions);
 			}
 		}
 	}
@@ -280,17 +318,19 @@ if(isset($_POST['create_tonality'])) {
 	if($filename <> '') {
 		$filename = good_name($type,$filename,$name_mode);
 		$new_file = $filename;
-		if(file_exists($dir.SLASH.$filename)) {
+		// 2026-11-19 New tonality resources are created in "my_tonality_resources", or in "tonality_resources" by the designer if requested. The name may not be that of a file in either folder - by Claude
+		$create_dir = new_resource_folder("tonality");
+		if(file_exists($dir_tonality_resources.$filename) OR file_exists($dir_my_tonality_resources.$filename)) {
 			echo "<p><span class=\"red-text\">This file already exists:</span> <span class=\"red-text\">".$filename."</span></p>";
 			unset($_POST['create_tonality']);
 			}
 		else {
-			$handle = fopen($dir.SLASH.$filename,"w");
+			$handle = fopen($create_dir.$filename,"w");
 			$template = "tonality_template";
 			$template_content = @file_get_contents($template);
 			fwrite($handle,$template_content."\n");
 			fclose($handle);
-			chmod($dir.SLASH.$filename,$permissions);
+			chmod($create_dir.$filename,$permissions);
 			}
 		}
 	}
@@ -300,13 +340,14 @@ if(isset($_POST['create_csound_orchestra'])) {
 	if($filename <> '') {
 		$filename = $filename.".orc";
 		$new_file = $filename;
-		if(file_exists($dir.SLASH.$filename)) {
+		$create_dir = new_csound_resource_folder(); // 2026-11-19 See create_csound
+		if(file_exists($dir_csound_resources.$filename) OR file_exists($dir_my_csound_resources.$filename)) {
 			echo "<p><span class=\"red-text\">This file already exists:</span> <span class=\"red-text\">".$filename."</span></p>";
 			}
 		else {
-			$handle = fopen($dir.SLASH.$filename,"w");
+			$handle = fopen($create_dir.$filename,"w");
 			fclose($handle);
-			chmod($dir.SLASH.$filename,$permissions);
+			chmod($create_dir.$filename,$permissions);
 			}
 		}
 	}
@@ -347,13 +388,15 @@ $extension = end($table);
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 echo "<p style=\"text-align:left;\">";
 if($path <> '') echo "<input class=\"edit\" type=\"submit\" name=\"\" value=\"REFRESH THIS PAGE\">";
-if($folder <> '') echo "&nbsp;&nbsp;<big><span class=\"red-text\">↑</span>&nbsp;<a href=\"".nice_url($upper_link)."\">UPPER FOLDER</a>&nbsp;<span class=\"red-text\">↑</span></big>";
+if(!$resource_folder) { // 2026-11-19 No UPPER FOLDER in the lists of Csound and tonality resources
+	if($folder <> '') echo "&nbsp;&nbsp;<big><span class=\"red-text\">↑</span>&nbsp;<a href=\"".nice_url($upper_link)."\">UPPER FOLDER</a>&nbsp;<span class=\"red-text\">↑</span></big>";
+	}
 echo "</p>";
 
 $link_list = "file_list.php?dir=".$dir;
 if($path <> '' AND $path <> $trash_folder) {
 	echo "<p><input class=\"edit\" onclick=\"window.open('".nice_url($link_list)."','listfiles','width=300,height=600,left=100'); return false;\" type=\"submit\" name=\"\" value=\"COPY list of files\">&nbsp;";
-	if(countBakFiles($dir) > 0) echo "<input class=\"trash\" type=\"submit\" name=\"trash_backups\" title=\"Delete '_bak' files\" value=\"MOVE '_bak' files to TRASH\"></p>";
+	if(countBakFiles($dir) > 0 OR ($resource_folder AND countBakFiles(rtrim(resource_dirs($resource_kind)['my'],"/\\")) > 0)) echo "<input class=\"trash\" type=\"submit\" name=\"trash_backups\" title=\"Delete '_bak' files\" value=\"MOVE '_bak' files to TRASH\"></p>";
 	if($download_files) echo "<input class=\"cancel\" type=\"submit\" name=\"\" value=\"CANCEL DOWNLOAD\">";
 	}
 echo "</form>";
@@ -373,18 +416,6 @@ if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension 
 	echo "<div style=\"float:right; padding:6px; background-color:transparent;\">";
 	if($path <> '') check_csound();
 	if(!is_integer(strpos($path,$tonality_resources)) AND $path <> '') link_to_tonality();
-	if($path == $tonality_resources) {
-		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-		echo "<p style=\"text-align:left;\">";
-		echo "<input class=\"save\" type=\"submit\" name=\"create_tonality\" value=\"CREATE NEW TONALITY FILE\"><br />named:&nbsp";
-		echo "<input type=\"text\" name=\"filename\" size=\"20\" style=\"background-color:CornSilk;\" value=\"\">";
-		$type = "to";
-		echo "<br /><input type=\"radio\" name=\"name_mode\" value=\"prefix\" checked>with prefix ‘-".$type."’";
-		echo "<br /><input type=\"radio\" name=\"name_mode\" value=\"extension\">with extension ‘bp".$type."’";
-		echo "<input type=\"hidden\" name=\"type\" value=\"".$type."\">";
-		echo "</p>";
-		echo "</form>";
-		}
 	if($path <> '') {
 		echo "<button class=\"save big\" onclick=\"toggleimport(); return false;\">IMPORT FILES</button><br />";
 		echo "<div id=\"import\" style=\"padding:6px; background-color:transparent;\">";
@@ -480,7 +511,7 @@ if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension 
 			}
 		echo "</div>";
 		}
-	else if($path <> $tonality_resources) {
+	else if($csound_folder) {
 		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		echo "<p style=\"text-align:left;\">";
 		echo "<input class=\"save\" type=\"submit\" name=\"create_csound\" value=\"CREATE NEW CSOUND RESOURCE FILE\"><br />named:&nbsp";
@@ -489,12 +520,27 @@ if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension 
 		echo "<br /><input type=\"radio\" name=\"name_mode\" value=\"prefix\" checked>with prefix ‘-".$type."’";
 		echo "<br /><input type=\"radio\" name=\"name_mode\" value=\"extension\">with extension ‘bp".$type."’";
 		echo "<input type=\"hidden\" name=\"type\" value=\"".$type."\">";
+		if($i_am_designer) echo "<br /><input type=\"checkbox\" name=\"in_fixed\">in ‘".$csound_resources."’ (fixed)";
 		echo "</p>";
 		echo "</form>";
 		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
 		echo "<p style=\"text-align:left;\">";
 		echo "<input class=\"save\" type=\"submit\" name=\"create_csound_orchestra\" value=\"CREATE NEW CSOUND ORCHESTRA FILE\"><br />named:&nbsp";
 		echo "<input type=\"text\" name=\"filename\" size=\"20\" style=\"background-color:CornSilk;\" value=\"\">.orc";
+		if($i_am_designer) echo "<br /><input type=\"checkbox\" name=\"in_fixed\">in ‘".$csound_resources."’ (fixed)";
+		echo "</p>";
+		echo "</form>";
+		}
+	else if($tonality_folder) { // 2026-11-19 Below IMPORT FILES, as in the Csound resource folder
+		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+		echo "<p style=\"text-align:left;\">";
+		echo "<input class=\"save\" type=\"submit\" name=\"create_tonality\" value=\"CREATE NEW TONALITY RESOURCE FILE\"><br />named:&nbsp";
+		echo "<input type=\"text\" name=\"filename\" size=\"20\" style=\"background-color:CornSilk;\" value=\"\">";
+		$type = "to";
+		echo "<br /><input type=\"radio\" name=\"name_mode\" value=\"prefix\" checked>with prefix ‘-".$type."’";
+		echo "<br /><input type=\"radio\" name=\"name_mode\" value=\"extension\">with extension ‘bp".$type."’";
+		echo "<input type=\"hidden\" name=\"type\" value=\"".$type."\">";
+		if($i_am_designer) echo "<br /><input type=\"checkbox\" name=\"in_fixed\">in ‘".$tonality_resources."’ (fixed)";
 		echo "</p>";
 		echo "</form>";
 		}
@@ -526,6 +572,8 @@ if(isset($_POST['move_checked_files'])) {
 	if(isset($_POST['folder_choice']) AND ($dest_folder = $_POST['folder_choice']) <> '') {
 		echo "<p id=\"refresh\"><span class=\"red-text\">➡ Moving selected files/folders</span> to ‘<span class=\"green-text\">".$dest_folder."</span>’</p>";
 		}
+	else if($path == $trash_folder) // 2026-11-19 Resources still go back to their folders
+		echo "<p id=\"refresh\"><span class=\"red-text\">➡ No destination folder was selected:</span> only Csound and tonality resources are moved back to their folders</p>";
 	else {
 		echo "<p><span class=\"red-text\">➡ No destination folder was selected, move canceled</span></p>";
 		$move_checked_files = FALSE;
@@ -536,6 +584,7 @@ if(isset($_POST['move_checked_files'])) {
 if($move_files) {
 	$list_folders = array();
 	$list_folders = folder_list($bp_application_path,$list_folders,'');
+	if($path == $trash_folder) array_unshift($list_folders,$my_csound_resources,$my_tonality_resources); // 2026-11-19
 	$imax = count($list_folders);
 	if($imax > 0) {
 		echo "<div style=\"float:right; padding:6px; border-radius:12px;\">";
@@ -558,15 +607,15 @@ if($move_files) {
 		}
 	}
 
-if(!$delete_files AND !$rename_files AND !$move_files AND !$download_files AND $path <> $trash_folder) {
+if(!$delete_files AND !$rename_files AND !$move_files AND !$download_files AND $path <> $trash_folder AND !$resource_folder) { // 2026-11-19 The resource lists have their own buttons
 	if($path <> '') echo "<input class=\"save\" style=\"margin-top:1em;\" title=\"Delete folders or files\" type=\"submit\" name=\"delete_files\" value=\"DELETE\">";
 	else  echo "<input class=\"save\" style=\"margin-top:1em;\" title=\"Delete folders or files\" type=\"submit\" name=\"delete_files\" value=\"DELETE FOLDERS\"><br /><br />";
 	}
 if($path <> '') {
-	if(!$rename_files AND !$delete_files AND !$move_files AND !$download_files) {
+	if(!$rename_files AND !$delete_files AND !$move_files AND !$download_files AND !$resource_folder) {
 		echo "&nbsp;<input class=\"save\"style=\"margin-top:1em;\" title=\"Rename folders or files\" type=\"submit\" name=\"rename_files\" value=\"RENAME OR COPY\">";
 		}
-	if(!$rename_files AND !$delete_files AND !$move_files AND !$download_files) {
+	if(!$rename_files AND !$delete_files AND !$move_files AND !$download_files AND !$resource_folder) {
 		echo "&nbsp;<input class=\"save\" style=\"margin-top:1em;\" title=\"Move folders or files\" type=\"submit\" name=\"move_files\" value=\"MOVE\">";
 		}
 	if(!$rename_files AND !$delete_files AND !$move_files AND !$download_files) {
@@ -661,6 +710,28 @@ if(!is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"t
 		if($n3 > 0) display_directory(FALSE,$dir,"keyboard");
 		echo "</td>";
 		echo"</tr>";
+		if($path == $trash_folder) { // 2026-11-19 Deleted resources - by Claude
+			echo "<tr>";
+			echo "<th>";
+			$n4 = display_directory(TRUE,$dir,"tonality");
+			echo "<h4>Tonal resources</h4>";
+			echo "</th>";
+			echo "<th>";
+			$n5 = display_directory(TRUE,$dir,"csresources");
+			echo "<h4>Csound resources</h4>";
+			echo "</th>";
+			echo "<th></th>";
+			echo"</tr>";
+			echo "<tr>";
+			echo "<td style=\"padding-bottom:6px;\">";
+			if($n4 > 0) display_directory(FALSE,$dir,"tonality");
+			echo "</td>";
+			echo "<td style=\"padding-bottom:6px;\">";
+			if($n5 > 0) display_directory(FALSE,$dir,"csresources");
+			echo "</td>";
+			echo "<td></td>";
+			echo"</tr>";
+			}
 		echo "<tr>";
 		echo "<th>";
 		$n1 = display_directory(TRUE,$dir,"settings");
@@ -699,6 +770,7 @@ function display_directory($test,$dir,$filter) {
 	global $path,$move_files,$move_checked_files,$new_file,$csound_resources,$tonality_resources,$delete_checked_files,$rename_checked_files,$delete_files,$download_files,$rename_files,$show_dependencies,$trash_backups,$trash_folder,$this_page,$url_this_page,$dir_trash_folder,$bp_application_path,$dest_folder,$done,$seen,$dir_csound_resources,$dir_tonality_resources,$last_grammar_name,$last_data_name;
 
 	global $absolute_application_path, $error_opening;
+	global $csound_folder,$my_csound_resources,$dir_my_csound_resources,$i_am_designer,$resource_folder,$resource_kind,$my_tonality_resources,$dir_my_tonality_resources;
 	
 	$dir = preg_replace('/'.preg_quote(SLASH,'/').'+$/','',$dir);
 	$target_path = $dir;
@@ -708,6 +780,13 @@ function display_directory($test,$dir,$filter) {
 		}
 	if($target_path <> '') $dircontent = @scandir($target_path);
 	else $dircontent = array();
+	// 2026-11-19 The Csound resource folder shows the files of "csound_resources" (fixed) and "my_csound_resources" - by Claude
+	$file_dir = array();
+	if($resource_folder AND $dircontent) {
+		$file_dir = resource_files($resource_kind);
+		$dircontent = array_keys($file_dir);
+		}
+	$dir0 = $dir;
 	if(!$dircontent) {
 		if(!$error_opening) {
 			if(file_exists($target_path)) echo "<p><span class=\"red-text\">Error opening a workspace</span> (<span class=\"green-text\">".$target_path."</span>) because of access limitations</p>";
@@ -718,8 +797,26 @@ function display_directory($test,$dir,$filter) {
 		}
 	natcasesort($dircontent);
 	$i_file = $files_shown = 0;
+	$new_versions = 0;
+	static $duplicate_script = FALSE;
+	if($resource_folder AND !$test AND !$duplicate_script) {
+		$duplicate_script = TRUE;
+		// 2026-11-19 Script of the DUPLICATE buttons: asks for a name not used in either folder, then posts it - by Claude
+		echo "<script>\nvar csNames = ".json_encode(array_values($dircontent)).";\n";
+		echo "function duplicateResource(file) {\n\tvar m, pre = '', ext = '';\n\tif(m = file.match(/^-(cs|to)\\./)) pre = m[0];\n\telse if(m = file.match(/\\.(orc|bpcs|bpto)$/)) ext = m[0];\n\tvar name = prompt('Duplicate ' + file + ' to ".resource_dirs($resource_kind)['my_name']." as:', '');\n\tif(name === null) return false;\n\tname = name.trim().replace(/[ +$:\\/\\\\]/g,'_');\n\tname = name.replace(/^-(cs|to)\\./,'').replace(/\\.(orc|bpcs|bpto)$/,'');\n\tif(name == '' || name[0] == '.') { alert('Invalid name'); return false; }\n\tname = pre + name + ext;\n\tif(csNames.indexOf(name) >= 0) { alert(name + ' already exists'); return duplicateResource(file); }\n";
+		echo "\tvar f = document.createElement('form'); f.method = 'post'; f.action = window.location.href;\n\t[['duplicate_resource',file],['duplicate_name',name]].forEach(function(p) { var i = document.createElement('input'); i.type = 'hidden'; i.name = p[0]; i.value = p[1]; f.appendChild(i); });\n\tdocument.body.appendChild(f); f.submit(); return false;\n\t}\n";
+		echo "function trashResource(file) {\n\tif(!confirm('Move ' + file + ' to the trash?')) return false;\n\tvar f = document.createElement('form'); f.method = 'post'; f.action = window.location.href;\n\tvar i = document.createElement('input'); i.type = 'hidden'; i.name = 'trash_resource'; i.value = file; f.appendChild(i);\n\tdocument.body.appendChild(f); f.submit(); return false;\n\t}\n</script>\n";
+		}
 	foreach($dircontent as $thisfile) { 
 		$i_file++;
+		$dir = isset($file_dir[$thisfile]) ? rtrim($file_dir[$thisfile],"/\\") : $dir0;
+		$link_folder = $path;
+		$fixed = $locked = FALSE;
+		if(isset($file_dir[$thisfile])) {
+			$fixed = same_folder($dir,resource_dirs($resource_kind)['fixed']);
+			$locked = ($fixed AND !$i_am_designer);
+			if(!$fixed) $link_folder = resource_dirs($resource_kind)['my_name'];
+			}
 		if($thisfile[0] == '.' OR $thisfile[0] == '_') continue;
 		if(is_integer($pos=strpos($thisfile,"BP2")) AND $pos == 0) continue;
 		if(is_integer($pos=strpos($thisfile,"License")) AND $pos == 0) continue;
@@ -729,7 +826,7 @@ function display_directory($test,$dir,$filter) {
 		if($test) {
 			if(($new_name = new_name($thisfile,"file")) <> $thisfile) rename($dir.SLASH.$thisfile,$dir.SLASH.$new_name);
 			}
-		if($move_files) $check_box = "<input type=\"checkbox\" name=\"move_".$i_file."\"> ";
+		if($move_files AND !$locked) $check_box = "<input type=\"checkbox\" name=\"move_".$i_file."\"> ";
 		else $check_box = '';
 		$this_file_moved = FALSE;
 		$absolute_path = str_replace($bp_application_path,$absolute_application_path,$dir.SLASH.$thisfile);
@@ -741,20 +838,35 @@ function display_directory($test,$dir,$filter) {
 	//	echo $dir.SLASH.$thisfile."<br>";
 
 		if($trash_backups AND is_integer($pos=strpos($thisfile,"_bak"))) {
-			$source_file = $bp_application_path.$path.SLASH.$thisfile;
+			$source_file = $dir.SLASH.$thisfile;
 			rename($source_file,$dir_trash_folder.$thisfile);
 			delete_settings($thisfile);
 			continue;
 			}
-		if(!$test AND $move_checked_files AND isset($_POST['move_'.$i_file])) {
+		if(!$test AND $move_checked_files AND isset($_POST['move_'.$i_file]) AND !$locked) {
 			unset($_POST['move_'.$i_file]);
-			$source_file = $bp_application_path.$path.SLASH.$thisfile;
-			$destination_file = $bp_application_path.$dest_folder.SLASH.$thisfile;
-			if(is_integer($pos=strpos($dest_folder,$thisfile)) AND $pos == 0) {
+			$source_file = $dir.SLASH.$thisfile;
+			// 2026-11-19 From the trash, Csound resources go back to "my_csound_resources" and tonality resources to "my_tonality_resources", whatever the folder chosen. Only these resources go to these folders - by Claude
+			$this_dest = $dest_folder;
+			$move_type = is_dir($source_file) ? "directory" : type_of_file($thisfile)['type'];
+			$move_kind = resource_kind_of_type($move_type);
+			if($path == $trash_folder AND $move_kind <> '') $this_dest = resource_dirs($move_kind)['my_name'];
+			$dest_kind = ($this_dest == $my_csound_resources) ? "csound" : (($this_dest == $my_tonality_resources) ? "tonality" : '');
+			$destination_file = $bp_application_path.$this_dest.SLASH.$thisfile;
+			if($this_dest == '') {
+				// No destination folder was chosen: only resources are moved
+				}
+			else if($dest_kind <> '' AND $move_kind <> $dest_kind) {
+				echo "<p><span class=\"red-text\">➡ Only ".($dest_kind == "csound" ? "Csound" : "tonality")." resources can be moved to</span> ‘<span class=\"green-text\">".$this_dest."</span>’: ‘<span class=\"green-text\">".$thisfile."</span>’ was not moved</p>";
+				}
+			else if($dest_kind <> '' AND file_exists(resource_dirs($dest_kind)['fixed'].$thisfile)) {
+				echo "<p><span class=\"red-text\">➡ There is already</span> a fixed file named ‘<span class=\"green-text\">".$thisfile."</span>’ in ‘<span class=\"green-text\">".resource_dirs($dest_kind)['fixed_name']."</span>’: rename the file in the trash before moving it</p>";
+				}
+			else if(is_integer($pos=strpos($dest_folder,$thisfile)) AND $pos == 0) {
 				echo "<p><span class=\"red-text\">➡ Cannot move a folder to its own content</span></p>";
 				}
 			else if(file_exists($destination_file)) {
-				if($dest_folder <> '') $the_dest = "‘<span class=\"green-text\">".$dest_folder."</span>’";
+				if($this_dest <> '') $the_dest = "‘<span class=\"green-text\">".$this_dest."</span>’";
 				else $the_dest = "the root folder";
 				echo "<p><span class=\"red-text\">➡ There is already</span> a file or folder named ‘<span class=\"green-text\">".$thisfile."</span>’ in ".$the_dest."</p>";
 				}
@@ -796,31 +908,37 @@ function display_directory($test,$dir,$filter) {
 			$extension = $type_of_file['extension'];
 			if($extension == "mid" OR  $extension == "txt" OR $extension == "mp3" OR $extension == "zip" OR $extension == "aif" OR $extension == "pdf" OR $extension == "php") continue;
 			}
-		if(isset($done[$thisfile]) OR ($filter <> '' AND $filter <> $type)) {
+		if($resource_folder AND $type == "directory") continue; // 2026-11-19 Folders of "csound_resources" (samples...) and "tonality_resources" (scale_images) are not listed
+		$is_csound_type = ($type == "csound" OR $type == "csorchestra");
+		if(isset($done[$thisfile]) OR ($filter <> '' AND $filter <> $type AND !($filter == "csresources" AND $is_csound_type))) {
 			continue;
 			}
 		if(!$test) $done[$thisfile] = TRUE;
 		if($test AND isset($seen[$thisfile])) continue;
-		if($test AND ($filter == '' OR $filter == $type)) $seen[$thisfile] = TRUE;
+		if($test AND ($filter == '' OR $filter == $type OR ($filter == "csresources" AND $is_csound_type))) $seen[$thisfile] = TRUE;
 	
 		if(!ok_output_location($thisfile,FALSE)) continue;
-		if(!$test AND $new_file == $thisfile AND $filter <> "directory") echo "<span class=\"red-text\">➡</span> ";
+		$new_version = ($fixed AND is_new_version_name($thisfile)); // 2026-11-19
+		if($new_version AND !$test) $new_versions++;
+		if(!$test AND (($new_file == $thisfile AND $filter <> "directory") OR $new_version)) echo "<span class=\"red-text\">➡</span> ";
 		if(!$test) echo $check_box;
 
 		if(!$test AND $path <> $csound_resources AND $path <> $trash_folder AND ($type == "csound" OR $type == "csorchestra")) {
-			echo "Moved ‘<span class=\"green-text\">".$dir.SLASH.$thisfile."</span>’ to ‘<span class=\"green-text\">".$dir_csound_resources.$thisfile."</span>’<br />";
-			if(file_exists($dir_csound_resources.$thisfile)) @unlink($dir.SLASH.$thisfile);
-			else rename($dir.SLASH.$thisfile,$dir_csound_resources.$thisfile);
+			// 2026-11-19 To "my_csound_resources", unless a file with the same name is in a Csound resource folder
+			echo "Moved ‘<span class=\"green-text\">".$dir.SLASH.$thisfile."</span>’ to ‘<span class=\"green-text\">".$dir_my_csound_resources.$thisfile."</span>’<br />";
+			if(file_exists(csound_resource_path($thisfile))) @unlink($dir.SLASH.$thisfile);
+			else rename($dir.SLASH.$thisfile,$dir_my_csound_resources.$thisfile);
 			}
 		else {
 			if(!$test AND $path <> $tonality_resources AND $path <> $trash_folder AND $type == "tonality") {
-				echo "Moved ‘<span class=\"green-text\">".$dir.SLASH.$thisfile."</span>’ to ‘<span class=\"green-text\">".$dir_tonality_resources.$thisfile."</span>’<br />";
-				if(file_exists($dir_tonality_resources.$thisfile)) @unlink($dir.SLASH.$thisfile);
-				else rename($dir.SLASH.$thisfile,$dir_tonality_resources.$thisfile);
+				// 2026-11-19 To "my_tonality_resources", unless a file with the same name is in a tonality resource folder
+				echo "Moved ‘<span class=\"green-text\">".$dir.SLASH.$thisfile."</span>’ to ‘<span class=\"green-text\">".$dir_my_tonality_resources.$thisfile."</span>’<br />";
+				if(file_exists(tonality_resource_path($thisfile))) @unlink($dir.SLASH.$thisfile);
+				else rename($dir.SLASH.$thisfile,$dir_my_tonality_resources.$thisfile);
 				}
 			else {
 				$renamed = FALSE;
-				if(!$test AND $delete_checked_files AND isset($_POST['delete_'.$i_file])) {
+				if(!$test AND $delete_checked_files AND isset($_POST['delete_'.$i_file]) AND !$locked) {
 					echo "<p><span class=\"red-text\">➡</span> Deleted ‘<span class=\"green-text\">".$thisfile."</span>’ (moved to <a target=\"_blank\" href=\"index.php?path=".$trash_folder."\">trash folder</a>)</p>";
 					rename($dir.SLASH.$thisfile,$dir_trash_folder.$thisfile);
 					delete_settings($thisfile);
@@ -829,7 +947,7 @@ function display_directory($test,$dir,$filter) {
 				$new_name = '';
 				if(!$test AND $rename_checked_files AND $type <> '' AND isset($_POST['new_name_'.$i_file]) AND trim($_POST['new_name_'.$i_file]) <> '') {
 					$new_name = trim($_POST['new_name_'.$i_file]);
-					$make_copy = isset($_POST['copy_'.$i_file]);
+					$make_copy = (isset($_POST['copy_'.$i_file]) OR $locked); // A fixed file can only be copied
 					$new_name = fix_new_name($new_name,TRUE);
 					if($new_name <> '') {
 						if($type <> "directory") {
@@ -851,17 +969,23 @@ function display_directory($test,$dir,$filter) {
 								$name_mode = "extension";
 							if($new_prefix <> '' AND $new_short_type == $short_type)
 								$name_mode = "prefix";
-							$new_name = good_name($short_type,$new_name,$name_mode);
+							// 2026-11-19 ".orc" is the only form of the name of a Csound orchestra (no "-or." or ".bporc")
+							if($type == "csorchestra") $new_name = preg_replace("/\\.orc$/",'',$new_name).".orc";
+							else $new_name = good_name($short_type,$new_name,$name_mode);
 							}
 						$old_name = $thisfile;
-						if(file_exists($dir.SLASH.$new_name)) {
+						// 2026-11-19 In the Csound resource folder, the new name may not be that of a file in either folder. A copy of a fixed file goes to "my_csound_resources", unless the designer makes it.
+						$copy_dir = $dir;
+						if($resource_folder AND $make_copy AND !($fixed AND $i_am_designer)) $copy_dir = rtrim(resource_dirs($resource_kind)['my'],"/\\");
+						if(file_exists($dir.SLASH.$new_name) OR ($resource_folder AND file_exists(resource_path($resource_kind,$new_name)))) {
 							echo "<span class=\"red-text\">➡</span> Can't rename to existing ‘".$new_name."’: ";
 							}
 						else {
 							if($make_copy) {
-								if($type <> "directory") copy($dir.SLASH.$old_name,$dir.SLASH.$new_name);
-								else rcopy($dir.SLASH.$old_name,$dir.SLASH.$new_name);
-								$link = $type.".php?file=".urlencode($path.SLASH.$new_name);
+								if($type <> "directory") copy($dir.SLASH.$old_name,$copy_dir.SLASH.$new_name);
+								else rcopy($dir.SLASH.$old_name,$copy_dir.SLASH.$new_name);
+								if($resource_folder) $link = $type.".php?file=".urlencode(resource_folder($resource_kind,$new_name).SLASH.$new_name);
+								else $link = $type.".php?file=".urlencode($path.SLASH.$new_name);
 								echo "‘<span class=\"green-text\">".$old_name."</span>’ <span class=\"red-text\">➡</span> copied to <a target=\"_blank\" href=\"".nice_url($link)."\">".$new_name."</a><br />";
 								}
 							else {
@@ -879,7 +1003,7 @@ function display_directory($test,$dir,$filter) {
 					echo "▶︎ ";
 					}
 				else if($thisfile == "bp" OR $thisfile == "bp.exe" OR $thisfile == "bp3") continue;
-				if(!$test AND $delete_files AND $type <> '' AND !do_not_delete($thisfile)) echo "<input type=\"checkbox\" name=\"delete_".$i_file."\"> ";
+				if(!$test AND $delete_files AND $type <> '' AND !do_not_delete($thisfile) AND !$locked) echo "<input type=\"checkbox\" name=\"delete_".$i_file."\"> ";
 				$link = $dir.SLASH.$thisfile;
 				if(!$test AND $download_files AND $type <> '' AND !$this_is_directory) echo "<a href=\"".$link."\" title=\"Download this file\" download=\"".$thisfile."\">⬇️</a> ";
 				if($type <> '') {
@@ -890,11 +1014,11 @@ function display_directory($test,$dir,$filter) {
 						$table = explode('_',$thisfile);
 						$extension = end($table);
 						if($path == '') $link = $this_page."?path=".urlencode($thisfile);
-						else $link = $this_page."?path=".urlencode($path.SLASH.$thisfile);
+						else $link = $this_page."?path=".urlencode($link_folder.SLASH.$thisfile);
 						if($extension == "temp") $link = '';
 						$this_is_directory = TRUE;
 						}
-					else $link = $type.".php?file=".urlencode($path.SLASH.$thisfile);
+					else $link = $type.".php?file=".urlencode($link_folder.SLASH.$thisfile);
 					if($type == "image") $link = $dir.SLASH.$thisfile;
 					if($link <> '') {
 						if($this_is_directory) echo "<a href=\"".nice_url($link)."\">";
@@ -907,14 +1031,18 @@ function display_directory($test,$dir,$filter) {
 					echo "&nbsp;";
 					if($this_is_an_alias) echo "(alias)";
 					else if($this_is_a_link) echo "(link)";
+					if($fixed) echo "(fixed)&nbsp;";
 					if($renamed) echo "(<span class=\"red-text\">renamed</span>)&nbsp;";
 					if($rename_files) {
 						echo "&nbsp;➡&nbsp;&nbsp;<input type=\"text\" style=\"border:2px; solid #dadada; border-bottom-style: groove; text-align:left;\" name=\"new_name_".$i_file."\" size=\"30\" value=\"\">";
-						echo "<input type=\"checkbox\" name=\"copy_".$i_file."\">&nbsp;➡&nbsp;copy";
+						if($locked) echo "<input type=\"hidden\" name=\"copy_".$i_file."\" value=\"1\">&nbsp;➡&nbsp;copy only";
+						else echo "<input type=\"checkbox\" name=\"copy_".$i_file."\">&nbsp;➡&nbsp;copy";
 						}
 					else if(!$this_is_directory AND !$this_is_a_link) {
 						$time_saved = filemtime($dir.SLASH.$thisfile);
 						echo "&nbsp;<small>&nbsp;".gmdate('Y-m-d H\hi',$time_saved)."</small>";
+						if($resource_folder AND resource_kind_of_type($type) == $resource_kind) echo "&nbsp;&nbsp;<button type=\"button\" class=\"save\" style=\"font-size:x-small; padding:1px 6px;\" onclick=\"return duplicateResource(".htmlspecialchars(json_encode($thisfile)).");\">Duplicate</button>";
+						if($resource_folder AND !$locked AND resource_kind_of_type($type) == $resource_kind) echo "&nbsp;<button type=\"button\" style=\"font-size:x-small; padding:1px 6px; color:DarkBlue; background-color:LightBlue; border-radius:0.5em;\" onclick=\"return trashResource(".htmlspecialchars(json_encode($thisfile)).");\">delete</button>";
 						}
 					echo "<br />";
 					if($show_dependencies) {
@@ -929,6 +1057,7 @@ function display_directory($test,$dir,$filter) {
 			}
 		}
 	if($files_shown == 0) return $files_shown;
+	if(!$test AND $new_versions > 0) echo "<p><span class=\"red-text\">➡</span> Files marked with a red arrow are new versions of fixed files, which an update renamed with “_new” because you have a file with the same name in ‘".resource_dirs($resource_kind)['my_name']."’. Compare them with yours, and delete or rename yours if the new version should replace it.</p>";
 	if(!$test AND $move_files)
 		echo "<p style=\"margin-left:6px;\"><span class=\"red-text\"><big>↑</big></span>&nbsp;<input class=\"save\" type=\"submit\" name=\"move_checked_files\" value=\"MOVE CHECKED FILES/FOLDERS\">&nbsp;&nbsp;<input class=\"cancel\" type=\"submit\" name=\"cancel\" value=\"CANCEL\"></p>";
 	if(!$test AND $delete_files)

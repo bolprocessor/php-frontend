@@ -295,17 +295,17 @@ if(isset($_POST['compilegrammar'])) {
 		else $command .= " -al ".$dir.$alphabet_file; // "-al" replaced "-ho" 2024-06-12
 		}
 	if($csound_file <> '') {
-		if(!file_exists($dir_csound_resources.$csound_file)) {
-			echo "<p style=\"color:red;\">WARNING: ".$dir_csound_resources.$csound_file." not found</p>";
+		if(!file_exists(csound_resource_path($csound_file))) {
+			echo "<p style=\"color:red;\">WARNING: ".csound_resource_path($csound_file)." not found</p>";
 			}
-		else $command .= " -cs ".$dir_csound_resources.$csound_file;
+		else $command .= " -cs ".csound_resource_path($csound_file);
 		}
 	if($tonality_file <> '') {
-		if(!file_exists($dir_tonality_resources.$tonality_file)) {
-			$error_mssg .= "<br /><span class=\"red-text\">WARNING: ".$dir_tonality_resources.$tonality_file." not found</span><br />";
+		if(!file_exists(tonality_resource_path($tonality_file))) {
+			$error_mssg .= "<br /><span class=\"red-text\">WARNING: ".tonality_resource_path($tonality_file)." not found</span><br />";
 			$error = TRUE;
 			}
-		else $command .= " -to ".$dir_tonality_resources.$tonality_file;
+		else $command .= " -to ".tonality_resource_path($tonality_file);
 		}
 	$tracefile = $temp_dir."trace_".my_session_id()."_".$filename.".txt";
 	$command .= " --traceout ".$tracefile;
@@ -379,8 +379,8 @@ if($alphabet_file <> '' AND $objects_file == '') {
 $found_orchestra_in_instruments = FALSE;
 if($csound_file <> '') {
 	if(file_exists($dir.$csound_file))
-		rename($dir.$csound_file,$dir_csound_resources.$csound_file);
-	$csound_orchestra = get_orchestra_filename($dir_csound_resources.$csound_file);
+		move_to_csound_resources($dir,$csound_file);
+	$csound_orchestra = get_orchestra_filename(csound_resource_path($csound_file));
 	if($csound_orchestra <> '') $found_orchestra_in_instruments = TRUE;
 	}
 else $csound_orchestra = '';
@@ -544,15 +544,15 @@ if($keyboard_file <> '') {
 		}
 	}
 if($csound_file <> '') {
-	if(!file_exists($dir_csound_resources.$csound_file)) {
-		$upload_mssg .= "<br /><span class=\"red-text\">WARNING: </span><span class=\"green-text\">".$dir_csound_resources.$csound_file."</span> not found<br />";
+	if(!file_exists(csound_resource_path($csound_file))) {
+		$upload_mssg .= "<br /><span class=\"red-text\">WARNING: </span><span class=\"green-text\">".csound_resource_path($csound_file)."</span> not found<br />";
 		$error = TRUE;
 		}
 	else $link_produce .= "&csound_file=".urlencode($csound_file);
 	}
 if($tonality_file <> '') {
-	if(!file_exists($dir_tonality_resources.$tonality_file)) {
-		$upload_mssg .= "<br /><span class=\"red-text\">WARNING: </span><span class=\"green-text\">".$dir_tonality_resources.$tonality_file."</span> not found<br />";
+	if(!file_exists(tonality_resource_path($tonality_file))) {
+		$upload_mssg .= "<br /><span class=\"red-text\">WARNING: </span><span class=\"green-text\">".tonality_resource_path($tonality_file)."</span> not found<br />";
 		$error = TRUE;
 		}
 	else $link_produce .= "&tonality_file=".urlencode($tonality_file);
@@ -560,11 +560,11 @@ if($tonality_file <> '') {
 if($csound_orchestra == '') $csound_orchestra = $csound_default_orchestra;
 if($csound_orchestra <> '') {
 	if(file_exists($dir.$csound_orchestra)) {
-		rename($dir.$csound_orchestra,$dir_csound_resources.$csound_orchestra);
+		move_to_csound_resources($dir,$csound_orchestra);
 		sleep(1);
 		}
 	check_function_tables($dir,$csound_file);
-	if(file_exists($dir_csound_resources.$csound_orchestra)) $link_produce .= "&csound_orchestra=".urlencode($csound_orchestra);
+	if(file_exists(csound_resource_path($csound_orchestra))) $link_produce .= "&csound_orchestra=".urlencode($csound_orchestra);
 	}
 $url_settings = "settings.php?file=".urlencode($dir_base.$settings_file)."&source=".urlencode(str_replace(' ','_',$filename));
 if($file_format == "csound") {
@@ -710,24 +710,24 @@ if($live_settings) echo "• <span class=\"red-text\">Live settings</span> is se
 if($sync_change) echo "• <span class=\"red-text\">Synchronised change</span> is set by <span class=\"green-text\">‘".$settings_file."’</span><br />";
 if($file_format == "csound") {
 	if($csound_orchestra <> '' AND file_exists($dir.$csound_orchestra)) {
-		rename($dir.$csound_orchestra,$dir_csound_resources.$csound_orchestra);
+		move_to_csound_resources($dir,$csound_orchestra);
 		sleep(1);
 		}
 	if($csound_default_orchestra <> '' AND file_exists($dir.$csound_default_orchestra)) {
-		rename($dir.$csound_default_orchestra,$dir_csound_resources.$csound_default_orchestra);
+		move_to_csound_resources($dir,$csound_default_orchestra);
 		sleep(1);
 		}
 	check_function_tables($dir,$csound_file);
 	if($csound_is_responsive) {
-		if($found_orchestra_in_instruments AND file_exists($dir_csound_resources.$csound_orchestra)) {
+		if($found_orchestra_in_instruments AND file_exists(csound_resource_path($csound_orchestra))) {
 			echo "• <span class=\"red-text\">Csound scores</span> will be produced and converted to sound files (including scales) using orchestra ‘<span class=\"green-text\">".$csound_orchestra."</span>’ as specified in <span class=\"green-text\">‘".$csound_file."’</span>";
-			if($found_orchestra_in_settings AND file_exists($dir_csound_resources.$csound_default_orchestra) AND $csound_orchestra <> $csound_default_orchestra) echo "<br />&nbsp;&nbsp;<span class=\"red-text\">➡</span> Orchestra ‘<span class=\"green-text\">".$csound_default_orchestra."</span>’ specified in <span class=\"green-text\">‘".$settings_file."’</span> will be ignored</font>";
+			if($found_orchestra_in_settings AND file_exists(csound_resource_path($csound_default_orchestra)) AND $csound_orchestra <> $csound_default_orchestra) echo "<br />&nbsp;&nbsp;<span class=\"red-text\">➡</span> Orchestra ‘<span class=\"green-text\">".$csound_default_orchestra."</span>’ specified in <span class=\"green-text\">‘".$settings_file."’</span> will be ignored</font>";
 			}
 		else if($found_orchestra_in_instruments AND !$found_orchestra_in_settings AND $csound_orchestra <> '') {
 			echo "<span class=\"red-text\">➡</span> Csound scores will be produced, yet conversion to sound files will not be possible because orchestra ‘<span class=\"green-text\">".$csound_orchestra."</span>’ specified in ‘<span class=\"green-text\">".$csound_file."</span>’ was not found in the Csound resources folder";
 			$csound_orchestra = '';
 			}
-		else if($csound_default_orchestra <> '' AND file_exists($dir_csound_resources.$csound_default_orchestra)) {
+		else if($csound_default_orchestra <> '' AND file_exists(csound_resource_path($csound_default_orchestra))) {
 			$csound_orchestra = $csound_default_orchestra;
 			echo "• <span class=\"red-text\">Csound scores</span> will be produced and converted to sound files (including scales) using orchestra ‘<span class=\"green-text\">".$csound_default_orchestra."</span>’</font>";
 			}
@@ -735,7 +735,7 @@ if($file_format == "csound") {
 			echo "<span class=\"red-text\">➡</span> Csound scores will be produced yet not converted to sound files by orchestra ‘<span class=\"green-text\">".$csound_default_orchestra."</span>’ as specified in ‘<span class=\"green-text\">".$settings_file."</span>’ because this file was not found in the Csound resources folder";
 			$csound_orchestra = '';
 			}
-		else if(file_exists($dir_csound_resources."0-default.orc")) {
+		else if(file_exists(csound_resource_path("0-default.orc"))) {
 			$csound_orchestra = "0-default.orc";
 			echo "• <span class=\"red-text\">Csound scores</span> will be produced and converted to sound files using default orchestra file ‘<span class=\"green-text\">".$csound_orchestra."</span>’";
 			}
@@ -743,7 +743,7 @@ if($file_format == "csound") {
 			echo "<span class=\"red-text\">➡</span> Csound scores will be produced yet not converted to sound files</font> because default orchestra file ‘<span class=\"green-text\">0-default.orc</span>’ was not found in the Csound resources folder";
 			$csound_orchestra = '';
 			}
-		if(file_exists($dir_csound_resources.$csound_orchestra)) $link_produce .= "&csound_orchestra=".urlencode($csound_orchestra);
+		if(file_exists(csound_resource_path($csound_orchestra))) $link_produce .= "&csound_orchestra=".urlencode($csound_orchestra);
 		}
 	else echo "<span class=\"red-text\">➡</span> Csound scores will be produced yet not converted to sound files because Csound is not installed or not responding";
 	echo "<br />";
@@ -930,7 +930,7 @@ if($settings_file <> '' AND file_exists($dir.$settings_file)) $link_produce .= "
 if($objects_file <> '') $link_produce .= "&objects=".urlencode($dir.$objects_file);
 if($csound_file <> '') $link_produce .= "&csound_file=".urlencode($csound_file);
 if($tonality_file <> '') $link_produce .= "&tonality_file=".urlencode($tonality_file);
-if(file_exists($dir_csound_resources.$csound_orchestra)) $link_produce .= "&csound_orchestra=".urlencode($csound_orchestra);
+if(file_exists(csound_resource_path($csound_orchestra))) $link_produce .= "&csound_orchestra=".urlencode($csound_orchestra);
 $link_produce .= "&output=".urlencode($output.SLASH.$output_file)."&format=".$file_format;
 if($show_production > 0)
 	$link_produce .= "&show_production=1";

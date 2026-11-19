@@ -2,6 +2,10 @@
 <?php
 // Comments "// note N" (in this file, data.php and _musicxml.php) refer to the numbered notes of the technical description of this algorithm: https://bolprocessor.org/tech-analysis-of-musicxml-php
 
+// 2026-11-19 Numbers are written in their shortest form (1.122, not 1.1220000000000001) whatever the php.ini settings. Windows installations may set serialize_precision = 17, which json_encode() and var_export() follow, and precision = 17, which echo and string conversions follow - by Claude
+ini_set('serialize_precision','-1');
+ini_set('precision','14');
+
 /* if(strtoupper(substr(PHP_OS,0,3)) === 'WIN' && isset($_SERVER['HTTP_HOST']) && $_SERVER['HTTP_HOST'] === 'localhost') {
 	// This avoids slowing down access on Windows machines
     header(
@@ -36,6 +40,7 @@ $section_headers = array("RND","ORD","LIN","SUB","SUB1","TEM","POSLONG","LEFT","
 
 $architecture = php_uname("m");
 
+$i_am_designer = FALSE;
 $test = FALSE;
 // $test = TRUE;
 
@@ -174,12 +179,27 @@ if(!file_exists($bp_application_path.$csound_resources)) {
 	chmod($bp_application_path.$csound_resources,$permissions);
 	}
 $dir_csound_resources = $bp_application_path.$csound_resources.SLASH;
+// 2026-11-19 The installation and update scripts replace the content of "csound_resources". Files created or changed by the user are kept in "my_csound_resources", which no script modifies. Files of "csound_resources" are "fixed": only the designer can change them ($i_am_designer). See csound_resource_dir() - by Claude
+$my_csound_resources = "my_csound_resources";
+if(!file_exists($bp_application_path.$my_csound_resources)) {
+	mkdir($bp_application_path.$my_csound_resources);
+	chmod($bp_application_path.$my_csound_resources,$permissions);
+	}
+$dir_my_csound_resources = $bp_application_path.$my_csound_resources.SLASH;
 
 if(!file_exists($bp_application_path.$tonality_resources)) {
 	mkdir($bp_application_path.$tonality_resources);
 	chmod($bp_application_path.$tonality_resources,$permissions);
 	}
 $dir_tonality_resources = $bp_application_path.$tonality_resources.SLASH;
+// 2026-11-19 Same as "my_csound_resources" for tonality resources ('-to' files) - by Claude
+$my_tonality_resources = "my_tonality_resources";
+if(!file_exists($bp_application_path.$my_tonality_resources)) {
+	mkdir($bp_application_path.$my_tonality_resources);
+	chmod($bp_application_path.$my_tonality_resources,$permissions);
+	}
+$dir_my_tonality_resources = $bp_application_path.$my_tonality_resources.SLASH;
+rename_new_fixed_resources(); // 2026-11-19
 
 if(!file_exists($bp_application_path.$midi_resources)) {
 	mkdir($bp_application_path.$midi_resources);
@@ -272,8 +292,10 @@ $top_header = "// Bol Processor BP3";
 
 // 2026-11-12 Csound resources in the former line format are converted to JSON (originals copied to the trash as NAME_old_format)
 convert_csound_resources_to_json($dir_csound_resources,$dir_trash_folder);
+convert_csound_resources_to_json($dir_my_csound_resources,$dir_trash_folder);
 // 2026-11-12 Tonality resources in the former line format are converted to JSON (originals copied to the trash as NAME_old_format)
 convert_tonality_resources_to_json($dir_tonality_resources,$dir_trash_folder);
+convert_tonality_resources_to_json($dir_my_tonality_resources,$dir_trash_folder);
 
 $KeyString = "key#";
 $Englishnote = array("C","C#","D","D#","E","F","F#","G","G#","A","A#","B","C");
@@ -796,13 +818,13 @@ function display_more_buttons($error,$content,$url_source_page,$dir,$grammar_fil
 		echo "</td>";
 		}
 	if($csound_file <> '') {
-		$url_this_page = "csound.php?file=".urlencode($csound_resources.SLASH.$csound_file);
+		$url_this_page = "csound.php?file=".urlencode(csound_resource_folder($csound_file).SLASH.$csound_file);
 		echo "<td>";
 		echo "<input class=\"edit\" type=\"submit\" formtarget=\"_blank\" formaction=\"".$url_this_page."\" value=\"EDIT ‘".begin_with(20,$csound_file)."’\">&nbsp;";
 		echo "</td>";
 		}
 	if($tonality_file <> '') {
-		$url_this_page = "tonality.php?file=".urlencode($tonality_resources.SLASH.$tonality_file);
+		$url_this_page = "tonality.php?file=".urlencode(tonality_resource_folder($tonality_file).SLASH.$tonality_file);
 		echo "<td>";
 		echo "<input class=\"edit\" type=\"submit\" formtarget=\"_blank\" formaction=\"".$url_this_page."\" value=\"EDIT ‘".begin_with(20,$tonality_file)."’\">&nbsp;";
 		echo "</td>";
@@ -1457,6 +1479,7 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder,$force,$page
 	if($verbose) echo "dir = ".$dir."<br />";
 	if($verbose) echo "filename = ".$filename."<br />";
 	if($verbose) echo "temp_folder = ".$temp_folder."<br />";
+	if(read_only_resource_folder($dir)) return "read-only"; // 2026-11-19 Fixed file of "csound_resources"
 	$file_lock2 = $dir.$filename."_lock2";
 	if(file_exists($file_lock2)) return "locked";
 	// 2026-11-10 Without the temporary folder (deleted as old), the file would be saved without its instruments
@@ -1592,6 +1615,14 @@ function csound_page_values_from_file($path) {
 		}
 	$page['tonality'] = trim(cs_get($values,"TonalityFileName",''));
 	return $page;
+	}
+
+function csound_temp_read_only($temp_folder) {
+	// 2026-11-19 TRUE if the '-cs' file whose temporary folder is $temp_folder (see "_source", written by csound.php) is a fixed file that can't be changed - by Claude
+	global $temp_dir;
+	$source = @file($temp_dir.$temp_folder.SLASH."_source",FILE_IGNORE_NEW_LINES);
+	if($source === FALSE OR count($source) < 2) return FALSE;
+	return read_only_resource_folder($source[0]);
 	}
 
 function csound_temp_changed($temp_folder) {
@@ -2683,6 +2714,7 @@ function to_scale_file_name($scale_name) {
 function to_add_scales_to_file($path,$scale_files) {
 	// Adds the scales of temporary scale files to the tonality resource $path. Returns array(name => TRUE if added, FALSE if the name already exists), or an error message
 	global $top_header,$permissions;
+	if(read_only_resource_folder(dirname($path))) return "‘".basename($path)."’ is a fixed file that can't be changed"; // 2026-11-19
 	$content = @file_get_contents($path);
 	if($content === FALSE) return "Cannot read ".$path;
 	$data = to_read_resource($content);
@@ -3008,6 +3040,7 @@ function SaveTonality($verbose,$dir,$filename,$temp_folder,$force) {
 	if($verbose) echo "<br />dir = ".$dir."<br />";
 	if($verbose) echo "filename = ".$filename."<br />";
 	if($verbose) echo "temp_folder = ".$temp_folder."<br />";
+	if(read_only_resource_folder($dir)) return "read-only"; // 2026-11-19 Fixed tonality resource
 	$file_lock3 = $dir.$filename."_lock3";
 //	if($verbose) echo "<br />file_lock3 = ".$file_lock3."<br />";
 	if(file_exists($file_lock3)) return "locked";
@@ -4660,7 +4693,7 @@ function relocate_function_table($dir,$line) {
 		return $clean_line;
 	$filename = str_replace('"','',$table[4],$count);
 	if($count > 0 AND file_exists($dir.$filename))
-		rename($dir.$filename,$dir_csound_resources.$filename);
+		move_to_csound_resources($dir,$filename);
 	return $clean_line;
 	}
 
@@ -4813,7 +4846,7 @@ function show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,
 			}
 		} */
 	if($csound_file <> '') {
-		$tonality_file_in_csound = get_tonality_file($dir_csound_resources.$csound_file);
+		$tonality_file_in_csound = get_tonality_file(csound_resource_path($csound_file));
 		if($tonality_file_in_csound <> '' AND $tonality_file_in_csound <> $tonality_file) {
 			echo "<p></p><div class=\"warning\">";
 			if($tonality_file == '') {
@@ -4828,7 +4861,7 @@ function show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,
 			}
 		}
 	if($tonality_file <> '') {
-		$list_of_tonal_scales = list_of_tonal_scales($dir_tonality_resources.$tonality_file);
+		$list_of_tonal_scales = list_of_tonal_scales(tonality_resource_path($tonality_file));
 		if((!isset($_POST['analyze_tonal']) AND $max_scales = count($list_of_tonal_scales)) > 0) {
 			if($max_scales > 1)  {
 				$i = 0;
@@ -4854,12 +4887,12 @@ function show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,
 		}
 	if($csound_file == '' AND ($file_format == "csound" OR $file_format == "csoundrt") AND !isset($_POST['analyze_tonal'])) {
 		// 2026-11-18 No '-cs' file: _ins(n) selects instrument n of the orchestra, "0-default.orc" by default
-		if($orchestra == '' OR !file_exists($dir_csound_resources.$orchestra)) $orchestra = "0-default.orc";
-		$list = orchestra_instruments($dir_csound_resources.$orchestra);
+		if($orchestra == '' OR !file_exists(csound_resource_path($orchestra))) $orchestra = "0-default.orc";
+		$list = orchestra_instruments(csound_resource_path($orchestra));
 		// The default orchestra is described by CSOUND_DEFAULT_RESOURCE, which produce.php attaches: its names can be used in _ins()
 		$names = array();
-		if($orchestra == "0-default.orc" AND file_exists($dir_csound_resources.CSOUND_DEFAULT_RESOURCE)) {
-			$default_instruments = list_of_instruments($dir_csound_resources.CSOUND_DEFAULT_RESOURCE);
+		if($orchestra == "0-default.orc" AND file_exists(csound_resource_path(CSOUND_DEFAULT_RESOURCE))) {
+			$default_instruments = list_of_instruments(csound_resource_path(CSOUND_DEFAULT_RESOURCE));
 			foreach($default_instruments['list'] as $i => $name) $names[intval($default_instruments['index'][$i])] = $name;
 			}
 		if(count($list) > 0) {
@@ -4878,7 +4911,7 @@ function show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,
 			}
 		}
 	if($csound_file <> '' AND !isset($_POST['analyze_tonal'])) {
-		$list_of_instruments = list_of_instruments($dir_csound_resources.$csound_file);
+		$list_of_instruments = list_of_instruments(csound_resource_path($csound_file));
 		$list = $list_of_instruments['list'];
 		$list_index = $list_of_instruments['index'];
 		if(($max_instr = count($list)) > 0) {
@@ -5485,6 +5518,7 @@ function hidden_directory($name) {
 		case "windows-scripts":
 		case "linux-scripts":
 		case "csound_resources":
+		case "my_csound_resources":
 		case "docs-developer":
 		case "docs-release":
 		case "icons":
@@ -5495,6 +5529,7 @@ function hidden_directory($name) {
 		case "source":
 		case "midi_resources":
 		case "tonality_resources":
+		case "my_tonality_resources":
 		case "temp_bolprocessor":
 			return TRUE;
 		}
@@ -7180,19 +7215,218 @@ function show_file_format_choice($type,$file_format,$url_this_page,$filename) {
 	}
 
 function list_of_csound_resources() {
-	// Names of the "-cs" files in the Csound resources folder, except backups and locks
-	global $dir_csound_resources;
+	// Names of the "-cs" files in the Csound resources folders ("my_csound_resources" and "csound_resources"), except backups and locks
 	$list = array();
-	$dircontent = @scandir($dir_csound_resources);
-	if($dircontent === FALSE) return $list;
-	foreach($dircontent as $thisfile) {
+	foreach(csound_resource_files() as $thisfile => $dir) {
 		if(!str_starts_with($thisfile,"-cs.") AND !str_ends_with($thisfile,".bpcs")) continue;
 		if(str_ends_with($thisfile,"_bak") OR preg_match("/_lock[0-9]*$/u",$thisfile)) continue;
-		if(!is_file($dir_csound_resources.$thisfile)) continue;
+		if(!is_file($dir.$thisfile)) continue;
 		$list[] = $thisfile;
 		}
-	natcasesort($list);
-	return array_values($list);
+	return $list;
+	}
+
+// 2026-11-19 Csound resources are found in two folders: "my_csound_resources" (files created or changed by the user) and "csound_resources" (fixed files of the distribution, replaced by updates). A name found in both is that of the file in "my_csound_resources". The same applies to tonality resources ("my_tonality_resources" and "tonality_resources"). $kind is "csound" or "tonality" - by Claude
+
+function resource_dirs($kind) {
+	// Folders (with their final SLASH) and names of the fixed and user folders of resources of $kind
+	global $dir_csound_resources,$dir_my_csound_resources,$csound_resources,$my_csound_resources;
+	global $dir_tonality_resources,$dir_my_tonality_resources,$tonality_resources,$my_tonality_resources;
+	if($kind == "tonality") return array('fixed' => $dir_tonality_resources,'my' => $dir_my_tonality_resources,'fixed_name' => $tonality_resources,'my_name' => $my_tonality_resources);
+	return array('fixed' => $dir_csound_resources,'my' => $dir_my_csound_resources,'fixed_name' => $csound_resources,'my_name' => $my_csound_resources);
+	}
+
+function resource_dir($kind,$filename) {
+	// Folder of resource $filename: the user folder if it is there, otherwise the fixed folder if it is there, otherwise the user folder where it will be created
+	$d = resource_dirs($kind);
+	$filename = trim((string) $filename);
+	if($filename <> '' AND file_exists($d['my'].$filename)) return $d['my'];
+	if($filename <> '' AND file_exists($d['fixed'].$filename)) return $d['fixed'];
+	return $d['my'];
+	}
+
+function resource_path($kind,$filename) {
+	return resource_dir($kind,$filename).trim((string) $filename);
+	}
+
+function resource_folder($kind,$filename) {
+	// Folder of resource $filename relative to the root of the application, for the 'file' argument of pages
+	$d = resource_dirs($kind);
+	if(resource_dir($kind,$filename) == $d['fixed']) return $d['fixed_name'];
+	return $d['my_name'];
+	}
+
+function resource_files($kind) {
+	// Files of both folders of $kind, in alphabetical order: name => folder (with its final SLASH). Names starting with '.' are ignored. A name found in both folders is that of the user folder.
+	$d = resource_dirs($kind);
+	$files = array();
+	foreach(array($d['fixed'],$d['my']) as $dir) {
+		$dircontent = @scandir($dir);
+		if($dircontent === FALSE) continue;
+		foreach($dircontent as $thisfile) {
+			if($thisfile[0] == '.') continue;
+			$files[$thisfile] = $dir;
+			}
+		}
+	uksort($files,"strnatcasecmp");
+	return $files;
+	}
+
+function is_resource_folder($kind,$dir) {
+	$d = resource_dirs($kind);
+	return same_folder($dir,$d['fixed']) OR same_folder($dir,$d['my']);
+	}
+
+function resource_kind_of_type($type) {
+	// Kind of resource of a file of type $type (see type_of_file()), or ''
+	if($type == "csound" OR $type == "csorchestra") return "csound";
+	if($type == "tonality") return "tonality";
+	return '';
+	}
+
+function new_resource_folder($kind) {
+	// Folder where a new resource is created: the user folder, or the fixed folder if the designer checked 'in_fixed'
+	global $i_am_designer;
+	$d = resource_dirs($kind);
+	if($i_am_designer AND isset($_POST['in_fixed'])) return $d['fixed'];
+	return $d['my'];
+	}
+
+function move_to_resources($kind,$dir,$filename) {
+	// A resource found in folder $dir (that of a project) is moved to the user folder, replacing a file with the same name there, as it formerly replaced the one in the fixed folder. A fixed file with the same name is not changed: the moved file takes its place.
+	$d = resource_dirs($kind);
+	if($filename == '' OR !is_file($dir.$filename) OR is_resource_folder($kind,$dir)) return;
+	rename($dir.$filename,$d['my'].$filename);
+	return;
+	}
+
+function csound_resource_dir($filename) { return resource_dir("csound",$filename); }
+function csound_resource_path($filename) { return resource_path("csound",$filename); }
+function csound_resource_folder($filename) { return resource_folder("csound",$filename); }
+function csound_resource_files() { return resource_files("csound"); }
+function is_csound_resource_folder($dir) { return is_resource_folder("csound",$dir); }
+function new_csound_resource_folder() { return new_resource_folder("csound"); }
+function move_to_csound_resources($dir,$filename) { move_to_resources("csound",$dir,$filename); return; }
+function tonality_resource_dir($filename) { return resource_dir("tonality",$filename); }
+function tonality_resource_path($filename) { return resource_path("tonality",$filename); }
+function tonality_resource_folder($filename) { return resource_folder("tonality",$filename); }
+function is_tonality_resource_folder($dir) { return is_resource_folder("tonality",$dir); }
+
+function csound_resource_is_fixed($filename) {
+	// TRUE if $filename is only in "csound_resources"
+	global $dir_csound_resources;
+	$filename = trim((string) $filename);
+	return ($filename <> '' AND csound_resource_dir($filename) == $dir_csound_resources AND file_exists($dir_csound_resources.$filename));
+	}
+
+function list_of_tonality_resources() {
+	// Names of the "-to" files in both tonality resource folders, except backups and locks
+	$list = array();
+	foreach(resource_files("tonality") as $thisfile => $dir) {
+		if(!str_starts_with($thisfile,"-to.") AND !str_ends_with($thisfile,".bpto")) continue;
+		if(str_ends_with($thisfile,"_bak") OR preg_match("/_lock[0-9]*$/u",$thisfile)) continue;
+		if(!is_file($dir.$thisfile)) continue;
+		$list[] = $thisfile;
+		}
+	return $list;
+	}
+
+function same_folder($dir1,$dir2) {
+	$real1 = realpath($dir1);
+	$real2 = realpath($dir2);
+	if($real1 === FALSE OR $real2 === FALSE) return rtrim($dir1,"/\\") == rtrim($dir2,"/\\");
+	return $real1 == $real2;
+	}
+
+function read_only_resource_folder($dir) {
+	// TRUE if files in folder $dir can't be changed: "csound_resources" or "tonality_resources", unless $i_am_designer
+	global $dir_csound_resources,$dir_tonality_resources,$i_am_designer;
+	if($i_am_designer) return FALSE;
+	return same_folder($dir,$dir_csound_resources) OR same_folder($dir,$dir_tonality_resources);
+	}
+
+function csound_sample_option() {
+	// 2026-11-19 Option of the Csound command line telling it to look for sound files (samples, e.g. "Salamander_piano/...") in "csound_resources" as well. Csound looks for them in the folder of the orchestra, which may be "my_csound_resources" - by Claude
+	global $dir_csound_resources;
+	$folder = realpath($dir_csound_resources);
+	if($folder === FALSE) return '';
+	return " \"--env:SSDIR+=".$folder."\"";
+	}
+
+function new_version_name($filename) {
+	// 2026-11-19 Name given to a fixed resource whose name is that of a file of the user folder: "-cs.NAME_new", "NAME_new.orc", "-to.NAME_new", "NAME_new.bpto"... Returns '' for other files - by Claude
+	if(preg_match("/^-(cs|to)\./",$filename)) return $filename."_new";
+	if(preg_match("/^(.+)\.(orc|bpcs|bpto)$/",$filename,$m)) return $m[1]."_new.".$m[2];
+	return '';
+	}
+
+function is_new_version_name($filename) {
+	return (preg_match("/^-(cs|to)\./",$filename) AND str_ends_with($filename,"_new")) OR preg_match("/_new\.(orc|bpcs|bpto)$/",$filename);
+	}
+
+function rename_new_fixed_resources() {
+	// 2026-11-19 An update of the distribution may bring to a fixed folder a file with the same name as one of the user folder, which would hide it. It is renamed with "_new" (see new_version_name()), replacing an older "_new" version, and marked with a red arrow in the list of resources - by Claude
+	foreach(array("csound","tonality") as $kind) {
+		$d = resource_dirs($kind);
+		$dircontent = @scandir($d['my']);
+		if($dircontent === FALSE) continue;
+		foreach($dircontent as $thisfile) {
+			if($thisfile[0] == '.') continue;
+			if(!is_file($d['fixed'].$thisfile)) continue;
+			$new_name = new_version_name($thisfile);
+			if($new_name == '') continue;
+			@rename($d['fixed'].$thisfile,$d['fixed'].$new_name);
+			}
+		}
+	return;
+	}
+
+function duplicate_resource($kind,$filename,$new_name) {
+	// 2026-11-19 Copies resource $filename (either folder) to the user folder as $new_name, which is completed like $filename ("-cs.", ".orc", "-to.", ".bpto"...) and may not be that of a file in either folder. Returns a message - by Claude
+	global $permissions;
+	$d = resource_dirs($kind);
+	$source = resource_path($kind,$filename);
+	$type = type_of_file($filename)['type'];
+	if($filename == '' OR !is_file($source) OR resource_kind_of_type($type) <> $kind)
+		return "<p><span class=\"red-text\">➡ Can't duplicate</span> ‘".htmlspecialchars($filename)."’</p>";
+	$new_name = trim(fix_new_name($new_name,TRUE));
+	if($type == "csorchestra") {
+		$new_name = preg_replace("/\.orc$/",'',$new_name);
+		if($new_name <> '') $new_name .= ".orc";
+		}
+	else {
+		$short = ($kind == "tonality") ? "to" : "cs";
+		$name_mode = str_ends_with($filename,".bp".$short) ? "extension" : "prefix";
+		$bare = str_ireplace(array("-".$short.".",".bp".$short),'',$new_name);
+		if($bare == '') $new_name = '';
+		else $new_name = good_name($short,$new_name,$name_mode);
+		}
+	if($new_name == '' OR $new_name[0] == '.')
+		return "<p><span class=\"red-text\">➡ Invalid name</span></p>";
+	if(file_exists(resource_path($kind,$new_name)))
+		return "<p><span class=\"red-text\">➡ Can't duplicate</span> ‘<span class=\"green-text\">".$filename."</span>’ <span class=\"red-text\">to existing</span> ‘<span class=\"green-text\">".htmlspecialchars($new_name)."</span>’</p>";
+	if(!copy($source,$d['my'].$new_name))
+		return "<p><span class=\"red-text\">➡ Failed to copy</span> ‘".$filename."’</p>";
+	@chmod($d['my'].$new_name,$permissions);
+	$link = $type.".php?file=".urlencode(resource_folder($kind,$new_name).SLASH.$new_name);
+	return "<p>‘<span class=\"green-text\">".$filename."</span>’ <span class=\"red-text\">➡</span> duplicated as <a target=\"_blank\" href=\"".nice_url($link)."\">".$new_name."</a> in ‘".$d['my_name']."’</p>";
+	}
+
+function read_only_page_script() {
+	// Makes the fields of a page read-only, and hides its buttons of class "save" or "trash", except elements of class "read-only-keep". Called on pages of fixed resources.
+	echo "<script>\n";
+	echo "document.addEventListener('DOMContentLoaded',function() {\n";
+	echo "	document.querySelectorAll('input[type=text]:not(.read-only-keep),input:not([type]):not(.read-only-keep),input[type=number]:not(.read-only-keep),textarea:not(.read-only-keep)').forEach(function(e) { e.readOnly = true; });\n";
+	echo "	document.querySelectorAll('select:not(.read-only-keep),input[type=checkbox]:not(.read-only-keep),input[type=radio]:not(.read-only-keep)').forEach(function(e) { e.disabled = true; });\n";
+	echo "	document.querySelectorAll('input.save:not(.read-only-keep),button.save:not(.read-only-keep),input.trash,button.trash,.read-only-hide').forEach(function(e) { e.style.display = 'none'; });\n";
+	echo "	});\n";
+	echo "</script>\n";
+	return;
+	}
+
+function read_only_message($filename,$what = "Csound resource",$folder = "csound_resources") {
+	echo "<p><span class=\"red-text\">➡ ‘".$filename."’ is a fixed ".$what." of the distribution: it can be viewed but not changed.</span><br />To change it, make a copy under another name with its Duplicate button in the <a class=\"linkdotted\" target=\"_blank\" href=\"index.php?path=".$folder."\">resource folder</a>.</p>";
+	return;
 	}
 
 function add_csound_resource_to_content($content,$csound_file) {
@@ -7245,13 +7479,15 @@ function csound_orchestra_line($orchestra,$csound_file = 'none') {
 	// Orchestra used for Csound scores and real-time Csound, displayed on project pages (2026-11-18)
 	// "➡ edit" opens the orchestra in csorchestra.php, whose 'file' argument is relative to the root of the application
 	// If $csound_file is empty (the project names no "-cs" file), the "Change instruments" button is displayed
-	global $csound_resources,$dir_csound_resources;
 	$default = ($orchestra == '');
 	if($default) $orchestra = "0-default.orc";
 	echo "Orchestra: <span class=\"green-text\">".$orchestra."</span>";
 	if($default) echo " (default)";
-	if(file_exists($dir_csound_resources.$orchestra))
-		echo " ➡ <a class=\"linkdotted\" target=\"_blank\" href=\"csorchestra.php?file=".urlencode($csound_resources.SLASH.$orchestra)."\">edit</a>";
+	if(file_exists(csound_resource_path($orchestra))) {
+		if(read_only_resource_folder(csound_resource_dir($orchestra))) $label = "view";
+		else $label = "edit";
+		echo " ➡ <a class=\"linkdotted\" target=\"_blank\" href=\"csorchestra.php?file=".urlencode(csound_resource_folder($orchestra).SLASH.$orchestra)."\">".$label."</a>";
+		}
 	if($csound_file == '') change_instruments_form();
 	else echo "<br />";
 	return;

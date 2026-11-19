@@ -33,6 +33,12 @@ require_once("_header.php");
 display_darklight();
 echo $error_post;
 stale_subpage($temp_folder); // 2026-11-10
+// 2026-11-19 The instruments of a fixed '-cs' file of "csound_resources" can only be viewed - by Claude
+if(csound_temp_read_only($temp_folder)) {
+	foreach(array('saveparameter') as $action) unset($_POST[$action]);
+	echo "<p><span class=\"red-text\">➡ This instrument belongs to a fixed Csound resource of the distribution: it can be viewed but not changed.</span></p>";
+	read_only_page_script();
+	}
 
 if($test) echo "folder_this_instrument = ".$folder_this_instrument."<br />";
 if($test) echo "temp_dir = ".$temp_dir."<br />";

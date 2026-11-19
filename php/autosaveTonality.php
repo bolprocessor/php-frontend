@@ -12,12 +12,12 @@ if(isset($_GET['save'])) {
 	if(!$test) {
 		$result = SaveTonality(FALSE,$dir,$filename,$temp_folder,FALSE);
 		if($result === "locked") {
-			echo "<span class=\"red-text\"> ➡ CANNOT autosave: please</span> <a href=\"tonality.php?file=".urlencode($tonality_resources.SLASH.$filename)."\">RELOAD</a> this page!";
+			echo "<span class=\"red-text\"> ➡ CANNOT autosave: please</span> <a href=\"tonality.php?file=".urlencode(tonality_resource_folder($filename).SLASH.$filename)."\">RELOAD</a> this page!";
 			}
 		else if($result === "missing") {
-			echo "<span class=\"red-text\"> ➡ CANNOT autosave: the temporary data of this page was deleted. Please close this page and</span> <a href=\"tonality.php?file=".urlencode($tonality_resources.SLASH.$filename)."\">RELOAD</a> it!";
+			echo "<span class=\"red-text\"> ➡ CANNOT autosave: the temporary data of this page was deleted. Please close this page and</span> <a href=\"tonality.php?file=".urlencode(tonality_resource_folder($filename).SLASH.$filename)."\">RELOAD</a> it!";
 			}
-		else if($result !== "skipped") echo "&nbsp;&nbsp;&nbsp;<span class=\"red-text\">".date('H\hi')."</span> ➡ <span class=\"red-text\">Autosaved all tonal scales to</span> “<span class=\"green-text\">".$filename."</span>”";
+		else if($result !== "skipped" AND $result !== "read-only") echo "&nbsp;&nbsp;&nbsp;<span class=\"red-text\">".date('H\hi')."</span> ➡ <span class=\"red-text\">Autosaved all tonal scales to</span> “<span class=\"green-text\">".$filename."</span>”";
 		}
 	}
 ?>

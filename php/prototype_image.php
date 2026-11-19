@@ -1,5 +1,6 @@
 <?php
 header("Content-type: image/png");
+ini_set('serialize_precision','-1'); ini_set('precision','14'); // 2026-11-19 Numbers in their shortest form, see _basic_tasks.php
 $save_codes_dir = urldecode($_GET['save_codes_dir']);
 $image_file = $save_codes_dir."/image.php";
 require_once($image_file);

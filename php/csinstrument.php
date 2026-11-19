@@ -29,6 +29,13 @@ require_once("_header.php");
 display_darklight();
 echo $error_post;
 stale_subpage($temp_folder); // 2026-11-10
+// 2026-11-19 The instruments of a fixed '-cs' file of "csound_resources" can only be viewed - by Claude
+$read_only = csound_temp_read_only($temp_folder);
+if($read_only) {
+	foreach(array('create_parameter','delete_parameter','rename_parameter','restore','saveinstrument') as $action) unset($_POST[$action]);
+	echo "<p><span class=\"red-text\">➡ This instrument belongs to a fixed Csound resource of the distribution: it can be viewed but not changed.</span></p>";
+	read_only_page_script();
+	}
 
 $instrument_folder_name = str_replace('-','_',$instrument_name);
 $folder_this_instrument = $temp_dir.$temp_folder.SLASH.$instrument_folder_name;
@@ -476,9 +483,9 @@ foreach($dir_instrument as $thisparameter) {
 	$parameter_name = str_replace(".txt.old",'',$thisparameter);
 	$deleted_parameters .= "“".$parameter_name."” ";
 	}
-if($deleted_parameters <> '') echo "<p><input class=\"save\" type=\"submit\" name=\"restore\" value=\"RESTORE ALL DELETED PARAMETERS\"> = <span class=\"green-text\"><big>".$deleted_parameters."</big></span></p>";
-echo "<p><input class=\"save\" type=\"submit\" name=\"create_parameter\" value=\"CREATE A NEW PARAMETER\"> named <input type=\"text\" name=\"new_parameter\" size=\"20\" value=\"\">";
-if(count($exists_name) > 0) {
+if($deleted_parameters <> '' AND !$read_only) echo "<p><input class=\"save\" type=\"submit\" name=\"restore\" value=\"RESTORE ALL DELETED PARAMETERS\"> = <span class=\"green-text\"><big>".$deleted_parameters."</big></span></p>";
+if(!$read_only) echo "<p><input class=\"save\" type=\"submit\" name=\"create_parameter\" value=\"CREATE A NEW PARAMETER\"> named <input type=\"text\" name=\"new_parameter\" size=\"20\" value=\"\">";
+if(count($exists_name) > 0 AND !$read_only) {
 	echo "&nbsp;👉&nbsp;<span class=\"red-text\">Don't use: </span><span class=\"green-text\"><b>";
 	foreach($exists_name AS $thisname => $value) {
 		echo "&nbsp;&nbsp;".$thisname;
@@ -533,8 +540,10 @@ if($n > 0) {
 		echo "<input class=\"save\" type=\"submit\" name=\"delete_parameter\"  onclick=\"return confirm('Are you sure?');\" value=\"DELETE\">";
 		echo "</td>";
 		echo "<td>";
-		echo "<input class=\"save\" type=\"submit\" name=\"rename_parameter\" value=\"RENAME\">&nbsp;=&nbsp;";
-		echo "<input type=\"text\" name=\"new_parameter_name\" size=\"20\" value=\"\">";
+		if(!$read_only) {
+			echo "<input class=\"save\" type=\"submit\" name=\"rename_parameter\" value=\"RENAME\">&nbsp;=&nbsp;";
+			echo "<input type=\"text\" name=\"new_parameter_name\" size=\"20\" value=\"\">";
+			}
 		echo "</td>";
 		echo "</form>";
 		echo "</tr>";

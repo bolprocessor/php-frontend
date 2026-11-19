@@ -1,5 +1,6 @@
 <?php
 error_reporting(0);
+ini_set('serialize_precision','-1'); ini_set('precision','14'); // 2026-11-19 Numbers in their shortest form, see _basic_tasks.php
 $save_codes_dir = urldecode($_GET['save_codes_dir']);
 $dir_scale_images = urldecode($_GET['dir_scale_images']);
 if(isset($_GET['csound_source'])) $csound_source = urldecode($_GET['csound_source']);
@@ -410,7 +411,7 @@ function imagelinedotted($im, $x1, $y1, $x2, $y2, $dist, $col) {
         array_push($style, $transp); // Generate style array - loop needed for customisable distance between the dots
     	}
    	imagesetstyle($im, $style);
-    return (integer) imageline($im, intval($x1), intval($y1), intval($x2), intval($y2), IMG_COLOR_STYLED);
+    return (int) imageline($im, intval($x1), intval($y1), intval($x2), intval($y2), IMG_COLOR_STYLED);
     imagesetstyle($im, array($col)); // Reset style - just in case...
 	}
 

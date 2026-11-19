@@ -10,7 +10,10 @@ if(isset($_GET['extension'])) $extension = urldecode($_GET['extension']);
 else $extension = '';
 
 if($dir <> '') {
-	$dircontent = scandir($dir);
+	// 2026-11-19 Both Csound (or tonality) resource folders are listed together - by Claude
+	if(is_csound_resource_folder($dir)) $dircontent = array_keys(csound_resource_files());
+	else if(is_tonality_resource_folder($dir)) $dircontent = array_keys(resource_files("tonality"));
+	else $dircontent = scandir($dir);
 	foreach($dircontent as $file) {
 		if($file[0] == '.') continue;
 		$table = explode('.',$file);

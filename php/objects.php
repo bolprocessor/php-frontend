@@ -235,7 +235,7 @@ if($CsoundInstruments_filename <> '' AND !is_integer(strpos($CsoundInstruments_f
 echo "<input type=\"hidden\" name=\"CsoundInstruments_filename\" value=\"".$CsoundInstruments_filename."\">";
 echo "CsoundInstruments filename = <input type=\"text\" name=\"CsoundInstruments_filename\" size=\"20\" value=\"".$CsoundInstruments_filename."\">";
 if($CsoundInstruments_filename <> '') { 
-	$CsoundInstruments_file = $dir_csound_resources.$CsoundInstruments_filename;
+	$CsoundInstruments_file = csound_resource_path($CsoundInstruments_filename);
 	if(!file_exists($CsoundInstruments_file)) {
 		echo "&nbsp;➡&nbsp;";
 		echo "File not found: <input class=\"save\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" name=\"createcsoundinstruments\" value=\"CREATE ‘".$CsoundInstruments_filename."’\">";
@@ -307,11 +307,11 @@ if($deleted_objects <> '') echo "<p><input class=\"save\" type=\"submit\" name=\
 echo "</form>";
 
 if($CsoundInstruments_filename <> '') {
-	$CsoundInstruments_file = $dir_csound_resources.$CsoundInstruments_filename;
+	$CsoundInstruments_file = csound_resource_path($CsoundInstruments_filename);
 	if($CsoundInstruments_filename <> '' AND file_exists($CsoundInstruments_file)) {
-		$url_csound_page = "csound.php?file=".urlencode($csound_resources.SLASH.$CsoundInstruments_file);
+		$url_csound_page = "csound.php?file=".urlencode(csound_resource_folder($CsoundInstruments_filename).SLASH.$CsoundInstruments_filename);
 		echo "<td><form method=\"post\" action=\"".$url_csound_page."\" enctype=\"multipart/form-data\">";
-		echo "<input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$CsoundInstruments_file."’\">&nbsp;";
+		echo "<input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$CsoundInstruments_filename."’\">&nbsp;";
 		echo "</td></form>";
 		}
 	}

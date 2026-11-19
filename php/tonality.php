@@ -17,6 +17,13 @@ $dir = str_replace($filename,'',$this_file);
 $warn_not_empty = FALSE;
 $max_scales = 0;
 $current_directory = str_replace(SLASH.$filename,'',$file);
+// 2026-11-19 A tonality resource is in "my_tonality_resources" or (fixed) in "tonality_resources". Fixed files can only be viewed, unless $i_am_designer - by Claude
+if($current_directory == $tonality_resources OR $current_directory == $my_tonality_resources) {
+	$dir = tonality_resource_dir($filename);
+	$this_file = $dir.$filename;
+	$current_directory = $tonality_resources;
+	}
+$read_only = read_only_resource_folder($dir);
 save_settings("last_directory",$current_directory);
 
 require_once("_header.php");
@@ -36,6 +43,14 @@ if(stale_temp_folder($temp_folder)) {
 	stale_page_message($filename);
 	$_POST = array();
 	}
+if($read_only) {
+	foreach(array_keys($_POST) as $ro_post_key) {
+		if(in_array($ro_post_key,array('import_files','create_scale','undelete_scales','empty_trash','restore','savealldata','use_convention','record_new_keys','align_scales','delete_these_scales','change_convention','reassign_keys','delete_scales')) OR preg_match("/^delete_scale_[0-9]+$/",$ro_post_key)) unset($_POST[$ro_post_key]);
+		}
+	if(isset($_POST['copy_this_scale']) AND (!isset($_POST['file_choice']) OR $_POST['file_choice'] == $filename)) unset($_POST['copy_this_scale']);
+	$autosave = FALSE;
+	}
+$keep = $read_only ? " read-only-keep" : ''; // Class of the fields and buttons used to copy or export scales to other files
 $need_to_save = FALSE;
 $scala_error = '';
 if($_SERVER['REQUEST_METHOD'] == 'POST' AND isset($_POST['import_files'])) {
@@ -104,7 +119,11 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' AND isset($_POST['import_files'])) {
 		@unlink($file_lock);
         }
     }
-echo "<h2>Tonality resource “".$filename."”</h2>";
+echo "<h2>Tonality resource “".$filename."”".(same_folder($dir,$dir_tonality_resources) ? " (fixed)" : '')."</h2>";
+if($read_only) {
+	read_only_message($filename,"tonality resource",$tonality_resources);
+	read_only_page_script();
+	}
 save_settings("last_name",$filename);
 
 if($test) echo "dir = ".$dir."<br />";
@@ -140,7 +159,7 @@ if(isset($_POST['create_scale'])) {
 			$source = $dir_scales.$clean_name_of_file."-source.txt";
 			if(file_exists($source)) {
 				$content_source = trim(@file_get_contents($source));
-				$error_create .= "in </span><span class=\"green-text\">‘<a target=\"_blank\" href=\"tonality.php?file=".urlencode($tonality_resources.SLASH.$content_source)."\">".$content_source."</a>’</span> ";
+				$error_create .= "in </span><span class=\"green-text\">‘<a target=\"_blank\" href=\"tonality.php?file=".urlencode(tonality_resource_folder($content_source).SLASH.$content_source)."\">".$content_source."</a>’</span> ";
 				}
 			echo "</span></p>";
 			}
@@ -208,12 +227,12 @@ if(isset($_GET['scalefilename'])) $scalefilename = urldecode($_GET['scalefilenam
 
 $duplicated_scale = FALSE;
 if(isset($_POST['copy_this_scale'])) {
-	if(isset($_POST['file_choice']) OR (isset($_POST['duplicate_name']) AND ($new_scale_name = trim($_POST['duplicate_name']) <> ''))) {
+	if(isset($_POST['file_choice']) OR (isset($_POST['duplicate_name']) AND trim($_POST['duplicate_name']) <> '')) {
 		if(isset($_POST['file_choice'])) $destination = $_POST['file_choice'];
 		else $destination = $filename;
 		echo "<hr>";
 		if($destination == $filename) {
-			$new_scale_name = trim($_POST['duplicate_name']);
+			$new_scale_name = isset($_POST['duplicate_name']) ? trim($_POST['duplicate_name']) : '';
 			$new_scale_name = preg_replace("/\s+/u",' ',$new_scale_name);
 			$clean_name_of_file = str_replace("#","_",$new_scale_name);
 			$clean_name_of_file = str_replace("/","_",$clean_name_of_file);
@@ -221,7 +240,11 @@ if(isset($_POST['copy_this_scale'])) {
 			$old_scale_file = $clean_name_of_file.".old";
 			$result1 = check_duplicate_name($dir_scales,$new_scale_file);
 			$result2 = check_duplicate_name($dir_scales,$old_scale_file);
-			if($result1 OR $result2) {
+			// 2026-11-19 A scale with an empty name was created when "(self)" was selected without a name
+			if($new_scale_name == '') {
+				echo "<p><span class=\"red-text\">WARNING</span>: A name is needed to duplicate <span class=\"green-text\">‘".$scalefilename."’</span> in the same file</p>";
+				}
+			else if($result1 OR $result2) {
 				echo "<p><span class=\"red-text\">WARNING</span>: This name <span class=\"green-text\">‘".$new_scale_name."’</span> already exists</p>";
 				}
 			else {
@@ -247,10 +270,13 @@ if(isset($_POST['copy_this_scale'])) {
 				else echo "<p><span class=\"red-text\">ERROR: couldn't open</span><span class=\"green-text\">".$dir_scales.$new_scale_file."</span></p>";
 				}
 			}
+		else if(read_only_resource_folder(tonality_resource_dir($destination))) // 2026-11-19 Checked before creating locks
+			echo "<p><span class=\"red-text\">‘".htmlspecialchars($destination)."’ is a fixed file that can't be changed</span></p>";
 		else {
 			echo "<p><span class=\"red-text\">Copying</span> <span class=\"green-text\">‘".$scalefilename."’</span> <span class=\"red-text\">to </span><span class=\"green-text\">‘".$destination."’</span></p>";
-			echo "<p><span class=\"red-text\">➡</span> <a target=\"_blank\" href=\"tonality.php?file=".urlencode($tonality_resources.SLASH.$destination)."\">Edit ‘".$destination."’</a></p>";
-			$file_lock = $dir.$destination."_lock";
+			echo "<p><span class=\"red-text\">➡</span> <a target=\"_blank\" href=\"tonality.php?file=".urlencode(tonality_resource_folder($destination).SLASH.$destination)."\">Edit ‘".$destination."’</a></p>";
+			$dir_destination = tonality_resource_dir($destination); // 2026-11-19
+			$file_lock = $dir_destination.$destination."_lock";
 			$time_start = time();
 			$time_end = $time_start + 10;
 			while(TRUE) {
@@ -262,10 +288,10 @@ if(isset($_POST['copy_this_scale'])) {
 				sleep(1);
 				}
 			// 2026-11-12 The scale is added to the JSON data of the destination file
-			$file_lock3 = $dir.$destination."_lock3";
+			$file_lock3 = $dir_destination.$destination."_lock3";
 			$handle = fopen($file_lock3,"w");
 			if($handle) fclose($handle);
-			$result = to_add_scales_to_file($dir.$destination,array($temp_dir.$temp_folder.SLASH."scales".SLASH.to_scale_file_name($scalefilename)));
+			$result = to_add_scales_to_file($dir_destination.$destination,array($temp_dir.$temp_folder.SLASH."scales".SLASH.to_scale_file_name($scalefilename)));
 			if(!is_array($result)) echo "<p><span class=\"red-text\">".$result."</span></p>";
 			else if(isset($result[$scalefilename]) AND !$result[$scalefilename]) {
 				echo "<p><span class=\"red-text\">A scale with the same name</span> <span class=\"green-text\">‘".$scalefilename."’</span> <span class=\"red-text\">already exists in</span> <span class=\"green-text\">‘".$destination."’</span><span class=\"red-text\">. You need to delete it before copying this version</span></p>";
@@ -283,14 +309,11 @@ for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
 		echo "<input class=\"cancel\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"\" value=\"CANCEL\">&nbsp;<input type=\"submit\" style=\"background-color:aquamarine; font-size:large;\" name=\"\" onclick=\"this.form.target='_self';return true;\" value=\"Click to copy scale ‘".$scalefilename."’ to:\"><br />";
 		echo "<blockquote>";
 		echo "<input type=\"hidden\" name=\"copy_this_scale\" value=\"1\">";
-		$dircontent = scandir($dir);
-		$folder = str_replace($bp_application_path,'',$dir);
-		foreach($dircontent as $thisfile) {
-			$prefix = substr($thisfile,0,3);
-			$table = explode(".",$thisfile);
-			$extension = end($table);
-			if(($prefix <> "-to" AND $extension <> "bpto") OR is_integer(strpos($thisfile,"_lock"))) continue;
-			echo "<input type=\"radio\" name=\"file_choice\" value=\"".$thisfile."\">".$thisfile;
+		// 2026-11-19 Files of both tonality resource folders, except fixed ones
+		foreach(list_of_tonality_resources() as $thisfile) {
+			if($thisfile == $filename AND $read_only) continue;
+			if($thisfile <> $filename AND read_only_resource_folder(tonality_resource_dir($thisfile))) continue;
+			echo "<input type=\"radio\" class=\"read-only-keep\" name=\"file_choice\" value=\"".$thisfile."\">".$thisfile;
 			if($thisfile == $filename) {
 				echo " <span class=\"red-text\">(self)</span> <input type=\"submit\" style=\"background-color:aquamarine; \" name=\"\" onclick=\"this.form.target='_self';return true;\" value=\"DUPLICATE ‘".$scalefilename."’\"> under name: <input type=\"text\" name=\"duplicate_name\" size=\"40\" value=\"\">";
 				}
@@ -804,9 +827,9 @@ if($max_scales > 0) {
 		echo "</table>";
 		}
 	if($done) {
-		echo "<p><input class=\"save\" type=\"submit\" name=\"export_scales\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#export\" value=\"EXPORT TONAL SCALES\">";
+		echo "<p><input class=\"save".$keep."\" type=\"submit\" name=\"export_scales\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#export\" value=\"EXPORT TONAL SCALES\">";
 		echo "&nbsp;<input class=\"save\" type=\"submit\" name=\"delete_scales\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#export\" value=\"DELETE SEVERAL SCALES\">";
-		echo "&nbsp;<input class=\"save\" type=\"submit\" name=\"compare_scales\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#export\" value=\"COMPARE TONAL SCALES\">";
+		echo "&nbsp;<input class=\"save".$keep."\" type=\"submit\" name=\"compare_scales\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#export\" value=\"COMPARE TONAL SCALES\">";
 		}
 	echo "&nbsp;<input class=\"save\" type=\"submit\" name=\"reassign_keys\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#topscales\" value=\"REASSIGN KEYS\">";
 	echo "</p>";
@@ -817,7 +840,7 @@ if($max_scales > 0) {
 		echo "<li class=\"morespace\" id=\"".$i_scale."\"><span class=\"turquoise-text\"><b>".$scale_name[$i_scale]."</b></span> ";
 		echo "➡ <input type=\"submit\" class=\"edit\" name=\"edit_scale\" formaction=\"".$link_edit."?scalefilename=".urlencode($scale_name[$i_scale])."&dir_scales=".urlencode($dir_scales)."&tonality_source=".urlencode($filename)."\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT\">"; // 2025-02-07
 		echo "&nbsp;<input type=\"submit\" class=\"save\" name=\"delete_scale_".$i_scale."\" formaction=\"".$url_this_page."&scalefilename=".urlencode($scale_name[$i_scale])."\" onclick=\"this.form.target='_self';return true;\" value=\"DELETE scale (can be reversed)\">";
-		echo "&nbsp;<input type=\"submit\" class=\"save\" name=\"copy_scale_".$i_scale."\" formaction=\"".$url_this_page."&scalefilename=".urlencode($scale_name[$i_scale])."\" onclick=\"this.form.target='_self';return true;\" value=\"COPY/DUPLICATE scale\">";
+		echo "&nbsp;<input type=\"submit\" class=\"save".$keep."\" name=\"copy_scale_".$i_scale."\" formaction=\"".$url_this_page."&scalefilename=".urlencode($scale_name[$i_scale])."\" onclick=\"this.form.target='_self';return true;\" value=\"".($read_only ? "COPY scale to another file" : "COPY/DUPLICATE scale")."\">";
 		$scala_file = $dir_scales.$scale_name[$i_scale].".scl";
 		$clean_name_of_file = str_replace("#","_",$scale_name[$i_scale]);
 		$clean_name_of_file = str_replace("/","_",$clean_name_of_file);
@@ -913,10 +936,15 @@ if($max_scales > 0) {
 		die();
 		}
 	
+	if(isset($_POST['export_to']) AND isset($_POST['file_choice']) AND read_only_resource_folder(tonality_resource_dir($_POST['file_choice']))) { // 2026-11-19 Checked before creating locks
+		echo "<p><span class=\"red-text\">‘".htmlspecialchars($_POST['file_choice'])."’ is a fixed file that can't be changed</span></p>";
+		unset($_POST['export_to']);
+		}
 	if(isset($_POST['export_to']) AND isset($_POST['file_choice'])) {
 		$destination = $_POST['file_choice'];
 		echo "<h3>Exporting to <span class=\"green-text\">‘".$destination."’</span>:</h3>";
-		$file_lock = $dir.$destination."_lock";
+		$dir_destination = tonality_resource_dir($destination); // 2026-11-19
+		$file_lock = $dir_destination.$destination."_lock";
 		$time_start = time();
 		$time_end = $time_start + 10;
 		while(TRUE) {
@@ -935,7 +963,7 @@ if($max_scales > 0) {
 			$exported[] = $scale_name[$i_scale];
 			$scale_files[] = $dir_scales.to_scale_file_name($scale_name[$i_scale]);
 			}
-		$result = to_add_scales_to_file($dir.$destination,$scale_files);
+		$result = to_add_scales_to_file($dir_destination.$destination,$scale_files);
 		if(!is_array($result)) echo "<li><span class=\"red-text\">".$result."</span></li>";
 		else foreach($exported as $scalefilename) {
 			echo "<li class=\"morespace\"><span class=\"turquoise-text\"><b>".$scalefilename."</b></span>";
@@ -944,7 +972,7 @@ if($max_scales > 0) {
 				}
 			echo "</li>";
 			}
-		$file_lock3 = $dir.$destination."_lock3";
+		$file_lock3 = $dir_destination.$destination."_lock3";
 		$handle_lock3 = fopen($file_lock3,"w");
 		fwrite($handle_lock3,"lock\n");
 		if($handle_lock3) fclose($handle_lock3);
@@ -960,21 +988,16 @@ if($max_scales > 0) {
 		echo "<input type=\"submit\" class=\"cancel\" name=\"export_to\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."\" value=\"CANCEL\">";
 		echo "&nbsp;<input type=\"submit\" style=\"background-color:aquamarine; \" name=\"export_to\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."#export\" value=\"EXPORT:\"><br /><br />";
 		for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
-			echo "<input type=\"checkbox\" name=\"export_".$i_scale."\"><span class=\"green-text\">".$scale_name[$i_scale]."</span><br />";
+			echo "<input type=\"checkbox\" class=\"read-only-keep\" name=\"export_".$i_scale."\"><span class=\"green-text\">".$scale_name[$i_scale]."</span><br />";
 			}
 		echo "</td>";
 		echo "<td>";
 		echo "<h3>TO:</h3>";
-echo $dir."<br />";
-		$dircontent = scandir($dir);
-		$folder = str_replace($bp_application_path,'',$dir);
-		foreach($dircontent as $thisfile) {
-			$prefix = substr($thisfile,0,3);
-			$table = explode(".",$thisfile);
-			$extension = end($table);
+		// 2026-11-19 Files of both tonality resource folders, except fixed ones
+		foreach(list_of_tonality_resources() as $thisfile) {
 			if($thisfile == $filename) continue;
-			if(($prefix <> "-to" AND $extension <> "bpto") OR is_integer(strpos($thisfile,"_lock"))) continue;
-			echo "<input type=\"radio\" name=\"file_choice\" value=\"".$thisfile."\">".$thisfile;
+			if(read_only_resource_folder(tonality_resource_dir($thisfile))) continue;
+			echo "<input type=\"radio\" class=\"read-only-keep\" name=\"file_choice\" value=\"".$thisfile."\">".$thisfile;
 			echo "<br />";
 			}
 		echo "</td>";
@@ -993,7 +1016,7 @@ echo $dir."<br />";
 		echo "<input type=\"submit\" class=\"cancel\" name=\"export_to\" onclick=\"this.form.target='_self';return true;\" formaction=\"".$url_this_page."\" value=\"CANCEL\">";
 		echo "&nbsp;<input type=\"submit\" style=\"background-color:aquamarine; \" name=\"export_to\" onclick=\"this.form.target='_blank';return true;\" formaction=\"".$url_classification."\" value=\"COMPARE selected scales:\"><br /><br />";
 		for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
-			echo "<input type=\"checkbox\" name=\"compare_".str_replace(' ','_',$scale_name[$i_scale])."\"><span class=\"green-text\">".$scale_name[$i_scale]."</span><br />";
+			echo "<input type=\"checkbox\" class=\"read-only-keep\" name=\"compare_".str_replace(' ','_',$scale_name[$i_scale])."\"><span class=\"green-text\">".$scale_name[$i_scale]."</span><br />";
 			}
 		echo "<input type=\"hidden\" name=\"dir_scales\" value=\"".$dir_scales."\">";
 		echo "</td>";
@@ -1097,7 +1120,7 @@ function create_from_scl($scale_name,$scala_filename,$content) {
 	//	$scala_error .= "@ source = ".$source."<br />";
 		if(file_exists($source)) {
 			$content_source = trim(@file_get_contents($source));
-			$scala_error .= " in </font><span class=\"green-text\">‘<a target=\"_blank\" href=\"tonality.php?file=".urlencode($tonality_resources.SLASH.$content_source)."\">".$content_source."</a>’</span>";
+			$scala_error .= " in </font><span class=\"green-text\">‘<a target=\"_blank\" href=\"tonality.php?file=".urlencode(tonality_resource_folder($content_source).SLASH.$content_source)."\">".$content_source."</a>’</span>";
 			}
 		return $scala_error;
 		}

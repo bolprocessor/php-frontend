@@ -135,7 +135,7 @@ function csoundrt_start($csound,$orchestra,&$message) {
 		$tried[] = $attempt['label'];
 		@unlink($files['ping']);
 		@unlink($files['state']);
-		$command = "\"".$csound."\" ".$attempt['option']." -d -m0 -+msg_color=0 --port=".$port." --orc \"".$orchestra_path."\"";
+		$command = "\"".$csound."\"".csound_sample_option()." ".$attempt['option']." -d -m0 -+msg_color=0 --port=".$port." --orc \"".$orchestra_path."\"";
 		if(stripos(PHP_OS,"WIN") === 0) {
 			// "start /B" returns at once, leaving Csound running in the background
 			pclose(popen("start \"BP3 Csound\" /B ".$command." > \"".$files['log']."\" 2>&1","r"));

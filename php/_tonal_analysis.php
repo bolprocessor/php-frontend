@@ -224,7 +224,7 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 		echo "> Analyze item(s) with their specified tonal scales<br />";
 		echo "<input type=\"radio\" name=\"compare_scales\" value=\"1\"";
 		if($compare_scales) echo " checked";
-		echo "> Evaluate adequacy of all tuning schemes defined in ‘<a target=\"_blank\" href=\"tonality.php?file=".urlencode($tonality_resources.SLASH.$tonality_file)."\">".$tonality_file."</a>’ in terms of consonance</p>";
+		echo "> Evaluate adequacy of all tuning schemes defined in ‘<a target=\"_blank\" href=\"tonality.php?file=".urlencode(tonality_resource_folder($tonality_file).SLASH.$tonality_file)."\">".$tonality_file."</a>’ in terms of consonance</p>";
 		}
 	else {
 		echo "<span class=\"red-text\">➡</span> You could also compare scales after declaring a ‘-to’ resource file on top of data and open the file in the <a target=\"_blank\" href=\"index.php?path=tonality_resources\"> tonality resource folder</a>";
@@ -686,7 +686,7 @@ function tonal_analysis($content,$url_this_page,$tonality_file,$temp_dir,$temp_f
 					}
 				if(!$found_scale /* AND $image_shown */) {
 					echo "<p style=\"text-align:center;\"><span class=\"red-text\"><big>No definition of tonal scale was found.</big></span><br /><br />";
-					echo "You need to open the ‘<a target=\"_blank\" href=\"tonality.php?file=".urlencode($tonality_resources.SLASH.$tonality_file)."\">".$tonality_file."</a>’ resource file to use its tonal scale definitions.</p>";
+					echo "You need to open the ‘<a target=\"_blank\" href=\"tonality.php?file=".urlencode(tonality_resource_folder($tonality_file).SLASH.$tonality_file)."\">".$tonality_file."</a>’ resource file to use its tonal scale definitions.</p>";
 					break;
 					}
 				}
