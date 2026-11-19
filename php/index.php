@@ -395,7 +395,7 @@ echo "</p>";
 
 $link_list = "file_list.php?dir=".$dir;
 if($path <> '' AND $path <> $trash_folder) {
-	echo "<p><input class=\"edit\" onclick=\"window.open('".nice_url($link_list)."','listfiles','width=300,height=600,left=100'); return false;\" type=\"submit\" name=\"\" value=\"COPY list of files\">&nbsp;";
+	echo "<p><input class=\"edit\" onclick=\"window.open('".nice_url($link_list)."','listfiles','width=300,height=600,left=100'); return false;\" type=\"submit\" name=\"\" value=\"COPY the list of files\">&nbsp;";
 	if(countBakFiles($dir) > 0 OR ($resource_folder AND countBakFiles(rtrim(resource_dirs($resource_kind)['my'],"/\\")) > 0)) echo "<input class=\"trash\" type=\"submit\" name=\"trash_backups\" title=\"Delete '_bak' files\" value=\"MOVE '_bak' files to TRASH\"></p>";
 	if($download_files) echo "<input class=\"cancel\" type=\"submit\" name=\"\" value=\"CANCEL DOWNLOAD\">";
 	}
@@ -1042,7 +1042,7 @@ function display_directory($test,$dir,$filter) {
 						$time_saved = filemtime($dir.SLASH.$thisfile);
 						echo "&nbsp;<small>&nbsp;".gmdate('Y-m-d H\hi',$time_saved)."</small>";
 						if($resource_folder AND resource_kind_of_type($type) == $resource_kind) echo "&nbsp;&nbsp;<button type=\"button\" class=\"save\" style=\"font-size:x-small; padding:1px 6px;\" onclick=\"return duplicateResource(".htmlspecialchars(json_encode($thisfile)).");\">Duplicate</button>";
-						if($resource_folder AND !$locked AND resource_kind_of_type($type) == $resource_kind) echo "&nbsp;<button type=\"button\" style=\"font-size:x-small; padding:1px 6px; color:DarkBlue; background-color:LightBlue; border-radius:0.5em;\" onclick=\"return trashResource(".htmlspecialchars(json_encode($thisfile)).");\">delete</button>";
+						if($resource_folder AND !$locked AND resource_kind_of_type($type) == $resource_kind) echo "&nbsp;<button type=\"button\" class=\"edit\" style=\"font-size:x-small; padding:1px 6px;\" onclick=\"return trashResource(".htmlspecialchars(json_encode($thisfile)).");\">delete</button>";
 						}
 					echo "<br />";
 					if($show_dependencies) {

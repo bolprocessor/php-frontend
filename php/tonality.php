@@ -1085,6 +1085,7 @@ for($i_scale = 1; $i_scale <= $max_scales; $i_scale++) {
 	if(isset($scale_fraction[$i_scale]) AND isset($table_names[$i_scale])) {
 		if(isset($_POST['export_scale_'.$i_scale])) {
 			export_scala($dir_scales,$scale_name[$i_scale]); // 2026-11-18 Same export as scale.php, including unnamed grades
+			export_kbm($dir_scales,$scale_name[$i_scale]); // 2026-11-19 As in scale.php
 			break;
 			}
 		}

@@ -2770,41 +2770,11 @@ fwrite($h_image,$line);
 fclose($h_image);
 
 // Store SCALA
-export_scala($dir_scales,$scale_name); // 2026-11-18 Shared with the "Export to SCALA" button of tonality.php. Called before chdir() because $dir_scales is a relative path
-
-$olddir = getcwd();
-chdir($dir_scales);
-
+export_scala($dir_scales,$scale_name); // 2026-11-18 Shared with the "Export to SCALA" button of tonality.php
 // Store KBM
-$file = $scale_name.".kbm";
-$text = "! ".$file."\n";
-$text .= "! Keyboard mapping (KBM) file\n";
-$text .= "! Size of map. The pattern repeats every so many keys:\n";
-$text .= $numgrades_fullscale."\n";
-$text .= "! First MIDI note number to retune:\n";
-$text .= "0\n";
-$text .= "! Last MIDI note number to retune:\n";
-$text .= "127\n";
-$text .= "! Middle note where the first entry in the mapping is mapped to:\n";
-$text .= $basekey."\n";
-$text .= "! Reference note for which frequency is given:\n";
-$text .= $basekey."\n";
-$text .= "! Frequency to tune the above note to (floating point e.g. 440.0):\n";
-$text .= $basefreq."\n";
-$text .= "! Scale degree to consider as formal octave:\n";
-$text .= $numgrades_fullscale."\n";
-$text .= "! Mapping\n";
-for($k = 0; $k < $numgrades_fullscale; $k++) {
-	// 2026-11-18 The SCALA file contains all grades, so a named grade is mapped to its own degree. Before, only named grades were counted
-	if($name[$k] == '' OR $name[$k] == "•") $text .= "x\n";
-	else $text .= $k."\n";
-	}
-$handle = fopen($file,"w");
-if($handle) {
-	fwrite($handle,$text);
-	fclose($handle);
-	}
-chdir($olddir);
+export_kbm($dir_scales,$scale_name); // 2026-11-19 Standard format, shared with tonality.php
+
+
 
 echo "</body>";
 echo "</html>";

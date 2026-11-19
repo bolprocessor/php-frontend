@@ -696,7 +696,7 @@ if($number_instruments > 0) {
 		echo "</td>";
 		echo "<td class=\"middle\" style=\"text-align:right; padding:5px;\">";
 		if(!$read_only) echo "<input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"duplicate_instrument\" value=\"DUPLICATE AS\">: <input type=\"text\" name=\"copy_instrument\" size=\"15\" value=\"\"><br />";
-		echo "<input class=\"edit\" style=\"background-color:yellow;\" type=\"submit\" formaction=\"".$url_this_page."\" onclick=\"this.form.target='_self';return true;\" name=\"copy_instrument_to\" value=\"COPY TO ANOTHER FILE\">";
+		echo "<input class=\"save read-only-keep\" type=\"submit\" formaction=\"".$url_this_page."\" onclick=\"this.form.target='_self';return true;\" name=\"copy_instrument_to\" value=\"COPY TO ANOTHER FILE\">";
 		echo "</td>";
 		echo "</form>";
 		echo "</tr>";

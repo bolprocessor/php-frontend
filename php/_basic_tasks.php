@@ -40,7 +40,7 @@ $section_headers = array("RND","ORD","LIN","SUB","SUB1","TEM","POSLONG","LEFT","
 
 $architecture = php_uname("m");
 
-$i_am_designer = FALSE;
+$i_am_designer = TRUE;
 $test = FALSE;
 // $test = TRUE;
 
@@ -6576,7 +6576,68 @@ function copyDirectory($src,$dst) {
     return true;
 	}
 
+function read_scale_lines($lines) {
+	// 2026-11-19 Reads the temporary file of a scale (former line format): note names (by grade, the last one for the octave), key numbers, numgrades, interval, base frequency, base key and ratios
+	$scale = array('names' => array(),'keys' => array(),'numgrades' => 0,'basefreq' => 0.,'basekey' => 60,'ratios' => array(),'fline' => array());
+	foreach($lines as $line) {
+		$line = trim($line);
+		if($line == '') continue;
+		if($line[0] == '/') $scale['names'] = explode(' ',preg_replace("/\s+/u",' ',trim(str_replace('/','',$line))));
+		else if($line[0] == 'k' AND preg_match("/^k(.*)k$/u",$line,$m)) $scale['keys'] = explode(' ',preg_replace("/\s+/u",' ',trim($m[1])));
+		else if($line[0] == 'f') {
+			$table = explode(' ',preg_replace("/\s+/u",' ',$line));
+			$scale['fline'] = $table;
+			$scale['numgrades'] = intval($table[4]);
+			$scale['basefreq'] = floatval($table[6]);
+			$scale['basekey'] = intval($table[7]);
+			$scale['ratios'] = array_map('floatval',array_slice($table,8));
+			}
+		}
+	return $scale;
+	}
+
+function scale_key_mapping($scale) {
+	// 2026-11-19 How BP assigns keys to grades (PrintThisNote() in the console): in a scale of up to 12 grades, consecutive keys play consecutive grades; otherwise they play the named grades, so that the pattern repeats every 'number of named grades' keys
+	$numgrades = $scale['numgrades'];
+	if($numgrades <= 12) return range(0,$numgrades - 1);
+	$mapping = array();
+	for($g = 0; $g < $numgrades; $g++)
+		if(isset($scale['names'][$g]) AND $scale['names'][$g] <> "•" AND $scale['names'][$g] <> '') $mapping[] = $g;
+	return $mapping;
+	}
+
+function export_kbm($dir_scales,$scale_name) {
+	// 2026-11-19 Writes the KBM file of a scale in the standard format (https://www.huygens-fokker.org/scala/help.htm#mappings): each entry gives the scale degree played by consecutive keys from the middle note, and the size of the map is the number of keys after which the pattern repeats. Called by scale.php and tonality.php, as is the console's ExportKBM()
+	global $permissions;
+	$content = @file_get_contents($dir_scales.to_scale_file_name($scale_name));
+	if($content === FALSE) return FALSE;
+	$scale = read_scale_lines(explode("\n",$content));
+	if($scale['numgrades'] < 1) return FALSE;
+	$mapping = scale_key_mapping($scale);
+	$text = "! ".$scale_name.".kbm\n";
+	$text .= "! Keyboard mapping (KBM) file\n";
+	$text .= "! Size of map. The pattern repeats every so many keys:\n";
+	$text .= count($mapping)."\n";
+	$text .= "! First MIDI note number to retune:\n0\n";
+	$text .= "! Last MIDI note number to retune:\n127\n";
+	$text .= "! Middle note where the first entry in the mapping is mapped to:\n".$scale['basekey']."\n";
+	$text .= "! Reference note for which frequency is given:\n".$scale['basekey']."\n";
+	$text .= "! Frequency to tune the above note to (floating point e.g. 440.0):\n".$scale['basefreq']."\n";
+	$text .= "! Scale degree to consider as formal octave:\n".$scale['numgrades']."\n";
+	$text .= "! Mapping\n";
+	foreach($mapping as $degree) $text .= $degree."\n";
+	$file = $dir_scales.$scale_name.".kbm";
+	if(@file_get_contents($file) !== $text) {
+		file_put_contents($file,$text);
+		@chmod($file,$permissions);
+		}
+	return $file;
+	}
+
 function update_scale_with_kbm($scl_name,$scale_file,$kbm_content) {
+	// 2026-11-19 Reads a KBM file in the standard format (https://www.huygens-fokker.org/scala/help.htm#mappings): after comments ('!'), the lines are the size of the map, the first and last keys to retune, the middle note, the reference note, its frequency, the scale degree to consider as formal octave, then one scale degree (or 'x' for an unmapped key) per key from the middle note. Unmapped keys at the end may be left out, and a size of 0 is a linear mapping.
+	// BP assigns keys to grades by a fixed rule (see scale_key_mapping()), so a mapping is accepted only if it follows that rule: in a scale of up to 12 grades, key i plays degree i (or is unmapped, making the grade unnamed); in a larger scale, consecutive keys play rising degrees from 0, which become the named grades. Mappings exported by BP before 2026-11-19 (one entry per grade, 'x' for unnamed grades) are also accepted.
+	// The scale is written to 'temp_scale_file.txt' in $dir_scales. Returns '' or an error message.
 	global $dir_scales,$need_to_save;
 	if($scale_file == '') {
 		$scl_name = preg_replace("/\s+/u",' ',$scl_name);
@@ -6585,137 +6646,117 @@ function update_scale_with_kbm($scl_name,$scale_file,$kbm_content) {
 		$scale_file = $dir_scales.$scl_name.".txt";
 		$need_to_save = TRUE;
 		}
-	$scale_content = file_get_contents($scale_file);
-	$table_scl = explode(chr(10),$scale_content);
-	$imax = count($table_scl);
-	$scale_file = "temp_scale_file.txt";
-	$handle = fopen($dir_scales.$scale_file,"w");
-	$new_mapping = FALSE;
-	$note_names = ''; $numgrades_fullscale = 0;
-	for($i = 0; $i < $imax; $i++) {
-		$line = trim($table_scl[$i]);
-		if(is_integer($pos=strpos($line,"/")) AND $pos == 0) {
-			// Note names
-			$note_names = preg_replace("/\s+/u",' ',$line);
-			$note_names = str_replace('/','',$note_names);
+	$table_scl = explode("\n",str_replace("\r",'',file_get_contents($scale_file)));
+	$scale = read_scale_lines($table_scl);
+	$numgrades = $scale['numgrades'];
+	if($numgrades < 1 OR count($scale['ratios']) <= $numgrades) return "The scale has no valid table<br />";
+	// Values of the KBM file, in order, without comments
+	$values = array();
+	foreach(explode("\n",str_replace("\r",'',$kbm_content)) as $line) {
+		$line = trim($line);
+		if($line == '' OR $line[0] == '!') continue;
+		$values[] = preg_split("/\s+/u",$line)[0];
+		}
+	if(count($values) < 7) return "The file should contain at least 7 values (size of map, first and last keys, middle note, reference note, frequency, formal octave)<br />";
+	$labels = array("Size of map","First MIDI note number","Last MIDI note number","Middle note","Reference note");
+	for($i = 0; $i < 5; $i++)
+		if(!preg_match("/^[0-9]+$/",$values[$i])) return $labels[$i]." (".$values[$i].") is not a valid integer<br />";
+	$size = intval($values[0]);
+	$middle = intval($values[3]);
+	$reference = intval($values[4]);
+	if($middle > 127 OR $reference > 127) return "Middle note (".$middle.") and reference note (".$reference.") should be in the range [0, 127]<br />";
+	if(!is_numeric($values[5]) OR floatval($values[5]) <= 0) return "Frequency (".$values[5].") is not a valid number<br />";
+	$frequency = floatval($values[5]);
+	if(!preg_match("/^-?[0-9]+$/",$values[6])) return "Scale degree to consider as formal octave (".$values[6].") is not a valid integer<br />";
+	$octave_degree = intval($values[6]);
+	if($size == 0) $octave_degree = $numgrades; // Linear mapping
+	if($octave_degree <> $numgrades) return "Scale degree to consider as formal octave (".$octave_degree.") should be the number of grades of the scale (".$numgrades."), because BP repeats the scale with its interval<br />";
+	if($size == 0) {
+		$size = $numgrades;
+		$entries = range(0,$numgrades - 1);
+		}
+	else {
+		$entries = array();
+		for($i = 0; $i < $size; $i++) {
+			$entry = isset($values[7 + $i]) ? $values[7 + $i] : 'x'; // Unmapped keys may be left out at the end
+			if($entry <> 'x' AND !preg_match("/^-?[0-9]+$/",$entry)) return "Incorrect value (".$entry.") found in the mapping<br />";
+			$entries[$i] = ($entry == 'x') ? 'x' : intval($entry);
+			}
+		}
+	// Which grades are named, and the key (relative to the middle note) of each
+	$mapped_grades = array();
+	$per_grade = TRUE; // Key i plays degree i or is unmapped: linear mapping, possibly with gaps
+	if($size <> $numgrades) $per_grade = FALSE;
+	foreach($entries as $i => $entry) if($entry !== 'x' AND $entry <> $i) $per_grade = FALSE;
+	if($entries[0] !== 0) return "The first entry of the mapping (".$entries[0].") should be 0, the base note of the scale<br />";
+	if($per_grade) {
+		foreach($entries as $i => $entry) if($entry !== 'x') $mapped_grades[$i] = $i;
+		}
+	else {
+		if($numgrades <= 12) return "In a scale of up to 12 grades, BP plays consecutive grades on consecutive keys, so the mapping should have ".$numgrades." entries 0, 1, 2… (or 'x' for unnamed grades)<br />";
+		$previous = -1;
+		foreach($entries as $i => $entry) {
+			if($entry === 'x') return "Key ".($middle + $i)." is unmapped. In a scale of more than 12 grades, BP plays consecutive named grades on consecutive keys, so each key of the pattern should play a degree<br />";
+			if($entry <= $previous OR $entry >= $numgrades) return "Degrees of the mapping should rise from 0 to at most ".($numgrades - 1).", as BP plays consecutive named grades on consecutive keys (found ".$entry." after ".$previous.")<br />";
+			$mapped_grades[$entry] = $i;
+			$previous = $entry;
+			}
+		}
+	if($numgrades > 12) { // Consecutive keys play the named grades
+		ksort($mapped_grades);
+		$i = 0;
+		foreach($mapped_grades as $g => $key) $mapped_grades[$g] = $i++;
+		}
+	// Frequency of the base note (middle note) from that of the reference note
+	$offset = $reference - $middle;
+	$index = (($offset % $size) + $size) % $size;
+	$degree = $entries[$index];
+	if($degree === 'x') return "The reference note (".$reference.") is unmapped<br />";
+	$degree += intdiv($offset - $index,$size) * $numgrades;
+	$interval = $scale['ratios'][$numgrades];
+	$grade = (($degree % $numgrades) + $numgrades) % $numgrades;
+	$ratio = $scale['ratios'][$grade] * pow($interval,intdiv($degree - $grade,$numgrades));
+	if($ratio <= 0) return "The reference note (".$reference.") is mapped to a grade without a ratio<br />";
+	$basefreq = round($frequency / $ratio,3);
+	// Note names and key numbers
+	$names = $scale['names'];
+	$new_names = $new_keys = array();
+	for($g = 0; $g < $numgrades; $g++) {
+		$old = (isset($names[$g]) AND $names[$g] <> '') ? $names[$g] : "•";
+		if(!isset($mapped_grades[$g])) {
+			$new_names[$g] = "•";
+			$new_keys[$g] = 0;
 			continue;
 			}
-		if(is_integer($pos=strpos($line,"f")) AND $pos == 0) {
-			// The Csound line
-			$line = preg_replace("/\s+/u",' ',$line);
-			$table_line = explode(' ',$line);
-			$numgrades_fullscale = $table_line[4];
-			$basefreq = $table_line[6];
-			$basenote = $table_line[7];
-	//		echo "<p>".$numgrades_fullscale."  ".$basefreq."   ".$basenote."</p>";
-			// Let's find these parameters in the KBM file
-			$table_kbm = explode(chr(10),$kbm_content);
-			$jmax = count($table_kbm);
-			for($j = 0; $j < $jmax; $j++) {
-				$line_kbm = trim($table_kbm[$j]);
-				if(is_integer($pos=strpos($line_kbm,"!")) AND $pos == 0) {
-					if(is_integer($pos=stripos($line_kbm,"! Size"))) {
-						$j++;
-						$line_kbm = trim($table_kbm[$j]);
-						if(!ctype_digit($line_kbm) OR intval($line_kbm) < 2) {
-							return "Size of map (".$line_kbm.") is not a valid integer<br />";
-							}
-						if(intval($line_kbm) <> $numgrades_fullscale) {
-							return "Size of map (".$line_kbm.") does not match the number of grades in the SCL file (".$numgrades_fullscale.")<br />";
-							}
-						continue;
-						}
-					if(is_integer($pos=stripos($line_kbm,"! Scale degree"))) {
-						$j++;
-						$line_kbm = trim($table_kbm[$j]);
-						if(!ctype_digit($line_kbm) OR intval($line_kbm) < 2) {
-							return "Scale degree to consider as formal octave (".$line_kbm.") is not a valid integer<br />";
-							}
-						if(intval($line_kbm) <> $numgrades_fullscale) {
-							return "Scale degree to consider as formal octave (".$line_kbm.") does not match the number of grades in the SCL file (".$numgrades_fullscale.")<br />";
-							}
-						continue;
-						}
-					if(is_integer($pos=stripos($line_kbm,"! Middle note"))) {
-						$j++;
-						$line_kbm = trim($table_kbm[$j]);
-						if(!ctype_digit($line_kbm) OR intval($line_kbm) < 2) {
-							return "Middle note (".$line_kbm.") is not a valid integer<br />";
-							}
-						$basenote = intval($line_kbm);
-						continue;
-						}
-					if(is_integer($pos=stripos($line_kbm,"! Frequency to"))) {
-						$j++;
-						$line_kbm = trim($table_kbm[$j]);
-						if(!is_numeric($line_kbm) OR $line_kbm < 2) {
-							return "Frequency (".$line_kbm.") is not a valid number<br />";
-							}
-						$frequency_kbm = number_format($line_kbm,2);
-						continue;
-						}
-					if(is_integer($pos=stripos($line_kbm,"! Reference note"))) {
-						$j++;
-						$line_kbm = trim($table_kbm[$j]);
-						if(!ctype_digit($line_kbm) OR intval($line_kbm) < 2) {
-							return "Reference note (".$line_kbm.") is not a valid integer<br />";
-							}
-						$reference_note_kbm = intval($line_kbm);
-						continue;
-						}
-					if(is_integer($pos=stripos($line_kbm,"! Mapping"))) {
-						$line_notes = "/";
-						if($note_names <> '') {
-							$table_notes = explode(' ',$note_names);
-							for($k = 0; $k < count($table_notes); $k++) {
-								$this_note[$k] = $table_notes[$k];
-								}
-							}
-						for($k = 0; $k < $numgrades_fullscale; $k++) {
-							$j++;
-							if(isset($table_kbm[$j]) AND $table_kbm[$j] <> '')
- 								$line_mapping = trim($table_kbm[$j]);
-							else return "Empty line found in the mapping<br />";
-							if(!ctype_digit($line_mapping) AND $line_mapping <> 'x') {
-								return "Incorrect value (".$line_mapping.") found in the mapping<br />";
-								}
-							if(ctype_digit($line_mapping)) {
-								$key_num = $basenote + intval($line_mapping);
-								if($note_names <> '' AND $this_note[$k] <> '•') {
-									$note = $this_note[$k];
-									}
-								else $note = "key#".$key_num;
-								}
-							else $note = "•";
-							$line_notes .= $note." ";
-						//	echo "note = ".$note."<br />";
-							}
-						if(isset($this_note[$k])) $line_notes .= $this_note[$k];
-						else $line_notes .= "key#".($key_num + 1);
-						$line_notes = $line_notes."/";
-						$new_mapping = TRUE;
-						fwrite($handle,$line_notes."\n");
-						break;
-						}
-					}
-				}
-			// We need to interpret the frequency from the reference note in KBM for the base note in BP3
-			if(isset($frequency_kbm) AND isset($reference_note_kbm)) {
-				$basefreq = number_format($frequency_kbm * pow(2,($basenote - $reference_note_kbm) / 12),2);
-			//	echo "<p>basefreq =  ".$basefreq."</p>";
-				$table_line[6] = $basefreq;
-				}
-			$table_line[7] = $basenote;
-			$line = implode(' ',$table_line);
+		$key = $mapped_grades[$g];
+		if($old <> "•") $new_names[$g] = $old;
+		else if($per_grade AND $numgrades <= 12) $new_names[$g] = "•"; // In a small scale, a linear mapping doesn't name unnamed grades
+		else $new_names[$g] = "key#".($middle + $key);
+		$new_keys[$g] = $key;
+		}
+	$period = ($numgrades <= 12) ? $numgrades : count($mapped_grades);
+	$new_names[$numgrades] = (isset($names[$numgrades]) AND $names[$numgrades] <> '' AND $names[$numgrades] <> "•") ? $names[$numgrades] : "key#".($middle + $period);
+	$new_keys[$numgrades] = $period;
+	$fline = $scale['fline'];
+	$fline[6] = $basefreq;
+	$fline[7] = $middle;
+	$handle = fopen($dir_scales."temp_scale_file.txt","w");
+	$done_names = $done_keys = FALSE;
+	foreach($table_scl as $line) {
+		$line = trim($line);
+		if($line == '') continue;
+		if($line[0] == '/' OR ($line[0] == 'k' AND preg_match("/^k.*k$/u",$line))) continue;
+		if($line[0] == 'f') {
+			fwrite($handle,"/".implode(' ',$new_names)."/\n");
+			fwrite($handle,"k".implode(' ',$new_keys)."k\n");
+			$line = implode(' ',$fline);
 			}
 		fwrite($handle,$line."\n");
 		}
 	fclose($handle);
-	$file_changed = $dir_scales."_changed";
-	$handle = fopen($file_changed,"w");
+	$handle = fopen($dir_scales."_changed","w");
 	if($handle) fclose($handle);
-	$kbm_error = '';
-	return $kbm_error;
+	return '';
 	}
 
 function make_links_clickable($text) {
