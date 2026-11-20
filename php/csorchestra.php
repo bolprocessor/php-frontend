@@ -4,9 +4,9 @@ require_once("_basic_tasks.php");
 if(isset($_GET['file'])) $file = urldecode($_GET['file']);
 else $file = '';
 if($file == '') die();
-// 2026-11-19 An orchestra of "csound_resources" or "my_csound_resources" is opened in the folder where it is, "my_csound_resources" first - by Claude
+// 2026-11-19 An orchestra of "csound_resources" or "csound_resources_private" is opened in the folder where it is, "csound_resources_private" first - by Claude
 $table = explode(SLASH,$file);
-if(count($table) == 2 AND ($table[0] == $csound_resources OR $table[0] == $my_csound_resources))
+if(count($table) == 2 AND ($table[0] == $csound_resources OR $table[0] == $csound_resources_private))
 	$file = csound_resource_folder($table[1]).SLASH.$table[1];
 $url_this_page = "csorchestra.php?file=".urlencode($file);
 $table = explode(SLASH,$file);
@@ -15,7 +15,7 @@ $this_file = $bp_application_path.$file;
 $dir = str_replace($filename,'',$this_file);
 $current_directory = str_replace(SLASH.$filename,'',$file);
 $read_only = read_only_resource_folder($dir); // 2026-11-19 A fixed file of "csound_resources" can only be viewed
-if($current_directory == $my_csound_resources) $current_directory = $csound_resources; // Both folders are listed together
+if($current_directory == $csound_resources_private) $current_directory = $csound_resources; // Both folders are listed together
 
 require_once("_header.php");
 display_darklight();

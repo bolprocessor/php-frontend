@@ -203,7 +203,10 @@ else {
 				break;
 			case "csoundrt": // Real-time Csound, see _csoundrt.php
 				$command .= " --csoundrt ".CSOUND_RT_PORT;
-				if($csoundrt_midi) $command .= " --rtmidi"; // MIDI ports for interaction, e.g. _script(wait for C3 channel 1)
+				if($csoundrt_midi) {
+					$command .= " --rtmidi"; // MIDI ports for interaction, e.g. _script(wait for C3 channel 1)
+					$command .= " --csoundrt-delay ".csoundrt_midi_delay(csoundrt_buffers()); // Silent MIDI notes come with the sound
+					}
 				break;
 			case "eventlist":
 				$command .= " --eventlistout ".$eventlist_file;

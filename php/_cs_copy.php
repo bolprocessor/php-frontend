@@ -227,7 +227,7 @@ function cs_copy_find_instrument($json,$instrument) {
 
 function cs_copy_instrument($dir,$source,$instrument,$target) {
 	// Copies instrument $instrument of '-cs' file $source (in $dir) to '-cs' file $target, with the code it needs in the orchestra of $target.
-	// 2026-11-19 $target and the orchestras are in "my_csound_resources" or "csound_resources" (see csound_resource_dir()). A fixed file that can't be changed is not modified - by Claude
+	// 2026-11-19 $target and the orchestras are in "csound_resources_private" or "csound_resources" (see csound_resource_dir()). A fixed file that can't be changed is not modified - by Claude
 	// Returns an HTML report. Nothing is changed if the copy is not possible.
 	global $dir_csound_resources,$temp_dir,$dir_trash_folder,$trash_folder,$csound_path,$csound_name,$permissions;
 	$report = "<p><span class=\"red-text\">Copying instrument</span> <span class=\"green-text\">‘".$instrument."’</span> <span class=\"red-text\">to</span> <span class=\"green-text\">‘".$target."’</span></p>";
@@ -274,6 +274,7 @@ function cs_copy_instrument($dir,$source,$instrument,$target) {
 	$notes = array();
 	$new_index = $source_index;
 	$new_orchestra = NULL;
+	$own_orchestra = ''; // 2026-11-20 Name of the orchestra created for a private target whose orchestra is fixed
 	if($target_orchestra == $source_orchestra) {
 		$notes[] = "Both files use orchestra ‘".$target_orchestra."’, which is not changed.";
 		if(isset($target_indexes[$source_index])) $notes[] = "Another instrument of ‘".$target."’ also has index ".$source_index.": both play instrument ".$source_index." of the orchestra.";
@@ -331,6 +332,13 @@ function cs_copy_instrument($dir,$source,$instrument,$target) {
 						break;
 					case "header":
 						$add = (count(array_intersect_key($unit['globals'],$need_globals)) > 0 || count(array_intersect_key($unit['refs'],$included_ids)) > 0);
+						if(!$add) {
+							// 2026-11-20 Code that only reads global variables of the copied code, without setting others or starting
+							// other instruments, e.g. the loading of all recordings when Beethoven.orc starts in real time - by Claude
+							$reads = array_intersect_key($unit['idents'],$src_globals);
+							$add = (count($reads) > 0 AND count(array_diff_key($reads,$need_globals)) == 0
+								AND count(array_diff_key($unit['globals'],$need_globals)) == 0 AND count(array_diff_key($unit['refs'],$included_ids)) == 0);
+							}
 						break;
 					default:
 						$add = FALSE;
@@ -502,8 +510,16 @@ function cs_copy_instrument($dir,$source,$instrument,$target) {
 			else $added['header'] = isset($added['header']) ? $added['header'] + 1 : 1;
 			}
 		if(count($block) > 0) {
-			if($target_orchestra <> "0-default.orc" AND read_only_resource_folder(csound_resource_dir($target_orchestra))) return $fail("‘".$target_orchestra."’ is a fixed orchestra of the distribution, which can't be changed. To add instruments, give ‘".$target."’ another orchestra (e.g. a copy of ‘".$target_orchestra."’ under a new name).");
-			if($target_orchestra == "0-default.orc") return $fail("‘0-default.orc’ is the default orchestra of the Bol Processor, which is replaced by updates. To add instruments, give ‘".$target."’ another orchestra (e.g. a copy of ‘0-default.orc’ under a new name).");
+			if($target_orchestra == "0-default.orc" OR read_only_resource_folder(csound_resource_dir($target_orchestra))) {
+				// 2026-11-20 A fixed orchestra can't be changed. A private target gets its own orchestra: a copy of the fixed one
+				// under its name ("-cs.trial.mohanam_bis" -> "trial.mohanam_bis.orc"), to which the instrument is added - by Claude
+				if(!same_folder($tdir,resource_dirs("csound")['my'])) {
+					if($target_orchestra == "0-default.orc") return $fail("‘0-default.orc’ is the default orchestra of the Bol Processor, which is replaced by updates. To add instruments, give ‘".$target."’ another orchestra (e.g. a copy of ‘0-default.orc’ under a new name).");
+					return $fail("‘".$target_orchestra."’ is a fixed orchestra of the distribution, which can't be changed. To add instruments, give ‘".$target."’ another orchestra (e.g. a copy of ‘".$target_orchestra."’ under a new name).");
+					}
+				$own_orchestra = unique_resource_name("csound",preg_replace(array('/^-cs\./','/\.bpcs$/'),'',$target),'',".orc");
+				$notes[] = "‘".$target_orchestra."’ is a fixed orchestra of the distribution, which can't be changed. ‘".$target."’ now has its own orchestra, ‘".$own_orchestra."’: a copy of ‘".$target_orchestra."’ with the new instrument.";
+				}
 			$eol = is_integer(strpos($target_text,"\r\n")) ? "\r\n" : "\n";
 			$date = gmdate('Y-m-d H:i:s');
 			$new_lines = $dst['lines'];
@@ -548,6 +564,17 @@ function cs_copy_instrument($dir,$source,$instrument,$target) {
 		}
 	if(!is_array($target_json[$target_label]['value'])) $target_json[$target_label]['value'] = array();
 	$target_json[$target_label]['value'][] = $object;
+	if($own_orchestra <> '') {
+		// The target names its own orchestra
+		$named = FALSE;
+		foreach($target_json as $label => $item) {
+			if(is_array($item) AND isset($item['key']) AND $item['key'] == "CsoundOrchestraName") {
+				$target_json[$label]['value'] = $own_orchestra;
+				$named = TRUE;
+				}
+			}
+		if(!$named) $target_json = array_merge(array_slice($target_json,0,1,TRUE),array("Csound orchestra file" => cs_item("CsoundOrchestraName",$own_orchestra)),array_slice($target_json,1,NULL,TRUE));
+		}
 	$json = json_encode($target_json,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE|JSON_PRESERVE_ZERO_FRACTION)."\n";
 	if($json === FALSE) return $fail("The new content of ‘".$target."’ could not be encoded.");
 	$file_lock = $tdir.$target."_lock";
@@ -556,9 +583,12 @@ function cs_copy_instrument($dir,$source,$instrument,$target) {
 	@unlink($file_lock);
 	file_put_contents($file_lock,"lock\n");
 	if($new_orchestra !== NULL) {
-		$orchestra_path = csound_resource_path($target_orchestra);
-		$backup = $target_orchestra."_".gmdate('Ymd-His');
-		@copy($orchestra_path,$dir_trash_folder.$backup);
+		if($own_orchestra <> '') $orchestra_path = resource_dirs("csound")['my'].$own_orchestra; // A new file: no backup
+		else {
+			$orchestra_path = csound_resource_path($target_orchestra);
+			$backup = $target_orchestra."_".gmdate('Ymd-His');
+			@copy($orchestra_path,$dir_trash_folder.$backup);
+			}
 		if(@file_put_contents($orchestra_path,$new_orchestra) === FALSE) {
 			unlink($file_lock);
 			return $fail("‘".$target_orchestra."’ could not be written.");
@@ -568,7 +598,10 @@ function cs_copy_instrument($dir,$source,$instrument,$target) {
 	$temp_file = $tdir.".copying".$target; // Replaces the file in a single step
 	if(@file_put_contents($temp_file,$json) === FALSE OR !@rename($temp_file,$tdir.$target)) {
 		@unlink($temp_file);
-		if($new_orchestra !== NULL) @file_put_contents($orchestra_path,$target_text);
+		if($new_orchestra !== NULL) {
+			if($own_orchestra <> '') @unlink($orchestra_path);
+			else @file_put_contents($orchestra_path,$target_text);
+			}
 		unlink($file_lock);
 		return $fail("‘".$target."’ could not be written.");
 		}
@@ -584,14 +617,20 @@ function cs_copy_instrument($dir,$source,$instrument,$target) {
 			if($key === 'header') $list[] = $label." line(s) of global settings";
 			else $list[] = $label;
 			}
-		$report .= "<li>Added to orchestra <span class=\"green-text\">‘".$target_orchestra."’</span>: ".implode(", ",$list).". The former version is in the trash as <span class=\"green-text\">‘".$trash_folder.SLASH.$backup."’</span>.</li>";
+		if($own_orchestra <> '') $report .= "<li>Added to orchestra <span class=\"green-text\">‘".$own_orchestra."’</span>: ".implode(", ",$list).".</li>";
+		else $report .= "<li>Added to orchestra <span class=\"green-text\">‘".$target_orchestra."’</span>: ".implode(", ",$list).". The former version is in the trash as <span class=\"green-text\">‘".$trash_folder.SLASH.$backup."’</span>.</li>";
 		$users = array();
 		foreach(list_of_csound_resources() as $thisfile) {
 			if($thisfile == $target) continue;
 			$other = csound_read_resource((string) @file_get_contents(csound_resource_path($thisfile)));
 			if(is_array($other) AND cs_get(cs_values($other),"CsoundOrchestraName",'') == $target_orchestra) $users[] = $thisfile;
 			}
-		if(count($users) > 0) $report .= "<li>This orchestra is also used by: ".implode(", ",$users)."</li>";
+		if(count($users) > 0 AND $own_orchestra == '') $report .= "<li>This orchestra is also used by: ".implode(", ",$users)."</li>";
+		// 2026-11-20 The samples named in the orchestra of a private target are copied to the private folder, as by Duplicate (copy_orchestra_files())
+		if(same_folder($tdir,resource_dirs("csound")['my'])) {
+			$copies = copy_orchestra_files($orchestra_path);
+			if(count($copies) > 0) $report .= "<li>Copied to ‘".resource_dirs("csound")['my_name']."’ so that the orchestra keeps working if the distribution changes: ".implode(", ",$copies)."</li>";
+			}
 		}
 	foreach($notes as $note) $report .= "<li>".$note."</li>";
 	$report .= "</ul>";

@@ -9,9 +9,9 @@ $verbose = FALSE;
 if(isset($_GET['file'])) $file = urldecode($_GET['file']);
 else $file = '';
 if($file == '') die();
-// 2026-11-19 A '-cs' file of "csound_resources" or "my_csound_resources" is opened in the folder where it is, "my_csound_resources" first - by Claude
+// 2026-11-19 A '-cs' file of "csound_resources" or "csound_resources_private" is opened in the folder where it is, "csound_resources_private" first - by Claude
 $table = explode(SLASH,$file);
-if(count($table) == 2 AND ($table[0] == $csound_resources OR $table[0] == $my_csound_resources))
+if(count($table) == 2 AND ($table[0] == $csound_resources OR $table[0] == $csound_resources_private))
 	$file = csound_resource_folder($table[1]).SLASH.$table[1];
 $url_this_page = "csound.php?file=".urlencode($file);
 save_settings("last_page",$url_this_page);
@@ -23,7 +23,7 @@ $warn_not_empty = FALSE;
 $max_scales = 0;
 $current_directory = str_replace(SLASH.$filename,'',$file);
 $read_only = read_only_resource_folder($dir); // 2026-11-19 A fixed file of "csound_resources" can only be viewed
-if($current_directory == $my_csound_resources) $current_directory = $csound_resources; // Both folders are listed together
+if($current_directory == $csound_resources_private) $current_directory = $csound_resources; // Both folders are listed together
 save_settings("last_directory",$current_directory);
 
 require_once("_header.php");
@@ -207,6 +207,39 @@ if(isset($_POST['duplicate_instrument'])) {
 		}
 	}
 
+// 2026-11-20 Renaming an instrument. Instruments are the files NAME.txt of the temporary folder, with their parameters in folder NAME
+// (spaces and '-' replaced with '_', see SaveCsoundInstruments()), so both are renamed, and the name in the header of NAME.txt - by Claude
+if(isset($_POST['rename_instrument'])) {
+	$instrument = $_POST['instrument_name'];
+	$new_instrument_name = trim($_POST['new_instrument_name']);
+	$new_instrument_name = str_replace(' ','_',$new_instrument_name);
+	$new_instrument_name = str_replace(array('"',"'",'/',"\\"),'',$new_instrument_name);
+	$old_folder_name = str_replace(array(' ','-'),'_',$instrument);
+	$new_folder_name = str_replace(array(' ','-'),'_',$new_instrument_name);
+	$this_instrument_file = $temp_dir.$temp_folder.SLASH.$instrument.".txt";
+	if($new_instrument_name == '' OR $new_instrument_name == $instrument) {
+		}
+	else if($new_instrument_name[0] == '.') echo "<p><span class=\"red-text\">Invalid name</span> <span class=\"green-text\"><big>“".$new_instrument_name."”</big></span></p>";
+	else if(isset($exists_name[$new_instrument_name]) OR ($new_folder_name <> $old_folder_name AND file_exists($temp_dir.$temp_folder.SLASH.$new_folder_name)))
+		echo "<p><span class=\"red-text\">Cannot rename</span> <span class=\"green-text\"><big>“".$instrument."”</big></span> <span class=\"red-text\">as</span> <span class=\"green-text\"><big>“".$new_instrument_name."”</big></span> <span class=\"red-text\">because an instrument with this name already exists (perhaps deleted)</span></p>";
+	else if(!is_file($this_instrument_file)) echo "<p><span class=\"red-text\">Instrument</span> <span class=\"green-text\">“".$instrument."”</span> <span class=\"red-text\">was not found</span></p>";
+	else {
+		$file_lock = $dir.$filename."_lock2";
+		file_put_contents($file_lock,"lock\n");
+		$table = explode(chr(10),(string) @file_get_contents($this_instrument_file));
+		if(isset($table[1])) $table[1] = preg_replace("/\".+\"/u","\"".$new_instrument_name."\"",$table[1]);
+		file_put_contents($temp_dir.$temp_folder.SLASH.$new_instrument_name.".txt",implode(chr(10),$table));
+		unlink($this_instrument_file);
+		if($new_folder_name <> $old_folder_name AND is_dir($temp_dir.$temp_folder.SLASH.$old_folder_name))
+			rename($temp_dir.$temp_folder.SLASH.$old_folder_name,$temp_dir.$temp_folder.SLASH.$new_folder_name);
+		unlink($file_lock);
+		unset($exists_name[$instrument]);
+		$exists_name[$new_instrument_name] = TRUE;
+		echo "<p><span class=\"red-text\">➡</span> Instrument <span class=\"green-text\">“".$instrument."”</span> has been renamed <span class=\"green-text\">“".$new_instrument_name."”</span>. Projects calling it by its name, e.g. <i>_ins(".$instrument.")</i>, must now use <i>_ins(".$new_instrument_name.")</i>.</p>";
+		$need_to_save = TRUE;
+		}
+	}
+
 // 2026-11-19 Copying an instrument to another '-cs' file, with the code it needs in the orchestra of that file (see _cs_copy.php) - by Claude
 if(isset($_POST['copy_instrument_to'])) {
 	$instrument = $_POST['instrument_name'];
@@ -332,6 +365,57 @@ else if(!$read_only) {
 	}
 else echo "File not found";
 echo "<br />";
+// 2026-11-20 Upload of the files and folders used by the orchestra (samples, wave tables...) to the folder of this file,
+// one file per request to csound_upload.php. The fields have no 'name', so that they are not sent with the form of the page - by Claude
+if(!$read_only) {
+	$upload_accept = ".".implode(",.",csound_sound_extensions());
+	echo "<button type=\"button\" class=\"edit\" style=\"margin-top:6px;\" onclick=\"var b = document.getElementById('cs_upload'); b.style.display = (b.style.display == 'none') ? 'block' : 'none';\">UPLOAD ASSOCIATED FILES/FOLDERS</button>";
+	echo "<div id=\"cs_upload\" class=\"thinborder\" style=\"display:none; padding:6px 1em; margin-top:6px; max-width:40em;\">";
+	echo "<small>Sound files and folders of samples go to ‘".basename(rtrim($dir,"/\\"))."’, the folder of this file and of its orchestra if it is there.<br />The orchestra names them by their path in this folder, e.g. \"MySamples/note_060.wav\".</small><br /><br />";
+	echo "Sound files: <input type=\"file\" id=\"cs_upload_files\" multiple accept=\"".$upload_accept."\"><br />";
+	echo "A folder: <input type=\"file\" id=\"cs_upload_folder\" webkitdirectory multiple><br />";
+	echo "<button type=\"button\" class=\"save\" style=\"margin-top:6px;\" onclick=\"csUpload();\">UPLOAD</button> <span id=\"cs_upload_status\"></span>";
+	echo "<div id=\"cs_upload_report\" style=\"font-size:small;\"></div>";
+	echo "</div>";
+	echo "<script>
+	async function csUpload() {
+		var items = [];
+		var files = document.getElementById('cs_upload_files').files;
+		for(var i = 0; i < files.length; i++) items.push([files[i],files[i].name]);
+		var folder = document.getElementById('cs_upload_folder').files;
+		for(var i = 0; i < folder.length; i++) {
+			var path = folder[i].webkitRelativePath || folder[i].name;
+			if(path.split('/').some(function(part) { return part.charAt(0) == '.'; })) continue; // Hidden files such as .DS_Store
+			items.push([folder[i],path]);
+			}
+		var status = document.getElementById('cs_upload_status');
+		var report = document.getElementById('cs_upload_report');
+		report.innerHTML = '';
+		if(items.length == 0) { status.textContent = 'Choose sound files or a folder first'; return; }
+		var added = 0, replaced = 0, refused = [];
+		for(var i = 0; i < items.length; i++) {
+			status.textContent = 'Uploading ' + (i + 1) + ' / ' + items.length + '…';
+			var data = new FormData();
+			data.append('cs_file'," .json_encode($filename).");
+			data.append('path',items[i][1]);
+			data.append('file',items[i][0]);
+			try {
+				var r = await fetch('csound_upload.php',{method:'POST',body:data,credentials:'same-origin'});
+				var d = await r.json();
+				if(!d.ok) refused.push(d.message);
+				else if(d.message == 'replaced') replaced++;
+				else added++;
+				}
+			catch(e) { refused.push(items[i][1] + ': the upload failed'); }
+			}
+		status.textContent = 'Done: ' + added + ' file(s) added' + (replaced > 0 ? ', ' + replaced + ' replaced' : '') + (refused.length > 0 ? ', ' + refused.length + ' refused' : '');
+		refused.slice(0,10).forEach(function(m) { var p = document.createElement('div'); p.textContent = '➡ ' + m; report.appendChild(p); });
+		if(refused.length > 10) { var p = document.createElement('div'); p.textContent = '… and ' + (refused.length - 10) + ' more'; report.appendChild(p); }
+		document.getElementById('cs_upload_files').value = '';
+		document.getElementById('cs_upload_folder').value = '';
+		}
+	</script>";
+	}
 $instruments = cs_get($csound_values,"CsInstruments",array());
 if(!is_array($instruments)) $instruments = array();
 $number_instruments = count($instruments);
@@ -695,7 +779,10 @@ if($number_instruments > 0) {
 		echo "<input class=\"save\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"delete_instrument\" value=\"DELETE\">";
 		echo "</td>";
 		echo "<td class=\"middle\" style=\"text-align:right; padding:5px;\">";
-		if(!$read_only) echo "<input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"duplicate_instrument\" value=\"DUPLICATE AS\">: <input type=\"text\" name=\"copy_instrument\" size=\"15\" value=\"\"><br />";
+		if(!$read_only) {
+			echo "<input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"rename_instrument\" value=\"RENAME AS\">: <input type=\"text\" name=\"new_instrument_name\" size=\"15\" value=\"\"><br />";
+			echo "<input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"duplicate_instrument\" value=\"DUPLICATE AS\">: <input type=\"text\" name=\"copy_instrument\" size=\"15\" value=\"\"><br />";
+			}
 		echo "<input class=\"save read-only-keep\" type=\"submit\" formaction=\"".$url_this_page."\" onclick=\"this.form.target='_self';return true;\" name=\"copy_instrument_to\" value=\"COPY TO ANOTHER FILE\">";
 		echo "</td>";
 		echo "</form>";

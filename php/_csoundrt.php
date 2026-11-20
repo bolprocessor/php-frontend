@@ -2,13 +2,72 @@
 // Real-time Csound (2026-11-16)
 // The console, with option "--csoundrt port", sends the lines of the Csound score to a Csound server listening to this UDP port.
 // These functions start, check and stop that server. They are used by produce.php, the project pages and csoundrt_quit.php.
-// The server runs: csound -odac -d -m0 --port=CSOUND_RT_PORT --orc <orchestra>
+// The server runs: csound -odac -b 512 -B 2048 -d -m0 --port=CSOUND_RT_PORT --orc <orchestra>
+// 2026-11-19 Buffers of 512 and 2048 frames (46 ms at 44100 Hz) instead of the defaults (128 and 256 frames on MacOS):
+// after a long time without Csound, the system takes some time to bring back its code and memory, which stalled the audio
+// thread for a few milliseconds and made gaps in the first seconds of the performance. The console delays the silent MIDI
+// notes by the same time (option --csoundrt-delay, see csoundrt_midi_delay()).
+// 2026-11-20 The buffers are set for each machine with the "settings" button of the project pages (csoundrt_settings.php),
+// stored in _settings.php ($csoundrt_software_buffer, $csoundrt_hardware_buffer). Until then, those of csoundrt_default_buffers() are used.
 // It keeps running between performances, so that they start at once. It is restarted when the orchestra changes,
 // and it quits after CSOUND_RT_IDLE seconds without a performance.
 
 if(!defined("CSOUND_RT_PORT")) {
 	define("CSOUND_RT_PORT",10789);
 	define("CSOUND_RT_IDLE",900); // seconds
+	}
+
+function csoundrt_system() {
+	// Name of the system, for the default buffers
+	if(stripos(PHP_OS,"WIN") === 0) return "Windows";
+	if(stripos(PHP_OS,"Linux") === 0) return "Linux";
+	return "MacOS";
+	}
+
+function csoundrt_default_buffers() {
+	// Default buffers (frames) of the server on this system: 'software' is option -b of Csound, 'hardware' option -B
+	switch(csoundrt_system()) {
+		case "Windows": return array('software' => 512,'hardware' => 2048); // to be confirmed
+		case "Linux": return array('software' => 512,'hardware' => 2048); // to be confirmed
+		default: return array('software' => 512,'hardware' => 2048); // MacOS
+		}
+	}
+
+function csoundrt_buffer_choices($which) {
+	// Sizes offered for the software buffer (-b) and the hardware buffer (-B): powers of 2, which audio drivers handle on all systems.
+	// Csound itself accepts other sizes on MacOS, but drivers of Windows and Linux may round or refuse them.
+	$choices = array();
+	for($size = ($which == "software" ? 64 : 128); $size <= ($which == "software" ? 8192 : 32768); $size *= 2) $choices[] = $size;
+	return $choices;
+	}
+
+function csoundrt_valid_buffers($software,$hardware) {
+	// '' if these buffers are acceptable, otherwise the reason
+	if(!ctype_digit((string)$software) OR !in_array(intval($software),csoundrt_buffer_choices("software"))
+			OR !ctype_digit((string)$hardware) OR !in_array(intval($hardware),csoundrt_buffer_choices("hardware")))
+		return "Buffers must be powers of 2: 64 to 8192 frames (software), 128 to 32768 frames (hardware)";
+	// Csound reduces -b if -B is smaller than twice its value (e.g. -b 1000 -B 1000 gives 500 frames)
+	if($hardware < 2 * $software) return "The hardware buffer (-B) must be at least twice the software buffer (-b)";
+	return '';
+	}
+
+function csoundrt_buffers() {
+	// Buffers used by the server: those set by the user in _settings.php, otherwise the defaults of this system
+	global $csoundrt_software_buffer, $csoundrt_hardware_buffer;
+	$buffers = csoundrt_default_buffers();
+	$buffers['user'] = FALSE;
+	if(isset($csoundrt_software_buffer,$csoundrt_hardware_buffer) AND $csoundrt_software_buffer <> '' AND $csoundrt_hardware_buffer <> ''
+			AND csoundrt_valid_buffers($csoundrt_software_buffer,$csoundrt_hardware_buffer) == '') {
+		$buffers['software'] = intval($csoundrt_software_buffer);
+		$buffers['hardware'] = intval($csoundrt_hardware_buffer);
+		$buffers['user'] = TRUE;
+		}
+	return $buffers;
+	}
+
+function csoundrt_midi_delay($buffers) {
+	// Delay (milliseconds) of the silent MIDI notes, so that they come with the sound: the time of the hardware buffer at 44100 Hz
+	return (int) round(1000. * $buffers['hardware'] / 44100.);
 	}
 
 function csoundrt_files() {
@@ -97,7 +156,10 @@ function csoundrt_start($csound,$orchestra,&$message) {
 		$message = "The orchestra file was not found: ".$orchestra;
 		return FALSE;
 		}
-	$signature = array('orchestra' => $orchestra_path,'mtime' => filemtime($orchestra_path),'csound' => $csound,'port' => $port);
+	$buffers = csoundrt_buffers();
+	$buffer_options = " -b ".$buffers['software']." -B ".$buffers['hardware'];
+	// A change of the buffers also restarts the server
+	$signature = array('orchestra' => $orchestra_path,'mtime' => filemtime($orchestra_path),'csound' => $csound,'port' => $port,'buffers' => trim($buffer_options));
 	$state = csoundrt_state();
 	$restart = FALSE;
 	if(csoundrt_ping(0.5)) {
@@ -135,7 +197,7 @@ function csoundrt_start($csound,$orchestra,&$message) {
 		$tried[] = $attempt['label'];
 		@unlink($files['ping']);
 		@unlink($files['state']);
-		$command = "\"".$csound."\"".csound_sample_option()." ".$attempt['option']." -d -m0 -+msg_color=0 --port=".$port." --orc \"".$orchestra_path."\"";
+		$command = "\"".$csound."\"".csound_sample_option()." ".$attempt['option'].$buffer_options." -d -m0 -+msg_color=0 --port=".$port." --orc \"".$orchestra_path."\"";
 		if(stripos(PHP_OS,"WIN") === 0) {
 			// "start /B" returns at once, leaving Csound running in the background
 			pclose(popen("start \"BP3 Csound\" /B ".$command." > \"".$files['log']."\" 2>&1","r"));

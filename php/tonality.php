@@ -17,8 +17,8 @@ $dir = str_replace($filename,'',$this_file);
 $warn_not_empty = FALSE;
 $max_scales = 0;
 $current_directory = str_replace(SLASH.$filename,'',$file);
-// 2026-11-19 A tonality resource is in "my_tonality_resources" or (fixed) in "tonality_resources". Fixed files can only be viewed, unless $i_am_designer - by Claude
-if($current_directory == $tonality_resources OR $current_directory == $my_tonality_resources) {
+// 2026-11-19 A tonality resource is in "tonality_resources_private" or (fixed) in "tonality_resources". Fixed files can only be viewed, unless $i_am_designer - by Claude
+if($current_directory == $tonality_resources OR $current_directory == $tonality_resources_private) {
 	$dir = tonality_resource_dir($filename);
 	$this_file = $dir.$filename;
 	$current_directory = $tonality_resources;

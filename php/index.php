@@ -1,8 +1,8 @@
 <?php
 require_once("_basic_tasks.php");
-// 2026-11-19 "my_csound_resources" is listed together with "csound_resources", and "my_tonality_resources" with "tonality_resources" - by Claude
-if($path == $my_csound_resources) $path = $csound_resources;
-if($path == $my_tonality_resources) $path = $tonality_resources;
+// 2026-11-19 "csound_resources_private" is listed together with "csound_resources", and "tonality_resources_private" with "tonality_resources" - by Claude
+if($path == $csound_resources_private) $path = $csound_resources;
+if($path == $tonality_resources_private) $path = $tonality_resources;
 $csound_folder = ($path == $csound_resources);
 $tonality_folder = ($path == $tonality_resources);
 $resource_kind = $csound_folder ? "csound" : ($tonality_folder ? "tonality" : '');
@@ -289,6 +289,21 @@ if($resource_folder AND isset($_POST['trash_resource'])) {
 		echo "<p><span class=\"red-text\">➡</span> Deleted ‘<span class=\"green-text\">".$thisfile."</span>’ (moved to <a target=\"_blank\" href=\"index.php?path=".$trash_folder."\">trash folder</a>)</p>";
 		}
 	}
+// 2026-11-20 'delete' button of the files and folders of "csound_resources_private" that are not resources (samples...), see csound_private_dependencies().
+// They are deleted at once, not moved to the trash, since the purpose is to free space - by Claude
+if($resource_kind == "csound" AND isset($_POST['delete_dependency'])) {
+	$dependency_name = basename(trim($_POST['delete_dependency']));
+	$dependency_items = csound_private_dependencies();
+	if($dependency_name == '' OR !isset($dependency_items[$dependency_name]))
+		echo "<p><span class=\"red-text\">➡ Can't delete</span> ‘".htmlspecialchars($dependency_name)."’</p>";
+	else {
+		$dependency_path = $dir_csound_resources_private.$dependency_name;
+		if($dependency_items[$dependency_name]['folder']) my_rmdir($dependency_path);
+		else @unlink($dependency_path);
+		if(file_exists($dependency_path)) echo "<p><span class=\"red-text\">➡ ‘".$dependency_name."’ could not be deleted</span></p>";
+		else echo "<p><span class=\"red-text\">➡</span> Deleted ‘<span class=\"green-text\">".$dependency_name."</span>’ from ‘".$csound_resources_private."’ (".($dependency_items[$dependency_name]['size'] >= 1048576 ? round($dependency_items[$dependency_name]['size'] / 1048576)." MB" : ceil($dependency_items[$dependency_name]['size'] / 1024)." kB")." freed)</p>";
+		}
+	}
 if(isset($_POST['create_csound'])) {
 	$type = $_POST['type'];
 	$name_mode = $_POST['name_mode'];
@@ -296,9 +311,9 @@ if(isset($_POST['create_csound'])) {
 	if($filename <> '') {
 		$filename = good_name($type,$filename,$name_mode);
 		$new_file = $filename;
-		// 2026-11-19 New Csound resources are created in "my_csound_resources", or in "csound_resources" by the designer if requested. The name may not be that of a file in either folder - by Claude
+		// 2026-11-19 New Csound resources are created in "csound_resources_private", or in "csound_resources" by the designer if requested. The name may not be that of a file in either folder - by Claude
 		$create_dir = new_csound_resource_folder();
-		if(file_exists($dir_csound_resources.$filename) OR file_exists($dir_my_csound_resources.$filename)) {
+		if(file_exists($dir_csound_resources.$filename) OR file_exists($dir_csound_resources_private.$filename)) {
 			echo "<p><span class=\"red-text\">This file already exists:</span> <span class=\"red-text\">".$filename."</span></p>";
 			unset($_POST['create_csound']);
 			}
@@ -318,9 +333,9 @@ if(isset($_POST['create_tonality'])) {
 	if($filename <> '') {
 		$filename = good_name($type,$filename,$name_mode);
 		$new_file = $filename;
-		// 2026-11-19 New tonality resources are created in "my_tonality_resources", or in "tonality_resources" by the designer if requested. The name may not be that of a file in either folder - by Claude
+		// 2026-11-19 New tonality resources are created in "tonality_resources_private", or in "tonality_resources" by the designer if requested. The name may not be that of a file in either folder - by Claude
 		$create_dir = new_resource_folder("tonality");
-		if(file_exists($dir_tonality_resources.$filename) OR file_exists($dir_my_tonality_resources.$filename)) {
+		if(file_exists($dir_tonality_resources.$filename) OR file_exists($dir_tonality_resources_private.$filename)) {
 			echo "<p><span class=\"red-text\">This file already exists:</span> <span class=\"red-text\">".$filename."</span></p>";
 			unset($_POST['create_tonality']);
 			}
@@ -341,7 +356,7 @@ if(isset($_POST['create_csound_orchestra'])) {
 		$filename = $filename.".orc";
 		$new_file = $filename;
 		$create_dir = new_csound_resource_folder(); // 2026-11-19 See create_csound
-		if(file_exists($dir_csound_resources.$filename) OR file_exists($dir_my_csound_resources.$filename)) {
+		if(file_exists($dir_csound_resources.$filename) OR file_exists($dir_csound_resources_private.$filename)) {
 			echo "<p><span class=\"red-text\">This file already exists:</span> <span class=\"red-text\">".$filename."</span></p>";
 			}
 		else {
@@ -584,7 +599,7 @@ if(isset($_POST['move_checked_files'])) {
 if($move_files) {
 	$list_folders = array();
 	$list_folders = folder_list($bp_application_path,$list_folders,'');
-	if($path == $trash_folder) array_unshift($list_folders,$my_csound_resources,$my_tonality_resources); // 2026-11-19
+	if($path == $trash_folder) array_unshift($list_folders,$csound_resources_private,$tonality_resources_private); // 2026-11-19
 	$imax = count($list_folders);
 	if($imax > 0) {
 		echo "<div style=\"float:right; padding:6px; border-radius:12px;\">";
@@ -629,6 +644,36 @@ if($path <> '') {
 	echo "<br /><br />";
 	}
 
+// 2026-11-20 Files and folders of "csound_resources_private" that are not resources (samples, wave tables...), with a 'delete' button - by Claude
+if($resource_kind == "csound") {
+	$dependency_items = csound_private_dependencies();
+	if(count($dependency_items) > 0) {
+		// Same presentation as the list of files below it (display_directory())
+		echo "<table class=\"thinborder\"><tr><td style=\"padding-bottom:6px;\">";
+		echo "<b>Other files of ‘".$csound_resources_private."’</b><br /><small>Samples, wave tables… copied with your Csound resources.<br />Delete those you no longer need to free space.</small><br /><br />";
+		echo "<script>
+		function deleteDependency(name,message) {
+			if(!confirm(message)) return false;
+			var f = document.createElement('form'); f.method = 'post'; f.action = window.location.href;
+			var i = document.createElement('input'); i.type = 'hidden'; i.name = 'delete_dependency'; i.value = name; f.appendChild(i);
+			document.body.appendChild(f); f.submit(); return false;
+			}
+		</script>";
+		foreach($dependency_items as $dependency_name => $dependency_item) {
+			$dependency_users = array_keys($dependency_item['users']);
+			$dependency_message = "Delete ".($dependency_item['folder'] ? "folder" : "file")." ".$dependency_name." for good?";
+			if(count($dependency_users) > 0) {
+				$dependency_message .= "\nIt is used by ".implode(", ",$dependency_users).".";
+				$dependency_message .= $dependency_item['fixed'] ? "\nCsound will find the one of csound_resources as long as the distribution has it." : "\nThey will not work without it.";
+				}
+			echo "<span class=\"green-text\">".htmlspecialchars($dependency_name)."</span>&nbsp;&nbsp;";
+			echo "<small>".($dependency_item['size'] >= 1048576 ? round($dependency_item['size'] / 1048576)." MB" : ceil($dependency_item['size'] / 1024)." kB");
+			echo ", ".(count($dependency_users) > 0 ? "used by ".implode(", ",$dependency_users) : "not used").($dependency_item['fixed'] ? " (also in ‘".$csound_resources."’)" : "")."</small>&nbsp;&nbsp;";
+			echo "<button type=\"button\" class=\"edit\" style=\"font-size:x-small; padding:1px 6px;\" onclick=\"return deleteDependency(".htmlspecialchars(json_encode($dependency_name)).",".htmlspecialchars(json_encode($dependency_message)).");\">delete</button><br />";
+			}
+		echo "</td></tr></table><br />";
+		}
+	}
 display_directory(FALSE,$dir,"directory");
 if($path <> $trash_folder) echo "▶︎&nbsp;🗑&nbsp;<a target=\"_blank\" href=\"index.php?path=".$trash_folder."\">TRASH</a><br />";
 echo "<br />";
@@ -770,7 +815,7 @@ function display_directory($test,$dir,$filter) {
 	global $path,$move_files,$move_checked_files,$new_file,$csound_resources,$tonality_resources,$delete_checked_files,$rename_checked_files,$delete_files,$download_files,$rename_files,$show_dependencies,$trash_backups,$trash_folder,$this_page,$url_this_page,$dir_trash_folder,$bp_application_path,$dest_folder,$done,$seen,$dir_csound_resources,$dir_tonality_resources,$last_grammar_name,$last_data_name;
 
 	global $absolute_application_path, $error_opening;
-	global $csound_folder,$my_csound_resources,$dir_my_csound_resources,$i_am_designer,$resource_folder,$resource_kind,$my_tonality_resources,$dir_my_tonality_resources;
+	global $csound_folder,$csound_resources_private,$dir_csound_resources_private,$i_am_designer,$resource_folder,$resource_kind,$tonality_resources_private,$dir_tonality_resources_private;
 	
 	$dir = preg_replace('/'.preg_quote(SLASH,'/').'+$/','',$dir);
 	$target_path = $dir;
@@ -780,7 +825,7 @@ function display_directory($test,$dir,$filter) {
 		}
 	if($target_path <> '') $dircontent = @scandir($target_path);
 	else $dircontent = array();
-	// 2026-11-19 The Csound resource folder shows the files of "csound_resources" (fixed) and "my_csound_resources" - by Claude
+	// 2026-11-19 The Csound resource folder shows the files of "csound_resources" (fixed) and "csound_resources_private" - by Claude
 	$file_dir = array();
 	if($resource_folder AND $dircontent) {
 		$file_dir = resource_files($resource_kind);
@@ -846,12 +891,12 @@ function display_directory($test,$dir,$filter) {
 		if(!$test AND $move_checked_files AND isset($_POST['move_'.$i_file]) AND !$locked) {
 			unset($_POST['move_'.$i_file]);
 			$source_file = $dir.SLASH.$thisfile;
-			// 2026-11-19 From the trash, Csound resources go back to "my_csound_resources" and tonality resources to "my_tonality_resources", whatever the folder chosen. Only these resources go to these folders - by Claude
+			// 2026-11-19 From the trash, Csound resources go back to "csound_resources_private" and tonality resources to "tonality_resources_private", whatever the folder chosen. Only these resources go to these folders - by Claude
 			$this_dest = $dest_folder;
 			$move_type = is_dir($source_file) ? "directory" : type_of_file($thisfile)['type'];
 			$move_kind = resource_kind_of_type($move_type);
 			if($path == $trash_folder AND $move_kind <> '') $this_dest = resource_dirs($move_kind)['my_name'];
-			$dest_kind = ($this_dest == $my_csound_resources) ? "csound" : (($this_dest == $my_tonality_resources) ? "tonality" : '');
+			$dest_kind = ($this_dest == $csound_resources_private) ? "csound" : (($this_dest == $tonality_resources_private) ? "tonality" : '');
 			$destination_file = $bp_application_path.$this_dest.SLASH.$thisfile;
 			if($this_dest == '') {
 				// No destination folder was chosen: only resources are moved
@@ -882,6 +927,8 @@ function display_directory($test,$dir,$filter) {
 				else {
 					rename($source_file,$destination_file);
 					$this_file_moved = TRUE;
+					if($move_type == "grammar" OR $move_type == "data") // 2026-11-20
+						copy_project_files($destination_file,$dir,$bp_application_path.$this_dest);
 					if(isset($last_grammar_name) AND $last_grammar_name == $thisfile) {
 						delete_settings_entry("last_grammar_page");
 						delete_settings_entry("last_grammar_name");
@@ -924,17 +971,17 @@ function display_directory($test,$dir,$filter) {
 		if(!$test) echo $check_box;
 
 		if(!$test AND $path <> $csound_resources AND $path <> $trash_folder AND ($type == "csound" OR $type == "csorchestra")) {
-			// 2026-11-19 To "my_csound_resources", unless a file with the same name is in a Csound resource folder
-			echo "Moved ‘<span class=\"green-text\">".$dir.SLASH.$thisfile."</span>’ to ‘<span class=\"green-text\">".$dir_my_csound_resources.$thisfile."</span>’<br />";
+			// 2026-11-19 To "csound_resources_private", unless a file with the same name is in a Csound resource folder
+			echo "Moved ‘<span class=\"green-text\">".$dir.SLASH.$thisfile."</span>’ to ‘<span class=\"green-text\">".$dir_csound_resources_private.$thisfile."</span>’<br />";
 			if(file_exists(csound_resource_path($thisfile))) @unlink($dir.SLASH.$thisfile);
-			else rename($dir.SLASH.$thisfile,$dir_my_csound_resources.$thisfile);
+			else rename($dir.SLASH.$thisfile,$dir_csound_resources_private.$thisfile);
 			}
 		else {
 			if(!$test AND $path <> $tonality_resources AND $path <> $trash_folder AND $type == "tonality") {
-				// 2026-11-19 To "my_tonality_resources", unless a file with the same name is in a tonality resource folder
-				echo "Moved ‘<span class=\"green-text\">".$dir.SLASH.$thisfile."</span>’ to ‘<span class=\"green-text\">".$dir_my_tonality_resources.$thisfile."</span>’<br />";
+				// 2026-11-19 To "tonality_resources_private", unless a file with the same name is in a tonality resource folder
+				echo "Moved ‘<span class=\"green-text\">".$dir.SLASH.$thisfile."</span>’ to ‘<span class=\"green-text\">".$dir_tonality_resources_private.$thisfile."</span>’<br />";
 				if(file_exists(tonality_resource_path($thisfile))) @unlink($dir.SLASH.$thisfile);
-				else rename($dir.SLASH.$thisfile,$dir_my_tonality_resources.$thisfile);
+				else rename($dir.SLASH.$thisfile,$dir_tonality_resources_private.$thisfile);
 				}
 			else {
 				$renamed = FALSE;
@@ -974,7 +1021,7 @@ function display_directory($test,$dir,$filter) {
 							else $new_name = good_name($short_type,$new_name,$name_mode);
 							}
 						$old_name = $thisfile;
-						// 2026-11-19 In the Csound resource folder, the new name may not be that of a file in either folder. A copy of a fixed file goes to "my_csound_resources", unless the designer makes it.
+						// 2026-11-19 In the Csound resource folder, the new name may not be that of a file in either folder. A copy of a fixed file goes to "csound_resources_private", unless the designer makes it.
 						$copy_dir = $dir;
 						if($resource_folder AND $make_copy AND !($fixed AND $i_am_designer)) $copy_dir = rtrim(resource_dirs($resource_kind)['my'],"/\\");
 						if(file_exists($dir.SLASH.$new_name) OR ($resource_folder AND file_exists(resource_path($resource_kind,$new_name)))) {
@@ -987,6 +1034,9 @@ function display_directory($test,$dir,$filter) {
 								if($resource_folder) $link = $type.".php?file=".urlencode(resource_folder($resource_kind,$new_name).SLASH.$new_name);
 								else $link = $type.".php?file=".urlencode($path.SLASH.$new_name);
 								echo "‘<span class=\"green-text\">".$old_name."</span>’ <span class=\"red-text\">➡</span> copied to <a target=\"_blank\" href=\"".nice_url($link)."\">".$new_name."</a><br />";
+								// 2026-11-20 A copy of a Csound resource in "csound_resources_private" gets its own orchestra, samples and tonality, see private_csound_resource_independent()
+								if($resource_folder AND $resource_kind == "csound" AND same_folder($copy_dir,resource_dirs("csound")['my']))
+									echo private_csound_resource_independent($type,$new_name);
 								}
 							else {
 								rename($dir.SLASH.$old_name,$dir.SLASH.$new_name);
