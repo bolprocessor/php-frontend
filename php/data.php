@@ -1679,8 +1679,10 @@ if($keyboard_file <> '') {
 		}
 	}
 if($sc_file <> '') {
-	if(!file_exists(resource_path("supercollider",$sc_file)))
-		$upload_mssg .= "<br /><span class=\"red-text\">WARNING:</span> <span class=\"green-text\">".$sc_file."</span> not found in ‘supercollider_resources’<br />";
+	// 2026-11-21 The '-sc' file is only used in real-time SuperCollider and OSC: other formats use the '-cs' file
+	if(!file_exists(resource_path("supercollider",$sc_file))) {
+		if($file_format == "scrt" OR $file_format == "osc") $upload_mssg .= "<br /><span class=\"red-text\">WARNING:</span> <span class=\"green-text\">".$sc_file."</span> not found in ‘supercollider_resources’<br />";
+		}
 	else $link_options .= "&sc_file=".urlencode($sc_file);
 	}
 if($csound_file <> '') {

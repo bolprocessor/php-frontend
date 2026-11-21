@@ -566,8 +566,9 @@ if($csound_file <> '') {
 	else $link_produce .= "&csound_file=".urlencode($csound_file);
 	}
 if($sc_file <> '') {
+	// 2026-11-21 The '-sc' file is only used in real-time SuperCollider and OSC: other formats use the '-cs' file
 	if(!file_exists(resource_path("supercollider",$sc_file))) {
-		$upload_mssg .= "<br /><span class=\"red-text\">WARNING: </span><span class=\"green-text\">".$sc_file."</span> not found in ‘supercollider_resources’<br />";
+		if($file_format == "scrt" OR $file_format == "osc") $upload_mssg .= "<br /><span class=\"red-text\">WARNING: </span><span class=\"green-text\">".$sc_file."</span> not found in ‘supercollider_resources’<br />";
 		}
 	else $link_produce .= "&sc_file=".urlencode($sc_file);
 	}
