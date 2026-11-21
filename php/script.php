@@ -67,7 +67,7 @@ if($need_to_save OR isset($_POST['savethisfile']) OR isset($_POST['checkscript']
 
 	$content = recode_entities($content);
 	$content = preg_replace("/ +/u",' ',$content);
-	save($this_file,$filename,$top_header,$content);
+	save_script($this_file,$filename,$top_header,$content);
 
 
 /*	$handle = fopen($this_file,"w");
@@ -196,7 +196,7 @@ function list_script_instructions($script_status,$script_more) {
 	return;
 	}
 
-function save($this_file,$filename,$top_header,$save_content) {
+function save_script($this_file,$filename,$top_header,$save_content) {
 	global $permissions;
 	if(trim($save_content) == '') return;
 	$handle = fopen($this_file, "w");
