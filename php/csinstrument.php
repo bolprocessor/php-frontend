@@ -31,9 +31,12 @@ echo $error_post;
 stale_subpage($temp_folder); // 2026-11-10
 // 2026-11-19 The instruments of a fixed '-cs' file of "csound_resources" can only be viewed - by Claude
 $read_only = csound_temp_read_only($temp_folder);
+// 2026-11-20 Instrument of a SuperCollider resource ('-sc' file, whose temporary folder starts with its name)
+$sc_page = str_starts_with($temp_folder,"-sc.");
+$what = $sc_page ? "SuperCollider" : "Csound";
 if($read_only) {
 	foreach(array('create_parameter','delete_parameter','rename_parameter','restore','saveinstrument') as $action) unset($_POST[$action]);
-	echo "<p><span class=\"red-text\">➡ This instrument belongs to a fixed Csound resource of the distribution: it can be viewed but not changed.</span></p>";
+	echo "<p><span class=\"red-text\">➡ This instrument belongs to a fixed ".$what." resource of the distribution: it can be viewed but not changed.</span></p>";
 	read_only_page_script();
 	}
 
@@ -48,7 +51,11 @@ if($test) echo "folder_this_instrument = ".$folder_this_instrument."<br />";
 
 // echo "&nbsp;Instrument file: <span class=\"green-text\">".$instrument_file."</span>";
 echo link_to_help();
-echo "<h2>Csound instrument <big><span class=\"green-text\">_ins(".$instrument_index.")</span> <span class=\"red-text\">".$instrument_name."</span></big></h2>";
+echo "<h2>".$what." instrument <big><span class=\"green-text\">_ins(".$instrument_index.")</span> <span class=\"red-text\">".$instrument_name."</span></big></h2>";
+if($sc_page) {
+	echo "<p>This instrument is played by SynthDef <b>".$instrument_name."</b>. Its fields are sent by name: ‘freq’ (pitch field, always in Hz), ‘vol’/‘vol2’ (volume start/end), ‘vel’ (attack velocity), ‘relvel’ (release velocity),<br />‘pan’/‘pan2’, ‘mod’/‘mod2’, ‘press’/‘press2’, ‘bend’/‘bend2’ (pitchbend in cents), and each additional parameter under its name (start) and its name followed by 2 (end).<br />";
+	echo "Field numbers only need to be different from each other: a field left empty is not sent. ‘table’ and ‘GEN’ are not used. All fields are also sent as ‘p4’, ‘p5’…</p>";
+	}
 
 $argmax_file = $folder_this_instrument.SLASH."argmax.php";
 $exists_name = list_of_parameter_names($temp_dir,$temp_folder);
@@ -423,6 +430,16 @@ echo "<tr>";
 echo "<td>Instrument pitch field:</td>";
 echo "<td style=\"padding: 5px;\"><input type=\"text\" name=\"InstrumentPitchIndex\" size=\"4\" value=\"".$InstrumentPitchIndex."\"></td>";
 echo "</tr><tr>";
+if($sc_page) {
+	// The pitch is always sent in Hz to SuperCollider: the format is kept for the file, not shown
+	echo "<td style=\"text-align:right;\">Pitch format:</td><td style=\"padding: 5px;\">Hz (argument ‘freq’)<input type=\"hidden\" name=\"InstrumentPitchFormat\" value=\"".$InstrumentPitchFormat."\"></td>";
+	echo "</tr>";
+	echo "</table>";
+	echo "</td>";
+	echo "</tr>";
+	echo "</table>";
+	}
+else {
 echo "<td style=\"text-align:right;\">Pitch format:</td>";
 echo "<td style=\"padding: 5px;\">";
 echo "<input type=\"radio\" name=\"InstrumentPitchFormat\" value=\"0\"";
@@ -440,6 +457,7 @@ echo "</table>";
 echo "</td>";
 echo "</tr>";
 echo "</table>";
+}
 
 echo "<table class=\"thicktable\">";
 echo "<tr>";

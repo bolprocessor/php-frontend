@@ -92,6 +92,10 @@ define("CSOUND_MIN_VERSION","7.0");
 define("CSOUND_DEFAULT_RESOURCE","-cs.0-default");
 // Real-time Csound: functions starting and stopping the Csound server (2026-11-16)
 require_once("_csoundrt.php");
+// Real-time SuperCollider: functions starting the server and loading the SynthDefs (2026-11-20)
+require_once("_scrt.php");
+// Real-time OSC (Max, Pd...): destination and project panel (2026-11-21)
+require_once("_oscrt.php");
 // $csound_path is the absolute path of the folder containing Csound on all systems
 // $programFiles is kept empty for compatibility (it used to be the "Program Files" folder on Windows)
 $programFiles = '';
@@ -202,6 +206,19 @@ if(!file_exists($bp_application_path.$tonality_resources_private)) {
 	chmod($bp_application_path.$tonality_resources_private,$permissions);
 	}
 $dir_tonality_resources_private = $bp_application_path.$tonality_resources_private.SLASH;
+// 2026-11-20 SuperCollider resources: '-sc' files (format of '-cs' files) and SynthDef files '*.scd', fixed ones in "supercollider_resources", the user's in "supercollider_resources_private" (see _scrt.php) - by Claude
+$supercollider_resources = "supercollider_resources";
+$supercollider_resources_private = "supercollider_resources_private";
+foreach(array($supercollider_resources,$supercollider_resources_private) as $sc_folder) {
+	if(!file_exists($bp_application_path.$sc_folder)) {
+		mkdir($bp_application_path.$sc_folder);
+		chmod($bp_application_path.$sc_folder,$permissions);
+		}
+	}
+$dir_supercollider_resources = $bp_application_path.$supercollider_resources.SLASH;
+$dir_supercollider_resources_private = $bp_application_path.$supercollider_resources_private.SLASH;
+// Kind of the resources handled by the pages of '-cs' files (csound.php, csorchestra.php...): "supercollider" when they handle a '-sc' file (supercollider.php, scsynthdef.php)
+if(!isset($cs_kind)) $cs_kind = "csound";
 rename_new_fixed_resources(); // 2026-11-19
 
 if(!file_exists($bp_application_path.$midi_resources)) {
@@ -604,6 +621,7 @@ function extract_data($is_grammar,$compact,$content) {
 	$nr_end_lines= 0;
 	if($is_grammar) $is_true_bp = TRUE;
 	$extract_data['grammar'] = $extract_data['metronome'] = $extract_data['time_structure'] = $extract_data['headers'] = $extract_data['alphabet'] = $extract_data['grammar'] = $extract_data['objects'] = $extract_data['csound'] = $extract_data['tonality'] = $extract_data['settings'] = $extract_data['data'] = $extract_data['orchestra'] = $extract_data['timebase'] = $extract_data['interaction'] = $extract_data['midisetup'] = $extract_data['timebase'] = $extract_data['keyboard'] = $extract_data['glossary'] = $extract_data['cstables'] = $extract_data['weights'] = $extract_data['data'] = '';
+	$extract_data['supercollider'] = ''; // 2026-11-20 '-sc' file
 	$extract_data['templates'] = $found_templates = $need_end_line = FALSE;
 	for($i = 0; $i < count($table); $i++) {
 		$line = trim($table[$i]);
@@ -670,6 +688,8 @@ function extract_data($is_grammar,$compact,$content) {
 			$extract_data['objects'] = fix_file_name($line,"mi");
 		else if(is_integer($pos=strpos($line,"-cs")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
 			$extract_data['csound'] = fix_file_name($line,"cs");
+		else if(str_starts_with($line,"-sc.") AND !is_integer(strpos($line,"<")))
+			$extract_data['supercollider'] = trim($line); // 2026-11-20 SuperCollider resource
 		else if(is_integer($pos=strpos($line,"-to")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
 			$extract_data['tonality'] = fix_file_name($line,"to");
 		else if(is_integer($pos=strpos($line,"-se")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
@@ -860,10 +880,26 @@ function display_more_buttons($error,$content,$url_source_page,$dir,$grammar_fil
 		echo "<input class=\"edit\" type=\"submit\" formtarget=\"_blank\" formaction=\"".$url_this_page."\" value=\"EDIT ‘".begin_with(20,$objects_file)."’\">&nbsp;";
 		echo "</td>";
 		}
-	if($csound_file <> '') {
+	// 2026-11-21 The EDIT buttons of the '-cs' and '-sc' files are shown only if the output format uses them (as in produce.php):
+	// Csound score, real-time Csound and event list use '-cs', real-time SuperCollider uses '-sc', real-time OSC uses '-sc' if the project names one, otherwise '-cs'.
+	// MIDI (real-time or file) and BP score use neither. Pages without an output format (e.g. alphabet.php) show both.
+	global $sc_file; // 2026-11-20 SuperCollider resource of the project
+	$show_cs = $show_sc = TRUE;
+	if(isset($file_format) AND $file_format <> '') {
+		$sc_named = (isset($sc_file) AND $sc_file <> '' AND file_exists(resource_path("supercollider",$sc_file)));
+		$show_cs = ($file_format == "csound" OR $file_format == "csoundrt" OR $file_format == "eventlist" OR ($file_format == "osc" AND !$sc_named));
+		$show_sc = ($file_format == "scrt" OR ($file_format == "osc" AND $sc_named));
+		}
+	if($csound_file <> '' AND $show_cs) {
 		$url_this_page = "csound.php?file=".urlencode(csound_resource_folder($csound_file).SLASH.$csound_file);
 		echo "<td>";
 		echo "<input class=\"edit\" type=\"submit\" formtarget=\"_blank\" formaction=\"".$url_this_page."\" value=\"EDIT ‘".begin_with(20,$csound_file)."’\">&nbsp;";
+		echo "</td>";
+		}
+	if(isset($sc_file) AND $sc_file <> '' AND $show_sc) {
+		$url_this_page = "supercollider.php?file=".urlencode(resource_folder("supercollider",$sc_file).SLASH.$sc_file);
+		echo "<td>";
+		echo "<input class=\"edit\" type=\"submit\" formtarget=\"_blank\" formaction=\"".$url_this_page."\" value=\"EDIT ‘".begin_with(20,$sc_file)."’\">&nbsp;";
 		echo "</td>";
 		}
 	if($tonality_file <> '') {
@@ -1543,7 +1579,7 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder,$force,$page
 	fwrite($handle,"lock\n");
 	fclose($handle);
 	$exists_name = list_of_parameter_names($temp_dir,$temp_folder);
-	$file_header = $top_header."\n// Csound resource file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s')." GMT";
+	$file_header = $top_header."\n// ".(str_starts_with($filename,"-sc.") ? "SuperCollider" : "Csound")." resource file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s')." GMT";
 	$data = array();
 	$warn_not_empty = FALSE;
 	if($page === NULL) $page = csound_page_values_from_post();
@@ -3492,7 +3528,8 @@ function type_of_file($thisfile) {
 			$type = "glossary"; break;
 		case '-to':
 			$type = "tonality"; break;
-		case '-sc':
+		case '-sc': // 2026-11-20 SuperCollider resources. '-sc' was an old prefix of scripts, which are now '+sc'
+			$type = "supercollider"; break;
 		case '+sc':
 			$type = "script"; break;
 		default:
@@ -3518,6 +3555,7 @@ function type_of_file($thisfile) {
 		case "bpsc": $type = "script"; $found = TRUE; break;
 		case "bpto": $type = "tonality"; $found = TRUE; break;
 		case "orc": $type = "csorchestra"; $found = TRUE; break;
+		case "scd": $type = "scsynthdef"; $found = TRUE; break; // 2026-11-20 SuperCollider SynthDefs
 	/*	case "sco": $type = "csorchestra"; $found = TRUE; break;
 		case "aiff": $type = "csorchestra"; $found = TRUE; break;
 		case "wav": $type = "csorchestra"; $found = TRUE; break; */
@@ -4479,7 +4517,7 @@ function display_console_state() {
 		$panicfile = str_replace(SLASH,'/',$panicfile);
 		if(isset($filename) AND $filename <> "Compilation" AND $filename <> "Produce" AND  $filename <> "Bol Processor" AND $url_this_page <> "index.php") {
 			echo "<div style=\"display:flex; justify-content:flex-end; align-items:center; background-color:transparent;\">";
-			if($file_format == "rtmidi" OR $file_format == "csoundrt") echo "<button type=\"button\" class=\"produce\" style=\"font-size: small;\" title=\"Stop all sound production!\" onclick=\"createFile('".$panicfile."');\">PANIC!</button>";
+			if($file_format == "rtmidi" OR $file_format == "csoundrt" OR $file_format == "scrt" OR $file_format == "osc") echo "<button type=\"button\" class=\"produce\" style=\"font-size: small;\" title=\"Stop all sound production!\" onclick=\"createFile('".$panicfile."');\">PANIC!</button>";
 			echo "&nbsp;&nbsp;";
 			echo "<div title=\"Switch on/off the light\" id=\"darkModeToggle\" class=\"myswitch\"/></div>";
 			echo "</div>\n";
@@ -4547,7 +4585,7 @@ function check_gcc() {
 	}
 
 function link_to_tonality() {
-	echo "<p class=\"thinborder\" style=\"background-color:azure; color:black; padding:4px; border-radius:6px; line-height:2;\">&nbsp;🎶&nbsp;&nbsp;Using microtonality?<br />&nbsp;👉&nbsp;&nbsp;<a class=\"darkblue-text\" target=\"_blank\" href=\"index.php?path=tonality_resources\">TONALITY resource folder</a></p>";
+	echo "<p class=\"thinborder\" style=\"font-size:small; background-color:azure; color:black; padding:4px; border-radius:6px; line-height:1.8;\">&nbsp;🎶&nbsp;&nbsp;Using microtonality?<br />&nbsp;👉&nbsp;&nbsp;<a class=\"darkblue-text\" target=\"_blank\" href=\"index.php?path=tonality_resources\">TONALITY resource folder</a></p>";
 	}
 
 function check_csound($inside_form = FALSE) {
@@ -4602,7 +4640,7 @@ function check_csound($inside_form = FALSE) {
 	else {
 		@file_put_contents($this_file,$info['content']);
 		$version = ($info['version'] <> '') ? "(".$info['version'].")&nbsp;" : '';
-		echo "<p class=\"thinborder\" style=\"vertical-align:middle; background-color:azure; color:black; padding-top:4px; padding-left:4px; padding-right:4px; padding-bottom:12px; border-radius:6px;\"><img src=\"pict/logo_csound.png\" width=\"90px;\" style=\"vertical-align:middle;\" />".$version."is responding<br />";
+		echo "<p class=\"thinborder\" style=\"font-size:small; vertical-align:middle; background-color:azure; color:black; padding:4px 4px 8px 4px; border-radius:6px;\"><img src=\"pict/logo_csound.png\" width=\"60px;\" style=\"vertical-align:middle;\" />".$version."is responding<br />";
 		$latest = csound_latest_release();
 		if($latest !== FALSE AND csound_newer_release($info,$latest))
 			echo "&nbsp;🆕&nbsp;&nbsp;<a class=\"darkblue-text\" target=\"_blank\" href=\"".csound_download_url()."\">Csound ".$latest['tag']." is available</a><br />";
@@ -4888,6 +4926,8 @@ function show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,
 			echo "</div>";
 			}
 		} */
+	// 2026-11-21 The instruments of the '-cs' file are listed only when the output is a Csound score or real-time Csound
+	$csound_output = ($file_format == "csound" OR $file_format == "csoundrt");
 	if($csound_file <> '') {
 		$tonality_file_in_csound = get_tonality_file(csound_resource_path($csound_file));
 		if($tonality_file_in_csound <> '' AND $tonality_file_in_csound <> $tonality_file) {
@@ -4924,59 +4964,11 @@ function show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,
 			echo "</p>";
 			}
 		}
-	else if($csound_file <> '') {
+	else if($csound_file <> '' AND $csound_output) {
 		echo "<p>Csound instruments have been loaded but scales cannot be used because no tonality file ‘-to’ has been found.<br />";
 		echo "➡ Instruction “_scale()” will be ignored</p>";
 		}
-	if($csound_file == '' AND ($file_format == "csound" OR $file_format == "csoundrt") AND !isset($_POST['analyze_tonal'])) {
-		// 2026-11-18 No '-cs' file: _ins(n) selects instrument n of the orchestra, "0-default.orc" by default
-		if($orchestra == '' OR !file_exists(csound_resource_path($orchestra))) $orchestra = "0-default.orc";
-		$list = orchestra_instruments(csound_resource_path($orchestra));
-		// The default orchestra is described by CSOUND_DEFAULT_RESOURCE, which produce.php attaches: its names can be used in _ins()
-		$names = array();
-		if($orchestra == "0-default.orc" AND file_exists(csound_resource_path(CSOUND_DEFAULT_RESOURCE))) {
-			$default_instruments = list_of_instruments(csound_resource_path(CSOUND_DEFAULT_RESOURCE));
-			foreach($default_instruments['list'] as $i => $name) $names[intval($default_instruments['index'][$i])] = $name;
-			}
-		if(count($list) > 0) {
-			echo "<p style=\"margin-bottom:0px;\">No ‘-cs’ file: orchestra <span class=\"green-text\">‘".$orchestra."’</span> contains instrument(s)";
-			if(count($names) > 0) echo " described in <span class=\"green-text\">‘".CSOUND_DEFAULT_RESOURCE."’</span>";
-			echo ":<ul style=\"margin-top:0px; margin-bottom:0px\">";
-			foreach($list as $number => $text) {
-				echo "<li>";
-				if(isset($names[$number])) echo "<b>_ins(</b><span class=\"turquoise-text\">".$names[$number]."</span><b>)</b> = ";
-				echo "<b>_ins(".$number.")</b>";
-				if($text <> '') echo " ➡ ".htmlspecialchars($text);
-				echo "</li>";
-				}
-			echo "</ul>";
-			echo "Notes without “_ins()” are played by instrument 1.</p>";
-			}
-		}
-	if($csound_file <> '' AND !isset($_POST['analyze_tonal'])) {
-		$list_of_instruments = list_of_instruments(csound_resource_path($csound_file));
-		$list = $list_of_instruments['list'];
-		$list_index = $list_of_instruments['index'];
-		if(($max_instr = count($list)) > 0) {
-			echo "<p style=\"margin-bottom:0px;\">Csound resource file <span class=\"green-text\">‘".$csound_file."’</span> contains definitions of instrument(s):";
-			echo "<ol style=\"margin-top:0px; margin-bottom:0px\">";
-			for($i_instr = 0; $i_instr < $max_instr; $i_instr++) {
-				echo "<li><b>_ins(</b><span class=\"turquoise-text\">".$list[$i_instr]."</span><b>)</b>";
-				echo " = <b>_ins(".$list_index[$i_instr].")</b>";
-				$param_list = $list_of_instruments['param'][$i_instr];
-				if(count($param_list) > 0) {
-					echo " ➡ parameter(s) ";
-					for($i_param = 0; $i_param < count($param_list); $i_param++) {
-						echo " “<span class=\"turquoise-text\">".$param_list[$i_param]."</span>”";
-						}
-					}
-				echo "</li>";
-				}
-			echo "</ol>";
-			echo "</p>";
-			}
-		else if($file_format == "csound") echo "<p>Csound resource file <span class=\"green-text\">‘".$csound_file."’</span> does not contain definitions of instrument(s). The default instrument <span class=\"green-text\">‘0-default.orc’</span> will be used.</p>";
-		}
+	// 2026-11-21 The instruments are listed on the panel of the output format, see csound_instruments_details()
 	return $content;
 	}
 
@@ -6482,7 +6474,7 @@ function filter_buttons_in($i,$param) {
 
 function filter_input_explanation() {
 	global $file_format;
-	if($file_format <> "rtmidi" AND $file_format <> "csoundrt") return;
+	if($file_format <> "rtmidi" AND $file_format <> "csoundrt" AND $file_format <> "scrt" AND $file_format <> "osc") return;
 	echo "<p>MIDI input filters are used to process incoming events, for example<br />from a connected piano keyboard or other MIDI devices — including<br />another instance of the BP3.</p>
 	<ul>
 	<li>By default (option ‘0’), events are ‘rejected’ and nothing happens.</li>
@@ -6494,7 +6486,7 @@ function filter_input_explanation() {
 
 function filter_output_explanation() {
 	global $file_format;
-	if($file_format <> "rtmidi" AND $file_format <> "csoundrt") return;
+	if($file_format <> "rtmidi" AND $file_format <> "csoundrt" AND $file_format <> "scrt" AND $file_format <> "osc") return;
 	echo "<ul>";
 	echo "<li>Event filter specifies which MIDI events can be sent to this output.</li>";
 	echo "<li>Channel filter specifies which MIDI channels can be sent to this output.</li>";
@@ -6541,27 +6533,27 @@ function display_midi_ports($filename) {
 		else $value = $MIDIoutput[$i];
 		if(!isset($MIDIoutputcomment[$i]) OR $MIDIoutputcomment[$i] == "void") $comment = '';
 		else $comment = $MIDIoutputcomment[$i];
-		echo "MIDI output&nbsp;&nbsp;<input type=\"text\" title=\"".$text_over_number."\" onchange=\"tellsave()\" name=\"MIDIoutput_".$i."\" size=\"2\" value=\"".$value."\">";
+		echo "<span style=\"white-space:nowrap;\">MIDI output&nbsp;&nbsp;<input type=\"text\" title=\"".$text_over_number."\" onchange=\"tellsave()\" name=\"MIDIoutput_".$i."\" size=\"2\" value=\"".$value."\">";
 		echo "&nbsp;<input type=\"text\" title=\"".$text_over_name."\" style=\"margin-bottom:6px;\" onchange=\"tellsave()\" name=\"MIDIoutputname_".$i."\" size=\"15\" value=\"".$MIDIoutputname[$i]."\">";
 		echo "&nbsp;<input type=\"text\" title=\"".$text_over_comment."\" name=\"MIDIoutputcomment_".$i."\" size=\"15\" value=\"".$comment."\">";
 		echo "&nbsp;<button type=\"button\" onclick=\"clearFields('MIDIoutput_".$i."','MIDIoutputname_".$i."','MIDIoutputcomment_".$i."')\">Delete</button>";
-		echo "&nbsp;<button class=\"edit\" onclick=\"toggledisplay_output(".$i."); return false;\">FILTER</button>";
+		echo "&nbsp;<button class=\"edit\" onclick=\"toggledisplay_output(".$i."); return false;\">FILTER</button></span>";
 		filter_form_output($i);
 		echo "<br />";
 		}
 	echo "<input class=\"save\" style=\"float:right;\" type=\"submit\" name=\"create_output\" value=\"Add an output\"><br />";
-	echo "<input class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topmidiports\" name=\"savemidiport\" value=\"SAVE MIDI ports\">";
-	echo str_replace(' ',"&nbsp;"," 👉 Delete name if changing number")."<br /><br />";
+	echo "<span style=\"white-space:nowrap;\"><input class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topmidiports\" name=\"savemidiport\" value=\"SAVE MIDI ports\">";
+	echo str_replace(' ',"&nbsp;"," 👉 Delete name if changing number")."</span><br /><br />";
 	for($i = 0; $i < $NumberMIDIinputs; $i++) {
 		if($MIDIinput[$i] == -1) $value = '';
 		else $value = $MIDIinput[$i];
 		if(!isset($MIDIinputcomment[$i]) OR $MIDIinputcomment[$i] == "void") $comment = '';
 		else $comment = $MIDIinputcomment[$i];
-		echo "MIDI input&nbsp;&nbsp;&nbsp;&nbsp;<input type=\"text\" title=\"".$text_over_number."\" onchange=\"tellsave()\" name=\"MIDIinput_".$i."\" size=\"2\" value=\"".$value."\">";
+		echo "<span style=\"white-space:nowrap;\">MIDI input&nbsp;&nbsp;&nbsp;&nbsp;<input type=\"text\" title=\"".$text_over_number."\" onchange=\"tellsave()\" name=\"MIDIinput_".$i."\" size=\"2\" value=\"".$value."\">";
 		echo "&nbsp;<input type=\"text\" title=\"".$text_over_name."\" style=\"margin-bottom:6px;\" onchange=\"tellsave()\" name=\"MIDIinputname_".$i."\" size=\"15\" value=\"".$MIDIinputname[$i]."\">";
 		echo "&nbsp;<input type=\"text\" title=\"".$text_over_comment."\" name=\"MIDIinputcomment_".$i."\" size=\"15\" value=\"".$comment."\">";
 		echo "&nbsp;<button type=\"button\" onclick=\"clearFields('MIDIinput_".$i."', 'MIDIinputname_".$i."', 'MIDIinputcomment_".$i."')\">Delete</button>";
-		echo "&nbsp;<button class=\"edit\" onclick=\"toggledisplay_input(".$i."); return false;\">FILTER</button>";
+		echo "&nbsp;<button class=\"edit\" onclick=\"toggledisplay_input(".$i."); return false;\">FILTER</button></span>";
 		filter_form_input($i);
 		echo "<br />";
 		}
@@ -7295,6 +7287,7 @@ function show_note_convention_form($type,$note_convention,$settings_file) {
 
 function show_file_format_choice($type,$file_format,$url_this_page,$filename) {
 	global $temp_midi_ressources,$dir_midi_resources;
+	echo "<span style=\"display:inline-block; white-space:nowrap;\">"; // 2026-11-21 The column is as wide as the longest format name
 	echo "<input type=\"radio\" style=\"margin-bottom:0.5em;\" name=\"new_file_format\" value=\"rtmidi\"";
 	if($file_format == "rtmidi") echo " checked";
 	echo ">Real-time MIDI";
@@ -7314,12 +7307,40 @@ function show_file_format_choice($type,$file_format,$url_this_page,$filename) {
 		if($file_format == "csoundrt") echo " checked";
 		echo ">Real-time Csound";
 		}
+	if(scrt_ready() OR $file_format == "scrt" OR $file_format == "osc") {
+		echo "<br /><input type=\"radio\" style=\"margin-bottom:0.5em;\" name=\"new_file_format\" value=\"scrt\"";
+		if($file_format == "scrt") echo " checked";
+		echo ">Real-time SuperCollider";
+		}
+	echo "<br /><input type=\"radio\" style=\"margin-bottom:0.5em;\" name=\"new_file_format\" value=\"osc\"";
+	if($file_format == "osc") echo " checked";
+	echo ">Real-time OSC (Max, Pd…)";
 	echo "<br /><input type=\"radio\" style=\"margin-bottom:0.5em;\" name=\"new_file_format\" value=\"eventlist\"";
 	if($file_format == "eventlist") echo " checked";
 	echo ">Event list";
+	echo "</span>";
 	echo "<br /><input class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topmidiports\" name=\"savethisfile\" value=\"SAVE format\">";
 	if($file_format == "csoundrt") csoundrt_format_notes();
+	if($file_format == "scrt") scrt_format_notes();
+	if($file_format == "osc") oscrt_format_notes();
+	if($file_format == "eventlist") { // 2026-11-21
+		global $csound_file;
+		if(isset($csound_file) AND $csound_file <> '' AND file_exists(csound_resource_path($csound_file)))
+			echo "<br /><br />Event list uses ".resource_file_link("csound",$csound_file)."<br />to write the names of the Csound instruments.";
+		}
 	return;
+	}
+
+function list_of_supercollider_resources() {
+	// 2026-11-21 Names of the "-sc" files in the SuperCollider resources folders, except backups and locks
+	$list = array();
+	foreach(resource_files("supercollider") as $thisfile => $dir) {
+		if(!str_starts_with($thisfile,"-sc.")) continue;
+		if(str_ends_with($thisfile,"_bak") OR preg_match("/_lock[0-9]*$/u",$thisfile)) continue;
+		if(!is_file($dir.$thisfile)) continue;
+		$list[] = $thisfile;
+		}
+	return $list;
 	}
 
 function list_of_csound_resources() {
@@ -7340,7 +7361,9 @@ function resource_dirs($kind) {
 	// Folders (with their final SLASH) and names of the fixed and user folders of resources of $kind
 	global $dir_csound_resources,$dir_csound_resources_private,$csound_resources,$csound_resources_private;
 	global $dir_tonality_resources,$dir_tonality_resources_private,$tonality_resources,$tonality_resources_private;
+	global $dir_supercollider_resources,$dir_supercollider_resources_private,$supercollider_resources,$supercollider_resources_private;
 	if($kind == "tonality") return array('fixed' => $dir_tonality_resources,'my' => $dir_tonality_resources_private,'fixed_name' => $tonality_resources,'my_name' => $tonality_resources_private);
+	if($kind == "supercollider") return array('fixed' => $dir_supercollider_resources,'my' => $dir_supercollider_resources_private,'fixed_name' => $supercollider_resources,'my_name' => $supercollider_resources_private);
 	return array('fixed' => $dir_csound_resources,'my' => $dir_csound_resources_private,'fixed_name' => $csound_resources,'my_name' => $csound_resources_private);
 	}
 
@@ -7389,6 +7412,7 @@ function resource_kind_of_type($type) {
 	// Kind of resource of a file of type $type (see type_of_file()), or ''
 	if($type == "csound" OR $type == "csorchestra") return "csound";
 	if($type == "tonality") return "tonality";
+	if($type == "supercollider" OR $type == "scsynthdef") return "supercollider";
 	return '';
 	}
 
@@ -7408,13 +7432,14 @@ function move_to_resources($kind,$dir,$filename) {
 	return;
 	}
 
-function csound_resource_dir($filename) { return resource_dir("csound",$filename); }
-function csound_resource_path($filename) { return resource_path("csound",$filename); }
-function csound_resource_folder($filename) { return resource_folder("csound",$filename); }
-function csound_resource_files() { return resource_files("csound"); }
-function is_csound_resource_folder($dir) { return is_resource_folder("csound",$dir); }
-function new_csound_resource_folder() { return new_resource_folder("csound"); }
-function move_to_csound_resources($dir,$filename) { move_to_resources("csound",$dir,$filename); return; }
+// 2026-11-20 These follow $cs_kind, which is "supercollider" in the pages of '-sc' files, so that csound.php and csorchestra.php handle them too
+function csound_resource_dir($filename) { global $cs_kind; return resource_dir($cs_kind,$filename); }
+function csound_resource_path($filename) { global $cs_kind; return resource_path($cs_kind,$filename); }
+function csound_resource_folder($filename) { global $cs_kind; return resource_folder($cs_kind,$filename); }
+function csound_resource_files() { global $cs_kind; return resource_files($cs_kind); }
+function is_csound_resource_folder($dir) { global $cs_kind; return is_resource_folder($cs_kind,$dir); }
+function new_csound_resource_folder() { global $cs_kind; return new_resource_folder($cs_kind); }
+function move_to_csound_resources($dir,$filename) { global $cs_kind; move_to_resources($cs_kind,$dir,$filename); return; }
 function tonality_resource_dir($filename) { return resource_dir("tonality",$filename); }
 function tonality_resource_path($filename) { return resource_path("tonality",$filename); }
 function tonality_resource_folder($filename) { return resource_folder("tonality",$filename); }
@@ -7447,10 +7472,10 @@ function same_folder($dir1,$dir2) {
 	}
 
 function read_only_resource_folder($dir) {
-	// TRUE if files in folder $dir can't be changed: "csound_resources" or "tonality_resources", unless $i_am_designer
-	global $dir_csound_resources,$dir_tonality_resources,$i_am_designer;
+	// TRUE if files in folder $dir can't be changed: "csound_resources", "tonality_resources" or "supercollider_resources", unless $i_am_designer
+	global $dir_csound_resources,$dir_tonality_resources,$dir_supercollider_resources,$i_am_designer;
 	if($i_am_designer) return FALSE;
-	return same_folder($dir,$dir_csound_resources) OR same_folder($dir,$dir_tonality_resources);
+	return same_folder($dir,$dir_csound_resources) OR same_folder($dir,$dir_tonality_resources) OR same_folder($dir,$dir_supercollider_resources);
 	}
 
 function csound_sample_option() {
@@ -7463,18 +7488,18 @@ function csound_sample_option() {
 
 function new_version_name($filename) {
 	// 2026-11-19 Name given to a fixed resource whose name is that of a file of the user folder: "-cs.NAME_new", "NAME_new.orc", "-to.NAME_new", "NAME_new.bpto"... Returns '' for other files - by Claude
-	if(preg_match("/^-(cs|to)\./",$filename)) return $filename."_new";
-	if(preg_match("/^(.+)\.(orc|bpcs|bpto)$/",$filename,$m)) return $m[1]."_new.".$m[2];
+	if(preg_match("/^-(cs|to|sc)\./",$filename)) return $filename."_new";
+	if(preg_match("/^(.+)\.(orc|bpcs|bpto|scd)$/",$filename,$m)) return $m[1]."_new.".$m[2];
 	return '';
 	}
 
 function is_new_version_name($filename) {
-	return (preg_match("/^-(cs|to)\./",$filename) AND str_ends_with($filename,"_new")) OR preg_match("/_new\.(orc|bpcs|bpto)$/",$filename);
+	return (preg_match("/^-(cs|to|sc)\./",$filename) AND str_ends_with($filename,"_new")) OR preg_match("/_new\.(orc|bpcs|bpto|scd)$/",$filename);
 	}
 
 function rename_new_fixed_resources() {
 	// 2026-11-19 An update of the distribution may bring to a fixed folder a file with the same name as one of the user folder, which would hide it. It is renamed with "_new" (see new_version_name()), replacing an older "_new" version, and marked with a red arrow in the list of resources - by Claude
-	foreach(array("csound","tonality") as $kind) {
+	foreach(array("csound","tonality","supercollider") as $kind) {
 		$d = resource_dirs($kind);
 		$dircontent = @scandir($d['my']);
 		if($dircontent === FALSE) continue;
@@ -7498,12 +7523,13 @@ function duplicate_resource($kind,$filename,$new_name) {
 	if($filename == '' OR !is_file($source) OR resource_kind_of_type($type) <> $kind)
 		return "<p><span class=\"red-text\">➡ Can't duplicate</span> ‘".htmlspecialchars($filename)."’</p>";
 	$new_name = trim(fix_new_name($new_name,TRUE));
-	if($type == "csorchestra") {
-		$new_name = preg_replace("/\.orc$/",'',$new_name);
-		if($new_name <> '') $new_name .= ".orc";
+	if($type == "csorchestra" OR $type == "scsynthdef") {
+		$ext = ($type == "scsynthdef") ? ".scd" : ".orc";
+		$new_name = preg_replace("/".preg_quote($ext,"/")."$/",'',$new_name);
+		if($new_name <> '') $new_name .= $ext;
 		}
 	else {
-		$short = ($kind == "tonality") ? "to" : "cs";
+		$short = ($kind == "tonality") ? "to" : (($kind == "supercollider") ? "sc" : "cs");
 		$name_mode = str_ends_with($filename,".bp".$short) ? "extension" : "prefix";
 		$bare = str_ireplace(array("-".$short.".",".bp".$short),'',$new_name);
 		if($bare == '') $new_name = '';
@@ -7688,9 +7714,12 @@ function read_only_message($filename,$what = "Csound resource",$folder = "csound
 	return;
 	}
 
-function add_csound_resource_to_content($content,$csound_file) {
+function add_csound_resource_to_content($content,$csound_file,$for_osc = FALSE) {
 	// Inserts the line naming a "-cs" file after the resource files ("-se.", "-al.", "x.bpse", ...) at the top of a grammar or data,
 	// and removes the line of another "-cs" file found there (2026-11-18)
+	// 2026-11-21 The same for a "-sc" file, replacing the line of another "-sc" file
+	$sc = str_starts_with($csound_file,"-sc.");
+	$remove_sc = ($sc OR $for_osc); // In real-time OSC, a '-cs' file chosen replaces the '-sc' file too, otherwise it would not be used
 	$content = str_replace(chr(13).chr(10),chr(10),$content);
 	$table = explode(chr(10),$content);
 	$out = array();
@@ -7700,7 +7729,8 @@ function add_csound_resource_to_content($content,$csound_file) {
 		$trimmed = trim($line);
 		if($top) {
 			if(preg_match("/^-[a-zA-Z]{2}\.\S/u",$trimmed) OR preg_match("/^\S+\.bp[a-z]{2}$/u",$trimmed)) {
-				if(str_starts_with($trimmed,"-cs.") OR str_ends_with($trimmed,".bpcs")) continue;
+				if($remove_sc AND str_starts_with($trimmed,"-sc.")) continue;
+				if(!$sc AND (str_starts_with($trimmed,"-cs.") OR str_ends_with($trimmed,".bpcs"))) continue;
 				$out[] = $line;
 				$insert_at = count($out);
 				continue;
@@ -7714,24 +7744,92 @@ function add_csound_resource_to_content($content,$csound_file) {
 	return implode(chr(10),$out);
 	}
 
-function change_instruments_form() {
+function change_instruments_form($kind = "csound",$current = '') {
 	// "Change instruments" button, displayed when the default orchestra is used because the project names no "-cs" file.
 	// It shows the list of "-cs" files. The selected file is added on top of the grammar or data, which is saved
 	// (handled by 'set_csound_file' in grammar.php and data.php). Must be called inside the form of the page.
+	// 2026-11-21 With $kind = "supercollider", the same for '-sc' files, in real-time SuperCollider (scrt_panel())
+	// 2026-11-21 Also displayed when the project names a file ($current, selected in the menu), which is then replaced
+	// 2026-11-21 With $kind = "osc" (real-time OSC, oscrt_panel()), the menu lists the '-sc' then the '-cs' files: choosing a '-cs' file
+	// also removes the '-sc' line of the project, which real-time OSC would otherwise use ('change_for_osc', see add_csound_resource_to_content())
 	global $url_this_page;
-	$list = list_of_csound_resources();
+	if($kind == "osc") $list = array_merge(list_of_supercollider_resources(),list_of_csound_resources());
+	else $list = ($kind == "supercollider") ? list_of_supercollider_resources() : list_of_csound_resources();
 	if(count($list) == 0) {
 		echo "<br />";
 		return;
 		}
 	echo " <button type=\"button\" class=\"save\" onclick=\"if(checksaved()) { var d = document.getElementById('change_instruments'); d.style.display = (d.style.display == 'none') ? 'inline' : 'none'; }\">Change instruments</button><br />";
 	echo "<span id=\"change_instruments\" style=\"display:none;\">";
+	if($kind == "osc") echo "<input type=\"hidden\" name=\"change_for_osc\" value=\"1\">";
 	echo "<select name=\"new_csound_file\">";
-	foreach($list as $thisfile) echo "<option value=\"".htmlspecialchars($thisfile)."\">".htmlspecialchars($thisfile)."</option>";
+	foreach($list as $thisfile) echo "<option value=\"".htmlspecialchars($thisfile)."\"".($thisfile == $current ? " selected" : '').">".htmlspecialchars($thisfile)."</option>";
 	echo "</select> ";
 	echo "<input class=\"save\" type=\"submit\" onclick=\"this.form.target='_self'; return true;\" name=\"set_csound_file\" formaction=\"".$url_this_page."#topmidiports\" value=\"USE THESE INSTRUMENTS\"><br />";
 	echo "</span>";
 	return;
+	}
+
+function resource_file_link($kind,$name) {
+	// 2026-11-21 Name of a '-cs' ($kind = "csound") or '-sc' ($kind = "supercollider") file, with a link opening its page in a new tab
+	$page = ($kind == "supercollider") ? "supercollider.php" : "csound.php";
+	$url = $page."?file=".urlencode(resource_folder($kind,$name).SLASH.$name);
+	return "<a class=\"linkdotted\" target=\"_blank\" href=\"".$url."\">‘".htmlspecialchars($name)."’</a>";
+	}
+
+function csound_instruments_details($csound_file,$orchestra) {
+	// 2026-11-21 The instruments of the '-cs' file, or of the orchestra if the project names no '-cs' file,
+	// listed on the panel of Csound scores and real-time Csound and shown by the "Show/hide details" button (formerly in show_instruments_and_scales())
+	$html = '';
+	if($csound_file == '') {
+		// 2026-11-18 No '-cs' file: _ins(n) selects instrument n of the orchestra, "0-default.orc" by default
+		if($orchestra == '' OR !file_exists(csound_resource_path($orchestra))) $orchestra = "0-default.orc";
+		$list = orchestra_instruments(csound_resource_path($orchestra));
+		// The default orchestra is described by CSOUND_DEFAULT_RESOURCE, which produce.php attaches: its names can be used in _ins()
+		$names = array();
+		if($orchestra == "0-default.orc" AND file_exists(csound_resource_path(CSOUND_DEFAULT_RESOURCE))) {
+			$default_instruments = list_of_instruments(csound_resource_path(CSOUND_DEFAULT_RESOURCE));
+			foreach($default_instruments['list'] as $i => $name) $names[intval($default_instruments['index'][$i])] = $name;
+			}
+		if(count($list) > 0) {
+			$html .= "Orchestra <span class=\"green-text\">‘".$orchestra."’</span> contains instrument(s)";
+			if(count($names) > 0) $html .= " described in <span class=\"green-text\">‘".CSOUND_DEFAULT_RESOURCE."’</span>";
+			$html .= ":<ul style=\"margin-top:0px; margin-bottom:0px\">";
+			foreach($list as $number => $text) {
+				$html .= "<li>";
+				if(isset($names[$number])) $html .= "<b>_ins(</b><span class=\"turquoise-text\">".$names[$number]."</span><b>)</b> = ";
+				$html .= "<b>_ins(".$number.")</b>";
+				if($text <> '') $html .= " ➡ ".htmlspecialchars($text);
+				$html .= "</li>";
+				}
+			$html .= "</ul>";
+			$html .= "Notes without “_ins()” are played by instrument 1.<br />";
+			}
+		}
+	if($csound_file <> '' AND file_exists(csound_resource_path($csound_file))) {
+		$list_of_instruments = list_of_instruments(csound_resource_path($csound_file));
+		$list = $list_of_instruments['list'];
+		$list_index = $list_of_instruments['index'];
+		if(($max_instr = count($list)) > 0) {
+			$html .= "Instruments of ".resource_file_link("csound",$csound_file).":";
+			$html .= "<ul style=\"margin-top:0px; margin-bottom:0px\">";
+			for($i_instr = 0; $i_instr < $max_instr; $i_instr++) {
+				$html .= "<li><b>_ins(</b><span class=\"turquoise-text\">".$list[$i_instr]."</span><b>)</b>";
+				$html .= " = <b>_ins(".$list_index[$i_instr].")</b>";
+				$param_list = $list_of_instruments['param'][$i_instr];
+				if(count($param_list) > 0) {
+					$html .= " ➡ parameter(s) ";
+					for($i_param = 0; $i_param < count($param_list); $i_param++) {
+						$html .= " “<span class=\"turquoise-text\">".$param_list[$i_param]."</span>”";
+						}
+					}
+				$html .= "</li>";
+				}
+			$html .= "</ul>";
+			}
+		else $html .= "Csound resource file <span class=\"green-text\">‘".$csound_file."’</span> does not contain definitions of instrument(s). The default instrument <span class=\"green-text\">‘0-default.orc’</span> will be used.";
+		}
+	return $html;
 	}
 
 function csound_orchestra_line($orchestra,$csound_file = 'none') {
@@ -7748,7 +7846,21 @@ function csound_orchestra_line($orchestra,$csound_file = 'none') {
 		echo " ➡ <a class=\"linkdotted\" target=\"_blank\" href=\"csorchestra.php?file=".urlencode(csound_resource_folder($orchestra).SLASH.$orchestra)."\">".$label."</a>";
 		}
 	if($csound_file == '') change_instruments_form();
-	else echo "<br />";
+	else {
+		echo "<br />";
+		if($csound_file <> 'none' AND file_exists(csound_resource_path($csound_file))) { // 2026-11-21
+			echo "Instrument names and parameters are defined in ".resource_file_link("csound",$csound_file).".";
+			change_instruments_form("csound",$csound_file);
+			}
+		}
+	if($csound_file <> 'none') {
+		// 2026-11-21 The list of instruments is shown by the "Show/hide details" button (no reload), as in real-time SuperCollider
+		$details = csound_instruments_details($csound_file,$default ? '' : $orchestra);
+		if($details <> '') {
+			echo "<button type=\"button\" class=\"edit\" style=\"font-size:small; margin-top:4px;\" onclick=\"var b = document.getElementById('cs_details'); b.style.display = (b.style.display == 'none') ? '' : 'none';\">Show/hide details</button><br />";
+			echo "<div id=\"cs_details\" style=\"display:none;\">".$details."<br /></div>";
+			}
+		}
 	return;
 	}
 
@@ -7782,11 +7894,11 @@ function csoundrt_format_notes() {
 	// Displayed below the SAVE format button when the output is real-time Csound
 	// The QUIT CSOUND button is shown while the server is running. Since the server is started by produce.php in another window,
 	// the page asks csoundrt_status.php every 2 seconds, and updates the button and the status displayed by csoundrt_panel().
-	echo "<br /><br />Notes are sent to Csound, which plays them<br />on the audio output of this computer.";
+	echo "<br /><br /><small>Notes are sent to Csound, which plays them on the audio output of this computer.</small>";
 	// 2026-11-20 The "settings" button opens a dialog setting the buffers of the server for this machine (csoundrt_settings.php)
 	$buffers = csoundrt_buffers();
 	$default = csoundrt_default_buffers();
-	echo "&nbsp;<button type=\"button\" class=\"edit\" style=\"font-size:small;\" title=\"Buffers of real-time Csound on this computer\" onclick=\"document.getElementById('csoundrt_dialog').showModal();\">settings</button>";
+	echo "&nbsp;<button type=\"button\" class=\"edit\" style=\"font-size:small;\" title=\"Buffers of real-time Csound on this computer\" onclick=\"document.getElementById('csoundrt_dialog').showModal();\">Settings</button>";
 	// The fields have no 'name', so that they are not sent with the form of the page.
 	// The dialog is in a <template>, then attached to the body by the script below: a <dialog> inside the paragraph
 	// of the page would close it, adding vertical space before the QUIT CSOUND button.
@@ -7882,6 +7994,109 @@ function csoundrt_format_notes() {
 				var key = d.running + '|' + d.orchestra;
 				if(key !== last) {
 					if(last !== null) csoundrtShow(d.running,d.orchestra,'');
+					last = key;
+					}
+				}).catch(function() {});
+			window.setTimeout(poll,2000);
+			}
+		poll();
+		})();
+	</script>";
+	return;
+	}
+
+function scrt_panel($sc_file,$csound_file = '') {
+	// Displayed on project pages instead of the name of the output file, when the output is real-time SuperCollider (2026-11-20)
+	// The instruments are those of the '-sc' file of the project, or of SC_DEFAULT_RESOURCE which produce.php gives the console otherwise.
+	// Instrument NAME is played by SynthDef NAME.
+	echo "<p>";
+	if(scrt_programs() === FALSE AND !scrt_ping(0.3))
+		echo "<span class=\"red-text\">SuperCollider was not found on this computer.</span> Install it from <a class=\"linkdotted\" target=\"_blank\" href=\"https://supercollider.github.io/\">supercollider.github.io</a><br />";
+	echo "<span id=\"scrt_status\">";
+	if(scrt_running()) echo scrt_owned() ? "The SuperCollider server started by the Bol Processor is running." : "A SuperCollider server is running (started by SuperCollider): it will play.";
+	else echo "The SuperCollider server will be started when you play.";
+	echo "</span><br />";
+	// 2026-11-21 The instruments, SynthDefs, recordings and the folder of the user's files are in a block shown by the "Details" button (no reload)
+	$details = '';
+	$resource = $sc_file;
+	if($sc_file <> '' AND file_exists(resource_path("supercollider",$sc_file))) { // 2026-11-21
+		echo "Instruments: ".resource_file_link("supercollider",$sc_file);
+		change_instruments_form("supercollider",$sc_file);
+		}
+	if($resource == '' OR !file_exists(resource_path("supercollider",$resource))) {
+		if($sc_file <> '') echo "<span class=\"red-text\">‘".htmlspecialchars($sc_file)."’ was not found in ‘supercollider_resources’.</span><br />";
+		else { // 2026-11-21 As for Csound (csound_orchestra_line()): the default instruments, and the "Change instruments" button adding a '-sc' file to the project
+			echo "Instruments: ".resource_file_link("supercollider",SC_DEFAULT_RESOURCE)." (default)";
+			change_instruments_form("supercollider");
+			}
+		if($sc_file == '' AND $csound_file <> '') $details .= "<span class=\"red-text\">This project names no ‘-sc’ file:</span> ‘".htmlspecialchars($csound_file)."’ is only used by Csound.<br />To play its instruments in SuperCollider, write a ‘-sc’ file with the same instruments and add its name (e.g. ‘-sc.".htmlspecialchars(preg_replace('/^-cs\./','',$csound_file))."’) on top of the project.<br />";
+		$resource = SC_DEFAULT_RESOURCE;
+		}
+	$names = array();
+	if(file_exists(resource_path("supercollider",$resource))) {
+		$instruments = list_of_instruments(resource_path("supercollider",$resource));
+		foreach($instruments['list'] as $i => $name) $names[intval($instruments['index'][$i])] = $name;
+		}
+	ksort($names);
+	$synthdefs = scrt_synthdef_names();
+	$missing = 0;
+	if(count($names) > 0) {
+		$details .= "Instruments of ".resource_file_link("supercollider",$resource)." and their SynthDefs:";
+		$details .= "<ul style=\"margin-top:0px; margin-bottom:0px\">";
+		foreach($names as $number => $name) {
+			$details .= "<li><b>_ins(</b><span class=\"turquoise-text\">".htmlspecialchars($name)."</span><b>)</b> = <b>_ins(".$number.")</b> ➡ ";
+			if(isset($synthdefs[$name])) $details .= "SynthDef <b>".htmlspecialchars($name)."</b>".($synthdefs[$name] == "private" ? " (private)" : '');
+			else {
+				$details .= "<span class=\"red-text\">SynthDef ‘".htmlspecialchars($name)."’ is not defined</span>";
+				$missing++;
+				}
+			$details .= "</li>";
+			}
+		$details .= "</ul>";
+		}
+	$sets = scrt_sample_sets(scrt_scd_of_resource($resource)); // 2026-11-20 Recordings played by its SynthDefs
+	if(count($sets) > 0) $details .= "Recordings: ".htmlspecialchars(implode(", ",array_map(function($map) { return basename($map,".json"); },$sets)))." (loaded into the server the first time you play)<br />";
+	$details .= "Your SynthDefs (files ‘*.scd’) and ‘-sc’ files go to folder <a class=\"linkdotted\" target=\"_blank\" href=\"index.php?path=supercollider_resources\">‘supercollider_resources_private’</a>.<br />";
+	echo "<button type=\"button\" class=\"edit\" style=\"font-size:small; margin-top:4px;\" onclick=\"var b = document.getElementById('scrt_details'); b.style.display = (b.style.display == 'none') ? '' : 'none';\">Show/hide details</button>";
+	// Missing SynthDefs are mentioned even when the details are hidden
+	if($missing > 0) echo " <span class=\"red-text\">".$missing." SynthDef".($missing > 1 ? "s are" : " is")." not defined</span>";
+	echo "<br /><div id=\"scrt_details\" style=\"display:none;\">".$details."<br /></div>";
+	echo "The MIDI ports below are used for interaction,<br />e.g. <i>_script(wait for C3 channel 1)</i>, once saved.";
+	echo "</p>";
+	return;
+	}
+
+function scrt_format_notes() {
+	// Displayed below the SAVE format button when the output is real-time SuperCollider (2026-11-20)
+	// The QUIT SUPERCOLLIDER button is shown while a server started by the Bol Processor is running.
+	// Since the server is started by produce.php in another window, the page asks scrt_status.php every 2 seconds.
+	echo "<br /><br /><small>Notes are sent as OSC messages to the SuperCollider server, which plays each instrument with the SynthDef of the same name (e.g. ‘piano’ for <i>_ins(piano)</i>).</small><br />";
+	echo "<small>Read <span class=\"green-text\">supercollider_resources/0-default.scd</span> to write your own.</small>";
+	echo "<br /><button id=\"scrt_quit\" type=\"button\" class=\"edit\" style=\"font-size:small; margin-top:6px;";
+	if(!scrt_owned() OR !scrt_running()) echo " display:none;";
+	echo "\" title=\"The server started by the Bol Processor quits by itself after ".round(SC_RT_IDLE / 60)." minutes without a performance\" onclick=\"scrtQuit();\">QUIT SUPERCOLLIDER</button>";
+	echo "<script>
+	function scrtShow(running,owned,text) {
+		var button = document.getElementById('scrt_quit');
+		var status = document.getElementById('scrt_status');
+		if(button) button.style.display = (running && owned) ? '' : 'none';
+		if(!status) return;
+		if(text) status.textContent = text;
+		else if(running) status.textContent = owned ? 'The SuperCollider server started by the Bol Processor is running.' : 'A SuperCollider server is running (started by SuperCollider): it will play.';
+		else status.textContent = 'The SuperCollider server will be started when you play.';
+		}
+	function scrtQuit() {
+		fetch('scrt_quit.php',{cache:'no-store'}).then(function(r) {return r.json();}).then(function(d) {
+			scrtShow(!d.stopped,true,d.stopped ? 'The SuperCollider server has quit.' : 'The SuperCollider server did not quit.');
+			});
+		}
+	(function() {
+		var last = null;
+		function poll() {
+			fetch('scrt_status.php',{cache:'no-store',credentials:'same-origin'}).then(function(r) {return r.json();}).then(function(d) {
+				var key = d.running + '|' + d.owned;
+				if(key !== last) {
+					if(last !== null) scrtShow(d.running,d.owned,'');
 					last = key;
 					}
 				}).catch(function() {});

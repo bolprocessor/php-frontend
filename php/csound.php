@@ -9,11 +9,14 @@ $verbose = FALSE;
 if(isset($_GET['file'])) $file = urldecode($_GET['file']);
 else $file = '';
 if($file == '') die();
+// 2026-11-20 Also used for SuperCollider resources ('-sc' files, same format) by supercollider.php, with $cs_kind = "supercollider" - by Claude
+$sc_page = ($cs_kind == "supercollider");
+$kind_dirs = resource_dirs($cs_kind);
 // 2026-11-19 A '-cs' file of "csound_resources" or "csound_resources_private" is opened in the folder where it is, "csound_resources_private" first - by Claude
 $table = explode(SLASH,$file);
-if(count($table) == 2 AND ($table[0] == $csound_resources OR $table[0] == $csound_resources_private))
+if(count($table) == 2 AND ($table[0] == $kind_dirs['fixed_name'] OR $table[0] == $kind_dirs['my_name']))
 	$file = csound_resource_folder($table[1]).SLASH.$table[1];
-$url_this_page = "csound.php?file=".urlencode($file);
+$url_this_page = ($sc_page ? "supercollider.php" : "csound.php")."?file=".urlencode($file);
 save_settings("last_page",$url_this_page);
 $table = explode(SLASH,$file);
 $filename = end($table);
@@ -23,7 +26,7 @@ $warn_not_empty = FALSE;
 $max_scales = 0;
 $current_directory = str_replace(SLASH.$filename,'',$file);
 $read_only = read_only_resource_folder($dir); // 2026-11-19 A fixed file of "csound_resources" can only be viewed
-if($current_directory == $csound_resources_private) $current_directory = $csound_resources; // Both folders are listed together
+if($current_directory == $kind_dirs['my_name']) $current_directory = $kind_dirs['fixed_name']; // Both folders are listed together
 save_settings("last_directory",$current_directory);
 
 require_once("_header.php");
@@ -35,12 +38,16 @@ echo "</a>   <span id='message2' style=\"margin-bottom:1em;\"></span>";
 echo "</p>";
 echo link_to_help();
 
-echo "<h2>Csound resource “".$filename."”";
-if(same_folder($dir,$dir_csound_resources)) echo " <small>(fixed)</small>";
+echo "<h2>".($sc_page ? "SuperCollider" : "Csound")." resource “".$filename."”";
+if(same_folder($dir,$kind_dirs['fixed'])) echo " <small>(fixed)</small>";
 echo "</h2>";
+if($sc_page) {
+	echo "<p>Instruments of this file are played in <b>real-time SuperCollider</b> by the SynthDefs of the same names (e.g. <i>_ins(violin)</i> by SynthDef <i>violin</i>).<br />";
+	echo "Their fields (pitch, volume, velocity, panoramic…) are sent to the SynthDef by name: ‘freq’ (always in Hz), ‘vol’ and ‘vol2’, ‘vel’, ‘pan’ and ‘pan2’, ‘mod’ and ‘mod2’, ‘press’ and ‘press2’, ‘bend’ and ‘bend2’,<br />and each additional parameter under its own name (e.g. ‘splash’ and ‘splash2’). Field numbers only need to be different from each other. Function tables (GEN 7) of continuous parameters are sent as envelopes, e.g. ‘bendenv’ or ‘slideenv’ (see ‘0-default.scd’).</p>";
+	}
 save_settings("last_name",$filename);
 if($read_only) {
-	read_only_message($filename);
+	read_only_message($filename,$sc_page ? "SuperCollider resource" : "Csound resource",$kind_dirs['fixed_name']);
 	read_only_page_script();
 	// Nothing is changed in a read-only file. Copying one of its instruments to another file is possible.
 	foreach(array('delete_instrument','restore','create_instrument','duplicate_instrument','savealldata') as $action) unset($_POST[$action]);
@@ -241,6 +248,7 @@ if(isset($_POST['rename_instrument'])) {
 	}
 
 // 2026-11-19 Copying an instrument to another '-cs' file, with the code it needs in the orchestra of that file (see _cs_copy.php) - by Claude
+if($sc_page) unset($_POST['copy_instrument_to'],$_POST['copy_this_instrument']); // Not for SuperCollider resources
 if(isset($_POST['copy_instrument_to'])) {
 	$instrument = $_POST['instrument_name'];
 	echo "<hr><p><span class=\"red-text\">➡ The code of the instrument will be added to the orchestra of the destination file if needed.</span></p>";
@@ -338,23 +346,25 @@ for($part = 1; $part <= MAXPARTS; $part++) {
 	if($verbose) echo "Part #".$part." => instrument [index ".$whichCsoundInstrumentForPart[$part]."]<br />";
 	}
 $CsoundOrchestraName = cs_get($csound_values,"CsoundOrchestraName",'');
-if($CsoundOrchestraName == '') {
-	$CsoundOrchestraName = "default.orc";
+// 2026-11-20 A '-sc' file names its file of SynthDefs ('*.scd') in place of the orchestra
+$orchestra_extension = $sc_page ? "scd" : "orc";
+if($CsoundOrchestraName == '' OR ($sc_page AND !str_ends_with($CsoundOrchestraName,".scd"))) {
+	$CsoundOrchestraName = $sc_page ? preg_replace('/^-sc\./','',$filename).".scd" : "default.orc";
 	$warn_not_empty = TRUE;
 	}
-echo "Csound orchestra file = <input type=\"text\" name=\"CsoundOrchestraName\" size=\"30\" value=\"".$CsoundOrchestraName."\">";
-$link = "file_list.php?dir=".urlencode($dir_csound_resources)."&extension=orc"; // Lists both Csound resource folders
+echo ($sc_page ? "SuperCollider SynthDef file" : "Csound orchestra file")." = <input type=\"text\" name=\"CsoundOrchestraName\" size=\"30\" value=\"".$CsoundOrchestraName."\">";
+$link = "file_list.php?dir=".urlencode($kind_dirs['fixed'])."&extension=".$orchestra_extension; // Lists both resource folders
 echo "<input class=\"save\" type=\"submit\" name=\"savealldata\" onclick=\"this.form.target='_self';return true;\" value=\"SAVE\">";
 echo " <input class=\"edit\" onclick=\"window.open('".$link."','listorchestra','width=200,height=300,left=100'); return false;\" type=\"submit\" name=\"produce\" value=\"which one?\">";
 	echo " ➡ ";
 if($warn_not_empty)
-	echo "<span class=\"red-text\">WARNING: this field should’nt be empty. By default it has been set to ‘default.orc’. </span>";
+	echo "<span class=\"red-text\">WARNING: this field should’nt be empty. By default it has been set to ‘".$CsoundOrchestraName."’. </span>";
 if(file_exists($dir.$CsoundOrchestraName) AND !is_csound_resource_folder($dir)) {
 	move_to_csound_resources($dir,$CsoundOrchestraName);
 	sleep(1);
 	}
 $orchestra_filename = csound_resource_path($CsoundOrchestraName);
-$url_orchestra = "csorchestra.php?file=".urlencode(csound_resource_folder($CsoundOrchestraName).SLASH.$CsoundOrchestraName);
+$url_orchestra = ($sc_page ? "scsynthdef.php" : "csorchestra.php")."?file=".urlencode(csound_resource_folder($CsoundOrchestraName).SLASH.$CsoundOrchestraName);
 if(file_exists($orchestra_filename)) {
 	if(read_only_resource_folder(csound_resource_dir($CsoundOrchestraName))) $label = "View this file";
 	else $label = "Edit this file";
@@ -367,7 +377,8 @@ else echo "File not found";
 echo "<br />";
 // 2026-11-20 Upload of the files and folders used by the orchestra (samples, wave tables...) to the folder of this file,
 // one file per request to csound_upload.php. The fields have no 'name', so that they are not sent with the form of the page - by Claude
-if(!$read_only) {
+// Not for SuperCollider resources, whose SynthDefs don't play samples yet
+if(!$read_only AND !$sc_page) {
 	$upload_accept = ".".implode(",.",csound_sound_extensions());
 	echo "<button type=\"button\" class=\"edit\" style=\"margin-top:6px;\" onclick=\"var b = document.getElementById('cs_upload'); b.style.display = (b.style.display == 'none') ? 'block' : 'none';\">UPLOAD ASSOCIATED FILES/FOLDERS</button>";
 	echo "<div id=\"cs_upload\" class=\"thinborder\" style=\"display:none; padding:6px 1em; margin-top:6px; max-width:40em;\">";
@@ -504,6 +515,7 @@ $begin_tables = "_begin tables";
 echo "<input type=\"hidden\" name=\"begin_tables\" value=\"".$begin_tables."\">";
 echo "<input type=\"hidden\" name=\"index_max\" value=\"".$index_max."\">";
 echo "<table><tr><td>";
+if($sc_page) echo "<div style=\"display:none;\">"; // Csound tables and tonality are not used by SuperCollider resources (the tonality is that of the project)
 echo "<h3>Tables</h3>";
 echo "<p><i>These will be put on top of Csound scores</i></p>";
 echo "<textarea name=\"cstables\" rows=\"5\" style=\"width:400px; background-color:cornsilk; color:black;\">";
@@ -629,6 +641,7 @@ echo $tonality_filename;
 echo "</textarea><br />";
 echo "<input type=\"hidden\" name=\"the_tables\" value='".$cstables."'>";  // For autosave
 echo "<input type=\"hidden\" name=\"dir_scales\" value=\"".$dir_scales."\">";
+if($sc_page) echo "</div>";
 
 if(is_integer(strpos($tonality_filename,"-to.")) OR is_integer(strpos($tonality_filename,".bpto"))) {
 	$url_tonality = "tonality.php?file=".urlencode(tonality_resource_folder($tonality_filename).SLASH.$tonality_filename);
@@ -719,7 +732,11 @@ echo "<p><input class=\"save big\" type=\"submit\" name=\"create_instrument\" on
 echo "</form>";
 
 if($number_instruments > 0) {
-	echo "<h3>Click Csound instruments below to edit them:</h3>";
+	if($sc_page) {
+		echo "<h3>Click instruments below to edit them:</h3>";
+		$sc_synthdefs = scrt_synthdef_names(); // SynthDefs compiled, see _scrt.php
+		}
+	else echo "<h3>Click Csound instruments below to edit them:</h3>";
 	echo "<table  class=\"thicktable\">";
 	$done_index = array();
 	for($j = 0; $j < $number_instruments; $j++) {
@@ -754,6 +771,10 @@ if($number_instruments > 0) {
 		echo "</form>";
 		echo "<td class=\"middle\">";
 		echo "<small>".$InstrumentComment[$j]."</small>";
+		if($sc_page) {
+			if(isset($sc_synthdefs[$CsoundInstrumentName[$j]])) echo "<br /><small>➡ SynthDef <b>".$CsoundInstrumentName[$j]."</b>".($sc_synthdefs[$CsoundInstrumentName[$j]] == "private" ? " (private)" : '')."</small>";
+			else echo "<br /><small><span class=\"red-text\">➡ SynthDef ‘".$CsoundInstrumentName[$j]."’ is not defined</span> in a file ‘*.scd’ (or it has not yet been compiled: this is done when playing)</small>";
+			}
 		echo "</td>";
 		echo "<form method=\"post\" action=\"".$url_this_page."#instruments\" enctype=\"multipart/form-data\">";
 		echo "<td class=\"middle\">";
@@ -783,7 +804,7 @@ if($number_instruments > 0) {
 			echo "<input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"rename_instrument\" value=\"RENAME AS\">: <input type=\"text\" name=\"new_instrument_name\" size=\"15\" value=\"\"><br />";
 			echo "<input class=\"edit\" type=\"submit\" onclick=\"this.form.target='_self';return true;\" name=\"duplicate_instrument\" value=\"DUPLICATE AS\">: <input type=\"text\" name=\"copy_instrument\" size=\"15\" value=\"\"><br />";
 			}
-		echo "<input class=\"save read-only-keep\" type=\"submit\" formaction=\"".$url_this_page."\" onclick=\"this.form.target='_self';return true;\" name=\"copy_instrument_to\" value=\"COPY TO ANOTHER FILE\">";
+		if(!$sc_page) echo "<input class=\"save read-only-keep\" type=\"submit\" formaction=\"".$url_this_page."\" onclick=\"this.form.target='_self';return true;\" name=\"copy_instrument_to\" value=\"COPY TO ANOTHER FILE\">";
 		echo "</td>";
 		echo "</form>";
 		echo "</tr>";

@@ -59,6 +59,7 @@ if($instruction == '') die_with_close_link("ERROR: No instruction has been sent"
 
 $here = isset($_GET['here']) ? urldecode($_GET['here']) : '???';
 $csound_file = $_GET['csound_file'] ?? '';
+$sc_file = basename($_GET['sc_file'] ?? ''); // 2026-11-20 SuperCollider resource ('-sc' file)
 $score_file = $_GET['score'] ?? '';
 $midi_file = $_GET['midifile'] ?? '';
 $eventlist_file = $_GET['eventlistfile'] ?? '';
@@ -143,6 +144,20 @@ else {
 			AND ($csound_orchestra == '' OR $csound_orchestra == "0-default.orc")
 			AND file_exists(csound_resource_path(CSOUND_DEFAULT_RESOURCE)))
 		$csound_file = CSOUND_DEFAULT_RESOURCE;
+	// 2026-11-20 Real-time SuperCollider uses the '-sc' file of the project, otherwise SC_DEFAULT_RESOURCE ("-sc.0-default"), whose instruments
+	// are those of "0-default.orc" with the same numbers and parameters, played by the SynthDefs of the same names (0-default.scd).
+	// The '-cs' file is not used: its instruments are played by Csound.
+	if($file_format == "scrt") {
+		$csound_file = '';
+		if($sc_file == '' OR !file_exists(resource_path("supercollider",$sc_file))) $sc_file = SC_DEFAULT_RESOURCE;
+		if(!file_exists(resource_path("supercollider",$sc_file))) $sc_file = '';
+		}
+	// 2026-11-21 Real-time OSC sends the names and parameters of the instruments of the '-sc' file of the project, otherwise of its '-cs' file
+	else if($file_format == "osc") {
+		if($sc_file <> '' AND file_exists(resource_path("supercollider",$sc_file))) $csound_file = '';
+		else $sc_file = '';
+		}
+	else $sc_file = '';
 
 	$grammar_name = str_replace(" ","_",$grammar_name);
 	$data_name = str_replace(" ","_",$data_name);
@@ -171,7 +186,7 @@ else {
 		}
 	// Real-time Csound uses the MIDI ports for interaction if they have been saved (2026-11-17)
 	$csoundrt_midi = FALSE;
-	if($file_format == "csoundrt") {
+	if($file_format == "csoundrt" OR $file_format == "scrt" OR $file_format == "osc") {
 		$saved_midiport = $dir_midi_resources.$project_fullname."_midiport";
 		if(!file_exists($midiport) AND file_exists($saved_midiport)) copy($saved_midiport,$midiport);
 		$csoundrt_midi = file_exists($midiport);
@@ -188,6 +203,7 @@ else {
 		if($path <> '') $command .= " ".$option." ".quote_if_spaces($path);
 	if($note_convention <> '') $command .= " --".$note_convention;
 	if($csound_file <> '') $command .= " -cs ".csound_resource_path($csound_file);
+	if($sc_file <> '') $command .= " -sc ".quote_if_spaces(resource_path("supercollider",$sc_file));
 	if($tonality_file <> '') $command .= " -to ".tonality_resource_path($tonality_file);
 	if($startup <> '') $command .= " --start ".$startup;
 	$plays_or_produces = in_array($instruction,["produce","produce-all","play","play-all","expand","create_set","enter_notes"]);
@@ -206,6 +222,20 @@ else {
 				if($csoundrt_midi) {
 					$command .= " --rtmidi"; // MIDI ports for interaction, e.g. _script(wait for C3 channel 1)
 					$command .= " --csoundrt-delay ".csoundrt_midi_delay(csoundrt_buffers()); // Silent MIDI notes come with the sound
+					}
+				break;
+			case "scrt": // Real-time SuperCollider, see _scrt.php
+				$command .= " --scrt ".SC_RT_PORT;
+				if($csoundrt_midi) {
+					$command .= " --rtmidi"; // MIDI ports for interaction
+					$command .= " --csoundrt-delay 12"; // Silent MIDI notes come with the sound: about the hardware buffer of scsynth (512 frames)
+					}
+				break;
+			case "osc": // Real-time OSC (Max, Pd...), see _oscrt.php
+				$command .= oscrt_option();
+				if($csoundrt_midi) {
+					$command .= " --rtmidi"; // MIDI ports for interaction
+					$command .= " --csoundrt-delay 0"; // Messages are sent at their dates, as are silent MIDI notes
 					}
 				break;
 			case "eventlist":
@@ -319,7 +349,7 @@ if($instruction <> "help") {
 	if($instruction == "templates") echo "👉 Creating/updating templates<br /><br />";
 	if($instruction == "enter_notes") echo "👉 Entering notes from the MIDI input device.<br /><br />Notes are displayed at the insertion point of your grammar or data.<br />The note convention is chosen in the settings file.<br /><br />👉 You can close this window when done.<br /><br />If it doesn't work, click STOP, then SHOW process, and check connected devices<br />&nbsp;&nbsp;to update the MIDI input.<br /><br />Read <a target=\"_blank\" href=\"https://bolprocessor.org/enter-notes/\">https://bolprocessor.org/enter-notes/</a> for details.<br /><br />";
 	echo "<button id=\"stopBtn\" type=\"button\" class=\"produce\" onclick=\"stopProcess();\">Click to STOP</button>";
-	if(($file_format == "rtmidi" OR $file_format == "csoundrt") AND $instruction <> "enter_notes") {
+	if(($file_format == "rtmidi" OR $file_format == "csoundrt" OR $file_format == "scrt" OR $file_format == "osc") AND $instruction <> "enter_notes") {
 		echo "&nbsp;<button id=\"pauseBtn\" type=\"button\" class=\"produce\" onclick=\"pauseProcess();\">Pause</button>";
 		echo "&nbsp;<button id=\"continueBtn\" type=\"button\" class=\"produce disabled\" disabled onclick=\"continueProcess();\">Continue</button>";
 		// Display the date of the performance, written by the console to the "_time" file every 200 ms
@@ -436,8 +466,29 @@ if($file_format == "csoundrt" AND $instruction <> "help") {
 	if(ob_get_level() > 0) ob_flush();
 	flush();
 	}
+// Real-time SuperCollider: start the server if none is running, and load the SynthDefs (2026-11-20)
+if($file_format == "scrt" AND $instruction <> "help") {
+	$scrt_status = '';
+	if(!scrt_start($scrt_status,$sc_file)) {
+		echo "<script>[\"warning\",\"wait\"].forEach(function(id) { var el = document.getElementById(id); if(el) el.style.display = \"none\"; });</script>";
+		echo "<p><span class=\"red-text\">➡ Real-time SuperCollider could not start:</span> ".$scrt_status."</p>";
+		die();
+		}
+	$table = explode("|",$scrt_status,2);
+	if($table[0] == "started") echo "<p><small><b><span class=\"red-text\">SuperCollider ➡</span></b> The SuperCollider server has been started on UDP port ".SC_RT_PORT."</small></p>\n";
+	if(isset($table[1])) echo "<p><small><b><span class=\"red-text\">SuperCollider ➡</span></b> ".$table[1]."</small></p>\n";
+	$scrt_log_offset = scrt_log_size();
+	scrt_begin_performance();
+	if(ob_get_level() > 0) ob_flush();
+	flush();
+	}
 // $command = "ASAN_OPTIONS=detect_leaks=0 ".$command; // This is for debugging
 $o = send_to_console($command);
+if($file_format == "scrt") {
+	scrt_end_performance(); // A server started by the Bol Processor will quit if it is not used for a while
+	usleep(300000);
+	$csound_report = scrt_errors_report($scrt_log_offset);
+	}
 if($file_format == "csoundrt") {
 	csoundrt_end_performance(); // The server will quit if it is not used for a while
 	usleep(300000); // Let Csound write its last messages

@@ -139,9 +139,10 @@ if(isset($_POST['apply_changes_instructions'])) {
 
 if(isset($_POST['set_csound_file']) AND isset($_POST['new_csound_file']) AND $_POST['new_csound_file'] <> '') {
 	// "Change instruments": the selected "-cs" file is added on top of the grammar (2026-11-18)
+	// or the selected "-sc" file in real-time SuperCollider (2026-11-21), replacing the line of another file of the same kind
 	$content = @file_get_contents($this_file,TRUE);
 	$extract_data = extract_data(TRUE,TRUE,$content);
-	$_POST['thistext'] = add_csound_resource_to_content($extract_data['content'],basename($_POST['new_csound_file']));
+	$_POST['thistext'] = add_csound_resource_to_content($extract_data['content'],basename($_POST['new_csound_file']),isset($_POST['change_for_osc']));
 	$no_save_midiresources = TRUE;
 	$need_to_save = TRUE;
 	}
@@ -155,7 +156,7 @@ if(isset($_POST['savemidiport'])) {
 
 if(isset($_POST['new_file_format'])) {
 	$file_format = $_POST['new_file_format'];
-	if($file_format == "rtmidi" OR $file_format == "csoundrt") read_midiressources($filename);
+	if($file_format == "rtmidi" OR $file_format == "csoundrt" OR $file_format == "scrt" OR $file_format == "osc") read_midiressources($filename);
 	$no_save_midiresources = TRUE;
 	}
 save_settings2("grammar_file_format",$filename,$file_format); // To _settings.php
@@ -196,7 +197,7 @@ if($need_to_save OR isset($_POST['savethisfile']) OR isset($_POST['compilegramma
 		}
 	else @unlink($file_path);
 	// Real-time Csound uses the MIDI ports for interaction, e.g. _script(wait for C3 channel 1)
-	if(($file_format == "rtmidi" OR $file_format == "csoundrt") AND !$no_save_midiresources) {
+	if(($file_format == "rtmidi" OR $file_format == "csoundrt" OR $file_format == "scrt" OR $file_format == "osc") AND !$no_save_midiresources) {
 		if(file_exists($refresh_file)) {
 			read_midiressources($filename);
 			store_midiressources($filename);
@@ -357,6 +358,7 @@ $alphabet_file = $extract_data['alphabet'];
 $data_file = $extract_data['data'];
 $objects_file = $extract_data['objects'];
 $csound_file = $extract_data['csound'];
+$sc_file = $extract_data['supercollider']; // 2026-11-20 SuperCollider resource ('-sc' file)
 $tonality_file = $extract_data['tonality'];
 $settings_file = $extract_data['settings'];
 $orchestra_file = $extract_data['orchestra'];
@@ -439,12 +441,13 @@ echo "<p style=\"text-align:left;\">";
 $csound_is_responsive = FALSE;
 echo "<div style=\"float:right; padding:6px; background-color:transparent;\">";
 $csound_is_responsive = check_csound();
+check_supercollider(); // 2026-11-21
 link_to_tonality();
 echo "</div>";
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
-echo "<table cellpadding=\"8px;\" id=\"topmidiports\" class=\"thinborder\"><tr>";
-echo "<td style=\"white-space:nowrap;\">";
-if($file_format <> "rtmidi" AND $file_format <> "csoundrt") {
+echo "<table cellpadding=\"8px;\" id=\"topmidiports\" class=\"thinborder\" style=\"width:1%;\"><tr>";
+echo "<td style=\"width:1%;\">"; // 2026-11-21 Both columns are as narrow as their content allows
+if($file_format <> "rtmidi" AND $file_format <> "csoundrt" AND $file_format <> "scrt" AND $file_format <> "osc") {
 	for($i = 0; $i < $NumberMIDIoutputs; $i++) {
 		echo "<input type=\"hidden\" name=\"MIDIoutput_".$i."\" value=\"".$MIDIoutput[$i]."\">";
 		echo "<input type=\"hidden\" name=\"MIDIoutputname_".$i."\" value=\"".$MIDIoutputname[$i]."\">";
@@ -468,6 +471,18 @@ else if($file_format == "csoundrt") {
 	csoundrt_panel($this_orchestra,$csound_file);
 	display_midi_ports($filename);
 	}
+else if($file_format == "osc") {
+	// Real-time OSC: notes are sent to a program such as Max or Pd, MIDI ports are used for interaction
+	echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
+	oscrt_panel($sc_file,$csound_file);
+	display_midi_ports($filename);
+	}
+else if($file_format == "scrt") {
+	// Real-time SuperCollider: notes are played by the SynthDefs, MIDI ports are used for interaction
+	echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
+	scrt_panel($sc_file,$csound_file);
+	display_midi_ports($filename);
+	}
 else {
 	echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
 	display_midi_ports($filename);
@@ -475,7 +490,7 @@ else {
 read_midiressources($filename);
 // if($file_format == "rtmidi") echo " 👉 Delete the name if you change a number!";
 echo "</td>";
-echo "<td id=\"topmidiports\" style=\"vertical-align:middle;\">";
+echo "<td id=\"topmidiports\" style=\"vertical-align:middle; width:1%;\">";
 if($file_format == '') {
 	$file_format = "rtmidi";
 	save_settings2("grammar_file_format",$filename,$file_format);
@@ -550,6 +565,12 @@ if($csound_file <> '') {
 		}
 	else $link_produce .= "&csound_file=".urlencode($csound_file);
 	}
+if($sc_file <> '') {
+	if(!file_exists(resource_path("supercollider",$sc_file))) {
+		$upload_mssg .= "<br /><span class=\"red-text\">WARNING: </span><span class=\"green-text\">".$sc_file."</span> not found in ‘supercollider_resources’<br />";
+		}
+	else $link_produce .= "&sc_file=".urlencode($sc_file);
+	}
 if($tonality_file <> '') {
 	if(!file_exists(tonality_resource_path($tonality_file))) {
 		$upload_mssg .= "<br /><span class=\"red-text\">WARNING: </span><span class=\"green-text\">".tonality_resource_path($tonality_file)."</span> not found<br />";
@@ -581,7 +602,7 @@ if($file_format == "eventlist") {
 	$eventlist_file = $output_file;
 	$link_produce .= "&eventlistfile=".urlencode($output.SLASH.$eventlist_file);
 	}
-if(($file_format == "rtmidi" OR $file_format == "csoundrt" OR $file_format == "csound" OR $file_format == "midi") AND $action == "produce-all") $output_file .= ".bpda";
+if(($file_format == "rtmidi" OR $file_format == "csoundrt" OR $file_format == "scrt" OR $file_format == "osc" OR $file_format == "csound" OR $file_format == "midi") AND $action == "produce-all") $output_file .= ".bpda";
 /* if($file_format == "rtmidi" AND file_exists($refresh_file)) $refresh_instruction = "document.getElementById('refresh').style.display = 'inline';";
 else $refresh_instruction = ''; */
 $window_name = window_name($filename);
@@ -673,7 +694,7 @@ else echo "•&nbsp;Time is <span class=\"red-text\">".nature_of_time($nature_of
 if($non_stop_improvize > 0) {
 	if($max_items == 0) $max_items = 20;
 	echo "• <span class=\"red-text\">Non-stop improvize</span> as per <span class=\"green-text\">‘".$settings_file."’</span>";
-	if($file_format <> "rtmidi" AND $file_format <> "csoundrt") echo ": <i>only ".$max_items." variations will be produced</i>";
+	if($file_format <> "rtmidi" AND $file_format <> "csoundrt" AND $file_format <> "scrt" AND $file_format <> "osc") echo ": <i>only ".$max_items." variations will be produced</i>";
 	echo "<br />";
 	}
 if($play_each_sub > 0) {
@@ -689,7 +710,7 @@ if($C4key <> 60) {
 if($found_elsewhere AND $objects_file <> '') echo "• <span class=\"red-text\">Sound-object prototype</span> file = <span class=\"green-text\">‘".$objects_file."’</span> found in <span class=\"green-text\">‘".$alphabet_file."’</span><br />";
 if($produce_all_items == 1) {
 	echo "• <span class=\"red-text\">Produce all items</span> is set ON by <span class=\"green-text\">‘".$settings_file."’</span>";
-	if($file_format <> "rtmidi" AND $file_format <> "csoundrt") echo ": <i>only ".$max_items." variations will be produced</i>";
+	if($file_format <> "rtmidi" AND $file_format <> "csoundrt" AND $file_format <> "scrt" AND $file_format <> "osc") echo ": <i>only ".$max_items." variations will be produced</i>";
 	echo "<br />";
 	}
 else if($show_production == 1) echo "• <span class=\"red-text\">Show production</span> is set ON by <span class=\"green-text\">‘".$settings_file."’</span><br />";
@@ -929,6 +950,7 @@ if($alphabet_file <> '') $link_produce .= "&alphabet=".urlencode($dir.$alphabet_
 if($settings_file <> '' AND file_exists($dir.$settings_file)) $link_produce .= "&settings=".urlencode($dir.$settings_file);
 if($objects_file <> '') $link_produce .= "&objects=".urlencode($dir.$objects_file);
 if($csound_file <> '') $link_produce .= "&csound_file=".urlencode($csound_file);
+if($sc_file <> '' AND file_exists(resource_path("supercollider",$sc_file))) $link_produce .= "&sc_file=".urlencode($sc_file);
 if($tonality_file <> '') $link_produce .= "&tonality_file=".urlencode($tonality_file);
 if(file_exists(csound_resource_path($csound_orchestra))) $link_produce .= "&csound_orchestra=".urlencode($csound_orchestra);
 $link_produce .= "&output=".urlencode($output.SLASH.$output_file)."&format=".$file_format;

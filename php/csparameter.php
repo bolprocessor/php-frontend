@@ -36,7 +36,7 @@ stale_subpage($temp_folder); // 2026-11-10
 // 2026-11-19 The instruments of a fixed '-cs' file of "csound_resources" can only be viewed - by Claude
 if(csound_temp_read_only($temp_folder)) {
 	foreach(array('saveparameter') as $action) unset($_POST[$action]);
-	echo "<p><span class=\"red-text\">➡ This instrument belongs to a fixed Csound resource of the distribution: it can be viewed but not changed.</span></p>";
+	echo "<p><span class=\"red-text\">➡ This instrument belongs to a fixed ".(str_starts_with($temp_folder,"-sc.") ? "SuperCollider" : "Csound")." resource of the distribution: it can be viewed but not changed.</span></p>";
 	read_only_page_script();
 	}
 
@@ -48,7 +48,8 @@ if($test) echo "parameter_name = ".$parameter_name."<br />";
 
 echo "<p>Folder of this instrument: <span class=\"green-text\">".$folder_this_instrument."</span>";
 echo link_to_help();
-echo "<h2>Csound parameter <big>“<span class=\"turquoise-text\">".$parameter_name."</span>”</big></h2>";
+echo "<h2>".(str_starts_with($temp_folder,"-sc.") ? "SuperCollider" : "Csound")." parameter <big>“<span class=\"turquoise-text\">".$parameter_name."</span>”</big></h2>";
+if(str_starts_with($temp_folder,"-sc.")) echo "<p>In SuperCollider, the start value is sent as argument ‘".$parameter_name."’ and the end value as ‘".$parameter_name."2’. ‘table’ and ‘GEN’ are not used.</p>"; // 2026-11-20
 echo "<p>This parameter belongs to <big>_ins(".$instrument_index.") “<span class=\"green-text\">".$instrument_name."</span>”</big> in file “<span class=\"green-text\">".$csfilename."</span>”</p>";
 
 if(isset($_POST['saveparameter'])) {

@@ -3,9 +3,11 @@ require_once("_basic_tasks.php");
 // 2026-11-19 "csound_resources_private" is listed together with "csound_resources", and "tonality_resources_private" with "tonality_resources" - by Claude
 if($path == $csound_resources_private) $path = $csound_resources;
 if($path == $tonality_resources_private) $path = $tonality_resources;
+if($path == $supercollider_resources_private) $path = $supercollider_resources; // 2026-11-20
 $csound_folder = ($path == $csound_resources);
 $tonality_folder = ($path == $tonality_resources);
-$resource_kind = $csound_folder ? "csound" : ($tonality_folder ? "tonality" : '');
+$supercollider_folder = ($path == $supercollider_resources);
+$resource_kind = $csound_folder ? "csound" : ($tonality_folder ? "tonality" : ($supercollider_folder ? "supercollider" : ''));
 $resource_folder = ($resource_kind <> '');
 if($path <> '') $filename = $path;
 else $filename = "Bol Processor";
@@ -36,7 +38,7 @@ if($path <> '' AND $_SERVER['REQUEST_METHOD'] === 'POST') {
 					}
 				// 2026-11-19 Only resources of the right kind are imported to a resource folder, and they may not replace or hide a file with the same name in either folder - by Claude
 				else if($resource_folder AND resource_kind_of_type($type_of_file['type']) <> $resource_kind) {
-					echo "<span class=\"red-text\">➡</span> File '".htmlspecialchars($fileName)."' ignored (not a ".($resource_kind == "csound" ? "Csound" : "tonality")." resource)<br>";
+					echo "<span class=\"red-text\">➡</span> File '".htmlspecialchars($fileName)."' ignored (not a ".($resource_kind == "csound" ? "Csound" : ($resource_kind == "supercollider" ? "SuperCollider" : "tonality"))." resource)<br>";
 					unlink($tmpName);
 					}
 				else if($resource_folder AND file_exists(resource_path($resource_kind,$fileName))) {
@@ -349,6 +351,32 @@ if(isset($_POST['create_tonality'])) {
 			}
 		}
 	}
+// 2026-11-20 New SuperCollider resources ('-sc' files) and SynthDef files ('*.scd'), in "supercollider_resources_private" (or "supercollider_resources" by the designer) - by Claude
+if(isset($_POST['create_supercollider']) OR isset($_POST['create_scsynthdef'])) {
+	$filename = trim(fix_new_name(trim($_POST['filename']),TRUE));
+	$filename = preg_replace(array('/^-sc\./','/\.scd$/'),'',$filename);
+	if($filename <> '' AND $filename[0] <> '.') {
+		$scd_name = $filename.".scd";
+		$filename = isset($_POST['create_supercollider']) ? "-sc.".$filename : $scd_name;
+		$new_file = $filename;
+		$create_dir = new_resource_folder("supercollider");
+		if(file_exists($dir_supercollider_resources.$filename) OR file_exists($dir_supercollider_resources_private.$filename)) {
+			echo "<p><span class=\"red-text\">This file already exists:</span> <span class=\"red-text\">".$filename."</span></p>";
+			}
+		else {
+			if(isset($_POST['create_supercollider'])) {
+				// Format of a '-cs' file, naming the file of SynthDefs with the same name
+				$data = cs_new_data();
+				$data["orchestra"] = $scd_name;
+				$data["tables"] = array(); // Csound tables are not used
+				$content = csound_data_to_json($top_header."\n// SuperCollider resource file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s')." GMT",$data);
+				}
+			else $content = "// SynthDefs for the Bol Processor (real-time SuperCollider). Each one plays the instrument of the same name in '-sc' files.\n// See supercollider_resources/0-default.scd for the arguments sent by the Bol Processor.\n\n(\n)\n";
+			file_put_contents($create_dir.$filename,$content);
+			chmod($create_dir.$filename,$permissions);
+			}
+		}
+	}
 if(isset($_POST['create_csound_orchestra'])) {
 	$filename = trim($_POST['filename']);
 	$filename = str_replace(".orc",'',$filename);
@@ -372,6 +400,7 @@ if(isset($_POST['create_script'])) {
 	$filename = trim($_POST['filename']);
 	if($filename <> '') {
 		$filename = good_name($type,$filename,$name_mode);
+		if(str_starts_with($filename,"-sc.")) $filename = "+sc.".substr($filename,4); // 2026-11-20 '-sc' is the prefix of SuperCollider resources
 		$new_file = $filename;
 		if(file_exists($dir.SLASH.$filename)) {
 			echo "<p><span class=\"red-text\">This file already exists:</span> <span class=\"red-text\">".$filename."</span></p>";
@@ -430,6 +459,7 @@ if($path == $trash_folder AND isset($_POST['empty_trash'])) {
 if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension <> "temp" AND !$delete_files AND !$rename_files AND !$move_files AND !$download_files) {
 	echo "<div style=\"float:right; padding:6px; background-color:transparent;\">";
 	if($path <> '') check_csound();
+	if($path <> '') check_supercollider(); // 2026-11-21
 	if(!is_integer(strpos($path,$tonality_resources)) AND $path <> '') link_to_tonality();
 	if($path <> '') {
 		echo "<button class=\"save big\" onclick=\"toggleimport(); return false;\">IMPORT FILES</button><br />";
@@ -441,7 +471,7 @@ if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension 
 		echo "</form>";
 		echo "</div>";
 		}
-	if($path <> $csound_resources AND $path <> $tonality_resources) {
+	if($path <> $csound_resources AND $path <> $tonality_resources AND $path <> $supercollider_resources) {
 		if($path <> '') echo "<br /><button class=\"save big\" onclick=\"togglecreate(); return false;\">CREATE FILES OR FOLDERS</button>";
 		else echo "<br /><button class=\"save big\" onclick=\"togglecreate(); return false;\">CREATE FOLDERS</button>";
 		echo "<div id=\"create\" style=\"background-color:transparent;\">";
@@ -497,7 +527,7 @@ if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension 
 			echo "<input class=\"save\" type=\"submit\" name=\"create_script\" value=\"CREATE NEW SCRIPT\"><br />named:&nbsp;";
 			echo "<input type=\"text\" name=\"filename\" size=\"20\" style=\"background-color:CornSilk;\" value=\"\">";
 			$type = "sc";
-			echo "<br /><input type=\"radio\" name=\"name_mode\" value=\"prefix\" checked>with prefix ‘-".$type."’";
+			echo "<br /><input type=\"radio\" name=\"name_mode\" value=\"prefix\" checked>with prefix ‘+".$type."’";
 			echo "<br /><input type=\"radio\" name=\"name_mode\" value=\"extension\">with extension ‘bp".$type."’";
 			echo "<input type=\"hidden\" name=\"type\" value=\"".$type."\">";
 			echo "</p>";
@@ -545,6 +575,19 @@ if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension 
 		if($i_am_designer) echo "<br /><input type=\"checkbox\" name=\"in_fixed\">in ‘".$csound_resources."’ (fixed)";
 		echo "</p>";
 		echo "</form>";
+		}
+	else if($supercollider_folder) { // 2026-11-20
+		foreach(array("create_supercollider" => "CREATE NEW SUPERCOLLIDER RESOURCE FILE","create_scsynthdef" => "CREATE NEW SYNTHDEF FILE") as $create_name => $create_label) {
+			echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
+			echo "<p style=\"text-align:left;\">";
+			echo "<input class=\"save\" type=\"submit\" name=\"".$create_name."\" value=\"".$create_label."\"><br />named:&nbsp";
+			if($create_name == "create_supercollider") echo "-sc.";
+			echo "<input type=\"text\" name=\"filename\" size=\"20\" style=\"background-color:CornSilk;\" value=\"\">";
+			if($create_name == "create_scsynthdef") echo ".scd";
+			if($i_am_designer) echo "<br /><input type=\"checkbox\" name=\"in_fixed\">in ‘".$supercollider_resources."’ (fixed)";
+			echo "</p>";
+			echo "</form>";
+			}
 		}
 	else if($tonality_folder) { // 2026-11-19 Below IMPORT FILES, as in the Csound resource folder
 		echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";
@@ -639,7 +682,7 @@ if($path <> '') {
 	if(!$rename_files AND !$delete_files AND !$move_files AND !$download_files AND $path == $trash_folder) {
 		echo "<br /><br />🗑&nbsp;<input style=\"background-color:red; color:white;\" title=\"Empty trash\" type=\"submit\" name=\"empty_trash\" value=\"EMPTY THIS TRASH\"> 👉 can't be reversed!";
 		}
-	if(!$show_dependencies AND !$delete_files AND !$move_files AND !$download_files AND $path <> $trash_folder AND !is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"tonality_resources"))) echo "<br /><input class=\"edit\" title=\"Show dependencies of files (links to other files)\" type=\"submit\" name=\"show_dependencies\" value=\"SHOW DEPENDENCIES\"> (links between files)";
+	if(!$show_dependencies AND !$delete_files AND !$move_files AND !$download_files AND $path <> $trash_folder AND !is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"tonality_resources")) AND !is_integer(strpos($path,"supercollider_resources"))) echo "<br /><input class=\"edit\" title=\"Show dependencies of files (links to other files)\" type=\"submit\" name=\"show_dependencies\" value=\"SHOW DEPENDENCIES\"> (links between files)";
 	else if($show_dependencies) echo "<br /><br /><input class=\"cancel\" type=\"submit\" value=\"HIDE DEPENDENCIES\">";
 	echo "<br /><br />";
 	}
@@ -689,7 +732,7 @@ if(is_integer(strpos($path,"scale_images"))) {
 	echo "</tr>";
 	}
 
-if(!is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"tonality_resources"))) {
+if(!is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"tonality_resources")) AND !is_integer(strpos($path,"supercollider_resources"))) {
 	if($path <> '' OR $show_grammar OR $show_data) {
 		echo "<tr>";
 		echo "<th>";
@@ -795,7 +838,7 @@ if(!is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"t
 if($path <> '') {
 	$n3 = display_directory(TRUE,$dir,'');
 	echo "<tr>";
-	if(!is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"tonality_resources"))) {
+	if(!is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"tonality_resources")) AND !is_integer(strpos($path,"supercollider_resources"))) {
 		echo "<td style=\"padding-bottom:6px;\">";
 		if($n1 > 0) display_directory(FALSE,$dir,"settings");
 		echo "</td>";
@@ -848,7 +891,7 @@ function display_directory($test,$dir,$filter) {
 		$duplicate_script = TRUE;
 		// 2026-11-19 Script of the DUPLICATE buttons: asks for a name not used in either folder, then posts it - by Claude
 		echo "<script>\nvar csNames = ".json_encode(array_values($dircontent)).";\n";
-		echo "function duplicateResource(file) {\n\tvar m, pre = '', ext = '';\n\tif(m = file.match(/^-(cs|to)\\./)) pre = m[0];\n\telse if(m = file.match(/\\.(orc|bpcs|bpto)$/)) ext = m[0];\n\tvar name = prompt('Duplicate ' + file + ' to ".resource_dirs($resource_kind)['my_name']." as:', '');\n\tif(name === null) return false;\n\tname = name.trim().replace(/[ +$:\\/\\\\]/g,'_');\n\tname = name.replace(/^-(cs|to)\\./,'').replace(/\\.(orc|bpcs|bpto)$/,'');\n\tif(name == '' || name[0] == '.') { alert('Invalid name'); return false; }\n\tname = pre + name + ext;\n\tif(csNames.indexOf(name) >= 0) { alert(name + ' already exists'); return duplicateResource(file); }\n";
+		echo "function duplicateResource(file) {\n\tvar m, pre = '', ext = '';\n\tif(m = file.match(/^-(cs|to|sc)\\./)) pre = m[0];\n\telse if(m = file.match(/\\.(orc|bpcs|bpto|scd)$/)) ext = m[0];\n\tvar name = prompt('Duplicate ' + file + ' to ".resource_dirs($resource_kind)['my_name']." as:', '');\n\tif(name === null) return false;\n\tname = name.trim().replace(/[ +$:\\/\\\\]/g,'_');\n\tname = name.replace(/^-(cs|to|sc)\\./,'').replace(/\\.(orc|bpcs|bpto|scd)$/,'');\n\tif(name == '' || name[0] == '.') { alert('Invalid name'); return false; }\n\tname = pre + name + ext;\n\tif(csNames.indexOf(name) >= 0) { alert(name + ' already exists'); return duplicateResource(file); }\n";
 		echo "\tvar f = document.createElement('form'); f.method = 'post'; f.action = window.location.href;\n\t[['duplicate_resource',file],['duplicate_name',name]].forEach(function(p) { var i = document.createElement('input'); i.type = 'hidden'; i.name = p[0]; i.value = p[1]; f.appendChild(i); });\n\tdocument.body.appendChild(f); f.submit(); return false;\n\t}\n";
 		echo "function trashResource(file) {\n\tif(!confirm('Move ' + file + ' to the trash?')) return false;\n\tvar f = document.createElement('form'); f.method = 'post'; f.action = window.location.href;\n\tvar i = document.createElement('input'); i.type = 'hidden'; i.name = 'trash_resource'; i.value = file; f.appendChild(i);\n\tdocument.body.appendChild(f); f.submit(); return false;\n\t}\n</script>\n";
 		}

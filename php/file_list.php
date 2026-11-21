@@ -13,6 +13,7 @@ if($dir <> '') {
 	// 2026-11-19 Both Csound (or tonality) resource folders are listed together - by Claude
 	if(is_csound_resource_folder($dir)) $dircontent = array_keys(csound_resource_files());
 	else if(is_tonality_resource_folder($dir)) $dircontent = array_keys(resource_files("tonality"));
+	else if(is_resource_folder("supercollider",$dir)) $dircontent = array_keys(resource_files("supercollider")); // 2026-11-20
 	else $dircontent = scandir($dir);
 	foreach($dircontent as $file) {
 		if($file[0] == '.') continue;

@@ -1310,9 +1310,10 @@ if(isset($_POST['apply_changes_instructions'])) {
 
 if(isset($_POST['set_csound_file']) AND isset($_POST['new_csound_file']) AND $_POST['new_csound_file'] <> '') {
 	// "Change instruments": the selected "-cs" file is added on top of the data (2026-11-18)
+	// or the selected "-sc" file in real-time SuperCollider (2026-11-21), replacing the line of another file of the same kind
 	$content = @file_get_contents($this_file,TRUE);
 	$extract_data = extract_data(FALSE,TRUE,$content);
-	$_POST['thistext'] = add_csound_resource_to_content($extract_data['content'],basename($_POST['new_csound_file']));
+	$_POST['thistext'] = add_csound_resource_to_content($extract_data['content'],basename($_POST['new_csound_file']),isset($_POST['change_for_osc']));
 	$no_save_midiresources = TRUE;
 	$need_to_save = TRUE;
 	}
@@ -1334,7 +1335,7 @@ if($need_to_save OR isset($_POST['savethisfile'])) {
 	$content = preg_replace("/ +/u",' ',$content);
 	save($this_file,$filename,$top_header,$content);
 	// Real-time Csound uses the MIDI ports for interaction, e.g. _script(wait for C3 channel 1)
-	if(($file_format == "rtmidi" OR $file_format == "csoundrt") AND !$no_save_midiresources) {
+	if(($file_format == "rtmidi" OR $file_format == "csoundrt" OR $file_format == "scrt" OR $file_format == "osc") AND !$no_save_midiresources) {
 		if(file_exists($refresh_file)) {
 			read_midiressources($filename);
 			store_midiressources($filename);
@@ -1369,6 +1370,7 @@ $alphabet_file = $extract_data['alphabet'];
 $grammar_file = $extract_data['grammar'];
 $objects_file = $extract_data['objects'];
 $csound_file = $extract_data['csound'];
+$sc_file = $extract_data['supercollider']; // 2026-11-20 SuperCollider resource ('-sc' file)
 $tonality_file = $extract_data['tonality'];
 $settings_file = $extract_data['settings'];
 $orchestra_file = $extract_data['orchestra'];
@@ -1545,7 +1547,7 @@ $file_format = $default_output_format;
 if(isset($data_file_format[$filename])) $file_format = $data_file_format[$filename];
 if(isset($_POST['new_file_format'])) {
 	$file_format = $_POST['new_file_format'];
-	if($file_format == "rtmidi" OR $file_format == "csoundrt") read_midiressources($filename);
+	if($file_format == "rtmidi" OR $file_format == "csoundrt" OR $file_format == "scrt" OR $file_format == "osc") read_midiressources($filename);
 	$no_save_midiresources = TRUE;
 	}
 save_settings2("data_file_format",$filename,$file_format); // To _settings.php
@@ -1569,14 +1571,15 @@ $content = show_instruments_and_scales($dir,$objects_file,$content,$url_this_pag
 if(!isset($_POST['analyze_tonal'])) {
 	echo "<div style=\"float:right; padding-right:6px; padding-left:6px; background-color:transparent;\">";
 	$csound_is_responsive = check_csound(TRUE); // Inside the form opened at the top of the page
+	check_supercollider(); // 2026-11-21
 	link_to_tonality();
 	echo "</div>";
 	}
 
 if(!isset($_POST['analyze_tonal'])) {
-	echo "<table id=\"topedit\" cellpadding=\"8px;\" class=\"thinborder\"><tr >";
-	echo "<td id=\"topmidiports\" style=\"white-space:nowrap;\">";
-	if($file_format <> "rtmidi" AND $file_format <> "csoundrt") {
+	echo "<table id=\"topedit\" cellpadding=\"8px;\" class=\"thinborder\" style=\"width:1%;\"><tr >";
+	echo "<td id=\"topmidiports\" style=\"width:1%;\">"; // 2026-11-21 Both columns are as narrow as their content allows
+	if($file_format <> "rtmidi" AND $file_format <> "csoundrt" AND $file_format <> "scrt" AND $file_format <> "osc") {
 		for($i = 0; $i < $NumberMIDIoutputs; $i++) {
 			echo "<input type=\"hidden\" name=\"MIDIoutput_".$i."\" value=\"".$MIDIoutput[$i]."\">";
 			echo "<input type=\"hidden\" name=\"MIDIoutputname_".$i."\" value=\"".$MIDIoutputname[$i]."\">";
@@ -1600,13 +1603,25 @@ if(!isset($_POST['analyze_tonal'])) {
 		csoundrt_panel($csound_orchestra,$csound_file);
 		display_midi_ports($filename);
 		}
+	else if($file_format == "osc") {
+		// Real-time OSC: notes are sent to a program such as Max or Pd, MIDI ports are used for interaction
+		echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
+		oscrt_panel($sc_file,$csound_file);
+		display_midi_ports($filename);
+		}
+	else if($file_format == "scrt") {
+		// Real-time SuperCollider: notes are played by the SynthDefs, MIDI ports are used for interaction
+		echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
+		scrt_panel($sc_file,$csound_file);
+		display_midi_ports($filename);
+		}
 	else {
 		echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
 		display_midi_ports($filename);
 		}
 	read_midiressources($filename);
 	echo "</td>";
-	echo "<td id=\"topmidiports\" style=\"vertical-align:middle;\"><p style=\"text-align:left;\">";
+	echo "<td id=\"topmidiports\" style=\"vertical-align:middle; width:1%;\"><p style=\"text-align:left;\">";
 	show_file_format_choice("data",$file_format,$url_this_page,$filename);
 	echo "</p>";
 	echo "</td>";
@@ -1663,6 +1678,11 @@ if($keyboard_file <> '') {
 		$error = TRUE;
 		}
 	}
+if($sc_file <> '') {
+	if(!file_exists(resource_path("supercollider",$sc_file)))
+		$upload_mssg .= "<br /><span class=\"red-text\">WARNING:</span> <span class=\"green-text\">".$sc_file."</span> not found in ‘supercollider_resources’<br />";
+	else $link_options .= "&sc_file=".urlencode($sc_file);
+	}
 if($csound_file <> '') {
 	if(!file_exists(csound_resource_path($csound_file))) {
 		$upload_mssg .= "<br /><span class=\"red-text\">WARNING:</span> <span class=\"green-text\">".$csound_file."</span> not found<br />";
@@ -1697,7 +1717,8 @@ if(!isset($_POST['analyze_tonal'])) {
 	echo $save_warning;
 	if($file_format == "csound") echo "<p>&nbsp;</p>";
 	else {
-		echo "<br /><div class=\"thinborder\" style=\"width:50%; padding-left:0.5em;\">";
+		// 2026-11-21 As wide as its content, and at least as wide as the table of output formats above it (script below)
+		echo "<br /><div id=\"capture_box\" class=\"thinborder\" style=\"display:inline-block; box-sizing:border-box; padding-left:0.5em; padding-right:0.5em;\">";
 		echo "<input type=\"hidden\" name=\"capture_file\" value=\"".$capture_file."\">";
 		if(file_exists($capture_file) AND is_capture_file($capture_file)) {
 			$link_analyse_capture = "capture_analysis.php?data=".urlencode($capture_file)."&quantization=".$quantization."&minimum_period=".$minimum_period."&trace_capture_analysis=".$trace_capture_analysis;
@@ -1720,6 +1741,7 @@ if(!isset($_POST['analyze_tonal'])) {
 			echo "</p>";
 			}
 		echo "</div>";
+		echo "<script>(function() { var t = document.getElementById('topedit'), d = document.getElementById('capture_box'); if(t && d) d.style.minWidth = t.offsetWidth + 'px'; })();</script>";
 		}
 	echo "<p id=\"downloadupload\"><button class=\"save\"\" onclick=\"toggledownload(); return false;\">DOWNLOAD / UPLOAD</button>&nbsp;<button class=\"edit\"\" onclick=\"togglesearch(); return false;\">SEARCH & REPLACE</button>";
 	enter_notes_button($filename,$NumberMIDIinputs,$dir,$settings_file);
@@ -2125,12 +2147,12 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 		if($error_mssg == '') {
 			echo "<input id=\"Button\" class=\"produce\" onmouseover=\"checksaved();\" onclick=\"event.preventDefault(); if(checksaved()) {window.open('".$link_play."','".$window_name_."','width=800,height=800,left=200'); return false;}\" type=\"submit\" name=\"produce\" title=\"Play polymetric expression\" value=\"PLAY\">&nbsp;";
 			if($chunked) echo "<input class=\"produce\" onmouseover=\"checksaved();\" onclick=\"event.preventDefault(); if(checksaved()) {window.open('".$link_play_chunked."','".$window_name_chunked."','width=800,height=800,left=150,toolbar=yes'); return false;}\" type=\"submit\" name=\"produce\" title=\"Play polymetric expression in chunks to save RAM\" value=\"PLAY safe (".$chunk_number." chunks)\">&nbsp;";
-			echo "&nbsp;<input class=\"edit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_expand."','".$window_name_expand."','width=800,height=800,left=100'); return false;\" type=\"submit\" name=\"produce\" title=\"Expand polymetric expression\" value=\"EXPAND\">";
+			echo "&nbsp;<input class=\"edit\" style=\"font-size:11px;\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_expand."','".$window_name_expand."','width=800,height=800,left=100'); return false;\" type=\"submit\" name=\"produce\" title=\"Expand polymetric expression\" value=\"EXPAND\">";
 			if($grammar_file <> '' AND file_exists($dir.$grammar_file))
 			//	echo $link_analyze_item."<br />";
 				echo "&nbsp;<input id=\"Button\" class=\"produce\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_analyze_item."','".$window_name_analyze."','width=800,height=800,left=100'); return false;\" type=\"submit\" name=\"produce\" title=\"Analyse this item versus the grammar\" value=\"Analyse\"> ";
 			if($chunked) {
-				echo "<br  /><input id=\"saveButton\" class=\"save\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" title=\"Create a new sample set\" value=\"refresh\">&nbsp;<span class=\"red-text\">➡&nbsp;</span>";
+				echo "<br  /><input id=\"saveButton\" class=\"save\" style=\"font-size:11px;\" type=\"submit\" onclick=\"clearsave();\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" title=\"Create a new sample set\" value=\"refresh\">&nbsp;<span class=\"red-text\">➡&nbsp;</span>";
 				$empty_minimised_set = !(isset($data_min_units[$i_item-1]) AND file_exists($data_min_units[$i_item-1]) AND number_of_lines_in_file($data_min_units[$i_item-1]) > 0);
 				$window_name_samples = "samples".$i_item;
 				if(isset($is_minimised[$i_item-1]) AND $is_minimised[$i_item-1]) {
@@ -2141,12 +2163,12 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 				else {
 					$create_button = "CREATE DATASET FOR AI";
 					$name_minimise_units = "minimise_units_".($i_item - 1);
-					if($empty_minimised_set) echo "<input id=\"saveButton\" class=\"save\" type=\"submit\" formaction=\"".$url_this_page."#topedit\" name=\"".$name_minimise_units."\" title=\"Minimise polymetric expressions\" value=\"mini\">&nbsp;<span class=\"red-text\">➡&nbsp;</span>";
+					if($empty_minimised_set) echo "<input id=\"saveButton\" class=\"save\" style=\"font-size:11px;\" type=\"submit\" formaction=\"".$url_this_page."#topedit\" name=\"".$name_minimise_units."\" title=\"Minimise polymetric expressions\" value=\"mini\">&nbsp;<span class=\"red-text\">➡&nbsp;</span>";
 					}
 				$number_samples = number_of_lines_in_file($units_path.($i_item-1)."_units.txt");
 				$link_sample = "preview_samples.php?file=".urlencode($data_units);
 				echo "<input type=\"hidden\" name=\"minimise_set\" value=\"1\">";
-				echo "<input class=\"edit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_create_set."','".$window_name_create_set."','width=800,height=800,left=100'); return false;\" type=\"submit\" name=\"create_set\" title=\"Create MIDI file sample set for AI training\" value=\"".$create_button."\">";
+				echo "<input class=\"edit\" style=\"font-size:11px;\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$link_create_set."','".$window_name_create_set."','width=800,height=800,left=100'); return false;\" type=\"submit\" name=\"create_set\" title=\"Create MIDI file sample set for AI training\" value=\"".$create_button."\">";
 				echo "(".$number_samples."&nbsp;<a href=\"\" onclick=\"window.open('".$link_sample."','".$window_name_samples."','width=1200,height=800,left=200'); return false;\">samples</a>)";
 				}
 			}
