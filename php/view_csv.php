@@ -20,7 +20,7 @@ function h($value) {
 <meta charset="utf-8">
 <title>Event list</title>
 <style>
-body { font-family: Arial, sans-serif; margin: 20px; }
+body { font-family: <?php echo isset($_SERVER['PHPDESKTOP_VERSION']) ? "\"Helvetica Neue\", \"Apple Symbols\", Helvetica, " : ''; /* 2026-11-22 Arial is shown as empty boxes in the standalone application (PHP Desktop) on MacOS, see phpdesktop_style() - by Claude */ ?>Arial, sans-serif; margin: 20px; }
 table { border-collapse: collapse; }
 th, td { border: 1px solid #aaa; padding: 4px 8px; text-align: left; }
 th { background: #e8e8e8; }
