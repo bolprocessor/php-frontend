@@ -52,6 +52,7 @@ $last_line = exec($command,$output,$return_var);
 
 // chdir($old_dir);
 echo "<link rel=\"stylesheet\" href=\"bp.css?v=".time()."\" />\n";
+echo phpdesktop_style(); // 2026-11-22
 // The "v=" forces this stylesheet to replace the previous one
 echo "<link rel=\"stylesheet\" href=\"skin".$skin.".css\" />\n";
 echo "<div style=\"padding: 1em; border-radius: 1em;\">";

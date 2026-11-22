@@ -1008,7 +1008,7 @@ function display_directory($test,$dir,$filter) {
 		if($test AND isset($seen[$thisfile])) continue;
 		if($test AND ($filter == '' OR $filter == $type OR ($filter == "csresources" AND $is_csound_type))) $seen[$thisfile] = TRUE;
 	
-		if(!ok_output_location($thisfile,FALSE)) continue;
+		if($thisfile <> "ctests" AND !ok_output_location($thisfile,FALSE)) continue; // 2026-11-22 "ctests" (examples) is listed, although it may not be used for output files
 		$new_version = ($fixed AND is_new_version_name($thisfile)); // 2026-11-19
 		if($new_version AND !$test) $new_versions++;
 		if(!$test AND (($new_file == $thisfile AND $filter <> "directory") OR $new_version)) echo "<span class=\"red-text\">➡</span> ";

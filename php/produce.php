@@ -16,6 +16,7 @@ echo "<head>";
 echo midi_player_script('');
 echo "<script src=\"darkmode.js\"></script>";
 echo "<link rel=\"stylesheet\" href=\"bp-light.css\" />\n";
+echo phpdesktop_style(); // 2026-11-22
 echo "</head>";
 
 echo "<body>\n";
@@ -500,6 +501,7 @@ session_reset();
 echo "<link rel=\"stylesheet\" href=\"bp.css?v=".time()."\" />\n";
 // The "v=" forces this stylesheet to replace the previous one
 echo "<link rel=\"stylesheet\" href=\"skin".$skin.".css\" />\n";
+echo phpdesktop_style(); // 2026-11-22
 
 $n_messages = count($o);
 $no_error = FALSE;
