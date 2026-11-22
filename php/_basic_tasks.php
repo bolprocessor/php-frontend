@@ -4164,14 +4164,20 @@ function watchdog_start() {
 	return;
 	}
 
+function linux_scripts_url() {
+	// 2026-11-22 Link to the Linux scripts. The query string, different at each page load, makes the browser download the file
+	// instead of reusing a copy in its cache, which may be an older version (the server ignores it).
+	return "https://bolprocessor.org/misc/linux-scripts.zip?t=".time();
+	}
+
 function watchdog_notice() {
-	// 2026-11-22 Linux (XAMPP): Apache belongs to root, so watchdog.sh can restart it only with the sudo rule created by change_permissions.sh.
+	// 2026-11-22 Linux (XAMPP): Apache belongs to root, so watchdog.sh can restart it only with the sudo rule created by watchdog_allow.sh,
+	// one of the Linux scripts (linux-scripts.zip, copied to /home), run by the installation and update scripts.
 	// When the rule is missing, watchdog.sh creates temp_bolprocessor/watchdog_needs_sudo (and deletes it within a minute once the rule exists).
 	// Displayed in the boxes of check_csound() on project pages and folder lists.
 	if(PHP_OS_FAMILY <> "Linux") return;
 	if(!file_exists(dirname(__DIR__).DIRECTORY_SEPARATOR."temp_bolprocessor".DIRECTORY_SEPARATOR."watchdog_needs_sudo")) return;
-	$script = dirname(__DIR__).DIRECTORY_SEPARATOR."change_permissions.sh";
-	echo "<p class=\"thinborder\" style=\"font-size:small; background-color:white; color:black; padding:4px 4px 8px 4px; border-radius:6px; border: 2px solid red;\">⚠️ The <b>watchdog</b> restarting Apache if it crashes or gets stuck is not allowed to do it.<br /><b>Linux user:</b> Open your terminal and type:<br /><span class=\"red-text\">sudo ".$script."</span><br />(Your password will be required...)</p>";
+	echo "<p class=\"thinborder\" style=\"font-size:small; background-color:white; color:black; padding:4px 4px 8px 4px; border-radius:6px; border: 2px solid red;\">⚠️ The <b>watchdog</b> restarting Apache if it crashes or gets stuck is not allowed to do it.<br /><b>Linux user:</b> Download the latest <a target=\"_blank\" class=\"linkdotted\" href=\"".linux_scripts_url()."\">Linux scripts</a> and copy them to the /home folder, as for the installation.<br />Then open your terminal and type:<br /><span class=\"red-text\">sudo /home/watchdog_allow.sh</span><br />(Your password will be required...)<br />The update scripts will then do it automatically.</p>";
 	return;
 	}
 
@@ -4673,7 +4679,7 @@ function check_csound($inside_form = FALSE) {
 		$latest = csound_latest_release();
 		$which = ($latest !== FALSE) ? "Csound ".$latest['tag'] : "Csound";
 		if(linux_system()) {
-			echo "<br /><span class=\"red-text\">➡</span>&nbsp;Read instructions in the <a target=\"_blank\" class=\"linkdotted\" href=\"https://bolprocessor.org/misc/linux-scripts.zip\">script folder</a> to install ".$which."<br />";
+			echo "<br /><span class=\"red-text\">➡</span>&nbsp;Read instructions in the <a target=\"_blank\" class=\"linkdotted\" href=\"".linux_scripts_url()."\">script folder</a> to install ".$which."<br />";
 			}
 		else {
 			echo "<br /><span class=\"red-text\">➡</span>&nbsp;<a target=\"_blank\" class=\"linkdotted\" href=\"".csound_download_url()."\">Follow this link</a> to install ".$which."<br />";

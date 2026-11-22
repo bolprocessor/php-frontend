@@ -4,14 +4,14 @@
 # Started by watchdog_start() (_basic_tasks.php) when a page is loaded and no watchdog is running.
 # Every minute it loads watchdog_ping.php, which answers "ok":
 #  - no answer and Apache's pid file removed: Apache was stopped on purpose, the watchdog quits;
-#  - no answer and the process of the pid file gone: Apache crashed, it is restarted at once;
+#  - the process of the pid file gone (even if its workers still answer): Apache crashed, it is restarted at once;
 #  - no answer from a running Apache not listening on the port of the URL (MAMP): it is not the server of the URL, the watchdog quits;
 #  - no answer 3 times in a row from a running Apache: it is stuck, it is stopped (killed if needed) and restarted.
 # It is not started by the standalone application (PHP Desktop), which has its own server and PHP.
 # It also quits when this file changes (update) or when the state folder disappears.
 # Events are written to <state folder>/watchdog_log.txt, and <state folder>/watchdog.txt is touched at every check.
 # Usage: /bin/sh watchdog.sh mamp|xampp <url of watchdog_ping.php> <state folder>
-# On Linux, restarting XAMPP needs root: change_permissions.sh allows user 'daemon' to run
+# On Linux, restarting XAMPP needs root: watchdog_allow.sh (one of the Linux scripts, run by the installation and update scripts) allows user 'daemon' to run
 # "/opt/lampp/lampp stopapache" and "/opt/lampp/lampp startapache" with sudo.
 
 SERVER="$1"
@@ -79,20 +79,30 @@ in_session() {
 	(cd / && env -i HOME="$HOME_DIR" USER="$USER_NAME" LOGNAME="$USER_NAME" PATH="$PATH" TMPDIR="$TMP_DIR" SHELL=/bin/sh "$@")
 	}
 
+# On Linux, "lampp stopapache" or "startapache" might wait for a frozen Apache: they are given a time limit,
+# so that the watchdog is not frozen with it ('timeout' stops sudo, which passes the signal on to lampp).
+# apachectl (MAMP) only sends a signal and returns.
+STOP_LIMIT=30
+START_LIMIT=60
+
 server_stop() {
 	if [ "$SERVER" = mamp ]; then
 		in_session "$ROOT/Library/bin/apachectl" stop
 	else
-		in_session sudo -n "$ROOT/lampp" stopapache
+		in_session timeout -k 5 $STOP_LIMIT sudo -n "$ROOT/lampp" stopapache
+		case $? in 124|137) log "'lampp stopapache' did not end within $STOP_LIMIT seconds";; esac
 	fi
+	return 0
 	}
 
 server_start() {
 	if [ "$SERVER" = mamp ]; then
 		in_session "$ROOT/Library/bin/apachectl" start
 	else
-		in_session sudo -n "$ROOT/lampp" startapache
+		in_session timeout -k 5 $START_LIMIT sudo -n "$ROOT/lampp" startapache
+		case $? in 124|137) log "'lampp startapache' did not end within $START_LIMIT seconds";; esac
 	fi
+	return 0
 	}
 
 server_pid() {
@@ -102,15 +112,15 @@ server_pid() {
 	}
 
 can_restart() {
-	# Linux: TRUE if sudo allows 'daemon' to stop and start Apache without a password (rule created by change_permissions.sh)
-	# Otherwise $NEEDS_SUDO is created, and watchdog_notice() (_basic_tasks.php) tells the user to run change_permissions.sh
+	# Linux: TRUE if sudo allows 'daemon' to stop and start Apache without a password (rule created by watchdog_allow.sh)
+	# Otherwise $NEEDS_SUDO is created, and watchdog_notice() (_basic_tasks.php) tells the user to run watchdog_allow.sh
 	[ "$SERVER" = mamp ] && return 0
 	if sudo -n -l "$ROOT/lampp" stopapache > /dev/null 2>&1 && sudo -n -l "$ROOT/lampp" startapache > /dev/null 2>&1; then
 		rm -f "$NEEDS_SUDO"
 		return 0
 	fi
 	if [ ! -f "$NEEDS_SUDO" ]; then
-		log "Not allowed to restart Apache: run 'sudo $(dirname "$DIR")/change_permissions.sh'"
+		log "Not allowed to restart Apache: run 'sudo /home/watchdog_allow.sh' (Linux scripts)"
 		touch "$NEEDS_SUDO"
 	fi
 	return 1
@@ -147,6 +157,14 @@ restart() {
 		rm -f "$PIDFILE"
 	elif [ -n "$(server_pid)" ]; then
 		log "Apache is still running after 'lampp stopapache'"
+	else
+		# Workers left by a main process that crashed: they belong to 'daemon', like the watchdog, and would keep port 80
+		if pgrep -u "$(id -u)" -f "^$ROOT/bin/httpd" > /dev/null; then
+			log "Killing the remaining processes of Apache"
+			pkill -9 -u "$(id -u)" -f "^$ROOT/bin/httpd"
+			sleep 1
+		fi
+		rm -f "$PIDFILE"
 	fi
 	server_start >> "$LOG" 2>&1
 	sleep 5
@@ -164,24 +182,27 @@ restart() {
 	}
 
 trim_log
+# Its content, not its date, tells that this file was changed: a file unpacked from a zip made in another time zone may have a date in the future
+SCRIPT_SUM=$(cksum < "$SCRIPT")
 log "Started (pid $$), checking $URL"
 FAIL=0
 while :; do
 	[ -d "$DIR" ] || exit 0
-	if [ -n "$(find "$SCRIPT" -newer "$LOCK/pid" 2>/dev/null)" ]; then
+	if [ "$(cksum < "$SCRIPT" 2>/dev/null)" != "$SCRIPT_SUM" ]; then
 		log "watchdog.sh was changed: quitting"
 		exit 0
 	fi
 	touch "$BEAT"
 	can_restart
-	if answers; then
+	if [ -f "$PIDFILE" ] && [ -z "$(server_pid)" ]; then
+		# Checked first: the workers of a killed main process may still answer for a while, but they are no longer replaced
+		FAIL=0
+		restart "Apache crashed"
+	elif answers; then
 		FAIL=0
 	elif [ ! -f "$PIDFILE" ]; then
 		log "Apache was stopped: quitting"
 		exit 0
-	elif [ -z "$(server_pid)" ]; then
-		FAIL=0
-		restart "Apache crashed"
 	elif [ "$SERVER" = mamp ] && ! lsof -nP -a -p "$(server_pid)" -iTCP:"$PORT" -sTCP:LISTEN > /dev/null 2>&1; then
 		# The URL is not served by MAMP's Apache (another server, or MAMP's port was changed): never restart MAMP for it
 		log "Apache is not listening on port $PORT: quitting"
