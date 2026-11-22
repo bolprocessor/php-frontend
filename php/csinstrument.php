@@ -523,7 +523,7 @@ foreach($dir_instrument as $thisparameter) {
 if($n > 0) {
 	echo "<table class=\"thicktable\">";
 	echo "<tr>";
-	echo "<td colspan=\"4\"><span class=\"red-text\">➡</span> Click the blue button to edit…</td>";
+	echo "<td colspan=\"4\"><span class=\"red-text\">➡</span> Click the blue button to ".($read_only ? "view" : "edit")."…</td>"; // 2026-11-22 "view" for a fixed file - by Claude
 	echo "</tr>";
 	foreach($dir_instrument as $thisparameter) {
 		if($thisparameter == '.' OR $thisparameter == ".." OR $thisparameter == ".DS_Store" OR $thisparameter == '') continue;

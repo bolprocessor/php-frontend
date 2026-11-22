@@ -733,10 +733,10 @@ echo "</form>";
 
 if($number_instruments > 0) {
 	if($sc_page) {
-		echo "<h3>Click instruments below to edit them:</h3>";
+		echo "<h3>Click instruments below to ".($read_only ? "view" : "edit")." them:</h3>"; // 2026-11-22 "view" for a fixed file - by Claude
 		$sc_synthdefs = scrt_synthdef_names(); // SynthDefs compiled, see _scrt.php
 		}
-	else echo "<h3>Click Csound instruments below to edit them:</h3>";
+	else echo "<h3>Click Csound instruments below to ".($read_only ? "view" : "edit")." them:</h3>";
 	echo "<table  class=\"thicktable\">";
 	$done_index = array();
 	for($j = 0; $j < $number_instruments; $j++) {
