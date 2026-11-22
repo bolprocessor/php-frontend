@@ -6552,6 +6552,20 @@ function filter_output_explanation() {
 	echo "</ul>";
 	}
 
+function midi_ports_width_placeholder() {
+	// 2026-11-22 Invisible copy of the widest lines of display_midi_ports(), so that the column of a grammar or data page keeps the same width when the format shows no MIDI ports. Fields have no name, so nothing is submitted.
+	echo "<div aria-hidden=\"true\" style=\"height:0; overflow:hidden; visibility:hidden;\">";
+	echo "<span style=\"white-space:nowrap;\">MIDI output&nbsp;&nbsp;<input type=\"text\" size=\"2\" tabindex=\"-1\">";
+	echo "&nbsp;<input type=\"text\" size=\"15\" tabindex=\"-1\">";
+	echo "&nbsp;<input type=\"text\" size=\"15\" tabindex=\"-1\">";
+	echo "&nbsp;<button type=\"button\" tabindex=\"-1\">Delete</button>";
+	echo "&nbsp;<button class=\"edit\" type=\"button\" tabindex=\"-1\">FILTER</button></span><br />";
+	echo "<span style=\"white-space:nowrap;\"><button class=\"save\" type=\"button\" tabindex=\"-1\">SAVE MIDI ports</button>";
+	echo str_replace(' ',"&nbsp;"," 👉 Delete name if changing number")."</span>";
+	echo "</div>";
+	return;
+	}
+
 function display_midi_ports($filename) {
 	global $MIDIoutput, $MIDIoutputname, $MIDIoutputcomment, $MIDIinput, $MIDIinputname, $MIDIinputcomment, $NumberMIDIinputs, $NumberMIDIoutputs, $url_this_page;
 	$midiport = read_midiressources($filename);

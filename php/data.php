@@ -1597,6 +1597,7 @@ if(!isset($_POST['analyze_tonal'])) {
 			csound_orchestra_line($csound_orchestra,$csound_file);
 			echo "</p>";
 			}
+		midi_ports_width_placeholder(); // 2026-11-22 Same width as with MIDI ports
 		}
 	else if($file_format == "csoundrt") {
 		// Real-time Csound: notes are played by Csound, MIDI ports are used for interaction
