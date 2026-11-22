@@ -29,6 +29,7 @@ MAXFAIL=3		# failed checks in a row before restarting a running server
 LOCK="$DIR/watchdog.lock"
 BEAT="$DIR/watchdog.txt"
 LOG="$DIR/watchdog_log.txt"
+NEEDS_SUDO="$DIR/watchdog_needs_sudo"	# Linux: the sudo rule is missing, pages tell how to create it
 
 case "$SERVER" in
 	mamp)
@@ -100,6 +101,21 @@ server_pid() {
 	[ -n "$P" ] && ps -p "$P" > /dev/null 2>&1 && echo "$P"
 	}
 
+can_restart() {
+	# Linux: TRUE if sudo allows 'daemon' to stop and start Apache without a password (rule created by change_permissions.sh)
+	# Otherwise $NEEDS_SUDO is created, and watchdog_notice() (_basic_tasks.php) tells the user to run change_permissions.sh
+	[ "$SERVER" = mamp ] && return 0
+	if sudo -n -l "$ROOT/lampp" stopapache > /dev/null 2>&1 && sudo -n -l "$ROOT/lampp" startapache > /dev/null 2>&1; then
+		rm -f "$NEEDS_SUDO"
+		return 0
+	fi
+	if [ ! -f "$NEEDS_SUDO" ]; then
+		log "Not allowed to restart Apache: run 'sudo $(dirname "$DIR")/change_permissions.sh'"
+		touch "$NEEDS_SUDO"
+	fi
+	return 1
+	}
+
 answers() {
 	[ "$(curl -s -m "$TIMEOUT" "$URL" 2>/dev/null)" = "ok" ]
 	}
@@ -112,6 +128,7 @@ trim_log() {
 
 RESTART_FAILS=0
 restart() {
+	can_restart || return
 	log "$1: restarting Apache"
 	P=$(server_pid)
 	server_stop >> "$LOG" 2>&1
@@ -156,6 +173,7 @@ while :; do
 		exit 0
 	fi
 	touch "$BEAT"
+	can_restart
 	if answers; then
 		FAIL=0
 	elif [ ! -f "$PIDFILE" ]; then

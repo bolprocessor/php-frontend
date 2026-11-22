@@ -442,6 +442,7 @@ $csound_is_responsive = FALSE;
 echo "<div style=\"float:right; padding:6px; background-color:transparent;\">";
 $csound_is_responsive = check_csound();
 check_supercollider(); // 2026-11-21
+watchdog_notice(); // 2026-11-22
 link_to_tonality();
 echo "</div>";
 echo "<form method=\"post\" action=\"".$url_this_page."\" enctype=\"multipart/form-data\">";

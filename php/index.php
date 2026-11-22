@@ -460,6 +460,7 @@ if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension 
 	echo "<div style=\"float:right; padding:6px; background-color:transparent;\">";
 	if($path <> '') check_csound();
 	if($path <> '') check_supercollider(); // 2026-11-21
+	watchdog_notice(); // 2026-11-22
 	if(!is_integer(strpos($path,$tonality_resources)) AND $path <> '') link_to_tonality();
 	if($path <> '') {
 		echo "<button class=\"save big\" onclick=\"toggleimport(); return false;\">IMPORT FILES</button><br />";

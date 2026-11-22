@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <?php
 // Comments "// note N" (in this file, data.php and _musicxml.php) refer to the numbered notes of the technical description of this algorithm: https://bolprocessor.org/tech-analysis-of-musicxml-php
 
@@ -15,7 +14,9 @@ ini_set('precision','14');
     	);
     exit;	
 	} */
+// 2026-11-22 The session is started before "<!DOCTYPE html>" is sent, otherwise session_start() fails when output_buffering is off, as in the standalone application (PHP Desktop) - by Claude
 session_start();
+echo "<!DOCTYPE html>\n";
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -4160,6 +4161,17 @@ function watchdog_start() {
 	if($server == "mamp") $command = "/usr/bin/perl -MPOSIX -e 'POSIX::setsid(); exec @ARGV' ".$command;
 	else $command = "setsid ".$command;
 	exec("cd / ; ".$command." > /dev/null 2>&1 < /dev/null &");
+	return;
+	}
+
+function watchdog_notice() {
+	// 2026-11-22 Linux (XAMPP): Apache belongs to root, so watchdog.sh can restart it only with the sudo rule created by change_permissions.sh.
+	// When the rule is missing, watchdog.sh creates temp_bolprocessor/watchdog_needs_sudo (and deletes it within a minute once the rule exists).
+	// Displayed in the boxes of check_csound() on project pages and folder lists.
+	if(PHP_OS_FAMILY <> "Linux") return;
+	if(!file_exists(dirname(__DIR__).DIRECTORY_SEPARATOR."temp_bolprocessor".DIRECTORY_SEPARATOR."watchdog_needs_sudo")) return;
+	$script = dirname(__DIR__).DIRECTORY_SEPARATOR."change_permissions.sh";
+	echo "<p class=\"thinborder\" style=\"font-size:small; background-color:white; color:black; padding:4px 4px 8px 4px; border-radius:6px; border: 2px solid red;\">⚠️ The <b>watchdog</b> restarting Apache if it crashes or gets stuck is not allowed to do it.<br /><b>Linux user:</b> Open your terminal and type:<br /><span class=\"red-text\">sudo ".$script."</span><br />(Your password will be required...)</p>";
 	return;
 	}
 
@@ -8714,15 +8726,21 @@ function adjust_spaces_in_score($line,$delete_comments) {
 
 function getLatestTaggedVersion() {
     $url = 'https://api.github.com/repos/bolprocessor/bolprocessor/releases/latest';
-    $ch = curl_init($url);
-    curl_setopt_array($ch, [
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_USERAGENT => 'PHP', // REQUIRED by GitHub
-        CURLOPT_CONNECTTIMEOUT => 10,
-        CURLOPT_TIMEOUT => 20
-    ]);
-    $response = curl_exec($ch);
-    curl_close($ch);
+    if(function_exists('curl_init')) {
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_USERAGENT => 'PHP', // REQUIRED by GitHub
+            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_TIMEOUT => 20
+        ]);
+        $response = curl_exec($ch);
+        curl_close($ch);
+        }
+    else { // 2026-11-22 The PHP of the standalone application (PHP Desktop) has no curl extension - by Claude
+        $context = stream_context_create(array('http' => array('timeout' => 10,'header' => "User-Agent: PHP\r\n")));
+        $response = @file_get_contents($url,FALSE,$context);
+        }
     if ($response === false) return false;
     $data = json_decode($response, true);
     return $data['tag_name'] ?? false;
