@@ -134,8 +134,8 @@ function run_script($dir,$dirPath,$this_script_file,$script_variables,$note_conv
 				$trace_done_file = $temp_dir."temp_".my_session_id()."_".$grammar_name."_done";
 				$trace_file = $temp_dir."temp_".my_session_id()."_".$grammar_name.".txt";
 				$command = $bp_application_path."bp produce";
-				if($settings <> '') $command .= " -se ".$settings;
-				$command .= " -gr ".$grammar;
+				$command .= " -gr ".script_quote_path($grammar);
+				$command .= script_grammar_resources($grammar,$settings); // 2026-11-21
 				if($note_convention <> '') $command .= " --".strtolower($note_convention);
 			//	$command .= " -d";
 				if($output_format == "csound")
@@ -208,6 +208,37 @@ function run_script($dir,$dirPath,$this_script_file,$script_variables,$note_conv
 			}
 		}
 	return;
+	}
+
+function script_grammar_resources($grammar,$settings) {
+	// 2026-11-21: options naming the files in the grammar's header, as on the grammar page. A "Load settings" instruction of the script ($settings) replaces the grammar's '-se' file
+	$options = '';
+	$content = @file_get_contents($grammar);
+	if($content === FALSE) {
+		echo "<p style=\"color:red;\">WARNING: ".$grammar." not found</p>";
+		return $options;
+		}
+	$extract_data = extract_data(TRUE,TRUE,$content);
+	$dir_grammar = dirname($grammar).SLASH;
+	if($settings == '' AND $extract_data['settings'] <> '') $settings = $dir_grammar.$extract_data['settings'];
+	$files = ["-se" => $settings];
+	if($extract_data['alphabet'] <> '') $files["-al"] = $dir_grammar.$extract_data['alphabet'];
+	if($extract_data['objects'] <> '') $files["-so"] = $dir_grammar.$extract_data['objects'];
+	if($extract_data['csound'] <> '') $files["-cs"] = csound_resource_path($extract_data['csound']);
+	if($extract_data['tonality'] <> '') $files["-to"] = tonality_resource_path($extract_data['tonality']);
+	foreach($files as $option => $path) {
+		if($path == '') continue;
+		if(!file_exists($path)) {
+			echo "<p style=\"color:red;\">WARNING: ".$path." not found</p>";
+			continue;
+			}
+		$options .= " ".$option." ".script_quote_path($path);
+		}
+	return $options;
+	}
+
+function script_quote_path($path) {
+	return str_contains($path,' ') ? '"'.$path.'"' : $path;
 	}
 
 ?>

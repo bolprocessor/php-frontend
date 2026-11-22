@@ -166,6 +166,7 @@ $pausefile = $temp_dir."messages".SLASH."_pause";
 $continuefile = $temp_dir."messages".SLASH."_continue";
 $temp_dir_abs = $temp_dir;
 if(windows_system()) $temp_dir_abs = str_replace("..".SLASH,$absolute_application_path,$temp_dir);
+watchdog_start();
 
 $MIDIinput = $MIDIoutput = array();
 $MIDIinput[0] = -1;
@@ -4130,6 +4131,36 @@ function windows_system() {
 	$os_platform = getOS();
 	if(PHP_OS == "WINNT" OR is_integer(strpos($os_platform,"Windows"))) return TRUE;
 	return FALSE;
+	}
+
+function watchdog_start() {
+	// 2026-11-22 Starts watchdog.sh, which restarts Apache (MAMP on MacOS, XAMPP on Linux) if it crashed or is stuck, unless it is running.
+	// It touches temp_bolprocessor/watchdog.txt at every check (every minute, plus up to 30 s of waiting), so a recent date means it is running.
+	// Only when this page is served by the Apache of MAMP or XAMPP: not by the standalone application (PHP Desktop, own server and PHP) even if MAMP is installed
+	if(PHP_SAPI == "cli" OR !isset($_SERVER['SERVER_PORT']) OR isset($_SERVER['PHPDESKTOP_VERSION'])) return;
+	if(!isset($_SERVER['SERVER_SOFTWARE']) OR stripos($_SERVER['SERVER_SOFTWARE'],"Apache") === FALSE) return;
+	if(PHP_OS_FAMILY == "Darwin" AND str_starts_with(PHP_BINARY,"/Applications/MAMP/") AND file_exists("/Applications/MAMP/Library/bin/apachectl")) $server = "mamp";
+	else if(PHP_OS_FAMILY == "Linux" AND str_starts_with((string)realpath(__DIR__),"/opt/lampp/") AND file_exists("/opt/lampp/lampp")) $server = "xampp";
+	else return;
+	$dir = dirname(__DIR__).DIRECTORY_SEPARATOR."temp_bolprocessor";
+	$beat = $dir.DIRECTORY_SEPARATOR."watchdog.txt";
+	clearstatcache(TRUE,$beat);
+	if(file_exists($beat) AND filemtime($beat) > time() - 150) return;
+	@touch($beat); // Other pages loaded meanwhile won't start another one
+	// URL of watchdog_ping.php, in the folder of this file
+	$url_path = '';
+	$document_root = isset($_SERVER['DOCUMENT_ROOT']) ? realpath($_SERVER['DOCUMENT_ROOT']) : FALSE;
+	$here = realpath(__DIR__);
+	if($document_root !== FALSE AND $here !== FALSE AND str_starts_with($here,$document_root))
+		$url_path = str_replace(DIRECTORY_SEPARATOR,'/',substr($here,strlen($document_root)));
+	else if(isset($_SERVER['SCRIPT_NAME'])) $url_path = dirname($_SERVER['SCRIPT_NAME']);
+	$url = "http://localhost:".intval($_SERVER['SERVER_PORT']).rtrim($url_path,'/')."/watchdog_ping.php";
+	$command = "/bin/sh ".escapeshellarg(__DIR__.DIRECTORY_SEPARATOR."watchdog.sh")." ".$server." ".escapeshellarg($url)." ".escapeshellarg($dir);
+	// In a new session, so that it survives the server and its signals
+	if($server == "mamp") $command = "/usr/bin/perl -MPOSIX -e 'POSIX::setsid(); exec @ARGV' ".$command;
+	else $command = "setsid ".$command;
+	exec("cd / ; ".$command." > /dev/null 2>&1 < /dev/null &");
+	return;
 	}
 
 
