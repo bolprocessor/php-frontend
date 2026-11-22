@@ -5617,7 +5617,7 @@ function rename_private_resource_folder($old,$new) {
 function phpdesktop_style() {
 	// 2026-11-22 In the standalone application (PHP Desktop), the system font of buttons and other form controls is shown as empty boxes on MacOS, so they get a font of their own - by Claude
 	if(!isset($_SERVER['PHPDESKTOP_VERSION'])) return '';
-	return "<style>button, input, select, textarea, option { font-family: \"Helvetica Neue\", Helvetica, Arial, sans-serif; }</style>\n";
+	return "<style>button, input, input::file-selector-button, select, textarea, option { font-family: \"Helvetica Neue\", Helvetica, Arial, sans-serif; }</style>\n";
 	}
 
 function hidden_directory($name) {

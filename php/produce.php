@@ -607,7 +607,13 @@ if($instruction <> "templates") {
 		$number = $table_number[0];
 		$image_time = isset($table_number[1]) ? $table_number[1]."s" : '';
 		$WidthMax = $HeightMax = 0;
-		foreach(explode(chr(10),(string)@file_get_contents($temp_dir_abs.$thisfile)) as $line) {
+		$image_content = (string)@file_get_contents($temp_dir_abs.$thisfile);
+		if(isset($_SERVER['PHPDESKTOP_VERSION']) AND str_contains($image_content,"px arial\";")) {
+			// 2026-11-22 In the standalone application (PHP Desktop), Arial is shown as empty boxes on MacOS, so the canvas gets the font of the buttons, see phpdesktop_style() - by Claude
+			$image_content = preg_replace('/(ctx\.font = "[0-9]+px) arial";/','$1 \'Helvetica Neue\', Helvetica, Arial, sans-serif";',$image_content);
+			@file_put_contents($temp_dir_abs.$thisfile,$image_content);
+			}
+		foreach(explode(chr(10),$image_content) as $line) {
 			if(str_contains($line,"canvas.width")) $WidthMax = intval(explode("=",$line)[2]) + 10;
 			if(str_contains($line,"canvas.height")) $HeightMax = intval(explode("=",$line)[2]);
 			}
