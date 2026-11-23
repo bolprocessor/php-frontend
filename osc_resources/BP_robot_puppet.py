@@ -35,9 +35,9 @@ JOINTS = ["torso", "head", "leftarm", "leftforearm", "rightarm", "rightforearm"]
 LIMITS = {  # degrees, as a robot would have
 	"torso": (-45, 45),
 	"head": (-60, 60),
-	"leftarm": (-30, 200),
+	"leftarm": (-90, 200),  # negative: across the body, e.g. letters O and W of "-da.robot_semaphore"
 	"leftforearm": (-30, 160),
-	"rightarm": (-30, 200),
+	"rightarm": (-90, 200),
 	"rightforearm": (-30, 160),
 	}
 
@@ -207,9 +207,10 @@ def point(x, y, length, degrees):
 
 
 class Window:
-	def __init__(self, puppet, messages, port):
+	def __init__(self, puppet, messages, port, flags=False):
 		import tkinter
 		self.puppet = puppet
+		self.flags = flags
 		self.messages = messages
 		self.root = tkinter.Tk()
 		self.root.title("Bol Processor robot puppet (OSC port %d)" % port)
@@ -268,6 +269,15 @@ class Window:
 				c.create_line(*p1, *p2, fill="#%02x%02x%02x" % (min(fade, 244), min(fade + 30, 241), min(fade + 60, 234)), width=3)
 			c.create_line(*shoulder, *elbow, width=12 * s, fill="#2a9d8f", capstyle="round")
 			c.create_line(*elbow, *hand, width=10 * s, fill="#e76f51", capstyle="round")
+			if self.flags:  # semaphore flag, red and yellow, on a stick extending the forearm
+				tip = point(*hand, 75 * s, fore)
+				mid = point(*hand, 35 * s, fore)
+				out = 90 if side == "left" else -90  # the flag flies on the outer side of the stick
+				corner = point(*tip, 40 * s, fore + out)
+				edge = point(*mid, 40 * s, fore + out)
+				c.create_polygon(*mid, *tip, *corner, fill="#e63946", outline="")
+				c.create_polygon(*mid, *edge, *corner, fill="#ffd60a", outline="")
+				c.create_line(*hand, *tip, width=3 * s, fill="#3d4a5c")
 			for p in (shoulder, elbow):
 				c.create_oval(p[0] - 6 * s, p[1] - 6 * s, p[0] + 6 * s, p[1] + 6 * s, fill="#3d4a5c", outline="")
 		y = 16
@@ -286,6 +296,7 @@ def main():
 	parser.add_argument("--host", default="127.0.0.1", help="address to listen to (default 127.0.0.1; 0.0.0.0 for another computer)")
 	parser.add_argument("--max-speed", type=float, default=400., help="maximum speed of the joints in degrees per second (default 400, 0 = no limit)")
 	parser.add_argument("--verbose", action="store_true", help="print the messages received")
+	parser.add_argument("--flags", action="store_true", help="draw semaphore flags in the hands (for \"-da.robot_semaphore\")")
 	parser.add_argument("--no-window", action="store_true", help="no window: print the messages and the angles every 0.5 s")
 	options = parser.parse_args()
 
@@ -306,7 +317,7 @@ def main():
 			sys.exit("This Python uses Tk %s, whose window doesn't work on recent versions of MacOS. Use the Python of "
 				"https://www.python.org (e.g. /Library/Frameworks/Python.framework/Versions/Current/bin/python3), "
 				"or run with --no-window" % tkinter.TkVersion)
-		Window(puppet, messages, options.port).run()
+		Window(puppet, messages, options.port, options.flags).run()
 		return
 	last = shown = time.monotonic()
 	try:

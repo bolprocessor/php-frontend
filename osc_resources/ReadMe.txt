@@ -83,13 +83,22 @@ whether or not a program listens.
        Linux with XAMPP:   cd /opt/lampp/htdocs/bolprocessor/osc_resources
                            python3 BP_robot_puppet.py
      (add --help for the options). It waits for messages on port 7400.
-  3. In the Bol Processor, open one of the two dances of the ctests folder, choose the output "Real-time OSC"
-     (host 127.0.0.1, port 7400) and click PRODUCE ITEM(S). The puppet dances.
-       -gr.robot_dance:   movements written as notes, with _cont() and _value(); four figures chosen at random.
-       -gr.robot_objects: gestures as time-objects (sound-objects) of -so.robot_objects, named in -al.robot_objects:
-                          a clap whose impact falls on the beat at any tempo, a cyclic wave, a nod with limited speed.
-                          Each prototype contains a Csound score whose lines are movements of the joints,
-                          e.g. "i5 0 0.5 261.626 0 150 0" raises the right arm from 0 to 150 degrees in 0.5 s.
+  3. In the Bol Processor, open one of the three examples of the ctests folder, choose the output "Real-time OSC"
+     (host 127.0.0.1, port 7400) and click PRODUCE ITEM(S) for a grammar, or PLAY next to an item of the data project.
+       -gr.robot_dance:      movements written as notes, with _cont() and _value(); four figures chosen at random.
+       -gr.robot_objects:    gestures as time-objects (sound-objects) of -so.robot_objects, named in -al.robot_objects:
+                             a clap whose impact falls on the beat at any tempo, a cyclic wave, a nod with limited speed.
+                             Each prototype contains a Csound score whose lines are movements of the joints,
+                             e.g. "i5 0 0.5 261.626 0 150 0" raises the right arm from 0 to 150 degrees in 0.5 s.
+       -da.robot_semaphore:  sentences spelled in the flag semaphore alphabet, e.g. "H E L L O space W O R L D".
+                             The letters A to Z and 'space' are time-objects of -so.robot_semaphore, named in
+                             -al.robot_semaphore. Each one holds both arms at the angles of the letter, seen by the observer,
+                             and the head nods at its end, which shows double letters. The joints' maximum speed makes
+                             the arms go from one letter to the next. Type your own sentences on the data page.
+                             Start the puppet with --flags to draw a flag in each hand:
+                               MacOS:   /usr/local/bin/python3 BP_robot_puppet.py --flags
+                               Windows: py BP_robot_puppet.py --flags
+                               Linux:   python3 BP_robot_puppet.py --flags
 Each joint is an instrument of -cs.Robot (torso, head, leftarm, leftforearm, rightarm, rightforearm), whose angle in degrees
 is the parameter named like it: a note of 'leftarm' moves the left arm from the value of _value(leftarm,...) at its beginning
 to its value at its end, following /bp/env if any. See https://bolprocessor.org/robot-puppet/
