@@ -147,6 +147,25 @@ if(isset($_POST['set_csound_file']) AND isset($_POST['new_csound_file']) AND $_P
 	$need_to_save = TRUE;
 	}
 
+// 2026-11-23 A grammar declaring no settings file gets the CHOOSE/CREATE buttons of data pages (settings_choose_create_form())
+if(isset($_POST['create_settings_file']) AND isset($_POST['new_settings_file']) AND trim($_POST['new_settings_file']) <> '') {
+	$content = @file_get_contents($this_file,TRUE);
+	$extract_data = extract_data(TRUE,TRUE,$content);
+	$_POST['thistext'] = add_settings_to_content($extract_data['content'],good_name("se",trim($_POST['new_settings_file']),''));
+	$no_save_midiresources = TRUE;
+	$need_to_save = TRUE;
+	}
+
+if(isset($_GET['newsettings']) AND $_GET['newsettings'] <> '') {
+	// Chosen in settings_list.php, which opens this page in a new tab
+	$content = @file_get_contents($this_file,TRUE);
+	$extract_data = extract_data(TRUE,TRUE,$content);
+	$_POST['thistext'] = add_settings_to_content($extract_data['content'],basename(urldecode($_GET['newsettings'])));
+	$no_save_midiresources = TRUE;
+	$need_to_save = TRUE;
+	echo "<div class=\"warning\"><span class=\"red-text\">WARNING: this is a new tab/window. Close the previous one to avoid mixing versions!</span></div>";
+	}
+
 $refresh_file = $temp_dir."trace_".my_session_id()."_".$filename."_midiport_refresh";
 if(isset($_POST['savemidiport'])) {
 	save_midiressources($filename,TRUE);
@@ -666,6 +685,7 @@ if($settings_file == '' OR !file_exists($dir.$settings_file)) {
 		}
 	echo "•&nbsp;Time resolution = <span class=\"red-text\">".$time_resolution."</span> millisecond(s) (by default)<br />";
 	echo "•&nbsp;No quantization<br />";
+	if($settings_file == '') settings_choose_create_form($dir,$filename,$url_this_page);
 	}
 else {
 	if($p_clock > 0 AND $q_clock > 0) {

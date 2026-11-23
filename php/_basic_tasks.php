@@ -7835,6 +7835,33 @@ function add_csound_resource_to_content($content,$csound_file,$for_osc = FALSE) 
 	return implode(chr(10),$out);
 	}
 
+function add_settings_to_content($content,$settings_file) {
+	// Puts the line naming a "-se" file on top of a grammar, removing the line of another settings file found among the resource files (2026-11-23)
+	$content = str_replace(chr(13).chr(10),chr(10),$content);
+	$table = explode(chr(10),$content);
+	$out = array();
+	$top = TRUE;
+	foreach($table as $line) {
+		$trimmed = trim($line);
+		if($top) {
+			if(str_starts_with($trimmed,"-se.") OR str_ends_with($trimmed,".bpse")) continue;
+			if($trimmed <> '' AND !str_starts_with($trimmed,"//") AND !preg_match("/^-[a-zA-Z]{2}\.\S/u",$trimmed) AND !preg_match("/^\S+\.bp[a-z]{2}$/u",$trimmed)) $top = FALSE;
+			}
+		$out[] = $line;
+		}
+	array_unshift($out,$settings_file);
+	return implode(chr(10),$out);
+	}
+
+function settings_choose_create_form($dir,$filename,$url_this_page) {
+	// CHOOSE an existing settings file or CREATE a new one, for a grammar declaring no "-se" file (2026-11-23, as on data pages)
+	$new_settings_file = str_replace("-gr.",'',$filename);
+	$new_settings_file = str_replace(".bpgr",'',$new_settings_file);
+	$new_settings_file = "-se.".$new_settings_file;
+	echo "<p><span class=\"red-text\">➡</span> <input class=\"save\" onclick=\"if(checksaved()) window.open('settings_list.php?dir=".urlencode($dir)."&thispage=".urlencode($url_this_page)."','settingsfiles','width=400,height=400,left=100'); return false;\" type=\"submit\" title=\"Display settings files of this folder\" value=\"CHOOSE\"> a settings file or <input class=\"edit\" type=\"submit\" onclick=\"if(!checksaved()) return false; this.form.target='_self'; return true;\" name=\"create_settings_file\" formaction=\"".$url_this_page."\" value=\"CREATE\"> a new file named <input type=\"text\" name=\"new_settings_file\" size=\"25\" value=\"".htmlspecialchars($new_settings_file)."\"></p>";
+	return;
+	}
+
 function change_instruments_form($kind = "csound",$current = '') {
 	// "Change instruments" button, displayed when the default orchestra is used because the project names no "-cs" file.
 	// It shows the list of "-cs" files. The selected file is added on top of the grammar or data, which is saved

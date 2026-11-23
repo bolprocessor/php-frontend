@@ -159,9 +159,13 @@ if(isset($event_csound[0])) {
 	}
 	
 // MIDI rectangle
-$x2 = $x1 + ($alpha * $time_max_midi);
-$y1 = 270;
-$y2 = $y1 + $height;
+// 2026-11-23 Its position is the reference of the drawings below (cyclic part, gaps, truncation, cover) only if the object contains MIDI codes.
+// Otherwise the rectangle of the Csound score is the reference: the arrow of a cyclic Csound object was drawn below its rectangle - fixed by Claude
+if($time_max_midi > 0 OR !isset($event_csound[0])) {
+	$x2 = $x1 + ($alpha * $time_max_midi);
+	$y1 = 270;
+	$y2 = $y1 + $height;
+	}
 if($time_max_midi > 0) {
 	imagefilledrectangle($im,$x1+($alpha*$preroll),$y1,$x2+($alpha*$postroll),$y2,$yellow);
 	imagerectangle($im,$x1+($alpha*$preroll),$y1,$x2+($alpha*$postroll),$y2,$black);
