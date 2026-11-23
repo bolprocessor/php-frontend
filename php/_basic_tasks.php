@@ -222,6 +222,7 @@ $dir_supercollider_resources_private = $bp_application_path.$supercollider_resou
 // Kind of the resources handled by the pages of '-cs' files (csound.php, csorchestra.php...): "supercollider" when they handle a '-sc' file (supercollider.php, scsynthdef.php)
 if(!isset($cs_kind)) $cs_kind = "csound";
 rename_new_fixed_resources(); // 2026-11-19
+delete_obsolete_ctests(); // 2026-11-23
 
 if(!file_exists($bp_application_path.$midi_resources)) {
 	mkdir($bp_application_path.$midi_resources);
@@ -7583,6 +7584,24 @@ function rename_new_fixed_resources() {
 			@rename($d['fixed'].$thisfile,$d['fixed'].$new_name);
 			}
 		}
+	return;
+	}
+
+function delete_obsolete_ctests() {
+	// 2026-11-23 The distribution of examples ("ctests_git", installed as "ctests") may contain "delete.txt", listing obsolete data, grammars and other files, one name per line, relative to "ctests". Those which exist are deleted, then "delete.txt" itself. Names that are absolute or contain ".." are ignored, as are folders. Never applied to "ctests_git", the source of the distribution - by Claude
+	global $bp_application_path;
+	$folder = $bp_application_path."ctests".SLASH;
+	$list = $folder."delete.txt";
+	if(!is_file($list)) return;
+	$content = @file_get_contents($list);
+	if($content === FALSE) return;
+	foreach(preg_split("/\R/",$content) as $line) {
+		$name = trim($line);
+		if($name == '' OR is_integer(strpos($name,"..")) OR $name[0] == '/' OR $name[0] == '\\' OR is_integer(strpos($name,':'))) continue;
+		$path = $folder.str_replace(array('/','\\'),SLASH,$name);
+		if(is_file($path)) @unlink($path);
+		}
+	@unlink($list);
 	return;
 	}
 
