@@ -190,6 +190,38 @@ function oscrt_program_line($python_file) {
 	return;
 	}
 
+function oscrt_record_program($project_path) {
+	// 2026-11-24 Record in _settings.php the Python program named by a grammar or data played in real-time OSC ('-py.NAME' line),
+	// e.g. $grammar_python_file["-gr.robot_dance"] = "dancer.py", or $data_python_file["-da.robot_semaphore"] = "dancer-with-flags.py".
+	// The line is read in the project file (as saved: the program is saved at once when chosen), not taken from the link, which may come from a page
+	// loaded before a change. A project naming no program gets "" only if it was recorded before. Nothing is recorded if the file can't be read. - by Claude
+	global $grammar_python_file,$data_python_file;
+	$project = basename(str_replace(SLASH,'/',$project_path));
+	if($project == '') return;
+	if(preg_match("/^-gr\./u",$project) OR preg_match("/\.bpgr$/u",$project)) $variable = "grammar_python_file";
+	else if(preg_match("/^-da\./u",$project) OR preg_match("/\.bpda$/u",$project)) $variable = "data_python_file";
+	else return;
+	$content = @file_get_contents($project_path);
+	if($content === FALSE) return;
+	$python_file = '';
+	foreach(preg_split("/\r\n|\n|\r/u",$content) as $line) {
+		$line = trim($line);
+		if(str_starts_with($line,"-py.") AND !is_integer(strpos($line,"<"))) { // As in extract_data()
+			$python_file = substr($line,4).".py";
+			break;
+			}
+		}
+	$recorded = ($variable == "grammar_python_file") ? $grammar_python_file : $data_python_file;
+	if(isset($recorded[$project])) {
+		if($recorded[$project] == $python_file) return;
+		}
+	else if($python_file == '') return;
+	save_settings2($variable,$project,$python_file);
+	if($variable == "grammar_python_file") $grammar_python_file[$project] = $python_file;
+	else $data_python_file[$project] = $python_file;
+	return;
+	}
+
 function oscrt_resource_link($name) {
 	// Name of an OSC resource with a link to its page
 	return "<a class=\"linkdotted\" target=\"_blank\" href=\"oscresource.php?file=".urlencode(resource_folder("osc",$name).SLASH.$name)."\">‘".htmlspecialchars($name)."’</a>";

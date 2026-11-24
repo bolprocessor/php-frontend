@@ -1425,7 +1425,6 @@ $trace_capture_analysis = TRUE;
 $minimum_period = 200; // milliseconds
 $advance_time = 10; // seconds
 $trace_minimise = FALSE;
-$ignore_fields = FALSE;
 $dir_base = str_replace($bp_application_path,'',$dir);
 $url_settings = "settings.php?file=".urlencode($dir_base.$settings_file);
 if($settings_file <> '' AND file_exists($dir.$settings_file)) {
@@ -1454,7 +1453,6 @@ if($settings_file <> '' AND file_exists($dir.$settings_file)) {
 		$quantization = $settings['Quantization']['value'];
 		$quantize = $settings['Quantize']['value'];
 		$nature_of_time_settings = $settings['Nature_of_time']['value'];
-		if(isset($settings['IgnoreFields'])) $ignore_fields = $settings['IgnoreFields']['value'];
 		if(isset($settings['TraceMinimise']['value'])) $trace_minimise = $settings['TraceMinimise']['value'];
 		if(isset($settings['MinPeriod']['value'])) $minimum_period = intval($settings['MinPeriod']['value']);
 		if(isset($settings['TraceCaptureAnalysis']['value'])) $trace_capture_analysis = intval($settings['TraceCaptureAnalysis']['value']);
@@ -1772,7 +1770,6 @@ if(!isset($_POST['analyze_tonal'])) {
 	echo "<div style=\"float:right; vertical-align:middle; background-color:transparent;\">Import MusicXML: <input   onclick=\"if(!checksaved()) return false;\" type=\"file\" name=\"music_xml_import\">&nbsp;<input type=\"submit\" onclick=\"if(!checksaved()) return false;\" class=\"save\" value=\"← IMPORT\"></div>";
 	echo "<div style=\"text-align:left; background-color:transparent;\"><input id=\"saveButton\" class=\"save big\" type=\"submit\" formaction=\"".$url_this_page."#topedit\" name=\"savethisfile\" value=\"SAVE ‘".begin_with(15,$filename)."’\"></div>";
 
-	if($ignore_fields) echo "<p>👉 The <span class=\"red-text\">“Ignore field separators”</span> option is set to TRUE. This data will use the old algorithm for processing serial tools</p>";
 	$content = do_replace($content);
 	echo $the_warning; // If saving was impossible due to write permissions
 	if($settings_file == '') {

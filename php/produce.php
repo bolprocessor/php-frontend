@@ -234,6 +234,7 @@ else {
 				break;
 			case "osc": // Real-time OSC (Max, Pd...), see _oscrt.php
 				$command .= oscrt_option();
+				oscrt_record_program(($here <> '' AND basename($grammar_path) == basename($here)) ? $grammar_path : $here); // 2026-11-24 Python program of the project to _settings.php
 				if($csoundrt_midi) {
 					$command .= " --rtmidi"; // MIDI ports for interaction
 					$command .= " --csoundrt-delay 0"; // Messages are sent at their dates, as are silent MIDI notes
