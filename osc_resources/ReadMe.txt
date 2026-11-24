@@ -84,8 +84,12 @@ holding a semaphore flag in each hand. The Bol Processor itself needs nothing mo
                              observer, and the head nods at its end, which shows double letters. The joints' maximum speed
                              makes the arms go from one letter to the next. Type your own sentences on the data page.
   3. Click PRODUCE ITEM(S) for a grammar, or PLAY next to an item of the data project. The robot dances.
-On Linux, the web server may not be allowed to open a window on the desktop. Then start the robot in a terminal
-(Command Prompt or PowerShell on Windows), from its folder, and leave it running. The paths are those of a standard installation:
+On Linux, XAMPP's web server runs as the user 'daemon', which your desktop doesn't allow to open windows. Allow it once
+by typing in a terminal (without sudo):
+       mkdir -p ~/.config/autostart && printf '[Desktop Entry]\nType=Application\nName=Bol Processor robots\nExec=xhost +SI:localuser:daemon\n' > ~/.config/autostart/bolprocessor-xhost.desktop
+then log out and in again (or type 'xhost +SI:localuser:daemon' to allow it right away).
+If the robot doesn't start from the interface, start it in a terminal (Command Prompt or PowerShell on Windows),
+from its folder, and leave it running. The paths are those of a standard installation:
        MacOS with MAMP:    cd /Applications/MAMP/htdocs/bolprocessor/osc_resources
                            /usr/local/bin/python3 dancer.py
        MacOS with XAMPP:   cd /Applications/XAMPP/xamppfiles/htdocs/bolprocessor/osc_resources

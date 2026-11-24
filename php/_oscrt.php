@@ -206,9 +206,10 @@ function check_osc($python_needed = TRUE) {
 		else {
 			echo "&nbsp;🐍&nbsp;&nbsp;<span class=\"red-text\"><b>Python</b> is needed for the robots</span><br />";
 			if($python['reason'] <> '') echo "&nbsp;<small>".$python['reason']."</small><br />";
-			echo "&nbsp;<a class=\"linkdotted\" target=\"_blank\" href=\"".python_download_url()."\"><button type=\"button\" class=\"produce\" style=\"font-size:small;\">INSTALL PYTHON</button></a>";
-			echo " <button type=\"button\" class=\"edit\" style=\"font-size:small;\" onclick=\"var b = this; b.textContent = 'Checking…'; var data = new FormData(); data.append('action','check'); fetch('oscrt_robot.php',{method:'POST',body:data,cache:'no-store',credentials:'same-origin'}).then(function() {location.reload();});\">CHECK AGAIN</button><br />";
-			if(osc_server_linux()) echo "&nbsp;<small>or in a terminal: <span class=\"green-text\">sudo apt install python3 python3-tk</span></small><br />";
+			// 2026-11-24 On Linux, python.org only offers the source code: Python and tkinter come from the package manager of the system
+			if(osc_server_linux()) echo "&nbsp;<small>Install it in a terminal: ".oscrt_command_html("sudo apt install python3 python3-tk")."<br />&nbsp;(Fedora: ".oscrt_command_html("sudo dnf install python3 python3-tkinter").")</small><br />&nbsp;";
+			else echo "&nbsp;<a class=\"linkdotted\" target=\"_blank\" href=\"".python_download_url()."\"><button type=\"button\" class=\"produce\" style=\"font-size:small;\">INSTALL PYTHON</button></a> ";
+			echo "<button type=\"button\" class=\"edit\" style=\"font-size:small;\" onclick=\"var b = this; b.textContent = 'Checking…'; var data = new FormData(); data.append('action','check'); fetch('oscrt_robot.php',{method:'POST',body:data,cache:'no-store',credentials:'same-origin'}).then(function() {location.reload();});\">CHECK AGAIN</button><br />";
 			// 2026-11-24 Python installed elsewhere: its path can be typed, as for Csound
 			$example = osc_server_windows() ? "py" : (osc_server_mac() ? "/usr/local/bin/python3" : "/usr/bin/python3");
 			echo "&nbsp;<small>Installed elsewhere? Type the path of Python, or the command that starts it in a terminal (e.g. <span class=\"green-text\">".htmlspecialchars($example)."</span>):</small><br />&nbsp;<input type=\"text\" id=\"python_path\" size=\"36\" style=\"background-color:white; color:black;\" value=\"\" onkeydown=\"if(event.key == 'Enter') {event.preventDefault(); this.nextElementSibling.click();}\"> ";
@@ -316,6 +317,7 @@ function python_probe($path,$arguments) {
 	// so that Python was never found. The launcher (py.exe) gives the actual interpreter (sys.executable), used to start the robots.
 	$code = "import sys; print(sys.version.split()[0]); print(sys.executable); import tkinter; print(tkinter.TkVersion)";
 	$command = array($path);
+	if(osc_server_linux()) $command = array("env","-u","LD_LIBRARY_PATH",$path); // Same environment as the robot (see oscrt_robot_start())
 	if($arguments <> '') $command[] = $arguments;
 	$command[] = "-c";
 	$command[] = $code;
@@ -411,6 +413,31 @@ function oscrt_robot_stop() {
 	return;
 	}
 
+function oscrt_linux_display() {
+	// 2026-11-24 Display of the desktop for a web server that has none: the first X server running (socket /tmp/.X11-unix/X0, X1...), otherwise :0
+	$sockets = glob("/tmp/.X11-unix/X*") ?: array();
+	natsort($sockets);
+	foreach($sockets as $socket) {
+		if(preg_match("/X([0-9]+)$/",$socket,$match)) return ":".$match[1];
+		}
+	return ":0";
+	}
+
+function oscrt_command_html($command) {
+	// 2026-11-24 A terminal command, with a small button copying it to the clipboard (also works in a message inserted with innerHTML)
+	$copy = "var b = this, t = b.getAttribute('data-command'); function done() {b.textContent = 'Copied'; setTimeout(function() {b.textContent = 'Copy';},1500);} if(navigator.clipboard &amp;&amp; window.isSecureContext) navigator.clipboard.writeText(t).then(done); else {var a = document.createElement('textarea'); a.value = t; document.body.appendChild(a); a.select(); document.execCommand('copy'); document.body.removeChild(a); done();}";
+	return "<span class=\"green-text\" style=\"font-family:monospace;\">".htmlspecialchars($command)."</span> <button type=\"button\" class=\"edit\" style=\"font-size:x-small; padding:1px 4px;\" data-command=\"".htmlspecialchars($command)."\" onclick=\"".$copy."\">Copy</button>";
+	}
+
+function oscrt_server_user() {
+	// Name of the user running the web server ('daemon' for XAMPP on Linux)
+	if(function_exists("posix_geteuid") AND function_exists("posix_getpwuid")) {
+		$info = @posix_getpwuid(posix_geteuid());
+		if(is_array($info) AND isset($info['name'])) return $info['name'];
+		}
+	return trim((string)@exec("id -un"));
+	}
+
 function oscrt_robot_start($python_file,&$message) {
 	// Start the Python program $python_file of an OSC resource folder, listening to the port of real-time OSC. A program started before is stopped.
 	// Its window opens on the desktop of the user running the web server (MAMP and XAMPP on MacOS and Windows, and BolProcessor.app, whose server runs
@@ -452,8 +479,12 @@ function oscrt_robot_start($python_file,&$message) {
 		}
 	else {
 		$environment = '';
-		if(osc_server_linux() AND getenv("DISPLAY") === FALSE) $environment = "DISPLAY=:0 "; // The web server may have no display
-		exec("cd ".escapeshellarg($dir)."; ".$environment."nohup ".escapeshellarg($python['path'])." ".escapeshellarg($script)." --port ".intval($d['port'])." > ".escapeshellarg($log)." 2>&1 < /dev/null & echo $!",$output);
+		if(osc_server_linux()) {
+			// 2026-11-24 XAMPP's Apache sets LD_LIBRARY_PATH=/opt/lampp/lib, whose libraries replaced those of the system: tkinter could not be imported
+			$environment = "env -u LD_LIBRARY_PATH ";
+			if(getenv("DISPLAY") === FALSE) $environment .= "DISPLAY=".oscrt_linux_display()." "; // The web server may have no display
+			}
+		exec("cd ".escapeshellarg($dir)."; nohup ".$environment.escapeshellarg($python['path'])." ".escapeshellarg($script)." --port ".intval($d['port'])." > ".escapeshellarg($log)." 2>&1 < /dev/null & echo $!",$output);
 		}
 	$pid = intval(trim(implode('',$output)));
 	// It fails at once if the port is used or the window can't be opened
@@ -466,9 +497,22 @@ function oscrt_robot_start($python_file,&$message) {
 	if(!$alive) {
 		$said = trim((string)@file_get_contents($log)."\n".(string)@file_get_contents($log.".err"));
 		$message = "‘".htmlspecialchars($python_file)."’ did not start";
-		if($said <> '') $message .= ": <span class=\"red-text\">".nl2br(htmlspecialchars(implode("\n",array_slice(preg_split("/\R/",$said),-4))))."</span>";
-		// On Linux, the web server (user 'daemon' in XAMPP) may not be allowed to open a window on the desktop
-		if(osc_server_linux()) $message .= "<br />Start it in a terminal: <span class=\"green-text\">cd ".htmlspecialchars($dir)."; python3 ".htmlspecialchars($python_file)."</span>";
+		$report = ($said <> '') ? nl2br(htmlspecialchars(implode("\n",array_slice(preg_split("/\R/",$said),-4)))) : '';
+		// On Linux, the web server (user 'daemon' in XAMPP) may not open a window on the desktop of the user unless the user allows it (xhost)
+		$server_user = osc_server_linux() ? oscrt_server_user() : '';
+		$display_refused = ($server_user <> '' AND preg_match("/display|Authorization required/i",$said));
+		// 2026-11-24 When the cause is known, the explanation comes first and Python's report is hidden under "Technical details"
+		if($report <> '' AND !$display_refused) $message .= ": <span class=\"red-text\">".$report."</span>";
+		if(osc_server_linux()) {
+			if($display_refused) {
+				$message .= ". The web server (user ‘".htmlspecialchars($server_user)."’) is not allowed to open windows on your desktop. To allow it at every login, type once in a terminal (without sudo):<br />".oscrt_command_html("mkdir -p ~/.config/autostart && printf '[Desktop Entry]\\nType=Application\\nName=Bol Processor robots\\nExec=xhost +SI:localuser:".$server_user."\\n' > ~/.config/autostart/bolprocessor-xhost.desktop");
+				$message .= "<br />then log out and in again (or type ".oscrt_command_html("xhost +SI:localuser:".$server_user)." to allow it right away, until you log out), and click START THE ROBOT again.";
+				$message .= "<br />Or start it";
+				}
+			else $message .= "<br />Start it";
+			$message .= " in a terminal: ".oscrt_command_html("cd ".$dir."; python3 ".$python_file);
+			if($display_refused AND $report <> '') $message .= "<details style=\"font-size:small; color:gray;\"><summary style=\"cursor:pointer;\">Technical details</summary>".$report."</details>";
+			}
 		return FALSE;
 		}
 	@file_put_contents(oscrt_robot_file(),json_encode(array('pid' => $pid,'file' => $python_file,'port' => $d['port'])));

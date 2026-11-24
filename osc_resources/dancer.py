@@ -314,9 +314,9 @@ def main():
 	if not options.no_window:
 		try:
 			import tkinter
-		except ImportError:
-			sys.exit("This Python has no tkinter for the window. Install it (e.g. 'brew install python-tk' with Homebrew, "
-				"'sudo apt install python3-tk' on Linux), use the Python of https://www.python.org, or run with --no-window")
+		except ImportError as error:
+			sys.exit("This Python has no tkinter for the window (%s). Install it (e.g. 'brew install python-tk' with Homebrew, "
+				"'sudo apt install python3-tk' on Linux), use the Python of https://www.python.org, or run with --no-window" % error)
 		if sys.platform == "darwin" and tkinter.TkVersion < 8.6:
 			# The Python of Apple's Command Line Tools comes with Tk 8.5, whose window hangs on recent versions of MacOS
 			sys.exit("This Python uses Tk %s, whose window doesn't work on recent versions of MacOS. Use the Python of "
