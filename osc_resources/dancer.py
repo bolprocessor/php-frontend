@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-# Bol Processor: a simulated robot puppet played in real-time OSC
+# Bol Processor: a simulated robot dancer played in real-time OSC
 # See https://bolprocessor.org/usage-in-robotics/ and ReadMe.txt in this folder.
 #
-# Run:   python3 BP_robot_puppet.py            (window, listening to UDP port 7400 on this computer)
-#        python3 BP_robot_puppet.py --help     (options)
+# Run:   python3 dancer.py            (window, listening to UDP port 7400 on this computer)
+#        python3 dancer.py --help     (options)
+# or click START THE ROBOT on the page of a grammar or data naming it with a line "-py.dancer" on top (output "Real-time OSC").
 # Then, in the Bol Processor, select the output format "Real-time OSC" (host 127.0.0.1, port 7400)
 # and produce "-gr.robot_dance", which names the instruments of "-cs.Robot".
 #
@@ -30,6 +31,9 @@ import sys
 import struct
 import threading
 import time
+
+FLAGS = False  # draw a semaphore flag in each hand (True in dancer-with-flags.py)
+TITLE = "Bol Processor robot dancer"
 
 JOINTS = ["torso", "head", "leftarm", "leftforearm", "rightarm", "rightforearm"]
 LIMITS = {  # degrees, as a robot would have
@@ -207,13 +211,12 @@ def point(x, y, length, degrees):
 
 
 class Window:
-	def __init__(self, puppet, messages, port, flags=False):
+	def __init__(self, puppet, messages, port):
 		import tkinter
 		self.puppet = puppet
-		self.flags = flags
 		self.messages = messages
 		self.root = tkinter.Tk()
-		self.root.title("Bol Processor robot puppet (OSC port %d)" % port)
+		self.root.title("%s (OSC port %d)" % (TITLE, port))
 		self.canvas = tkinter.Canvas(self.root, width=640, height=600, background="#f4f1ea", highlightthickness=0)
 		self.canvas.pack(fill="both", expand=True)
 		self.trails = {"left": [], "right": []}
@@ -269,7 +272,7 @@ class Window:
 				c.create_line(*p1, *p2, fill="#%02x%02x%02x" % (min(fade, 244), min(fade + 30, 241), min(fade + 60, 234)), width=3)
 			c.create_line(*shoulder, *elbow, width=12 * s, fill="#2a9d8f", capstyle="round")
 			c.create_line(*elbow, *hand, width=10 * s, fill="#e76f51", capstyle="round")
-			if self.flags:  # semaphore flag, red and yellow, on a stick extending the forearm
+			if FLAGS:  # semaphore flag, red and yellow, on a stick extending the forearm
 				tip = point(*hand, 75 * s, fore)
 				mid = point(*hand, 35 * s, fore)
 				out = 90 if side == "left" else -90  # the flag flies on the outer side of the stick
@@ -291,17 +294,19 @@ class Window:
 
 
 def main():
-	parser = argparse.ArgumentParser(description="Robot puppet played by the Bol Processor in real-time OSC")
+	parser = argparse.ArgumentParser(description=TITLE + " played by the Bol Processor in real-time OSC")
 	parser.add_argument("--port", type=int, default=7400, help="UDP port (default 7400)")
 	parser.add_argument("--host", default="127.0.0.1", help="address to listen to (default 127.0.0.1; 0.0.0.0 for another computer)")
 	parser.add_argument("--max-speed", type=float, default=400., help="maximum speed of the joints in degrees per second (default 400, 0 = no limit)")
 	parser.add_argument("--verbose", action="store_true", help="print the messages received")
-	parser.add_argument("--flags", action="store_true", help="draw semaphore flags in the hands (for \"-da.robot_semaphore\")")
 	parser.add_argument("--no-window", action="store_true", help="no window: print the messages and the angles every 0.5 s")
 	options = parser.parse_args()
 
 	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	sock.bind((options.host, options.port))
+	try:
+		sock.bind((options.host, options.port))
+	except OSError:
+		sys.exit("UDP port %d is already used on %s, maybe by another robot. Close its window, or choose another port with --port" % (options.port, options.host))
 	messages = queue.Queue()
 	threading.Thread(target=receive, args=(sock, messages, options.verbose or options.no_window), daemon=True).start()
 	puppet = Puppet(options.max_speed)
@@ -317,7 +322,7 @@ def main():
 			sys.exit("This Python uses Tk %s, whose window doesn't work on recent versions of MacOS. Use the Python of "
 				"https://www.python.org (e.g. /Library/Frameworks/Python.framework/Versions/Current/bin/python3), "
 				"or run with --no-window" % tkinter.TkVersion)
-		Window(puppet, messages, options.port, options.flags).run()
+		Window(puppet, messages, options.port).run()
 		return
 	last = shown = time.monotonic()
 	try:

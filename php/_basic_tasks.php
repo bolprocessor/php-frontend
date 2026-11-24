@@ -219,8 +219,20 @@ foreach(array($supercollider_resources,$supercollider_resources_private) as $sc_
 	}
 $dir_supercollider_resources = $bp_application_path.$supercollider_resources.SLASH;
 $dir_supercollider_resources_private = $bp_application_path.$supercollider_resources_private.SLASH;
+// 2026-11-24 OSC resources: programs receiving real-time OSC (Python robots '*.py', Max and Pd patches...), fixed ones in "osc_resources", the user's in "osc_resources_private" (see _oscrt.php) - by Claude
+$osc_resources = "osc_resources";
+$osc_resources_private = "osc_resources_private";
+foreach(array($osc_resources,$osc_resources_private) as $osc_folder) {
+	if(!file_exists($bp_application_path.$osc_folder)) {
+		mkdir($bp_application_path.$osc_folder);
+		chmod($bp_application_path.$osc_folder,$permissions);
+		}
+	}
+$dir_osc_resources = $bp_application_path.$osc_resources.SLASH;
+$dir_osc_resources_private = $bp_application_path.$osc_resources_private.SLASH;
 // Kind of the resources handled by the pages of '-cs' files (csound.php, csorchestra.php...): "supercollider" when they handle a '-sc' file (supercollider.php, scsynthdef.php)
 if(!isset($cs_kind)) $cs_kind = "csound";
+delete_obsolete_resources(); // 2026-11-24 Before rename_new_fixed_resources(), which would rename an obsolete file shadowed by a user file
 rename_new_fixed_resources(); // 2026-11-19
 delete_obsolete_ctests(); // 2026-11-23
 
@@ -625,6 +637,7 @@ function extract_data($is_grammar,$compact,$content) {
 	if($is_grammar) $is_true_bp = TRUE;
 	$extract_data['grammar'] = $extract_data['metronome'] = $extract_data['time_structure'] = $extract_data['headers'] = $extract_data['alphabet'] = $extract_data['grammar'] = $extract_data['objects'] = $extract_data['csound'] = $extract_data['tonality'] = $extract_data['settings'] = $extract_data['data'] = $extract_data['orchestra'] = $extract_data['timebase'] = $extract_data['interaction'] = $extract_data['midisetup'] = $extract_data['timebase'] = $extract_data['keyboard'] = $extract_data['glossary'] = $extract_data['cstables'] = $extract_data['weights'] = $extract_data['data'] = '';
 	$extract_data['supercollider'] = ''; // 2026-11-20 '-sc' file
+	$extract_data['python'] = ''; // 2026-11-24 '-py.NAME' line: Python program NAME.py receiving real-time OSC
 	$extract_data['templates'] = $found_templates = $need_end_line = FALSE;
 	for($i = 0; $i < count($table); $i++) {
 		$line = trim($table[$i]);
@@ -693,6 +706,8 @@ function extract_data($is_grammar,$compact,$content) {
 			$extract_data['csound'] = fix_file_name($line,"cs");
 		else if(str_starts_with($line,"-sc.") AND !is_integer(strpos($line,"<")))
 			$extract_data['supercollider'] = trim($line); // 2026-11-20 SuperCollider resource
+		else if(str_starts_with($line,"-py.") AND !is_integer(strpos($line,"<")))
+			$extract_data['python'] = substr(trim($line),4).".py"; // 2026-11-24 Program receiving real-time OSC
 		else if(is_integer($pos=strpos($line,"-to")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
 			$extract_data['tonality'] = fix_file_name($line,"to");
 		else if(is_integer($pos=strpos($line,"-se")) AND $pos == 0 AND !is_integer(strpos($line,"<")))
@@ -3559,6 +3574,10 @@ function type_of_file($thisfile) {
 		case "bpto": $type = "tonality"; $found = TRUE; break;
 		case "orc": $type = "csorchestra"; $found = TRUE; break;
 		case "scd": $type = "scsynthdef"; $found = TRUE; break; // 2026-11-20 SuperCollider SynthDefs
+		case "py": // 2026-11-24 Programs receiving real-time OSC: Python (robots), Max, Pd, Max for Live
+		case "maxpat":
+		case "pd":
+		case "amxd": $type = "oscresource"; $found = TRUE; break;
 	/*	case "sco": $type = "csorchestra"; $found = TRUE; break;
 		case "aiff": $type = "csorchestra"; $found = TRUE; break;
 		case "wav": $type = "csorchestra"; $found = TRUE; break; */
@@ -5644,6 +5663,7 @@ function hidden_directory($name) {
 		case "source":
 		case "midi_resources":
 		case "osc_resources": // 2026-11-22
+		case "osc_resources_private": // 2026-11-24
 		case "supercollider_resources":
 		case "supercollider_resources_private":
 		case "tonality_resources":
@@ -7435,6 +7455,8 @@ function resource_dirs($kind) {
 	global $dir_csound_resources,$dir_csound_resources_private,$csound_resources,$csound_resources_private;
 	global $dir_tonality_resources,$dir_tonality_resources_private,$tonality_resources,$tonality_resources_private;
 	global $dir_supercollider_resources,$dir_supercollider_resources_private,$supercollider_resources,$supercollider_resources_private;
+	global $dir_osc_resources,$dir_osc_resources_private,$osc_resources,$osc_resources_private;
+	if($kind == "osc") return array('fixed' => $dir_osc_resources,'my' => $dir_osc_resources_private,'fixed_name' => $osc_resources,'my_name' => $osc_resources_private); // 2026-11-24
 	if($kind == "tonality") return array('fixed' => $dir_tonality_resources,'my' => $dir_tonality_resources_private,'fixed_name' => $tonality_resources,'my_name' => $tonality_resources_private);
 	if($kind == "supercollider") return array('fixed' => $dir_supercollider_resources,'my' => $dir_supercollider_resources_private,'fixed_name' => $supercollider_resources,'my_name' => $supercollider_resources_private);
 	return array('fixed' => $dir_csound_resources,'my' => $dir_csound_resources_private,'fixed_name' => $csound_resources,'my_name' => $csound_resources_private);
@@ -7486,6 +7508,7 @@ function resource_kind_of_type($type) {
 	if($type == "csound" OR $type == "csorchestra") return "csound";
 	if($type == "tonality") return "tonality";
 	if($type == "supercollider" OR $type == "scsynthdef") return "supercollider";
+	if($type == "oscresource") return "osc"; // 2026-11-24
 	return '';
 	}
 
@@ -7546,9 +7569,9 @@ function same_folder($dir1,$dir2) {
 
 function read_only_resource_folder($dir) {
 	// TRUE if files in folder $dir can't be changed: "csound_resources", "tonality_resources" or "supercollider_resources", unless $i_am_designer
-	global $dir_csound_resources,$dir_tonality_resources,$dir_supercollider_resources,$i_am_designer;
+	global $dir_csound_resources,$dir_tonality_resources,$dir_supercollider_resources,$dir_osc_resources,$i_am_designer;
 	if($i_am_designer) return FALSE;
-	return same_folder($dir,$dir_csound_resources) OR same_folder($dir,$dir_tonality_resources) OR same_folder($dir,$dir_supercollider_resources);
+	return same_folder($dir,$dir_csound_resources) OR same_folder($dir,$dir_tonality_resources) OR same_folder($dir,$dir_supercollider_resources) OR same_folder($dir,$dir_osc_resources);
 	}
 
 function csound_sample_option() {
@@ -7562,17 +7585,17 @@ function csound_sample_option() {
 function new_version_name($filename) {
 	// 2026-11-19 Name given to a fixed resource whose name is that of a file of the user folder: "-cs.NAME_new", "NAME_new.orc", "-to.NAME_new", "NAME_new.bpto"... Returns '' for other files - by Claude
 	if(preg_match("/^-(cs|to|sc)\./",$filename)) return $filename."_new";
-	if(preg_match("/^(.+)\.(orc|bpcs|bpto|scd)$/",$filename,$m)) return $m[1]."_new.".$m[2];
+	if(preg_match("/^(.+)\.(orc|bpcs|bpto|scd|py|maxpat|pd|amxd)$/",$filename,$m)) return $m[1]."_new.".$m[2];
 	return '';
 	}
 
 function is_new_version_name($filename) {
-	return (preg_match("/^-(cs|to|sc)\./",$filename) AND str_ends_with($filename,"_new")) OR preg_match("/_new\.(orc|bpcs|bpto|scd)$/",$filename);
+	return (preg_match("/^-(cs|to|sc)\./",$filename) AND str_ends_with($filename,"_new")) OR preg_match("/_new\.(orc|bpcs|bpto|scd|py|maxpat|pd|amxd)$/",$filename);
 	}
 
 function rename_new_fixed_resources() {
 	// 2026-11-19 An update of the distribution may bring to a fixed folder a file with the same name as one of the user folder, which would hide it. It is renamed with "_new" (see new_version_name()), replacing an older "_new" version, and marked with a red arrow in the list of resources - by Claude
-	foreach(array("csound","tonality","supercollider") as $kind) {
+	foreach(array("csound","tonality","supercollider","osc") as $kind) {
 		$d = resource_dirs($kind);
 		$dircontent = @scandir($d['my']);
 		if($dircontent === FALSE) continue;
@@ -7605,6 +7628,20 @@ function delete_obsolete_ctests() {
 	return;
 	}
 
+function delete_obsolete_resources() {
+	// 2026-11-24 Files of the distribution that were replaced, deleted from the fixed resource folders of installations (updates don't delete files).
+	// Only fixed folders: a file with the same name in a private folder belongs to the user and is kept - by Claude
+	global $bp_application_path;
+	$obsolete = array(
+		"osc_resources/BP_robot_puppet.py", // Replaced by dancer.py and dancer-with-flags.py
+		);
+	foreach($obsolete as $name) {
+		$path = $bp_application_path.str_replace("/",SLASH,$name);
+		if(is_file($path)) @unlink($path);
+		}
+	return;
+	}
+
 function duplicate_resource($kind,$filename,$new_name) {
 	// 2026-11-19 Copies resource $filename (either folder) to the user folder as $new_name, which is completed like $filename ("-cs.", ".orc", "-to.", ".bpto"...) and may not be that of a file in either folder. Returns a message - by Claude
 	global $permissions;
@@ -7614,8 +7651,10 @@ function duplicate_resource($kind,$filename,$new_name) {
 	if($filename == '' OR !is_file($source) OR resource_kind_of_type($type) <> $kind)
 		return "<p><span class=\"red-text\">➡ Can't duplicate</span> ‘".htmlspecialchars($filename)."’</p>";
 	$new_name = trim(fix_new_name($new_name,TRUE));
-	if($type == "csorchestra" OR $type == "scsynthdef") {
-		$ext = ($type == "scsynthdef") ? ".scd" : ".orc";
+	if($type == "oscresource") $type = "osc_extension"; // 2026-11-24 Same extension as the original (".py", ".maxpat"...)
+	if($type == "csorchestra" OR $type == "scsynthdef" OR $type == "osc_extension") {
+		$ext = ($type == "scsynthdef") ? ".scd" : ($type == "osc_extension" ? ".".pathinfo($filename,PATHINFO_EXTENSION) : ".orc");
+		if($type == "osc_extension") $type = "oscresource";
 		$new_name = preg_replace("/".preg_quote($ext,"/")."$/",'',$new_name);
 		if($new_name <> '') $new_name .= $ext;
 		}
@@ -7850,6 +7889,35 @@ function add_settings_to_content($content,$settings_file) {
 		$out[] = $line;
 		}
 	array_unshift($out,$settings_file);
+	return implode(chr(10),$out);
+	}
+
+function add_python_to_content($content,$python_file) {
+	// 2026-11-24 Puts the line "-py.NAME" naming the Python program "NAME.py" (real-time OSC receiver, see _oscrt.php) after the resource files at the top
+	// of a grammar or data, replacing the line of another program. With $python_file = '', the line is removed - by Claude
+	$content = str_replace(chr(13).chr(10),chr(10),$content);
+	$table = explode(chr(10),$content);
+	$out = array();
+	$insert_at = -1;
+	$top = TRUE;
+	foreach($table as $line) {
+		$trimmed = trim($line);
+		if($top) {
+			if(preg_match("/^-[a-zA-Z]{2}\.\S/u",$trimmed) OR preg_match("/^\S+\.bp[a-z]{2}$/u",$trimmed)) {
+				if(str_starts_with($trimmed,"-py.")) continue;
+				$out[] = $line;
+				$insert_at = count($out);
+				continue;
+				}
+			if($trimmed <> '' AND !str_starts_with($trimmed,"//")) $top = FALSE;
+			}
+		$out[] = $line;
+		}
+	if($python_file <> '') {
+		$python_line = "-py.".preg_replace("/\.py$/",'',$python_file);
+		if($insert_at < 0) array_unshift($out,$python_line);
+		else array_splice($out,$insert_at,0,array($python_line));
+		}
 	return implode(chr(10),$out);
 	}
 

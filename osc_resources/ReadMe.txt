@@ -57,48 +57,52 @@ note with a sine wave, one note at a time. For polyphony, send /bp/note to the v
 In Max: [udpreceive 7400] -> [route /bp/note /bp/off /bp/stop ...]
 In Pd:  [netreceive -u -b 7400] -> [oscparse] -> [list trim] -> [route bp] -> [route note off stop ...]
 
-Robot puppet
-------------
-BP_robot_puppet.py is a small Python 3 program (standard library only) that draws a puppet in a window. It listens to the
-OSC messages of the Bol Processor and moves the puppet's joints. The Bol Processor itself needs nothing more: it sends OSC
-whether or not a program listens.
-  1. Get a suitable Python (once). The window needs Python's tkinter with Tk 8.6 or later.
+Robot dancers
+-------------
+dancer.py and dancer-with-flags.py are small Python 3 programs (standard library only) that draw a robot in a window.
+They listen to the OSC messages of the Bol Processor and move the robot's joints. dancer-with-flags.py is the same robot
+holding a semaphore flag in each hand. The Bol Processor itself needs nothing more: it sends OSC whether or not a program listens.
+  1. Get a suitable Python (once). The window needs Python's tkinter with Tk 8.6 or later. In "Real-time OSC", the page of
+     a project naming a robot shows whether Python was found, with an INSTALL PYTHON button if it wasn't.
      - MacOS: the 'python3' of Apple's Command Line Tools (/usr/bin/python3) has Tk 8.5, whose window hangs, so the program
-       refuses it. Install Python from https://www.python.org/downloads/ (the installer includes Tk 8.6). It is then
-       /usr/local/bin/python3, but typing 'python3' may still run Apple's: give the full path, as below.
+       refuses it. Install Python from https://www.python.org/downloads/ (the installer includes Tk 8.6).
        Homebrew's Python needs 'brew install python-tk'.
      - Windows: the installer of https://www.python.org includes tkinter.
-     - Linux: sudo apt install python3-tk
-     Without a suitable Python, run the program with --no-window: it prints the angles instead of drawing the puppet.
-  2. Start the puppet in a Terminal (Command Prompt or PowerShell on Windows), from the osc_resources folder,
-     and leave it running. The paths are those of a standard installation:
-       MacOS with MAMP:    cd /Applications/MAMP/htdocs/bolprocessor/osc_resources
-                           /usr/local/bin/python3 BP_robot_puppet.py
-       MacOS with XAMPP:   cd /Applications/XAMPP/xamppfiles/htdocs/bolprocessor/osc_resources
-                           /usr/local/bin/python3 BP_robot_puppet.py
-       Windows with MAMP:  cd C:\MAMP\htdocs\bolprocessor\osc_resources
-                           py BP_robot_puppet.py
-       Windows with XAMPP: cd C:\xampp\htdocs\bolprocessor\osc_resources
-                           py BP_robot_puppet.py
-       Linux with XAMPP:   cd /opt/lampp/htdocs/bolprocessor/osc_resources
-                           python3 BP_robot_puppet.py
-     (add --help for the options). It waits for messages on port 7400.
-  3. In the Bol Processor, open one of the three examples of the ctests folder, choose the output "Real-time OSC"
-     (host 127.0.0.1, port 7400) and click PRODUCE ITEM(S) for a grammar, or PLAY next to an item of the data project.
-       -gr.robot_dance:      movements written as notes, with _cont() and _value(); four figures chosen at random.
+     - Linux: sudo apt install python3 python3-tk
+     Without a suitable Python, run the program with --no-window: it prints the angles instead of drawing the robot.
+  2. Open one of the examples of the ctests folder and choose the output "Real-time OSC" (host 127.0.0.1, port 7400).
+     Its line "-py.dancer" (or "-py.dancer-with-flags") on top names the robot: the page shows it with a START THE ROBOT button,
+     which opens the robot's window. Closing the window stops the robot. The "Change" button chooses another program.
+       -gr.robot_dance:      movements written as notes, with _cont() and _value(); four figures chosen at random (dancer.py).
        -gr.robot_objects:    gestures as time-objects (sound-objects) of -so.robot_objects, named in -al.robot_objects:
                              a clap whose impact falls on the beat at any tempo, a cyclic wave, a nod with limited speed.
                              Each prototype contains a Csound score whose lines are movements of the joints,
-                             e.g. "i5 0 0.5 261.626 0 150 0" raises the right arm from 0 to 150 degrees in 0.5 s.
-       -da.robot_semaphore:  sentences spelled in the flag semaphore alphabet, e.g. "H E L L O space W O R L D".
-                             The letters A to Z and 'space' are time-objects of -so.robot_semaphore, named in
-                             -al.robot_semaphore. Each one holds both arms at the angles of the letter, seen by the observer,
-                             and the head nods at its end, which shows double letters. The joints' maximum speed makes
-                             the arms go from one letter to the next. Type your own sentences on the data page.
-                             Start the puppet with --flags to draw a flag in each hand:
-                               MacOS:   /usr/local/bin/python3 BP_robot_puppet.py --flags
-                               Windows: py BP_robot_puppet.py --flags
-                               Linux:   python3 BP_robot_puppet.py --flags
+                             e.g. "i5 0 0.5 261.626 0 150 0" raises the right arm from 0 to 150 degrees in 0.5 s (dancer.py).
+       -da.robot_semaphore:  sentences spelled in the flag semaphore alphabet, e.g. "H E L L O space W O R L D"
+                             (dancer-with-flags.py). The letters A to Z and 'space' are time-objects of -so.robot_semaphore,
+                             named in -al.robot_semaphore. Each one holds both arms at the angles of the letter, seen by the
+                             observer, and the head nods at its end, which shows double letters. The joints' maximum speed
+                             makes the arms go from one letter to the next. Type your own sentences on the data page.
+  3. Click PRODUCE ITEM(S) for a grammar, or PLAY next to an item of the data project. The robot dances.
+On Linux, the web server may not be allowed to open a window on the desktop. Then start the robot in a terminal
+(Command Prompt or PowerShell on Windows), from its folder, and leave it running. The paths are those of a standard installation:
+       MacOS with MAMP:    cd /Applications/MAMP/htdocs/bolprocessor/osc_resources
+                           /usr/local/bin/python3 dancer.py
+       MacOS with XAMPP:   cd /Applications/XAMPP/xamppfiles/htdocs/bolprocessor/osc_resources
+                           /usr/local/bin/python3 dancer.py
+       Windows with MAMP:  cd C:\MAMP\htdocs\bolprocessor\osc_resources
+                           py dancer.py
+       Windows with XAMPP: cd C:\xampp\htdocs\bolprocessor\osc_resources
+                           py dancer.py
+       Linux with XAMPP:   cd /opt/lampp/htdocs/bolprocessor/osc_resources
+                           python3 dancer.py
+       BolProcessor.app:   cd /Applications/BolProcessor.app/Contents/Resources/www/osc_resources
+                           /usr/local/bin/python3 dancer.py
+                           (if the application is elsewhere, replace /Applications with its folder)
+     (dancer-with-flags.py in the same way; add --help for the options). It waits for messages on port 7400.
+The robots, these examples of receivers and your own programs are listed in the OSC resource folder of the interface
+(link "OSC resource folder" on project pages in "Real-time OSC"). Duplicate copies a file to osc_resources_private,
+where it can be changed, e.g. to drive real servos in send_to_hardware().
 Each joint is an instrument of -cs.Robot (torso, head, leftarm, leftforearm, rightarm, rightforearm), whose angle in degrees
 is the parameter named like it: a note of 'leftarm' moves the left arm from the value of _value(leftarm,...) at its beginning
 to its value at its end, following /bp/env if any. See https://bolprocessor.org/robot-puppet/

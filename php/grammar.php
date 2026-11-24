@@ -147,6 +147,15 @@ if(isset($_POST['set_csound_file']) AND isset($_POST['new_csound_file']) AND $_P
 	$need_to_save = TRUE;
 	}
 
+// 2026-11-24 Python program receiving real-time OSC ("-py.NAME" line), chosen on the panel of real-time OSC (oscrt_program_line())
+if(isset($_POST['set_python_file']) AND isset($_POST['new_python_file'])) {
+	$content = @file_get_contents($this_file,TRUE);
+	$extract_data = extract_data(TRUE,TRUE,$content);
+	$_POST['thistext'] = add_python_to_content($extract_data['content'],($_POST['new_python_file'] == "-") ? '' : basename($_POST['new_python_file']));
+	$no_save_midiresources = TRUE;
+	$need_to_save = TRUE;
+	}
+
 // 2026-11-23 A grammar declaring no settings file gets the CHOOSE/CREATE buttons of data pages (settings_choose_create_form())
 if(isset($_POST['create_settings_file']) AND isset($_POST['new_settings_file']) AND trim($_POST['new_settings_file']) <> '') {
 	$content = @file_get_contents($this_file,TRUE);
@@ -378,6 +387,7 @@ $data_file = $extract_data['data'];
 $objects_file = $extract_data['objects'];
 $csound_file = $extract_data['csound'];
 $sc_file = $extract_data['supercollider']; // 2026-11-20 SuperCollider resource ('-sc' file)
+$python_file = $extract_data['python']; // 2026-11-24 Python program receiving real-time OSC ('-py.NAME' line)
 $tonality_file = $extract_data['tonality'];
 $settings_file = $extract_data['settings'];
 $orchestra_file = $extract_data['orchestra'];
@@ -461,6 +471,7 @@ $csound_is_responsive = FALSE;
 echo "<div style=\"float:right; padding:6px; background-color:transparent;\">";
 $csound_is_responsive = check_csound();
 check_supercollider(); // 2026-11-21
+if($file_format == "osc") check_osc($python_file <> ''); // 2026-11-24 Python and the OSC resource folder
 watchdog_notice(); // 2026-11-22
 link_to_tonality();
 echo "</div>";
@@ -495,7 +506,7 @@ else if($file_format == "csoundrt") {
 else if($file_format == "osc") {
 	// Real-time OSC: notes are sent to a program such as Max or Pd, MIDI ports are used for interaction
 	echo "<input type=\"hidden\" name=\"output_file\" value=\"".$output_file."\">";
-	oscrt_panel($sc_file,$csound_file);
+	oscrt_panel($sc_file,$csound_file,$python_file);
 	display_midi_ports($filename);
 	}
 else if($file_format == "scrt") {

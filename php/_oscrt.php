@@ -4,6 +4,9 @@
 // at their dates to a program such as Max or Pd listening to this UDP port, see CsoundRealTime.c. Unlike real-time Csound and SuperCollider,
 // no server is started: the receiving program is run by the user. Its address is set for each machine with the form of the project pages
 // (oscrt_settings.php), stored in _settings.php ($oscrt_host, $oscrt_port). Example receivers are in "osc_resources".
+// 2026-11-24 A grammar or data may name a Python program receiving the messages, e.g. the robot "osc_resources/dancer.py", with a line "-py.dancer"
+// on top (the console skips it). Project pages show it with buttons to change it and to start it (oscrt_robot.php), once Python is found (python_status()).
+// OSC resources are listed by index.php?path=osc_resources: "osc_resources" (fixed) and "osc_resources_private" (the user's), see resource_dirs("osc") - by Claude
 
 if(!defined("OSC_RT_DEFAULT_PORT")) {
 	define("OSC_RT_DEFAULT_PORT",7400);
@@ -31,9 +34,11 @@ function oscrt_option() {
 	return " --osc ".$d['port'].($d['host'] <> "127.0.0.1" ? "@".$d['host'] : '');
 	}
 
-function oscrt_panel($sc_file,$csound_file) {
+function oscrt_panel($sc_file,$csound_file,$python_file = '') {
 	// Displayed on project pages instead of the name of the output file, when the output is real-time OSC
 	// The destination and the messages are shown by the "settings" button of oscrt_format_notes() (2026-11-21)
+	// 2026-11-24 $python_file: the program named by the line "-py.NAME" of the project ("NAME.py"), see oscrt_program_line()
+	oscrt_program_line($python_file);
 	echo "<p>";
 	$kind = '';
 	if($sc_file <> '' AND file_exists(resource_path("supercollider",$sc_file))) { $kind = "supercollider"; $file = $sc_file; }
@@ -105,5 +110,369 @@ function oscrt_format_notes() {
 		}
 	</script>";
 	return;
+	}
+// ------------ Programs receiving OSC: Python robots (2026-11-24, by Claude) ------------
+
+// 2026-11-24 System of the server, which runs Python. windows_system(), mac_system() and linux_system() read the browser's User-Agent instead.
+function osc_server_windows() { return PHP_OS_FAMILY == "Windows"; }
+function osc_server_mac() { return PHP_OS_FAMILY == "Darwin"; }
+function osc_server_linux() { return PHP_OS_FAMILY == "Linux"; }
+
+function oscrt_python_programs() {
+	// Names of the Python programs ('*.py') of both OSC resource folders
+	$list = array();
+	foreach(resource_files("osc") as $thisfile => $dir) {
+		if(!str_ends_with($thisfile,".py") OR !is_file($dir.$thisfile)) continue;
+		if(str_ends_with($thisfile,"_bak") OR preg_match("/_lock[0-9]*$/u",$thisfile)) continue;
+		$list[] = $thisfile;
+		}
+	return $list;
+	}
+
+function oscrt_local_destination() {
+	// TRUE if the OSC messages are sent to this computer, where a robot can be started
+	$d = oscrt_destination();
+	return in_array(strtolower($d['host']),array("127.0.0.1","localhost","::1"));
+	}
+
+function oscrt_program_line($python_file) {
+	// The Python program named by the project ("-py.NAME"), with buttons to start it and to choose another one. Must be called inside the form of the page.
+	global $url_this_page;
+	$programs = oscrt_python_programs();
+	echo "<p>";
+	if($python_file <> '') {
+		$found = file_exists(resource_path("osc",$python_file));
+		if($found) echo "Receiving program: ".oscrt_resource_link($python_file);
+		else echo "Receiving program: <span class=\"red-text\">‘".htmlspecialchars($python_file)."’ was not found</span> in the <a class=\"linkdotted\" target=\"_blank\" href=\"index.php?path=osc_resources\">OSC resource folder</a>";
+		if(count($programs) > 0) echo " <button type=\"button\" class=\"save\" style=\"font-size:small;\" onclick=\"if(checksaved()) { var d = document.getElementById('change_python'); d.style.display = (d.style.display == 'none') ? 'inline' : 'none'; }\">Change</button>";
+		if($found) {
+			$python = python_status();
+			$running = oscrt_robot_running();
+			echo "<br />";
+			if(!$python['ok']) echo "<span class=\"red-text\">➡</span> It needs Python (see the box on the right)";
+			else if(!oscrt_local_destination()) {
+				$d = oscrt_destination();
+				echo "<span class=\"red-text\">➡</span> Messages go to ".htmlspecialchars($d['host']).": start the program on that computer";
+				}
+			else {
+				echo "<button type=\"button\" class=\"produce\" onclick=\"return oscrtRobot('start',".htmlspecialchars(json_encode($python_file)).");\">START THE ROBOT</button>";
+				echo " <button type=\"button\" class=\"edit\" id=\"oscrt_robot_stop\" style=\"font-size:small;".($running === '' ? " display:none;" : '')."\" onclick=\"return oscrtRobot('stop','');\">STOP</button>";
+				echo " <span id=\"oscrt_robot_message\" style=\"font-size:small;\">".($running <> '' ? "‘".htmlspecialchars($running)."’ is running" : '')."</span>";
+				}
+			}
+		}
+	else {
+		echo "Receiving program: Max, Pd… or a Python robot of the <a class=\"linkdotted\" target=\"_blank\" href=\"index.php?path=osc_resources\">OSC resource folder</a>";
+		if(count($programs) > 0) echo " <button type=\"button\" class=\"save\" style=\"font-size:small;\" onclick=\"if(checksaved()) { var d = document.getElementById('change_python'); d.style.display = (d.style.display == 'none') ? 'inline' : 'none'; }\">Choose a Python program</button>";
+		}
+	if(count($programs) > 0) {
+		echo "<span id=\"change_python\" style=\"display:none;\"><br /><select name=\"new_python_file\">";
+		echo "<option value=\"-\">(none)</option>";
+		foreach($programs as $thisfile) echo "<option value=\"".htmlspecialchars($thisfile)."\"".($thisfile == $python_file ? " selected" : '').">".htmlspecialchars($thisfile)."</option>";
+		echo "</select> <input class=\"save\" type=\"submit\" onclick=\"this.form.target='_self'; return true;\" name=\"set_python_file\" formaction=\"".$url_this_page."#topmidiports\" value=\"USE THIS PROGRAM\"></span>";
+		}
+	echo "</p>";
+	echo "<script>
+	function oscrtRobot(action,file) {
+		var data = new FormData();
+		data.append('action',action);
+		data.append('file',file);
+		var message = document.getElementById('oscrt_robot_message');
+		var stop = document.getElementById('oscrt_robot_stop');
+		message.textContent = (action == 'start') ? 'Starting…' : 'Stopping…';
+		fetch('oscrt_robot.php',{method:'POST',body:data,cache:'no-store',credentials:'same-origin'}).then(function(r) {return r.json();}).then(function(d) {
+			message.innerHTML = d.message;
+			stop.style.display = d.running ? '' : 'none';
+			}).catch(function() {message.textContent = 'No answer from the interface.';});
+		return false;
+		}
+	</script>";
+	return;
+	}
+
+function oscrt_resource_link($name) {
+	// Name of an OSC resource with a link to its page
+	return "<a class=\"linkdotted\" target=\"_blank\" href=\"oscresource.php?file=".urlencode(resource_folder("osc",$name).SLASH.$name)."\">‘".htmlspecialchars($name)."’</a>";
+	}
+
+function check_osc($python_needed = TRUE) {
+	// Box displayed next to that of Csound on project pages in real-time OSC, and on the OSC resource folder: Python and the link to the folder
+	global $path, $osc_resources;
+	$osc_folder = (isset($path) AND $path == $osc_resources);
+	echo "<p class=\"thinborder\" style=\"font-size:small; vertical-align:middle; background-color:azure; color:black; padding:4px 4px 8px 4px; border-radius:6px; line-height:1.6;\">";
+	if($python_needed OR $osc_folder) {
+		$python = python_status();
+		if($python['ok']) echo "&nbsp;🐍&nbsp;&nbsp;<b>Python</b> ".htmlspecialchars($python['version'])." (Tk ".htmlspecialchars($python['tk']).") is ready<br />";
+		else {
+			echo "&nbsp;🐍&nbsp;&nbsp;<span class=\"red-text\"><b>Python</b> is needed for the robots</span><br />";
+			if($python['reason'] <> '') echo "&nbsp;<small>".$python['reason']."</small><br />";
+			echo "&nbsp;<a class=\"linkdotted\" target=\"_blank\" href=\"".python_download_url()."\"><button type=\"button\" class=\"produce\" style=\"font-size:small;\">INSTALL PYTHON</button></a>";
+			echo " <button type=\"button\" class=\"edit\" style=\"font-size:small;\" onclick=\"var b = this; b.textContent = 'Checking…'; var data = new FormData(); data.append('action','check'); fetch('oscrt_robot.php',{method:'POST',body:data,cache:'no-store',credentials:'same-origin'}).then(function() {location.reload();});\">CHECK AGAIN</button><br />";
+			if(osc_server_linux()) echo "&nbsp;<small>or in a terminal: <span class=\"green-text\">sudo apt install python3 python3-tk</span></small><br />";
+			// 2026-11-24 Python installed elsewhere: its path can be typed, as for Csound
+			$example = osc_server_windows() ? "py" : (osc_server_mac() ? "/usr/local/bin/python3" : "/usr/bin/python3");
+			echo "&nbsp;<small>Installed elsewhere? Type the path of Python, or the command that starts it in a terminal (e.g. <span class=\"green-text\">".htmlspecialchars($example)."</span>):</small><br />&nbsp;<input type=\"text\" id=\"python_path\" size=\"36\" style=\"background-color:white; color:black;\" value=\"\" onkeydown=\"if(event.key == 'Enter') {event.preventDefault(); this.nextElementSibling.click();}\"> ";
+			echo "<button type=\"button\" class=\"save\" style=\"font-size:small;\" onclick=\"var data = new FormData(); data.append('action','path'); data.append('path',document.getElementById('python_path').value); fetch('oscrt_robot.php',{method:'POST',body:data,cache:'no-store',credentials:'same-origin'}).then(function(r) {return r.json();}).then(function(d) {if(d.ok) location.reload(); else document.getElementById('python_path_message').innerHTML = d.message;});\">TRY</button><br />";
+			echo "&nbsp;<small><span id=\"python_path_message\" class=\"red-text\"></span></small>";
+			}
+		}
+	if(!$osc_folder) echo "&nbsp;👉&nbsp;&nbsp;<a class=\"darkblue-text\" target=\"_blank\" href=\"index.php?path=osc_resources\">OSC resource folder</a><br />";
+	echo "</p>";
+	return;
+	}
+
+function python_download_url() {
+	if(osc_server_windows()) return "https://www.python.org/downloads/windows/";
+	if(osc_server_mac()) return "https://www.python.org/downloads/macos/";
+	return "https://www.python.org/downloads/";
+	}
+
+function python_candidates() {
+	// Python 3 interpreters that may be installed: [path, arguments]. On MacOS, the Python of www.python.org comes first, since Apple's has Tk 8.5.
+	// /usr/bin/python3 of MacOS is not tried: without the Command Line Tools, it would open a window offering to install them.
+	// 2026-11-24 A path typed by the user (check_osc()) comes first
+	global $python_path;
+	$list = array();
+	if(isset($python_path) AND trim($python_path) <> '') $list[] = array(trim($python_path),'');
+	if(osc_server_windows()) {
+		// 2026-11-24 Python may be installed in many ways: the installer of python.org (AppData\Local\Programs\Python of the user, or Program Files),
+		// the Python install manager (AppData\Local\Python\pythoncore-3.X-64, with "py" as an alias), the Microsoft Store (aliases in
+		// AppData\Local\Microsoft\WindowsApps), Anaconda... So the places recorded in the registry are tried (PEP 514), then the usual folders
+		// of all users (the web server may not have the variables of the user's session, such as LOCALAPPDATA), and finally the commands
+		// "py", "python" and "python3" as a terminal would find them, which is how the user would check that Python works.
+		$found = python_windows_registry();
+		$patterns = array("C:/Users/*/AppData/Local/Programs/Python/Python3*/python.exe","C:/Users/*/AppData/Local/Python/pythoncore-3*/python.exe","C:/Program Files/Python3*/python.exe","C:/Python3*/python.exe");
+		$local = getenv("LOCALAPPDATA");
+		if($local) {
+			$local = str_replace("\\","/",$local);
+			array_unshift($patterns,$local."/Programs/Python/Python3*/python.exe",$local."/Python/pythoncore-3*/python.exe");
+			}
+		$globbed = array();
+		foreach($patterns as $pattern) $globbed = array_merge($globbed,glob($pattern) ?: array());
+		usort($globbed,function($a,$b) { return strnatcasecmp(basename(dirname($b)),basename(dirname($a))); }); // Newest first
+		$found = array_merge($found,$globbed);
+		$seen = array();
+		foreach($found as $p) {
+			$key = strtolower(str_replace("\\","/",$p));
+			if(isset($seen[$key])) continue;
+			$seen[$key] = TRUE;
+			$list[] = array($p,'');
+			}
+		// Python launchers, for all users or for one user
+		foreach(array_merge(array("C:/Windows/py.exe"),glob("C:/Users/*/AppData/Local/Programs/Python/Launcher/py.exe") ?: array()) as $p) $list[] = array($p,"-3");
+		// Commands found in the PATH of the web server, as in a terminal (aliases of the install manager and of the Microsoft Store included)
+		$list[] = array("py","-3");
+		$list[] = array("python",'');
+		$list[] = array("python3",'');
+		foreach(array("py","python3","python") as $name) {
+			foreach(glob("C:/Users/*/AppData/Local/Microsoft/WindowsApps/".$name.".exe") ?: array() as $p) $list[] = array($p,($name == "py") ? "-3" : '');
+			}
+		}
+	else if(osc_server_linux()) {
+		foreach(array("/usr/bin/python3","/usr/local/bin/python3") as $p) $list[] = array($p,'');
+		}
+	else {
+		foreach(array("/Library/Frameworks/Python.framework/Versions/Current/bin/python3","/usr/local/bin/python3","/opt/homebrew/bin/python3","/usr/local/opt/python3/bin/python3","/Library/Developer/CommandLineTools/usr/bin/python3") as $p) $list[] = array($p,'');
+		}
+	return $list;
+	}
+
+function python_is_command($path) {
+	// A command found in the PATH ("py"), or an alias of the Microsoft Store or the install manager (WindowsApps), which is_file() may not see
+	return (strpbrk($path,"/\\") === FALSE OR stripos($path,"WindowsApps") !== FALSE);
+	}
+
+function python_windows_registry() {
+	// 2026-11-24 Interpreters recorded in the registry by the installers (PEP 514): ExecutablePath, or python.exe in InstallPath
+	$list = array();
+	foreach(array("HKCU\\Software\\Python","HKLM\\Software\\Python","HKLM\\Software\\WOW6432Node\\Python") as $root) {
+		$output = scrt_run(array("reg","query",$root,"/s"),5);
+		$key = '';
+		foreach(preg_split("/\R/",$output) as $line) {
+			if(preg_match("/^HKEY_/i",$line)) {
+				$key = trim($line);
+				continue;
+				}
+			if(!preg_match("/^\s+(\S.*?)\s+REG_(?:EXPAND_)?SZ\s+(.+)$/",$line,$match)) continue;
+			$value = trim($match[2]);
+			if(strcasecmp($match[1],"ExecutablePath") == 0) $exe = $value;
+			else if(preg_match("/\\\\InstallPath$/i",$key) AND preg_match("/^\(/",$match[1])) $exe = rtrim($value,"\\")."\\python.exe";
+			else continue;
+			if(preg_match("/python\.exe$/i",$exe) AND is_file($exe)) $list[] = $exe;
+			}
+		}
+	return $list;
+	}
+
+function python_status_file() {
+	$dir = realpath(dirname(__DIR__).DIRECTORY_SEPARATOR."temp_bolprocessor");
+	if($dir === FALSE) $dir = dirname(__DIR__).DIRECTORY_SEPARATOR."temp_bolprocessor";
+	return $dir.DIRECTORY_SEPARATOR."python_status.json";
+	}
+
+function python_probe($path,$arguments) {
+	// Version of Python, its executable and the version of its Tk ('' if tkinter is missing), or FALSE if it does not answer.
+	// 2026-11-24 The command is an array, run without a shell: on Windows, cmd.exe removed the first and last quotes of a command starting with a quote,
+	// so that Python was never found. The launcher (py.exe) gives the actual interpreter (sys.executable), used to start the robots.
+	$code = "import sys; print(sys.version.split()[0]); print(sys.executable); import tkinter; print(tkinter.TkVersion)";
+	$command = array($path);
+	if($arguments <> '') $command[] = $arguments;
+	$command[] = "-c";
+	$command[] = $code;
+	$output = scrt_run($command,15);
+	$lines = preg_split("/\R/",trim($output));
+	if(!isset($lines[0]) OR !preg_match("/^3\.[0-9]+/",trim($lines[0]))) return FALSE;
+	$executable = (isset($lines[1]) AND is_file(trim($lines[1]))) ? trim($lines[1]) : '';
+	$tk = (isset($lines[2]) AND preg_match("/^[0-9]+\.[0-9]+$/",trim($lines[2]))) ? trim($lines[2]) : '';
+	return array('version' => trim($lines[0]),'executable' => $executable,'tk' => $tk);
+	}
+
+function python_status($refresh = FALSE) {
+	// A Python 3 able to open the window of the robots (tkinter, with Tk 8.6 or later on MacOS): 'ok', 'path', 'arguments', 'version', 'tk',
+	// and 'reason' telling what is wrong when it is not 'ok'. The interpreter found is remembered (python_status.json) as long as its file is unchanged.
+	static $status = NULL;
+	if($status !== NULL AND !$refresh) return $status;
+	$file = python_status_file();
+	if(!$refresh) {
+		$saved = @json_decode((string)@file_get_contents($file),TRUE);
+		if(is_array($saved) AND isset($saved['path']) AND $saved['path'] <> '' AND (python_is_command($saved['path']) OR (is_file($saved['path']) AND @filemtime($saved['path']) == ($saved['mtime'] ?? -1)))) {
+			$status = $saved;
+			$status['ok'] = TRUE;
+			$status['reason'] = '';
+			return $status;
+			}
+		}
+	@unlink($file);
+	$status = array('ok' => FALSE,'path' => '','arguments' => '','version' => '','tk' => '','reason' => '');
+	$reason = '';
+	$tried = 0;
+	foreach(python_candidates() as $candidate) {
+		list($path,$arguments) = $candidate;
+		if(!python_is_command($path) AND !is_file($path)) continue;
+		$tried++;
+		$info = python_probe($path,$arguments);
+		if($info === FALSE) continue;
+		$name = "Python ".$info['version'];
+		if($info['tk'] == '') {
+			if($reason == '') $reason = $name." (".htmlspecialchars($path).") has no tkinter for the window";
+			continue;
+			}
+		if(osc_server_mac() AND version_compare($info['tk'],"8.6","<")) {
+			if($reason == '') $reason = $name." (".htmlspecialchars($path).") has Tk ".$info['tk'].", whose window doesn't work on recent versions of MacOS";
+			continue;
+			}
+		if($info['executable'] <> '') { // The interpreter itself, rather than a launcher or a link
+			$path = $info['executable'];
+			$arguments = '';
+			}
+		$status = array('ok' => TRUE,'path' => $path,'arguments' => $arguments,'version' => $info['version'],'tk' => $info['tk'],'reason' => '','mtime' => @filemtime($path));
+		@file_put_contents($file,json_encode($status));
+		return $status;
+		}
+	if($reason == '') $reason = ($tried > 0) ? "Python was found but did not answer" : "No Python 3 was found in the usual places";
+	$status['reason'] = $reason;
+	return $status;
+	}
+
+function oscrt_robot_file() {
+	return dirname(python_status_file()).DIRECTORY_SEPARATOR."osc_robot.json";
+	}
+
+function oscrt_robot_state() {
+	$state = @json_decode((string)@file_get_contents(oscrt_robot_file()),TRUE);
+	return is_array($state) ? $state : array();
+	}
+
+function oscrt_pid_alive($pid) {
+	// TRUE if process $pid is running Python
+	$pid = intval($pid);
+	if($pid <= 0) return FALSE;
+	$output = array();
+	if(osc_server_windows()) exec("tasklist /FI \"PID eq ".$pid."\" /NH 2>NUL",$output);
+	else exec("ps -p ".$pid." -o comm= 2>/dev/null",$output);
+	return (stripos(implode(" ",$output),"python") !== FALSE);
+	}
+
+function oscrt_robot_running() {
+	// Name of the program started by the Bol Processor which is still running, or ''
+	$state = oscrt_robot_state();
+	if(isset($state['pid']) AND oscrt_pid_alive($state['pid'])) return $state['file'] ?? '';
+	return '';
+	}
+
+function oscrt_robot_stop() {
+	$state = oscrt_robot_state();
+	if(isset($state['pid']) AND oscrt_pid_alive($state['pid'])) {
+		if(osc_server_windows()) exec("taskkill /PID ".intval($state['pid'])." /F");
+		else exec("kill ".intval($state['pid']));
+		for($i = 0; $i < 20 AND oscrt_pid_alive($state['pid']); $i++) usleep(100000);
+		}
+	@unlink(oscrt_robot_file());
+	return;
+	}
+
+function oscrt_robot_start($python_file,&$message) {
+	// Start the Python program $python_file of an OSC resource folder, listening to the port of real-time OSC. A program started before is stopped.
+	// Its window opens on the desktop of the user running the web server (MAMP and XAMPP on MacOS and Windows, and BolProcessor.app, whose server runs
+	// as the user: checked on MacOS 2026-11-24). Paths are relative to the folder of the interface, so no server is assumed. Closing the window stops it.
+	$python_file = basename($python_file);
+	if(!in_array($python_file,oscrt_python_programs())) {
+		$message = "‘".htmlspecialchars($python_file)."’ was not found";
+		return FALSE;
+		}
+	$python = python_status();
+	if(!$python['ok']) {
+		$message = "Python was not found";
+		return FALSE;
+		}
+	if(!oscrt_local_destination()) {
+		$message = "Messages are sent to another computer: start the program there";
+		return FALSE;
+		}
+	oscrt_robot_stop();
+	$d = oscrt_destination();
+	$script = realpath(resource_path("osc",$python_file));
+	$dir = dirname($script);
+	$log = dirname(python_status_file()).DIRECTORY_SEPARATOR."osc_robot_log.txt";
+	@unlink($log);
+	@unlink($log.".err");
+	$pid = 0;
+	$output = array();
+	if(osc_server_windows()) {
+		// pythonw.exe (or pyw.exe, the launcher) runs without a console window. Not -WindowStyle Hidden: Windows would apply it to the first window shown, that of the robot.
+		$exe = str_replace("/","\\",$python['path']);
+		if(python_is_command($exe)) $exe = preg_replace("/(python|py)(3?)(\.exe)?$/i","$1w$3",$exe); // pyw, pythonw: Start-Process finds them in the PATH
+		else {
+			$windowed = preg_replace("/(python|py)\.exe$/i","$1w.exe",$exe);
+			if(is_file($windowed)) $exe = $windowed;
+			}
+		$arguments = ($python['arguments'] <> '' ? $python['arguments']." " : '')."\"".$script."\" --port ".$d['port'];
+		$command = "powershell -NoProfile -Command \"(Start-Process -FilePath '".$exe."' -ArgumentList '".str_replace("'","''",$arguments)."' -WorkingDirectory '".$dir."' -RedirectStandardOutput '".$log."' -RedirectStandardError '".$log.".err' -PassThru).Id\"";
+		exec($command,$output);
+		}
+	else {
+		$environment = '';
+		if(osc_server_linux() AND getenv("DISPLAY") === FALSE) $environment = "DISPLAY=:0 "; // The web server may have no display
+		exec("cd ".escapeshellarg($dir)."; ".$environment."nohup ".escapeshellarg($python['path'])." ".escapeshellarg($script)." --port ".intval($d['port'])." > ".escapeshellarg($log)." 2>&1 < /dev/null & echo $!",$output);
+		}
+	$pid = intval(trim(implode('',$output)));
+	// It fails at once if the port is used or the window can't be opened
+	$alive = FALSE;
+	for($i = 0; $i < 8; $i++) {
+		usleep(250000);
+		$alive = ($pid > 0 AND oscrt_pid_alive($pid));
+		if(!$alive) break;
+		}
+	if(!$alive) {
+		$said = trim((string)@file_get_contents($log)."\n".(string)@file_get_contents($log.".err"));
+		$message = "‘".htmlspecialchars($python_file)."’ did not start";
+		if($said <> '') $message .= ": <span class=\"red-text\">".nl2br(htmlspecialchars(implode("\n",array_slice(preg_split("/\R/",$said),-4))))."</span>";
+		// On Linux, the web server (user 'daemon' in XAMPP) may not be allowed to open a window on the desktop
+		if(osc_server_linux()) $message .= "<br />Start it in a terminal: <span class=\"green-text\">cd ".htmlspecialchars($dir)."; python3 ".htmlspecialchars($python_file)."</span>";
+		return FALSE;
+		}
+	@file_put_contents(oscrt_robot_file(),json_encode(array('pid' => $pid,'file' => $python_file,'port' => $d['port'])));
+	$message = "‘".htmlspecialchars($python_file)."’ is running: its window listens to port ".$d['port'].". Close it to stop the robot.";
+	return TRUE;
 	}
 ?>

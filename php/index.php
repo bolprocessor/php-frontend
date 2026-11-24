@@ -4,10 +4,12 @@ require_once("_basic_tasks.php");
 if($path == $csound_resources_private) $path = $csound_resources;
 if($path == $tonality_resources_private) $path = $tonality_resources;
 if($path == $supercollider_resources_private) $path = $supercollider_resources; // 2026-11-20
+if($path == $osc_resources_private) $path = $osc_resources; // 2026-11-24
 $csound_folder = ($path == $csound_resources);
 $tonality_folder = ($path == $tonality_resources);
 $supercollider_folder = ($path == $supercollider_resources);
-$resource_kind = $csound_folder ? "csound" : ($tonality_folder ? "tonality" : ($supercollider_folder ? "supercollider" : ''));
+$osc_folder = ($path == $osc_resources); // 2026-11-24 Programs receiving real-time OSC
+$resource_kind = $csound_folder ? "csound" : ($tonality_folder ? "tonality" : ($supercollider_folder ? "supercollider" : ($osc_folder ? "osc" : '')));
 $resource_folder = ($resource_kind <> '');
 if($path <> '') $filename = $path;
 else $filename = "Bol Processor";
@@ -38,7 +40,7 @@ if($path <> '' AND $_SERVER['REQUEST_METHOD'] === 'POST') {
 					}
 				// 2026-11-19 Only resources of the right kind are imported to a resource folder, and they may not replace or hide a file with the same name in either folder - by Claude
 				else if($resource_folder AND resource_kind_of_type($type_of_file['type']) <> $resource_kind) {
-					echo "<span class=\"red-text\">➡</span> File '".htmlspecialchars($fileName)."' ignored (not a ".($resource_kind == "csound" ? "Csound" : ($resource_kind == "supercollider" ? "SuperCollider" : "tonality"))." resource)<br>";
+					echo "<span class=\"red-text\">➡</span> File '".htmlspecialchars($fileName)."' ignored (not a ".($resource_kind == "csound" ? "Csound" : ($resource_kind == "supercollider" ? "SuperCollider" : ($resource_kind == "osc" ? "OSC" : "tonality")))." resource)<br>";
 					unlink($tmpName);
 					}
 				else if($resource_folder AND file_exists(resource_path($resource_kind,$fileName))) {
@@ -460,6 +462,7 @@ if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension 
 	echo "<div style=\"float:right; padding:6px; background-color:transparent;\">";
 	if($path <> '') check_csound();
 	if($path <> '') check_supercollider(); // 2026-11-21
+	if($osc_folder) check_osc(TRUE); // 2026-11-24 Python, needed by the robots
 	watchdog_notice(); // 2026-11-22
 	if(!is_integer(strpos($path,$tonality_resources)) AND $path <> '') link_to_tonality();
 	if($path <> '') {
@@ -472,7 +475,7 @@ if($dir <> $bp_application_path."php" AND $path <> $trash_folder AND $extension 
 		echo "</form>";
 		echo "</div>";
 		}
-	if($path <> $csound_resources AND $path <> $tonality_resources AND $path <> $supercollider_resources) {
+	if($path <> $csound_resources AND $path <> $tonality_resources AND $path <> $supercollider_resources AND $path <> $osc_resources) {
 		if($path <> '') echo "<br /><button class=\"save big\" onclick=\"togglecreate(); return false;\">CREATE FILES OR FOLDERS</button>";
 		else echo "<br /><button class=\"save big\" onclick=\"togglecreate(); return false;\">CREATE FOLDERS</button>";
 		echo "<div id=\"create\" style=\"background-color:transparent;\">";
@@ -683,7 +686,7 @@ if($path <> '') {
 	if(!$rename_files AND !$delete_files AND !$move_files AND !$download_files AND $path == $trash_folder) {
 		echo "<br /><br />🗑&nbsp;<input style=\"background-color:red; color:white;\" title=\"Empty trash\" type=\"submit\" name=\"empty_trash\" value=\"EMPTY THIS TRASH\"> 👉 can't be reversed!";
 		}
-	if(!$show_dependencies AND !$delete_files AND !$move_files AND !$download_files AND $path <> $trash_folder AND !is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"tonality_resources")) AND !is_integer(strpos($path,"supercollider_resources"))) echo "<br /><input class=\"edit\" title=\"Show dependencies of files (links to other files)\" type=\"submit\" name=\"show_dependencies\" value=\"SHOW DEPENDENCIES\"> (links between files)";
+	if(!$show_dependencies AND !$delete_files AND !$move_files AND !$download_files AND $path <> $trash_folder AND !is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"tonality_resources")) AND !is_integer(strpos($path,"supercollider_resources")) AND !is_integer(strpos($path,"osc_resources"))) echo "<br /><input class=\"edit\" title=\"Show dependencies of files (links to other files)\" type=\"submit\" name=\"show_dependencies\" value=\"SHOW DEPENDENCIES\"> (links between files)";
 	else if($show_dependencies) echo "<br /><br /><input class=\"cancel\" type=\"submit\" value=\"HIDE DEPENDENCIES\">";
 	echo "<br /><br />";
 	}
@@ -718,6 +721,9 @@ if($resource_kind == "csound") {
 		echo "</td></tr></table><br />";
 		}
 	}
+if($osc_folder) { // 2026-11-24
+	echo "<p style=\"max-width:700px;\">Programs receiving the messages of <b>real-time OSC</b>: robots in Python (‘*.py’), patches of Max and Pd, a Max for Live device. Fixed files come with the Bol Processor. <b>Duplicate</b> copies a file to ‘".$osc_resources_private."’, where you can change it. A grammar or data naming a Python program with a line <span class=\"green-text\">-py.NAME</span> on top shows a button to start it. <a class=\"linkdotted\" target=\"_blank\" href=\"../osc_resources/ReadMe.txt\">ReadMe</a></p>";
+	}
 display_directory(FALSE,$dir,"directory");
 if($path <> $trash_folder) echo "▶︎&nbsp;🗑&nbsp;<a target=\"_blank\" href=\"index.php?path=".$trash_folder."\">TRASH</a><br />";
 echo "<br />";
@@ -733,7 +739,7 @@ if(is_integer(strpos($path,"scale_images"))) {
 	echo "</tr>";
 	}
 
-if(!is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"tonality_resources")) AND !is_integer(strpos($path,"supercollider_resources"))) {
+if(!is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"tonality_resources")) AND !is_integer(strpos($path,"supercollider_resources")) AND !is_integer(strpos($path,"osc_resources"))) {
 	if($path <> '' OR $show_grammar OR $show_data) {
 		echo "<tr>";
 		echo "<th>";
@@ -839,7 +845,7 @@ if(!is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"t
 if($path <> '') {
 	$n3 = display_directory(TRUE,$dir,'');
 	echo "<tr>";
-	if(!is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"tonality_resources")) AND !is_integer(strpos($path,"supercollider_resources"))) {
+	if(!is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"tonality_resources")) AND !is_integer(strpos($path,"supercollider_resources")) AND !is_integer(strpos($path,"osc_resources"))) {
 		echo "<td style=\"padding-bottom:6px;\">";
 		if($n1 > 0) display_directory(FALSE,$dir,"settings");
 		echo "</td>";
@@ -892,7 +898,7 @@ function display_directory($test,$dir,$filter) {
 		$duplicate_script = TRUE;
 		// 2026-11-19 Script of the DUPLICATE buttons: asks for a name not used in either folder, then posts it - by Claude
 		echo "<script>\nvar csNames = ".json_encode(array_values($dircontent)).";\n";
-		echo "function duplicateResource(file) {\n\tvar m, pre = '', ext = '';\n\tif(m = file.match(/^-(cs|to|sc)\\./)) pre = m[0];\n\telse if(m = file.match(/\\.(orc|bpcs|bpto|scd)$/)) ext = m[0];\n\tvar name = prompt('Duplicate ' + file + ' to ".resource_dirs($resource_kind)['my_name']." as:', '');\n\tif(name === null) return false;\n\tname = name.trim().replace(/[ +$:\\/\\\\]/g,'_');\n\tname = name.replace(/^-(cs|to|sc)\\./,'').replace(/\\.(orc|bpcs|bpto|scd)$/,'');\n\tif(name == '' || name[0] == '.') { alert('Invalid name'); return false; }\n\tname = pre + name + ext;\n\tif(csNames.indexOf(name) >= 0) { alert(name + ' already exists'); return duplicateResource(file); }\n";
+		echo "function duplicateResource(file) {\n\tvar m, pre = '', ext = '';\n\tif(m = file.match(/^-(cs|to|sc)\\./)) pre = m[0];\n\telse if(m = file.match(/\\.(orc|bpcs|bpto|scd|py|maxpat|pd|amxd)$/)) ext = m[0];\n\tvar name = prompt('Duplicate ' + file + ' to ".resource_dirs($resource_kind)['my_name']." as:', '');\n\tif(name === null) return false;\n\tname = name.trim().replace(/[ +$:\\/\\\\]/g,'_');\n\tname = name.replace(/^-(cs|to|sc)\\./,'').replace(/\\.(orc|bpcs|bpto|scd|py|maxpat|pd|amxd)$/,'');\n\tif(name == '' || name[0] == '.') { alert('Invalid name'); return false; }\n\tname = pre + name + ext;\n\tif(csNames.indexOf(name) >= 0) { alert(name + ' already exists'); return duplicateResource(file); }\n";
 		echo "\tvar f = document.createElement('form'); f.method = 'post'; f.action = window.location.href;\n\t[['duplicate_resource',file],['duplicate_name',name]].forEach(function(p) { var i = document.createElement('input'); i.type = 'hidden'; i.name = p[0]; i.value = p[1]; f.appendChild(i); });\n\tdocument.body.appendChild(f); f.submit(); return false;\n\t}\n";
 		echo "function trashResource(file) {\n\tif(!confirm('Move ' + file + ' to the trash?')) return false;\n\tvar f = document.createElement('form'); f.method = 'post'; f.action = window.location.href;\n\tvar i = document.createElement('input'); i.type = 'hidden'; i.name = 'trash_resource'; i.value = file; f.appendChild(i);\n\tdocument.body.appendChild(f); f.submit(); return false;\n\t}\n</script>\n";
 		}
