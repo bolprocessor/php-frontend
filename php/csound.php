@@ -628,25 +628,13 @@ for($k = 0; array_key_exists("CsoundTables[".$k."]",$csound_values); $k++) {
 		}
 	}
 $done_table = FALSE;
-// Name of the associated tonality file. By default, the name of this file with "-to." (used when old scale definitions are found)
-$line = trim(cs_get($csound_values,"TonalityFileName",''));
-if(str_starts_with($line,"-to") OR is_integer(strpos($line,".bpto"))) $tonality_filename = $line;
-else if($i_scale == 0) $tonality_filename = "No associated tonality file";
-echo "</textarea><br />";
-
-echo "<h3>Associated tonality file</h3>";
-echo "<input type=\"hidden\" name=\"tonality\" value=\"".$tonality_filename."\">";  // For autosave
-echo "<textarea name=\"tonality_filename\" rows=\"1\" style=\"width:400px; background-color:cornsilk; color:black;\">";
-echo $tonality_filename;
+// 2026-11-24 An associated tonality file ("TonalityFileName") is no longer shown or read: the tonality is that of the project.
+// Scale definitions found in an old file are moved to a tonality file named after this file with "-to." ($tonality_filename, see above).
 echo "</textarea><br />";
 echo "<input type=\"hidden\" name=\"the_tables\" value='".$cstables."'>";  // For autosave
 echo "<input type=\"hidden\" name=\"dir_scales\" value=\"".$dir_scales."\">";
 if($sc_page) echo "</div>";
 
-if(is_integer(strpos($tonality_filename,"-to.")) OR is_integer(strpos($tonality_filename,".bpto"))) {
-	$url_tonality = "tonality.php?file=".urlencode(tonality_resource_folder($tonality_filename).SLASH.$tonality_filename);
-	echo "<input class=\"edit\" type=\"submit\" formaction=\"".$url_tonality."\" target=\"_blank\" name=\"opentonality\" onclick=\"this.form.target='_blank';return true;\" value=\"EDIT ‘".$tonality_filename."’\">&nbsp;";
-	}
 $max_scales = $i_scale; // Beware that we count scales from 1 because 0 is the default equal-tempered scale
 	
 if($max_scales > 1) {
@@ -748,8 +736,7 @@ if($number_instruments > 0) {
 			while(isset($done_index[$this_index])) $this_index++;
 			}
 		$done_index[$this_index] = TRUE;
-		echo "<form method=\"post\" action=\"csinstrument.php?instrument_name=".urlencode($CsoundInstrumentName[$j])."&tonality_filename=".urlencode($tonality_filename)."&instrument_index=".urlencode($this_index)."&instrument_file=".urlencode($instrument_file[$j])."&temp_folder=".urlencode($temp_folder)."\" enctype=\"multipart/form-data\">";
-		echo "<input type=\"hidden\" name=\"tonality_filename\" value=\"".$tonality_filename."\">";
+		echo "<form method=\"post\" action=\"csinstrument.php?instrument_name=".urlencode($CsoundInstrumentName[$j])."&instrument_index=".urlencode($this_index)."&instrument_file=".urlencode($instrument_file[$j])."&temp_folder=".urlencode($temp_folder)."\" enctype=\"multipart/form-data\">";
 		echo "<input type=\"hidden\" name=\"instrument_index\" value=\"".$this_index."\">";
 		echo "<input type=\"hidden\" name=\"temp_folder\" value=\"".$temp_folder."\">";
 		echo "<input type=\"hidden\" name=\"instrument_file\" value=\"".$instrument_file[$j]."\">";
@@ -778,7 +765,6 @@ if($number_instruments > 0) {
 		echo "</td>";
 		echo "<form method=\"post\" action=\"".$url_this_page."#instruments\" enctype=\"multipart/form-data\">";
 		echo "<td class=\"middle\">";
-		echo "<input type=\"hidden\" name=\"tonality_filename\" value=\"".$tonality_filename."\">";
 		echo "<input type=\"hidden\" name=\"dir\" value=\"".$dir."\">";
 		echo "<input type=\"hidden\" name=\"filename\" value=\"".$filename."\">";
 		echo "<input type=\"hidden\" name=\"InstrumentIndex\" value=\"".$this_index."\">";

@@ -41,7 +41,7 @@ $section_headers = array("RND","ORD","LIN","SUB","SUB1","TEM","POSLONG","LEFT","
 
 $architecture = php_uname("m");
 
-$i_am_designer = FALSE;
+$i_am_designer = FALSE; // Making it TRUE will allow you to modify the contents of "*_resources" folders which are overwritten at each update.
 $test = FALSE;
 // $test = TRUE;
 
@@ -1570,7 +1570,7 @@ function so_temp_changed($temp_folder,$prototypes_file) {
 
 function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder,$force,$page = NULL) {
 	// 2026-11-11 Csound resources are saved in JSON format. Values are stored by their key, see csound_data_to_json()
-	// 2026-11-18 '$page' gives the values of the form of csound.php (orchestra, channels, parts, tables, tonality). By default they are read from $_POST - by Claude
+	// 2026-11-18 '$page' gives the values of the form of csound.php (orchestra, channels, parts, tables). By default they are read from $_POST - by Claude
 	global $top_header, $test, $temp_dir, $permissions;
 //	$verbose = TRUE;
 	if($verbose) echo "dir = ".$dir."<br />";
@@ -1656,7 +1656,6 @@ function SaveCsoundInstruments($verbose,$dir,$filename,$temp_folder,$force,$page
 		return "error";
 		}
 	$data['tables'] = $page['tables'];
-	$data['tonality'] = $page['tonality'];
 	$json = csound_data_to_json($file_header,$data);
 	@unlink($dir.$filename);
 	file_put_contents($dir.$filename,$json);
@@ -1685,8 +1684,6 @@ function csound_page_values_from_post() {
 		$line = trim($line);
 		if($line <> '') $page['tables'][] = $line;
 		}
-	$page['tonality'] = trim($_POST['tonality_filename']);
-	if($page['tonality'] == "No associated tonality file") $page['tonality'] = '';
 	return $page;
 	}
 
@@ -1710,7 +1707,6 @@ function csound_page_values_from_file($path) {
 		$line = trim($values["CsoundTables[".$k."]"]);
 		if($line <> '') $page['tables'][] = $line;
 		}
-	$page['tonality'] = trim(cs_get($values,"TonalityFileName",''));
 	return $page;
 	}
 
@@ -1723,7 +1719,7 @@ function csound_temp_read_only($temp_folder) {
 	}
 
 function csound_temp_changed($temp_folder) {
-	// 2026-11-18 Called by csinstrument.php and csparameter.php when instruments or parameters have been changed in the temporary folder of a '-cs' file. The file is saved at once, with the other values (orchestra, channels, parts, tables, tonality) it has on disk, which these pages don't change. Previously it was saved by the autosave of csound.php within 30 seconds, and reloading csound.php before discarded the changes. If it can't be saved now, '_changed' tells the autosave to do it - by Claude
+	// 2026-11-18 Called by csinstrument.php and csparameter.php when instruments or parameters have been changed in the temporary folder of a '-cs' file. The file is saved at once, with the other values (orchestra, channels, parts, tables) it has on disk, which these pages don't change. Previously it was saved by the autosave of csound.php within 30 seconds, and reloading csound.php before discarded the changes. If it can't be saved now, '_changed' tells the autosave to do it - by Claude
 	global $temp_dir;
 	$file_changed = $temp_dir.$temp_folder.SLASH."_changed";
 	$handle = fopen($file_changed,"w");
@@ -1818,7 +1814,7 @@ function cs_new_data() {
 	for($ch = 1; $ch <= 16; $ch++) $channels[$ch] = -1;
 	$parts = array();
 	for($part = 1; $part <= MAXPARTS; $part++) $parts[$part] = -1;
-	return array("orchestra" => "0-default.orc","channels" => $channels,"parts" => $parts,"instruments" => array(),"tables" => array("f1 0 256 10 1 ; This table may be changed"),"tonality" => '');
+	return array("orchestra" => "0-default.orc","channels" => $channels,"parts" => $parts,"instruments" => array(),"tables" => array("f1 0 256 10 1 ; This table may be changed"));
 	}
 
 function cs_values_to_lines($fields,$values) {
@@ -1939,8 +1935,7 @@ function csound_lines_to_data($lines) {
 		while($i < count($lines) AND trim($lines[$i]) == '') $i++;
 		$line = ($i < count($lines)) ? trim($lines[$i++]) : NULL;
 		}
-	$data['tonality'] = '';
-	if($line !== NULL AND $line <> "No associated tonality file") $data['tonality'] = $line;
+	// 2026-11-24 The line after the tables, naming an associated tonality file, is ignored
 	return $data;
 	}
 
@@ -2011,7 +2006,7 @@ function csound_data_to_json($file_header,$data) {
 	$json["Csound instruments"] = cs_item("CsInstruments",$instruments);
 	foreach($data['tables'] as $k => $line)
 		$json["Csound table line #".($k + 1)] = cs_item("CsoundTables[".$k."]",$line);
-	$json["Associated tonality file"] = cs_item("TonalityFileName",$data['tonality']);
+	// 2026-11-24 The associated tonality file ("TonalityFileName") is no longer saved: the tonality is that of the project
 	return json_encode($json,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE|JSON_PRESERVE_ZERO_FRACTION)."\n";
 	}
 
@@ -4907,33 +4902,6 @@ function add_instruction($instruction,$content) {
 	return $content;
 	}
 
-function get_tonality_file($csound_instruments_file) {
-	$tonality_filename = '';
-	if(!file_exists($csound_instruments_file)) return $tonality_filename;
-	$content = @file_get_contents($csound_instruments_file);
-	if(MB_CONVERT_OK) $content = mb_convert_encoding($content,'UTF-8','UTF-8');
-	if(csound_is_json($content)) { // 2026-11-11
-		$json = csound_json_decode($content);
-		if($json !== FALSE) $tonality_filename = cs_get(cs_values($json),"TonalityFileName",'');
-		return $tonality_filename;
-		}
-	$table = explode(chr(10),$content);
-	$imax = count($table);
-	for($i = 0; $i < $imax; $i++) {
-		$line = trim($table[$i]);
-		if($line <> "_end tables") continue;
-		if($i < ($imax - 1)) {
-			$line = trim($table[$i + 1]);
-			if((is_integer($pos=strpos($line,"-to.")) AND $pos == 0) OR (is_integer(strpos($line,".bpto"))))
-				$tonality_filename = $line;
-			else $tonality_filename = '';
-			}
-		else $tonality_filename = '';
-
-		}
-	return $tonality_filename;
-	}
-
 function orchestra_instruments($orchestra_path) {
 	// 2026-11-18 Numbered instruments of a Csound orchestra, as an array number => description.
 	// The descriptions are taken from the "; Instruments:" block at the top of the file (as in "0-default.orc"),
@@ -4997,21 +4965,6 @@ function show_instruments_and_scales($dir,$objects_file,$content,$url_this_page,
 		} */
 	// 2026-11-21 The instruments of the '-cs' file are listed only when the output is a Csound score or real-time Csound
 	$csound_output = ($file_format == "csound" OR $file_format == "csoundrt");
-	if($csound_file <> '') {
-		$tonality_file_in_csound = get_tonality_file(csound_resource_path($csound_file));
-		if($tonality_file_in_csound <> '' AND $tonality_file_in_csound <> $tonality_file) {
-			echo "<p></p><div class=\"warning\">";
-			if($tonality_file == '') {
-				$content = add_instruction($tonality_file_in_csound,$content);
-				$tonality_file = $tonality_file_in_csound;
-				echo "👉&nbsp;&nbsp;File <class=\"darkblue-text\">‘".$csound_file."’</span> indicates that tonality file <class=\"darkblue-text\">‘".$tonality_file_in_csound."’</span><br />should be associated. This indication has been added to the project.<br /><span class=\"red-text\">You need to</span> <input class=\"save big\" type=\"submit\" onclick=\"clearsave();\" name=\"savethisfile\" formaction=\"".$url_this_page."\" value=\"SAVE ‘".$filename."’\">";
-				}
-			else {
-				echo "👉&nbsp;&nbsp;<span class=\"red-text\">WARNING:</span> File <class=\"darkblue-text\">‘".$csound_file."’</span> indicates that tonality file<br /><class=\"darkblue-text\">‘".$tonality_file_in_csound."’</span> should be associated.<br />This project selects <class=\"darkblue-text\">‘".$tonality_file."’</span> instead, <span class=\"red-text\">which we will use.</span><br />Your can edit <class=\"darkblue-text\">‘".$csound_file."’</span> to solve the inconsistency.";
-				}
-			echo "</div>";
-			}
-		}
 	if($tonality_file <> '') {
 		$list_of_tonal_scales = list_of_tonal_scales(tonality_resource_path($tonality_file));
 		if((!isset($_POST['analyze_tonal']) AND $max_scales = count($list_of_tonal_scales)) > 0) {
@@ -7681,7 +7634,7 @@ function private_csound_resource_independent($type,$name) {
 	// 2026-11-20 Called when a Csound resource has been copied to "csound_resources_private" (Duplicate, RENAME OR COPY), $type being
 	// that of type_of_file(). The copy must keep working if a later distribution changes or deletes the fixed files it uses:
 	// - a '-cs' file whose orchestra is fixed gets a copy of it under its own name ("-cs.Beethoven_try" -> "Beethoven_try.orc"),
-	//   which it names from now on. Its tonality file is not copied: tonality resources are duplicated on their own page.
+	//   which it names from now on.
 	// - the samples and other files named in the orchestra (e.g. "Iowa_strings/violin/...") are copied to "csound_resources_private"
 	//   unless they are already there, see copy_orchestra_files(). Csound finds them in the folder of the orchestra.
 	// Returns a message (HTML) listing the copies - by Claude
