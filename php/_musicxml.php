@@ -57,6 +57,7 @@ function convert_musicxml($the_score,$repeat_section,$divisions,$fifths,$mode,$m
 	if($trace_measures AND $reload_musicxml) echo "Tracing measures #".$measures['min']." to #".$measures['max']."<br />";
 	if($include_breaths) {
 		if($breath_tag <> '') $breath_trace_tag = "[".$breath_tag."] ";
+		$breath_trace_tag .= "_breath "; // 2026-11-26 The console delays the beats and ticks of the time base by the duration of the breath
 		$fraction = $breath_length['p']."/".$breath_length['q'];
 		$simplify = simplify($fraction,$max_term_in_fraction);
 		$p = $breath_length['p'] = $simplify['p'];

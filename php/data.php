@@ -1938,6 +1938,7 @@ if(!$hide AND !isset($_POST['analyze_tonal'])) {
 echo "</form>";
 $table = explode(chr(10).chr(10),$content); // 2026-04-09 Now using double linefeeds
 $imax = count($table);
+$data_breath_tag = breath_tag_of($content); // 2026-11-26 Breaths of data imported from MusicXML before '_breath' existed (see create_parts())
 if($imax > 0 AND (substr_count($content,'{') > 0 OR substr_count($content,"-da.") > 0  OR substr_count($content,".bpda") > 0) AND !$hide) {
 	echo "<span id=\"tonalanalysis\"></span>";
 	if(isset($_POST['analyze_tonal']))
@@ -2223,6 +2224,7 @@ if($NumberMIDIinputs > 0) footer_enter_notes();
 echo "</body></html>";
 
 function create_parts($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxchunk_size,$measure_min,$measure_max,$label) {
+	global $data_breath_tag;
 	global $permissions,$p_clock, $q_clock;
 //	$minchunk_size = 0;
 	$test_legato = FALSE;
@@ -2288,6 +2290,7 @@ function create_parts($line,$i_item,$temp_dir,$temp_folder,$minchunk_size,$maxch
 			}
 		}
 	if($restrict_analysis) echo ":</b><br /><small>".$line."</small><br /><br />";
+	$line = convert_breath_tags($line,$data_breath_tag); // 2026-11-26
 	$line = preg_replace('/(?<!^)\[[^\]]*\]/u','',trim($line)); // 2026-04-09, keep [] in the beginning
 	if($label == "units") {
 		$line = normalize_rests($line); // Normally not necessary if recently imported musicxml

@@ -224,7 +224,8 @@
         "17 0 _transposestep",
         "65 2 _scale",
         "66 1 _capture",
-        "67 1 _part"
+        "67 1 _part",
+        "68 0 _breath"
     ],
     "HTMLdiacritical": [
         "amp",

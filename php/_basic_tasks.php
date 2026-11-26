@@ -4645,6 +4645,19 @@ function file_link($link) {
 	return $link;
 	}
 
+function breath_tag_of($content) {
+	// 2026-11-26 Tag of the breaths of a data file imported from MusicXML, from its line "// Interpreting breaths as 1/6 beat with tag [🌱]", or ''
+	if(preg_match("/^\/\/ Interpreting breaths as [^\n]* with tag \[([^\]\n]+)\]/mu",$content,$match)) return $match[1];
+	return '';
+	}
+
+function convert_breath_tags($line,$tag) {
+	// 2026-11-26 Data imported from MusicXML before '_breath' existed: "[TAG] 1/6" becomes "[TAG] _breath 1/6", so that the console
+	// delays the beats and ticks of the time base by the duration of the breath
+	if($tag == '') return $line;
+	return preg_replace("/\[".preg_quote($tag,'/')."\](?!\s*_breath)\s*/u","[".$tag."] _breath ",$line);
+	}
+
 function windows_free_console() {
 	// 2026-11-26 Windows: before compiling, makes room for a new "bp.exe". A running bp.exe can't be deleted (it can be renamed),
 	// e.g. a production that never ended, so the running ones are killed, and if the file is still locked it is renamed "bp_old_<date>.exe",
@@ -8755,6 +8768,7 @@ function is_performance_control($text) {
 	switch($before) {
 		case "_articulcont":
 		case "_articulfixed":
+		case "_breath":
 		case "_articulstep":
 		case "_capture":
 		case "_chan":
