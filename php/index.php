@@ -221,18 +221,19 @@ if(isset($_POST['create_timebase'])) {
 	$filename = trim($_POST['filename']);
 	if($filename <> '') {
 		$filename = good_name($type,$filename,$name_mode);
+		$tb_dir = rtrim(timebase_dir($dir),SLASH); // 2026-11-26 Time bases are created in the top folder of the workspace - by Claude
 		$new_file = $filename;
-		if(file_exists($dir.SLASH.$filename)) {
+		if(file_exists($tb_dir.SLASH.$filename)) {
 			echo "<p><span class=\"red-text\">This file already exists:</span> <span class=\"red-text\">".$filename."</span></p>";
 			unset($_POST['create_timebase']);
 			}
 		else {
-			$handle = fopen($dir.SLASH.$filename,"w");
+			$handle = fopen($tb_dir.SLASH.$filename,"w");
 			$template = "timebase_template";
 			$template_content = @file_get_contents($template);
 			fwrite($handle,$template_content."\n");
 			fclose($handle);
-			chmod($dir.SLASH.$filename,$permissions);
+			chmod($tb_dir.SLASH.$filename,$permissions);
 			}
 		}
 	}
@@ -782,8 +783,9 @@ if(!is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"t
 		echo"</tr>";
 		echo "<tr>";
 		echo "<th>";
-		$n1 = display_directory(TRUE,$dir,"timebase");
+		$n1 = display_timebases(TRUE,$dir);
 		echo "<h4>Time base(s)</h4>";
+		if($n1 > 0 AND !same_folder(timebase_dir($dir),$dir)) echo "<small>in ‘".rtrim(timebase_dir($path),SLASH)."’</small>";
 		echo "</th>";
 		echo "<th>";
 		$n2 = display_directory(TRUE,$dir,"objects");
@@ -796,7 +798,7 @@ if(!is_integer(strpos($path,"csound_resources")) AND !is_integer(strpos($path,"t
 		echo"</tr>";
 		echo "<tr>";
 		echo "<td style=\"padding-bottom:6px;\">";
-		if($n1 > 0) display_directory(FALSE,$dir,"timebase");
+		if($n1 > 0) display_timebases(FALSE,$dir);
 		echo "</td>";
 		echo "<td style=\"padding-bottom:6px;\">";
 		if($n2 > 0) display_directory(FALSE,$dir,"objects");
@@ -860,6 +862,21 @@ if($path <> '') {
 	}
 echo "</table>";
 echo "</form>";
+
+function display_timebases($test,$dir) {
+	// 2026-11-26 Time bases are in the top folder of the workspace (see timebase_dir()), so a subfolder such as "ctests_git/Imported_MusicXML"
+	// lists those of "ctests_git", with links to their pages. The checkboxes for moving, deleting or renaming files are not shown there,
+	// since they are numbered in the order of the files of the folder displayed, and these files are in another folder - by Claude
+	global $path,$move_files,$move_checked_files,$delete_files,$delete_checked_files,$rename_files,$rename_checked_files,$trash_backups;
+	$top = timebase_dir($dir);
+	if(same_folder($top,$dir)) return display_directory($test,$dir,"timebase");
+	$saved = array($path,$move_files,$move_checked_files,$delete_files,$delete_checked_files,$rename_files,$rename_checked_files,$trash_backups);
+	$path = rtrim(timebase_dir($path),SLASH);
+	$move_files = $move_checked_files = $delete_files = $delete_checked_files = $rename_files = $rename_checked_files = $trash_backups = FALSE;
+	$n = display_directory($test,$top,"timebase");
+	list($path,$move_files,$move_checked_files,$delete_files,$delete_checked_files,$rename_files,$rename_checked_files,$trash_backups) = $saved;
+	return $n;
+	}
 
 function display_directory($test,$dir,$filter) {
 	global $path,$move_files,$move_checked_files,$new_file,$csound_resources,$tonality_resources,$delete_checked_files,$rename_checked_files,$delete_files,$download_files,$rename_files,$show_dependencies,$trash_backups,$trash_folder,$this_page,$url_this_page,$dir_trash_folder,$bp_application_path,$dest_folder,$done,$seen,$dir_csound_resources,$dir_tonality_resources,$last_grammar_name,$last_data_name;

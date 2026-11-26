@@ -24,6 +24,7 @@ if(!file_exists($bp_application_path."source")) {
 	}
 echo "<p style=\"text-align:center; width:90%;\">Wait before closing this page…</p>";
 if(file_exists($bp_application_path.$console)) @unlink($bp_application_path.$console);
+if(windows_system()) windows_free_console(); // 2026-11-26
 $command_show = $command = "make clean && make 2>bp_compile_result.txt";
 if(windows_system()) {
 	$command = "mingw32-make clean && mingw32-make 2>bp_compile_result.txt";

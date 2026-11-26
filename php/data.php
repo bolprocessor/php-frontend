@@ -1343,6 +1343,7 @@ if($need_to_save OR isset($_POST['savethisfile'])) {
 	if($more_data <> '') $content = $more_data."\n\n".$content;
 	$content = preg_replace("/ +/u",' ',$content);
 	save($this_file,$filename,$top_header,$content);
+	if(isset($_POST['savethisfile'])) $the_warning .= timebase_declarations_warning($content); // 2026-11-26
 	// Real-time Csound uses the MIDI ports for interaction, e.g. _script(wait for C3 channel 1)
 	if(($file_format == "rtmidi" OR $file_format == "csoundrt" OR $file_format == "scrt" OR $file_format == "osc") AND !$no_save_midiresources) {
 		if(file_exists($refresh_file)) {
@@ -1534,6 +1535,9 @@ if(!isset($_POST['analyze_tonal'])) {
 	else {
 		echo "• Note convention is <span class=\"red-text\">ENGLISH</span> by default";
 		}
+	// 2026-11-25 No ticks in smooth time: _smooth or _striated in data, otherwise the settings
+	$smooth_time = ($time_structure == "smooth" OR ($time_structure <> "striated" AND $nature_of_time == SMOOTH));
+	if($timebase_file <> '' AND !$smooth_time) echo "<br />".play_ticks_checkbox("data",$filename,$url_this_page);
 	echo "</div><br />";
 	}
 
@@ -1677,11 +1681,14 @@ if($objects_file <> '') {
 	else $link_options .= "&objects=".urlencode($dir.$objects_file);
 	}
 if($timebase_file <> '') {
-	if(!file_exists($dir.$timebase_file)) {
-		$upload_mssg .= upload_related_form($dir,$timebase_file,"timebase");
+	if(!file_exists(timebase_dir($dir).$timebase_file)) {
+		$upload_mssg .= upload_related_form(timebase_dir($dir),$timebase_file,"timebase");
 		$error = TRUE;
 		}
-	else $link_options .= "&timebase=".urlencode($dir.$timebase_file);
+	else {
+		$link_options .= "&timebase=".urlencode(timebase_dir($dir).$timebase_file);
+		if(!play_ticks("data",$filename)) $link_options .= "&mute_ticks=1"; // 2026-11-25 "Play ticks" unchecked
+		}
 	}
 if($keyboard_file <> '') {
 	if(!file_exists($dir.$keyboard_file)) {

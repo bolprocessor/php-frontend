@@ -27,6 +27,7 @@
 "ShowPianoRoll"	"Show pianoroll"		"1"	"1"
 "GraphicScaleP"	"Graphic scale P"		"0"	"1"
 "GraphicScaleQ"	"Graphic scale Q"		"0"	"1"
+"StartFromOne"	"Number beats from 1"	"in the graphics (otherwise from 0)"	"1"	"0"
 "DisplayProduce"	"Display production"		"1"	"0"
 "SplitTimeObjects"	"Split terminal symbols"		"1"	"1"
 "SplitVariables"	"Split |variables|"		"1"	"1"

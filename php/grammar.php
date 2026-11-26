@@ -208,6 +208,7 @@ if($need_to_save OR isset($_POST['savethisfile']) OR isset($_POST['compilegramma
 	$content = recode_entities($content);
 	$content = preg_replace("/ +/u",' ',$content);
 	$the_warning = save($this_file,$filename,$top_header,$content);
+	if(isset($_POST['savethisfile'])) $the_warning .= timebase_declarations_warning($content); // 2026-11-26
 	$file_path = $temp_dir.$tracelive_folder.SLASH."_saved_grammar";
 	file_put_contents($file_path,$dir.$filename);
 	@chmod($file_path,$permissions);
@@ -577,11 +578,14 @@ if($objects_file <> '') {
 	else $link_produce .= "&objects=".urlencode($dir.$objects_file);
 	}
 if($timebase_file <> '') {
-	if(!file_exists($dir.$timebase_file)) {
-		$upload_mssg .= upload_related_form($dir,$timebase_file,"timebase");
+	if(!file_exists(timebase_dir($dir).$timebase_file)) {
+		$upload_mssg .= upload_related_form(timebase_dir($dir),$timebase_file,"timebase");
 		$error = TRUE;
 		}
-	else $link_produce .= "&timebase=".urlencode($dir.$timebase_file);
+	else {
+		$link_produce .= "&timebase=".urlencode(timebase_dir($dir).$timebase_file);
+		if(!play_ticks("grammar",$filename)) $link_produce .= "&mute_ticks=1"; // 2026-11-25 "Play ticks" unchecked
+		}
 	}
 if($keyboard_file <> '') {
 	if(!file_exists($dir.$keyboard_file)) {
@@ -759,6 +763,7 @@ if($trace_production == 1) echo "• <span class=\"red-text\">Trace production</
 	} */
 if($settings_file <> '' AND file_exists($dir.$settings_file) AND $note_convention <> '') echo "• Note convention is <span class=\"red-text\">".strtoupper(note_convention(intval($note_convention)))."</span> as per <span class=\"green-text\">‘".$settings_file."’</span><br />";
 else echo "• Note convention is <span class=\"red-text\">ENGLISH</span> by default<br />";
+if($timebase_file <> '' AND $nature_of_time <> SMOOTH) echo play_ticks_checkbox("grammar",$filename,$url_this_page)."<br />"; // 2026-11-25 No ticks in smooth time
 if($live_grammar) echo "• <span class=\"red-text\">Live grammar</span> is set by <span class=\"green-text\">‘".$settings_file."’</span><br />";
 if($live_settings) echo "• <span class=\"red-text\">Live settings</span> is set by <span class=\"green-text\">‘".$settings_file."’</span><br />";
 if($sync_change) echo "• <span class=\"red-text\">Synchronised change</span> is set by <span class=\"green-text\">‘".$settings_file."’</span><br />";
@@ -981,6 +986,10 @@ if($file_format == "eventlist") {
 if($alphabet_file <> '') $link_produce .= "&alphabet=".urlencode($dir.$alphabet_file);
 if($settings_file <> '' AND file_exists($dir.$settings_file)) $link_produce .= "&settings=".urlencode($dir.$settings_file);
 if($objects_file <> '') $link_produce .= "&objects=".urlencode($dir.$objects_file);
+if($timebase_file <> '' AND file_exists(timebase_dir($dir).$timebase_file)) {
+	$link_produce .= "&timebase=".urlencode(timebase_dir($dir).$timebase_file); // 2026-11-25 Ticks superposed to the performance
+	if(!play_ticks("grammar",$filename)) $link_produce .= "&mute_ticks=1"; // "Play ticks" unchecked
+	}
 if($csound_file <> '') $link_produce .= "&csound_file=".urlencode($csound_file);
 if($sc_file <> '' AND file_exists(resource_path("supercollider",$sc_file))) $link_produce .= "&sc_file=".urlencode($sc_file);
 if($tonality_file <> '') $link_produce .= "&tonality_file=".urlencode($tonality_file);

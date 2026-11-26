@@ -85,6 +85,9 @@ if(isset($_FILES['mid_upload']) AND $_FILES['mid_upload']['tmp_name'] <> '') {
 if(isset($_POST['changestatus'])) {
 	$maxticks = intval($_POST['maxticks']);
 	$timebase_data = array('tracks' => array(),'comment' => isset($_POST['comment']) ? trim($_POST['comment']) : '');
+	// 2026-11-26 The metronome is saved in the file (1 beat in 1 second if a field is empty) - by Claude
+	$timebase_data['pclock'] = isset($_POST['p_clock']) ? trim($_POST['p_clock']) : '';
+	$timebase_data['qclock'] = isset($_POST['q_clock']) ? trim($_POST['q_clock']) : '';
 	for($i_cycle = 0; $i_cycle < $maxticks; $i_cycle++) {
 		$track = array();
 		foreach(tb_track_fields() as $key => $field)
@@ -96,6 +99,7 @@ if(isset($_POST['changestatus'])) {
 	if(isset($_POST['addtrack'])) $timebase_data['tracks'][] = tb_new_track();
 	$file_header = $top_header."\n// Time base file saved as \"".$filename."\". Date: ".gmdate('Y-m-d H:i:s')." GMT";
 	file_put_contents($this_file,tb_data_to_json($file_header,$timebase_data));
+	if(isset($_POST['savealldata'])) echo "<p id=\"timespan\"><span class=\"red-text\">Saving file:</span> <span class=\"green-text\">".$filename."</span></p>"; // 2026-11-26 As on csound.php - by Claude
 	}
 try_create_new_file($this_file,$filename);
 // A file in the former line format is converted when it is opened (the original is copied to the trash as NAME_old_format)
@@ -122,13 +126,8 @@ echo "<p class=\"green-text\">".str_replace("\n","<br />",htmlspecialchars($time
 $maxticks = count($timebase_data['tracks']);
 $maxbeats = TB_MAXBEATS;
 
-$p_clock = 1;
-$q_clock = 1;
-if(isset($_POST['p_clock'])) $p_clock = round($_POST['p_clock']);
-if(isset($_POST['q_clock'])) $q_clock = round($_POST['q_clock']);
-$g = gcd($p_clock,$q_clock);
-$p_clock = $p_clock / $g;
-$q_clock = $q_clock / $g;
+// 2026-11-26 Metronome of the time base, saved in the file: 1 beat in 1 second in a file saved before - by Claude
+list($p_clock,$q_clock) = tb_metronome($timebase_data);
 $metronome = metronome($p_clock,$q_clock);
 if(isset($_POST['division']) AND $_POST['division'] > 0) $division = $_POST['division'];
 else $division = 1000;
@@ -142,7 +141,9 @@ echo "<input type=\"hidden\" name=\"changestatus\" value=\"1\">";
 echo "<input type=\"hidden\" name=\"maxticks\" value=\"".$maxticks."\">";
 echo "<input type=\"hidden\" name=\"maxbeats\" value=\"".$maxbeats."\">";
 echo "<input class=\"save\" type=\"submit\" name=\"savealldata\" value=\"SAVE ALL DATA\">";
-echo "<p>&nbsp;&nbsp;&nbsp;<input type=\"text\" name=\"p_clock\" size=\"8\" value=\"".$p_clock."\"> beats in <input type=\"text\" name=\"q_clock\" size=\"8\" value=\"".$q_clock."\"> sec. ➡ mm = ".$metronome." beats/mn</p>";
+// 2026-11-26 The metronome of the time base is relative to the beats of the project: Pclock ticks in Qclock beats (see TbRatio() in TimeBase.c) - by Claude
+echo "<p>&nbsp;&nbsp;&nbsp;Metronome of the ticks: <input type=\"text\" name=\"p_clock\" size=\"8\" value=\"".$p_clock."\"> ticks in <input type=\"text\" name=\"q_clock\" size=\"8\" value=\"".$q_clock."\"> beat".($q_clock > 1 ? "s" : '');
+echo "<br /><small>&nbsp;&nbsp;&nbsp;Beats are those of the project (its metronome and the tempo of the item). This page plays them at 60 beats/mn, i.e. ".$metronome." ticks/mn.</small></p>";
 if(file_exists($midi_import_mf2t)) {
 	$new_metronome = metronome(1000000,$tempo);
 	if($new_metronome <> $metronome) {
@@ -155,6 +156,7 @@ if(file_exists($midi_import_mf2t)) {
 		}
 	}
 
+$gm_drumset = (new Midi())->getDrumset(); // Names of General MIDI percussion keys (channel 10)
 echo "<table class=\"thicktable\">";
 if(isset($_POST['delete_midifile'])) {
 	@unlink($midi_import_mf2t);
@@ -189,7 +191,10 @@ for($i_cycle = 0; $i_cycle < $maxticks; $i_cycle++) {
 	echo "</tr>";
 	echo "<tr>";
 	$key = $TickKey[$i_cycle];
-	echo "<td style=\"padding:6px; text-align:center;\">key = <input type=\"text\" name=\"TickKey_".$i_cycle."\" size=\"3\" value=\"".$TickKey[$i_cycle]."\">&nbsp;&nbsp;<span style=\"color:#007BFF;;\">".key_to_note('English',$key)." / ".key_to_note('French',$key)." / ".key_to_note('Indian',$key)."</span></td>";
+	// 2026-11-25 On channel 10, General MIDI players render keys as percussion instruments
+	if($TickChannel[$i_cycle] == 10) $key_name = "percussion: ".($gm_drumset[$key] ?? "key ".$key);
+	else $key_name = key_to_note('English',$key)." / ".key_to_note('French',$key)." / ".key_to_note('Indian',$key);
+	echo "<td style=\"padding:6px; text-align:center;\">key = <input type=\"text\" name=\"TickKey_".$i_cycle."\" size=\"3\" value=\"".$TickKey[$i_cycle]."\">&nbsp;&nbsp;<span style=\"color:#007BFF;;\">".$key_name."</span></td>";
 	echo "<td colspan=\"2\" style=\"padding:6px; text-align:center;\">channel = <input type=\"text\" name=\"TickChannel_".$i_cycle."\" size=\"3\" value=\"".$TickChannel[$i_cycle]."\"> velocity = <input type=\"text\" name=\"TickVelocity_".$i_cycle."\" size=\"3\" value=\"".$TickVelocity[$i_cycle]."\"> duration = <input type=\"text\" name=\"TickDuration_".$i_cycle."\" size=\"3\" value=\"".$TickDuration[$i_cycle]."\"> ms</td>";
 	echo "</tr>";
 	echo "<tr><td colspan=\"4\">";
@@ -251,6 +256,8 @@ echo "<div style=\"float:right;\"><input class=\"save\" type=\"submit\" name=\"a
 echo "Comment on this timebase:<br /><input type=\"text\" name=\"comment\" size=\"80\" value=\"".htmlspecialchars($comment)."\">";
 echo "</td></tr>";
 echo "</table>";
+// 2026-11-25 The MIDI file player has General MIDI sounds: without a program change, other channels play the piano, whose high keys are hardly audible
+echo "<p>👉 On <b>MIDI channel 10</b>, General MIDI players, including the MIDI file player below, play keys as percussion instruments, for instance wood blocks (keys 76 and 77), side stick (37) or claves (75), which make clear ticks. On other channels the player uses a piano, and ticks on its highest keys are hardly audible. A MIDI device may have other sounds.</p>";
 
 $check_midi = FALSE;
 // $check_midi = TRUE;

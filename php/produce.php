@@ -94,6 +94,8 @@ else {
 		}
 	$settings_path = urldecode($_GET['settings'] ?? '');
 	$objects_path = $_GET['objects'] ?? '';
+	$timebase_path = urldecode($_GET['timebase'] ?? ''); // 2026-11-25 Time base: ticks superposed to the performance in MIDI files and real-time MIDI
+	if($timebase_path <> '' AND file_exists($timebase_path)) convert_timebase_to_json($timebase_path,$dir_trash_folder); // A file in the former line format is converted, as when it is opened (timebase.php)
 	$weights_path = $_GET['weights'] ?? '';
 	$note_convention = $_GET['note_convention'] ?? '';
 	$alphabet_path = urldecode($_GET['alphabet'] ?? '');
@@ -191,6 +193,8 @@ else {
 		$saved_midiport = $dir_midi_resources.$project_fullname."_midiport";
 		if(!file_exists($midiport) AND file_exists($saved_midiport)) copy($saved_midiport,$midiport);
 		$csoundrt_midi = file_exists($midiport);
+		// 2026-11-25 The ticks of a time base are sent to the MIDI output (default destination if no MIDI ports were saved)
+		if($timebase_path <> '') $csoundrt_midi = TRUE;
 		}
 	@unlink($project_name.".mid");
 	@unlink($project_name.".html");
@@ -199,10 +203,11 @@ else {
 	if($output <> '') @unlink($output);
 
 	$command = $application_path.$console." ".$instruction;
-	$input_files = ["-se" => $settings_path, "-da" => $data_path, "-gr" => $grammar_path, "-al" => $alphabet_path, "-wg" => $weights_path, "-so" => $objects_path];
+	$input_files = ["-se" => $settings_path, "-da" => $data_path, "-gr" => $grammar_path, "-al" => $alphabet_path, "-wg" => $weights_path, "-so" => $objects_path, "-tb" => $timebase_path];
 	foreach($input_files as $option => $path)
 		if($path <> '') $command .= " ".$option." ".quote_if_spaces($path);
 	if($note_convention <> '') $command .= " --".$note_convention;
+	if($timebase_path <> '' AND isset($_GET['mute_ticks'])) $command .= " --mute-ticks"; // 2026-11-25 "Play ticks" unchecked on the project page
 	if($csound_file <> '') $command .= " -cs ".csound_resource_path($csound_file);
 	if($sc_file <> '') $command .= " -sc ".quote_if_spaces(resource_path("supercollider",$sc_file));
 	if($tonality_file <> '') $command .= " -to ".tonality_resource_path($tonality_file);
@@ -358,7 +363,26 @@ if($instruction <> "help") {
 		// The console removes from the trace path the characters not accepted by remove_spaces()
 		$timefile = preg_replace('/[^A-Za-z0-9():_.,-]/','',"trace_".my_session_id()."_".$project_fullname."_time");
 		@unlink($temp_dir.$timefile);
+		// _script(Wait for Space): the console creates the "_waitspace" file while it waits, and reads the "_space" file created here (see CheckSpaceBar() in ConsoleMain.c) (2026-11-26)
+		$spacefile = str_replace(SLASH,'/',$temp_dir_abs.preg_replace('/_time$/','_space',$timefile));
+		@unlink($spacefile);
 		echo "<br /><br /><big><b>⏱ <span id=\"perfTime\" style=\"font-family:monospace;\">0:00.0</span><span id=\"perfEnd\" style=\"font-family:monospace;\"></span></b></big>";
+		echo "<span id=\"spaceWait\" style=\"display:none;\"><br /><br /><big><b>👉 Waiting for the space bar</b></big>&nbsp;<button id=\"spaceBtn\" type=\"button\" class=\"produce\" onclick=\"pressSpace();\">SPACE</button></span>";
+		echo "<script>
+		function pressSpace() {
+			createFile(".json_encode($spacefile).");
+			document.getElementById('spaceWait').style.display = 'none';
+			}
+		document.addEventListener('keydown', function(event) {
+			if(event.key !== ' ' || event.repeat) return;
+			const target = event.target;
+			if(target && (target.tagName == 'INPUT' || target.tagName == 'TEXTAREA' || target.isContentEditable)) return;
+			const box = document.getElementById('wait');
+			if(box && box.style.display == 'none') return; // The console has finished
+			event.preventDefault(); // Don't click the focused button or scroll the page
+			pressSpace();
+			});
+		</script>";
 		echo "<script>
 		(function() {
 			const url = 'time_poll.php?file=' + encodeURIComponent(".json_encode($timefile).");
@@ -380,6 +404,8 @@ if($instruction <> "help") {
 						if(typeof result.ms === 'number') display.textContent = format(result.ms);
 						// Expected end of the performance (of the current item if there are several)
 						if(typeof result.end === 'number' && result.end > 0) displayEnd.textContent = ' / ' + format(result.end);
+						const spaceWait = document.getElementById('spaceWait');
+						if(spaceWait) spaceWait.style.display = result.space ? 'inline' : 'none';
 						}
 					}
 				catch(error) {}

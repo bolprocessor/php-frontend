@@ -6,11 +6,11 @@
             {
                 "Key": {
                     "key": "TickKey",
-                    "value": 108
+                    "value": 76
                 },
                 "MIDI channel": {
                     "key": "TickChannel",
-                    "value": 1
+                    "value": 10
                 },
                 "Velocity": {
                     "key": "TickVelocity",
@@ -83,11 +83,11 @@
             {
                 "Key": {
                     "key": "TickKey",
-                    "value": 96
+                    "value": 77
                 },
                 "MIDI channel": {
                     "key": "TickChannel",
-                    "value": 1
+                    "value": 10
                 },
                 "Velocity": {
                     "key": "TickVelocity",
@@ -160,11 +160,11 @@
             {
                 "Key": {
                     "key": "TickKey",
-                    "value": 106
+                    "value": 37
                 },
                 "MIDI channel": {
                     "key": "TickChannel",
-                    "value": 1
+                    "value": 10
                 },
                 "Velocity": {
                     "key": "TickVelocity",

@@ -952,7 +952,7 @@ function display_more_buttons($error,$content,$url_source_page,$dir,$grammar_fil
 		echo "</td>";
 		}
 	if($timebase_file <> '') {
-		$url_this_page = "timebase.php?file=".urlencode($dir.$timebase_file);
+		$url_this_page = "timebase.php?file=".urlencode(timebase_dir($dir).$timebase_file); // 2026-11-25 Top folder of the workspace
 		echo "<td>";
 		echo "<input class=\"edit\" style=\"float:right;\" type=\"submit\" name=\"editsettings\" onclick=\"window.open('".$url_this_page."','".$timebase_file."','width=1000,height=900,left=50'); return false;\" value=\"EDIT ‘".begin_with(20,$timebase_file)."’\">";
 		echo "</td>";
@@ -2895,6 +2895,10 @@ function tb_new_track() {
 	// Values of a new track (button ADD ANOTHER TRACK)
 	$track = array();
 	foreach(tb_track_fields() as $key => $field) $track[$key] = $field[1];
+	// 2026-11-25 General MIDI percussion (channel 10, High Wood Block), which every player renders as a tick.
+	// On another channel, the MIDI file player uses its default piano, whose high keys are hardly audible.
+	$track["TickChannel"] = 10;
+	$track["TickKey"] = 76;
 	$track["Ticks"] = array_fill(0,TB_MAXBEATS,0);
 	return $track;
 	}
@@ -2989,9 +2993,21 @@ function tb_data_to_json($file_header,$data) {
 		}
 	$json = array();
 	$json['header'] = $file_header;
+	list($pclock,$qclock) = tb_metronome($data); // 2026-11-26 Metronome of the time base, used by the console for its ticks instead of that of the project - by Claude
+	$json["Metronome: ticks"] = cs_item("Pclock",$pclock,"ticks");
+	$json["Metronome: beats"] = cs_item("Qclock",$qclock,"beats of the project");
 	$json["Tracks"] = cs_item("Tracks",$tracks);
 	$json["Comment on this time base"] = cs_item("Comment",$data['comment']);
 	return json_encode($json,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE)."\n";
+	}
+
+function tb_metronome($data) {
+	// 2026-11-26 Metronome of a time base, array(Pclock,Qclock) simplified. 1 beat in 1 second if it is not set, e.g. in files saved before 2026-11-26 - by Claude
+	$p = isset($data['pclock']) ? round(floatval($data['pclock'])) : 0;
+	$q = isset($data['qclock']) ? round(floatval($data['qclock'])) : 0;
+	if($p <= 0 OR $q <= 0) return array(1,1);
+	$g = gcd($p,$q);
+	return array(intval($p / $g),intval($q / $g));
 	}
 
 function tb_read_resource($content) {
@@ -3001,7 +3017,7 @@ function tb_read_resource($content) {
 		$json = csound_json_decode($content);
 		if($json === FALSE) return "This file is not valid JSON: ".json_last_error_msg();
 		$values = cs_values($json);
-		$data = array('header' => cs_get($json,'header',''),'tracks' => array(),'comment' => strval(cs_get($values,"Comment",'')));
+		$data = array('header' => cs_get($json,'header',''),'tracks' => array(),'comment' => strval(cs_get($values,"Comment",'')),'pclock' => cs_get($values,"Pclock",0),'qclock' => cs_get($values,"Qclock",0));
 		$tracks = cs_get($values,"Tracks",array());
 		if(is_array($tracks)) foreach($tracks as $object) $data['tracks'][] = tb_check_track(cs_values($object));
 		return $data;
@@ -4629,6 +4645,28 @@ function file_link($link) {
 	return $link;
 	}
 
+function windows_free_console() {
+	// 2026-11-26 Windows: before compiling, makes room for a new "bp.exe". A running bp.exe can't be deleted (it can be renamed),
+	// e.g. a production that never ended, so the running ones are killed, and if the file is still locked it is renamed "bp_old_<date>.exe",
+	// deleted at the next compilation (or after restarting the computer). Copies left over by previous compilations are deleted first.
+	global $bp_application_path, $console;
+	foreach(glob($bp_application_path."bp_old_*.exe") as $old) @unlink($old);
+	$file = $bp_application_path.$console;
+	if(!file_exists($file)) return;
+	exec("taskkill /F /T /IM ".$console." 2>NUL",$output,$status);
+	if($status == 0) echo "<p style=\"text-align:center; width:90%;\">A running ‘".$console."’ was stopped.</p>";
+	for($i = 0; $i < 10 && file_exists($file); $i++) { // The system may take a moment to release the file
+		if(@unlink($file)) break;
+		usleep(300000);
+		}
+	if(file_exists($file)) {
+		$old = $bp_application_path."bp_old_".date("Ymd-His").".exe";
+		if(@rename($file,$old)) echo "<p style=\"text-align:center; width:90%;\">‘".$console."’ was in use: it was renamed ‘".basename($old)."’, which will be deleted later.</p>";
+		else echo "<p style=\"text-align:center; width:90%; color:red;\">‘".$console."’ is in use and could not be deleted or renamed. Type <span class=\"green-text\">taskkill /F /IM ".$console."</span> in a Command Prompt, or end it in the Details tab of the Task Manager, then compile again.</p>";
+		}
+	return;
+	}
+
 function check_console() {
 	global $bp_application_path, $console;
 	$command = $bp_application_path.$console." --short-version";
@@ -5698,6 +5736,34 @@ function download_upload_project_form($dir,$thisfile,$type,$settings_file) {
 	return;
 	}
 
+function timebase_declarations_warning($content) {
+	// 2026-11-26 Warning displayed when saving a grammar or data that declares more than one time base ("-tb" lines): only the last one is used (see extract_data()) - by Claude
+	$found = array();
+	foreach(preg_split('/\r\n|\r|\n/u',$content) as $line) {
+		$line = trim($line);
+		if(str_starts_with($line,"-tb") AND !is_integer(strpos($line,"<"))) $found[] = htmlspecialchars($line);
+		}
+	if(count($found) < 2) return '';
+	return "<div style=\"background-color:white; color:black; padding:6px 6px 6px 1em; border-radius:12px; width:50%; word-wrap:break-word; border:2px solid red;\"><p>⚠️ <span class=\"red-text\"><b>This file declares ".count($found)." time bases:</b></span> ".implode(", ",$found)."<br />Only the last one (<span class=\"green-text\">".end($found)."</span>) will be used. Delete the others.</p></div>";
+	}
+
+function timebase_dir($dir) {
+	// 2026-11-25 Folder of the time base files ("-tb") of a project in folder $dir: the top folder of its workspace,
+	// e.g. "../ctests_git/" (or "../ctests/" in the distribution) for a project in "../ctests_git/Imported_MusicXML/"
+	// $dir may start with $bp_application_path ("../") or be relative to the root ("ctests_git/..."), and the result has the same form
+	global $bp_application_path;
+	$path = str_replace(SLASH.SLASH,SLASH,$dir);
+	$prefix = '';
+	if(strpos($path,$bp_application_path) === 0) {
+		$prefix = $bp_application_path;
+		$path = substr($path,strlen($bp_application_path));
+		}
+	$relative = trim($path,SLASH);
+	if($relative == '') return $dir;
+	$table = explode(SLASH,$relative);
+	return $prefix.$table[0].SLASH;
+	}
+
 function upload_related_form($dir,$file,$type) {
 	global $bp_application_path,$url_this_page;
 	$dir_base = str_replace($bp_application_path,'',$dir);
@@ -5725,6 +5791,7 @@ function upload_related($dir) {
 			$result .= "<br />👉 <span class=\"red-text\">Incorrect file name:</span> <span class=\"green-text\">".$uploadedFileName."</span>.</span> Please select <span class=\"green-text\">".$expectedFileName."</span>";
 		else {
 			$uploadDir = $dir; // Define your upload directory
+			if(str_starts_with($expectedFileName,"-tb.")) $uploadDir = rtrim(timebase_dir($dir.SLASH),SLASH); // 2026-11-25 Time bases are in the top folder of the workspace
 			$uploadPath = $uploadDir.SLASH.basename($uploadedFileName);
 			if (move_uploaded_file($_FILES['uploaded_file']['tmp_name'], $uploadPath)) {
 				chmod($uploadPath,$permissions);
@@ -6873,6 +6940,31 @@ function make_links_clickable($text) {
     return $text_with_links;
 	}
 
+
+function play_ticks($kind,$filename) {
+	// 2026-11-25 TRUE if the ticks of the time base ("-tb" file) of this project are played. $kind is "grammar" or "data".
+	// Set by the checkbox of play_ticks_checkbox(), which reloads the page with "&play_ticks=0" or "&play_ticks=1", and kept in _settings.php
+	global $grammar_play_ticks,$data_play_ticks;
+	$variable = $kind."_play_ticks";
+	if(isset($_GET['play_ticks'])) {
+		$value = ($_GET['play_ticks'] == "0") ? "0" : "1";
+		save_settings2($variable,$filename,$value);
+		if($kind == "grammar") $grammar_play_ticks[$filename] = $value;
+		else $data_play_ticks[$filename] = $value;
+		}
+	$table = ($kind == "grammar") ? $grammar_play_ticks : $data_play_ticks;
+	return !(isset($table[$filename]) AND $table[$filename] == "0"); // Checked by default
+	}
+
+function play_ticks_checkbox($kind,$filename,$url_this_page) {
+	// Checkbox "Play ticks" shown below the note convention when the project declares a time base. Unchecked, produce.php gives the console
+	// option --mute-ticks: ticks are not played, but still shown in the graphics. The page is reloaded only if the project is saved (checksaved())
+	$checked = play_ticks($kind,$filename);
+	$url = $url_this_page."&play_ticks=".($checked ? "0" : "1");
+	$text = "<input type=\"checkbox\" id=\"play_ticks\"".($checked ? " checked" : '')." onchange=\"if(checksaved()) window.open('".$url."','_self'); else this.checked = !this.checked;\">";
+	$text .= "&nbsp;<label for=\"play_ticks\">Play ticks of the time base</label>";
+	return $text;
+	}
 
 function midi_player_script($path_to_php) {
 	// Returns the script tag of the MIDI file player. $path_to_php leads from the page to the "php" folder
