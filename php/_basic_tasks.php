@@ -97,6 +97,8 @@ require_once("_csoundrt.php");
 require_once("_scrt.php");
 // Real-time OSC (Max, Pd...): destination and project panel (2026-11-21)
 require_once("_oscrt.php");
+// AI agent: Claude Code with the knowledge package of "AI_Claude" (2026-11-27)
+require_once("_ai_agent.php");
 // $csound_path is the absolute path of the folder containing Csound on all systems
 // $programFiles is kept empty for compatibility (it used to be the "Program Files" folder on Windows)
 $programFiles = '';
@@ -1428,6 +1430,7 @@ function output_folder_cleanable($folder) {
 		case "trash_bolprocessor":
 		case "scripts":
 		case "ctests":
+		case "AI_Claude": // 2026-11-27 AI agent - by Claude
 		case "data":
 		case "my_data":
 		case "bp_old_versions":
@@ -6072,6 +6075,7 @@ function ok_output_location($folder,$talk) {
 	$result = TRUE;
 	if(hidden_directory($folder)) $result = FALSE;
 	if($folder == "ctests") $result = FALSE;
+	if($folder == "AI_Claude") $result = FALSE; // 2026-11-27 Projects and knowledge package of the AI agent - by Claude
 	if($folder == "csound_resources") $result = FALSE;
 	if($folder == "midi_resources") $result = FALSE;
 	if($folder == "tonality_resources") $result = FALSE;

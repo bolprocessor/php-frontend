@@ -128,6 +128,7 @@ $folder = str_replace($bp_application_path,'',$dir);
 
 echo link_to_help();
 if($path == '') {
+	ai_home_box(); // 2026-11-27 AI agent - by Claude
 	select_a_skin($url_this_page,$path,$skin);
 	select_a_midi_player($url_this_page,$midi_player);
  	}
@@ -1031,7 +1032,8 @@ function display_directory($test,$dir,$filter) {
 		if($test AND isset($seen[$thisfile])) continue;
 		if($test AND ($filter == '' OR $filter == $type OR ($filter == "csresources" AND $is_csound_type))) $seen[$thisfile] = TRUE;
 	
-		if($thisfile <> "ctests" AND !ok_output_location($thisfile,FALSE)) continue; // 2026-11-22 "ctests" (examples) is listed, although it may not be used for output files
+		if($thisfile == AI_AGENT_FOLDER AND $path == '' AND !ai_folder_has_projects()) continue; // 2026-11-27 Listed once the AI agent has saved projects in it
+		if($thisfile <> "ctests" AND $thisfile <> "AI_Claude" AND !ok_output_location($thisfile,FALSE)) continue; // 2026-11-22 "ctests" (examples) is listed, although it may not be used for output files; also "AI_Claude" (AI agent, 2026-11-27)
 		$new_version = ($fixed AND is_new_version_name($thisfile)); // 2026-11-19
 		if($new_version AND !$test) $new_versions++;
 		if(!$test AND (($new_file == $thisfile AND $filter <> "directory") OR $new_version)) echo "<span class=\"red-text\">➡</span> ";
@@ -1209,6 +1211,7 @@ function folder_list($dir,$list,$path) {
 function do_not_delete($thisfile) {
 	if($thisfile == "scale_images") return TRUE;
 	if($thisfile == "ctests") return TRUE;
+	if($thisfile == "AI_Claude") return TRUE; // 2026-11-27 AI agent - by Claude
 	if($thisfile == "macos-scripts") return TRUE;
 	if($thisfile == "windows-scripts") return TRUE;
 	return FALSE;

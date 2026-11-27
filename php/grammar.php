@@ -281,6 +281,7 @@ if(!file_exists($output)) {
 echo link_to_help();
 
 echo "<h2>Grammar project “".$filename."”</h2>";
+ai_ask_button($file); // 2026-11-27 AI agent - by Claude
 save_settings("last_grammar_name",$filename);
 
 /*

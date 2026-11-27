@@ -1,0 +1,41 @@
+{
+  "awaySummaryEnabled": false,
+  "spinnerTipsEnabled": false,
+  "permissions": {
+    "additionalDirectories": [
+      ".."
+    ],
+    "allow": [
+      "Edit(/**)",
+      "Bash(bash .claude/skills/bp-compose/scripts/bptest.sh *)",
+      "Bash(.claude/skills/bp-compose/scripts/bptest.sh *)",
+      "Bash(bash .claude/skills/bp-compose/scripts/bpsettings.sh *)",
+      "Bash(.claude/skills/bp-compose/scripts/bpsettings.sh *)",
+      "Bash(cd ../php)",
+      "Bash(../bp *)",
+      "Bash(../bp3 *)",
+      "Bash(../bp.exe *)",
+      "Bash(python3 -m json.tool *)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(grep *)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(wc *)",
+      "Bash(diff *)",
+      "WebFetch(domain:bolprocessor.org)"
+    ],
+    "ask": [
+      "Edit(/.claude/**)",
+      "Edit(/CLAUDE.md)"
+    ],
+    "deny": [
+      "Edit(../php/_settings.php)",
+      "Edit(../csound_resources/**)",
+      "Edit(../tonality_resources/**)",
+      "Edit(../supercollider_resources/**)",
+      "Edit(../osc_resources/**)",
+      "Bash(rm -rf *)"
+    ]
+  }
+}

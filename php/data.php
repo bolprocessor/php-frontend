@@ -98,6 +98,7 @@ $new_convention = '';
 $this_score = array();
 
 echo "<h2>Data project “".$filename."”</h2>";
+ai_ask_button($file); // 2026-11-27 AI agent - by Claude
 save_settings("last_data_name",$filename);
 
 $temp_folder = str_replace(' ','_',$filename)."_".my_session_id()."_temp";
