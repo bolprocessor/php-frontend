@@ -114,6 +114,9 @@ function ai_claude_auth($path) {
 	// On MacOS the sign-in is kept in the Keychain, which the web server can't read: Claude Code then answers that it is not signed in
 	// even when it is (checked with MAMP 2026-11-27). Its credentials file is used on Windows and Linux.
 	if(!$json['loggedIn'] AND osc_server_mac()) return array('state' => 'unknown','plan' => '','method' => '');
+	// On Linux, XAMPP's Apache runs as 'daemon': a Claude Code found in /home/USER is then asked with the home of 'daemon', whose answer says
+	// nothing about the user's sign-in
+	if(!$json['loggedIn'] AND ai_user_home($path) <> ai_home()) return array('state' => 'unknown','plan' => '','method' => '');
 	return array('state' => $json['loggedIn'] ? 'yes' : 'no','plan' => (string)($json['subscriptionType'] ?? ''),'method' => (string)($json['authMethod'] ?? ''));
 	}
 
@@ -143,10 +146,22 @@ function ai_agent_ready() {
 	return (is_array($saved) AND (!empty($saved['found']) OR !empty($saved['manual'])));
 	}
 
+function ai_user_home($claude = '') {
+	// Home folder of the user of Claude Code: that of the web server, except on Linux for a Claude Code found in /home/USER (XAMPP's Apache
+	// runs as 'daemon'). $claude: its path, by default the one found.
+	if(!osc_server_linux()) return ai_home();
+	if($claude == '') {
+		$saved = @json_decode((string)@file_get_contents(ai_status_file()),TRUE);
+		$claude = is_array($saved) ? (string)($saved['path'] ?? '') : '';
+		}
+	if(preg_match("#^(/home/[^/]+)/#",$claude,$match)) return $match[1];
+	return ai_home();
+	}
+
 function ai_folder_trusted() {
 	// TRUE if Claude Code trusts the folder AI_Claude (answer "Yes, I trust this folder" at its first start, recorded in ~/.claude.json for this
-	// folder or a folder above it), FALSE if not, NULL if its configuration can't be read. Read only.
-	$home = ai_home();
+	// folder or a folder above it), FALSE if not, NULL if its configuration can't be read (e.g. by 'daemon' on Linux). Read only.
+	$home = ai_user_home();
 	if($home == '') return NULL;
 	$config = @json_decode((string)@file_get_contents($home.DIRECTORY_SEPARATOR.".claude.json"),TRUE);
 	if(!is_array($config)) return NULL;
