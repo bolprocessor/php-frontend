@@ -209,18 +209,19 @@ function ai_shell_quote($text) {
 	return "'".str_replace("'","'\\''",$text)."'";
 	}
 
-// The request comes after "--": "--add-dir" accepts several folders, and took the request for one of them (2026-11-27)
+// The request comes after "--" (2026-11-27: "--add-dir" took it for a folder). No "--add-dir ..": it asked at every start whether to trust the root folder
+// (2026-11-28); the folder ".." of "additionalDirectories" in AI_Claude/.claude/settings.json applies without asking once AI_Claude is trusted.
 function ai_terminal_command($prompt) {
 	// The command typed in a terminal (Linux, or when no terminal could be opened)
 	$folder = ai_agent_folder();
 	if(osc_server_windows()) {
 		$status = ai_agent_status();
 		$claude = ($status['found'] AND strpbrk($status['path'],"\\/") !== FALSE) ? "& '".str_replace("'","''",$status['path'])."'" : "claude";
-		$command = "cd \"".$folder."\"; ".$claude." --add-dir ..";
+		$command = "cd \"".$folder."\"; ".$claude;
 		if($prompt <> '') $command .= " -- '".str_replace("'","''",str_replace("\"","\\\"",$prompt))."'";
 		return $command;
 		}
-	$command = "cd ".ai_shell_quote($folder)." && claude --add-dir ..";
+	$command = "cd ".ai_shell_quote($folder)." && claude";
 	if($prompt <> '') $command .= " -- ".ai_shell_quote($prompt);
 	return $command;
 	}
@@ -311,7 +312,7 @@ $claude = CLAUDE
 if(($prompt -ne '') -and (($PSNativeCommandArgumentPassing -eq $null) -or ($PSNativeCommandArgumentPassing -eq 'Legacy') -or ($claude -like '*.cmd'))) {
 	$prompt = $prompt -replace '(\\*)"','$1$1\"'
 	}
-if($prompt -ne '') { & $claude --add-dir .. -- $prompt } else { & $claude --add-dir .. }
+if($prompt -ne '') { & $claude -- $prompt } else { & $claude }
 PS1;
 		$text = str_replace(array("FOLDER","REQUEST","CLAUDE","COLUMNS","ROWS"),array($q($folder),$q($request_file),$q($claude),AI_TERMINAL_COLUMNS,AI_TERMINAL_ROWS),$template);
 		// UTF-8 with a byte order mark, so that Windows PowerShell 5.1 reads paths with accents correctly
@@ -333,7 +334,7 @@ PS1;
 		$lines[] = "printf '\\033]0;Bol Processor - AI agent (Claude Code)\\007'";
 		$lines[] = "printf '\\n\\033[36m Bol Processor - AI agent (Claude Code)\\n - To answer a question of Claude Code: choose with the arrow keys (up, down), then press Return.\\n - The first time, it may ask whether you trust this folder: press the down arrow to choose \"Yes, I trust this folder\", then Return.\\n - When you have finished, type /exit and press Return, then reload the page of the project in the browser.\\033[0m\\n\\n'";
 		$lines[] = "prompt=$(cat ".ai_shell_quote($request_file).")";
-		$lines[] = "if [ -n \"\$prompt\" ]; then ".ai_shell_quote($claude)." --add-dir .. -- \"\$prompt\"; else ".ai_shell_quote($claude)." --add-dir ..; fi";
+		$lines[] = "if [ -n \"\$prompt\" ]; then ".ai_shell_quote($claude)." -- \"\$prompt\"; else ".ai_shell_quote($claude)."; fi";
 		if(@file_put_contents($script,implode("\n",$lines)."\n") === FALSE) {
 			$message = "Could not write in ‘temp_bolprocessor’";
 			return FALSE;
