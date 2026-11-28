@@ -221,7 +221,12 @@ function ai_terminal_command($prompt) {
 		if($prompt <> '') $command .= " -- '".str_replace("'","''",str_replace("\"","\\\"",$prompt))."'";
 		return $command;
 		}
-	$command = "cd ".ai_shell_quote($folder)." && claude";
+	// The installer puts Claude Code in ~/.local/bin, often not in the PATH (it says so): its full path, when found, or else the command of the PATH
+	// or ~/.local/bin/claude (2026-11-28, Linux: "claude: command not found")
+	$status = ai_agent_status();
+	if($status['found'] AND strpbrk($status['path'],"/") !== FALSE) $claude = ai_shell_quote($status['path']);
+	else $claude = "\"\$(command -v claude || echo \"\$HOME/.local/bin/claude\")\"";
+	$command = "cd ".ai_shell_quote($folder)." && ".$claude;
 	if($prompt <> '') $command .= " -- ".ai_shell_quote($prompt);
 	return $command;
 	}
