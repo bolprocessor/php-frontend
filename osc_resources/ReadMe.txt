@@ -57,8 +57,8 @@ note with a sine wave, one note at a time. For polyphony, send /bp/note to the v
 In Max: [udpreceive 7400] -> [route /bp/note /bp/off /bp/stop ...]
 In Pd:  [netreceive -u -b 7400] -> [oscparse] -> [list trim] -> [route bp] -> [route note off stop ...]
 
-Robot dancers
--------------
+Robot dancers and horse
+-----------------------
 dancer.py and dancer-with-flags.py are small Python 3 programs (standard library only) that draw a robot in a window.
 They listen to the OSC messages of the Bol Processor and move the robot's joints. dancer-with-flags.py is the same robot
 holding a semaphore flag in each hand. The Bol Processor itself needs nothing more: it sends OSC whether or not a program listens.
@@ -83,6 +83,9 @@ holding a semaphore flag in each hand. The Bol Processor itself needs nothing mo
                              named in -al.robot_semaphore. Each one holds both arms at the angles of the letter, seen by the
                              observer, and the head nods at its end, which shows double letters. The joints' maximum speed
                              makes the arms go from one letter to the next. Type your own sentences on the data page.
+       -gr.robot_horse:      a galloping horse (horse.py) whose gaits are time-objects of -so.robot_horse, named in
+                             -al.robot_horse: strides of walk, trot, canter and gallop (the gallop within its speed limits),
+                             a jump whose takeoff falls on the beat, rearing, neighing, swishing the tail.
   3. Click PRODUCE ITEM(S) for a grammar, or PLAY next to an item of the data project. The robot dances.
 On Linux, XAMPP's web server runs as the user 'daemon', which your desktop doesn't allow to open windows. Allow it once
 by typing in a terminal (without sudo):
@@ -103,13 +106,18 @@ from its folder, and leave it running. The paths are those of a standard install
        BolProcessor.app:   cd /Applications/BolProcessor.app/Contents/Resources/www/osc_resources
                            /usr/local/bin/python3 dancer.py
                            (if the application is elsewhere, replace /Applications with its folder)
-     (dancer-with-flags.py in the same way; add --help for the options). It waits for messages on port 7400.
+     (dancer-with-flags.py and horse.py in the same way; add --help for the options). It waits for messages on port 7400.
 The robots, these examples of receivers and your own programs are listed in the OSC resource folder of the interface
 (link "OSC resource folder" on project pages in "Real-time OSC"). Duplicate copies a file to osc_resources_private,
 where it can be changed, e.g. to drive real servos in send_to_hardware().
 Each joint is an instrument of -cs.Robot (torso, head, leftarm, leftforearm, rightarm, rightforearm), whose angle in degrees
 is the parameter named like it: a note of 'leftarm' moves the left arm from the value of _value(leftarm,...) at its beginning
-to its value at its end, following /bp/env if any. See https://bolprocessor.org/robot-puppet/
+to its value at its end, following /bp/env if any.
+The joints of horse.py are the instruments of -cs.Horse: body (pitch, positive when rearing), neck, head, tail,
+foreleft, foreright, hindleft, hindright (upper part of the legs: 0 vertical, positive forward), foreleftknee,
+forerightknee, hindlefthock, hindrighthock (flexion in degrees), lift (height of the lowest hoof above the ground, in pixels)
+and pace (speed of the ground in pixels per second). The horse keeps its lowest hoof on the ground unless 'lift' raises it.
+See https://bolprocessor.org/robot-puppet/
 and https://bolprocessor.org/usage-in-robotics/
 
 Ableton Live
