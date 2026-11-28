@@ -1110,6 +1110,16 @@ function compile_help($text_help_file,$html_help_file) {
 	return $help;
 	}
 
+function workspace_button($directory,$check_saved = TRUE,$refresh = FALSE) {
+	// 2026-11-28 "Workspace = DIRECTORY" button listing the folder of the page. $check_saved: ask checksaved() first (pages editing a project).
+	// $refresh: followed by REFRESH THIS PAGE, reloading the page from its address (never sending a form again), e.g. after the AI agent changed the project
+	$url = "index.php?path=".urlencode($directory);
+	$check = $check_saved ? "if(checksaved()) " : '';
+	$button = "Workspace = <input title=\"List this workspace\" class=\"edit\" name=\"workspace\" type=\"submit\"".($check_saved ? " onmouseover=\"checksaved();\"" : '')." onclick=\"".$check."window.open('".$url."','_self');\" value=\"".$directory."\">";
+	if($refresh) $button .= "&nbsp;<button type=\"button\" class=\"edit\" title=\"Reload this page, e.g. after the AI agent changed the project\" onclick=\"".$check."window.location.replace(window.location.href.split('#')[0]);\">REFRESH THIS PAGE</button>";
+	return $button;
+	}
+
 function link_to_help() {
 	global $html_help_file;
 //	$console_link = "produce.php?instruction=help";
@@ -1431,6 +1441,7 @@ function output_folder_cleanable($folder) {
 		case "scripts":
 		case "ctests":
 		case "AI_Claude": // 2026-11-27 AI agent - by Claude
+		case "AI_eval": // 2026-11-28 Evaluation set of the AI agent
 		case "data":
 		case "my_data":
 		case "bp_old_versions":
@@ -6076,6 +6087,7 @@ function ok_output_location($folder,$talk) {
 	if(hidden_directory($folder)) $result = FALSE;
 	if($folder == "ctests") $result = FALSE;
 	if($folder == "AI_Claude") $result = FALSE; // 2026-11-27 Projects and knowledge package of the AI agent - by Claude
+	if($folder == "AI_eval") $result = FALSE; // 2026-11-28 Evaluation set of the AI agent (development only): not listed on the home page
 	if($folder == "csound_resources") $result = FALSE;
 	if($folder == "midi_resources") $result = FALSE;
 	if($folder == "tonality_resources") $result = FALSE;

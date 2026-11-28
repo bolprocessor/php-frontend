@@ -7,6 +7,7 @@
     ],
     "allow": [
       "Edit(/**)",
+      "Edit(../ctests/**)",
       "Bash(bash .claude/skills/bp-compose/scripts/bptest.sh *)",
       "Bash(.claude/skills/bp-compose/scripts/bptest.sh *)",
       "Bash(bash .claude/skills/bp-compose/scripts/bpsettings.sh *)",

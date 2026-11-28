@@ -86,8 +86,7 @@ $file_format = $default_output_format;
 if(isset($data_file_format[$filename])) $file_format = $data_file_format[$filename];
 if(!isset($_POST['analyze_tonal'])) display_console_state();
 
-$url = "index.php?path=".urlencode($current_directory);
-echo "&nbsp;Workspace = <input title=\"List this workspace\" class=\"edit big\" name=\"workspace\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$url."','_self');\" value=\"".$current_directory."\">";
+echo "&nbsp;".workspace_button($current_directory,TRUE,TRUE);
 
 echo link_to_help();
 
@@ -97,8 +96,8 @@ $save_warning = '';
 $new_convention = '';
 $this_score = array();
 
-echo "<h2>Data project “".$filename."”</h2>";
 ai_ask_button($file); // 2026-11-27 AI agent - by Claude
+echo "<h2>Data project “".$filename."”</h2>";
 save_settings("last_data_name",$filename);
 
 $temp_folder = str_replace(' ','_',$filename)."_".my_session_id()."_temp";

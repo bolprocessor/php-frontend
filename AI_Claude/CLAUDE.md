@@ -6,8 +6,8 @@ This folder (`AI_Claude`) is at the root of the installation, so the rest of the
 
 | Folder | Content |
 |---|---|
-| `../ctests` | examples distributed with BP3 (grammars `-gr.*`, data `-da.*`, settings `-se.*`...), updated by the installers |
-| `../AI_Claude` (here) | new projects you create, and `my_changes/`, the record of changes to the program |
+| `../ctests` | examples distributed with BP3 (grammars `-gr.*`, data `-da.*`, settings `-se.*`...), updated by the installers, and the new projects you create |
+| `../AI_Claude` (here) | your knowledge package, and `my_changes/`, the record of changes to the program |
 | `../tonality_resources`, `../csound_resources`, `../supercollider_resources`, `../osc_resources` | fixed resources (scales, instruments, Python programs for OSC), replaced by updates: never change them |
 | `../*_resources_private` | the user's own resources of the same kinds |
 | `../php` | the web interface (PHP) |
@@ -20,7 +20,7 @@ Users may also keep projects in other folders of the root, listed on the home pa
 
 - For anything about Bol Processor projects (creating, improving, explaining or debugging a grammar or data project, its settings, alphabets, sound-objects, scales, instruments), use the skill **bp-compose**. It contains the syntax, the file formats, a catalogue of examples and the test procedure.
 - **Never play music in real time** and never send anything to MIDI devices, synthesisers, SuperCollider, Csound servers or robots: the user plays the result in the interface. Your tests write files only (see the skill).
-- New projects go in this folder. Before changing a project elsewhere, say what you will change and keep a copy of the former version (see the skill).
+- New projects go in `../ctests`, without ever overwriting a file there: choose names not taken yet (see the skill). Before changing an existing project, say what you will change and keep a copy of the former version (see the skill).
 - When the request names a project (e.g. "[Project: ../ctests/-gr.Mozart]"), start by reading it and the files named on its first lines.
 
 ## Changes to the program (PHP or C)

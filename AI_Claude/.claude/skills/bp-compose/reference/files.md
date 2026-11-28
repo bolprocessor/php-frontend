@@ -22,7 +22,7 @@ Where the interface finds them:
 | Line | File looked for in |
 |---|---|
 | `-se.NAME`, `-al.NAME`, `-so.NAME` | the folder of the project |
-| `-tb.NAME` | the top folder of the workspace (e.g. `AI_Claude/` or `ctests/`), even for a project in a subfolder |
+| `-tb.NAME` | the top folder of the workspace (e.g. `ctests/`), even for a project in a subfolder |
 | `-to.NAME` | `../tonality_resources_private/`, then `../tonality_resources/` |
 | `-cs.NAME` | `../csound_resources_private/`, then `../csound_resources/` |
 | `-sc.NAME` | `../supercollider_resources_private/`, then `../supercollider_resources/` |

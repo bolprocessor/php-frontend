@@ -97,7 +97,7 @@ if($status['found'] OR $status['manual']) {
 	echo "<form method=\"post\" action=\"".$url_this_page."\" style=\"display:inline;\"><input type=\"hidden\" name=\"action\" value=\"check\"><input class=\"edit\" type=\"submit\" value=\"CHECK AGAIN\"></form>";
 	if($trusted === TRUE) echo "</details>";
 	echo "<h3>3. Use</h3>";
-	echo "<p>Open a grammar or data project: below its title, click the button <b>🤖 Ask my AI agent</b> and type your request. To ask for a new piece, do the same from any project and say so: the agent saves the projects it creates in the folder ‘".AI_AGENT_FOLDER."’, shown on the home page once it contains some.</p>";
+	echo "<p>Open a grammar or data project: at the right of its title, click the button <b>🤖 Ask my AI agent</b> and type your request. To ask for a new piece, do the same from any project and say so: the agent saves the projects it creates in the folder ‘ctests’, with names that don't replace existing files.</p>";
 	echo "<p><small>Changes of the program (PHP or C) asked of the agent are erased by the updates of the Bol Processor. The agent records them in ‘".AI_AGENT_FOLDER."/my_changes’: send your ideas to the author if they could be useful to everyone.</small></p>";
 	}
 echo "</body></html>";

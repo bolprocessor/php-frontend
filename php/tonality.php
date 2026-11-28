@@ -30,8 +30,7 @@ require_once("_header.php");
 display_darklight();
 
 echo "<p>";
-$url = "index.php?path=".urlencode($current_directory);
-echo "&nbsp;Workspace = <input title=\"List this workspace\" class=\"edit big\" name=\"workspace\" type=\"submit\" onmouseover=\"checksaved();\" onclick=\"if(checksaved()) window.open('".$url."','_self');\" value=\"".$current_directory."\"> ";
+echo "&nbsp;".workspace_button($current_directory)." ";
 echo "  <span id='message3' style=\"margin-bottom:1em;\"></span>";
 
 echo link_to_help();

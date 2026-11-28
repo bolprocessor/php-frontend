@@ -30,7 +30,7 @@ Traps met while making projects with the Bol Processor. Most are caught by the t
 - `_tempo()` inside a field applies until the end of that field only.
 - The metronome is `Pclock/Qclock` = period of a beat in seconds (not beats per minute): 90 beats per minute is Pclock 2, Qclock 3. `_mm(90)` in a grammar is simpler.
 - `_rndtime(x)` has no effect when x is smaller than the quantization (10 ms by default).
-- Time base files (`-tb`) are found in the top folder of the workspace (e.g. `AI_Claude/`), not in a subfolder.
+- Time base files (`-tb`) are found in the top folder of the workspace (e.g. `ctests/`), not in a subfolder.
 
 ## Sound-objects
 

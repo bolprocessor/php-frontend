@@ -372,7 +372,8 @@ function ai_ask_button($file) {
 	$project = ai_project_path(str_replace(SLASH,"/",$file));
 	if($project == '') return;
 	$link = "ai_agent.php?ask=".urlencode($project);
-	echo "<button class=\"edit big\" title=\"Ask the AI agent (Claude Code) to change or explain this project\" onclick=\"if(checksaved()) window.open('".$link."','ai_agent','width=700,height=600,left=150'); return false;\">🤖 Ask my AI agent</button>";
+	// Called just before the title: floats at the right, below the box of the logo and PANIC! (clear), aligned with the box of Csound below
+	echo "<div style=\"float:right; clear:right; padding:6px; background-color:transparent;\"><button class=\"edit big\" title=\"Ask the AI agent (Claude Code) to change or explain this project\" onclick=\"if(checksaved()) window.open('".$link."','ai_agent','width=700,height=600,left=150'); return false;\">🤖 Ask my AI agent</button></div>";
 	return;
 	}
 
@@ -385,7 +386,7 @@ function ai_home_box() {
 		}
 	$status = ai_agent_status();
 	if($status['found'] OR $status['manual']) {
-		echo " is ready. To use it, open a grammar or data project: a button <span style=\"white-space:nowrap;\"><b>🤖 Ask my AI agent</b></span> is shown below its title.";
+		echo " is ready. To use it, open a grammar or data project: a button <span style=\"white-space:nowrap;\"><b>🤖 Ask my AI agent</b></span> is shown at the right of its title.";
 		echo "&nbsp;<button class=\"edit\" title=\"Claude Code ".htmlspecialchars($status['version'])."\" onclick=\"window.open('ai_agent.php','ai_agent','width=700,height=650,left=150'); return false;\">SET UP</button>";
 		}
 	else echo "&nbsp;<button class=\"save big\" onclick=\"window.open('ai_agent.php','ai_agent','width=700,height=650,left=150'); return false;\">INSTALL AI AGENT</button>";

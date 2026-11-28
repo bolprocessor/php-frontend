@@ -44,7 +44,7 @@ On Windows, the script needs the Bash of Git for Windows (which Claude Code uses
 For special checks, run the console yourself from `../php` (always from there):
 
 ```sh
-cd ../php && ../bp produce -gr ../AI_Claude/-gr.MyPiece -se ../AI_Claude/-se.MyPiece --seed 1 --trace-production -o ../temp_bolprocessor/AI_tests/x.txt
+cd ../php && ../bp produce -gr ../ctests/-gr.MyPiece -se ../ctests/-se.MyPiece --seed 1 --trace-production -o ../temp_bolprocessor/AI_tests/x.txt
 ```
 
 (`../bp3` on Linux, `../bp.exe` on Windows.) Useful actions and options (`../bp --help` lists them all):
