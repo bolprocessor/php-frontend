@@ -82,6 +82,13 @@ if($status['found'] OR $status['manual']) {
 	echo "<h3>2. Sign in and first start</h3>";
 	if($status['auth'] == "yes") echo "<p>✅ Claude Code is signed in".($status['plan'] <> '' ? " (".htmlspecialchars(ucfirst($status['plan'])).")" : '').".</p>";
 	else if($status['auth'] == "no") echo "<p>❌ Claude Code is not signed in.</p>";
+	// 2026-11-28 Sign-in with an API key or a Claude Console account: everything is billed per token, not counted in the subscription
+	$method = (string)($status['method'] ?? '');
+	if($status['auth'] == "yes" AND $method <> '' AND $method <> "claude.ai") {
+		echo "<p class=\"red-text\">⚠️ Claude Code is signed in with an <b>API account</b> (".htmlspecialchars($method)."), not with your Claude subscription: everything the agent does is <b>charged in money</b>, per token, instead of being counted in the limits of your plan.</p>";
+		echo "<p>To use your subscription: in Claude Code, type <b>/login</b> and choose your Claude account (Pro, Max...). If a variable <span style=\"font-family:monospace;\">ANTHROPIC_API_KEY</span> is set on this computer, remove it: Claude Code uses it before your subscription. Then click CHECK AGAIN.</p>";
+		}
+	echo "<p><small>💰 If Claude Code shows a cost in dollars at the end of a session, or if you are charged while your plan's limit isn't reached, type <b>/status</b> in Claude Code: the line ‘Login method’ should name your Claude subscription, not an API key. Also avoid the models marked “Requires usage credits” in <b>/model</b>: they are charged beyond your subscription. See <a class=\"linkdotted\" target=\"_blank\" href=\"".AI_AGENT_PAGE."#cost\">Cost and limits</a>.</small></p>";
 	$trusted = ai_folder_trusted();
 	if($trusted === TRUE) echo "<p>✅ Claude Code trusts the folder ‘".AI_AGENT_FOLDER."’: the first start is done.</p>";
 	else if($trusted === FALSE) echo "<p>❌ The first start is not done yet: Claude Code doesn't trust the folder ‘".AI_AGENT_FOLDER."’.</p>";

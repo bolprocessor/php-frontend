@@ -121,7 +121,8 @@ function ai_claude_auth($path) {
 	}
 
 function ai_agent_status($refresh = FALSE) {
-	// State of the AI agent, remembered in temp_bolprocessor/ai_agent.json: 'found' (Claude Code), 'path', 'version', 'auth', 'plan', 'date',
+	// State of the AI agent, remembered in temp_bolprocessor/ai_agent.json: 'found' (Claude Code), 'path', 'version', 'auth', 'plan',
+	// 'method' (sign-in: "claude.ai" for a subscription, otherwise an API account billed per token; 2026-11-28), 'date',
 	// 'manual' (Linux: the user says Claude Code works in a terminal). Looked for again when $refresh or after AI_AGENT_CHECK_DELAY.
 	$file = ai_status_file();
 	$saved = @json_decode((string)@file_get_contents($file),TRUE);
@@ -131,7 +132,7 @@ function ai_agent_status($refresh = FALSE) {
 		$version = ai_claude_probe($path);
 		if($version === FALSE) continue;
 		$auth = ai_claude_auth($path);
-		$status = array('found' => TRUE,'path' => $path,'version' => $version,'auth' => $auth['state'],'plan' => $auth['plan'],'date' => time(),'manual' => FALSE);
+		$status = array('found' => TRUE,'path' => $path,'version' => $version,'auth' => $auth['state'],'plan' => $auth['plan'],'method' => $auth['method'],'date' => time(),'manual' => FALSE);
 		break;
 		}
 	if(!$status['found'] AND is_array($saved) AND !empty($saved['manual'])) $status['manual'] = TRUE; // Linux: kept until Claude Code is found

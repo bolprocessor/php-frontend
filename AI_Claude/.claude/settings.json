@@ -1,6 +1,9 @@
 {
   "awaySummaryEnabled": false,
   "spinnerTipsEnabled": false,
+  "env": {
+    "CLAUDE_CODE_DISABLE_FAST_MODE": "1"
+  },
   "permissions": {
     "additionalDirectories": [
       ".."
