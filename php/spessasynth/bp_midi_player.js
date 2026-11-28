@@ -24,7 +24,19 @@ function status(text) {
 async function init() {
 	await ctx.audioWorklet.addModule(processorURL);
 	synth = new WorkletSynthesizer(ctx);
-	synth.connect(ctx.destination);
+	// The sound bank is quiet compared with other players: raise it by 15 dB (x 5.6),
+	// followed by a limiter so that loud passages don't clip
+	const gain = ctx.createGain();
+	gain.gain.value = Math.pow(10, 15 / 20);
+	const limiter = ctx.createDynamicsCompressor();
+	limiter.threshold.value = -3;
+	limiter.knee.value = 0;
+	limiter.ratio.value = 20;
+	limiter.attack.value = 0.003;
+	limiter.release.value = 0.25;
+	synth.connect(gain);
+	gain.connect(limiter);
+	limiter.connect(ctx.destination);
 	status("Loading sounds…");
 	const response = await fetch(soundBankURL);
 	if(!response.ok) throw new Error("Cannot load " + soundBankURL);

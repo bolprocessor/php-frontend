@@ -368,6 +368,8 @@ if($instruction <> "help") {
 		@unlink($spacefile);
 		echo "<br /><br /><big><b>⏱ <span id=\"perfTime\" style=\"font-family:monospace;\">0:00.0</span><span id=\"perfEnd\" style=\"font-family:monospace;\"></span></b></big>";
 		echo "<span id=\"spaceWait\" style=\"display:none;\"><br /><br /><big><b>👉 Waiting for the space bar</b></big>&nbsp;<button id=\"spaceBtn\" type=\"button\" class=\"produce\" onclick=\"pressSpace();\">SPACE</button></span>";
+		// Other waits (a note, MIDI Start, Continue or Stop, forever): the console writes their description to the "_wait" file (see ShowWait() in ConsoleMain.c) (2026-11-28)
+		echo "<span id=\"otherWait\" style=\"display:none;\"><br /><br /><big><b>👉 Waiting for <span id=\"otherWaitText\"></span></b></big></span>";
 		echo "<script>
 		function pressSpace() {
 			createFile(".json_encode($spacefile).");
@@ -406,6 +408,12 @@ if($instruction <> "help") {
 						if(typeof result.end === 'number' && result.end > 0) displayEnd.textContent = ' / ' + format(result.end);
 						const spaceWait = document.getElementById('spaceWait');
 						if(spaceWait) spaceWait.style.display = result.space ? 'inline' : 'none';
+						const otherWait = document.getElementById('otherWait');
+						if(otherWait) {
+							const text = (typeof result.wait === 'string') ? result.wait : '';
+							document.getElementById('otherWaitText').textContent = text;
+							otherWait.style.display = (text !== '') ? 'inline' : 'none';
+							}
 						}
 					}
 				catch(error) {}
