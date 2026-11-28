@@ -516,7 +516,9 @@ function oscrt_robot_start($python_file,&$message) {
 			$environment = "env -u LD_LIBRARY_PATH ";
 			if(getenv("DISPLAY") === FALSE) $environment .= "DISPLAY=".oscrt_linux_display()." "; // The web server may have no display
 			}
-		exec("cd ".escapeshellarg($dir)."; nohup ".$environment.escapeshellarg($python['path'])." ".escapeshellarg($script)." --port ".intval($d['port'])." > ".escapeshellarg($log)." 2>&1 < /dev/null & echo $!",$output);
+		// 2026-11-28 On MacOS, nohup may fail with "can't detach from console: No such process" (Apache started by MAMP after a stop): the robot is started in its own session, as the watchdog is (watchdog_start())
+		$detach = osc_server_mac() ? "/usr/bin/perl -MPOSIX -e 'POSIX::setsid(); exec @ARGV' " : "nohup ";
+		exec("cd ".escapeshellarg($dir)."; ".$detach.$environment.escapeshellarg($python['path'])." ".escapeshellarg($script)." --port ".intval($d['port'])." > ".escapeshellarg($log)." 2>&1 < /dev/null & echo $!",$output);
 		}
 	$pid = intval(trim(implode('',$output)));
 	// It fails at once if the port is used or the window can't be opened

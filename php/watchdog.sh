@@ -66,7 +66,8 @@ if ! mkdir "$LOCK" 2>/dev/null; then
 fi
 echo $$ > "$LOCK/pid"
 trap 'rm -rf "$LOCK" "$BEAT"' EXIT		# A page loaded afterwards starts a new watchdog at once
-trap 'exit 0' INT TERM
+trap 'log "Stopped by signal INT: quitting"; exit 0' INT
+trap 'log "Stopped by signal TERM (e.g. MAMP or XAMPP stopping its processes, log-out or shutdown): quitting"; exit 0' TERM
 trap '' HUP
 
 # The server is started with the environment of the user's session, not that of PHP (almost empty)
